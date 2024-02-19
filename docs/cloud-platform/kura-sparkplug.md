@@ -2,6 +2,9 @@
 
 The `org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider` package provides a Eclipse Kura Cloud Connection that implements the [Eclipse Sparkplug&reg; v3.0.0 specification](https://sparkplug.eclipse.org/specification/version/3.0/documents/sparkplug-specification-3.0.0.pdf).
 
+!!! info "Minimum requirements"
+    This addon is compatible with Kura 5.2+.
+
 
 
 ## Introduction to Eclipse Sparkplug
@@ -114,11 +117,11 @@ The Sparkplug Device implemented by this publisher **does not support** the foll
 
 ##### Sparkplug Device Payload
 
-The payload of the sent `DDATA` message will be encoded using the [Sparkplug Protobuf definition](https://github.com/eclipse/tahu/blob/3.x/sparkplug_b/sparkplug_b.proto) converting the [`KuraPayload`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java) into [Sparkplug payload](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload) as follows:
+The payload of `DDATA` message will be encoded using the [Sparkplug B Protobuf definition](https://github.com/eclipse/tahu/blob/3.x/sparkplug_b/sparkplug_b.proto) converting the [`KuraPayload`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java) into [Sparkplug payload](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload) as follows:
 
 - Metrics from [`KuraPayload.metric()`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L116) become [Sparkplug metrics](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#metric). Only the **name**, **timestamp**, **datatype** and **value** components are added. The timestamp is set to the publishing instant. The datatype is inferred from the Java type as follows:
 
-    | Java Type | Sparkplug Type |
+    | Java Type | Sparkplug DataType |
     | - | - |
     | `Boolean` | `DataType.Boolean` |
     | `byte[]` | `DataType.Bytes` |
@@ -149,6 +152,35 @@ The payload of the sent `DDATA` message will be encoded using the [Sparkplug Pro
     - **kura.position.timestamp**: `DataType.DateTime`
 
 - [`KuraPayload.getTimestamp()`](https://github.com/eclipse/kura/blob/d53ec833b7438a70a0e3a79406f4c8aed52e94f0/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L76), if not null, it will be used as the timestamp metric of the Sparkplug payload
+
+#### Sparkplug Subscriber
+
+This cloud connections allows creating a Cloud Subscriber that will subscribe to a generic set of topics. The configuration is shown in the picture below.
+
+![](./images/sparkplugSubscriber.png)
+
+It is assumed that the payloads received by this Cloud Connection are encoded using the [Sparkplug B Protobuf definition](https://github.com/eclipse/tahu/blob/3.x/sparkplug_b/sparkplug_b.proto). Users of this Cloud Subscriber should expect to receive `KuraMessage`s containing a `KuraPayload` such that:
+
+- If non null, the [Sparkplug body](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload) is used to set [`KuraPayload.setBody()`](https://github.com/eclipse/kura/blob/1064870aad5d6f344864644e8c7dadc9ae5d5697/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L124)
+- If non null, the [Sparkplug seq Metric](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload) is converted into a [Kura metric](https://github.com/eclipse/kura/blob/1064870aad5d6f344864644e8c7dadc9ae5d5697/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L96) with name `seq`
+- If non null, the [Sparkplug timestamp](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload) is used as Eclipse Kura's payload [timestamp](https://github.com/eclipse/kura/blob/1064870aad5d6f344864644e8c7dadc9ae5d5697/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L80)
+- All [Sparkplug Metrics](https://github.com/eclipse-sparkplug/sparkplug/blob/3.x/specification/src/main/asciidoc/chapters/Sparkplug_6_Payloads.adoc#payload) are converted into [Kura metrics](https://github.com/eclipse/kura/blob/1064870aad5d6f344864644e8c7dadc9ae5d5697/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraPayload.java#L96) with the same name and the following conversion rules:
+    
+    | Sparkplug ValueCase | Java Type |
+    | - | - |
+    | `Boolean` | `boolean` |
+    | `Bytes` | `byte[]` |
+    | `Dataset` | `byte[]` |
+    | `Double` | `double` |
+    | `Extension` | `byte[]` |
+    | `Float` | `float` |
+    | `Integer` | `int` |
+    | `Long` | `long` |
+    | `String` | `String` |
+    | `Template` | `byte[]` |
+    | default | `null` |
+
+    The metric timestamp is not supported in Eclipse Kura, therefore this information is lost at conversion.
 
 ### Data Service Layer Configuration
 

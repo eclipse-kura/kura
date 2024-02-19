@@ -26,6 +26,7 @@ import java.util.Objects;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
+import org.eclipse.kura.container.signature.ValidationResult;
 import org.junit.Test;
 
 public class DummyContainerSignatureValidationServiceTest {
@@ -39,7 +40,9 @@ public class DummyContainerSignatureValidationServiceTest {
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";
 
-    private boolean validationResult = false;
+    private static final ValidationResult FAILED_VALIDATION = new ValidationResult();
+
+    private ValidationResult validationResult;
     private Exception occurredException;
     private ImageInstanceDescriptor imageDescriptor;
     private String rawValidationOutcomeStringSetting = "";
@@ -106,7 +109,7 @@ public class DummyContainerSignatureValidationServiceTest {
         whenVerifyIsCalledWith("alpine", "latest", TRUST_ANCHOR, false);
 
         thenNoExceptionOccurred();
-        thenVerificationResultIs(false);
+        thenVerificationResultIs(FAILED_VALIDATION);
     }
 
     @Test
@@ -117,7 +120,7 @@ public class DummyContainerSignatureValidationServiceTest {
         whenVerifyIsCalledWith("alpine", "develop", TRUST_ANCHOR, false);
 
         thenNoExceptionOccurred();
-        thenVerificationResultIs(false);
+        thenVerificationResultIs(FAILED_VALIDATION);
     }
 
     @Test
@@ -128,7 +131,7 @@ public class DummyContainerSignatureValidationServiceTest {
         whenVerifyIsCalledWith("alpine", "latest", TRUST_ANCHOR, false);
 
         thenNoExceptionOccurred();
-        thenVerificationResultIs(true);
+        thenVerificationResultIs(new ValidationResult(true, "sha256:1234567890"));
     }
 
     @Test
@@ -139,7 +142,7 @@ public class DummyContainerSignatureValidationServiceTest {
         whenVerifyWithAuthIsCalledWith("alpine", "develop", TRUST_ANCHOR, false, USERNAME, PASSWORD);
 
         thenNoExceptionOccurred();
-        thenVerificationResultIs(false);
+        thenVerificationResultIs(FAILED_VALIDATION);
     }
 
     @Test
@@ -150,7 +153,7 @@ public class DummyContainerSignatureValidationServiceTest {
         whenVerifyWithAuthIsCalledWith("alpine", "latest", TRUST_ANCHOR, false, USERNAME, PASSWORD);
 
         thenNoExceptionOccurred();
-        thenVerificationResultIs(true);
+        thenVerificationResultIs(new ValidationResult(true, "sha256:1234567890"));
     }
 
     @Test
@@ -162,7 +165,7 @@ public class DummyContainerSignatureValidationServiceTest {
         whenVerifyImageInstanceDescriptorIsCalledWith(this.imageDescriptor, TRUST_ANCHOR, false);
 
         thenNoExceptionOccurred();
-        thenVerificationResultIs(false);
+        thenVerificationResultIs(FAILED_VALIDATION);
     }
 
     @Test
@@ -174,7 +177,7 @@ public class DummyContainerSignatureValidationServiceTest {
         whenVerifyImageInstanceDescriptorIsCalledWith(this.imageDescriptor, TRUST_ANCHOR, false);
 
         thenNoExceptionOccurred();
-        thenVerificationResultIs(true);
+        thenVerificationResultIs(new ValidationResult(true, "sha256:1234567890"));
     }
 
     @Test
@@ -187,7 +190,7 @@ public class DummyContainerSignatureValidationServiceTest {
                 PASSWORD);
 
         thenNoExceptionOccurred();
-        thenVerificationResultIs(false);
+        thenVerificationResultIs(FAILED_VALIDATION);
     }
 
     @Test
@@ -200,7 +203,7 @@ public class DummyContainerSignatureValidationServiceTest {
                 PASSWORD);
 
         thenNoExceptionOccurred();
-        thenVerificationResultIs(true);
+        thenVerificationResultIs(new ValidationResult(true, "sha256:1234567890"));
     }
 
     /*
@@ -290,7 +293,7 @@ public class DummyContainerSignatureValidationServiceTest {
         assertEquals(expectedSize, this.containerSignatureValidationService.getValidationResultsSize());
     }
 
-    private void thenVerificationResultIs(boolean expectedResult) {
+    private void thenVerificationResultIs(ValidationResult expectedResult) {
         assertEquals(expectedResult, this.validationResult);
     }
 

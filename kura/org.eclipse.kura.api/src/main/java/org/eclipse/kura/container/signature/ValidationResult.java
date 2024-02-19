@@ -27,7 +27,7 @@ public final class ValidationResult {
         this.isSignatureValid = Objects.requireNonNull(signatureValid);
 
         if (this.isSignatureValid && (!this.imageDigest.isPresent() || this.imageDigest.get().isEmpty())) {
-            throw new IllegalArgumentException("Digest cannot be empty when signature is valid.");
+            throw new IllegalArgumentException("Image digest must be provided when signature is valid.");
         }
     }
 

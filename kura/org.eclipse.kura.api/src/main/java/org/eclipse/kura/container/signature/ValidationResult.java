@@ -71,19 +71,16 @@ public final class ValidationResult {
             return false;
         }
         ValidationResult other = (ValidationResult) obj;
-
         return this.isSignatureValid == other.isSignatureValid && this.imageDigest.equals(other.imageDigest);
-
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (this.imageDigest == null ? 0 : this.imageDigest.hashCode());
+        result = prime * result + this.imageDigest.hashCode();
         result = prime * result + Boolean.hashCode(isSignatureValid);
         return result;
-
     }
 
 }

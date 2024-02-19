@@ -99,38 +99,6 @@ public class DummyContainerSignatureValidationServiceTest {
         thenExceptionOccurred(IllegalArgumentException.class);
     }
 
-    private <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
-        assertNotNull(this.occurredException);
-        assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
-    }
-
-    private void thenValidationResultsContains(String imageName, String imageTag, String expectedDigest) {
-        String digest = this.containerSignatureValidationService.getValidationResultsFor(imageName, imageTag);
-        assertTrue(Objects.nonNull(digest));
-        assertEquals(expectedDigest, digest);
-    }
-
-    private void givenRawValidationStringWith(String entry) {
-        if (this.rawValidationOutcomeStringSetting.isEmpty()) {
-            this.rawValidationOutcomeStringSetting = entry;
-        } else {
-            this.rawValidationOutcomeStringSetting = String.format("%s\n%s", this.rawValidationOutcomeStringSetting,
-                    entry);
-        }
-    }
-
-    private void whenUpdatedIsCalledWith(Map<String, Object> props) {
-        try {
-            this.containerSignatureValidationService.updated(props);
-        } catch (Exception e) {
-            this.occurredException = e;
-        }
-    }
-
-    private void thenValidationResultsSizeIs(int expectedSize) {
-        assertEquals(expectedSize, this.containerSignatureValidationService.getValidationResultsSize());
-    }
-
     @Test
     public void verifyReturnsFailureWithEmptyConfiguration() {
         givenContainerSignatureValidationServiceWith(this.properties);
@@ -238,6 +206,15 @@ public class DummyContainerSignatureValidationServiceTest {
     /*
      * GIVEN
      */
+    private void givenRawValidationStringWith(String entry) {
+        if (this.rawValidationOutcomeStringSetting.isEmpty()) {
+            this.rawValidationOutcomeStringSetting = entry;
+        } else {
+            this.rawValidationOutcomeStringSetting = String.format("%s\n%s", this.rawValidationOutcomeStringSetting,
+                    entry);
+        }
+    }
+
     private void givenContainerSignatureValidationServiceWith(Map<String, Object> configuration) {
         this.containerSignatureValidationService.activate(configuration);
     }
@@ -254,6 +231,14 @@ public class DummyContainerSignatureValidationServiceTest {
     /*
      * WHEN
      */
+    private void whenUpdatedIsCalledWith(Map<String, Object> props) {
+        try {
+            this.containerSignatureValidationService.updated(props);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
     private void whenVerifyIsCalledWith(String imageName, String imageTag, String trustAnchor, boolean isVerify) {
         try {
             this.validationResult = this.containerSignatureValidationService.verify(imageName, imageTag, trustAnchor,
@@ -295,6 +280,16 @@ public class DummyContainerSignatureValidationServiceTest {
     /*
      * THEN
      */
+    private void thenValidationResultsContains(String imageName, String imageTag, String expectedDigest) {
+        String digest = this.containerSignatureValidationService.getValidationResultsFor(imageName, imageTag);
+        assertTrue(Objects.nonNull(digest));
+        assertEquals(expectedDigest, digest);
+    }
+
+    private void thenValidationResultsSizeIs(int expectedSize) {
+        assertEquals(expectedSize, this.containerSignatureValidationService.getValidationResultsSize());
+    }
+
     private void thenVerificationResultIs(boolean expectedResult) {
         assertEquals(expectedResult, this.validationResult);
     }
@@ -310,5 +305,10 @@ public class DummyContainerSignatureValidationServiceTest {
         }
 
         assertNull(errorMessage, this.occurredException);
+    }
+
+    private <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
+        assertNotNull(this.occurredException);
+        assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
     }
 }

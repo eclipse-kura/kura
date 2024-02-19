@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -45,28 +45,60 @@ public class GwtUserServiceImpl extends OsgiRemoteServiceServlet implements GwtU
     public void createUser(final GwtXSRFToken token, final String userName) throws GwtKuraException {
         checkXSRFToken(token);
 
-        this.userManager.createUser(userName);
+        try {
+            this.userManager.createUser(userName);
+        } catch (KuraException e) {
+            logger.warn("failed to create user", e);
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+        }
     }
 
     @Override
     public void deleteUser(final GwtXSRFToken token, final String userName) throws GwtKuraException {
         checkXSRFToken(token);
 
-        this.userManager.deleteUser(userName);
+        try {
+            this.userManager.deleteUser(userName);
+        } catch (KuraException e) {
+            logger.warn("failed to delete user", e);
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+        }
     }
 
     @Override
     public Set<String> getDefinedPermissions(final GwtXSRFToken token) throws GwtKuraException {
         checkXSRFToken(token);
 
-        return this.userManager.getDefinedPermissions();
+        try {
+            return this.userManager.getDefinedPermissions();
+        } catch (KuraException e) {
+            logger.warn("failed to get defined permissions", e);
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+        }
     }
 
     @Override
     public Set<GwtUserConfig> getUserConfig(final GwtXSRFToken token) throws GwtKuraException {
         checkXSRFToken(token);
 
-        return this.userManager.getUserConfig();
+        try {
+            return this.userManager.getUserConfig();
+        } catch (KuraException e) {
+            logger.warn("failed to get user configuration", e);
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+        }
+    }
+
+    @Override
+    public GwtUserConfig getUserConfigOrDefault(GwtXSRFToken token, String name) throws GwtKuraException {
+        checkXSRFToken(token);
+
+        try {
+            return this.userManager.getUserDefaultConfig(name);
+        } catch (KuraException e) {
+            logger.warn("failed to get user configuration", e);
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+        }
     }
 
     @Override
@@ -84,7 +116,7 @@ public class GwtUserServiceImpl extends OsgiRemoteServiceServlet implements GwtU
         try {
             this.userManager.setUserConfig(userConfig);
         } catch (KuraException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, null, e.getMessage());
         }
     }
 

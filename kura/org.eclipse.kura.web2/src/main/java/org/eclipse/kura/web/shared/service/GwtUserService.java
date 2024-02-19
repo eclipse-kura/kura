@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -38,6 +38,9 @@ public interface GwtUserService extends RemoteService {
 
     @Audit(componentName = "UI User", description = "Get identities configuration")
     public Set<GwtUserConfig> getUserConfig(GwtXSRFToken token) throws GwtKuraException;
+
+    @Audit(componentName = "UI User", description = "Get default identity configuration")
+    public GwtUserConfig getUserConfigOrDefault(GwtXSRFToken token, final String name) throws GwtKuraException;
 
     @Audit(componentName = "UI User", description = "Update identities configuration")
     public void setUserConfig(GwtXSRFToken token, Set<GwtUserConfig> userConfig) throws GwtKuraException;

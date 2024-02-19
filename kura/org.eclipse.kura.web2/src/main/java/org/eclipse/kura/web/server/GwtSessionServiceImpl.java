@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.servlet.http.Cookie;
@@ -98,7 +99,12 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
             throw new GwtKuraException(GwtKuraErrorCode.UNAUTHENTICATED);
         }
 
-        return userManager.getUserConfig((String) username).orElse(null);
+        try {
+            return userManager.getUserConfig((String) username).orElse(null);
+        } catch (KuraException e) {
+            logger.warn("failed to get configuration for identiy {}", username);
+            return null;
+        }
     }
 
     @Override
@@ -110,9 +116,13 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
 
         String username = getSessionUsername(session);
 
-        Optional<GwtUserConfig> userConfig = this.userManager.getUserConfig(username);
+        try {
+            Optional<GwtUserConfig> userConfig = this.userManager.getUserConfig(username);
 
-        if (!userConfig.isPresent() || !userConfig.get().isPasswordAuthEnabled()) {
+            if (!userConfig.isPresent() || !userConfig.get().isPasswordAuthEnabled()) {
+                throw new GwtKuraException(GwtKuraErrorCode.OPERATION_NOT_SUPPORTED);
+            }
+        } catch (final KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.OPERATION_NOT_SUPPORTED);
         }
 
@@ -122,11 +132,13 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
             logger.warn("Wrong password");
             throw new GwtKuraException(GwtKuraErrorCode.INVALID_USERNAME_PASSWORD);
         }
-        
+
+        if (Objects.equals(oldPassword, newPassword)) {
+            throw new GwtKuraException(GwtKuraErrorCode.PASSWORD_CHANGE_SAME_PASSWORD);
+        }
+
         try {
-            if (!this.userManager.setUserPassword(username, newPassword)) {
-                throw new GwtKuraException(GwtKuraErrorCode.PASSWORD_CHANGE_SAME_PASSWORD);
-            }
+            this.userManager.setUserPassword(username, newPassword);
         } catch (final KuraException e) {
             logger.warn("Failed to update user password", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);

@@ -27,31 +27,31 @@ import org.osgi.annotation.versioning.ProviderType;
 public class PasswordStrengthRequirements {
 
     private final int passwordMinimumLength;
-    private final boolean passwordRequireDigits;
-    private final boolean passwordRequireSpecialChars;
-    private final boolean passwordRequireBothCases;
+    private final boolean digitsRequired;
+    private final boolean specialCharactersRequired;
+    private final boolean bothCasesRequired;
 
     /**
      * Creates a new instance.
      * 
-     * @param passwordMinimumLength       the minimum allowed password length.
-     * @param passwordRequireDigits       a {@code boolean} indicating whether new
-     *                                    passwords must contain
-     *                                    at least one digit.
-     * @param passwordRequireSpecialChars a {@code boolean} indicating whether new
-     *                                    passwords must contain
-     *                                    at least one non alphanumeric character.
-     * @param passwordRequireBothCases    a {@code boolean} indicating whether new
-     *                                    passwords must contain
-     *                                    at least one upper case and lower case
-     *                                    character.
+     * @param passwordMinimumLength     the minimum allowed password length.
+     * @param digitsRequired            a {@code boolean} indicating whether new
+     *                                  passwords must contain
+     *                                  at least one digit.
+     * @param specialCharactersRequired a {@code boolean} indicating whether new
+     *                                  passwords must contain
+     *                                  at least one non alphanumeric character.
+     * @param bothCasesRequired         a {@code boolean} indicating whether new
+     *                                  passwords must contain
+     *                                  at least one upper case and lower case
+     *                                  character.
      */
-    public PasswordStrengthRequirements(int passwordMinimumLength, boolean passwordRequireDigits,
-            boolean passwordRequireSpecialChars, boolean passwordRequireBothCases) {
+    public PasswordStrengthRequirements(int passwordMinimumLength, boolean digitsRequired,
+            boolean specialCharactersRequired, boolean bothCasesRequired) {
         this.passwordMinimumLength = passwordMinimumLength;
-        this.passwordRequireDigits = passwordRequireDigits;
-        this.passwordRequireSpecialChars = passwordRequireSpecialChars;
-        this.passwordRequireBothCases = passwordRequireBothCases;
+        this.digitsRequired = digitsRequired;
+        this.specialCharactersRequired = specialCharactersRequired;
+        this.bothCasesRequired = bothCasesRequired;
     }
 
     /**
@@ -70,18 +70,19 @@ public class PasswordStrengthRequirements {
      * @return a {@code boolean} indicating whether new passwords must contain
      *         at least one digit.
      */
-    public boolean isPasswordRequireDigits() {
-        return passwordRequireDigits;
+    public boolean digitsRequired() {
+        return digitsRequired;
     }
 
     /**
      * Returns a {@code boolean} indicating whether new passwords must contain
      * at least one non alphanumeric character.
      * 
-     * @return
+     * @return a {@code boolean} indicating whether new passwords must contain
+     *         at least one non alphanumeric character.
      */
-    public boolean isPasswordRequireSpecialChars() {
-        return passwordRequireSpecialChars;
+    public boolean specialCharactersRequired() {
+        return specialCharactersRequired;
     }
 
     /**
@@ -89,16 +90,16 @@ public class PasswordStrengthRequirements {
      * at least one upper case and lower case character.
      * 
      * @return a {@code boolean} indicating whether new passwords must contain
-     *         at least one non alphanumeric character.
+     *         at least one upper case and lower case character.
      */
-    public boolean isPasswordRequireBothCases() {
-        return passwordRequireBothCases;
+    public boolean bothCasesRequired() {
+        return bothCasesRequired;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(passwordMinimumLength, passwordRequireBothCases, passwordRequireDigits,
-                passwordRequireSpecialChars);
+        return Objects.hash(passwordMinimumLength, bothCasesRequired, digitsRequired,
+                specialCharactersRequired);
     }
 
     @Override
@@ -111,9 +112,9 @@ public class PasswordStrengthRequirements {
         }
         PasswordStrengthRequirements other = (PasswordStrengthRequirements) obj;
         return passwordMinimumLength == other.passwordMinimumLength
-                && passwordRequireBothCases == other.passwordRequireBothCases
-                && passwordRequireDigits == other.passwordRequireDigits
-                && passwordRequireSpecialChars == other.passwordRequireSpecialChars;
+                && bothCasesRequired == other.bothCasesRequired
+                && digitsRequired == other.digitsRequired
+                && specialCharactersRequired == other.specialCharactersRequired;
     }
 
 }

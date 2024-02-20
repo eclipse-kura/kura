@@ -33,6 +33,7 @@ nav:
       - SSL Configuration: gateway-configuration/ssl-configuration.md
       - Web Console Configuration: gateway-configuration/web-console-configuration.md
       - Gateway Administration Console Authentication: gateway-configuration/gateway-administration-console-authentication.md
+      - Authentication and Authorization: gateway-configuration/authentication-and-authorization.md
     - Administration:
       - Directory Layout: administration/directory-layout.md
       - Snapshot Management: administration/snapshot-management.md

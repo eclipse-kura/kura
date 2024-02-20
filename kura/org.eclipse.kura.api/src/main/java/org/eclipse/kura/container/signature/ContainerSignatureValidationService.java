@@ -51,10 +51,10 @@ public interface ContainerSignatureValidationService {
      * @param verifyInTransparencyLog
      *            Sets the transparency log verification, to be used when an artifact signature has been uploaded to the
      *            transparency log. Artifacts cannot be publicly verified when not included in a log.
-     * @return
+     * @return {@link:ValidationResult}
      */
-    public boolean verify(String imageName, String imageReference, String trustAnchor, boolean verifyInTransparencyLog)
-            throws KuraException;
+    public ValidationResult verify(String imageName, String imageReference, String trustAnchor,
+            boolean verifyInTransparencyLog) throws KuraException;
 
     /**
      * Verifies the signature of a container image using the provided trust anchor and the provided registry
@@ -90,10 +90,10 @@ public interface ContainerSignatureValidationService {
      * @param registryPassword
      *            Optional password for registry authentication. If the registry requires authentication,
      *            both username and password must be provided.
-     * @return
+     * @return {@link:ValidationResult}
      */
-    public boolean verify(String imageName, String imageReference, String trustAnchor, boolean verifyInTransparencyLog,
-            String registryUsername, Password registryPassword) throws KuraException;
+    public ValidationResult verify(String imageName, String imageReference, String trustAnchor,
+            boolean verifyInTransparencyLog, String registryUsername, Password registryPassword) throws KuraException;
 
     /**
      * Verifies the signature of a container image using the provided trust anchor. The trust anchor format depends on
@@ -116,10 +116,10 @@ public interface ContainerSignatureValidationService {
      * @param verifyInTransparencyLog
      *            Sets the transparency log verification, to be used when an artifact signature has been uploaded to the
      *            transparency log. Artifacts cannot be publicly verified when not included in a log.
-     * @return
+     * @return {@link:ValidationResult}
      */
-    public boolean verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor, boolean verifyInTransparencyLog)
-            throws KuraException;
+    public ValidationResult verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor,
+            boolean verifyInTransparencyLog) throws KuraException;
 
     /**
      * Verifies the signature of a container image using the provided trust anchor and the provided registry
@@ -151,8 +151,8 @@ public interface ContainerSignatureValidationService {
      * @param registryPassword
      *            Optional password for registry authentication. If the registry requires authentication,
      *            both username and password must be provided.
-     * @return
+     * @return {@link:ValidationResult}
      */
-    public boolean verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor, boolean verifyInTransparencyLog,
-            String registryUsername, Password registryPassword) throws KuraException;
+    public ValidationResult verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor,
+            boolean verifyInTransparencyLog, String registryUsername, Password registryPassword) throws KuraException;
 }

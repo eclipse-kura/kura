@@ -34,6 +34,7 @@ import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
 import org.eclipse.kura.container.signature.ContainerSignatureValidationService;
+import org.eclipse.kura.container.signature.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,21 +120,22 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             return false;
         }
 
-        // Get image digest to perform the signature verification and later populate the digest entry in the
-        // snapshot
-        // this.containerOrchestrationService.getImageDigestBy(newProps.getContainerImage(),
-        // newProps.getContainerImageTag());
-
         String trustAnchor = configuration.getSignatureTrustAnchor().get();
         boolean verifyInTransparencyLog = configuration.getSignatureVerifyTransparencyLog();
 
         for (ContainerSignatureValidationService validationService : this.availableContainerSignatureValidationService) {
-            if (validationService.verify(configuration.getContainerImage(), configuration.getContainerImageTag(),
-                    trustAnchor, verifyInTransparencyLog)) {
+            ValidationResult results = validationService.verify(configuration.getContainerImage(),
+                    configuration.getContainerImageTag(), trustAnchor, verifyInTransparencyLog);
+            if (results.isSignatureValid()) {
+                String imageDigest = results.imageDigest().orElse("[ERROR] Image digest not provided! [ERROR]");
+                logger.info("Service \"{}\" reports that the signature for image {}:{} is VALID",
+                        validationService.getClass(), configuration.getContainerImage(), imageDigest);
                 return true;
             }
         }
 
+        logger.info("Validation reports that the signature for image {}:{} is NOT VALID",
+                configuration.getContainerImage(), configuration.getContainerImageTag());
         return false;
     }
 

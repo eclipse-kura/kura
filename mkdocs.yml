@@ -141,6 +141,7 @@ nav:
         - How to Use Legacy Bluetooth LE Beacon Scanner: java-application-development/how-to-use-legacy-bt-beacon-scanner.md
         - How to Use New Bluetooth LE APIs: java-application-development/how-to-use-new-bt-le-apis.md
         - How to Use New Beacon APIs: java-application-development/how-to-use-new-beacon-apis.md
+        - How to Use Dummy Container Signature Validation Service: java-application-development/how-to-use-dummy-signature-service.md
       - RAM Usage Considerations: java-application-development/ram-usage-considerations.md
       - Contributing: java-application-development/contributing.md
     - Quality Assurance:

@@ -153,7 +153,7 @@ public class TabHardwareUi extends Composite implements NetworkTab {
         this.mtu.setText(String.valueOf(this.selectedNetIfConfig.getHwMTU()));
         this.usb.setText(this.selectedNetIfConfig.getHwUsbDevice());
         this.rssi.setText(this.selectedNetIfConfig.getHwRssi());
-        this.channel.setText(this.selectedNetIfConfig.getHwWlanChannel());
+        this.channel.setText(this.selectedNetIfConfig.getCurrentHwWifiChannel());
     }
 
     private void reset() {
@@ -187,7 +187,7 @@ public class TabHardwareUi extends Composite implements NetworkTab {
             }
             updatedNetIf.setHwUsbDevice(this.usb.getText());
             updatedNetIf.setHwRssi(this.rssi.getText());
-            updatedNetIf.setHwWlanChannel(this.channel.getText());
+            updatedNetIf.setCurrentHwWifiChannel(this.channel.getText());
         }
     }
 }

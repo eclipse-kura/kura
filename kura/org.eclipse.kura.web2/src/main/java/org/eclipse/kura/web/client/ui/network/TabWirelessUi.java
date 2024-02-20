@@ -1810,8 +1810,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
         if (TabWirelessUi.this.channelList.getItemCount() != 0) {
             selectedChannelValue = this.channelList.getSelectedIndex();
-            this.channelList.clear();
         }
+
+        this.channelList.clear();
 
         addAutomaticChannel(freqChannels);
         freqChannels.stream().forEach(this::addItemChannelList);

@@ -1,6 +1,6 @@
 # How to use the Dummy Container Signature Validation Service
 
-The Dummy Container Signature Validation Service is an example implementation of the [Container Signature Validation Service interface] which mainly serves as a reference for future implementations and testing.
+The Dummy Container Signature Validation Service is an example implementation of the [Container Signature Validation Service interface](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/container/signature/ContainerSignatureValidationService.java) which mainly serves as a reference for future implementations and testing.
 
 The purpose of this component is to have a service whose configuration dictates the signature verification outcome. In the main text area is possible to set the container image reference that the service will report as correctly signed.
 

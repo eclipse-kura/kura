@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   
+   Copyright (c) 2024 Eurotech and/or its affiliates and others
+
+   This program and the accompanying materials are made
+   available under the terms of the Eclipse Public License 2.0
+   which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+	SPDX-License-Identifier: EPL-2.0
+	
+	Contributors:
+	 Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" enabled="true" immediate="true" name="org.eclipse.kura.example.web.extension.server.ExampleExtensionComponent">
+   <implementation class="org.eclipse.kura.example.web.extension.server.ExampleExtensionComponent"/>
+   <reference bind="setHttpService" cardinality="1..1" interface="org.osgi.service.http.HttpService" name="HttpService" policy="static"/>
+   <reference bind="setConsole" cardinality="1..1" interface="org.eclipse.kura.web.api.Console" name="Console" policy="static"/>
+</scr:component>

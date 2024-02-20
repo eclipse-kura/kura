@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -100,6 +100,7 @@
         <module>org.eclipse.kura.example.gpio.led</module>
         <module>org.eclipse.kura.example.tamper.detection</module>
         <module>org.eclipse.kura.example.rest.authentication.provider</module>
+        <module>org.eclipse.kura.example.identity.configuration.extension</module>
         <module>test</module>
     </modules>
 
@@ -117,7 +118,6 @@
                     -Dosgi.console=5002
                     -DbuildingWithTycho=true -Dosgi.locking=none
                     -Dds.showtrace=true -Djava.io.tmpdir=/tmp
-                    -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
                     -Dosgi.clean=true
                     -Dorg.eclipse.kura.mode=emulator
                     -Dkura.snapshots=${project.basedir}/target/
@@ -140,7 +140,6 @@
                     -Dosgi.console=5002
                     -DbuildingWithTycho=true -Dosgi.locking=none
                     -Dds.showtrace=true -Djava.io.tmpdir=/tmp
-                    -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
                     -Dosgi.clean=true
                     -Dorg.eclipse.kura.mode=emulator
                     -Dkura.snapshots=${project.basedir}/target/

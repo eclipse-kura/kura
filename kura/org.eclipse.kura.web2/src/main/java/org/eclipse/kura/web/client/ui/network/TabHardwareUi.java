@@ -102,7 +102,7 @@ public class TabHardwareUi extends Composite implements NetworkTab {
         this.labelMtu.setText(MSGS.netHwMTU());
         this.labelUsb.setText(MSGS.netHwUSBDevice());
         this.labelRssi.setText(MSGS.netHwSignalStrength());
-        this.labelChannel.setText(MSGS.netHwWlanChannel());
+        this.labelChannel.setText(MSGS.netCurrentHwWifiChannel());
     }
 
     // Dirty flag not needed here since this tab is not modifiable

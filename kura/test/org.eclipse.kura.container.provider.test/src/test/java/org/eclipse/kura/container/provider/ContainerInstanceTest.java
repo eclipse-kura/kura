@@ -72,7 +72,7 @@ public class ContainerInstanceTest {
 
     @Test
     public void testServiceActivateWithPropertiesDisabled() throws KuraException, InterruptedException {
-        givenFullProperties(false);
+        givenPropertiesWith(CONTAINER_ENABLED, false);
         givenDockerService();
 
         whenActivateInstanceIsCalledWith(this.properties);
@@ -83,7 +83,7 @@ public class ContainerInstanceTest {
 
     @Test
     public void testServiceActivateWithPropertiesEnabled() throws KuraException {
-        givenFullProperties(true);
+        givenPropertiesWith(CONTAINER_ENABLED, true);
         givenDockerService();
 
         whenActivateInstanceIsCalledWith(this.properties);
@@ -95,7 +95,7 @@ public class ContainerInstanceTest {
 
     @Test
     public void testServiceUpdateSameProperties() throws KuraException {
-        givenFullProperties(false);
+        givenPropertiesWith(CONTAINER_ENABLED, false);
         givenDockerService();
         givenContainerInstanceWith(this.properties);
 
@@ -107,10 +107,10 @@ public class ContainerInstanceTest {
 
     @Test
     public void testServiceUpdateEnable() {
-        givenFullProperties(false);
+        givenPropertiesWith(CONTAINER_ENABLED, false);
         givenDockerService();
         givenContainerInstanceWith(this.properties);
-        givenFullProperties(true);
+        givenPropertiesWith(CONTAINER_ENABLED, true);
 
         whenUpdateInstanceIsCalledWith(this.properties);
 
@@ -120,11 +120,11 @@ public class ContainerInstanceTest {
 
     @Test
     public void testServiceUpdateDisable() throws KuraException {
-        givenFullProperties(true);
+        givenPropertiesWith(CONTAINER_ENABLED, true);
         givenDockerService();
         givenContainerInstanceWith(this.properties);
         givenStartedContainer();
-        givenFullProperties(false);
+        givenPropertiesWith(CONTAINER_ENABLED, false);
 
         whenUpdateInstanceIsCalledWith(this.properties);
 
@@ -134,7 +134,7 @@ public class ContainerInstanceTest {
 
     @Test
     public void testServiceDeactivateNoRunningContainers() throws KuraException, InterruptedException {
-        givenFullProperties(false);
+        givenPropertiesWith(CONTAINER_ENABLED, false);
         givenDockerService();
         givenContainerInstanceWith(this.properties);
 
@@ -146,7 +146,7 @@ public class ContainerInstanceTest {
 
     @Test
     public void testServiceDeactivateStopContainer() throws KuraException {
-        givenFullProperties(true);
+        givenPropertiesWith(CONTAINER_ENABLED, true);
         givenDockerService();
         givenContainerInstanceWith(this.properties);
         givenStartedContainer();
@@ -181,23 +181,6 @@ public class ContainerInstanceTest {
         } catch (Exception e) {
             // no need
         }
-    }
-
-    private void givenFullProperties(boolean enabled) {
-        givenPropertiesWith(CONTAINER_ENABLED, enabled);
-        givenPropertiesWith(CONTAINER_IMAGE, "myimage");
-        givenPropertiesWith(CONTAINER_IMAGE_TAG, "mytag");
-        givenPropertiesWith(CONTAINER_NAME, "myname");
-        givenPropertiesWith(CONTAINER_PORTS_EXTERNAL, "");
-        givenPropertiesWith(CONTAINER_PORTS_INTERNAL, "");
-        givenPropertiesWith(CONTAINER_ARGS, "");
-        givenPropertiesWith(CONTAINER_ENV1, "");
-        givenPropertiesWith(CONTAINER_PATH_DESTINATION, "");
-        givenPropertiesWith(CONTAINER_PATH_FILE_PATH, "");
-        givenPropertiesWith(CONTAINER_DEVICE, "");
-        givenPropertiesWith(CONTAINER_LOGGER_PARAMETERS, "");
-        givenPropertiesWith(CONTAINER_LOGGING_TYPE, "default");
-        givenPropertiesWith(CONTAINER_NETWORKING_MODE, "");
     }
 
     private void givenPropertiesWith(String key, Object value) {

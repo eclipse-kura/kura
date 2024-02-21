@@ -145,8 +145,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         updateState(State::onDisabled);
     }
 
-    private ValidationResult validateContainerImageSignature(ContainerInstanceOptions configuration)
-            throws KuraException {
+    private ValidationResult validateContainerImageSignature(ContainerInstanceOptions configuration) {
 
         if (Objects.isNull(this.availableContainerSignatureValidationService)
                 || this.availableContainerSignatureValidationService.isEmpty()) {
@@ -174,16 +173,22 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         }
 
         for (ContainerSignatureValidationService validationService : this.availableContainerSignatureValidationService) {
-            ValidationResult results;
+            ValidationResult results = FAILED_VALIDATION;
 
-            if (registryPasswordCredentials.isPresent()) {
-                results = validationService.verify(configuration.getContainerImage(),
-                        configuration.getContainerImageTag(), trustAnchor, verifyInTransparencyLog,
-                        registryPasswordCredentials.get().getUsername(),
-                        registryPasswordCredentials.get().getPassword());
-            } else {
-                results = validationService.verify(configuration.getContainerImage(),
-                        configuration.getContainerImageTag(), trustAnchor, verifyInTransparencyLog);
+            try {
+                if (registryPasswordCredentials.isPresent()) {
+                    results = validationService.verify(configuration.getContainerImage(),
+                            configuration.getContainerImageTag(), trustAnchor, verifyInTransparencyLog,
+                            registryPasswordCredentials.get().getUsername(),
+                            registryPasswordCredentials.get().getPassword());
+                } else {
+                    results = validationService.verify(configuration.getContainerImage(),
+                            configuration.getContainerImageTag(), trustAnchor, verifyInTransparencyLog);
+                }
+            } catch (KuraException e) {
+                logger.warn(
+                        "Error validating container signature with {}. Setting validation results as FAILED. Caused by: ",
+                        validationService.getClass(), e);
             }
 
             if (results.isSignatureValid()) {

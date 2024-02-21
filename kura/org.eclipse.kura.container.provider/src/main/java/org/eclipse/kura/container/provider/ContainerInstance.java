@@ -94,9 +94,9 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
 
             ValidationResult containerSignatureValidated = validateContainerImageSignature(newProps);
-            logger.info("Container signature validation result for {}@{} ({}) - {}", newProps.getContainerImage(),
-                    containerSignatureValidated.imageDigest().orElse("-"), newProps.getContainerImageTag(),
-                    containerSignatureValidated.isSignatureValid() ? "VALID" : "NOT VALID");
+            logger.info("Container signature validation result for {}@{}({}) - {}", newProps.getContainerImage(),
+                    containerSignatureValidated.imageDigest().orElse("?"), newProps.getContainerImageTag(),
+                    containerSignatureValidated.isSignatureValid() ? "OK" : "FAIL");
 
             if (newProps.isEnabled()) {
                 this.containerOrchestrationService.registerListener(this);

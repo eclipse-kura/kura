@@ -58,12 +58,11 @@ public class ContainerInstanceTest {
 
     private ContainerOrchestrationService dockerService;
     private Map<String, Object> properties = new HashMap<>();
-    private ContainerInstance configurableGenericDockerService;
+    private ContainerInstance configurableGenericDockerService = new ContainerInstance();
     private Exception occurredException;
     private final CompletableFuture<Void> containerStarted = new CompletableFuture<>();
 
     public void testServiceActivateNullProperties() {
-        givenConfigurableGenericDockerService();
         givenDockerService();
 
         whenActivateInstanceIsCalledWith(null);
@@ -74,7 +73,6 @@ public class ContainerInstanceTest {
     @Test
     public void testServiceActivateWithPropertiesDisabled() throws KuraException, InterruptedException {
         givenFullProperties(false);
-        givenConfigurableGenericDockerService();
         givenDockerService();
 
         whenActivateInstanceIsCalledWith(this.properties);
@@ -86,7 +84,6 @@ public class ContainerInstanceTest {
     @Test
     public void testServiceActivateWithPropertiesEnabled() throws KuraException {
         givenFullProperties(true);
-        givenConfigurableGenericDockerService();
         givenDockerService();
 
         whenActivateInstanceIsCalledWith(this.properties);
@@ -99,7 +96,6 @@ public class ContainerInstanceTest {
     @Test
     public void testServiceUpdateSameProperties() throws KuraException {
         givenFullProperties(false);
-        givenConfigurableGenericDockerService();
         givenDockerService();
         givenContainerInstanceWith(this.properties);
 
@@ -112,7 +108,6 @@ public class ContainerInstanceTest {
     @Test
     public void testServiceUpdateEnable() {
         givenFullProperties(false);
-        givenConfigurableGenericDockerService();
         givenDockerService();
         givenContainerInstanceWith(this.properties);
         givenFullProperties(true);
@@ -126,7 +121,6 @@ public class ContainerInstanceTest {
     @Test
     public void testServiceUpdateDisable() throws KuraException {
         givenFullProperties(true);
-        givenConfigurableGenericDockerService();
         givenDockerService();
         givenContainerInstanceWith(this.properties);
         givenStartedContainer();
@@ -140,7 +134,6 @@ public class ContainerInstanceTest {
     @Test
     public void testServiceDeactivateNoRunningContainers() throws KuraException, InterruptedException {
         givenFullProperties(false);
-        givenConfigurableGenericDockerService();
         givenDockerService();
         givenContainerInstanceWith(this.properties);
 
@@ -152,7 +145,6 @@ public class ContainerInstanceTest {
     @Test
     public void testServiceDeactivateStopContainer() throws KuraException {
         givenFullProperties(true);
-        givenConfigurableGenericDockerService();
         givenDockerService();
         givenContainerInstanceWith(this.properties);
         givenStartedContainer();
@@ -203,10 +195,6 @@ public class ContainerInstanceTest {
         this.properties.put(CONTAINER_LOGGER_PARAMETERS, "");
         this.properties.put(CONTAINER_LOGGING_TYPE, "default");
         this.properties.put(CONTAINER_NETWORKING_MODE, "");
-    }
-
-    private void givenConfigurableGenericDockerService() {
-        this.configurableGenericDockerService = new ContainerInstance();
     }
 
     private void givenStartedContainer() {

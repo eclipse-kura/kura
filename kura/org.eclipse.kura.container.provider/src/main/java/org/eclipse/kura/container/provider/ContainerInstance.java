@@ -46,6 +46,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     private static final Logger logger = LoggerFactory.getLogger(ContainerInstance.class);
 
+    private static final ValidationResult FAILED_VALIDATION = new ValidationResult();
+
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private ContainerOrchestrationService containerOrchestrationService;
@@ -93,7 +95,11 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         try {
             ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
 
-            boolean containerSignatureValidated = validateContainerImageSignature(newProps);
+            ValidationResult containerSignatureValidated = validateContainerImageSignature(newProps);
+            logger.info("Container signature validation result for \"{}:{}\" (Digest: \"{}\") - {}",
+                    newProps.getContainerImage(), newProps.getContainerImageTag(),
+                    containerSignatureValidated.imageDigest().orElse("-"),
+                    containerSignatureValidated.isSignatureValid() ? "VALID" : "NOT VALID");
 
             if (newProps.isEnabled()) {
                 this.containerOrchestrationService.registerListener(this);
@@ -110,18 +116,19 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     }
 
-    private boolean validateContainerImageSignature(ContainerInstanceOptions configuration) throws KuraException {
+    private ValidationResult validateContainerImageSignature(ContainerInstanceOptions configuration)
+            throws KuraException {
 
         if (Objects.isNull(this.availableContainerSignatureValidationService)
                 || this.availableContainerSignatureValidationService.isEmpty()) {
             logger.warn("No container signature validation service available. Skipping signature validation.");
-            return false;
+            return FAILED_VALIDATION;
         }
 
         if (!configuration.getSignatureTrustAnchor().isPresent()
                 || configuration.getSignatureTrustAnchor().get().isEmpty()) {
             logger.warn("No signature trust anchor available. Skipping signature validation.");
-            return false;
+            return FAILED_VALIDATION;
         }
 
         String trustAnchor = configuration.getSignatureTrustAnchor().get();
@@ -152,16 +159,11 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             }
 
             if (results.isSignatureValid()) {
-                String imageDigest = results.imageDigest().orElse("[ERROR] Image digest not provided! [ERROR]");
-                logger.info("Service \"{}\" reports that the signature for image {}:{} is VALID",
-                        validationService.getClass(), configuration.getContainerImage(), imageDigest);
-                return true;
+                return results;
             }
         }
 
-        logger.info("Validation reports that the signature for image {}:{} is NOT VALID",
-                configuration.getContainerImage(), configuration.getContainerImageTag());
-        return false;
+        return FAILED_VALIDATION;
     }
 
     public void deactivate() {

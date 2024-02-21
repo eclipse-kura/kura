@@ -162,13 +162,13 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         String trustAnchor = configuration.getSignatureTrustAnchor().get();
         boolean verifyInTransparencyLog = configuration.getSignatureVerifyTransparencyLog();
 
-        Optional<PasswordRegistryCredentials> registryPasswordCredentials = Optional.empty();
+        Optional<PasswordRegistryCredentials> registryCredentials = Optional.empty();
         if (configuration.getRegistryCredentials().isPresent()) {
-            RegistryCredentials registryCredentials = configuration.getRegistryCredentials().get();
-            if (registryCredentials instanceof PasswordRegistryCredentials) {
-                registryPasswordCredentials = Optional.of((PasswordRegistryCredentials) registryCredentials);
+            RegistryCredentials configuredCredentials = configuration.getRegistryCredentials().get();
+            if (configuredCredentials instanceof PasswordRegistryCredentials) {
+                registryCredentials = Optional.of((PasswordRegistryCredentials) configuredCredentials);
             } else {
-                logger.warn("Unsupported registry credentials type.  Attempting unauthenticated validation.");
+                logger.warn("Unsupported registry credentials type. Attempting unauthenticated validation.");
             }
         }
 
@@ -176,11 +176,10 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             ValidationResult results = FAILED_VALIDATION;
 
             try {
-                if (registryPasswordCredentials.isPresent()) {
+                if (registryCredentials.isPresent()) {
                     results = validationService.verify(configuration.getContainerImage(),
                             configuration.getContainerImageTag(), trustAnchor, verifyInTransparencyLog,
-                            registryPasswordCredentials.get().getUsername(),
-                            registryPasswordCredentials.get().getPassword());
+                            registryCredentials.get().getUsername(), registryCredentials.get().getPassword());
                 } else {
                     results = validationService.verify(configuration.getContainerImage(),
                             configuration.getContainerImageTag(), trustAnchor, verifyInTransparencyLog);

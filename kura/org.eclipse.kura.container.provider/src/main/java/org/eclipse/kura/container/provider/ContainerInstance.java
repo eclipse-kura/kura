@@ -26,12 +26,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.UnaryOperator;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
+import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
 import org.eclipse.kura.container.signature.ContainerSignatureValidationService;
 import org.eclipse.kura.container.signature.ValidationResult;
@@ -123,9 +127,30 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         String trustAnchor = configuration.getSignatureTrustAnchor().get();
         boolean verifyInTransparencyLog = configuration.getSignatureVerifyTransparencyLog();
 
+        Optional<PasswordRegistryCredentials> registryPasswordCredentials = Optional.empty();
+        if (configuration.getRegistryCredentials().isPresent()) {
+            RegistryCredentials registryCredentials = configuration.getRegistryCredentials().get();
+            if (registryCredentials instanceof PasswordRegistryCredentials) {
+                registryPasswordCredentials = Optional.of((PasswordRegistryCredentials) registryCredentials);
+            } else {
+                logger.warn(
+                        "Unsupported registry credentials type. Only PasswordRegistryCredentials is supported. Attempting unauthenticated validation.");
+            }
+        }
+
         for (ContainerSignatureValidationService validationService : this.availableContainerSignatureValidationService) {
-            ValidationResult results = validationService.verify(configuration.getContainerImage(),
-                    configuration.getContainerImageTag(), trustAnchor, verifyInTransparencyLog);
+            ValidationResult results;
+
+            if (registryPasswordCredentials.isPresent()) {
+                results = validationService.verify(configuration.getContainerImage(),
+                        configuration.getContainerImageTag(), trustAnchor, verifyInTransparencyLog,
+                        registryPasswordCredentials.get().getUsername(),
+                        registryPasswordCredentials.get().getPassword());
+            } else {
+                results = validationService.verify(configuration.getContainerImage(),
+                        configuration.getContainerImageTag(), trustAnchor, verifyInTransparencyLog);
+            }
+
             if (results.isSignatureValid()) {
                 String imageDigest = results.imageDigest().orElse("[ERROR] Image digest not provided! [ERROR]");
                 logger.info("Service \"{}\" reports that the signature for image {}:{} is VALID",

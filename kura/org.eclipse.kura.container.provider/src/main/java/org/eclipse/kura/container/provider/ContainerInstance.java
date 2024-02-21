@@ -26,11 +26,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.UnaryOperator;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
@@ -140,8 +138,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             if (registryCredentials instanceof PasswordRegistryCredentials) {
                 registryPasswordCredentials = Optional.of((PasswordRegistryCredentials) registryCredentials);
             } else {
-                logger.warn(
-                        "Unsupported registry credentials type. Only PasswordRegistryCredentials is supported. Attempting unauthenticated validation.");
+                logger.warn("Unsupported registry credentials type.  Attempting unauthenticated validation.");
             }
         }
 

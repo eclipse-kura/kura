@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2024 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+       SPDX-License-Identifier: EPL-2.0
+
+       Contributors:
+        Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.example.container.signature.validation.DummyContainerSignatureValidationService"
+         name="Dummy Container Signature Validation Service"
+         description="This is an example implementation of a service implementing a Container Signature Validation Service. The main purpose of this service is testing and serving as reference for future implementations.">
+
+        <AD id="manual.setValidationOutcome"
+            name="Set signature validation outcome"
+            type="String"
+            cardinality="0"
+            required="true"
+            default=""
+            description="Set the outcome for container signature validations performed by this service. Supported format: imageName:imageTag@digest. Example: hello-world:latest@sha256:e2fc4e...|TextArea"/>
+
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.example.container.signature.validation.DummyContainerSignatureValidationService">
+        <Object ocdref="org.eclipse.kura.example.container.signature.validation.DummyContainerSignatureValidationService"/>
+    </Designate>
+</MetaData>

@@ -13,6 +13,9 @@
 
 package org.eclipse.kura.container.provider;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -20,9 +23,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,20 +54,21 @@ public class ContainerInstanceTest {
     private static final String CONTAINER_DEVICE = "container.Device";
     private static final String CONTAINER_LOGGER_PARAMETERS = "container.loggerParameters";
     private static final String CONTAINER_LOGGING_TYPE = "container.loggingType";
-    private static final String CONTAINER_NETWORKING_MODE = "container.networkMode";   
+    private static final String CONTAINER_NETWORKING_MODE = "container.networkMode";
 
     private ContainerOrchestrationService dockerService;
-    private Map<String, Object> properties;
+    private Map<String, Object> properties = new HashMap<>();
     private ContainerInstance configurableGenericDockerService;
+    private Exception occurredException;
     private final CompletableFuture<Void> containerStarted = new CompletableFuture<>();
 
-    @Test(expected = IllegalArgumentException.class)
     public void testServiceActivateNullProperties() {
-        givenNullProperties();
         givenConfigurableGenericDockerService();
         givenDockerService();
 
-        whenActivateInstance();
+        whenActivateInstanceIsCalledWith(null);
+
+        thenExceptionOccurred(IllegalArgumentException.class);
     }
 
     @Test
@@ -70,7 +77,7 @@ public class ContainerInstanceTest {
         givenConfigurableGenericDockerService();
         givenDockerService();
 
-        whenActivateInstance();
+        whenActivateInstanceIsCalledWith(this.properties);
 
         thenNotStartedMicroservice();
 
@@ -82,7 +89,7 @@ public class ContainerInstanceTest {
         givenConfigurableGenericDockerService();
         givenDockerService();
 
-        whenActivateInstance();
+        whenActivateInstanceIsCalledWith(this.properties);
 
         thenNotStoppedMicroservice();
         thenStartedMicroservice();
@@ -94,7 +101,7 @@ public class ContainerInstanceTest {
         givenFullProperties(false);
         givenConfigurableGenericDockerService();
         givenDockerService();
-        givenActivateInstance();
+        givenContainerInstanceWith(this.properties);
 
         whenUpdateInstance();
 
@@ -107,7 +114,7 @@ public class ContainerInstanceTest {
         givenFullProperties(false);
         givenConfigurableGenericDockerService();
         givenDockerService();
-        givenActivateInstance();
+        givenContainerInstanceWith(this.properties);
         givenFullProperties(true);
 
         whenUpdateInstance();
@@ -121,7 +128,7 @@ public class ContainerInstanceTest {
         givenFullProperties(true);
         givenConfigurableGenericDockerService();
         givenDockerService();
-        givenActivateInstance();
+        givenContainerInstanceWith(this.properties);
         givenStartedContainer();
         givenFullProperties(false);
 
@@ -135,7 +142,7 @@ public class ContainerInstanceTest {
         givenFullProperties(false);
         givenConfigurableGenericDockerService();
         givenDockerService();
-        givenActivateInstance();
+        givenContainerInstanceWith(this.properties);
 
         whenDeactivateInstance();
 
@@ -147,7 +154,7 @@ public class ContainerInstanceTest {
         givenFullProperties(true);
         givenConfigurableGenericDockerService();
         givenDockerService();
-        givenActivateInstance();
+        givenContainerInstanceWith(this.properties);
         givenStartedContainer();
 
         whenDeactivateInstance();
@@ -181,12 +188,7 @@ public class ContainerInstanceTest {
         }
     }
 
-    private void givenNullProperties() {
-        this.properties = null;
-    }
-
     private void givenFullProperties(boolean enabled) {
-        this.properties = new HashMap<>();
         this.properties.put(CONTAINER_ENABLED, enabled);
         this.properties.put(CONTAINER_IMAGE, "myimage");
         this.properties.put(CONTAINER_IMAGE_TAG, "mytag");
@@ -218,12 +220,16 @@ public class ContainerInstanceTest {
         }
     }
 
-    private void givenActivateInstance() {
-        whenActivateInstance();
+    private void givenContainerInstanceWith(Map<String, Object> configuration) {
+        whenActivateInstanceIsCalledWith(configuration);
     }
 
-    private void whenActivateInstance() {
-        this.configurableGenericDockerService.activate(this.properties);
+    private void whenActivateInstanceIsCalledWith(Map<String, Object> configuration) {
+        try {
+            this.configurableGenericDockerService.activate(configuration);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
     }
 
     private void whenUpdateInstance() {
@@ -248,6 +254,24 @@ public class ContainerInstanceTest {
 
     private void thenStartedMicroservice() {
         givenStartedContainer();
+    }
+
+    private void thenNoExceptionOccurred() {
+        String errorMessage = "Empty message";
+        if (Objects.nonNull(this.occurredException)) {
+            StringWriter sw = new StringWriter();
+            this.occurredException.printStackTrace(new PrintWriter(sw));
+
+            errorMessage = String.format("No exception expected, \"%s\" found. Caused by: %s",
+                    this.occurredException.getClass().getName(), sw.toString());
+        }
+
+        assertNull(errorMessage, this.occurredException);
+    }
+
+    private <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
+        assertNotNull(this.occurredException);
+        assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
     }
 
 }

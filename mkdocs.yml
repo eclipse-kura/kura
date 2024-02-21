@@ -21,6 +21,7 @@ nav:
         - Cellular Configuration: gateway-configuration/cellular-configuration.md
         - VLAN Configuration: gateway-configuration/vlan-configuration.md
         - Advanced Settings: gateway-configuration/network-advanced.md
+        - Hardware Tab: gateway-configuration/network-hardware.md
       - Firewall Configuration: gateway-configuration/firewall-configuration.md
       - Network Threat Manager: gateway-configuration/network-threat-manager.md
       - Cloud Connections:

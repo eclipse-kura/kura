@@ -77,8 +77,8 @@ public class ContainerInstanceTest {
 
         whenActivateInstanceIsCalledWith(this.properties);
 
+        thenNoExceptionOccurred();
         thenNotStartedMicroservice();
-
     }
 
     @Test
@@ -88,9 +88,9 @@ public class ContainerInstanceTest {
 
         whenActivateInstanceIsCalledWith(this.properties);
 
+        thenNoExceptionOccurred();
         thenNotStoppedMicroservice();
         thenStartedMicroservice();
-
     }
 
     @Test
@@ -101,8 +101,8 @@ public class ContainerInstanceTest {
 
         whenUpdateInstanceIsCalledWith(this.properties);
 
+        thenNoExceptionOccurred();
         thenNotStoppedMicroservice();
-
     }
 
     @Test
@@ -114,6 +114,7 @@ public class ContainerInstanceTest {
 
         whenUpdateInstanceIsCalledWith(this.properties);
 
+        thenNoExceptionOccurred();
         thenStartedMicroservice();
     }
 
@@ -127,6 +128,7 @@ public class ContainerInstanceTest {
 
         whenUpdateInstanceIsCalledWith(this.properties);
 
+        thenNoExceptionOccurred();
         thenStoppedMicroservice();
     }
 
@@ -138,6 +140,7 @@ public class ContainerInstanceTest {
 
         whenDeactivateInstance();
 
+        thenNoExceptionOccurred();
         thenNotStartedMicroservice();
     }
 
@@ -150,6 +153,7 @@ public class ContainerInstanceTest {
 
         whenDeactivateInstance();
 
+        thenNoExceptionOccurred();
         thenStoppedMicroservice();
     }
 
@@ -224,11 +228,19 @@ public class ContainerInstanceTest {
     }
 
     private void whenUpdateInstanceIsCalledWith(Map<String, Object> configuration) {
-        this.configurableGenericDockerService.updated(configuration);
+        try {
+            this.configurableGenericDockerService.updated(configuration);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
     }
 
     private void whenDeactivateInstance() {
-        this.configurableGenericDockerService.deactivate();
+        try {
+            this.configurableGenericDockerService.deactivate();
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
     }
 
     private void thenStoppedMicroservice() throws KuraException {

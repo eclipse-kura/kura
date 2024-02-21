@@ -99,7 +99,7 @@ public class ContainerInstanceTest {
         givenDockerService();
         givenContainerInstanceWith(this.properties);
 
-        whenUpdateInstance();
+        whenUpdateInstanceIsCalledWith(this.properties);
 
         thenNotStoppedMicroservice();
 
@@ -112,10 +112,9 @@ public class ContainerInstanceTest {
         givenContainerInstanceWith(this.properties);
         givenFullProperties(true);
 
-        whenUpdateInstance();
+        whenUpdateInstanceIsCalledWith(this.properties);
 
         thenStartedMicroservice();
-
     }
 
     @Test
@@ -126,7 +125,7 @@ public class ContainerInstanceTest {
         givenStartedContainer();
         givenFullProperties(false);
 
-        whenUpdateInstance();
+        whenUpdateInstanceIsCalledWith(this.properties);
 
         thenStoppedMicroservice();
     }
@@ -181,20 +180,24 @@ public class ContainerInstanceTest {
     }
 
     private void givenFullProperties(boolean enabled) {
-        this.properties.put(CONTAINER_ENABLED, enabled);
-        this.properties.put(CONTAINER_IMAGE, "myimage");
-        this.properties.put(CONTAINER_IMAGE_TAG, "mytag");
-        this.properties.put(CONTAINER_NAME, "myname");
-        this.properties.put(CONTAINER_PORTS_EXTERNAL, "");
-        this.properties.put(CONTAINER_PORTS_INTERNAL, "");
-        this.properties.put(CONTAINER_ARGS, "");
-        this.properties.put(CONTAINER_ENV1, "");
-        this.properties.put(CONTAINER_PATH_DESTINATION, "");
-        this.properties.put(CONTAINER_PATH_FILE_PATH, "");
-        this.properties.put(CONTAINER_DEVICE, "");
-        this.properties.put(CONTAINER_LOGGER_PARAMETERS, "");
-        this.properties.put(CONTAINER_LOGGING_TYPE, "default");
-        this.properties.put(CONTAINER_NETWORKING_MODE, "");
+        givenPropertiesWith(CONTAINER_ENABLED, enabled);
+        givenPropertiesWith(CONTAINER_IMAGE, "myimage");
+        givenPropertiesWith(CONTAINER_IMAGE_TAG, "mytag");
+        givenPropertiesWith(CONTAINER_NAME, "myname");
+        givenPropertiesWith(CONTAINER_PORTS_EXTERNAL, "");
+        givenPropertiesWith(CONTAINER_PORTS_INTERNAL, "");
+        givenPropertiesWith(CONTAINER_ARGS, "");
+        givenPropertiesWith(CONTAINER_ENV1, "");
+        givenPropertiesWith(CONTAINER_PATH_DESTINATION, "");
+        givenPropertiesWith(CONTAINER_PATH_FILE_PATH, "");
+        givenPropertiesWith(CONTAINER_DEVICE, "");
+        givenPropertiesWith(CONTAINER_LOGGER_PARAMETERS, "");
+        givenPropertiesWith(CONTAINER_LOGGING_TYPE, "default");
+        givenPropertiesWith(CONTAINER_NETWORKING_MODE, "");
+    }
+
+    private void givenPropertiesWith(String key, Object value) {
+        this.properties.put(key, value);
     }
 
     private void givenStartedContainer() {
@@ -220,8 +223,8 @@ public class ContainerInstanceTest {
         }
     }
 
-    private void whenUpdateInstance() {
-        this.configurableGenericDockerService.updated(this.properties);
+    private void whenUpdateInstanceIsCalledWith(Map<String, Object> configuration) {
+        this.configurableGenericDockerService.updated(configuration);
     }
 
     private void whenDeactivateInstance() {

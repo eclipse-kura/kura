@@ -16,7 +16,6 @@ package org.eclipse.kura.web.client.ui.network;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -368,7 +367,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             update();
         });
-        
+
         this.tcp6Tab.status.addChangeHandler(event -> {
             evalActiveConfig();
 
@@ -387,7 +386,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                     || !tcpIp6Status.equals(TabWirelessUi.this.tcp6Status);
 
             if (isStatusChanged) {
-                if (tcpIp4Status.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name())) || tcpIp6Status.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name()))) {
+                if (tcpIp4Status.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name()))
+                        || tcpIp6Status.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name()))) {
                     TabWirelessUi.this.activeConfig = TabWirelessUi.this.selectedNetIfConfig.getStationWifiConfig();
                 } else {
                     TabWirelessUi.this.activeConfig = TabWirelessUi.this.selectedNetIfConfig.getActiveWifiConfig();
@@ -460,27 +460,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             this.selectedNetIfConfig = (GwtWifiNetInterfaceConfig) config;
 
             this.activeConfig = this.selectedNetIfConfig.getActiveWifiConfig();
-            if (Objects.nonNull(this.activeConfig)) {
-                if (this.activeConfig.getChannels() != null
-                        && !TabWirelessUi.this.activeConfig.getChannels().isEmpty()) {
-                    updateChanneList(TabWirelessUi.this.activeConfig);
-                }
-            }
+
             loadCountryCode();
         }
-    }
-
-    private void updateChanneList(GwtWifiConfig config) {
-        int channelToSelect = 0;
-
-        List<Integer> channels = config.getChannels();
-
-        if (channels != null && !channels.isEmpty()) {
-            channelToSelect = config.getChannels().get(0);
-        }
-
-        this.channelList.setSelectedIndex(getChannelIndexFromValue(channelToSelect));
-
     }
 
     @Override
@@ -559,9 +541,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         // ------------
 
         setRadioModeByValue(this.activeConfig.getRadioMode());
-
-        // select proper channels
-        updateChanneList(this.activeConfig);
 
         String activeSecurity = this.activeConfig.getSecurity();
         if (activeSecurity != null) {
@@ -659,7 +638,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         String tcpip6Status = this.tcp6Tab.getStatus();
 
         // Tcp/IP disabled
-        if (tcpip4Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.name()) && tcpip6Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.name())) {
+        if (tcpip4Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.name())
+                && tcpip6Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.name())) {
             setForm(false);
         } else {
             setForm(true);
@@ -1814,27 +1794,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                                 @Override
                                 public void onSuccess(List<GwtWifiChannelFrequency> freqChannels) {
 
-                                    TabWirelessUi.this.channelList.clear();
-
-                                    addAutomaticChannel(freqChannels);
-
-                                    freqChannels.stream().forEach(TabWirelessUi.this::addItemChannelList);
-
-                                    List<Integer> currentChannels = TabWirelessUi.this.activeConfig.getChannels();
-
-                                    if (currentChannels != null && !currentChannels.isEmpty()) {
-                                        int channel = TabWirelessUi.this.activeConfig.getChannels().get(0);
-
-                                        int selectedChannelIndex = getChannelIndexFromValue(channel);
-                                        int channelIndex = selectedChannelIndex == -1 ? 0 : selectedChannelIndex;
-
-                                        TabWirelessUi.this.channelList.setSelectedIndex(channelIndex);
-
-                                    }
-
-                                    boolean hasChannels = TabWirelessUi.this.channelList.getItemCount() > 0;
-
-                                    TabWirelessUi.this.noChannels.setVisible(!hasChannels);
+                                    updateChannelListValues(freqChannels);
 
                                 }
                             });
@@ -1842,6 +1802,29 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             });
         }
 
+    }
+
+    private void updateChannelListValues(List<GwtWifiChannelFrequency> freqChannels) {
+
+        int selectedChannelValue = 0;
+
+        if (TabWirelessUi.this.channelList.getItemCount() != 0) {
+            selectedChannelValue = this.channelList.getSelectedIndex();
+        }
+
+        this.channelList.clear();
+
+        addAutomaticChannel(freqChannels);
+        freqChannels.stream().forEach(this::addItemChannelList);
+
+        if (this.activeConfig.getChannels() != null && !this.activeConfig.getChannels().isEmpty()) {
+            this.netTabs.hardwareTab.channel
+                    .setText(this.channelList.getItemText(this.activeConfig.getChannels().get(0)));
+
+            this.channelList.setSelectedIndex(selectedChannelValue);
+        }
+
+        this.noChannels.setVisible((this.channelList.getItemCount() <= 0));
     }
 
     private void addAutomaticChannel(List<GwtWifiChannelFrequency> freqs) {

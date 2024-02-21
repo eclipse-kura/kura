@@ -239,6 +239,14 @@ public class GwtNetInterfaceConfig extends KuraBaseModel implements Serializable
         set("hwRssi", rssi);
     }
 
+    public String getCurrentHwWifiChannel() {
+        return get("currentHwWifiChannel");
+    }
+
+    public void setCurrentHwWifiChannel(String channel) {
+        set("currentHwWifiChannel", channel);
+    }
+
     public GwtNetRouterMode getRouterModeEnum() {
         return GwtNetRouterMode.valueOf(getRouterMode());
     }

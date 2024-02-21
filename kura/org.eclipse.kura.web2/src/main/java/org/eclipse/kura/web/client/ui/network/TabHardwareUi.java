@@ -57,6 +57,8 @@ public class TabHardwareUi extends Composite implements NetworkTab {
     FormLabel labelUsb;
     @UiField
     FormLabel labelRssi;
+    @UiField
+    FormLabel labelChannel;
 
     @UiField
     FormControlStatic state;
@@ -80,6 +82,8 @@ public class TabHardwareUi extends Composite implements NetworkTab {
     FormControlStatic usb;
     @UiField
     FormControlStatic rssi;
+    @UiField
+    FormControlStatic channel;
 
     public TabHardwareUi(GwtSession currentSession) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -98,6 +102,7 @@ public class TabHardwareUi extends Composite implements NetworkTab {
         this.labelMtu.setText(MSGS.netHwMTU());
         this.labelUsb.setText(MSGS.netHwUSBDevice());
         this.labelRssi.setText(MSGS.netHwSignalStrength());
+        this.labelChannel.setText(MSGS.netCurrentHwWifiChannel());
     }
 
     // Dirty flag not needed here since this tab is not modifiable
@@ -148,6 +153,7 @@ public class TabHardwareUi extends Composite implements NetworkTab {
         this.mtu.setText(String.valueOf(this.selectedNetIfConfig.getHwMTU()));
         this.usb.setText(this.selectedNetIfConfig.getHwUsbDevice());
         this.rssi.setText(this.selectedNetIfConfig.getHwRssi());
+        this.channel.setText(this.selectedNetIfConfig.getCurrentHwWifiChannel());
     }
 
     private void reset() {
@@ -162,6 +168,7 @@ public class TabHardwareUi extends Composite implements NetworkTab {
         this.mtu.setText("");
         this.usb.setText("");
         this.rssi.setText("");
+        this.channel.setText("");
     }
 
     @Override
@@ -180,6 +187,7 @@ public class TabHardwareUi extends Composite implements NetworkTab {
             }
             updatedNetIf.setHwUsbDevice(this.usb.getText());
             updatedNetIf.setHwRssi(this.rssi.getText());
+            updatedNetIf.setCurrentHwWifiChannel(this.channel.getText());
         }
     }
 }

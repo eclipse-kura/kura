@@ -113,6 +113,38 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     }
 
+    public void deactivate() {
+        logger.info("deactivate...");
+
+        updateState(State::onDisabled);
+
+        this.executor.shutdown();
+        this.containerOrchestrationService.unregisterListener(this);
+
+        logger.info("deactivate...done");
+    }
+
+    // ----------------------------------------------------------------
+    //
+    // Private methods
+    //
+    // ----------------------------------------------------------------
+
+    @Override
+    public void onConnect() {
+        updateState(State::onConnect);
+    }
+
+    @Override
+    public void onDisconnect() {
+        //
+    }
+
+    @Override
+    public void onDisabled() {
+        updateState(State::onDisabled);
+    }
+
     private ValidationResult validateContainerImageSignature(ContainerInstanceOptions configuration)
             throws KuraException {
 
@@ -160,38 +192,6 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         }
 
         return FAILED_VALIDATION;
-    }
-
-    public void deactivate() {
-        logger.info("deactivate...");
-
-        updateState(State::onDisabled);
-
-        this.executor.shutdown();
-        this.containerOrchestrationService.unregisterListener(this);
-
-        logger.info("deactivate...done");
-    }
-
-    // ----------------------------------------------------------------
-    //
-    // Private methods
-    //
-    // ----------------------------------------------------------------
-
-    @Override
-    public void onConnect() {
-        updateState(State::onConnect);
-    }
-
-    @Override
-    public void onDisconnect() {
-        //
-    }
-
-    @Override
-    public void onDisabled() {
-        updateState(State::onDisabled);
     }
 
     private synchronized void updateState(final UnaryOperator<State> update) {

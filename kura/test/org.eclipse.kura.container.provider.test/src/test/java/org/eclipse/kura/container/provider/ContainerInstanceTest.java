@@ -56,14 +56,14 @@ public class ContainerInstanceTest {
     private static final String CONTAINER_LOGGING_TYPE = "container.loggingType";
     private static final String CONTAINER_NETWORKING_MODE = "container.networkMode";
 
-    private ContainerOrchestrationService dockerService;
+    private ContainerOrchestrationService mockContainerOrchestrationService = mock(ContainerOrchestrationService.class);
     private Map<String, Object> properties = new HashMap<>();
-    private ContainerInstance configurableGenericDockerService = new ContainerInstance();
+    private ContainerInstance containerInstance = new ContainerInstance();
     private Exception occurredException;
     private final CompletableFuture<Void> containerStarted = new CompletableFuture<>();
 
     public void testServiceActivateNullProperties() {
-        givenDockerService();
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
 
         whenActivateInstanceIsCalledWith(null);
 
@@ -73,7 +73,7 @@ public class ContainerInstanceTest {
     @Test
     public void testServiceActivateWithPropertiesDisabled() throws KuraException, InterruptedException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
-        givenDockerService();
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
 
         whenActivateInstanceIsCalledWith(this.properties);
 
@@ -84,7 +84,7 @@ public class ContainerInstanceTest {
     @Test
     public void testServiceActivateWithPropertiesEnabled() throws KuraException {
         givenPropertiesWith(CONTAINER_ENABLED, true);
-        givenDockerService();
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
 
         whenActivateInstanceIsCalledWith(this.properties);
 
@@ -96,7 +96,7 @@ public class ContainerInstanceTest {
     @Test
     public void testServiceUpdateSameProperties() throws KuraException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
-        givenDockerService();
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
         givenContainerInstanceWith(this.properties);
 
         whenUpdateInstanceIsCalledWith(this.properties);
@@ -108,7 +108,7 @@ public class ContainerInstanceTest {
     @Test
     public void testServiceUpdateEnable() {
         givenPropertiesWith(CONTAINER_ENABLED, false);
-        givenDockerService();
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
         givenContainerInstanceWith(this.properties);
         givenPropertiesWith(CONTAINER_ENABLED, true);
 
@@ -121,7 +121,7 @@ public class ContainerInstanceTest {
     @Test
     public void testServiceUpdateDisable() throws KuraException {
         givenPropertiesWith(CONTAINER_ENABLED, true);
-        givenDockerService();
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
         givenContainerInstanceWith(this.properties);
         givenStartedContainer();
         givenPropertiesWith(CONTAINER_ENABLED, false);
@@ -135,7 +135,7 @@ public class ContainerInstanceTest {
     @Test
     public void testServiceDeactivateNoRunningContainers() throws KuraException, InterruptedException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
-        givenDockerService();
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
         givenContainerInstanceWith(this.properties);
 
         whenDeactivateInstance();
@@ -147,7 +147,7 @@ public class ContainerInstanceTest {
     @Test
     public void testServiceDeactivateStopContainer() throws KuraException {
         givenPropertiesWith(CONTAINER_ENABLED, true);
-        givenDockerService();
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
         givenContainerInstanceWith(this.properties);
         givenStartedContainer();
 
@@ -161,18 +161,18 @@ public class ContainerInstanceTest {
      * GIVEN
      */
 
-    private void givenDockerService() {
-        this.dockerService = mock(ContainerOrchestrationService.class);
-        this.configurableGenericDockerService.setContainerOrchestrationService(this.dockerService);
+    private void givenContainerInstanceWith(ContainerOrchestrationService cos) {
+        this.containerInstance.setContainerOrchestrationService(cos);
         try {
             final AtomicReference<ContainerConfiguration> config = new AtomicReference<>();
 
-            when(this.dockerService.startContainer((ContainerConfiguration) any())).thenAnswer(i -> {
-                config.set(i.getArgument(0, ContainerConfiguration.class));
-                this.containerStarted.complete(null);
-                return "1234";
-            });
-            when(this.dockerService.listContainerDescriptors()).thenAnswer(i -> {
+            when(this.mockContainerOrchestrationService.startContainer((ContainerConfiguration) any()))
+                    .thenAnswer(i -> {
+                        config.set(i.getArgument(0, ContainerConfiguration.class));
+                        this.containerStarted.complete(null);
+                        return "1234";
+                    });
+            when(this.mockContainerOrchestrationService.listContainerDescriptors()).thenAnswer(i -> {
                 if (this.containerStarted.isDone()) {
                     return Collections.singletonList(ContainerInstanceDescriptor.builder()
                             .setContainerName(config.get().getContainerName()).setContainerID("1234").build());
@@ -204,7 +204,7 @@ public class ContainerInstanceTest {
 
     private void givenContainerInstanceWith(Map<String, Object> configuration) {
         try {
-            this.configurableGenericDockerService.activate(configuration);
+            this.containerInstance.activate(configuration);
         } catch (Exception e) {
             fail("Failed to activate container instance. Caused by: " + e.getMessage());
         }
@@ -216,7 +216,7 @@ public class ContainerInstanceTest {
 
     private void whenActivateInstanceIsCalledWith(Map<String, Object> configuration) {
         try {
-            this.configurableGenericDockerService.activate(configuration);
+            this.containerInstance.activate(configuration);
         } catch (Exception e) {
             this.occurredException = e;
         }
@@ -224,7 +224,7 @@ public class ContainerInstanceTest {
 
     private void whenUpdateInstanceIsCalledWith(Map<String, Object> configuration) {
         try {
-            this.configurableGenericDockerService.updated(configuration);
+            this.containerInstance.updated(configuration);
         } catch (Exception e) {
             this.occurredException = e;
         }
@@ -232,7 +232,7 @@ public class ContainerInstanceTest {
 
     private void whenDeactivateInstance() {
         try {
-            this.configurableGenericDockerService.deactivate();
+            this.containerInstance.deactivate();
         } catch (Exception e) {
             this.occurredException = e;
         }
@@ -244,11 +244,11 @@ public class ContainerInstanceTest {
 
     private void thenStopContainerWasCalled(boolean expectCalled) throws KuraException {
         int timesCalled = expectCalled ? 1 : 0;
-        verify(this.dockerService, times(timesCalled)).stopContainer(any(String.class));
+        verify(this.mockContainerOrchestrationService, times(timesCalled)).stopContainer(any(String.class));
     }
 
     private void thenStartContainerWasNeverCalled() throws KuraException, InterruptedException {
-        verify(this.dockerService, times(0)).startContainer(any(ContainerConfiguration.class));
+        verify(this.mockContainerOrchestrationService, times(0)).startContainer(any(ContainerConfiguration.class));
     }
 
     private void thenStartedMicroservice() {

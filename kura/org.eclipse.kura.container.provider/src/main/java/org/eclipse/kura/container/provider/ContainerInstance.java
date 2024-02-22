@@ -149,17 +149,17 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
         if (Objects.isNull(this.availableContainerSignatureValidationService)
                 || this.availableContainerSignatureValidationService.isEmpty()) {
-            logger.warn("No container signature validation service available. Skipping signature validation.");
+            logger.warn("No container signature validation service available. Signature validation failed.");
             return FAILED_VALIDATION;
         }
 
-        if (!configuration.getSignatureTrustAnchor().isPresent()
-                || configuration.getSignatureTrustAnchor().get().isEmpty()) {
-            logger.warn("No signature trust anchor available. Skipping signature validation.");
+        Optional<String> optTrustAnchor = configuration.getSignatureTrustAnchor();
+        if (!optTrustAnchor.isPresent() || optTrustAnchor.get().isEmpty()) {
+            logger.warn("No trust anchor available. Signature validation failed.");
             return FAILED_VALIDATION;
         }
 
-        String trustAnchor = configuration.getSignatureTrustAnchor().get();
+        String trustAnchor = optTrustAnchor.get();
         boolean verifyInTransparencyLog = configuration.getSignatureVerifyTransparencyLog();
         Optional<RegistryCredentials> registryCredentials = configuration.getRegistryCredentials();
 

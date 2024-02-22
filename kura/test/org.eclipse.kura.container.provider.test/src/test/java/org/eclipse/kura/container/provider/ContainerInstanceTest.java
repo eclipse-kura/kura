@@ -78,7 +78,7 @@ public class ContainerInstanceTest {
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenNotStartedMicroservice();
+        thenStartContainerWasNeverCalled();
     }
 
     @Test
@@ -89,7 +89,7 @@ public class ContainerInstanceTest {
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenNotStoppedMicroservice();
+        thenStopContainerWasCalled(false);
         thenStartedMicroservice();
     }
 
@@ -102,7 +102,7 @@ public class ContainerInstanceTest {
         whenUpdateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenNotStoppedMicroservice();
+        thenStopContainerWasCalled(false);
     }
 
     @Test
@@ -129,7 +129,7 @@ public class ContainerInstanceTest {
         whenUpdateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenStoppedMicroservice();
+        thenStopContainerWasCalled(true);
     }
 
     @Test
@@ -141,7 +141,7 @@ public class ContainerInstanceTest {
         whenDeactivateInstance();
 
         thenNoExceptionOccurred();
-        thenNotStartedMicroservice();
+        thenStartContainerWasNeverCalled();
     }
 
     @Test
@@ -154,7 +154,7 @@ public class ContainerInstanceTest {
         whenDeactivateInstance();
 
         thenNoExceptionOccurred();
-        thenStoppedMicroservice();
+        thenStopContainerWasCalled(true);
     }
 
     private void givenDockerService() {
@@ -226,15 +226,12 @@ public class ContainerInstanceTest {
         }
     }
 
-    private void thenStoppedMicroservice() throws KuraException {
-        verify(this.dockerService, times(1)).stopContainer(any(String.class));
+    private void thenStopContainerWasCalled(boolean expectCalled) throws KuraException {
+        int timesCalled = expectCalled ? 1 : 0;
+        verify(this.dockerService, times(timesCalled)).stopContainer(any(String.class));
     }
 
-    private void thenNotStoppedMicroservice() throws KuraException {
-        verify(this.dockerService, times(0)).stopContainer(any(String.class));
-    }
-
-    private void thenNotStartedMicroservice() throws KuraException, InterruptedException {
+    private void thenStartContainerWasNeverCalled() throws KuraException, InterruptedException {
         verify(this.dockerService, times(0)).startContainer(any(ContainerConfiguration.class));
     }
 

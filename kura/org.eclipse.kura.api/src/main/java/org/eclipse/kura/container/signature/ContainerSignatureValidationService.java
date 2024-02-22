@@ -13,8 +13,8 @@
 package org.eclipse.kura.container.signature;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
+import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -84,16 +84,13 @@ public interface ContainerSignatureValidationService {
      * @param verifyInTransparencyLog
      *            Sets the transparency log verification, to be used when an artifact signature has been uploaded to the
      *            transparency log. Artifacts cannot be publicly verified when not included in a log.
-     * @param registryUsername
-     *            Optional username for registry authentication. If the registry requires authentication,
-     *            both username and password must be provided.
-     * @param registryPassword
-     *            Optional password for registry authentication. If the registry requires authentication,
-     *            both username and password must be provided.
+     * @param credentials
+     *            Credentials for registry authentication. If the registry requires authentication,
+     *            this needs to be provided to verify the signature. See {@link RegistryCredentials}.
      * @return {@link:ValidationResult}
      */
     public ValidationResult verify(String imageName, String imageReference, String trustAnchor,
-            boolean verifyInTransparencyLog, String registryUsername, Password registryPassword) throws KuraException;
+            boolean verifyInTransparencyLog, RegistryCredentials credentials) throws KuraException;
 
     /**
      * Verifies the signature of a container image using the provided trust anchor. The trust anchor format depends on
@@ -145,14 +142,11 @@ public interface ContainerSignatureValidationService {
      * @param verifyInTransparencyLog
      *            Sets the transparency log verification, to be used when an artifact signature has been uploaded to the
      *            transparency log. Artifacts cannot be publicly verified when not included in a log.
-     * @param registryUsername
-     *            Optional username for registry authentication. If the registry requires authentication,
-     *            both username and password must be provided.
-     * @param registryPassword
-     *            Optional password for registry authentication. If the registry requires authentication,
-     *            both username and password must be provided.
+     * @param credentials
+     *            Credentials for registry authentication. If the registry requires authentication,
+     *            this needs to be provided to verify the signature. See {@link RegistryCredentials}.
      * @return {@link:ValidationResult}
      */
     public ValidationResult verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor,
-            boolean verifyInTransparencyLog, String registryUsername, Password registryPassword) throws KuraException;
+            boolean verifyInTransparencyLog, RegistryCredentials credentials) throws KuraException;
 }

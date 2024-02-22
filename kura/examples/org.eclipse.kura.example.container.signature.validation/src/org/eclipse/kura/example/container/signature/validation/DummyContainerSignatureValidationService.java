@@ -18,8 +18,8 @@ import java.util.Objects;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
+import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.signature.ContainerSignatureValidationService;
 import org.eclipse.kura.container.signature.ValidationResult;
 import org.slf4j.Logger;
@@ -62,7 +62,7 @@ public class DummyContainerSignatureValidationService
 
     @Override
     public ValidationResult verify(String imageName, String imageReference, String trustAnchor,
-            boolean verifyInTransparencyLog, String registryUsername, Password registryPassword) throws KuraException {
+            boolean verifyInTransparencyLog, RegistryCredentials credentials) throws KuraException {
         logger.info("Validating signature for {}:{} using authenticated registry", imageName, imageReference);
         return verify(imageName, imageReference);
     }
@@ -76,7 +76,7 @@ public class DummyContainerSignatureValidationService
 
     @Override
     public ValidationResult verify(ImageInstanceDescriptor imageDescriptor, String trustAnchor,
-            boolean verifyInTransparencyLog, String registryUsername, Password registryPassword) throws KuraException {
+            boolean verifyInTransparencyLog, RegistryCredentials credentials) throws KuraException {
         logger.info("Validating signature for {}:{} using authenticated registry", imageDescriptor.getImageName(),
                 imageDescriptor.getImageTag());
         return verify(imageDescriptor.getImageName(), imageDescriptor.getImageTag());

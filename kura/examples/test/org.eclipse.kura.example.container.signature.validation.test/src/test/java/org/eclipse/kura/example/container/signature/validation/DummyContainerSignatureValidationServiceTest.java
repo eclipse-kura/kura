@@ -22,10 +22,13 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
+import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
+import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.signature.ValidationResult;
 import org.junit.Test;
 
@@ -134,7 +137,8 @@ public class DummyContainerSignatureValidationServiceTest {
         givenPropertyWith(PROPERTY_NAME, "alpine:latest@sha256:1234567890");
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyWithAuthIsCalledWith("alpine", "develop", TRUST_ANCHOR, false, USERNAME, PASSWORD);
+        whenVerifyWithAuthIsCalledWith("alpine", "develop", TRUST_ANCHOR, false,
+            new PasswordRegistryCredentials(Optional.empty(), USERNAME, new Password(PASSWORD)));
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(FAILED_VALIDATION);
@@ -145,7 +149,8 @@ public class DummyContainerSignatureValidationServiceTest {
         givenPropertyWith(PROPERTY_NAME, "alpine:latest@sha256:1234567890");
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyWithAuthIsCalledWith("alpine", "latest", TRUST_ANCHOR, false, USERNAME, PASSWORD);
+        whenVerifyWithAuthIsCalledWith("alpine", "latest", TRUST_ANCHOR, false,
+            new PasswordRegistryCredentials(Optional.empty(), USERNAME, new Password(PASSWORD)));
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(new ValidationResult(true, "sha256:1234567890"));
@@ -181,8 +186,8 @@ public class DummyContainerSignatureValidationServiceTest {
         givenImageInstanceDescriptorWith("alpine", "develop", IMAGE_ID);
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyImageInstanceDescriptorWithAuthIsCalledWith(this.imageDescriptor, TRUST_ANCHOR, false, USERNAME,
-                PASSWORD);
+        whenVerifyImageInstanceDescriptorWithAuthIsCalledWith(this.imageDescriptor, TRUST_ANCHOR, false,
+            new PasswordRegistryCredentials(Optional.empty(), USERNAME, new Password(PASSWORD)));
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(FAILED_VALIDATION);
@@ -194,8 +199,8 @@ public class DummyContainerSignatureValidationServiceTest {
         givenImageInstanceDescriptorWith("alpine", "latest", IMAGE_ID);
         givenContainerSignatureValidationServiceWith(this.properties);
 
-        whenVerifyImageInstanceDescriptorWithAuthIsCalledWith(this.imageDescriptor, TRUST_ANCHOR, false, USERNAME,
-                PASSWORD);
+        whenVerifyImageInstanceDescriptorWithAuthIsCalledWith(this.imageDescriptor, TRUST_ANCHOR, false,
+            new PasswordRegistryCredentials(Optional.empty(), USERNAME, new Password(PASSWORD)));
 
         thenNoExceptionOccurred();
         thenVerificationResultIs(new ValidationResult(true, "sha256:1234567890"));
@@ -238,10 +243,10 @@ public class DummyContainerSignatureValidationServiceTest {
     }
 
     private void whenVerifyWithAuthIsCalledWith(String imageName, String imageTag, String trustAnchor, boolean isVerify,
-            String user, String pass) {
+            RegistryCredentials credentials) {
         try {
             this.validationResult = this.containerSignatureValidationService.verify(imageName, imageTag, trustAnchor,
-                    isVerify, user, new Password(pass));
+                    isVerify, credentials);
         } catch (KuraException e) {
             this.occurredException = e;
         }
@@ -257,10 +262,9 @@ public class DummyContainerSignatureValidationServiceTest {
     }
 
     private void whenVerifyImageInstanceDescriptorWithAuthIsCalledWith(ImageInstanceDescriptor descriptor,
-            String trustAnchor, boolean isVerify, String user, String pass) {
+            String trustAnchor, boolean isVerify, RegistryCredentials credentials) {
         try {
-            this.validationResult = this.containerSignatureValidationService.verify(descriptor, trustAnchor, isVerify,
-                    user, new Password(pass));
+            this.validationResult = this.containerSignatureValidationService.verify(descriptor, trustAnchor, isVerify, credentials);
         } catch (KuraException e) {
             this.occurredException = e;
         }

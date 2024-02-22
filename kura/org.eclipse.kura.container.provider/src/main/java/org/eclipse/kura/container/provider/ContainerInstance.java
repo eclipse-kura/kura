@@ -92,11 +92,15 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         try {
             ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
 
-            ValidationResult containerSignatureValidated = validateContainerImageSignature(newProps);
-            String imageDigest = containerSignatureValidated.imageDigest().orElse("?");
-            logger.info("Container signature validation result for {}@{}({}) - {}", newProps.getContainerImage(),
-                    imageDigest, newProps.getContainerImageTag(),
-                    containerSignatureValidated.isSignatureValid() ? "OK" : "FAIL");
+            if (newProps.getSignatureTrustAnchor().isPresent()) {
+                ValidationResult containerSignatureValidated = validateContainerImageSignature(newProps);
+                String imageDigest = containerSignatureValidated.imageDigest().orElse("?");
+                logger.info("Container signature validation result for {}@{}({}) - {}", newProps.getContainerImage(),
+                        imageDigest, newProps.getContainerImageTag(),
+                        containerSignatureValidated.isSignatureValid() ? "OK" : "FAIL");
+            } else {
+                logger.info("No trust anchor available. Signature validation skipped.");
+            }
 
             if (newProps.isEnabled()) {
                 this.containerOrchestrationService.registerListener(this);

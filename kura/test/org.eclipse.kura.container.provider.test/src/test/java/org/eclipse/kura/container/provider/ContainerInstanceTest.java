@@ -157,6 +157,10 @@ public class ContainerInstanceTest {
         thenStopContainerWasCalled(true);
     }
 
+    /*
+     * GIVEN
+     */
+
     private void givenDockerService() {
         this.dockerService = mock(ContainerOrchestrationService.class);
         this.configurableGenericDockerService.setContainerOrchestrationService(this.dockerService);
@@ -199,8 +203,16 @@ public class ContainerInstanceTest {
     }
 
     private void givenContainerInstanceWith(Map<String, Object> configuration) {
-        whenActivateInstanceIsCalledWith(configuration);
+        try {
+            this.configurableGenericDockerService.activate(configuration);
+        } catch (Exception e) {
+            fail("Failed to activate container instance. Caused by: " + e.getMessage());
+        }
     }
+
+    /*
+     * WHEN
+     */
 
     private void whenActivateInstanceIsCalledWith(Map<String, Object> configuration) {
         try {
@@ -225,6 +237,10 @@ public class ContainerInstanceTest {
             this.occurredException = e;
         }
     }
+
+    /*
+     * THEN
+     */
 
     private void thenStopContainerWasCalled(boolean expectCalled) throws KuraException {
         int timesCalled = expectCalled ? 1 : 0;

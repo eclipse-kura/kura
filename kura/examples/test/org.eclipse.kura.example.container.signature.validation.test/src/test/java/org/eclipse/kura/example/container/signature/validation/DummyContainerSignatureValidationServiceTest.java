@@ -22,10 +22,12 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
+import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.container.signature.ValidationResult;
 import org.junit.Test;
 
@@ -241,7 +243,7 @@ public class DummyContainerSignatureValidationServiceTest {
             String user, String pass) {
         try {
             this.validationResult = this.containerSignatureValidationService.verify(imageName, imageTag, trustAnchor,
-                    isVerify, user, new Password(pass));
+                    isVerify, new PasswordRegistryCredentials(Optional.empty(), user, new Password(pass)));
         } catch (KuraException e) {
             this.occurredException = e;
         }
@@ -260,7 +262,7 @@ public class DummyContainerSignatureValidationServiceTest {
             String trustAnchor, boolean isVerify, String user, String pass) {
         try {
             this.validationResult = this.containerSignatureValidationService.verify(descriptor, trustAnchor, isVerify,
-                    user, new Password(pass));
+                    new PasswordRegistryCredentials(Optional.empty(), user, new Password(pass)));
         } catch (KuraException e) {
             this.occurredException = e;
         }

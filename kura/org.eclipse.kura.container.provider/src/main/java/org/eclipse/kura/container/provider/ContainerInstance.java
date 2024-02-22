@@ -161,16 +161,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
         String trustAnchor = configuration.getSignatureTrustAnchor().get();
         boolean verifyInTransparencyLog = configuration.getSignatureVerifyTransparencyLog();
-
-        Optional<PasswordRegistryCredentials> registryCredentials = Optional.empty();
-        if (configuration.getRegistryCredentials().isPresent()) {
-            RegistryCredentials configuredCredentials = configuration.getRegistryCredentials().get();
-            if (configuredCredentials instanceof PasswordRegistryCredentials) {
-                registryCredentials = Optional.of((PasswordRegistryCredentials) configuredCredentials);
-            } else {
-                logger.warn("Unsupported registry credentials type. Attempting unauthenticated validation.");
-            }
-        }
+        Optional<RegistryCredentials> registryCredentials = configuration.getRegistryCredentials();
 
         for (ContainerSignatureValidationService validationService : this.availableContainerSignatureValidationService) {
             ValidationResult results = FAILED_VALIDATION;
@@ -179,7 +170,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                 if (registryCredentials.isPresent()) {
                     results = validationService.verify(configuration.getContainerImage(),
                             configuration.getContainerImageTag(), trustAnchor, verifyInTransparencyLog,
-                            registryCredentials.get().getUsername(), registryCredentials.get().getPassword());
+                            registryCredentials.get());
                 } else {
                     results = validationService.verify(configuration.getContainerImage(),
                             configuration.getContainerImageTag(), trustAnchor, verifyInTransparencyLog);

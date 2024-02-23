@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
@@ -206,16 +208,16 @@ public class ContainerInstanceTest {
     }
 
     private void givenContainerStateIs(ContainerInstanceState expectedState) {
-        int count = 10;
-        while (this.containerInstance.getState() != expectedState && count-- > 0) {
+        CountDownLatch latch = new CountDownLatch(10);
+        while (this.containerInstance.getState() != expectedState) {
             try {
-                Thread.sleep(100);
+                latch.await(100, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
 
-        if (count <= 0) {
+        if (latch.getCount() <= 0) {
             fail(String.format("Container instance did not reach expected state \"%s\"", expectedState));
         }
     }
@@ -268,18 +270,16 @@ public class ContainerInstanceTest {
     }
 
     private void thenWaitForContainerInstanceToBecome(ContainerInstanceState expectedState) {
-        int count = 10;
-        while (this.containerInstance.getState() != expectedState && count-- > 0) {
+        CountDownLatch latch = new CountDownLatch(10);
+        while (this.containerInstance.getState() != expectedState) {
             try {
-                Thread.sleep(100);
+                latch.await(100, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
 
-        if (count <= 0) {
-            fail(String.format("Container instance did not reach expected state \"%s\"", expectedState));
-        }
+        assertEquals(expectedState, this.containerInstance.getState());
     }
 
     private void thenStartContainerWasCalled(boolean expectCalled) throws KuraException, InterruptedException {

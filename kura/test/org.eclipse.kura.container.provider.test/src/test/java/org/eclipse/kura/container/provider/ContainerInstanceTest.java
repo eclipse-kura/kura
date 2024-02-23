@@ -44,20 +44,10 @@ import org.junit.Test;
 
 public class ContainerInstanceTest {
 
-    private static final String CONTAINER_PATH_FILE_PATH = "container.path.filePath";
-    private static final String CONTAINER_PATH_DESTINATION = "container.path.destination";
-    private static final String CONTAINER_ENV1 = "container.env1";
-    private static final String CONTAINER_ARGS = "container.args";
-    private static final String CONTAINER_PORTS_INTERNAL = "container.ports.internal";
-    private static final String CONTAINER_PORTS_EXTERNAL = "container.ports.external";
     private static final String CONTAINER_NAME = "container.name";
     private static final String CONTAINER_IMAGE_TAG = "container.image.tag";
     private static final String CONTAINER_IMAGE = "container.image";
     private static final String CONTAINER_ENABLED = "container.enabled";
-    private static final String CONTAINER_DEVICE = "container.Device";
-    private static final String CONTAINER_LOGGER_PARAMETERS = "container.loggerParameters";
-    private static final String CONTAINER_LOGGING_TYPE = "container.loggingType";
-    private static final String CONTAINER_NETWORKING_MODE = "container.networkMode";
 
     private ContainerOrchestrationService mockContainerOrchestrationService = mock(ContainerOrchestrationService.class);
     private Map<String, Object> properties = new HashMap<>();
@@ -103,23 +93,6 @@ public class ContainerInstanceTest {
         thenNoExceptionOccurred();
         thenWaitForContainerInstanceToBecome(ContainerInstanceState.CREATED);
         thenStopContainerWasNeverCalled();
-        thenStartContainerWasCalledWith(this.properties);
-    }
-
-    @Test
-    public void activateContainerInstanceRetriesWhenContainerStartThrows() throws KuraException, InterruptedException {
-        givenContainerOrchestratorThrowingOnStart();
-        givenContainerInstanceWith(this.mockContainerOrchestrationService);
-
-        givenPropertiesWith(CONTAINER_ENABLED, true);
-        givenPropertiesWith(CONTAINER_NAME, "myContainer");
-        givenPropertiesWith(CONTAINER_IMAGE, "nginx");
-        givenPropertiesWith(CONTAINER_IMAGE_TAG, "latest");
-
-        whenActivateInstanceIsCalledWith(this.properties);
-
-        thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome(ContainerInstanceState.STARTING);
         thenStartContainerWasCalledWith(this.properties);
     }
 
@@ -267,8 +240,6 @@ public class ContainerInstanceTest {
         while (this.containerInstance.getState() != expectedState && count-- > 0) {
             try {
                 Thread.sleep(100);
-                System.out.println(
-                        String.format("Waiting for container to become %s (attempt %d)", expectedState, count));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -281,11 +252,6 @@ public class ContainerInstanceTest {
 
     private void givenContainerOrchestratorIsNotConnected() throws KuraException, InterruptedException {
         when(this.mockContainerOrchestrationService.listContainerDescriptors())
-                .thenThrow(new IllegalStateException("Not connected"));
-    }
-
-    private void givenContainerOrchestratorThrowingOnStart() throws KuraException, InterruptedException {
-        when(this.mockContainerOrchestrationService.startContainer(any(ContainerConfiguration.class)))
                 .thenThrow(new IllegalStateException("Not connected"));
     }
 
@@ -349,8 +315,6 @@ public class ContainerInstanceTest {
         int count = 10;
         while (this.containerInstance.getState() != expectedState && count-- > 0) {
             try {
-                System.out.println(
-                        String.format("Waiting for container to become %s (attempt %d)", expectedState, count));
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

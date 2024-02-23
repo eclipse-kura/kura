@@ -100,7 +100,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     private void startEnforcementMonitor() {
         this.enforcementEvent = this.dockerClient.eventsCmd().withEventFilter("start")
-                .exec(new AllowlistEnforcementMonitor(currentConfig, this));
+                .exec(new AllowlistEnforcementMonitor(currentConfig.getEnforcementAllowlistContent(), this));
     }
 
     public void activate(Map<String, Object> properties) {
@@ -958,9 +958,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         List<String> imageDigests = new ArrayList<>();
         dockerClient.listImagesCmd().withImageNameFilter(containerName).exec().stream().forEach(image -> {
             List<String> digests = Arrays.asList(image.getRepoDigests());
-            digests.stream().forEach(digest -> {
-                imageDigests.add(digest.split("@")[1]);
-            });
+            digests.stream().forEach(digest -> imageDigests.add(digest.split("@")[1]));
         });
 
         return imageDigests;

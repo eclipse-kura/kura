@@ -9,36 +9,31 @@ import org.eclipse.kura.container.orchestration.provider.impl.ContainerOrchestra
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.dockerjava.api.async.ResultCallback;
+import com.github.dockerjava.api.async.ResultCallbackTemplate;
 import com.github.dockerjava.api.model.Event;
 
-public class AllowlistEnforcement {
+public class AllowlistEnforcementMonitor extends ResultCallbackTemplate<AllowlistEnforcementMonitor, Event> {
 
-    private static final Logger logger = LoggerFactory.getLogger(AllowlistEnforcement.class);
+    private static final Logger logger = LoggerFactory.getLogger(AllowlistEnforcementMonitor.class);
     private static final String ENFORCEMENT_SUCCESS = "Enforcement allowlist contains image digests {}...container {} is starting";
     private static final String ENFORCEMENT_FAILURE = "Enforcement allowlist doesn't contain image digests...container {} will be stopped";
-
+    private final ContainerOrchestrationServiceOptions currentConfig;
     private final ContainerOrchestrationServiceImpl orchestrationServiceImpl;
-    private final ResultCallback.Adapter<Event> enforcement;
 
-    public AllowlistEnforcement(ContainerOrchestrationServiceOptions currentConfig,
+    public AllowlistEnforcementMonitor(ContainerOrchestrationServiceOptions currentConfiguration,
             ContainerOrchestrationServiceImpl containerOrchestrationService) {
 
+        this.currentConfig = currentConfiguration;
         this.orchestrationServiceImpl = containerOrchestrationService;
-        this.enforcement = new ResultCallback.Adapter<Event>() {
+    }
 
-            @Override
-            public void onNext(Event item) {
-
-                if (item.getAction().equals("start") && currentConfig.isEnforcementEnabled()) {
-                    try {
-                        implementAllowlistEnforcement(item.getId(), currentConfig);
-                    } catch (KuraException e) {
-                        logger.error("Error during container stopping process");
-                    }
-                }
-            }
-        };
+    @Override
+    public void onNext(Event item) {
+        try {
+            implementAllowlistEnforcement(item.getId(), currentConfig);
+        } catch (KuraException e) {
+            logger.error("Error during container stopping process");
+        }
     }
 
     private void implementAllowlistEnforcement(String id, ContainerOrchestrationServiceOptions currentConfig)
@@ -64,7 +59,4 @@ public class AllowlistEnforcement {
                 .map(container -> container.getContainerName()).orElse(null);
     }
 
-    public ResultCallback.Adapter<Event> getEnforcementCallback() {
-        return this.enforcement;
-    }
 }

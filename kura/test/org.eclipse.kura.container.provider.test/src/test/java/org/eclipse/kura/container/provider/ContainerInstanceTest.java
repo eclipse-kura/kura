@@ -107,6 +107,41 @@ public class ContainerInstanceTest {
     }
 
     @Test
+    public void activateContainerInstanceRetriesWhenContainerStartThrows() throws KuraException, InterruptedException {
+        givenContainerOrchestratorThrowingOnStart();
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
+
+        givenPropertiesWith(CONTAINER_ENABLED, true);
+        givenPropertiesWith(CONTAINER_NAME, "myContainer");
+        givenPropertiesWith(CONTAINER_IMAGE, "nginx");
+        givenPropertiesWith(CONTAINER_IMAGE_TAG, "latest");
+
+        whenActivateInstanceIsCalledWith(this.properties);
+
+        thenNoExceptionOccurred();
+        thenWaitForContainerInstanceToBecome(ContainerInstanceState.STARTING);
+        thenStartContainerWasCalledWith(this.properties);
+    }
+
+    @Test
+    public void activateContainerInstanceWithDisconnectedContainerOrchestratorWorks()
+            throws KuraException, InterruptedException {
+        givenContainerOrchestratorIsNotConnected();
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
+
+        givenPropertiesWith(CONTAINER_ENABLED, true);
+        givenPropertiesWith(CONTAINER_NAME, "myContainer");
+        givenPropertiesWith(CONTAINER_IMAGE, "nginx");
+        givenPropertiesWith(CONTAINER_IMAGE_TAG, "latest");
+
+        whenActivateInstanceIsCalledWith(this.properties);
+
+        thenNoExceptionOccurred();
+        thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
+        thenStartContainerWasNeverCalled();
+    }
+
+    @Test
     public void updateContainerInstanceWithSamePropertiesWorks() throws KuraException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
         givenContainerOrchestratorHasNoRunningContainers();
@@ -242,6 +277,16 @@ public class ContainerInstanceTest {
         if (count <= 0) {
             fail("Container instance state is not " + expectedState);
         }
+    }
+
+    private void givenContainerOrchestratorIsNotConnected() throws KuraException, InterruptedException {
+        when(this.mockContainerOrchestrationService.listContainerDescriptors())
+                .thenThrow(new IllegalStateException("Not connected"));
+    }
+
+    private void givenContainerOrchestratorThrowingOnStart() throws KuraException, InterruptedException {
+        when(this.mockContainerOrchestrationService.startContainer(any(ContainerConfiguration.class)))
+                .thenThrow(new IllegalStateException("Not connected"));
     }
 
     private void givenContainerOrchestratorHasNoRunningContainers() {

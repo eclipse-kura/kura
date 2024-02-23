@@ -16,6 +16,7 @@ import static java.util.Objects.isNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,11 +39,13 @@ import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor.ImageIns
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
+import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcement;
 import org.eclipse.kura.crypto.CryptoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.InspectImageResponse;
 import com.github.dockerjava.api.command.PullImageCmd;
@@ -53,6 +56,7 @@ import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ContainerPort;
 import com.github.dockerjava.api.model.Device;
 import com.github.dockerjava.api.model.DeviceRequest;
+import com.github.dockerjava.api.model.Event;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Image;
@@ -86,6 +90,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private DockerClient dockerClient;
     private CryptoService cryptoService;
     private List<ExposedPort> exposedPorts;
+    private ResultCallback.Adapter<Event> enforcementEvent;
 
     public void setDockerClient(DockerClient dockerClient) {
         this.dockerClient = dockerClient;
@@ -93,6 +98,11 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
+    }
+
+    private void startEnforcementMonitor() {
+        this.enforcementEvent = this.dockerClient.eventsCmd()
+                .exec(new AllowlistEnforcement(currentConfig, this).getEnforcementCallback());
     }
 
     public void activate(Map<String, Object> properties) {
@@ -132,6 +142,9 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 return;
             }
 
+            if (currentConfig.isEnforcementEnabled()) {
+                startEnforcementMonitor();
+            }
             logger.info("Connection Successful");
         }
 
@@ -329,7 +342,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     @Override
     public void stopContainer(String id) throws KuraException {
         checkRequestEnv(id);
-
         try {
             this.dockerClient.stopContainerCmd(id).exec();
         } catch (Exception e) {
@@ -793,6 +805,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private void disconnect() {
         if (testConnection()) {
             try {
+                this.enforcementEvent.close();
                 this.dockerServiceListeners.forEach(ContainerOrchestrationServiceListener::onDisconnect);
                 this.dockerClient.close();
             } catch (IOException e) {
@@ -921,6 +934,19 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Delete Container Image",
                     "500 (server error). Image is most likely in use by a container.");
         }
+    }
+
+    public List<String> getImageDigestsByContainerName(String containerName) {
+
+        List<String> imageDigests = new ArrayList<>();
+        dockerClient.listImagesCmd().withImageNameFilter(containerName).exec().stream().forEach(image -> {
+            List<String> digests = Arrays.asList(image.getRepoDigests());
+            digests.stream().forEach(digest -> {
+                imageDigests.add(digest.split("@")[1]);
+            });
+        });
+
+        return imageDigests;
     }
 
 }

@@ -148,7 +148,7 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    public void updateDisabledContainerInstanceWithDisabledContainerWorks() throws KuraException, InterruptedException {
+    public void deactivateContainerInstanceWithDisabledContainerWorks() throws KuraException, InterruptedException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
         givenContainerOrchestratorHasNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);

@@ -39,13 +39,12 @@ import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor.ImageIns
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
-import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcement;
+import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcementMonitor;
 import org.eclipse.kura.crypto.CryptoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.InspectImageResponse;
 import com.github.dockerjava.api.command.PullImageCmd;
@@ -56,7 +55,6 @@ import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ContainerPort;
 import com.github.dockerjava.api.model.Device;
 import com.github.dockerjava.api.model.DeviceRequest;
-import com.github.dockerjava.api.model.Event;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Image;
@@ -90,7 +88,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private DockerClient dockerClient;
     private CryptoService cryptoService;
     private List<ExposedPort> exposedPorts;
-    private ResultCallback.Adapter<Event> enforcementEvent;
+    private AllowlistEnforcementMonitor enforcementEvent;
 
     public void setDockerClient(DockerClient dockerClient) {
         this.dockerClient = dockerClient;
@@ -101,8 +99,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     private void startEnforcementMonitor() {
-        this.enforcementEvent = this.dockerClient.eventsCmd()
-                .exec(new AllowlistEnforcement(currentConfig, this).getEnforcementCallback());
+        this.enforcementEvent = this.dockerClient.eventsCmd().withEventFilter("start")
+                .exec(new AllowlistEnforcementMonitor(currentConfig, this));
     }
 
     public void activate(Map<String, Object> properties) {
@@ -135,6 +133,10 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 return;
             }
 
+            if (this.enforcementEvent != null) {
+                closeEnforcement();
+            }
+
             connect();
 
             if (!testConnection()) {
@@ -143,12 +145,28 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             }
 
             if (currentConfig.isEnforcementEnabled()) {
-                startEnforcementMonitor();
+                try {
+                    startEnforcementMonitor();
+                } catch (Exception ex) {
+                    logger.error("Error starting enforcement monitor", ex);
+                }
             }
             logger.info("Connection Successful");
         }
 
         logger.info("Bundle {} has updated with config!", APP_ID);
+    }
+
+    private void closeEnforcement() {
+        try {
+            this.enforcementEvent.close();
+            this.enforcementEvent.awaitCompletion(5, TimeUnit.SECONDS);
+        } catch (InterruptedException ex) {
+            logger.error("Waited to long to close enforcement monitor, stopping it...", ex);
+            Thread.currentThread().interrupt();
+        } catch (IOException ex) {
+            logger.error("Failed to close enforcement monitor, stopping it...", ex);
+        }
     }
 
     @Override
@@ -805,7 +823,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private void disconnect() {
         if (testConnection()) {
             try {
-                this.enforcementEvent.close();
                 this.dockerServiceListeners.forEach(ContainerOrchestrationServiceListener::onDisconnect);
                 this.dockerClient.close();
             } catch (IOException e) {

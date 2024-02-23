@@ -228,17 +228,19 @@ public class ContainerInstanceTest {
     }
 
     private void givenContainerStateIs(ContainerInstanceState expectedState) {
-        CountDownLatch latch = new CountDownLatch(10);
-        while (this.containerInstance.getState() != expectedState) {
+        int count = 10;
+        while (this.containerInstance.getState() != expectedState && count-- > 0) {
             try {
-                latch.await(100, TimeUnit.MILLISECONDS);
+                Thread.sleep(100);
+                System.out.println(
+                        String.format("Waiting for container to become %s (attempt %d)", expectedState, count));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
 
-        if (latch.getCount() <= 0) {
-            fail(String.format("Container instance did not reach expected state \"%s\"", expectedState));
+        if (count <= 0) {
+            fail("Container instance state is not " + expectedState);
         }
     }
 
@@ -299,10 +301,12 @@ public class ContainerInstanceTest {
     }
 
     private void thenWaitForContainerInstanceToBecome(ContainerInstanceState expectedState) {
-        CountDownLatch latch = new CountDownLatch(10);
-        while (this.containerInstance.getState() != expectedState) {
+        int count = 10;
+        while (this.containerInstance.getState() != expectedState && count-- > 0) {
             try {
-                latch.await(100, TimeUnit.MILLISECONDS);
+                System.out.println(
+                        String.format("Waiting for container to become %s (attempt %d)", expectedState, count));
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

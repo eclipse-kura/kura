@@ -154,7 +154,7 @@ public class ContainerInstanceTest {
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
         givenContainerInstanceActivatedWith(this.properties);
 
-        whenDeactivateInstance();
+        whenDeactivateInstanceIsCalled();
 
         thenNoExceptionOccurred();
         thenStartContainerWasCalled(false);
@@ -168,7 +168,7 @@ public class ContainerInstanceTest {
         givenContainerInstanceActivatedWith(this.properties);
         givenContainerStateIs(ContainerInstanceState.CREATED);
 
-        whenDeactivateInstance();
+        whenDeactivateInstanceIsCalled();
 
         thenNoExceptionOccurred();
         thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
@@ -227,7 +227,6 @@ public class ContainerInstanceTest {
     private void givenContainerOrchestratorIsRunningContainer(String containerName, String containerId) {
         List<ContainerInstanceDescriptor> runningContainers = Collections.singletonList(ContainerInstanceDescriptor
                 .builder().setContainerName(containerName).setContainerID(containerId).build());
-
         when(this.mockContainerOrchestrationService.listContainerDescriptors()).thenReturn(runningContainers);
     }
 
@@ -251,7 +250,7 @@ public class ContainerInstanceTest {
         }
     }
 
-    private void whenDeactivateInstance() {
+    private void whenDeactivateInstanceIsCalled() {
         try {
             this.containerInstance.deactivate();
         } catch (Exception e) {

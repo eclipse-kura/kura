@@ -62,7 +62,7 @@ public class ContainerInstanceTest {
     private ContainerInstance containerInstance = new ContainerInstance();
     private Exception occurredException;
 
-    public void testServiceActivateNullProperties() {
+    public void activateContainerInstanceWithNullPropertiesThrows() {
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
 
         whenActivateInstanceIsCalledWith(null);
@@ -71,7 +71,7 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    public void testServiceActivateWithPropertiesDisabled() throws KuraException, InterruptedException {
+    public void activateContainerInstanceWithDisabledContainerWorks() throws KuraException, InterruptedException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
         givenContainerOrchestratorHasNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
@@ -84,7 +84,7 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    public void testServiceActivateWithPropertiesEnabled() throws KuraException, InterruptedException {
+    public void activateContainerInstanceWithEnabledContainerWorks() throws KuraException, InterruptedException {
         givenPropertiesWith(CONTAINER_ENABLED, true);
         givenContainerOrchestratorHasNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
@@ -98,7 +98,7 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    public void testServiceUpdateSameProperties() throws KuraException {
+    public void updateContainerInstanceWithSamePropertiesWorks() throws KuraException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
         givenContainerOrchestratorHasNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
@@ -112,7 +112,7 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    public void testServiceUpdateEnable() throws KuraException, InterruptedException {
+    public void updateDisabledContainerInstanceWithEnabledContainerWorks() throws KuraException, InterruptedException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
         givenContainerOrchestratorHasNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
@@ -128,7 +128,7 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    public void testServiceUpdateDisable() throws KuraException {
+    public void updateEnabledContainerInstanceWithDisabledContainerWorks() throws KuraException {
         givenPropertiesWith(CONTAINER_ENABLED, true);
         givenPropertiesWith(CONTAINER_NAME, "pippo");
         givenContainerOrchestratorHasNoRunningContainers();
@@ -148,7 +148,7 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    public void testServiceDeactivateNoRunningContainers() throws KuraException, InterruptedException {
+    public void updateDisabledContainerInstanceWithDisabledContainerWorks() throws KuraException, InterruptedException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
         givenContainerOrchestratorHasNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
@@ -161,7 +161,7 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    public void testServiceDeactivateStopContainer() throws KuraException {
+    public void deactivateContainerInstanceWithEnabledContainerWorks() throws KuraException {
         givenPropertiesWith(CONTAINER_ENABLED, true);
         givenContainerOrchestratorHasNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);

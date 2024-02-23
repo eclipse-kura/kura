@@ -74,29 +74,34 @@ public class ContainerInstanceTest {
 
     @Test
     public void activateContainerInstanceWithDisabledContainerWorks() throws KuraException, InterruptedException {
-        givenPropertiesWith(CONTAINER_ENABLED, false);
         givenContainerOrchestratorHasNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
+
+        givenPropertiesWith(CONTAINER_ENABLED, false);
 
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
         thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
-        thenStartContainerWasCalled(false);
+        thenStartContainerWasNeverCalled();
     }
 
     @Test
     public void activateContainerInstanceWithEnabledContainerWorks() throws KuraException, InterruptedException {
-        givenPropertiesWith(CONTAINER_ENABLED, true);
         givenContainerOrchestratorHasNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
+
+        givenPropertiesWith(CONTAINER_ENABLED, true);
+        givenPropertiesWith(CONTAINER_NAME, "myContainer");
+        givenPropertiesWith(CONTAINER_IMAGE, "nginx");
+        givenPropertiesWith(CONTAINER_IMAGE_TAG, "latest");
 
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
         thenWaitForContainerInstanceToBecome(ContainerInstanceState.CREATED);
         thenStopContainerWasCalled(false);
-        thenStartContainerWasCalled(true);
+        thenStartContainerWasCalledWith(this.properties);
     }
 
     @Test
@@ -121,12 +126,15 @@ public class ContainerInstanceTest {
         givenContainerInstanceActivatedWith(this.properties);
 
         givenNewPropertiesWith(CONTAINER_ENABLED, true);
+        givenNewPropertiesWith(CONTAINER_NAME, "myContainer");
+        givenNewPropertiesWith(CONTAINER_IMAGE, "nginx");
+        givenNewPropertiesWith(CONTAINER_IMAGE_TAG, "latest");
 
         whenUpdateInstanceIsCalledWith(this.newProperties);
 
-        thenWaitForContainerInstanceToBecome(ContainerInstanceState.CREATED);
         thenNoExceptionOccurred();
-        thenStartContainerWasCalled(true);
+        thenWaitForContainerInstanceToBecome(ContainerInstanceState.CREATED);
+        thenStartContainerWasCalledWith(this.newProperties);
     }
 
     @Test
@@ -159,7 +167,7 @@ public class ContainerInstanceTest {
         whenDeactivateInstanceIsCalled();
 
         thenNoExceptionOccurred();
-        thenStartContainerWasCalled(false);
+        thenStartContainerWasNeverCalled();
     }
 
     @Test
@@ -282,9 +290,13 @@ public class ContainerInstanceTest {
         assertEquals(expectedState, this.containerInstance.getState());
     }
 
-    private void thenStartContainerWasCalled(boolean expectCalled) throws KuraException, InterruptedException {
-        int times = expectCalled ? 1 : 0;
-        verify(this.mockContainerOrchestrationService, times(times)).startContainer(any(ContainerConfiguration.class));
+    private void thenStartContainerWasNeverCalled() throws KuraException, InterruptedException {
+        verify(this.mockContainerOrchestrationService, times(0)).startContainer(any(ContainerConfiguration.class));
+    }
+
+    private void thenStartContainerWasCalledWith(Map<String, Object> props) throws KuraException, InterruptedException {
+        ContainerInstanceOptions options = new ContainerInstanceOptions(props);
+        verify(this.mockContainerOrchestrationService, times(1)).startContainer(options.getContainerConfiguration());
     }
 
     private void thenDeleteContainerWasCalled(boolean expectCalled) throws KuraException {

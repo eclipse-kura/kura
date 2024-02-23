@@ -19,6 +19,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -100,7 +101,7 @@ public class ContainerInstanceTest {
 
         thenNoExceptionOccurred();
         thenWaitForContainerInstanceToBecome(ContainerInstanceState.CREATED);
-        thenStopContainerWasCalled(false);
+        thenStopContainerWasNeverCalled();
         thenStartContainerWasCalledWith(this.properties);
     }
 
@@ -115,7 +116,7 @@ public class ContainerInstanceTest {
 
         thenNoExceptionOccurred();
         thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
-        thenStopContainerWasCalled(false);
+        thenStopContainerWasNeverCalled();
     }
 
     @Test
@@ -153,7 +154,7 @@ public class ContainerInstanceTest {
 
         thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
         thenNoExceptionOccurred();
-        thenStopContainerWasCalled(true);
+        thenStopContainerWasCalled();
         thenDeleteContainerWasCalled(true);
     }
 
@@ -182,7 +183,7 @@ public class ContainerInstanceTest {
 
         thenNoExceptionOccurred();
         thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
-        thenStopContainerWasCalled(true);
+        thenStopContainerWasCalled();
         thenDeleteContainerWasCalled(true);
     }
 
@@ -272,9 +273,12 @@ public class ContainerInstanceTest {
      * THEN
      */
 
-    private void thenStopContainerWasCalled(boolean expectCalled) throws KuraException {
-        int timesCalled = expectCalled ? 1 : 0;
-        verify(this.mockContainerOrchestrationService, times(timesCalled)).stopContainer(any());
+    private void thenStopContainerWasNeverCalled() throws KuraException {
+        verify(this.mockContainerOrchestrationService, never()).stopContainer(any());
+    }
+
+    private void thenStopContainerWasCalled() throws KuraException {
+        verify(this.mockContainerOrchestrationService, times(1)).stopContainer(any());
     }
 
     private void thenWaitForContainerInstanceToBecome(ContainerInstanceState expectedState) {

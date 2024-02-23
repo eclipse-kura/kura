@@ -60,7 +60,8 @@ public class ContainerOrchestrationServiceOptions {
     }
 
     public List<String> getEnforcementAllowlistContent() {
-        return Arrays.asList(this.enforcementAllowlistContent.trim().split(","));
+        return Arrays
+                .asList(this.enforcementAllowlistContent.replaceAll("\\s", "").replace("\n", "").trim().split(","));
     }
 
     @Override
@@ -80,8 +81,9 @@ public class ContainerOrchestrationServiceOptions {
             return false;
         }
         ContainerOrchestrationServiceOptions other = (ContainerOrchestrationServiceOptions) obj;
-        return Objects.equals(enforcementAllowlistContent, other.enforcementAllowlistContent) && enforcementEnabled == other.enforcementEnabled
-                && enabled == other.enabled && Objects.equals(hostUrl, other.hostUrl);
+        return Objects.equals(enforcementAllowlistContent, other.enforcementAllowlistContent)
+                && enforcementEnabled == other.enforcementEnabled && enabled == other.enabled
+                && Objects.equals(hostUrl, other.hostUrl);
     }
 
 }

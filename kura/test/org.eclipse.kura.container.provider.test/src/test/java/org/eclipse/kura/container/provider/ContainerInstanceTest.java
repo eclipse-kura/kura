@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+import static org.mockito.Answers.values;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -27,6 +28,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -37,6 +39,8 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.container.provider.ContainerInstance.ContainerInstanceState;
+import org.junit.After;
 import org.junit.Test;
 
 public class ContainerInstanceTest {
@@ -58,6 +62,7 @@ public class ContainerInstanceTest {
 
     private ContainerOrchestrationService mockContainerOrchestrationService = mock(ContainerOrchestrationService.class);
     private Map<String, Object> properties = new HashMap<>();
+    private Map<String, Object> newProperties = new HashMap<>();
     private ContainerInstance containerInstance = new ContainerInstance();
     private Exception occurredException;
     private final CompletableFuture<Void> containerStarted = new CompletableFuture<>();
@@ -73,70 +78,145 @@ public class ContainerInstanceTest {
     @Test
     public void testServiceActivateWithPropertiesDisabled() throws KuraException, InterruptedException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
+        givenContainerOrchestratorHasNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
 
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
+        thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
         thenStartContainerWasNeverCalled();
     }
 
+    private void givenContainerOrchestratorHasNoRunningContainers() {
+        when(this.mockContainerOrchestrationService.listContainerDescriptors()).thenReturn(Collections.emptyList());
+    }
+
     @Test
-    public void testServiceActivateWithPropertiesEnabled() throws KuraException {
+    public void testServiceActivateWithPropertiesEnabled() throws KuraException, InterruptedException {
         givenPropertiesWith(CONTAINER_ENABLED, true);
+        givenContainerOrchestratorHasNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
 
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
+        thenWaitForContainerInstanceToBecome(ContainerInstanceState.CREATED);
         thenStopContainerWasCalled(false);
-        thenStartedMicroservice();
+        thenStartContainerWasCalled();
+    }
+
+    @After
+    public void tearDown() {
+        this.containerInstance.deactivate();
+    }
+
+    private void thenWaitForContainerInstanceToBecome(ContainerInstanceState expectedState) {
+        int count = 10;
+        while (this.containerInstance.getState() != expectedState && count-- > 0) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        if (count <= 0) {
+            fail(String.format("Container instance did not reach expected state \"%s\"", expectedState));
+        }
+    }
+
+    private void thenStartContainerWasCalled() throws KuraException, InterruptedException {
+        verify(this.mockContainerOrchestrationService, times(1)).startContainer(any(ContainerConfiguration.class));
     }
 
     @Test
     public void testServiceUpdateSameProperties() throws KuraException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
+        givenContainerOrchestratorHasNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
-        givenContainerInstanceWith(this.properties);
+        givenContainerInstanceActivatedWith(this.properties);
 
         whenUpdateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
+        thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
         thenStopContainerWasCalled(false);
     }
 
     @Test
-    public void testServiceUpdateEnable() {
+    public void testServiceUpdateEnable() throws KuraException, InterruptedException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
+        givenContainerOrchestratorHasNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
-        givenContainerInstanceWith(this.properties);
-        givenPropertiesWith(CONTAINER_ENABLED, true);
+        givenContainerInstanceActivatedWith(this.properties);
 
-        whenUpdateInstanceIsCalledWith(this.properties);
+        givenNewPropertiesWith(CONTAINER_ENABLED, true);
 
+        whenUpdateInstanceIsCalledWith(this.newProperties);
+
+        thenWaitForContainerInstanceToBecome(ContainerInstanceState.CREATED);
         thenNoExceptionOccurred();
-        thenStartedMicroservice();
+        thenStartContainerWasCalled();
+    }
+
+    private void givenNewPropertiesWith(String key, Object value) {
+        this.newProperties.put(key, value);
     }
 
     @Test
     public void testServiceUpdateDisable() throws KuraException {
         givenPropertiesWith(CONTAINER_ENABLED, true);
+        givenPropertiesWith(CONTAINER_NAME, "pippo");
+        givenContainerOrchestratorHasNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
-        givenContainerInstanceWith(this.properties);
-        givenStartedContainer();
-        givenPropertiesWith(CONTAINER_ENABLED, false);
+        givenContainerInstanceActivatedWith(this.properties);
+        givenContainerStateIs(ContainerInstanceState.CREATED);
 
-        whenUpdateInstanceIsCalledWith(this.properties);
+        givenContainerOrchestratorIsRunningContainer("pippo", "1234");
+        givenNewPropertiesWith(CONTAINER_ENABLED, false);
 
+        whenUpdateInstanceIsCalledWith(this.newProperties);
+
+        thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
         thenNoExceptionOccurred();
         thenStopContainerWasCalled(true);
+        thenDeleteContainerWasCalled(true);
+    }
+
+    private void givenContainerStateIs(ContainerInstanceState expectedState) {
+        int count = 10;
+        while (this.containerInstance.getState() != expectedState && count-- > 0) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        if (count <= 0) {
+            fail(String.format("Container instance did not reach expected state \"%s\"", expectedState));
+        }
+    }
+
+    private void thenDeleteContainerWasCalled(boolean expectCalled) throws KuraException {
+        int times = expectCalled ? 1 : 0;
+        verify(this.mockContainerOrchestrationService, times(times)).deleteContainer(any());
+    }
+
+    private void givenContainerOrchestratorIsRunningContainer(String containerName, String containerId) {
+        List<ContainerInstanceDescriptor> runningContainers = Collections.singletonList(ContainerInstanceDescriptor
+                .builder().setContainerName(containerName).setContainerID(containerId).build());
+
+        when(this.mockContainerOrchestrationService.listContainerDescriptors()).thenReturn(runningContainers);
     }
 
     @Test
     public void testServiceDeactivateNoRunningContainers() throws KuraException, InterruptedException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
+        givenContainerOrchestratorHasNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
-        givenContainerInstanceWith(this.properties);
+        givenContainerInstanceActivatedWith(this.properties);
 
         whenDeactivateInstance();
 
@@ -147,14 +227,17 @@ public class ContainerInstanceTest {
     @Test
     public void testServiceDeactivateStopContainer() throws KuraException {
         givenPropertiesWith(CONTAINER_ENABLED, true);
+        givenContainerOrchestratorHasNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
-        givenContainerInstanceWith(this.properties);
-        givenStartedContainer();
+        givenContainerInstanceActivatedWith(this.properties);
+        givenContainerStateIs(ContainerInstanceState.CREATED);
 
         whenDeactivateInstance();
 
         thenNoExceptionOccurred();
+        thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
         thenStopContainerWasCalled(true);
+        thenDeleteContainerWasCalled(true);
     }
 
     /*
@@ -163,46 +246,13 @@ public class ContainerInstanceTest {
 
     private void givenContainerInstanceWith(ContainerOrchestrationService cos) {
         this.containerInstance.setContainerOrchestrationService(cos);
-        try {
-            final AtomicReference<ContainerConfiguration> config = new AtomicReference<>();
-
-            when(this.mockContainerOrchestrationService.startContainer((ContainerConfiguration) any()))
-                    .thenAnswer(i -> {
-                        config.set(i.getArgument(0, ContainerConfiguration.class));
-                        this.containerStarted.complete(null);
-                        return "1234";
-                    });
-            when(this.mockContainerOrchestrationService.listContainerDescriptors()).thenAnswer(i -> {
-                if (this.containerStarted.isDone()) {
-                    return Collections.singletonList(ContainerInstanceDescriptor.builder()
-                            .setContainerName(config.get().getContainerName()).setContainerID("1234").build());
-                } else {
-                    return Collections.emptyList();
-                }
-            });
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } catch (Exception e) {
-            // no need
-        }
     }
 
     private void givenPropertiesWith(String key, Object value) {
         this.properties.put(key, value);
     }
 
-    private void givenStartedContainer() {
-        try {
-            this.containerStarted.get(1, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            fail("interrupted while waiting container startup");
-        } catch (final Exception e) {
-            fail("container not started");
-        }
-    }
-
-    private void givenContainerInstanceWith(Map<String, Object> configuration) {
+    private void givenContainerInstanceActivatedWith(Map<String, Object> configuration) {
         try {
             this.containerInstance.activate(configuration);
         } catch (Exception e) {
@@ -244,15 +294,11 @@ public class ContainerInstanceTest {
 
     private void thenStopContainerWasCalled(boolean expectCalled) throws KuraException {
         int timesCalled = expectCalled ? 1 : 0;
-        verify(this.mockContainerOrchestrationService, times(timesCalled)).stopContainer(any(String.class));
+        verify(this.mockContainerOrchestrationService, times(timesCalled)).stopContainer(any());
     }
 
     private void thenStartContainerWasNeverCalled() throws KuraException, InterruptedException {
         verify(this.mockContainerOrchestrationService, times(0)).startContainer(any(ContainerConfiguration.class));
-    }
-
-    private void thenStartedMicroservice() {
-        givenStartedContainer();
     }
 
     private void thenNoExceptionOccurred() {

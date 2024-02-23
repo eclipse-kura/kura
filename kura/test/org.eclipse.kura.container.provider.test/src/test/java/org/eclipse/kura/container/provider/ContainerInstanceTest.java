@@ -80,7 +80,7 @@ public class ContainerInstanceTest {
 
         thenNoExceptionOccurred();
         thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
-        thenStartContainerWasNeverCalled();
+        thenStartContainerWasCalled(false);
     }
 
     @Test
@@ -94,7 +94,7 @@ public class ContainerInstanceTest {
         thenNoExceptionOccurred();
         thenWaitForContainerInstanceToBecome(ContainerInstanceState.CREATED);
         thenStopContainerWasCalled(false);
-        thenStartContainerWasCalled();
+        thenStartContainerWasCalled(true);
     }
 
     @Test
@@ -124,7 +124,7 @@ public class ContainerInstanceTest {
 
         thenWaitForContainerInstanceToBecome(ContainerInstanceState.CREATED);
         thenNoExceptionOccurred();
-        thenStartContainerWasCalled();
+        thenStartContainerWasCalled(true);
     }
 
     @Test
@@ -157,7 +157,7 @@ public class ContainerInstanceTest {
         whenDeactivateInstance();
 
         thenNoExceptionOccurred();
-        thenStartContainerWasNeverCalled();
+        thenStartContainerWasCalled(false);
     }
 
     @Test
@@ -268,10 +268,6 @@ public class ContainerInstanceTest {
         verify(this.mockContainerOrchestrationService, times(timesCalled)).stopContainer(any());
     }
 
-    private void thenStartContainerWasNeverCalled() throws KuraException, InterruptedException {
-        verify(this.mockContainerOrchestrationService, times(0)).startContainer(any(ContainerConfiguration.class));
-    }
-
     private void thenWaitForContainerInstanceToBecome(ContainerInstanceState expectedState) {
         int count = 10;
         while (this.containerInstance.getState() != expectedState && count-- > 0) {
@@ -287,8 +283,9 @@ public class ContainerInstanceTest {
         }
     }
 
-    private void thenStartContainerWasCalled() throws KuraException, InterruptedException {
-        verify(this.mockContainerOrchestrationService, times(1)).startContainer(any(ContainerConfiguration.class));
+    private void thenStartContainerWasCalled(boolean expectCalled) throws KuraException, InterruptedException {
+        int times = expectCalled ? 1 : 0;
+        verify(this.mockContainerOrchestrationService, times(times)).startContainer(any(ContainerConfiguration.class));
     }
 
     private void thenDeleteContainerWasCalled(boolean expectCalled) throws KuraException {

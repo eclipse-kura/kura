@@ -117,6 +117,7 @@ public class ContainerInstanceTest {
         thenNoExceptionOccurred();
         thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
         thenStopContainerWasNeverCalled();
+        thenDeleteContainerWasNeverCalled();
     }
 
     @Test
@@ -155,7 +156,7 @@ public class ContainerInstanceTest {
         thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
         thenNoExceptionOccurred();
         thenStopContainerWasCalled();
-        thenDeleteContainerWasCalled(true);
+        thenDeleteContainerWasCalled();
     }
 
     @Test
@@ -184,7 +185,7 @@ public class ContainerInstanceTest {
         thenNoExceptionOccurred();
         thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
         thenStopContainerWasCalled();
-        thenDeleteContainerWasCalled(true);
+        thenDeleteContainerWasCalled();
     }
 
     @After
@@ -303,9 +304,12 @@ public class ContainerInstanceTest {
         verify(this.mockContainerOrchestrationService, times(1)).startContainer(options.getContainerConfiguration());
     }
 
-    private void thenDeleteContainerWasCalled(boolean expectCalled) throws KuraException {
-        int times = expectCalled ? 1 : 0;
-        verify(this.mockContainerOrchestrationService, times(times)).deleteContainer(any());
+    private void thenDeleteContainerWasNeverCalled() throws KuraException {
+        verify(this.mockContainerOrchestrationService, never()).deleteContainer(any());
+    }
+
+    private void thenDeleteContainerWasCalled() throws KuraException {
+        verify(this.mockContainerOrchestrationService, times(1)).deleteContainer(any());
     }
 
     private void thenNoExceptionOccurred() {

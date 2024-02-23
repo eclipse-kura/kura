@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
@@ -62,7 +61,6 @@ public class ContainerInstanceTest {
     private Map<String, Object> newProperties = new HashMap<>();
     private ContainerInstance containerInstance = new ContainerInstance();
     private Exception occurredException;
-    private final CompletableFuture<Void> containerStarted = new CompletableFuture<>();
 
     public void testServiceActivateNullProperties() {
         givenContainerInstanceWith(this.mockContainerOrchestrationService);

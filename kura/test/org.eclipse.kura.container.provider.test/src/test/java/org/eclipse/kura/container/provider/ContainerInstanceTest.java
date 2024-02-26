@@ -113,6 +113,48 @@ public class ContainerInstanceTest {
     }
 
     @Test
+    public void activateContainerInstanceWithAreadyRunningContainerWorksWithDisabled()
+            throws KuraException, InterruptedException {
+        givenContainerOrchestratorIsRunningContainer("myRunningContainer", "123456");
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
+
+        givenPropertiesWith(CONTAINER_ENABLED, false);
+        givenPropertiesWith(CONTAINER_NAME, "myRunningContainer");
+        givenPropertiesWith(CONTAINER_IMAGE, "nginx");
+        givenPropertiesWith(CONTAINER_IMAGE_TAG, "latest");
+
+        whenActivateInstanceIsCalledWith(this.properties);
+
+        thenNoExceptionOccurred();
+        thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
+
+        // Are we sure about this?
+        thenStartContainerWasNeverCalled();
+        thenStopContainerWasNeverCalled();
+        thenDeleteContainerWasNeverCalled();
+    }
+
+    @Test
+    public void activateContainerInstanceWithAreadyRunningContainerWorksWithEnabled()
+            throws KuraException, InterruptedException {
+        givenContainerOrchestratorIsRunningContainer("myRunningContainer", "123456");
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
+
+        givenPropertiesWith(CONTAINER_ENABLED, true);
+        givenPropertiesWith(CONTAINER_NAME, "myRunningContainer");
+        givenPropertiesWith(CONTAINER_IMAGE, "nginx");
+        givenPropertiesWith(CONTAINER_IMAGE_TAG, "latest");
+
+        whenActivateInstanceIsCalledWith(this.properties);
+
+        thenNoExceptionOccurred();
+        thenWaitForContainerInstanceToBecome(ContainerInstanceState.CREATED);
+
+        // Are we sure about this?
+        thenStartContainerWasCalledWith(this.properties);
+    }
+
+    @Test
     public void updateContainerInstanceWithNullPropertiesThrows() throws KuraException, InterruptedException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
         givenContainerOrchestratorHasNoRunningContainers();

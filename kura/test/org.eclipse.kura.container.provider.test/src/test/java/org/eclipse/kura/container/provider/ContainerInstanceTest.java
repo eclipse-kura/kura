@@ -359,14 +359,6 @@ public class ContainerInstanceTest {
      * THEN
      */
 
-    private void thenStopContainerWasNeverCalled() throws KuraException {
-        verify(this.mockContainerOrchestrationService, never()).stopContainer(any(String.class));
-    }
-
-    private void thenStopContainerWasCalledFor(String containerId) throws KuraException {
-        verify(this.mockContainerOrchestrationService, times(1)).stopContainer(containerId);
-    }
-
     private void thenWaitForContainerInstanceToBecome(ContainerInstanceState expectedState) {
         int count = 10;
         do {
@@ -378,6 +370,14 @@ public class ContainerInstanceTest {
         } while (this.containerInstance.getState() != expectedState && count-- > 0);
 
         assertEquals(expectedState, this.containerInstance.getState());
+    }
+
+    private void thenStopContainerWasNeverCalled() throws KuraException {
+        verify(this.mockContainerOrchestrationService, never()).stopContainer(any(String.class));
+    }
+
+    private void thenStopContainerWasCalledFor(String containerId) throws KuraException {
+        verify(this.mockContainerOrchestrationService, times(1)).stopContainer(containerId);
     }
 
     private void thenStartContainerWasNeverCalled() throws KuraException, InterruptedException {

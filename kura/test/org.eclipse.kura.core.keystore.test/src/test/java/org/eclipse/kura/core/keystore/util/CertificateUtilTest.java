@@ -11,7 +11,7 @@
  * Eurotech
  *******************************************************************************/
 
-package org.eclipse.kura.cor.keystore.util;
+package org.eclipse.kura.core.keystore.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -48,7 +48,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.util.Store;
-import org.eclipse.kura.core.keystore.util.CertificateUtil;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;

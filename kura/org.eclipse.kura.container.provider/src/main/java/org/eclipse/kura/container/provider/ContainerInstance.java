@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 public class ContainerInstance implements ConfigurableComponent, ContainerOrchestrationServiceListener {
 
-    // Enum containing container state
     public enum ContainerInstanceState {
         DISABLED,
         STARTING,

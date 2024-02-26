@@ -63,7 +63,7 @@ public class ContainerInstanceTest {
 
     @Test
     public void activateContainerInstanceWithDisabledContainerWorks() throws KuraException, InterruptedException {
-        givenContainerOrchestratorHasNoRunningContainers();
+        givenContainerOrchestratorWithNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
 
         givenPropertiesWith(CONTAINER_ENABLED, false);
@@ -77,7 +77,7 @@ public class ContainerInstanceTest {
 
     @Test
     public void activateContainerInstanceWithEnabledContainerWorks() throws KuraException, InterruptedException {
-        givenContainerOrchestratorHasNoRunningContainers();
+        givenContainerOrchestratorWithNoRunningContainers();
         givenContainerOrchestratorReturningOnStart("1234");
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
 
@@ -115,7 +115,7 @@ public class ContainerInstanceTest {
     @Test
     public void activateContainerInstanceWithAreadyRunningContainerWorksWithDisabled()
             throws KuraException, InterruptedException {
-        givenContainerOrchestratorIsRunningContainer("myRunningContainer", "123456");
+        givenContainerOrchestratorWithRunningContainer("myRunningContainer", "123456");
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
 
         givenPropertiesWith(CONTAINER_ENABLED, false);
@@ -137,7 +137,7 @@ public class ContainerInstanceTest {
     @Test
     public void activateContainerInstanceWithAreadyRunningContainerWorksWithEnabled()
             throws KuraException, InterruptedException {
-        givenContainerOrchestratorIsRunningContainer("myRunningContainer", "123456");
+        givenContainerOrchestratorWithRunningContainer("myRunningContainer", "123456");
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
 
         givenPropertiesWith(CONTAINER_ENABLED, true);
@@ -157,7 +157,7 @@ public class ContainerInstanceTest {
     @Test
     public void updateContainerInstanceWithNullPropertiesThrows() throws KuraException, InterruptedException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
-        givenContainerOrchestratorHasNoRunningContainers();
+        givenContainerOrchestratorWithNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
         givenContainerInstanceActivatedWith(this.properties);
 
@@ -173,7 +173,7 @@ public class ContainerInstanceTest {
     @Test
     public void updateContainerInstanceWithSamePropertiesWorks() throws KuraException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
-        givenContainerOrchestratorHasNoRunningContainers();
+        givenContainerOrchestratorWithNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
         givenContainerInstanceActivatedWith(this.properties);
 
@@ -188,7 +188,7 @@ public class ContainerInstanceTest {
     @Test
     public void updateDisabledContainerInstanceWithEnabledContainerWorks() throws KuraException, InterruptedException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
-        givenContainerOrchestratorHasNoRunningContainers();
+        givenContainerOrchestratorWithNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
         givenContainerInstanceActivatedWith(this.properties);
 
@@ -206,7 +206,7 @@ public class ContainerInstanceTest {
 
     @Test
     public void updateEnabledContainerInstanceWithDisabledContainerWorks() throws KuraException, InterruptedException {
-        givenContainerOrchestratorHasNoRunningContainers();
+        givenContainerOrchestratorWithNoRunningContainers();
         givenContainerOrchestratorReturningOnStart("1234");
 
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
@@ -216,7 +216,7 @@ public class ContainerInstanceTest {
         givenContainerInstanceActivatedWith(this.properties);
         givenContainerStateIs(ContainerInstanceState.CREATED);
 
-        givenContainerOrchestratorIsRunningContainer("pippo", "1234");
+        givenContainerOrchestratorWithRunningContainer("pippo", "1234");
         givenNewPropertiesWith(CONTAINER_ENABLED, false);
 
         whenUpdateInstanceIsCalledWith(this.newProperties);
@@ -230,7 +230,7 @@ public class ContainerInstanceTest {
     @Test
     public void deactivateContainerInstanceWithDisabledContainerWorks() throws KuraException, InterruptedException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
-        givenContainerOrchestratorHasNoRunningContainers();
+        givenContainerOrchestratorWithNoRunningContainers();
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
         givenContainerInstanceActivatedWith(this.properties);
 
@@ -242,7 +242,7 @@ public class ContainerInstanceTest {
 
     @Test
     public void deactivateContainerInstanceWithEnabledContainerWorks() throws KuraException, InterruptedException {
-        givenContainerOrchestratorHasNoRunningContainers();
+        givenContainerOrchestratorWithNoRunningContainers();
         givenContainerOrchestratorReturningOnStart("1234");
 
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
@@ -252,7 +252,7 @@ public class ContainerInstanceTest {
         givenContainerInstanceActivatedWith(this.properties);
         givenContainerStateIs(ContainerInstanceState.CREATED);
 
-        givenContainerOrchestratorIsRunningContainer("pippo", "1234");
+        givenContainerOrchestratorWithRunningContainer("pippo", "1234");
 
         whenDeactivateInstanceIsCalled();
 
@@ -311,11 +311,11 @@ public class ContainerInstanceTest {
                 .thenThrow(new IllegalStateException("Not connected"));
     }
 
-    private void givenContainerOrchestratorHasNoRunningContainers() {
+    private void givenContainerOrchestratorWithNoRunningContainers() {
         when(this.mockContainerOrchestrationService.listContainerDescriptors()).thenReturn(Collections.emptyList());
     }
 
-    private void givenContainerOrchestratorIsRunningContainer(String containerName, String containerId) {
+    private void givenContainerOrchestratorWithRunningContainer(String containerName, String containerId) {
         List<ContainerInstanceDescriptor> runningContainers = Collections.singletonList(ContainerInstanceDescriptor
                 .builder().setContainerName(containerName).setContainerID(containerId).build());
         when(this.mockContainerOrchestrationService.listContainerDescriptors()).thenReturn(runningContainers);

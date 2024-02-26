@@ -113,6 +113,22 @@ public class ContainerInstanceTest {
     }
 
     @Test
+    public void updateContainerInstanceWithNullPropertiesThrows() throws KuraException, InterruptedException {
+        givenPropertiesWith(CONTAINER_ENABLED, false);
+        givenContainerOrchestratorHasNoRunningContainers();
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
+        givenContainerInstanceActivatedWith(this.properties);
+
+        whenUpdateInstanceIsCalledWith(null);
+
+        thenExceptionOccurred(IllegalArgumentException.class);
+        thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
+        thenStopContainerWasNeverCalled();
+        thenStartContainerWasNeverCalled();
+        thenDeleteContainerWasNeverCalled();
+    }
+
+    @Test
     public void updateContainerInstanceWithSamePropertiesWorks() throws KuraException {
         givenPropertiesWith(CONTAINER_ENABLED, false);
         givenContainerOrchestratorHasNoRunningContainers();

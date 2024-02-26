@@ -293,13 +293,13 @@ public class ContainerInstanceTest {
 
     private void givenContainerStateIs(ContainerInstanceState expectedState) {
         int count = 10;
-        while (this.containerInstance.getState() != expectedState && count-- > 0) {
+        do {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-        }
+        } while (this.containerInstance.getState() != expectedState && count-- > 0);
 
         if (count <= 0) {
             fail("Container instance state is not " + expectedState);
@@ -369,13 +369,13 @@ public class ContainerInstanceTest {
 
     private void thenWaitForContainerInstanceToBecome(ContainerInstanceState expectedState) {
         int count = 10;
-        while (this.containerInstance.getState() != expectedState && count-- > 0) {
+        do {
             try {
-                Thread.sleep(100);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-        }
+        } while (this.containerInstance.getState() != expectedState && count-- > 0);
 
         assertEquals(expectedState, this.containerInstance.getState());
     }

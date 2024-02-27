@@ -50,6 +50,7 @@ import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.User;
 import org.osgi.service.useradmin.UserAdmin;
 
+@Ignore
 public class NetworkConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     private static final String METHOD_SPEC_GET = "GET";

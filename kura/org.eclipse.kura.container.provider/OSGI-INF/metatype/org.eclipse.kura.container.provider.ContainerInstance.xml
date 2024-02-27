@@ -169,8 +169,8 @@
          </AD>
             
        <AD id="container.loggerParameters" name="Logger Parameters"
-            description="Used to pass logger parameters to a container's logging driver. Example: max-buffer-size=5m, max-file=2." type="String" cardinality="1"
-            required="false" default="max-buffer-size=5m, max-file=2" />
+            description="Used to pass logger parameters to a container's logging driver. Example: max-size=10m, max-file=2." type="String" cardinality="1"
+            required="false" default="max-size=10m" />
 
         <AD id="container.restart.onfailure" name="Restart Container On Failure" type="Boolean" cardinality="1" required="true" default="false"
             description="Automatically restart the container when it has failed.">

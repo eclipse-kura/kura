@@ -55,6 +55,7 @@ public class ContainerInstanceTest {
     private ContainerInstance containerInstance = new ContainerInstance();
     private Exception occurredException;
 
+    @Test
     public void activateContainerInstanceWithNullPropertiesThrows() {
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
 

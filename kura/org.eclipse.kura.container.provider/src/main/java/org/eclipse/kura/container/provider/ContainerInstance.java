@@ -35,12 +35,6 @@ import org.slf4j.LoggerFactory;
 
 public class ContainerInstance implements ConfigurableComponent, ContainerOrchestrationServiceListener {
 
-    public enum ContainerInstanceState {
-        DISABLED,
-        STARTING,
-        CREATED
-    }
-
     private static final Logger logger = LoggerFactory.getLogger(ContainerInstance.class);
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -101,16 +95,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         logger.info("deactivate...done");
     }
 
-    public synchronized ContainerInstanceState getState() {
-        if (this.state instanceof Disabled) {
-            return ContainerInstanceState.DISABLED;
-        } else if (this.state instanceof Starting) {
-            return ContainerInstanceState.STARTING;
-        } else if (this.state instanceof Created) {
-            return ContainerInstanceState.CREATED;
-        } else {
-            throw new IllegalStateException("Unknown state: " + this.state);
-        }
+    public synchronized String getState() {
+        return this.state.getClass().getSimpleName();
     }
 
     // ----------------------------------------------------------------

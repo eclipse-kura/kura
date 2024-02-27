@@ -36,7 +36,6 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
-import org.eclipse.kura.container.provider.ContainerInstance.ContainerInstanceState;
 import org.junit.After;
 import org.junit.Test;
 
@@ -71,7 +70,7 @@ public class ContainerInstanceTest {
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
+        thenWaitForContainerInstanceToBecome("Disabled");
         thenStartContainerWasNeverCalled();
     }
 
@@ -89,7 +88,7 @@ public class ContainerInstanceTest {
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome(ContainerInstanceState.CREATED);
+        thenWaitForContainerInstanceToBecome("Created");
         thenStopContainerWasNeverCalled();
         thenStartContainerWasCalledWith(this.properties);
     }
@@ -108,7 +107,7 @@ public class ContainerInstanceTest {
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
+        thenWaitForContainerInstanceToBecome("Disabled");
         thenStartContainerWasNeverCalled();
     }
 
@@ -126,7 +125,7 @@ public class ContainerInstanceTest {
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
+        thenWaitForContainerInstanceToBecome("Disabled");
 
         // Are we sure about this?
         thenStartContainerWasNeverCalled();
@@ -148,7 +147,7 @@ public class ContainerInstanceTest {
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome(ContainerInstanceState.CREATED);
+        thenWaitForContainerInstanceToBecome("Created");
 
         // Are we sure about this?
         thenStartContainerWasCalledWith(this.properties);
@@ -164,7 +163,7 @@ public class ContainerInstanceTest {
         whenUpdateInstanceIsCalledWith(null);
 
         thenExceptionOccurred(IllegalArgumentException.class);
-        thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
+        thenWaitForContainerInstanceToBecome("Disabled");
         thenStopContainerWasNeverCalled();
         thenStartContainerWasNeverCalled();
         thenDeleteContainerWasNeverCalled();
@@ -180,7 +179,7 @@ public class ContainerInstanceTest {
         whenUpdateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
+        thenWaitForContainerInstanceToBecome("Disabled");
         thenStopContainerWasNeverCalled();
         thenDeleteContainerWasNeverCalled();
     }
@@ -200,7 +199,7 @@ public class ContainerInstanceTest {
         whenUpdateInstanceIsCalledWith(this.newProperties);
 
         thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome(ContainerInstanceState.CREATED);
+        thenWaitForContainerInstanceToBecome("Created");
         thenStartContainerWasCalledWith(this.newProperties);
     }
 
@@ -214,14 +213,14 @@ public class ContainerInstanceTest {
         givenPropertiesWith(CONTAINER_ENABLED, true);
         givenPropertiesWith(CONTAINER_NAME, "pippo");
         givenContainerInstanceActivatedWith(this.properties);
-        givenContainerStateIs(ContainerInstanceState.CREATED);
+        givenContainerStateIs("Created");
 
         givenContainerOrchestratorWithRunningContainer("pippo", "1234");
         givenNewPropertiesWith(CONTAINER_ENABLED, false);
 
         whenUpdateInstanceIsCalledWith(this.newProperties);
 
-        thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
+        thenWaitForContainerInstanceToBecome("Disabled");
         thenNoExceptionOccurred();
         thenStopContainerWasCalledFor("1234");
         thenDeleteContainerWasCalledFor("1234");
@@ -250,14 +249,14 @@ public class ContainerInstanceTest {
         givenPropertiesWith(CONTAINER_ENABLED, true);
         givenPropertiesWith(CONTAINER_NAME, "pippo");
         givenContainerInstanceActivatedWith(this.properties);
-        givenContainerStateIs(ContainerInstanceState.CREATED);
+        givenContainerStateIs("Created");
 
         givenContainerOrchestratorWithRunningContainer("pippo", "1234");
 
         whenDeactivateInstanceIsCalled();
 
         thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome(ContainerInstanceState.DISABLED);
+        thenWaitForContainerInstanceToBecome("Disabled");
         thenStopContainerWasCalledFor("1234");
         thenDeleteContainerWasCalledFor("1234");
     }
@@ -291,7 +290,7 @@ public class ContainerInstanceTest {
         }
     }
 
-    private void givenContainerStateIs(ContainerInstanceState expectedState) {
+    private void givenContainerStateIs(String expectedState) {
         int count = 10;
         do {
             try {
@@ -299,10 +298,11 @@ public class ContainerInstanceTest {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-        } while (this.containerInstance.getState() != expectedState && count-- > 0);
+        } while (!expectedState.equals(this.containerInstance.getState()) && count-- > 0);
 
         if (count <= 0) {
-            fail("Container instance state is not " + expectedState);
+            fail(String.format("Container instance state is not \"%s\" (currently \"%s\")", expectedState,
+                    this.containerInstance.getState()));
         }
     }
 
@@ -359,7 +359,7 @@ public class ContainerInstanceTest {
      * THEN
      */
 
-    private void thenWaitForContainerInstanceToBecome(ContainerInstanceState expectedState) {
+    private void thenWaitForContainerInstanceToBecome(String expectedState) {
         int count = 10;
         do {
             try {
@@ -367,7 +367,7 @@ public class ContainerInstanceTest {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-        } while (this.containerInstance.getState() != expectedState && count-- > 0);
+        } while (!expectedState.equals(this.containerInstance.getState()) && count-- > 0);
 
         assertEquals(expectedState, this.containerInstance.getState());
     }

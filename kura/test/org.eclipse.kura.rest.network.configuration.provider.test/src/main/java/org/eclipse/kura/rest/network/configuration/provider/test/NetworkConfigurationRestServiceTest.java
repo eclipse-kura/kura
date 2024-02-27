@@ -38,6 +38,7 @@ import org.eclipse.kura.rest.network.configuration.provider.test.responses.MockC
 import org.eclipse.kura.rest.network.configuration.provider.test.responses.RestNetworkConfigurationJson;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;

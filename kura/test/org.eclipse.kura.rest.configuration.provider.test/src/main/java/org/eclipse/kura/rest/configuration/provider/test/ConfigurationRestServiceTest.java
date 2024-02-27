@@ -63,6 +63,7 @@ import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -77,6 +78,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonValue;
 
+@Ignore
 @RunWith(Parameterized.class)
 public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 

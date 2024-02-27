@@ -46,6 +46,9 @@ public class ContainerInstanceTest {
     private static final String CONTAINER_IMAGE = "container.image";
     private static final String CONTAINER_ENABLED = "container.enabled";
 
+    private static final String CONTAINER_STATE_CREATED = "Created";
+    private static final String CONTAINER_STATE_DISABLED = "Disabled";
+
     private ContainerOrchestrationService mockContainerOrchestrationService = mock(ContainerOrchestrationService.class);
     private Map<String, Object> properties = new HashMap<>();
     private Map<String, Object> newProperties = new HashMap<>();
@@ -70,7 +73,7 @@ public class ContainerInstanceTest {
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome("Disabled");
+        thenWaitForContainerInstanceToBecome(CONTAINER_STATE_DISABLED);
         thenStartContainerWasNeverCalled();
     }
 
@@ -88,7 +91,7 @@ public class ContainerInstanceTest {
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome("Created");
+        thenWaitForContainerInstanceToBecome(CONTAINER_STATE_CREATED);
         thenStopContainerWasNeverCalled();
         thenStartContainerWasCalledWith(this.properties);
     }
@@ -107,7 +110,7 @@ public class ContainerInstanceTest {
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome("Disabled");
+        thenWaitForContainerInstanceToBecome(CONTAINER_STATE_DISABLED);
         thenStartContainerWasNeverCalled();
     }
 
@@ -125,7 +128,7 @@ public class ContainerInstanceTest {
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome("Disabled");
+        thenWaitForContainerInstanceToBecome(CONTAINER_STATE_DISABLED);
 
         // Are we sure about this?
         thenStartContainerWasNeverCalled();
@@ -147,7 +150,7 @@ public class ContainerInstanceTest {
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome("Created");
+        thenWaitForContainerInstanceToBecome(CONTAINER_STATE_CREATED);
 
         // Are we sure about this?
         thenStartContainerWasCalledWith(this.properties);
@@ -163,7 +166,7 @@ public class ContainerInstanceTest {
         whenUpdateInstanceIsCalledWith(null);
 
         thenExceptionOccurred(IllegalArgumentException.class);
-        thenWaitForContainerInstanceToBecome("Disabled");
+        thenWaitForContainerInstanceToBecome(CONTAINER_STATE_DISABLED);
         thenStopContainerWasNeverCalled();
         thenStartContainerWasNeverCalled();
         thenDeleteContainerWasNeverCalled();
@@ -179,7 +182,7 @@ public class ContainerInstanceTest {
         whenUpdateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome("Disabled");
+        thenWaitForContainerInstanceToBecome(CONTAINER_STATE_DISABLED);
         thenStopContainerWasNeverCalled();
         thenDeleteContainerWasNeverCalled();
     }
@@ -199,7 +202,7 @@ public class ContainerInstanceTest {
         whenUpdateInstanceIsCalledWith(this.newProperties);
 
         thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome("Created");
+        thenWaitForContainerInstanceToBecome(CONTAINER_STATE_CREATED);
         thenStartContainerWasCalledWith(this.newProperties);
     }
 
@@ -213,14 +216,14 @@ public class ContainerInstanceTest {
         givenPropertiesWith(CONTAINER_ENABLED, true);
         givenPropertiesWith(CONTAINER_NAME, "pippo");
         givenContainerInstanceActivatedWith(this.properties);
-        givenContainerStateIs("Created");
+        givenContainerStateIs(CONTAINER_STATE_CREATED);
 
         givenContainerOrchestratorWithRunningContainer("pippo", "1234");
         givenNewPropertiesWith(CONTAINER_ENABLED, false);
 
         whenUpdateInstanceIsCalledWith(this.newProperties);
 
-        thenWaitForContainerInstanceToBecome("Disabled");
+        thenWaitForContainerInstanceToBecome(CONTAINER_STATE_DISABLED);
         thenNoExceptionOccurred();
         thenStopContainerWasCalledFor("1234");
         thenDeleteContainerWasCalledFor("1234");
@@ -249,14 +252,14 @@ public class ContainerInstanceTest {
         givenPropertiesWith(CONTAINER_ENABLED, true);
         givenPropertiesWith(CONTAINER_NAME, "pippo");
         givenContainerInstanceActivatedWith(this.properties);
-        givenContainerStateIs("Created");
+        givenContainerStateIs(CONTAINER_STATE_CREATED);
 
         givenContainerOrchestratorWithRunningContainer("pippo", "1234");
 
         whenDeactivateInstanceIsCalled();
 
         thenNoExceptionOccurred();
-        thenWaitForContainerInstanceToBecome("Disabled");
+        thenWaitForContainerInstanceToBecome(CONTAINER_STATE_DISABLED);
         thenStopContainerWasCalledFor("1234");
         thenDeleteContainerWasCalledFor("1234");
     }

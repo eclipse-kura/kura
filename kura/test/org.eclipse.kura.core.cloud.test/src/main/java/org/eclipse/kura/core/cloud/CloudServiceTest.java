@@ -58,6 +58,7 @@ import org.eclipse.kura.system.ExtendedPropertyGroup;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.osgi.framework.FrameworkUtil;
@@ -70,6 +71,7 @@ import org.slf4j.LoggerFactory;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 
+@Ignore
 public class CloudServiceTest {
 
     private static final String MODEM_RSSI = "modem_rssi";

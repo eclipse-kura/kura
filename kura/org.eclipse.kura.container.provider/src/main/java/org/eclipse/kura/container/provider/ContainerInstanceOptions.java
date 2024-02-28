@@ -68,6 +68,11 @@ public class ContainerInstanceOptions {
     private static final Property<String> CONTAINER_GPUS = new Property<>("container.gpus", "all");
     private static final Property<String> CONTAINER_RUNTIME = new Property<>("container.runtime", "");
 
+    private static final Property<String> SIGNATURE_TRUST_ANCHOR = new Property<>("container.signature.trust.anchor",
+            "");
+    private static final Property<Boolean> SIGNATURE_VERIFY_TLOG = new Property<>(
+            "container.signature.verify.transparency.log", true);
+
     private boolean enabled;
     private final String image;
     private final String imageTag;
@@ -95,6 +100,9 @@ public class ContainerInstanceOptions {
     private final Optional<Float> containerCpus;
     private final Optional<String> containerGpus;
     private final Optional<String> containerRuntime;
+
+    private final Optional<String> signatureTrustAnchor;
+    private final Boolean signatureVerifyTransparencyLog;
 
     public ContainerInstanceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -128,6 +136,8 @@ public class ContainerInstanceOptions {
         this.containerCpus = CONTAINER_CPUS.getOptional(properties);
         this.containerGpus = parseOptionalString(CONTAINER_GPUS.getOptional(properties));
         this.containerRuntime = parseOptionalString(CONTAINER_RUNTIME.getOptional(properties));
+        this.signatureTrustAnchor = parseOptionalString(SIGNATURE_TRUST_ANCHOR.getOptional(properties));
+        this.signatureVerifyTransparencyLog = SIGNATURE_VERIFY_TLOG.get(properties);
     }
 
     private Map<String, String> parseVolume(String volumeString) {
@@ -333,6 +343,14 @@ public class ContainerInstanceOptions {
 
     public Optional<String> getRuntime() {
         return this.containerRuntime;
+    }
+
+    public Optional<String> getSignatureTrustAnchor() {
+        return this.signatureTrustAnchor;
+    }
+
+    public Boolean getSignatureVerifyTransparencyLog() {
+        return this.signatureVerifyTransparencyLog;
     }
 
     private ImageConfiguration buildImageConfig() {

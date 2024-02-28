@@ -305,6 +305,52 @@ public class ContainerInstanceTest {
     }
 
     @Test
+    public void signatureValidationDoesntGetCalledWithInvalidTrustAnchor() throws KuraException, InterruptedException {
+        givenContainerOrchestratorWithNoRunningContainers();
+        givenContainerOrchestratorReturningOnStart("1234");
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
+
+        givenContainerSignatureValidationServiceReturningFailureFor("nginx", "latest");
+        givenContainerInstanceWith(this.mockContainerSignatureValidationService);
+
+        givenPropertiesWith(CONTAINER_ENABLED, true);
+        givenPropertiesWith(CONTAINER_NAME, "pippo");
+        givenPropertiesWith(CONTAINER_IMAGE, "nginx");
+        givenPropertiesWith(CONTAINER_IMAGE_TAG, "latest");
+        givenPropertiesWith(CONTAINER_TRUST_ANCHOR, "");
+        givenPropertiesWith(CONTAINER_VERIFY_TLOG, true);
+
+        whenActivateInstanceIsCalledWith(this.properties);
+
+        thenNoExceptionOccurred();
+        thenWaitForContainerInstanceToBecome(CONTAINER_STATE_CREATED);
+        thenStartContainerWasCalledWith(this.properties);
+        thenVerifySignatureWasNeverCalled();
+    }
+
+    @Test
+    public void signatureValidationDoesntGetCalledWithMissingSignatureValidationService()
+            throws KuraException, InterruptedException {
+        givenContainerOrchestratorWithNoRunningContainers();
+        givenContainerOrchestratorReturningOnStart("1234");
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
+
+        givenPropertiesWith(CONTAINER_ENABLED, true);
+        givenPropertiesWith(CONTAINER_NAME, "pippo");
+        givenPropertiesWith(CONTAINER_IMAGE, "nginx");
+        givenPropertiesWith(CONTAINER_IMAGE_TAG, "latest");
+        givenPropertiesWith(CONTAINER_TRUST_ANCHOR, "anotherRealTrustAnchor ;)");
+        givenPropertiesWith(CONTAINER_VERIFY_TLOG, true);
+
+        whenActivateInstanceIsCalledWith(this.properties);
+
+        thenNoExceptionOccurred();
+        thenWaitForContainerInstanceToBecome(CONTAINER_STATE_CREATED);
+        thenStartContainerWasCalledWith(this.properties);
+        thenVerifySignatureWasNeverCalled();
+    }
+
+    @Test
     public void signatureValidationWorks() throws KuraException, InterruptedException {
         givenContainerOrchestratorWithNoRunningContainers();
         givenContainerOrchestratorReturningOnStart("1234");

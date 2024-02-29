@@ -29,7 +29,7 @@
 	</properties>
 
 	<artifactId>org.eclipse.kura.core</artifactId>
-	<version>1.4.1-SNAPSHOT</version>
+	<version>1.4.1</version>
 	<packaging>eclipse-plugin</packaging>
 	
 </project>

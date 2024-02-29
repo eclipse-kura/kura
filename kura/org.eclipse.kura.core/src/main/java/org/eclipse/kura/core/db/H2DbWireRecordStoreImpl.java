@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,11 +15,13 @@ package org.eclipse.kura.core.db;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.type.BooleanValue;
 import org.eclipse.kura.type.ByteArrayValue;
+import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.DoubleValue;
 import org.eclipse.kura.type.FloatValue;
 import org.eclipse.kura.type.IntegerValue;
@@ -79,6 +81,28 @@ public class H2DbWireRecordStoreImpl extends AbstractJdbcWireRecordStoreImpl {
         result.put(ByteArrayValue.class, "BLOB");
 
         return Collections.unmodifiableMap(result);
+    }
+
+    @Override
+    protected boolean isCorrectColumnType(final TypedValue<?> value, String mappedType, String actualType) {
+
+        final boolean mappedTypeEquals = Objects.equals(mappedType, actualType);
+
+        if (mappedTypeEquals) {
+            return true;
+        }
+
+        final DataType dataType = value.getType();
+
+        if (dataType == DataType.DOUBLE || dataType == DataType.FLOAT) {
+            return "DOUBLE PRECISION".equals(actualType) || actualType.startsWith("FLOAT");
+        } else if (dataType == DataType.STRING) {
+            return actualType.startsWith("CHARACTER VARYING");
+        } else if (dataType == DataType.BYTE_ARRAY) {
+            return "BINARY LARGE OBJECT".equals(actualType);
+        } else {
+            return false;
+        }
     }
 
 }

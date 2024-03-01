@@ -16,8 +16,11 @@ package org.eclipse.kura.container.provider;
 import static java.util.Objects.isNull;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -29,7 +32,10 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
+import org.eclipse.kura.container.signature.ContainerSignatureValidationService;
+import org.eclipse.kura.container.signature.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,14 +43,31 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     private static final Logger logger = LoggerFactory.getLogger(ContainerInstance.class);
 
+    private static final ValidationResult FAILED_VALIDATION = new ValidationResult();
+
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private ContainerOrchestrationService containerOrchestrationService;
+    private Set<ContainerSignatureValidationService> availableContainerSignatureValidationService = new HashSet<>();
 
     private State state = new Disabled(new ContainerInstanceOptions(Collections.emptyMap()));
 
     public void setContainerOrchestrationService(final ContainerOrchestrationService containerOrchestrationService) {
         this.containerOrchestrationService = containerOrchestrationService;
+    }
+
+    public synchronized void setContainerSignatureValidationService(
+            final ContainerSignatureValidationService containerSignatureValidationService) {
+
+        logger.info("Container signature validation service {} added.", containerSignatureValidationService.getClass());
+        this.availableContainerSignatureValidationService.add(containerSignatureValidationService);
+    }
+
+    public synchronized void unsetContainerSignatureValidationService(
+            final ContainerSignatureValidationService containerSignatureValidationService) {
+        logger.info("Container signature validation service {} removed.",
+                containerSignatureValidationService.getClass());
+        this.availableContainerSignatureValidationService.remove(containerSignatureValidationService);
     }
 
     // ----------------------------------------------------------------
@@ -69,6 +92,16 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         try {
             ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
 
+            if (newProps.getSignatureTrustAnchor().isPresent()) {
+                ValidationResult containerSignatureValidated = validateContainerImageSignature(newProps);
+                String imageDigest = containerSignatureValidated.imageDigest().orElse("?");
+                logger.info("Container signature validation result for {}@{}({}) - {}", newProps.getContainerImage(),
+                        imageDigest, newProps.getContainerImageTag(),
+                        containerSignatureValidated.isSignatureValid() ? "OK" : "FAIL");
+            } else {
+                logger.info("No trust anchor available. Signature validation skipped.");
+            }
+
             if (newProps.isEnabled()) {
                 this.containerOrchestrationService.registerListener(this);
             } else {
@@ -77,8 +110,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
             updateState(s -> s.onConfigurationUpdated(newProps));
         } catch (Exception e) {
-            logger.error("Failed to create container instance. Please check configuration of container: {}.",
-                    properties.get(ConfigurationService.KURA_SERVICE_PID));
+            logger.error("Failed to create container instance. Please check configuration of container: {}. Caused by:",
+                    properties.get(ConfigurationService.KURA_SERVICE_PID), e);
             updateState(State::onDisabled);
         }
 
@@ -118,6 +151,50 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     @Override
     public void onDisabled() {
         updateState(State::onDisabled);
+    }
+
+    private ValidationResult validateContainerImageSignature(ContainerInstanceOptions configuration) {
+
+        if (Objects.isNull(this.availableContainerSignatureValidationService)
+                || this.availableContainerSignatureValidationService.isEmpty()) {
+            logger.warn("No container signature validation service available. Signature validation failed.");
+            return FAILED_VALIDATION;
+        }
+
+        Optional<String> optTrustAnchor = configuration.getSignatureTrustAnchor();
+        if (!optTrustAnchor.isPresent() || optTrustAnchor.get().isEmpty()) {
+            logger.warn("No trust anchor available. Signature validation failed.");
+            return FAILED_VALIDATION;
+        }
+
+        String trustAnchor = optTrustAnchor.get();
+        boolean verifyInTransparencyLog = configuration.getSignatureVerifyTransparencyLog();
+        Optional<RegistryCredentials> registryCredentials = configuration.getRegistryCredentials();
+
+        for (ContainerSignatureValidationService validationService : this.availableContainerSignatureValidationService) {
+            ValidationResult results = FAILED_VALIDATION;
+
+            try {
+                if (registryCredentials.isPresent()) {
+                    results = validationService.verify(configuration.getContainerImage(),
+                            configuration.getContainerImageTag(), trustAnchor, verifyInTransparencyLog,
+                            registryCredentials.get());
+                } else {
+                    results = validationService.verify(configuration.getContainerImage(),
+                            configuration.getContainerImageTag(), trustAnchor, verifyInTransparencyLog);
+                }
+            } catch (KuraException e) {
+                logger.warn(
+                        "Error validating container signature with {}. Setting validation results as FAILED. Caused by: ",
+                        validationService.getClass(), e);
+            }
+
+            if (results.isSignatureValid()) {
+                return results;
+            }
+        }
+
+        return FAILED_VALIDATION;
     }
 
     private synchronized void updateState(final UnaryOperator<State> update) {

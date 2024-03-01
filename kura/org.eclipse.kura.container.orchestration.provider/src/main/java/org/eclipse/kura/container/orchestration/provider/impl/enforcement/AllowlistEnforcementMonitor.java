@@ -13,6 +13,7 @@
 
 package org.eclipse.kura.container.orchestration.provider.impl.enforcement;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,10 +33,11 @@ public class AllowlistEnforcementMonitor extends ResultCallbackTemplate<Allowlis
     private final List<String> enforcementAllowlistContent;
     private final ContainerOrchestrationServiceImpl orchestrationServiceImpl;
 
-    public AllowlistEnforcementMonitor(List<String> allowlistContent,
+    public AllowlistEnforcementMonitor(String allowlistContent,
             ContainerOrchestrationServiceImpl containerOrchestrationService) {
 
-        this.enforcementAllowlistContent = allowlistContent;
+        this.enforcementAllowlistContent = Arrays
+                .asList(allowlistContent.replaceAll("\\s", "").replace("\n", "").trim().split(","));
         this.orchestrationServiceImpl = containerOrchestrationService;
     }
 
@@ -49,6 +51,7 @@ public class AllowlistEnforcementMonitor extends ResultCallbackTemplate<Allowlis
     }
 
     private void implementAllowlistEnforcement(String id) throws KuraException {
+
         List<String> digestsList = this.orchestrationServiceImpl
                 .getImageDigestsByContainerName(getContainerNameById(id));
 

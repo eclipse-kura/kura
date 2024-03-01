@@ -14,8 +14,6 @@ package org.eclipse.kura.container.orchestration.provider.impl;
 
 import static java.util.Objects.isNull;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -59,9 +57,8 @@ public class ContainerOrchestrationServiceOptions {
         return this.enforcementEnabled;
     }
 
-    public List<String> getEnforcementAllowlistContent() {
-        return Arrays
-                .asList(this.enforcementAllowlistContent.replaceAll("\\s", "").replace("\n", "").trim().split(","));
+    public String getEnforcementAllowlistContent() {
+        return this.enforcementAllowlistContent;
     }
 
     @Override

@@ -143,15 +143,15 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 logger.error("Could not connect to docker CLI.");
                 return;
             }
+            logger.info("Connection Successful");
 
             if (currentConfig.isEnforcementEnabled()) {
                 try {
                     startEnforcementMonitor();
                 } catch (Exception ex) {
-                    logger.error("Error starting enforcement monitor", ex);
+                    logger.error("Error starting enforcement monitor, connection to docker stopped", ex);
                 }
             }
-            logger.info("Connection Successful");
         }
 
         logger.info("Bundle {} has updated with config!", APP_ID);
@@ -161,6 +161,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         try {
             this.enforcementEvent.close();
             this.enforcementEvent.awaitCompletion(5, TimeUnit.SECONDS);
+            this.enforcementEvent = null;
         } catch (InterruptedException ex) {
             logger.error("Waited to long to close enforcement monitor, stopping it...", ex);
             Thread.currentThread().interrupt();
@@ -956,6 +957,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     public List<String> getImageDigestsByContainerName(String containerName) {
 
         List<String> imageDigests = new ArrayList<>();
+
         dockerClient.listImagesCmd().withImageNameFilter(containerName).exec().stream().forEach(image -> {
             List<String> digests = Arrays.asList(image.getRepoDigests());
             digests.stream().forEach(digest -> imageDigests.add(digest.split("@")[1]));

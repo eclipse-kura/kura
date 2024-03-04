@@ -351,22 +351,22 @@ public class GwtNetworkServiceImpl {
 
                                 // security
                                 switch (wifiConfig.getSecurity()) {
-                                    case SECURITY_WPA:
-                                        gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA.name());
-                                        break;
-                                    case SECURITY_WPA2:
-                                        gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA2.name());
-                                        break;
-                                    case SECURITY_WPA_WPA2:
-                                        gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name());
-                                        break;
-                                    case SECURITY_WEP:
-                                        gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWEP.name());
-                                        break;
-                                    case SECURITY_NONE:
-                                    default:
-                                        gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityNONE.name());
-                                        break;
+                                case SECURITY_WPA:
+                                    gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA.name());
+                                    break;
+                                case SECURITY_WPA2:
+                                    gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA2.name());
+                                    break;
+                                case SECURITY_WPA_WPA2:
+                                    gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name());
+                                    break;
+                                case SECURITY_WEP:
+                                    gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityWEP.name());
+                                    break;
+                                case SECURITY_NONE:
+                                default:
+                                    gwtWifiConfig.setSecurity(GwtWifiSecurity.netWifiSecurityNONE.name());
+                                    break;
                                 }
 
                                 if (wifiConfig.getPairwiseCiphers() == WifiCiphers.CCMP_TKIP) {
@@ -430,25 +430,25 @@ public class GwtNetworkServiceImpl {
                                 GwtWifiRadioMode gwtWifiRadioMode = null;
                                 if (wifiConfig.getRadioMode() != null) {
                                     switch (wifiConfig.getRadioMode()) {
-                                        case RADIO_MODE_80211a:
-                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeA;
-                                            break;
-                                        case RADIO_MODE_80211b:
-                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeB;
-                                            break;
-                                        case RADIO_MODE_80211g:
-                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBG;
-                                            break;
-                                        case RADIO_MODE_80211nHT20:
-                                        case RADIO_MODE_80211nHT40above:
-                                        case RADIO_MODE_80211nHT40below:
-                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBGN;
-                                            break;
-                                        case RADIO_MODE_80211_AC:
-                                            gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeANAC;
-                                            break;
-                                        default:
-                                            break;
+                                    case RADIO_MODE_80211a:
+                                        gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeA;
+                                        break;
+                                    case RADIO_MODE_80211b:
+                                        gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeB;
+                                        break;
+                                    case RADIO_MODE_80211g:
+                                        gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBG;
+                                        break;
+                                    case RADIO_MODE_80211nHT20:
+                                    case RADIO_MODE_80211nHT40above:
+                                    case RADIO_MODE_80211nHT40below:
+                                        gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBGN;
+                                        break;
+                                    case RADIO_MODE_80211_AC:
+                                        gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeANAC;
+                                        break;
+                                    default:
+                                        break;
                                     }
                                 }
                                 if (gwtWifiRadioMode != null) {
@@ -1690,7 +1690,7 @@ public class GwtNetworkServiceImpl {
                 properties.put(wifiPassphrasePropName,
                         new Password(GwtSafeHtmlUtils.htmlUnescape(oldGwtWifiConfig.get().getPassword())));
             } else {
-                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+                throw new GwtKuraException(GwtKuraErrorCode.PASSWORD_NEVER_SET);
             }
 
         } else if (passKey != null && mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
@@ -1815,24 +1815,24 @@ public class GwtNetworkServiceImpl {
         WifiRadioMode wifiRadioMode;
 
         switch (radioMode) {
-            case netWifiRadioModeA:
-                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211a;
-                break;
-            case netWifiRadioModeB:
-                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211b;
-                break;
-            case netWifiRadioModeBG:
-                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211g;
-                break;
-            case netWifiRadioModeBGN:
-                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211nHT20;
-                break;
-            case netWifiRadioModeANAC:
-                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211_AC;
-                break;
+        case netWifiRadioModeA:
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211a;
+            break;
+        case netWifiRadioModeB:
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211b;
+            break;
+        case netWifiRadioModeBG:
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211g;
+            break;
+        case netWifiRadioModeBGN:
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211nHT20;
+            break;
+        case netWifiRadioModeANAC:
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211_AC;
+            break;
 
-            default:
-                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+        default:
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
         }
 
         return wifiRadioMode;

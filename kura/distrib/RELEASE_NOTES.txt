@@ -6,6 +6,7 @@ This service release of Eclipse Kura includes the following changes:
 - Fixed memory leak in org.eclipse.kura.linux.usb when unrecongnized udev events are received
 - Fixed data loss in Wire Record Store implementation for H2 when certain data types are stored
 
+
 Target Environments:
  Kura is released as pre-compiled binary installers for the following platforms:
   * Raspberry Pi 2/3/4 based on Raspberry Pi OS (32 bits) (Kura networking)
@@ -18,6 +19,7 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * 678d3dd611 - [distrib] added libudev.so.0 symlink [backport release-5.4.0] (#5167) (github-actions[bot])
   * 443f471a99 - Fixed unnecessary column type changes in H2DbWireRecordStoreImpl [backport release-5.4.0] (#5158) (github-actions[bot])
   * b0e4b54907 - [linux.usb] memory leak on non-usb udev events [backport release-5.4.0] (#5138) (github-actions[bot])
   * e2123f3559 - [BaseKeystoreService] Add missing key generator provider [backport release-5.4.0] (#5070) (github-actions[bot])
@@ -80,6 +82,8 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 678d3dd611 - fix(distrib): added libudev.so.0 symlink [backport release-5.4.0] (#5167) (github-actions[bot])
+  * f26ed8b694 - chore: add Kura 5.4.1 release notes (#5161) (github-actions[bot])
   * 9b0737185d - chore: automated uptick to 5.4.1 (#5160) (github-actions[bot])
   * 443f471a99 - fix: Fixed unnecessary column type changes in H2DbWireRecordStoreImpl [backport release-5.4.0] (#5158) (github-actions[bot])
   * cca825718d - build(distrib): update org.eclipse.kura.linux.usb.version from 1.4.0 to 1.4.1-SNAPSHOT (#5145) (Marcello Rinaldo Martina)

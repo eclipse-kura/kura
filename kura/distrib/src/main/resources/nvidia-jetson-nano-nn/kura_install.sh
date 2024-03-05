@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 #  Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
 #

@@ -18,7 +18,7 @@ setup_libudev() {
         ln -sf /lib/libudev.so.1 /lib/libudev.so.0
     fi
 
-    if [ ! -f /usr/lib/arm-linux-gnueabihf/libudev.so.0 ]; then
+    if [ ! -f /usr/lib/arm-linux-gnueabihf/libudev.so.0 ] && [ -f /usr/lib/arm-linux-gnueabihf/libudev.so.1 ]; then
         ln -sf /usr/lib/arm-linux-gnueabihf/libudev.so.1 /usr/lib/arm-linux-gnueabihf/libudev.so.0
     fi
 }

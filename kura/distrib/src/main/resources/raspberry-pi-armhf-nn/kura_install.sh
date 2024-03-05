@@ -12,6 +12,18 @@
 #   Eurotech
 #
 
+setup_libudev() {
+    # create soft link for libudev.so.0 to make it retrocompatible
+    # https://unix.stackexchange.com/questions/156776/arch-ubuntu-so-whats-the-deal-with-libudev-so-0
+    if [ ! -f /lib/libudev.so.0 ] && [ -f /lib/libudev.so.1 ]; then
+        ln -sf /lib/libudev.so.1 /lib/libudev.so.0
+    fi
+
+    if [ ! -f /usr/lib/arm-linux-gnueabihf/libudev.so.0 ] && [ -f /usr/lib/arm-linux-gnueabihf/libudev.so.1 ]; then
+       ln -sf /usr/lib/arm-linux-gnueabihf/libudev.so.1 /usr/lib/arm-linux-gnueabihf/libudev.so.0
+    fi
+}
+
 INSTALL_DIR=/opt/eclipse
 
 #create known kura install location

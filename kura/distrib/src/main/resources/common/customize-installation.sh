@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (c) 2023 Eurotech and/or its affiliates and others
+#  Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
 #
 #  This program and the accompanying materials are made
 #  available under the terms of the Eclipse Public License 2.0
@@ -12,8 +12,44 @@
 #   Eurotech
 #
 
+setup_libudev() {
+    # create soft link for libudev.so.0 to make it retrocompatible
+    # https://unix.stackexchange.com/questions/156776/arch-ubuntu-so-whats-the-deal-with-libudev-so-0
+    if [ ! -f /lib/libudev.so.0 ] && [ -f /lib/libudev.so.1 ]; then
+        ln -sf /lib/libudev.so.1 /lib/libudev.so.0
+    fi
+    
+    local is_arm32=false
+    local is_aarch64=false
+    local is_x86_64=false
+
+    if uname -m | grep -q arm ; then
+        is_arm32=true
+    fi
+    if uname -m | grep -q aarch ; then
+        is_aarch64=true
+    fi
+    if uname -m | grep -q x86_64 ; then
+        is_x86_64=true
+    fi
+    
+    if [ "$is_arm32" = true ] && [ ! -f /usr/lib/arm-linux-gnueabihf/libudev.so.0 ]; then
+        ln -sf /usr/lib/arm-linux-gnueabihf/libudev.so.1 /usr/lib/arm-linux-gnueabihf/libudev.so.0
+    fi
+
+    if [ "$is_aarch64" = true ] && [ ! -f /usr/lib/aarch64-linux-gnu/libudev.so.0 ]; then
+       ln -sf /usr/lib/aarch64-linux-gnu/libudev.so.1 /usr/lib/aarch64-linux-gnu/libudev.so.0
+    fi
+
+    if [ "$is_x86_64" = true ] && [ ! -f /usr/lib/x86_64-linux-gnu/libudev.so.0 ]; then
+       ln -sf /usr/lib/x86_64-linux-gnu/libudev.so.1 /usr/lib/x86_64-linux-gnu/libudev.so.0
+    fi
+}
+
 KURA_PLATFORM=$( uname -m )
 sed -i "s/kura_platform/${KURA_PLATFORM}/g" "/opt/eclipse/kura/framework/kura.properties"
+
+setup_libudev
 
 BOARD="generic-device"
 

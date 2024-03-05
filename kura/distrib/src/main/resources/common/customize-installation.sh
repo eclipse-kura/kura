@@ -18,31 +18,23 @@ setup_libudev() {
     if [ ! -f /lib/libudev.so.0 ] && [ -f /lib/libudev.so.1 ]; then
         ln -sf /lib/libudev.so.1 /lib/libudev.so.0
     fi
-    
-    local is_arm32=false
-    local is_aarch64=false
-    local is_x86_64=false
 
     if uname -m | grep -q arm ; then
-        is_arm32=true
+        destination="/usr/lib/arm-linux-gnueabihf/libudev.so.1"
+        link_name="/usr/lib/arm-linux-gnueabihf/libudev.so.0"
     fi
     if uname -m | grep -q aarch ; then
-        is_aarch64=true
+        destination="/usr/lib/aarch64-linux-gnu/libudev.so.1"
+        link_name="/usr/lib/aarch64-linux-gnu/libudev.so.0"
     fi
     if uname -m | grep -q x86_64 ; then
-        is_x86_64=true
-    fi
-    
-    if [ "$is_arm32" = true ] && [ ! -f /usr/lib/arm-linux-gnueabihf/libudev.so.0 ]; then
-        ln -sf /usr/lib/arm-linux-gnueabihf/libudev.so.1 /usr/lib/arm-linux-gnueabihf/libudev.so.0
+         destination="/usr/lib/x86_64-linux-gnu/libudev.so.1"
+        link_name="/usr/lib/x86_64-linux-gnu/libudev.so.0"
     fi
 
-    if [ "$is_aarch64" = true ] && [ ! -f /usr/lib/aarch64-linux-gnu/libudev.so.0 ]; then
-       ln -sf /usr/lib/aarch64-linux-gnu/libudev.so.1 /usr/lib/aarch64-linux-gnu/libudev.so.0
-    fi
-
-    if [ "$is_x86_64" = true ] && [ ! -f /usr/lib/x86_64-linux-gnu/libudev.so.0 ]; then
-       ln -sf /usr/lib/x86_64-linux-gnu/libudev.so.1 /usr/lib/x86_64-linux-gnu/libudev.so.0
+    if [ -f "${destination}" ] && [ ! -f "${link_name}" ]; then
+        echo "Setting up symlink ${link_name} -> ${destination}"
+        ln -sf "${destination}" "${link_name}"
     fi
 }
 

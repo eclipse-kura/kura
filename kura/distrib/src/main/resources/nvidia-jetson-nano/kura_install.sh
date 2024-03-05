@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
+# Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -12,7 +12,21 @@
 #  Eurotech
 #
 
+setup_libudev() {
+    # create soft link for libudev.so.0 to make it retrocompatible
+    # https://unix.stackexchange.com/questions/156776/arch-ubuntu-so-whats-the-deal-with-libudev-so-0
+    if [ ! -f /lib/libudev.so.0 ] && [ -f /lib/libudev.so.1 ]; then
+        ln -sf /lib/libudev.so.1 /lib/libudev.so.0
+    fi
+
+    if [ ! -f /usr/lib/aarch64-linux-gnu/libudev.so.0 ] && [ -f /usr/lib/aarch64-linux-gnu/libudev.so.1 ]; then
+       ln -sf /usr/lib/aarch64-linux-gnu/libudev.so.1 /usr/lib/aarch64-linux-gnu/libudev.so.0
+    fi
+}
+
 INSTALL_DIR=/opt/eclipse
+
+setup_libudev
 
 #create known kura install location
 ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura

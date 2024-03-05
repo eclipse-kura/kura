@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (c) 2023 Eurotech and/or its affiliates and others
+#  Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
 #
 #  This program and the accompanying materials are made
 #  available under the terms of the Eclipse Public License 2.0
@@ -12,8 +12,36 @@
 #   Eurotech
 #
 
+setup_libudev() {
+    # create soft link for libudev.so.0 to make it retrocompatible
+    # https://unix.stackexchange.com/questions/156776/arch-ubuntu-so-whats-the-deal-with-libudev-so-0
+    if [ ! -f /lib/libudev.so.0 ] && [ -f /lib/libudev.so.1 ]; then
+        ln -sf /lib/libudev.so.1 /lib/libudev.so.0
+    fi
+
+    if uname -m | grep -q arm ; then
+        destination="/usr/lib/arm-linux-gnueabihf/libudev.so.1"
+        link_name="/usr/lib/arm-linux-gnueabihf/libudev.so.0"
+    fi
+    if uname -m | grep -q aarch ; then
+        destination="/usr/lib/aarch64-linux-gnu/libudev.so.1"
+        link_name="/usr/lib/aarch64-linux-gnu/libudev.so.0"
+    fi
+    if uname -m | grep -q x86_64 ; then
+         destination="/usr/lib/x86_64-linux-gnu/libudev.so.1"
+        link_name="/usr/lib/x86_64-linux-gnu/libudev.so.0"
+    fi
+
+    if [ -f "${destination}" ] && [ ! -f "${link_name}" ]; then
+        echo "Setting up symlink ${link_name} -> ${destination}"
+        ln -sf "${destination}" "${link_name}"
+    fi
+}
+
 KURA_PLATFORM=$( uname -m )
 sed -i "s/kura_platform/${KURA_PLATFORM}/g" "/opt/eclipse/kura/framework/kura.properties"
+
+setup_libudev
 
 BOARD="generic-device"
 

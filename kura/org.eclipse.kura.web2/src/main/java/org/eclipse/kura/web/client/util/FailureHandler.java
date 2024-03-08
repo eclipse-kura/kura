@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -79,25 +79,28 @@ public class FailureHandler {
 
             GwtKuraException gee = (GwtKuraException) caught;
             GwtKuraErrorCode code = gee.getCode();
-            
-            switch(code) {
-                case DUPLICATE_NAME:
-                    errorMessageBuilder.append(MSGS.duplicateNameError());
-                    break;
-                case CONNECTION_FAILURE:
-                    errorMessageBuilder.append(MSGS.connectionFailure());
-                    break;
-                case ILLEGAL_ARGUMENT:
-                    errorMessageBuilder.append(MSGS.illegalArgumentError());
-                    break;
-                case ILLEGAL_NULL_ARGUMENT:
-                    errorMessageBuilder.append(MSGS.illegalNullArgumentError());
-                    break;
-                case CERTIFICATE_PARSE_FAILURE:
-                    errorMessageBuilder.append(MSGS.certificateParseFailure());
-                    break;
-                default:
-                    errorMessageBuilder.append(MSGS.genericError());
+
+            switch (code) {
+            case DUPLICATE_NAME:
+                errorMessageBuilder.append(MSGS.duplicateNameError());
+                break;
+            case CONNECTION_FAILURE:
+                errorMessageBuilder.append(MSGS.connectionFailure());
+                break;
+            case ILLEGAL_ARGUMENT:
+                errorMessageBuilder.append(MSGS.illegalArgumentError());
+                break;
+            case ILLEGAL_NULL_ARGUMENT:
+                errorMessageBuilder.append(MSGS.illegalNullArgumentError());
+                break;
+            case CERTIFICATE_PARSE_FAILURE:
+                errorMessageBuilder.append(MSGS.certificateParseFailure());
+                break;
+            case PASSWORD_NEVER_SET:
+                errorMessageBuilder.append(MSGS.passwordNeverSetError());
+                break;
+            default:
+                errorMessageBuilder.append(MSGS.genericError());
             }
 
         } else if (caught instanceof StatusCodeException && ((StatusCodeException) caught).getStatusCode() == 0) {

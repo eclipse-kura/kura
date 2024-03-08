@@ -14,7 +14,6 @@ package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -31,8 +30,8 @@ public class GwtKeystoreEntry extends GwtBaseModel implements IsSerializable, Se
     public GwtKeystoreEntry() {
     }
 
-    public GwtKeystoreEntry(final String alias, final List<String> distinguishedNames, String keystoreName,
-            final Kind kind, final Date validityStart, final Date validityEnd) {
+    public GwtKeystoreEntry(final String alias, final String distinguishedNames, String keystoreName, final Kind kind,
+            final Date validityStart, final Date validityEnd) {
         set("alias", alias);
         set("DNs", distinguishedNames);
         set("keystoreName", keystoreName);
@@ -45,7 +44,7 @@ public class GwtKeystoreEntry extends GwtBaseModel implements IsSerializable, Se
         return get("alias");
     }
 
-    public List<String> getDistinguishedNames() {
+    public String getDistinguishedNames() {
         return get("DNs");
     }
 

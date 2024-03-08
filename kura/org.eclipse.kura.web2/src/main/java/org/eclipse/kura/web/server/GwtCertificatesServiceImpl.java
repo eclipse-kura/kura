@@ -155,7 +155,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                     Date validityEndDate = null;
 
                     List<String> distinguishedNames = new ArrayList<>();
-                    
+
                     if (e.getValue() instanceof PrivateKeyEntry) {
                         kind = Kind.KEY_PAIR;
 
@@ -200,8 +200,8 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                         continue;
                     }
 
-                    result.add(new GwtKeystoreEntry(e.getKey(), distinguishedNames, (String) kuraServicePid, kind, validityStartDate,
-                            validityEndDate));
+                    result.add(new GwtKeystoreEntry(e.getKey(), String.join(" ", distinguishedNames),
+                            (String) kuraServicePid, kind, validityStartDate, validityEndDate));
                 }
             } catch (KuraException keystoreException) {
                 logger.error("Error while accessing keystore file of Keystore Service {}: {}", kuraServicePid,

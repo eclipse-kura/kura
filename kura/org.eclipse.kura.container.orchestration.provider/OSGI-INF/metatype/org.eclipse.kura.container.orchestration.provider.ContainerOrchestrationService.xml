@@ -27,7 +27,7 @@
             cardinality="0" required="true" default="unix:///var/run/docker.sock" />
             
         <AD id="allowlist.enabled" name="Allowlist Enforcement Enabled" type="Boolean" cardinality="0" required="true" default="false"
-            description="Enable/Disable the Allowlist enforcement. If enabled, only containers images whose digest can be found in the allowlist will be allowed to be ran/loaded/created.">
+            description="Enable/Disable the Allowlist enforcement. If enabled, only containers images whose digest can be found in the allowlist will be allowed to be run/loaded/created.">
         </AD>
         
         <AD

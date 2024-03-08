@@ -14,6 +14,8 @@ To use this service select the **ContainerOrchestrationService** option located 
 
 - **Enabled**--activates the service when set to true
 - **Container Engine Host URL**--provides a string that tells the service where to find the container engine (best left to the default value).
+- **Allowlist Enforcement Enabled**--activates the container enforcement of the service, which let only the allowed containers to run
+- **Container Image Allowlist Content**--the comma-separated list of conainer's digests allowed to be run
 
 ![Container Orchestration Provider](./images/container-orchestration-provider.png)
 
@@ -100,3 +102,21 @@ To stop the container without deleting the component, set the **Enabled** field 
 ## Container Management Dashboard
 
 The Container Orchestration service also provides the user with an intuitive container dashboard. This dashboard shows all containers running on a gateway, including containers created with the framework and those created manually through the command-line interface. To utilize this dashboard the org.eclipse.container.orchestration.provider (ContainerOrchestrationService) must be enabled, and the dashboard can be opened by navigating to Device > Containers.
+
+## Container Enforcement
+
+The Container Orchestration service also provides a security feature, to decide in advance which containers can be run on the system. This feature can be enabled or disabled through the `Allowlist Enforcement Enabled` option.
+
+This tool starts from the concept of digest, which is a unique and immutable identifier of an image: it is therefore an excellent means to identify from which image a container is created.
+
+For this reason, it is possible to insert in the box `Container Image Allowlist Content` a list of digests separated by a comma, in the form of strings: when a container is booted on the system (whether it is launched by Kura or by a terminal CLI), Kura goes back to the image from which the container started, extracts the digest and verifies that it is present in the list provided during the service configuration.
+
+If present, the container is let to be started without interference, otherwise it is immediatly stopped and removed from the container list.
+
+As example, suppose that an user wants to implement the container enforcement, in order to let only the Kura docker container to be run on the device. To do this, it should enable the Container Enforcement by setting to `true` the `Allowlist Enforcement Enabled`, and filling the box below with the digest of the Kura image (supposed it's the fake one `sha256:cbef93b12dff2b32579c950dedbf3cdfe637adf5558cb1f8307906a94c8a5c6b`)
+
+![Container Orchestration Provider Enfrocement](./images/container-orchestration-provider-enforcement.png)
+
+After applying, whenever a container is started on the device, the enforcement will check the image digest comparing it to the one inside the box: if the continaer is the Kura one, it will be allowed to start, otherwise it will be stopped. If the user wants to add more than one digest (for example another fake one `sha256:089283c269c4947ecfebec55c8a893da6c4c5ef057b3fbd79d0aed398dedc3a4`), it just needs to add it to the comma-separated list.
+
+![Container Orchestration Provider Enfrocement Multiple Digests](./images/container-orchestration-provider-enforcement-multiple-digests.png)

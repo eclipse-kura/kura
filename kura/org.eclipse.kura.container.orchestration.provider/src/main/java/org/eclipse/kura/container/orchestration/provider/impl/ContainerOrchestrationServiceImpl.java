@@ -174,14 +174,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 .setContainerState(convertDockerStateToFrameworkState(container.getState()))
                 .setFrameworkManaged(isFrameworkManaged(container)).build()));
 
-        result.stream().forEach(res -> {
-            res.getContainerPorts().stream().forEach(ports -> {
-                logger.info("\n\nINT: {}\nEXT: {}\nTYPE: {}\n\n", ports.getInternalPort(), ports.getExternalPort(),
-                        ports.getInternetProtocol());
-            });
-
-        });
-
         return result;
 
     }

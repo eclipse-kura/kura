@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerState;
 import org.eclipse.kura.container.orchestration.provider.impl.ContainerOrchestrationServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,41 +38,69 @@ public class AllowlistEnforcementMonitor extends ResultCallbackTemplate<Allowlis
     public AllowlistEnforcementMonitor(String allowlistContent,
             ContainerOrchestrationServiceImpl containerOrchestrationService) {
 
-        this.enforcementAllowlistContent = Arrays
-                .asList(allowlistContent.replaceAll("\\s", "").replace("\n", "").trim().split(","));
+        this.enforcementAllowlistContent = Arrays.asList(allowlistContent.replace(" ", "").split("\\r?\\n|\\r"))
+                .stream().filter(line -> !line.isEmpty()).collect(Collectors.toList());
         this.orchestrationServiceImpl = containerOrchestrationService;
     }
 
     @Override
     public void onNext(Event item) {
-        try {
-            implementAllowlistEnforcement(item.getId());
-        } catch (KuraException e) {
-            logger.error("Error during container stopping process");
-        }
+        implementAllowlistEnforcement(item.getId());
     }
 
-    private void implementAllowlistEnforcement(String id) throws KuraException {
+    private void implementAllowlistEnforcement(String containerId) {
 
         List<String> digestsList = this.orchestrationServiceImpl
-                .getImageDigestsByContainerName(getContainerNameById(id));
+                .getImageDigestsByContainerName(getContainerNameById(containerId));
 
         List<String> digestIntersection = this.enforcementAllowlistContent.stream().distinct()
                 .filter(digestsList::contains).collect(Collectors.toList());
 
         if (!digestIntersection.isEmpty()) {
-            logger.info(ENFORCEMENT_SUCCESS, digestIntersection, id);
+            logger.info(ENFORCEMENT_SUCCESS, digestIntersection, containerId);
         } else {
-            logger.error(ENFORCEMENT_FAILURE, id);
-            this.orchestrationServiceImpl.stopContainer(id);
-            this.orchestrationServiceImpl.deleteContainer(id);
+            logger.error(ENFORCEMENT_FAILURE, containerId);
+            stopContainer(containerId);
+            deleteContainer(containerId);
         }
     }
 
-    private String getContainerNameById(String id) {
+    private String getContainerNameById(String containerId) {
         return this.orchestrationServiceImpl.listContainerDescriptors().stream()
-                .filter(container -> container.getContainerId().equals(id)).findFirst()
+                .filter(container -> container.getContainerId().equals(containerId)).findFirst()
                 .map(container -> container.getContainerName()).orElse(null);
     }
 
+    private void stopContainer(String containerId) {
+
+        this.orchestrationServiceImpl.listContainerDescriptors().stream()
+                .filter(descriptor -> descriptor.getContainerId().equals(containerId)).findFirst()
+                .ifPresent(descriptor -> {
+                    if (descriptor.getContainerState().equals(ContainerState.ACTIVE)
+                            || descriptor.getContainerState().equals(ContainerState.STARTING)) {
+                        try {
+                            this.orchestrationServiceImpl.stopContainer(descriptor.getContainerId());
+                        } catch (KuraException ex) {
+                            logger.error("Error during container stopping process of {}:", descriptor.getContainerId(),
+                                    ex);
+                        }
+                    }
+
+                });
+    }
+
+    private void deleteContainer(String containerId) {
+        try {
+            this.orchestrationServiceImpl.deleteContainer(containerId);
+        } catch (KuraException ex) {
+            logger.error("Error during container deleting process of {}:", containerId, ex);
+        }
+    }
+
+    public void verifyContainersDigests(List<ContainerInstanceDescriptor> containerDescriptors) {
+
+        for (ContainerInstanceDescriptor descriptor : containerDescriptors) {
+            implementAllowlistEnforcement(descriptor.getContainerId());
+        }
+    }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.eclipse.kura.container.orchestration.provider;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -51,6 +50,10 @@ import com.github.dockerjava.api.model.Image;
 
 public class ContainerOrchestrationServiceImplTest {
 
+    private static final String[] REPO_DIGESTS_ARRAY = new String[] {
+            "ubuntu@sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107" };
+    private static final String[] EXPECTED_DIGESTS_ARRAY = new String[] {
+            "sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107" };
     private static final String IMAGE_TAG_LATEST = "latest";
     private static final String IMAGE_NAME_NGINX = "nginx";
     private static final String CONTAINER_NAME_FRANK = "frank";
@@ -310,7 +313,7 @@ public class ContainerOrchestrationServiceImplTest {
 
         whenGetImageDigestsByContainerName(IMAGE_NAME_NGINX);
 
-        thenDigestsListIsNotEmpty();
+        thenDigestsListEqualsExpectedOne(EXPECTED_DIGESTS_ARRAY);
 
     }
 
@@ -486,8 +489,7 @@ public class ContainerOrchestrationServiceImplTest {
 
         when(mockImage.getId()).thenReturn("ngnix");
         when(mockImage.getRepoTags()).thenReturn(new String[] { IMAGE_NAME_NGINX, IMAGE_TAG_LATEST, "nginx:latest" });
-        when(mockImage.getRepoDigests()).thenReturn(
-                new String[] { "ubuntu@sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107" });
+        when(mockImage.getRepoDigests()).thenReturn(REPO_DIGESTS_ARRAY);
         images.add(mockImage);
 
         when(this.localDockerClient.listImagesCmd()).thenReturn(mock(ListImagesCmd.class));
@@ -508,8 +510,7 @@ public class ContainerOrchestrationServiceImplTest {
 
         when(mockImage.getId()).thenReturn("ngnix");
         when(mockImage.getRepoTags()).thenReturn(new String[] { IMAGE_NAME_NGINX, IMAGE_TAG_LATEST, "nginx:latest" });
-        when(mockImage.getRepoDigests()).thenReturn(
-                new String[] { "ubuntu@sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107" });
+        when(mockImage.getRepoDigests()).thenReturn(REPO_DIGESTS_ARRAY);
         images.add(mockImage);
 
         when(this.localDockerClient.listImagesCmd()).thenReturn(mock(ListImagesCmd.class));
@@ -590,7 +591,7 @@ public class ContainerOrchestrationServiceImplTest {
         verify(this.localDockerClient, times(1)).inspectImageCmd(any(String.class));
     }
 
-    private void thenDigestsListIsNotEmpty() {
-        assertFalse(this.digestsList.isEmpty());
+    private void thenDigestsListEqualsExpectedOne(String[] digestsArray) {
+        assertEquals(this.digestsList, Arrays.asList(digestsArray));
     }
 }

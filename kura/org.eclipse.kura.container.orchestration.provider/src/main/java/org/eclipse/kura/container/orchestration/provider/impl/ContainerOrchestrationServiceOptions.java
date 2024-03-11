@@ -24,13 +24,13 @@ public class ContainerOrchestrationServiceOptions {
     private static final Property<Boolean> IS_ENABLED = new Property<>("enabled", false);
     private static final Property<String> DOCKER_HOST_URL = new Property<>("container.engine.host",
             "unix:///var/run/docker.sock");
-    private static final Property<Boolean> ALLOWLIST_ENABLED = new Property<>("allowlist.enabled", false);
-    private static final Property<String> ALLOWLIST_CONTENT = new Property<>("allowlist.content", "");
+    private static final Property<Boolean> ENFORCEMENT_ENABLED = new Property<>("enforcement.enabled", false);
+    private static final Property<String> ENFORCEMENT_ALLOWLIST = new Property<>("enforcement.allowlist", "");
 
     private final boolean enabled;
     private final String hostUrl;
     private final boolean enforcementEnabled;
-    private final String enforcementAllowlistContent;
+    private final String enforcementAllowlist;
 
     public ContainerOrchestrationServiceOptions(final Map<String, Object> properties) {
 
@@ -40,8 +40,8 @@ public class ContainerOrchestrationServiceOptions {
 
         this.enabled = IS_ENABLED.get(properties);
         this.hostUrl = DOCKER_HOST_URL.get(properties);
-        this.enforcementEnabled = ALLOWLIST_ENABLED.get(properties);
-        this.enforcementAllowlistContent = ALLOWLIST_CONTENT.get(properties);
+        this.enforcementEnabled = ENFORCEMENT_ENABLED.get(properties);
+        this.enforcementAllowlist = ENFORCEMENT_ALLOWLIST.get(properties);
 
     }
 
@@ -57,13 +57,13 @@ public class ContainerOrchestrationServiceOptions {
         return this.enforcementEnabled;
     }
 
-    public String getEnforcementAllowlistContent() {
-        return this.enforcementAllowlistContent;
+    public String getEnforcementAllowlist() {
+        return this.enforcementAllowlist;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(enforcementAllowlistContent, enforcementEnabled, enabled, hostUrl);
+        return Objects.hash(enforcementAllowlist, enforcementEnabled, enabled, hostUrl);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class ContainerOrchestrationServiceOptions {
             return false;
         }
         ContainerOrchestrationServiceOptions other = (ContainerOrchestrationServiceOptions) obj;
-        return Objects.equals(enforcementAllowlistContent, other.enforcementAllowlistContent)
+        return Objects.equals(enforcementAllowlist, other.enforcementAllowlist)
                 && enforcementEnabled == other.enforcementEnabled && enabled == other.enabled
                 && Objects.equals(hostUrl, other.hostUrl);
     }

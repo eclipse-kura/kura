@@ -1,3 +1,16 @@
+/*******************************************************************************
+ * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
+
 package org.eclipse.kura.container.orchestration.provider;
 
 import static org.junit.Assert.assertEquals;
@@ -47,8 +60,8 @@ public class EnforcementSecurityTest {
     private static final String REGISTRY_PASSWORD = "test1";
 
     private static final String EMPTY_ALLOWLIST_CONTENT = "";
-    private static final String FILLED_ALLOWLIST_CONTENT_NO_SPACE = "sha256:f9d633ff6640178c2d0525017174a688e2c1aef28f0a0130b26bd5554491f0da,sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107";
-    private static final String FILLED_ALLOWLIST_CONTENT_WITH_SPACES = " sha256:f9d633ff6640178c2d0525017174a688e2c1aef28f0a0130b26bd5554491f0da , sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107";
+    private static final String FILLED_ALLOWLIST_CONTENT_NO_SPACE = "sha256:f9d633ff6640178c2d0525017174a688e2c1aef28f0a0130b26bd5554491f0da\nsha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107";
+    private static final String FILLED_ALLOWLIST_CONTENT_WITH_SPACES = " sha256:f9d633ff6640178c2d0525017174a688e2c1aef28f0a0130b26bd5554491f0da \n sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107";
 
     private static final String CORRECT_DIGEST = "ubuntu@sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107";
     private static final String WRONG_DIGEST = "ubuntu@sha256:0000000000000000000000000000000000000000000000000000000000000000";
@@ -67,8 +80,8 @@ public class EnforcementSecurityTest {
     @Test
     public void shouldAllowStartingWithCorrectAllowlistContent() throws KuraException, InterruptedException {
 
-        givenMockedContainerOrchestrationService();
-        givenMockedDockerClient(new String[] { CORRECT_DIGEST });
+        givenMockedContainerOrchestrationServiceWith(CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.ACTIVE);
+        givenMockedDockerClient(new String[] { CORRECT_DIGEST }, CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME);
         givenAllowlistEnforcement(FILLED_ALLOWLIST_CONTENT_NO_SPACE);
 
         whenOnNext();
@@ -79,8 +92,8 @@ public class EnforcementSecurityTest {
     @Test
     public void shouldAllowStartingWithCorrectAllowlistContentWithSpaces() throws KuraException, InterruptedException {
 
-        givenMockedContainerOrchestrationService();
-        givenMockedDockerClient(new String[] { CORRECT_DIGEST });
+        givenMockedContainerOrchestrationServiceWith(CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.ACTIVE);
+        givenMockedDockerClient(new String[] { CORRECT_DIGEST }, CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME);
         givenAllowlistEnforcement(FILLED_ALLOWLIST_CONTENT_WITH_SPACES);
 
         whenOnNext();
@@ -91,25 +104,25 @@ public class EnforcementSecurityTest {
     @Test
     public void shouldNotAllowStartingWithEmptyAllowlistContent() throws KuraException, InterruptedException {
 
-        givenMockedContainerOrchestrationService();
-        givenMockedDockerClient(new String[] { CORRECT_DIGEST });
+        givenMockedContainerOrchestrationServiceWith(CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.ACTIVE);
+        givenMockedDockerClient(new String[] { CORRECT_DIGEST }, CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME);
         givenAllowlistEnforcement(EMPTY_ALLOWLIST_CONTENT);
 
         whenOnNext();
 
-        thenContainerDigestIsNotVerifiedAndStopped();
+        thenContainerDigestIsNotValidAndStopped();
     }
 
     @Test
     public void shouldNotAllowStartingWithWrongContainerDigest() throws KuraException, InterruptedException {
 
-        givenMockedContainerOrchestrationService();
-        givenMockedDockerClient(new String[] { WRONG_DIGEST });
+        givenMockedContainerOrchestrationServiceWith(CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.ACTIVE);
+        givenMockedDockerClient(new String[] { WRONG_DIGEST }, CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME);
         givenAllowlistEnforcement(FILLED_ALLOWLIST_CONTENT_NO_SPACE);
 
         whenOnNext();
 
-        thenContainerDigestIsNotVerifiedAndStopped();
+        thenContainerDigestIsNotValidAndStopped();
     }
 
     /*
@@ -118,16 +131,16 @@ public class EnforcementSecurityTest {
 
     ContainerInstanceDescriptor containerInstanceDescriptor;
 
-    private void givenMockedContainerOrchestrationService() throws KuraException, InterruptedException {
+    private void givenMockedContainerOrchestrationServiceWith(String containerId, String containerName,
+            String imageName, ContainerState containerState) throws KuraException, InterruptedException {
         this.mockedContainerOrchImpl = spy(new ContainerOrchestrationServiceImpl());
 
-        containerInstanceDescriptor = ContainerInstanceDescriptor.builder().setContainerID(CONTAINER_ID)
-                .setContainerName(CONTAINER_NAME).setContainerImage(IMAGE_NAME).setContainerState(ContainerState.ACTIVE)
-                .build();
+        containerInstanceDescriptor = ContainerInstanceDescriptor.builder().setContainerID(containerId)
+                .setContainerName(containerName).setContainerImage(imageName).setContainerState(containerState).build();
         List<ContainerInstanceDescriptor> containerDescriptors = new ArrayList<>();
         containerDescriptors.add(containerInstanceDescriptor);
 
-        ImageConfiguration imageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName(IMAGE_NAME)
+        ImageConfiguration imageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName(imageName)
                 .setImageTag("latest").setImageDownloadTimeoutSeconds(0)
                 .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
                         REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
@@ -143,14 +156,15 @@ public class EnforcementSecurityTest {
         doNothing().when(this.mockedContainerOrchImpl).pullImage(any(ImageConfiguration.class));
     }
 
-    private void givenMockedDockerClient(String[] digestsList) {
+    private void givenMockedDockerClient(String[] digestsList, String containerId, String containerName,
+            String imageName) {
         DockerClient mockedDockerClient = mock(DockerClient.class, Mockito.RETURNS_DEEP_STUBS);
         List<Image> images = new LinkedList<>();
         Image mockImage = mock(Image.class);
 
-        when(mockImage.getRepoTags()).thenReturn(new String[] { IMAGE_NAME, "latest", "nginx:latest" });
+        when(mockImage.getRepoTags()).thenReturn(new String[] { imageName, "latest", "nginx:latest" });
         when(mockImage.getRepoDigests()).thenReturn(digestsList);
-        when(mockImage.getId()).thenReturn(IMAGE_NAME);
+        when(mockImage.getId()).thenReturn(imageName);
         images.add(mockImage);
 
         when(mockedDockerClient.listImagesCmd()).thenReturn(mock(ListImagesCmd.class));
@@ -158,8 +172,8 @@ public class EnforcementSecurityTest {
         when(mockedDockerClient.listImagesCmd().withImageNameFilter(anyString()).exec()).thenReturn(images);
         when(mockedDockerClient.stopContainerCmd(anyString())).thenReturn(mock(StopContainerCmd.class));
         when(mockedDockerClient.stopContainerCmd(anyString()).exec()).thenAnswer(answer -> {
-            this.containerInstanceDescriptor = ContainerInstanceDescriptor.builder().setContainerID(CONTAINER_ID)
-                    .setContainerName(CONTAINER_NAME).setContainerImage(IMAGE_NAME)
+            this.containerInstanceDescriptor = ContainerInstanceDescriptor.builder().setContainerID(containerId)
+                    .setContainerName(containerName).setContainerImage(imageName)
                     .setContainerState(ContainerState.FAILED).build();
             return null;
         });
@@ -168,8 +182,6 @@ public class EnforcementSecurityTest {
     }
 
     private void givenAllowlistEnforcement(String rawAllowlistContent) {
-        // List<String> allowlistContent = Arrays
-        // .asList(rawAllowlistContent.replaceAll("\\s", "").replace("\n", "").trim().split(","));
         this.allowlistEnforcementMonitor = new AllowlistEnforcementMonitor(rawAllowlistContent,
                 this.mockedContainerOrchImpl);
     }
@@ -192,7 +204,7 @@ public class EnforcementSecurityTest {
 
     }
 
-    private void thenContainerDigestIsNotVerifiedAndStopped() {
+    private void thenContainerDigestIsNotValidAndStopped() {
         assertEquals(ContainerState.FAILED, this.containerInstanceDescriptor.getContainerState());
     }
 }

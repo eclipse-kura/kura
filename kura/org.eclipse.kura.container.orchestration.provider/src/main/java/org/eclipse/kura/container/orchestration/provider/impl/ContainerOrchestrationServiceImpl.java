@@ -88,7 +88,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private DockerClient dockerClient;
     private CryptoService cryptoService;
     private List<ExposedPort> exposedPorts;
-    private AllowlistEnforcementMonitor enforcementEvent;
+    private AllowlistEnforcementMonitor allowlistEnforcementMonitor;
 
     public void setDockerClient(DockerClient dockerClient) {
         this.dockerClient = dockerClient;
@@ -96,11 +96,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
-    }
-
-    private void startEnforcementMonitor() {
-        this.enforcementEvent = this.dockerClient.eventsCmd().withEventFilter("start")
-                .exec(new AllowlistEnforcementMonitor(currentConfig.getEnforcementAllowlistContent(), this));
     }
 
     public void activate(Map<String, Object> properties) {
@@ -133,8 +128,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 return;
             }
 
-            if (this.enforcementEvent != null) {
-                closeEnforcement();
+            if (this.allowlistEnforcementMonitor != null) {
+                closeEnforcementMonitor();
             }
 
             connect();
@@ -149,25 +144,39 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 try {
                     startEnforcementMonitor();
                 } catch (Exception ex) {
-                    logger.error("Error starting enforcement monitor, connection to docker stopped", ex);
+                    logger.error("Error starting enforcement monitor, disconnecting from docker...", ex);
+                    cleanUpDocker();
+                    closeEnforcementMonitor();
+                    logger.error("Disconnected from docker");
                 }
+
+                verifyAlreadyRunningContainer();
             }
         }
 
         logger.info("Bundle {} has updated with config!", APP_ID);
     }
 
-    private void closeEnforcement() {
+    private void startEnforcementMonitor() {
+        this.allowlistEnforcementMonitor = this.dockerClient.eventsCmd().withEventFilter("start")
+                .exec(new AllowlistEnforcementMonitor(currentConfig.getEnforcementAllowlist(), this));
+    }
+
+    private void closeEnforcementMonitor() {
         try {
-            this.enforcementEvent.close();
-            this.enforcementEvent.awaitCompletion(5, TimeUnit.SECONDS);
-            this.enforcementEvent = null;
+            this.allowlistEnforcementMonitor.close();
+            this.allowlistEnforcementMonitor.awaitCompletion(5, TimeUnit.SECONDS);
+            this.allowlistEnforcementMonitor = null;
         } catch (InterruptedException ex) {
             logger.error("Waited to long to close enforcement monitor, stopping it...", ex);
             Thread.currentThread().interrupt();
         } catch (IOException ex) {
             logger.error("Failed to close enforcement monitor, stopping it...", ex);
         }
+    }
+
+    private void verifyAlreadyRunningContainer() {
+        this.allowlistEnforcementMonitor.verifyContainersDigests(listContainerDescriptors());
     }
 
     @Override
@@ -795,6 +804,10 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     private void cleanUpDocker() {
+
+        if (this.allowlistEnforcementMonitor != null) {
+            closeEnforcementMonitor();
+        }
 
         if (testConnection()) {
             this.dockerServiceListeners.forEach(ContainerOrchestrationServiceListener::onDisabled);

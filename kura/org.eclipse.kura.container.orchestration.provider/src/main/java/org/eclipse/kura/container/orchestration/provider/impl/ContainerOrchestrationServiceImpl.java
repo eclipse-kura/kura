@@ -150,7 +150,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                     logger.error("Disconnected from docker");
                 }
 
-                verifyAlreadyRunningContainer();
+                enforceAlreadyRunningContainer();
             }
         }
 
@@ -175,8 +175,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
     }
 
-    private void verifyAlreadyRunningContainer() {
-        this.allowlistEnforcementMonitor.verifyAlreadyRunningContainersDigests(listContainerDescriptors());
+    private void enforceAlreadyRunningContainer() {
+        this.allowlistEnforcementMonitor.enforceAllowlistFor(listContainerDescriptors());
     }
 
     @Override

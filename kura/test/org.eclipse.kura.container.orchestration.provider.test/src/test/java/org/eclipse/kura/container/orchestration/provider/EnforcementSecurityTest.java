@@ -200,9 +200,6 @@ public class EnforcementSecurityTest {
         when(mockedDockerClient.listImagesCmd().withImageNameFilter(anyString()).exec()).thenReturn(images);
         when(mockedDockerClient.stopContainerCmd(anyString())).thenReturn(mock(StopContainerCmd.class));
         when(mockedDockerClient.stopContainerCmd(anyString()).exec()).thenAnswer(answer -> {
-            // this.containerInstanceDescriptor = ContainerInstanceDescriptor.builder().setContainerID(containerId)
-            // .setContainerName(containerName).setContainerImage(imageName)
-            // .setContainerState(ContainerState.STOPPING).build();
             this.stoppingResult = ContainerState.STOPPING;
             return null;
         });
@@ -232,7 +229,7 @@ public class EnforcementSecurityTest {
     }
 
     private void whenVerifyAlreadyRunningContainersDigests(List<ContainerInstanceDescriptor> containerDescriptors) {
-        this.allowlistEnforcementMonitor.verifyAlreadyRunningContainersDigests(containerDescriptors);
+        this.allowlistEnforcementMonitor.enforceAllowlistFor(containerDescriptors);
     }
 
     /*

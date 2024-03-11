@@ -45,10 +45,10 @@ public class AllowlistEnforcementMonitor extends ResultCallbackTemplate<Allowlis
 
     @Override
     public void onNext(Event item) {
-        implementAllowlistEnforcement(item.getId());
+        enforceAllowlistFor(item.getId());
     }
 
-    private void implementAllowlistEnforcement(String containerId) {
+    private void enforceAllowlistFor(String containerId) {
 
         List<String> digestsList = this.orchestrationServiceImpl
                 .getImageDigestsByContainerName(getContainerNameById(containerId));
@@ -62,6 +62,13 @@ public class AllowlistEnforcementMonitor extends ResultCallbackTemplate<Allowlis
             logger.error(ENFORCEMENT_FAILURE, containerId);
             stopContainer(containerId);
             deleteContainer(containerId);
+        }
+    }
+
+    public void enforceAllowlistFor(List<ContainerInstanceDescriptor> containerDescriptors) {
+
+        for (ContainerInstanceDescriptor descriptor : containerDescriptors) {
+            enforceAllowlistFor(descriptor.getContainerId());
         }
     }
 
@@ -94,13 +101,6 @@ public class AllowlistEnforcementMonitor extends ResultCallbackTemplate<Allowlis
             this.orchestrationServiceImpl.deleteContainer(containerId);
         } catch (KuraException ex) {
             logger.error("Error during container deleting process of {}:", containerId, ex);
-        }
-    }
-
-    public void verifyAlreadyRunningContainersDigests(List<ContainerInstanceDescriptor> containerDescriptors) {
-
-        for (ContainerInstanceDescriptor descriptor : containerDescriptors) {
-            implementAllowlistEnforcement(descriptor.getContainerId());
         }
     }
 }

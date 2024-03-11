@@ -31,13 +31,13 @@
         </AD>
         
         <AD
-			id="allowlist.content"
-			name="Container Image Allowlist Content"
-			description="List of comma separated 'sha256' values containing the image digests.|TextArea"
-			type="String"
-			cardinality="1"
-			required="false"
-			default="" />
+            id="allowlist.content"
+            name="Container Image Allowlist Content"
+            description="List of comma separated 'sha256' values containing the image digests.|TextArea"
+            type="String"
+            cardinality="1"
+            required="false"
+            default="" />
         
     </OCD>
 

@@ -101,22 +101,39 @@ To stop the container without deleting the component, set the **Enabled** field 
 
 ## Container Management Dashboard
 
-The Container Orchestration service also provides the user with an intuitive container dashboard. This dashboard shows all containers running on a gateway, including containers created with the framework and those created manually through the command-line interface. To utilize this dashboard the org.eclipse.container.orchestration.provider (ContainerOrchestrationService) must be enabled, and the dashboard can be opened by navigating to Device > Containers.
+The Container Orchestration service also provides the user with an intuitive container dashboard. This dashboard shows all containers running on a gateway, including containers created with the framework and those created manually through the command-line interface. To utilize this dashboard the `org.eclipse.container.orchestration.provider` (ContainerOrchestrationService) must be enabled, and the dashboard can be opened by navigating to Device > Containers.
 
 ## Container Enforcement
 
-The Container Orchestration service also provides a security feature, to decide in advance which containers can be run on the system. This feature can be enabled or disabled through the `Allowlist Enforcement Enabled` option.
+The Container Orchestration service also provides a security feature which dictates the containers allowed to run on the system. This feature can be enabled or disabled through the `Allowlist Enforcement Enabled` option.
 
-This tool starts from the concept of digest, which is a unique and immutable identifier of an image: it is therefore an excellent means to identify from which image a container is created.
+This mechanism leverages the concept of _digest_, which is a unique and immutable identifier for a container image: it is therefore an excellent mean to identify the image from which a container was created.
 
-For this reason, it is possible to insert in the box `Container Image Allowlist Content` a list of digests separated by a comma, in the form of strings: when a container is booted on the system (whether it is launched by Kura or by a terminal CLI), Kura goes back to the image from which the container started, extracts the digest and verifies that it is present in the list provided during the service configuration.
+Given the above, Kura allows the user to provide a list of container image digests in the `Container Image Allowlist` field, in the form of newline-separated strings: when a container is started on the host system (whether it is launched by Kura or by a terminal CLI), Kura retrieves the image from which the container was created, extracts the digest and verifies that it is present in the allowlist provided during service configuration.
 
-If present, the container is let to be started without interference, otherwise it is immediatly stopped and removed from the container list.
+If the image digest is present, the container is allowed to proceed without interference, otherwise it is immediately stopped and deleted from the host system.
 
-As example, suppose that an user wants to implement the container enforcement, in order to let only the Kura docker container to be run on the device. To do this, it should enable the Container Enforcement by setting to `true` the `Allowlist Enforcement Enabled`, and filling the box below with the digest of the Kura image (supposed it's the fake one `sha256:cbef93b12dff2b32579c950dedbf3cdfe637adf5558cb1f8307906a94c8a5c6b`)
+A similar behavior is performed when at Kura startup (or if a user starts the enforcement monitor at runtime) there are already containers in the container descriptors list (whether they are started or stopped): when the enforcement is activated, it extracts the digests from the above containers and compares them with those in the allowlist. Again, containers that have been created from images whose digests are in the allowlist will be left intact, otherwise they will be stopped and deleted from the descriptors list.
+
+The verification is performed by intersecting the list of digests extracted by the containers and the one provided in the configuration: in this way, an empty intersection will result in a failing verification, while a non-empty one means that the image digests is equal to one of the allowlist entries.
+
+![Enforcement Flow](./images/container-orchestration-provider-enforcement-flow.png)
+
+### Example scenario
+
+A user wants to leverage the container enforcement in order to let only docker containers started from an image named `foo_image` to be run on the device. To do this, they should enable the Container Enforcement by setting the `Allowlist Enforcement Enabled` to `true`, and fill the `Container Image Allowlist` field with the digest of the `foo_image` docker image (i.e.`sha256:0000000000000000000000000000000000000000000000000000000000000000` in the example below).
 
 ![Container Orchestration Provider Enfrocement](./images/container-orchestration-provider-enforcement.png)
 
-After applying, whenever a container is started on the device, the enforcement will check the image digest comparing it to the one inside the box: if the continaer is the Kura one, it will be allowed to start, otherwise it will be stopped. If the user wants to add more than one digest (for example another fake one `sha256:089283c269c4947ecfebec55c8a893da6c4c5ef057b3fbd79d0aed398dedc3a4`), it just needs to add it to the comma-separated list.
+#### Startup of the Monitor
+
+Let's suppose that on the device there are already two containers running, one created from the `foo_image` an one from an image named `unwanted_image` with digest `sha256:9999999999999999999999999999999999999999999999999999999999999999`. Once the monitor starts with the configuration previously described, the enforcement extracts the digests of both containers and checks if they're included in the provided allowlist: in this case, the container originating from the `foo_image` will be left running, while the one created from the `unwanted_image` will be stopped and deleted, because its digest is not included in the allowlist.
+
+The same happens also in case the containers are stopped: if the digests is verified, they'll be left in the descriptors list in the Stopped state, otherwise they'll be deleted.
+
+#### Running Container After Monitor Startup
+
+After the starting phase just described, the enforcement will be quitely monitor the activity of the docker client. Whenever a container is started on the device, it will check the image digest from which the container was created, comparing it to the ones inside the allowlist: if the container is created from the `foo_image` docker image, it will be allowed to start, otherwise it will be stopped and deleted. If the user wants to add more than one allowed image, for example one named `wanted_image` with digest `sha256:1111111111111111111111111111111111111111111111111111111111111111`), it just needs to add it to the newline-separated list.
 
 ![Container Orchestration Provider Enfrocement Multiple Digests](./images/container-orchestration-provider-enforcement-multiple-digests.png)
+

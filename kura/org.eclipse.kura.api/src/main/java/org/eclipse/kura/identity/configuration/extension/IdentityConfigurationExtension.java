@@ -35,6 +35,39 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface IdentityConfigurationExtension {
 
     /**
+     * Retrieves the default configuration managed by this extension for the
+     * given identity, if any. This method may be called for the given identity name
+     * even if it currently does not exists on the system.
+     * <br>
+     * The returned configuration should be the same as the one returned by
+     * {@link IdentityConfigurationExtension#getConfiguration(String)} for an
+     * identity that has just been created before that any configuration update is
+     * applied to it.
+     * <br>
+     * The {@link ComponentConfiguration#getPid()} method of the returned
+     * configuration must be set to the value of the kura.service.pid property of
+     * the extension service.
+     * 
+     * 
+     * @param identityName the name of the identity.
+     * @return the default additional configuration, or an empty optional.
+     * @throws KuraException if a failure occurs while retrieving the configuration.
+     */
+    public Optional<ComponentConfiguration> getDefaultConfiguration(String identityName) throws KuraException;
+
+    /**
+     * Performs a validation of the provided configuration without applying any
+     * change to the system. This method can be called also for identities that do
+     * not exist on the system yet,
+     * typically this will be done just before creating a new identity.
+     * 
+     * @param identityName  the name of the identity.
+     * @param configuration the configuration to be validated.
+     * @throws KuraException if the provided configuration is not valid.
+     */
+    public void validateConfiguration(String identityName, ComponentConfiguration configuration) throws KuraException;
+
+    /**
      * Retrieves the additional configuration managed by this extension for the
      * given identity, if any.
      * <br>

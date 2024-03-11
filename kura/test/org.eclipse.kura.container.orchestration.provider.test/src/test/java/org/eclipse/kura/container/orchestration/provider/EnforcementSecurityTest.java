@@ -45,6 +45,7 @@ import org.mockito.Mockito;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.ListImagesCmd;
+import com.github.dockerjava.api.command.RemoveContainerCmd;
 import com.github.dockerjava.api.command.StopContainerCmd;
 import com.github.dockerjava.api.model.Event;
 import com.github.dockerjava.api.model.Image;
@@ -73,8 +74,11 @@ public class EnforcementSecurityTest {
 
     private Map<String, Object> properties = new HashMap<>();
 
+    private ContainerState stoppingResult;
+
     public EnforcementSecurityTest() {
         this.properties.clear();
+        this.stoppingResult = null;
     }
 
     @Test
@@ -84,7 +88,7 @@ public class EnforcementSecurityTest {
         givenMockedDockerClient(new String[] { CORRECT_DIGEST }, CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME);
         givenAllowlistEnforcement(FILLED_ALLOWLIST_CONTENT_NO_SPACE);
 
-        whenOnNext();
+        whenOnNext(CONTAINER_ID);
 
         thenContainerDigestIsVerified();
     }
@@ -96,7 +100,7 @@ public class EnforcementSecurityTest {
         givenMockedDockerClient(new String[] { CORRECT_DIGEST }, CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME);
         givenAllowlistEnforcement(FILLED_ALLOWLIST_CONTENT_WITH_SPACES);
 
-        whenOnNext();
+        whenOnNext(CONTAINER_ID);
 
         thenContainerDigestIsVerified();
     }
@@ -108,9 +112,9 @@ public class EnforcementSecurityTest {
         givenMockedDockerClient(new String[] { CORRECT_DIGEST }, CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME);
         givenAllowlistEnforcement(EMPTY_ALLOWLIST_CONTENT);
 
-        whenOnNext();
+        whenOnNext(CONTAINER_ID);
 
-        thenContainerDigestIsNotValidAndStopped();
+        thenContainerDigestIsNotValidAndStoppedAndDeleted();
     }
 
     @Test
@@ -120,9 +124,33 @@ public class EnforcementSecurityTest {
         givenMockedDockerClient(new String[] { WRONG_DIGEST }, CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME);
         givenAllowlistEnforcement(FILLED_ALLOWLIST_CONTENT_NO_SPACE);
 
-        whenOnNext();
+        whenOnNext(CONTAINER_ID);
 
-        thenContainerDigestIsNotValidAndStopped();
+        thenContainerDigestIsNotValidAndStoppedAndDeleted();
+    }
+
+    @Test
+    public void shouldStopAndDeleteContainerWithWrongDigestAndActiveState() throws KuraException, InterruptedException {
+
+        givenMockedContainerOrchestrationServiceWith(CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.ACTIVE);
+        givenMockedDockerClient(new String[] { CORRECT_DIGEST }, CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME);
+        givenAllowlistEnforcement(EMPTY_ALLOWLIST_CONTENT);
+
+        whenVerifyAlreadyRunningContainersDigests(this.mockedContainerOrchImpl.listContainerDescriptors());
+
+        thenContainerDigestIsNotValidAndStoppedAndDeleted();
+    }
+
+    @Test
+    public void shouldOnlyDeleteContainerWithWrongDigestAndFailedState() throws KuraException, InterruptedException {
+
+        givenMockedContainerOrchestrationServiceWith(CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME, ContainerState.FAILED);
+        givenMockedDockerClient(new String[] { CORRECT_DIGEST }, CONTAINER_ID, CONTAINER_NAME, IMAGE_NAME);
+        givenAllowlistEnforcement(EMPTY_ALLOWLIST_CONTENT);
+
+        whenVerifyAlreadyRunningContainersDigests(this.mockedContainerOrchImpl.listContainerDescriptors());
+
+        thenContainerDigestIsNotValidAndOnlyDeleted();
     }
 
     /*
@@ -172,6 +200,15 @@ public class EnforcementSecurityTest {
         when(mockedDockerClient.listImagesCmd().withImageNameFilter(anyString()).exec()).thenReturn(images);
         when(mockedDockerClient.stopContainerCmd(anyString())).thenReturn(mock(StopContainerCmd.class));
         when(mockedDockerClient.stopContainerCmd(anyString()).exec()).thenAnswer(answer -> {
+            // this.containerInstanceDescriptor = ContainerInstanceDescriptor.builder().setContainerID(containerId)
+            // .setContainerName(containerName).setContainerImage(imageName)
+            // .setContainerState(ContainerState.STOPPING).build();
+            this.stoppingResult = ContainerState.STOPPING;
+            return null;
+        });
+
+        when(mockedDockerClient.removeContainerCmd(anyString())).thenReturn(mock(RemoveContainerCmd.class));
+        when(mockedDockerClient.removeContainerCmd(anyString()).exec()).thenAnswer(answer -> {
             this.containerInstanceDescriptor = ContainerInstanceDescriptor.builder().setContainerID(containerId)
                     .setContainerName(containerName).setContainerImage(imageName)
                     .setContainerState(ContainerState.FAILED).build();
@@ -190,8 +227,12 @@ public class EnforcementSecurityTest {
      * When
      */
 
-    private void whenOnNext() {
-        this.allowlistEnforcementMonitor.onNext(new Event("start", CONTAINER_ID, "nginx:latest", 1708963202L));
+    private void whenOnNext(String containerId) {
+        this.allowlistEnforcementMonitor.onNext(new Event("start", containerId, "nginx:latest", 1708963202L));
+    }
+
+    private void whenVerifyAlreadyRunningContainersDigests(List<ContainerInstanceDescriptor> containerDescriptors) {
+        this.allowlistEnforcementMonitor.verifyAlreadyRunningContainersDigests(containerDescriptors);
     }
 
     /*
@@ -204,7 +245,13 @@ public class EnforcementSecurityTest {
 
     }
 
-    private void thenContainerDigestIsNotValidAndStopped() {
+    private void thenContainerDigestIsNotValidAndStoppedAndDeleted() {
+        assertEquals(ContainerState.STOPPING, this.stoppingResult);
+        assertEquals(ContainerState.FAILED, this.containerInstanceDescriptor.getContainerState());
+    }
+
+    private void thenContainerDigestIsNotValidAndOnlyDeleted() {
+        assertEquals(null, this.stoppingResult);
         assertEquals(ContainerState.FAILED, this.containerInstanceDescriptor.getContainerState());
     }
 }

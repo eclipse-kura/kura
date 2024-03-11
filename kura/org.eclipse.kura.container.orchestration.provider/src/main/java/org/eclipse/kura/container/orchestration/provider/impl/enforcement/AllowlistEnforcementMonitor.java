@@ -97,7 +97,7 @@ public class AllowlistEnforcementMonitor extends ResultCallbackTemplate<Allowlis
         }
     }
 
-    public void verifyContainersDigests(List<ContainerInstanceDescriptor> containerDescriptors) {
+    public void verifyAlreadyRunningContainersDigests(List<ContainerInstanceDescriptor> containerDescriptors) {
 
         for (ContainerInstanceDescriptor descriptor : containerDescriptors) {
             implementAllowlistEnforcement(descriptor.getContainerId());

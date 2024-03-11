@@ -176,7 +176,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     private void verifyAlreadyRunningContainer() {
-        this.allowlistEnforcementMonitor.verifyContainersDigests(listContainerDescriptors());
+        this.allowlistEnforcementMonitor.verifyAlreadyRunningContainersDigests(listContainerDescriptors());
     }
 
     @Override

@@ -18,7 +18,7 @@ node {
     stage('Build') {
         timeout(time: 2, unit: 'HOURS') {
             dir("kura") {
-                withMaven(jdk: 'adoptopenjdk-hotspot-jdk8-latest', maven: 'apache-maven-3.6.3') {
+                withMaven(jdk: 'adoptopenjdk-hotspot-jdk8-latest', maven: 'apache-maven-latest') {
                     sh "touch /tmp/isJenkins.txt"
                     sh "mvn -f target-platform/pom.xml clean install -Pno-mirror -Pcheck-exists-plugin"
                     sh "mvn -f kura/pom.xml clean install -Pcheck-exists-plugin"
@@ -44,7 +44,7 @@ node {
     stage('Sonar') {
         timeout(time: 2, unit: 'HOURS') {
             dir("kura") {
-                withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.6.3') {
+                withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-latest') {
                     withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONARCLOUD_TOKEN')]) {
                         withSonarQubeEnv {
                             sh '''

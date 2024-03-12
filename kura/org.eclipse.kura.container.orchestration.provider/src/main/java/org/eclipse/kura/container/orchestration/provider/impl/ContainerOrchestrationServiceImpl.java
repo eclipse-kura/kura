@@ -168,7 +168,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             this.allowlistEnforcementMonitor.awaitCompletion(5, TimeUnit.SECONDS);
             this.allowlistEnforcementMonitor = null;
         } catch (InterruptedException ex) {
-            logger.error("Waited to long to close enforcement monitor, stopping it...", ex);
+            logger.error("Waited too long to close enforcement monitor, stopping it...", ex);
             Thread.currentThread().interrupt();
         } catch (IOException ex) {
             logger.error("Failed to close enforcement monitor, stopping it...", ex);

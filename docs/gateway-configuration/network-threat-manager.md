@@ -74,3 +74,6 @@ ip6tables -A output-kura -m rt --rt-type 0 -j DROP
 ```
 
 Also in this case, to enable the feature and add the rules to the firewall, the **flooding.protection.enabled.ipv6** property has to be set to true. If the device doesn't support IPv6, this property is ignored.
+
+!!! Warning
+    To recover the device state when the IPv6 flooding protection feature is disabled, a reboot is required. So, to disable the feature, set the **flooding.protection.enabled.ipv6** property to false tha reboot the device.

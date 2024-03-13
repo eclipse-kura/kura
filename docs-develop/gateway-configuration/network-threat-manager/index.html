@@ -3214,6 +3214,10 @@ The <strong>flooding.protection.enabled</strong> property is used to enable the 
 <a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>ip6tables -A output-kura -m rt --rt-type 0 -j DROP
 </code></pre></div>
 <p>Also in this case, to enable the feature and add the rules to the firewall, the <strong>flooding.protection.enabled.ipv6</strong> property has to be set to true. If the device doesn't support IPv6, this property is ignored.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>To recover the device state when the IPv6 flooding protection feature is disabled, a reboot is required. So, to disable the feature, set the <strong>flooding.protection.enabled.ipv6</strong> property to false tha reboot the device.</p>
+</div>
 
               
             </article>

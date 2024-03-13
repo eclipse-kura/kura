@@ -132,6 +132,7 @@
 <setEntry value="org.eclipse.kura.core.net@default:default"/>
 <setEntry value="org.eclipse.kura.core.status@default:default"/>
 <setEntry value="org.eclipse.kura.core.system@default:default"/>
+<setEntry value="org.eclipse.kura.core.identity@default:default"/>
 <setEntry value="org.eclipse.kura.core@default:default"/>
 <setEntry value="org.eclipse.kura.deployment.agent@default:default"/>
 <setEntry value="org.eclipse.kura.driver.helper.provider@default:default"/>

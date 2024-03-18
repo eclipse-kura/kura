@@ -15,6 +15,7 @@ package org.eclipse.kura.container.orchestration.provider.impl.enforcement;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraException;
@@ -32,14 +33,14 @@ public class AllowlistEnforcementMonitor extends ResultCallbackTemplate<Allowlis
     private static final Logger logger = LoggerFactory.getLogger(AllowlistEnforcementMonitor.class);
     private static final String ENFORCEMENT_SUCCESS = "Enforcement allowlist contains image digests {}...container {} is starting";
     private static final String ENFORCEMENT_FAILURE = "Enforcement allowlist doesn't contain image digests...container {} will be stopped";
-    private final List<String> enforcementAllowlistContent;
+    private final Set<String> enforcementAllowlistContent;
     private final ContainerOrchestrationServiceImpl orchestrationServiceImpl;
 
     public AllowlistEnforcementMonitor(String allowlistContent,
             ContainerOrchestrationServiceImpl containerOrchestrationService) {
 
         this.enforcementAllowlistContent = Arrays.asList(allowlistContent.replace(" ", "").split("\\r?\\n|\\r"))
-                .stream().filter(line -> !line.isEmpty()).collect(Collectors.toList());
+                .stream().filter(line -> !line.isEmpty()).collect(Collectors.toSet());
         this.orchestrationServiceImpl = containerOrchestrationService;
     }
 
@@ -50,11 +51,16 @@ public class AllowlistEnforcementMonitor extends ResultCallbackTemplate<Allowlis
 
     private void enforceAllowlistFor(String containerId) {
 
-        List<String> digestsList = this.orchestrationServiceImpl
+        Set<String> digestsList = this.orchestrationServiceImpl
                 .getImageDigestsByContainerName(getContainerNameById(containerId));
 
-        List<String> digestIntersection = this.enforcementAllowlistContent.stream().distinct()
-                .filter(digestsList::contains).collect(Collectors.toList());
+        Set<String> digestIntersection = this.enforcementAllowlistContent.stream().distinct()
+                .filter(digestsList::contains).collect(Collectors.toSet());
+
+        if (digestIntersection.isEmpty()) {
+            digestIntersection = this.orchestrationServiceImpl.getContainerInstancesAllowlist().stream().distinct()
+                    .filter(digestsList::contains).collect(Collectors.toSet());
+        }
 
         if (!digestIntersection.isEmpty()) {
             logger.info(ENFORCEMENT_SUCCESS, digestIntersection, containerId);

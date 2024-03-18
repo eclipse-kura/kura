@@ -17,6 +17,7 @@ import static java.util.Objects.isNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -89,6 +90,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private CryptoService cryptoService;
     private List<ExposedPort> exposedPorts;
     private AllowlistEnforcementMonitor allowlistEnforcementMonitor;
+
+    private Map<String, String> containerInstancesDigests = new HashMap<>();
 
     public void setDockerClient(DockerClient dockerClient) {
         this.dockerClient = dockerClient;
@@ -354,6 +357,9 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             logger.info("Creating new container instance");
             pullImage(container.getImageConfiguration());
             containerId = createContainer(container);
+            if (this.currentConfig.isEnforcementEnabled()) {
+                addContainerInstanceDigest(containerId, container.getEnforcementDigest());
+            }
             startContainer(containerId);
         }
 
@@ -371,6 +377,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     public void stopContainer(String id) throws KuraException {
         checkRequestEnv(id);
         try {
+            removeContainerInstanceDigest(id);
             this.dockerClient.stopContainerCmd(id).exec();
         } catch (Exception e) {
             logger.error("Could not stop container {}. Caused by {}", id, e);
@@ -967,9 +974,9 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
     }
 
-    public List<String> getImageDigestsByContainerName(String containerName) {
+    public Set<String> getImageDigestsByContainerName(String containerName) {
 
-        List<String> imageDigests = new ArrayList<>();
+        Set<String> imageDigests = new HashSet<>();
 
         dockerClient.listImagesCmd().withImageNameFilter(containerName).exec().stream().forEach(image -> {
             List<String> digests = Arrays.asList(image.getRepoDigests());
@@ -977,6 +984,29 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         });
 
         return imageDigests;
+    }
+
+    private void addContainerInstanceDigest(String containerId, Optional<String> containerInstanceDigest) {
+
+        if (containerInstanceDigest.isPresent()) {
+            logger.info("Container {} configuration presented enforcement digest. Adding it to the digests allowlist.",
+                    containerId);
+            this.containerInstancesDigests.put(containerId, containerInstanceDigest.get());
+        } else {
+            logger.info("Container {} configuration doesn't contain the enforcement digest, but monitoring is enabled."
+                    + " Be sure that the digest is included in the service allowlist", containerId);
+        }
+
+    }
+
+    private void removeContainerInstanceDigest(String containerId) {
+        if (this.containerInstancesDigests.containsKey(containerId)) {
+            this.containerInstancesDigests.remove(containerId);
+        }
+    }
+
+    public Set<String> getContainerInstancesAllowlist() {
+        return new HashSet<>(this.containerInstancesDigests.values());
     }
 
 }

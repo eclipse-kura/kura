@@ -57,6 +57,7 @@ public class ContainerConfiguration {
     private Optional<Float> cpus;
     private Optional<String> gpus;
     private Optional<String> runtime;
+    private Optional<String> enforcementDigest;
 
     private ContainerConfiguration() {
     }
@@ -304,6 +305,16 @@ public class ContainerConfiguration {
     }
 
     /**
+     * Return the enforcement digest assigned to the container.
+     *
+     * @return the optional runtime string used by the container
+     * @since 2.7
+     */
+    public Optional<String> getEnforcementDigest() {
+        return this.enforcementDigest;
+    }
+
+    /**
      * Creates a builder for creating a new {@link ContainerConfiguration} instance.
      *
      * @return the builder.
@@ -314,10 +325,10 @@ public class ContainerConfiguration {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.containerDevices, this.containerEnvVars, this.containerLoggerParameters,
-                this.containerLoggingType, this.containerName, this.containerPorts, this.containerPrivileged,
-                this.containerVolumes, this.cpus, this.entryPoint, this.gpus, this.imageConfig, this.isFrameworkManaged,
-                this.memory, this.networkConfiguration, this.containerRestartOnFailure, this.runtime);
+        return Objects.hash(containerDevices, containerEnvVars, containerLoggerParameters, containerLoggingType,
+                containerName, containerPorts, containerPrivileged, containerRestartOnFailure, containerVolumes, cpus,
+                enforcementDigest, entryPoint, gpus, imageConfig, isFrameworkManaged, memory, networkConfiguration,
+                runtime);
     }
 
     @Override
@@ -325,25 +336,28 @@ public class ContainerConfiguration {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
             return false;
         }
         ContainerConfiguration other = (ContainerConfiguration) obj;
-        return Objects.equals(this.containerDevices, other.containerDevices)
-                && Objects.equals(this.containerEnvVars, other.containerEnvVars)
-                && Objects.equals(this.containerLoggerParameters, other.containerLoggerParameters)
-                && Objects.equals(this.containerLoggingType, other.containerLoggingType)
-                && Objects.equals(this.containerName, other.containerName)
-                && Objects.equals(this.containerPorts, other.containerPorts)
-                && Objects.equals(this.containerPrivileged, other.containerPrivileged)
-                && Objects.equals(this.containerVolumes, other.containerVolumes)
-                && Objects.equals(this.cpus, other.cpus) && Objects.equals(this.entryPoint, other.entryPoint)
-                && Objects.equals(this.gpus, other.gpus) && Objects.equals(this.imageConfig, other.imageConfig)
-                && Objects.equals(this.isFrameworkManaged, other.isFrameworkManaged)
-                && Objects.equals(this.memory, other.memory)
-                && Objects.equals(this.networkConfiguration, other.networkConfiguration)
-                && Objects.equals(this.containerRestartOnFailure, other.containerRestartOnFailure)
-                && Objects.equals(this.runtime, other.runtime);
+        return Objects.equals(containerDevices, other.containerDevices)
+                && Objects.equals(containerEnvVars, other.containerEnvVars)
+                && Objects.equals(containerLoggerParameters, other.containerLoggerParameters)
+                && Objects.equals(containerLoggingType, other.containerLoggingType)
+                && Objects.equals(containerName, other.containerName)
+                && Objects.equals(containerPorts, other.containerPorts)
+                && Objects.equals(containerPrivileged, other.containerPrivileged)
+                && Objects.equals(containerRestartOnFailure, other.containerRestartOnFailure)
+                && Objects.equals(containerVolumes, other.containerVolumes) && Objects.equals(cpus, other.cpus)
+                && Objects.equals(enforcementDigest, other.enforcementDigest)
+                && Objects.equals(entryPoint, other.entryPoint) && Objects.equals(gpus, other.gpus)
+                && Objects.equals(imageConfig, other.imageConfig)
+                && Objects.equals(isFrameworkManaged, other.isFrameworkManaged) && Objects.equals(memory, other.memory)
+                && Objects.equals(networkConfiguration, other.networkConfiguration)
+                && Objects.equals(runtime, other.runtime);
     }
 
     public static final class ContainerConfigurationBuilder {
@@ -367,6 +381,7 @@ public class ContainerConfiguration {
         private Optional<Float> cpus = Optional.empty();
         private Optional<String> gpus = Optional.empty();
         private Optional<String> runtime = Optional.empty();
+        private Optional<String> enforcementDigest = Optional.empty();
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -547,6 +562,14 @@ public class ContainerConfiguration {
             return this;
         }
 
+        /**
+         * @since 2.7
+         */
+        public ContainerConfigurationBuilder setEnforcementDigest(Optional<String> digest) {
+            this.enforcementDigest = digest;
+            return this;
+        }
+
         public ContainerConfiguration build() {
 
             if (this.containerPorts.isEmpty()) {
@@ -577,6 +600,7 @@ public class ContainerConfiguration {
             result.cpus = this.cpus;
             result.gpus = this.gpus;
             result.runtime = this.runtime;
+            result.enforcementDigest = this.enforcementDigest;
 
             return result;
         }

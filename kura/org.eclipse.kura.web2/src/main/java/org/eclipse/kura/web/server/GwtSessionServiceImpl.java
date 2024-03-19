@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements GwtSessionService {
 
-    private static final Logger logger = LoggerFactory.getLogger(GwtSessionServiceImpl.class);
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private final UserManager userManager;
 
@@ -59,10 +59,10 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
 
         if (session != null) {
             final Object username = session.getAttribute(Attributes.AUTORIZED_USER.getValue());
-            final String id = session.getId();
             session.invalidate();
 
-            logger.info("UI Logout - Success - Logout succeeded for user: {}, session {}", username, id);
+            auditLogger.info("{} UI Session - Success - Logout succeeded for user: {}",
+                    AuditContext.currentOrInternal(), username);
 
             Cookie[] cookies = request.getCookies();
             for (Cookie cookie : cookies) {
@@ -119,7 +119,8 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
         try {
             this.userManager.authenticateWithPassword(username, oldPassword);
         } catch (KuraException e) {
-            logger.warn("Wrong password");
+            auditLogger.warn("{} UI Session - Failure - Wrong password for user {}", AuditContext.currentOrInternal(),
+                    username);
             throw new GwtKuraException(GwtKuraErrorCode.INVALID_USERNAME_PASSWORD);
         }
         
@@ -127,8 +128,12 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
             if (!this.userManager.setUserPassword(username, newPassword)) {
                 throw new GwtKuraException(GwtKuraErrorCode.PASSWORD_CHANGE_SAME_PASSWORD);
             }
+
+            auditLogger.info("{} UI Session - Success - Password updated for user {}", AuditContext.currentOrInternal(),
+                    username);
         } catch (final KuraException e) {
-            logger.warn("Failed to update user password", e);
+            auditLogger.warn("{} UI Session - Failure - Failed to update password for user {}",
+                    AuditContext.currentOrInternal(), username);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
         }
 

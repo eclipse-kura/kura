@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -65,10 +65,12 @@ import org.eclipse.kura.rest.configuration.api.DTOUtil;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
+import org.eclipse.kura.web.server.RequiredPermissions.Mode;
 import org.eclipse.kura.web.server.util.AssetConfigValidator;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -106,7 +108,7 @@ public class FileServlet extends AuditServlet {
 
     private static final int BUFFER = 1024;
     private static int tooBig = 0x6400000; // Max size of unzipped data, 100MB
-    private static int tooMany = 1024;     // Max number of files
+    private static int tooMany = 1024; // Max number of files
 
     private DiskFileItemFactory diskFileItemFactory;
     private FileCleaningTracker fileCleaningTracker;
@@ -185,12 +187,16 @@ public class FileServlet extends AuditServlet {
         }
 
         if (reqPathInfo.startsWith("/deploy")) {
+            KuraRemoteServiceServlet.requirePermissions(req, Mode.ALL, new String[] { KuraPermission.PACKAGES_ADMIN });
             doPostDeploy(req);
         } else if (reqPathInfo.equals("/configuration/snapshot")) {
+            KuraRemoteServiceServlet.requirePermissions(req, Mode.ALL, new String[] { KuraPermission.ADMIN });
             doPostConfigurationSnapshot(req);
         } else if (reqPathInfo.equals("/command")) {
+            KuraRemoteServiceServlet.requirePermissions(req, Mode.ALL, new String[] { KuraPermission.DEVICE });
             doPostCommand(req);
         } else if (reqPathInfo.equals("/asset")) {
+            KuraRemoteServiceServlet.requirePermissions(req, Mode.ALL, new String[] { KuraPermission.WIRES_ADMIN });
             doPostAsset(req, resp);
         } else {
             logger.error("Unknown request path info: {}", reqPathInfo);
@@ -859,7 +865,8 @@ class UploadRequest extends ServletFileUpload {
     public UploadRequest(DiskFileItemFactory diskFileItemFactory) {
         super(diskFileItemFactory);
         setSizeMax(FileServlet.getFileUploadSizeMax());
-        // contrary to what the name says, this method does not set the number of allowed files but the number of parts
+        // contrary to what the name says, this method does not set the number of
+        // allowed files but the number of parts
         // (files and fields)
         setFileCountMax(10L);
         this.formFields = new HashMap<>();

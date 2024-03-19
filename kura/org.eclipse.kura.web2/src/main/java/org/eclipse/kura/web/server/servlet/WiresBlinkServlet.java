@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -33,6 +33,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
+import org.eclipse.kura.web.server.KuraRemoteServiceServlet.KuraPermissionException;
+import org.eclipse.kura.web.server.RequiredPermissions.Mode;
+import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.wire.graph.Constants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -46,7 +50,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The Class EventHandlerServlet is responsible for interacting between Event
- * Admin and Javascript through Server Sent Events (SSE). This is mainly required
+ * Admin and Javascript through Server Sent Events (SSE). This is mainly
+ * required
  * for Kura Wires to delegate the emit events.
  */
 public final class WiresBlinkServlet extends HttpServlet implements WireAdminListener {
@@ -66,8 +71,10 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
     }
 
     /**
-     * Maximum size of the queue to maintain the events. The queue does not care if any
-     * event maintained by the queue is rejected. As long as a consumer thread can consume
+     * Maximum size of the queue to maintain the events. The queue does not care if
+     * any
+     * event maintained by the queue is rejected. As long as a consumer thread can
+     * consume
      * events from the queue, the system behavior is considered as expected.
      */
     private static final int MAX_SIZE_OF_QUEUE = 10;
@@ -112,17 +119,24 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
      * Performs a GET request for Server Sent Event Value.
      *
      * @param request
-     *            the request
+     *                 the request
      * @param response
-     *            the response
+     *                 the response
      * @throws ServletException
-     *             the servlet exception
+     *                          the servlet exception
      * @throws IOException
-     *             Signals that an I/O exception has occurred.
+     *                          Signals that an I/O exception has occurred.
      */
     @Override
     public void doGet(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException {
+        try {
+            KuraRemoteServiceServlet.requirePermissions(request, Mode.ALL, new String[] { KuraPermission.WIRES_ADMIN });
+        } catch (final KuraPermissionException e) {
+            response.sendError(403);
+            return;
+        }
+
         // track the new session
         final String requestId = request.getParameter("session");
 
@@ -135,7 +149,8 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
             return;
         }
 
-        // destroy the session if exists. It actually destroys the current session which initiated
+        // destroy the session if exists. It actually destroys the current session which
+        // initiated
         // the destruction request
         final String sessionToDestroy = request.getParameter("logout");
 

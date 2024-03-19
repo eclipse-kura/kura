@@ -41,6 +41,7 @@ public class SessionAutorizationSecurityHandler implements SecurityHandler {
             final HttpSession session = request.getSession(false);
 
             if (session == null) {
+                auditLogger.warn("{} UI Session - Failure - User session does not exist", auditContext);
                 return false;
             }
 

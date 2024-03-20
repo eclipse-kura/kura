@@ -146,14 +146,13 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             if (currentConfig.isEnforcementEnabled()) {
                 try {
                     startEnforcementMonitor();
+                    enforceAlreadyRunningContainer();
                 } catch (Exception ex) {
                     logger.error("Error starting enforcement monitor, disconnecting from docker...", ex);
                     cleanUpDocker();
                     closeEnforcementMonitor();
                     logger.error("Disconnected from docker");
                 }
-
-                enforceAlreadyRunningContainer();
             }
         }
 
@@ -161,15 +160,19 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     private void startEnforcementMonitor() {
+        logger.info("Enforcement monitor starting...");
         this.allowlistEnforcementMonitor = this.dockerClient.eventsCmd().withEventFilter("start")
                 .exec(new AllowlistEnforcementMonitor(currentConfig.getEnforcementAllowlist(), this));
+        logger.info("Enforcement monitor starting...done.");
     }
 
     private void closeEnforcementMonitor() {
         try {
+            logger.info("Enforcement monitor closing...");
             this.allowlistEnforcementMonitor.close();
             this.allowlistEnforcementMonitor.awaitCompletion(5, TimeUnit.SECONDS);
             this.allowlistEnforcementMonitor = null;
+            logger.info("Enforcement monitor closing...done.");
         } catch (InterruptedException ex) {
             logger.error("Waited too long to close enforcement monitor, stopping it...", ex);
             Thread.currentThread().interrupt();
@@ -179,7 +182,9 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     private void enforceAlreadyRunningContainer() {
+        logger.info("Enforcement check on already running containers...");
         this.allowlistEnforcementMonitor.enforceAllowlistFor(listContainerDescriptors());
+        logger.info("Enforcement check on already running containers...done");
     }
 
     @Override
@@ -357,9 +362,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             logger.info("Creating new container instance");
             pullImage(container.getImageConfiguration());
             containerId = createContainer(container);
-            if (this.currentConfig.isEnforcementEnabled()) {
-                addContainerInstanceDigest(containerId, container.getEnforcementDigest());
-            }
+            addContainerInstanceDigest(containerId, container.getEnforcementDigest());
             startContainer(containerId);
         }
 
@@ -378,7 +381,11 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         checkRequestEnv(id);
         try {
             removeContainerInstanceDigest(id);
-            this.dockerClient.stopContainerCmd(id).exec();
+
+            if (listContainersIds().contains(id)) {
+                this.dockerClient.stopContainerCmd(id).exec();
+            }
+
         } catch (Exception e) {
             logger.error("Could not stop container {}. Caused by {}", id, e);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
@@ -389,7 +396,11 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     public void deleteContainer(String id) throws KuraException {
         checkRequestEnv(id);
         try {
-            this.dockerClient.removeContainerCmd(id).exec();
+
+            if (listContainersIds().contains(id)) {
+                this.dockerClient.removeContainerCmd(id).exec();
+            }
+
             this.frameworkManagedContainers.removeIf(c -> id.equals(c.id));
         } catch (Exception e) {
             logger.error("Could not remove container {}. Caused by {}", id, e);
@@ -528,8 +539,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             if (containerDescription.isContainerPrivileged()) {
                 configuration = configuration.withPrivileged(containerDescription.isContainerPrivileged());
             }
-
-            commandBuilder.withExposedPorts(this.exposedPorts);
+            commandBuilder = commandBuilder.withExposedPorts(this.exposedPorts);
 
             return commandBuilder.withHostConfig(configuration).exec().getId();
 
@@ -989,12 +999,15 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private void addContainerInstanceDigest(String containerId, Optional<String> containerInstanceDigest) {
 
         if (containerInstanceDigest.isPresent()) {
-            logger.info("Container {} configuration presented enforcement digest. Adding it to the digests allowlist.",
+            logger.info(
+                    "Container {} presented enforcement digest. Adding it to the digests allowlist: it will be used if the enforcement is enabled.",
                     containerId);
             this.containerInstancesDigests.put(containerId, containerInstanceDigest.get());
         } else {
-            logger.info("Container {} configuration doesn't contain the enforcement digest, but monitoring is enabled."
-                    + " Be sure that the digest is included in the service allowlist", containerId);
+            logger.info(
+                    "Container {} doesn't contain the enforcement digest. "
+                            + "If enforcement is enabled, be sure that the digest is included in the service allowlist",
+                    containerId);
         }
 
     }

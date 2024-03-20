@@ -113,7 +113,7 @@ Given the above, Kura allows the user to provide a list of container image diges
 
 If the image digest is present, the container is allowed to proceed without interference, otherwise it is immediately stopped and deleted from the host system.
 
-A similar behavior is performed when at Kura startup (or if a user starts the enforcement monitor at runtime) there are already containers in the container descriptors list (whether they are started or stopped): when the enforcement is activated, it extracts the digests from the above containers and compares them with those in the allowlist. Again, containers that have been created from images whose digests are in the allowlist will be left intact, otherwise they will be stopped and deleted from the descriptors list.
+A similar behaviour is performed at Kura startup or when the enforcement is enabled at runtime: if there are already containers on the device (whether they are started or stopped) and the enforcement is activated, Kura extracts the digests from the containers and compares them with those in the allowlist. Again, containers that have been created from images whose digests are in the allowlist will be left intact, otherwise they will be stopped and deleted from the descriptors list.
 
 The verification is performed by intersecting the list of digests extracted by the containers and the one provided in the configuration: in this way, an empty intersection will result in a failing verification, while a non-empty one means that the image digests is equal to one of the allowlist entries.
 
@@ -125,15 +125,15 @@ A user wants to leverage the container enforcement in order to let only docker c
 
 ![Container Orchestration Provider Enfrocement](./images/container-orchestration-provider-enforcement.png)
 
-#### Startup of the Monitor
+#### Startup of the Enforcement Feature
 
-Let's suppose that on the device there are already two containers running, one created from the `foo_image` an one from an image named `unwanted_image` with digest `sha256:9999999999999999999999999999999999999999999999999999999999999999`. Once the monitor starts with the configuration previously described, the enforcement extracts the digests of both containers and checks if they're included in the provided allowlist: in this case, the container originating from the `foo_image` will be left running, while the one created from the `unwanted_image` will be stopped and deleted, because its digest is not included in the allowlist.
+Let's suppose that on the device there are already two containers running, one created from the `foo_image` an one from an image named `unwanted_image` with digest `sha256:9999999999999999999999999999999999999999999999999999999999999999`. Once the enforcement starts with the configuration previously described, it extracts the digests of both containers and checks if they're included in the provided allowlist: in this case, the container originating from the `foo_image` will be allowed to run, while the one created from the `unwanted_image` will be stopped and deleted, because its digest is not included in the allowlist.
 
 The same happens also in case the containers are stopped: if the digests is verified, they'll be left in the descriptors list in the Stopped state, otherwise they'll be deleted.
 
-#### Running Container After Monitor Startup
+#### Running Container After Enforcement Feature Startup
 
-After the starting phase just described, the enforcement will be quitely monitor the activity of the docker client. Whenever a container is started on the device, it will check the image digest from which the container was created, comparing it to the ones inside the allowlist: if the container is created from the `foo_image` docker image, it will be allowed to start, otherwise it will be stopped and deleted. If the user wants to add more than one allowed image, for example one named `wanted_image` with digest `sha256:1111111111111111111111111111111111111111111111111111111111111111`), it just needs to add it to the newline-separated list.
+After the starting phase just described, Kura will continuously monitor the activity of the docker engine. Whenever a container is started on the device, it will check the image digest from which the container was created, comparing it to the ones inside the allowlist: if the container is created from the `foo_image` docker image, it will be allowed to start, otherwise it will be stopped and deleted. If the user wants to add more than one allowed image, for example one named `wanted_image` with digest `sha256:1111111111111111111111111111111111111111111111111111111111111111`), it just needs to add it to the newline-separated list.
 
 ![Container Orchestration Provider Enfrocement Multiple Digests](./images/container-orchestration-provider-enforcement-multiple-digests.png)
 

@@ -2603,7 +2603,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-use-kura-ibeacon-apis" class="md-nav__link">
+  <a href="#how-to-use-kura-ibeacontm-apis" class="md-nav__link">
     How to use Kura iBeacon&trade; APIs
   </a>
   
@@ -2611,14 +2611,14 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#create-an-ibeacon-advertiser" class="md-nav__link">
+  <a href="#create-an-ibeacontm-advertiser" class="md-nav__link">
     Create an iBeacon&trade; advertiser
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#create-an-ibeacon-scanner" class="md-nav__link">
+  <a href="#create-an-ibeacontm-scanner" class="md-nav__link">
     Create an iBeacon&trade; scanner
   </a>
   
@@ -2630,7 +2630,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-use-kura-eddystone-apis" class="md-nav__link">
+  <a href="#how-to-use-kura-eddystonetm-apis" class="md-nav__link">
     How to use Kura Eddystone&trade; APIs
   </a>
   
@@ -2638,14 +2638,14 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#create-an-eddystone-advertiser" class="md-nav__link">
+  <a href="#create-an-eddystonetm-advertiser" class="md-nav__link">
     Create an Eddystone&trade; advertiser
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#create-an-eddystone-scanner" class="md-nav__link">
+  <a href="#create-an-eddystonetm-scanner" class="md-nav__link">
     Create an Eddystone&trade; scanner
   </a>
   
@@ -3162,7 +3162,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-use-kura-ibeacon-apis" class="md-nav__link">
+  <a href="#how-to-use-kura-ibeacontm-apis" class="md-nav__link">
     How to use Kura iBeacon&trade; APIs
   </a>
   
@@ -3170,14 +3170,14 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#create-an-ibeacon-advertiser" class="md-nav__link">
+  <a href="#create-an-ibeacontm-advertiser" class="md-nav__link">
     Create an iBeacon&trade; advertiser
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#create-an-ibeacon-scanner" class="md-nav__link">
+  <a href="#create-an-ibeacontm-scanner" class="md-nav__link">
     Create an iBeacon&trade; scanner
   </a>
   
@@ -3189,7 +3189,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-use-kura-eddystone-apis" class="md-nav__link">
+  <a href="#how-to-use-kura-eddystonetm-apis" class="md-nav__link">
     How to use Kura Eddystone&trade; APIs
   </a>
   
@@ -3197,14 +3197,14 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#create-an-eddystone-advertiser" class="md-nav__link">
+  <a href="#create-an-eddystonetm-advertiser" class="md-nav__link">
     Create an Eddystone&trade; advertiser
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#create-an-eddystone-scanner" class="md-nav__link">
+  <a href="#create-an-eddystonetm-scanner" class="md-nav__link">
     Create an Eddystone&trade; scanner
   </a>
   
@@ -3240,7 +3240,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h2 id="overview">Overview</h2>
 <p>Starting from version 3.1.0, Eclipse Kura implements a new set of APIs for managing Bluetooth Low Energy and Beacon devices. The new APIs replace the existing Bluetooth APIs, but the old ones are still available and can be used. So, the applications developed before Kura 3.1.0 continue to work.</p>
 <p>The purpose of the new BLE Beacon APIs is to simplify the development of applications that interact with Bluetooth LE Beacon devices, offering clear and easy-to-use methods for advertising and scanning. Eclipse Kura offers out-of-the-box the implementation of the Beacon APIs for iBeacon&trade; and Eddystone&trade; technologies. Moreover, the new APIs allow to easily integrate new beacon implementations with Eclipse Kura.</p>
-<h2 id="how-to-use-kura-ibeacon-apis">How to use Kura iBeacon&trade; APIs</h2>
+<h2 id="how-to-use-kura-ibeacontm-apis">How to use Kura iBeacon&trade; APIs</h2>
 <p>This section briefly presents how to use the iBeacon&trade; implementation of the Kura Beacon APIs, providing several code snippets to explain how to perform common operations on iBeacons. For a complete example on iBeacon advertising and scanning, please refer to the new <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ibeacon.advertiser" about="_blank">iBeacon&trade; advertiser</a> and <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ibeacon.scanner" about="_blank">iBeacon&trade; scanner</a> examples. For more information about iBeacon&trade; please refer to <a href="https://developer.apple.com/ibeacon/" about="_blank">official page</a>.</p>
 <p>An application that wants to use the iBeacon&trade; implementation of Kura Beacon APIs should bind the <strong>BluetoothLeService</strong> and <strong>BluetoothLeIBeaconService</strong> OSGI services, as shown in the following Java snippet:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setBluetoothLeService</span><span class="p">(</span><span class="n">BluetoothLeService</span><span class="w"> </span><span class="n">bluetoothLeService</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -3283,7 +3283,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="p">}</span><span class="w"> </span>
 </code></pre></div>
 <p>where <strong>adapterName</strong> is the name of the adapter, e.g. hci0.</p>
-<h3 id="create-an-ibeacon-advertiser">Create an iBeacon&trade; advertiser</h3>
+<h3 id="create-an-ibeacontm-advertiser">Create an iBeacon&trade; advertiser</h3>
 <p>In order to properly configure an iBeacon&trade; advertiser, a <strong>BluetoothLeIBeaconService</strong> is needed to create a new <strong>BluetoothLeIBeaconAdvertiser</strong> instance bound to a specific Bluetooth adapter:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">try</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="n">BluetoothLeBeaconAdvertiser</span><span class="o">&lt;</span><span class="n">BluetoothLeIBeacon</span><span class="o">&gt;</span><span class="w"> </span><span class="n">advertiser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeIBeaconService</span><span class="p">.</span><span class="na">newBeaconAdvertiser</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeAdapter</span><span class="p">);</span>
@@ -3321,7 +3321,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="n">logger</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&quot;Stop iBeacon advertising failed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">);</span>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="p">}</span>
 </code></pre></div>
-<h3 id="create-an-ibeacon-scanner">Create an iBeacon&trade; scanner</h3>
+<h3 id="create-an-ibeacontm-scanner">Create an iBeacon&trade; scanner</h3>
 <p>As done for the <a href="#create-an-ibeacontrade-advertiser">advertiser</a>, a <strong>BluetoothLeIBeaconService</strong> is needed to create a new <strong>BluetoothLeIBeaconScanner</strong> instance bound to a specific Bluetooth adapter:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">bluetoothLeBeaconScanner</span><span class="o">&lt;</span><span class="n">BluetoothLeIBeacon</span><span class="o">&gt;</span><span class="w"> </span><span class="n">scanner</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeIBeaconService</span><span class="p">.</span><span class="na">newBeaconScanner</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeAdapter</span><span class="p">);</span>
 </code></pre></div>
@@ -3356,7 +3356,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p class="admonition-title">Note</p>
 <p>The <strong>kura.legacy.bluetooth.beacon.scan property</strong> in the <strong>kura.properties</strong> file defines how the scan for beacons is performed. If set to <strong>true</strong>, the deprecated <strong>hcitool</strong> command is used. This guarantees that all the advertisement packets are reported. If set to <strong>false</strong>, the library will communicate to the OS using dbus. In the latter case, the rate of reports is limited and not all the advertisement packets are reported.</p>
 </div>
-<h2 id="how-to-use-kura-eddystone-apis">How to use Kura Eddystone&trade; APIs</h2>
+<h2 id="how-to-use-kura-eddystonetm-apis">How to use Kura Eddystone&trade; APIs</h2>
 <p>Eddystone&trade; is a protocol specification that defines a BLE message format for proximity beacon messages. It describes several different frame types that may be used individually or in combinations to create beacons that can be used for a variety of applications. For more information please see <a href="https://developers.google.com/beacons/" about="_blank">here</a> and <a href="https://github.com/google/eddystone" about="_blank">here</a>.</p>
 <p>In this section the Eddystone&trade; implementation of the Kura Beacon APIs is presented, providing several code snippets to explain how to perform common operations on them. For a complete example on Eddystone&trade; advertising and scanning, please refer to the new <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.eddystone.advertiser" about="_blank">Eddystone&trade; advertiser</a> and <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.eddystone.scanner" about="_blank">Eddystone&trade; scanner</a> examples.</p>
 <div class="admonition warning">
@@ -3404,7 +3404,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="p">}</span><span class="w"> </span>
 </code></pre></div>
 <p>where <strong>adapterName</strong> is the name of the adapter, e.g. hci0.</p>
-<h3 id="create-an-eddystone-advertiser">Create an Eddystone&trade; advertiser</h3>
+<h3 id="create-an-eddystonetm-advertiser">Create an Eddystone&trade; advertiser</h3>
 <p>In order to properly configure an Eddystone&trade; advertiser, a <strong>BluetoothLeEddystoneService</strong> is needed to create a new <strong>BluetoothLeEddystoneAdvertiser</strong> instance bound to a specific Bluetooth adapter:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">try</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">    </span><span class="n">BluetoothLeBeaconAdvertiser</span><span class="o">&lt;</span><span class="n">BluetoothLeEddystone</span><span class="o">&gt;</span><span class="w"> </span><span class="n">advertiser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">advertising</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeEddystoneService</span><span class="p">.</span><span class="na">newBeaconAdvertiser</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeAdapter</span><span class="p">);</span>
@@ -3439,7 +3439,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="w">    </span><span class="n">logger</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&quot;Stop Advertiser advertising failed&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">);</span>
 <a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="p">}</span>
 </code></pre></div>
-<h3 id="create-an-eddystone-scanner">Create an Eddystone&trade; scanner</h3>
+<h3 id="create-an-eddystonetm-scanner">Create an Eddystone&trade; scanner</h3>
 <p>As done for the <a href="#create-an-eddystonetrade-advertiser">advertiser</a>, a <strong>BluetoothLeEddystoneService</strong> is needed to create a new <strong>BluetoothLeEddystoneScanner</strong> instance bound to a specific Bluetooth adapter:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="n">bluetoothLeBeaconScanner</span><span class="o">&lt;</span><span class="n">BluetoothLeEddystone</span><span class="o">&gt;</span><span class="w"> </span><span class="n">scanner</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeEddystoneService</span><span class="p">.</span><span class="na">newBeaconScanner</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeAdapter</span><span class="p">);</span>
 </code></pre></div>

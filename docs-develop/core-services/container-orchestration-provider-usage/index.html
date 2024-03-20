@@ -1228,6 +1228,46 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#container-enforcement" class="md-nav__link">
+    Container Enforcement
+  </a>
+  
+    <nav class="md-nav" aria-label="Container Enforcement">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-scenario" class="md-nav__link">
+    Example scenario
+  </a>
+  
+    <nav class="md-nav" aria-label="Example scenario">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#startup-of-the-enforcement-feature" class="md-nav__link">
+    Startup of the Enforcement Feature
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-container-after-enforcement-feature-startup" class="md-nav__link">
+    Running Container After Enforcement Feature Startup
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3170,6 +3210,46 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#container-enforcement" class="md-nav__link">
+    Container Enforcement
+  </a>
+  
+    <nav class="md-nav" aria-label="Container Enforcement">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-scenario" class="md-nav__link">
+    Example scenario
+  </a>
+  
+    <nav class="md-nav" aria-label="Example scenario">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#startup-of-the-enforcement-feature" class="md-nav__link">
+    Startup of the Enforcement Feature
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-container-after-enforcement-feature-startup" class="md-nav__link">
+    Running Container After Enforcement Feature Startup
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -3192,6 +3272,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <ul>
 <li><strong>Enabled</strong>--activates the service when set to true</li>
 <li><strong>Container Engine Host URL</strong>--provides a string that tells the service where to find the container engine (best left to the default value).</li>
+<li><strong>Allowlist Enforcement Enabled</strong>--activates the container enforcement of the service, which let only the allowed containers to run</li>
+<li><strong>Container Image Allowlist Content</strong>--the comma-separated list of conainer's digests allowed to be run</li>
 </ul>
 <p><img alt="Container Orchestration Provider" src="../images/container-orchestration-provider.png" /></p>
 <h2 id="creating-your-first-container">Creating your first container.</h2>
@@ -3286,7 +3368,24 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </div>
 <p>To stop the container without deleting the component, set the <strong>Enabled</strong> field to <strong>false</strong>, and then press <strong>Apply</strong>. This will delete the running container, but leave this component available for running the container again in the future. If you want to completely remove the container and component, press the <strong>Delete</strong> button to the top right of the screen, and press <strong>Yes</strong> on the confirmation dialogue.</p>
 <h2 id="container-management-dashboard">Container Management Dashboard</h2>
-<p>The Container Orchestration service also provides the user with an intuitive container dashboard. This dashboard shows all containers running on a gateway, including containers created with the framework and those created manually through the command-line interface. To utilize this dashboard the org.eclipse.container.orchestration.provider (ContainerOrchestrationService) must be enabled, and the dashboard can be opened by navigating to Device &gt; Containers.</p>
+<p>The Container Orchestration service also provides the user with an intuitive container dashboard. This dashboard shows all containers running on a gateway, including containers created with the framework and those created manually through the command-line interface. To utilize this dashboard the <code>org.eclipse.container.orchestration.provider</code> (ContainerOrchestrationService) must be enabled, and the dashboard can be opened by navigating to Device &gt; Containers.</p>
+<h2 id="container-enforcement">Container Enforcement</h2>
+<p>The Container Orchestration service also provides a security feature which dictates the containers allowed to run on the system. This feature can be enabled or disabled through the <code>Allowlist Enforcement Enabled</code> option.</p>
+<p>This mechanism leverages the concept of <em>digest</em>, which is a unique and immutable identifier for a container image: it is therefore an excellent mean to identify the image from which a container was created.</p>
+<p>Given the above, Kura allows the user to provide a list of container image digests in the <code>Container Image Allowlist</code> field, in the form of newline-separated strings: when a container is started on the host system (whether it is launched by Kura or by a terminal CLI), Kura retrieves the image from which the container was created, extracts the digest and verifies that it is present in the allowlist provided during service configuration.</p>
+<p>If the image digest is present, the container is allowed to proceed without interference, otherwise it is immediately stopped and deleted from the host system.</p>
+<p>A similar behaviour is performed at Kura startup or when the enforcement is enabled at runtime: if there are already containers on the device (whether they are started or stopped) and the enforcement is activated, Kura extracts the digests from the containers and compares them with those in the allowlist. Again, containers that have been created from images whose digests are in the allowlist will be left intact, otherwise they will be stopped and deleted from the descriptors list.</p>
+<p>The verification is performed by intersecting the list of digests extracted by the containers and the one provided in the configuration: in this way, an empty intersection will result in a failing verification, while a non-empty one means that the image digests is equal to one of the allowlist entries.</p>
+<p><img alt="Enforcement Flow" src="../images/container-orchestration-provider-enforcement-flow.png" /></p>
+<h3 id="example-scenario">Example scenario</h3>
+<p>A user wants to leverage the container enforcement in order to let only docker containers started from an image named <code>foo_image</code> to be run on the device. To do this, they should enable the Container Enforcement by setting the <code>Allowlist Enforcement Enabled</code> to <code>true</code>, and fill the <code>Container Image Allowlist</code> field with the digest of the <code>foo_image</code> docker image (i.e.<code>sha256:0000000000000000000000000000000000000000000000000000000000000000</code> in the example below).</p>
+<p><img alt="Container Orchestration Provider Enfrocement" src="../images/container-orchestration-provider-enforcement.png" /></p>
+<h4 id="startup-of-the-enforcement-feature">Startup of the Enforcement Feature</h4>
+<p>Let's suppose that on the device there are already two containers running, one created from the <code>foo_image</code> an one from an image named <code>unwanted_image</code> with digest <code>sha256:9999999999999999999999999999999999999999999999999999999999999999</code>. Once the enforcement starts with the configuration previously described, it extracts the digests of both containers and checks if they're included in the provided allowlist: in this case, the container originating from the <code>foo_image</code> will be allowed to run, while the one created from the <code>unwanted_image</code> will be stopped and deleted, because its digest is not included in the allowlist.</p>
+<p>The same happens also in case the containers are stopped: if the digests is verified, they'll be left in the descriptors list in the Stopped state, otherwise they'll be deleted.</p>
+<h4 id="running-container-after-enforcement-feature-startup">Running Container After Enforcement Feature Startup</h4>
+<p>After the starting phase just described, Kura will continuously monitor the activity of the docker engine. Whenever a container is started on the device, it will check the image digest from which the container was created, comparing it to the ones inside the allowlist: if the container is created from the <code>foo_image</code> docker image, it will be allowed to start, otherwise it will be stopped and deleted. If the user wants to add more than one allowed image, for example one named <code>wanted_image</code> with digest <code>sha256:1111111111111111111111111111111111111111111111111111111111111111</code>), it just needs to add it to the newline-separated list.</p>
+<p><img alt="Container Orchestration Provider Enfrocement Multiple Digests" src="../images/container-orchestration-provider-enforcement-multiple-digests.png" /></p>
 
               
             </article>

@@ -1015,6 +1015,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private void removeContainerInstanceDigest(String containerId) {
         if (this.containerInstancesDigests.containsKey(containerId)) {
             this.containerInstancesDigests.remove(containerId);
+            enforceAlreadyRunningContainer();
         }
     }
 

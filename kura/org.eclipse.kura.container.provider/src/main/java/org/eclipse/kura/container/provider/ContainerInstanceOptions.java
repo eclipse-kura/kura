@@ -394,6 +394,22 @@ public class ContainerInstanceOptions {
                 .setRuntime(getRuntime()).setEnforcementDigest(getEnforcementDigest()).build();
     }
 
+    public ContainerConfiguration getContainerConfiguration(String signatureExtractedDigest) {
+
+        Optional<String> finalEnforcementDigest = (!signatureExtractedDigest.equals("?"))
+                ? Optional.of(signatureExtractedDigest)
+                : getEnforcementDigest();
+
+        return buildPortConfig(ContainerConfiguration.builder()).setContainerName(getContainerName())
+                .setImageConfiguration(buildImageConfig()).setEnvVars(getContainerEnvList())
+                .setVolumes(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
+                .setDeviceList(getContainerDeviceList()).setFrameworkManaged(true).setLoggingType(getLoggingType())
+                .setContainerNetowrkConfiguration(buildContainerNetworkConfig())
+                .setLoggerParameters(getLoggerParameters()).setEntryPoint(getEntryPoint())
+                .setRestartOnFailure(getRestartOnFailure()).setMemory(getMemory()).setCpus(getCpus()).setGpus(getGpus())
+                .setRuntime(getRuntime()).setEnforcementDigest(finalEnforcementDigest).build();
+    }
+
     private List<Integer> parsePortString(String ports) {
         List<Integer> tempArray = new ArrayList<>();
         if (!ports.isEmpty()) {

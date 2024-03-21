@@ -49,6 +49,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     private ContainerOrchestrationService containerOrchestrationService;
     private Set<ContainerSignatureValidationService> availableContainerSignatureValidationService = new HashSet<>();
+    private String signatureExtractedDigest;
 
     private State state = new Disabled(new ContainerInstanceOptions(Collections.emptyMap()));
 
@@ -91,15 +92,24 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
         try {
             ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
+            this.signatureExtractedDigest = null;
 
-            if (newProps.getSignatureTrustAnchor().isPresent()) {
-                ValidationResult containerSignatureValidated = validateContainerImageSignature(newProps);
-                String imageDigest = containerSignatureValidated.imageDigest().orElse("?");
-                logger.info("Container signature validation result for {}@{}({}) - {}", newProps.getContainerImage(),
-                        imageDigest, newProps.getContainerImageTag(),
-                        containerSignatureValidated.isSignatureValid() ? "OK" : "FAIL");
-            } else {
-                logger.info("No trust anchor available. Signature validation skipped.");
+            if (!newProps.getEnforcementDigest().isPresent()) {
+
+                logger.info(
+                        "Container configuration doesn't include enforcement digest. Validating with Container Signature Validation service");
+
+                if (newProps.getSignatureTrustAnchor().isPresent()) {
+                    ValidationResult containerSignatureValidated = validateContainerImageSignature(newProps);
+                    this.signatureExtractedDigest = containerSignatureValidated.imageDigest().orElse("?");
+                    logger.info("Container signature validation result for {}@{}({}) - {}",
+                            newProps.getContainerImage(), this.signatureExtractedDigest,
+                            newProps.getContainerImageTag(),
+                            containerSignatureValidated.isSignatureValid() ? "OK" : "FAIL");
+                } else {
+                    logger.info("No trust anchor available. Signature validation skipped.");
+                }
+
             }
 
             if (newProps.isEnabled()) {
@@ -342,7 +352,9 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             int maxRetries = options.getMaxDownloadRetries();
             int retryInterval = options.getRetryInterval();
 
-            final ContainerConfiguration containerConfiguration = options.getContainerConfiguration();
+            final ContainerConfiguration containerConfiguration = options.getEnforcementDigest().isPresent()
+                    ? options.getContainerConfiguration()
+                    : options.getContainerConfiguration(signatureExtractedDigest);
 
             int retries = 0;
             while ((unlimitedRetries || retries < maxRetries) && !Thread.currentThread().isInterrupted()) {

@@ -380,11 +380,12 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     public void stopContainer(String id) throws KuraException {
         checkRequestEnv(id);
         try {
-            removeContainerInstanceDigest(id);
 
             if (listContainersIds().contains(id)) {
                 this.dockerClient.stopContainerCmd(id).exec();
             }
+
+            removeContainerInstanceDigest(id);
 
         } catch (Exception e) {
             logger.error("Could not stop container {}. Caused by {}", id, e);

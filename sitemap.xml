@@ -1,0 +1,2512 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://github.com/eclipse/kura</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/issues</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pulls</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/security</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kapua</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/releases</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/milestones</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/issues/4863</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/issues/3796</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/issues/2560</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5186</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5185</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5184</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5183</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5179</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5175</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5162</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5155</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4937</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4573</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/2534</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4746</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4841</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5174</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/categories/announcements</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/categories/general</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/categories/ideas</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/categories/polls</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/categories/q-a</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/categories/show-and-tell</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5181</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5142</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5113</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5110</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4831</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5066</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5080</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5071</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5068</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5105</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5091</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5093</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5102</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4943</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5039</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4832</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4961</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4808</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4866</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4911</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4897</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4900</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4827</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/workflows/backport.yml</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/workflows/stale-issues.yml</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/workflows/github-code-scanning/codeql</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/workflows/deploy_docs.yml</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/workflows/semantic-pr.yml</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/workflows/pages/pages-build-deployment</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/workflows/release-notes.yml</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/workflows/version-uptick.yml</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/caches</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8387337524</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8387337524/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8387247029</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5178</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8387247029/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8384219708</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8384219708/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8371661490</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8371660839</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8371660839/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8368421397</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8368421397/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8364856801</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8364856302</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8364856302/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8364856293</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8364856293/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8358308575</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8358308575/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8357359761</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8357346224</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/8cb9c1714f740a3d06e490d3366dfbaf489936d9</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8357346224/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8357346121</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5172</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8357346121/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8357190602</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8357190602/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8352632138</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8352632138/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8339515205</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8339514884</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8339514884/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8336250107</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8336250107/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8320049950</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8320049950/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8312100548</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8312100548/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8307369174</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8304417874</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8304417874/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8300100459</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8300100217</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8300100217/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8300091276</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Home/_history</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Getting-started-with-OSGi</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Development-Environment-Tips-and-Tricks</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Adding-a-new-bundle-to-Kura</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Kura-Semantic-Versioning</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Guidelines-on-importing-internal-packages</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Kura-Git-Workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Kura-Release-Engineering</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Kura-Github-Documentation</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Migration-from-Mockito-1-to-Mockito-4</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/login?return_to=https%3A%2F%2Fgithub.com%2Feclipse%2Fkura%2Fdiscussions%2Fnew%2Fchoose</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Cloud-Connectors-Implementation-Guidelines</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Developing-Kura-with-Apply-M1-chip</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Eclipse-Kura-Developer-Experience</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Gherkin-Tests-Guidelines</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Integration-Tests</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Kura-passwords-encryption</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Kura-Release-notes-generation</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/SSL-Refactor-concepts</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Structured-data-in-Drivers-Assets</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Subscribing-data-to-in-built-MQTT-Server-and-sending-data-to-Cloud-Platform-(Kapua)</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Unit-Test-Guidelines-and-Recipes</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Use-of-jdeb-in-Kura</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Version-upticking</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/wiki/Subscribing-data-to-in-built-MQTT-Server-and-sending-data-to-Cloud-Platform-%28Kapua%29</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kapua/issues</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kapua/pulls</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kapua/actions</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kapua/wiki</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kapua/security</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kapua/releases</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kapua/releases/tag/1.6.10</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels?sort=name-asc</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels?sort=name-desc</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels?sort=count-desc</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels?sort=count-asc</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/backport%20docs-release-5.2</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/backport%20docs-release-5.3</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/backport%20docs-release-5.4</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/backport%20release-4.1.0</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/backport%20release-5.0.0</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/backport%20release-5.1.0</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/backport%20release-5.2.0</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/backport%20release-5.3.0</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/backport%20release-5.4.0</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/blog</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/bug</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/cleanup</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/dependencies</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/discussion</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/documentation</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/duplicate</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/EclipseInt</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/enhancement</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/Epic</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/exempt-stale</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/help%20wanted</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/installation</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/invalid</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/java</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/karaf</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/Kura-3.2.0</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/Kura-4.0.0</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/kura-asset</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/kura-bluetooth</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/milestones?state=open</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/milestones?state=closed</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/milestones?direction=desc&amp;sort=due_date&amp;state=open</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/milestones?direction=asc&amp;sort=due_date&amp;state=open</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/milestones?direction=asc&amp;sort=completeness&amp;state=open</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/milestones?direction=desc&amp;sort=completeness&amp;state=open</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/milestones?direction=asc&amp;sort=title&amp;state=open</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/milestones?direction=desc&amp;sort=title&amp;state=open</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/milestones?direction=desc&amp;sort=count&amp;state=open</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/milestones?direction=asc&amp;sort=count&amp;state=open</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/labels/Stale</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/1</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/issues/2621</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5186/commits</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5186/checks</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5186/files</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5186/files/df0768ea25d2c34087d09b56bd2dd2d06941b3c5</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5185/commits</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5185/checks</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5185/files</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5184/commits</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5184/checks</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5184/files</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5183/commits</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5183/checks</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5183/files</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5183/files/2bb676aa4d2b4bf5430ce382aa3655f2334f1538</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5179/commits</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5179/checks</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5179/files</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5179/files/3c5e4b5ef94b003088f3bdedf2fc64f278173ded</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5179/files/2d3de141475cfdb495bd2e3b25ca10de07fc8af9</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5175/commits</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5175/checks</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5175/files</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5162/commits</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5162/checks</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5162/files</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5162/files/f5a7b0eb088203588b3313f4ba9618b6bfcd4227</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5148</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5162/files/91b521de3567f8699a4abe5e213e112236a48695</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5162/files/b9e32609870359a9719df90cc7ce79a641cce671</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5162/files/f67926e5feaeb59c845181f4cf60ed8a5fe6310e</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5155/commits</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5155/checks</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5155/files</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4937/commits</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4937/checks</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4937/files</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4573/commits</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4573/checks</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4573/files</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/eclipse-jdtls/eclipse.jdt.ls</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/5623ca7e7f935fd8ecef579e0f19cb4fbbc54cad</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/636670e081ffb1ae2cbfc659c3a7885103810c3f</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/1c59973936e8223ccb46aa8ea1428c35eac0cc24</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/701f3198fcf21bcd00dca1b02449b39caf923ab1</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/2534/commits</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/2534/checks</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/2534/files</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/7b2be1a7aeef76a2d2453c58751fe27011ffcb62</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/40b6d1f86e0c32d2d7a017b3ede22520e92e1727</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/4fb0b935eca7cdb0070f32883b80445fde91ff08</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4841?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4841?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4841?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/blob/KURA_5.4.1_RELEASE/kura/distrib/RELEASE_NOTES.txt</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4858</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4818</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5181?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5181?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5181?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5142?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5142?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5142?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5113?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5113?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5113?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/d74484bee2be0501f0d107ff01deec793e6ef384</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5117</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5110?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5110?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5110?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/588c0a237e4a47344d413691e5086fd4452397c8</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4831?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4831?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4831?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5066?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5066?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5066?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5080?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5080?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5080?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5071?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5071?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5071?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5059</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4957</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5068?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5068?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5068?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5087</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5104</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5105?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5105?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5105?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5091?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5091?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5091?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5095</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/3592</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/990fc4dc790985389c68a5e9473f92ac65777ee4</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5093?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5093?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5093?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5102?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5102?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/5102?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4943?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4943?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4943?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/blob/KURA_5.4.0_RELEASE/kura/distrib/RELEASE_NOTES.txt</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4832?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4832?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4832?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/60fa70ce72434274db9cab391fdd0ec13fb1732b</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4961?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4961?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4961?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4816</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4808?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4808?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4808?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4786</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4796</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4800</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4804</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/f0a99ec5380699f49245852a64241c22a51b79a5</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/6be683f53247ce81aa2c4ed3b739fa878342825b</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/870b84b5e655bca9d36c96d4ac397a2427ab20be</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4919</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4866?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4866?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4866?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4877</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/ec2d052dd3e698d60d8eddac24325f0f32980fd5</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4872</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/4910</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4911?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4911?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4911?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4897?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4897?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4897?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4900?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4900?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4900?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/aa0e1d6ec0c293d76afea64c31d3be89467ab875</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4827?sort=old</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4827?sort=new</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/discussions/4827?sort=top</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8282032537</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5166</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8282032537/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8281547521</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5146</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8281547521/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8277452465</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5182</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8277452465/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8268025077</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5176</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8268025077/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8267922358</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5180</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8267922358/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8263945556</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8263945556/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8263945549</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8263945549/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8263945539</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8263945539/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8263938941</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8263938941/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8263938910</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8263938910/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8263938904</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8263938904/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8234101938</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5173</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8234101938/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8229889105</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5171</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8229889105/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8205939634</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5163</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8205939634/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8204078410</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5165</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8204078410/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8190604715</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5170</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8190604715/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8190598410</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5169</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8190598410/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8160732403</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5168</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8160732403/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8160694987</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5167</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8160694987/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8159543792</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5164</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8159543792/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8157620022</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8157620022/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8137534912</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5156</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8137534912/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8290085680</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8290085680/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8274196451</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8274196451/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8258113904</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8258113904/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8242317010</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8242317010/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8226477618</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8226477618/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8218710035</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8218710035/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8211251247</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8211251247/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8197473634</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8197473634/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8181565772</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8181565772/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8165680662</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8165680662/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8149759547</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8149759547/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8134756101</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8134756101/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8126929931</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8126929931/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8119452203</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8119452203/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8105272379</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8105272379/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8089759990</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8089759990/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8074004513</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8074004513/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8058341519</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8058341519/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8278516520</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8277508618</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8263627041</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8250042735</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8234101664</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8214136410</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8205939560</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8204078398</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8188745706</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8168741015</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8159543606</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8155555108</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8153124403</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8142455024</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8137534812</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8122386662</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8113550781</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8098107016</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/pull/5159</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8097610274</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8277452494</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/683a98a500bb0230413b6243839be166a2f55638</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8277452494/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8267922393</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/6dfc28c2b78e3429e93a491c80a740e6f6cbdd85</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/8267922393/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7988705984</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/c605daff536dba9748ec83084142f2a3662ce4c3</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7988705984/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7976033282</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/7e031dcbf801dc280f925ac268a5b5e1e61b2e68</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7976033282/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7970799168</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/9e3eadccb4750bcc027c0bc3da2add5c627555ad</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7970799168/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7960740629</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/5a9e3b379f4e179e8d8e845f1001967062b30a7c</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7960740629/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7956364534</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/d380b1d2faa19a990588ad89c77b289363516cd4</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7956364534/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7914476658</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/47b88eac0b0a41a2007a8fe7e0b42863ce79bd1b</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7914476658/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7898495526</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/599e67b091762ccff1a39b27c15813a5db005ed8</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7898495526/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7883676947</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/0fdef839e9801768ae5e818a1f7089974ed87ebe</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7883676947/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7870408079</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/6150576c0f17254cc4d2efdbe6d80042af04df36</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7870408079/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7743019874</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/6ca371d0c9b3d40de60c927c06f26df1bc0a3350</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7743019874/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7723718892</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/d139b269f36fa1b0c59c0330272f93ab8de71e57</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7723718892/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7692728892</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/1479e85dcc354f8abd9656f58fc11f1001852a3e</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7692728892/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7616452820</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/a7f911ec63f8a557722133efeb35a35122bdd265</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7616452820/workflow</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/actions/runs/7586747912</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/eclipse/kura/commit/7630764a2e1452c43473585ee5aeb6df86e87a69</loc>
+  <lastmod>2024-03-22T08:24:42+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+
+
+</urlset>

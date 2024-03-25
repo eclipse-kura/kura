@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>examples</artifactId>
-        <version>5.4.2-SNAPSHOT</version>
+        <version>5.4.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 

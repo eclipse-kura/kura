@@ -13,10 +13,12 @@
      Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" immediate="true" name="org.eclipse.kura.internal.rest.identity.provider.IdentityRestService">
-    <implementation class="org.eclipse.kura.internal.rest.identity.provider.IdentityRestService" />
-
-    <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.identity.provider.IdentityRestService"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
+    activate="activate" 
+    immediate="true" 
+    name="org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2">
+    
+    <implementation class="org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2" />
 
     <reference interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry"
                bind="bindRequestHandlerRegistry"
@@ -43,18 +45,24 @@
                name="UserAdmin"
                policy="static" />
                
-    <reference interface="org.eclipse.kura.internal.rest.identity.provider.IdentityService" 
+    <reference interface="org.eclipse.kura.internal.rest.identity.provider.LegacyIdentityService" 
+               bind="bindLegacyIdentityService" 
+               cardinality="0..1"  
+               name="LegacyIdentityService" 
+               policy="static" />
+               
+    <reference interface="org.eclipse.kura.identity.IdentityService" 
                bind="bindIdentityService" 
                cardinality="0..1"  
                name="IdentityService" 
                policy="static" />
 
     <service>
-        <provide interface="org.eclipse.kura.internal.rest.identity.provider.IdentityRestService"/>
+        <provide interface="org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2" />
     </service>
 
-    <property name="service.pid"
-              type="String"
-              value="org.eclipse.kura.internal.rest.identity.provider.IdentityRestService" />
+    <property name="service.pid" type="String" value="org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2" />
+    <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2" />
+    
 
 </scr:component>

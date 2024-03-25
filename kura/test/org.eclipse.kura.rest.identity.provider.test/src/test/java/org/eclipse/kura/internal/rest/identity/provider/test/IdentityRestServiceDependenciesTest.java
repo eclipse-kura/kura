@@ -30,7 +30,7 @@ import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.internal.rest.identity.provider.IdentityRestService;
+import org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV1;
 import org.junit.Test;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
@@ -41,7 +41,7 @@ public class IdentityRestServiceDependenciesTest {
     private static final String REST_ROLE_NAME = "identity";
     private static final String KURA_PERMISSION_REST_ROLE = "kura.permission.rest." + REST_ROLE_NAME;
 
-    private final IdentityRestService service = new IdentityRestService();
+    private final IdentityRestServiceV1 service = new IdentityRestServiceV1();
     private UserAdmin userAdmin;
     private CryptoService cryptoService;
     private ConfigurationService configurationService;

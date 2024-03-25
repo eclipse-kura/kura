@@ -26,80 +26,31 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloudconnection.request.RequestHandler;
-import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
-import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.rest.identity.provider.dto.PermissionDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserConfigDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.ValidatorOptionsDTO;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
-import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.eclipse.kura.util.validation.ValidatorOptions;
-import org.osgi.service.useradmin.Role;
-import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("restriction")
 @Path("identity/v1")
-public class IdentityRestService {
+public class IdentityRestServiceV1 extends AbstractIdentityRestService {
 
-    private static final Logger logger = LoggerFactory.getLogger(IdentityRestService.class);
-    private static final String DEBUG_MESSAGE = "Processing request for method '{}'";
+    private static final Logger logger = LoggerFactory.getLogger(IdentityRestServiceV1.class);
 
     private static final String MQTT_APP_ID = "IDN-V1";
-    private static final String REST_ROLE_NAME = "identity";
-    private static final String KURA_PERMISSION_REST_ROLE = "kura.permission.rest." + REST_ROLE_NAME;
 
-    private final RequestHandler requestHandler = new JaxRsRequestHandlerProxy(this);
-
-    private CryptoService cryptoService;
-
-    private UserAdmin userAdmin;
-    private IdentityService identityService;
-    private ConfigurationService configurationService;
-
-    public void bindCryptoService(CryptoService cryptoService) {
-        this.cryptoService = cryptoService;
+    @Override
+    protected Logger getLogger() {
+        return logger;
     }
 
-    public void bindConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = configurationService;
-    }
-
-    public void bindUserAdmin(UserAdmin userAdmin) {
-        this.userAdmin = userAdmin;
-        this.userAdmin.createRole(KURA_PERMISSION_REST_ROLE, Role.GROUP);
-    }
-
-    public void bindRequestHandlerRegistry(RequestHandlerRegistry registry) {
-        try {
-            registry.registerRequestHandler(MQTT_APP_ID, this.requestHandler);
-        } catch (final Exception e) {
-            logger.warn("Failed to register {} request handler", MQTT_APP_ID, e);
-        }
-    }
-
-    // Added mainly for testing purposes. Currently the service is created by this endpoint.
-    public void bindIdentityService(IdentityService identityService) {
-        this.identityService = identityService;
-    }
-
-    public void unbindRequestHandlerRegistry(RequestHandlerRegistry registry) {
-        try {
-            registry.unregister(MQTT_APP_ID);
-        } catch (final Exception e) {
-            logger.warn("Failed to unregister {} request handler", MQTT_APP_ID, e);
-        }
-    }
-
-    public void activate() {
-        // create only if not set externally. Added mainly for testing purposes.
-        if (this.identityService == null) {
-            this.identityService = new IdentityService(this.cryptoService, this.userAdmin, this.configurationService);
-        }
+    @Override
+    protected String getMqttApplicationId() {
+        return MQTT_APP_ID;
     }
 
     @POST
@@ -109,7 +60,7 @@ public class IdentityRestService {
     public Response createUser(final UserDTO userName) {
         try {
             logger.debug(DEBUG_MESSAGE, "createUser");
-            this.identityService.createUser(userName);
+            this.legacyIdentityService.createUser(userName);
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -124,7 +75,7 @@ public class IdentityRestService {
     public Response updateUser(final UserDTO user) {
         try {
             logger.debug(DEBUG_MESSAGE, "updateUser");
-            this.identityService.updateUser(user);
+            this.legacyIdentityService.updateUser(user);
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -140,7 +91,7 @@ public class IdentityRestService {
     public UserDTO getUser(final UserDTO userName) {
         try {
             logger.debug(DEBUG_MESSAGE, "getUser");
-            return this.identityService.getUser(userName.getUserName());
+            return this.legacyIdentityService.getUser(userName.getUserName());
         } catch (KuraException e) {
             if (e.getCode().equals(KuraErrorCode.NOT_FOUND)) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND, "Identity does not exist");
@@ -160,7 +111,7 @@ public class IdentityRestService {
     public Response deleteUser(final UserDTO userName) {
         try {
             logger.debug(DEBUG_MESSAGE, "deleteUser");
-            this.identityService.deleteUser(userName.getUserName());
+            this.legacyIdentityService.deleteUser(userName.getUserName());
         } catch (KuraException e) {
             if (e.getCode().equals(KuraErrorCode.NOT_FOUND)) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND, "Identity does not exist");
@@ -180,7 +131,7 @@ public class IdentityRestService {
     public PermissionDTO getDefinedPermissions() {
         try {
             logger.debug(DEBUG_MESSAGE, "getDefinedPermissions");
-            return new PermissionDTO(this.identityService.getDefinedPermissions());
+            return new PermissionDTO(this.legacyIdentityService.getDefinedPermissions());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -194,7 +145,7 @@ public class IdentityRestService {
         try {
             logger.debug(DEBUG_MESSAGE, "getUserConfig");
             UserConfigDTO userConfig = new UserConfigDTO();
-            userConfig.setUserConfig(this.identityService.getUserConfig());
+            userConfig.setUserConfig(this.legacyIdentityService.getUserConfig());
             return userConfig;
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
@@ -207,7 +158,7 @@ public class IdentityRestService {
     public ValidatorOptionsDTO getValidatorOptions() {
         try {
             logger.debug(DEBUG_MESSAGE, "getValidatorOptions");
-            ValidatorOptions validatorOptions = this.identityService.getValidatorOptions();
+            ValidatorOptions validatorOptions = this.legacyIdentityService.getValidatorOptions();
             return new ValidatorOptionsDTO(//
                     validatorOptions.isPasswordMinimumLength(), //
                     validatorOptions.isPasswordRequireDigits(), //

@@ -14,8 +14,9 @@ package org.eclipse.kura.internal.rest.identity.provider.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -29,6 +30,7 @@ import org.eclipse.kura.identity.PasswordHash;
 import org.eclipse.kura.identity.Permission;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.AdditionalConfigurationsDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityConfigurationDTO;
+import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PasswordConfigurationDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PermissionConfigurationDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PermissionDTO;
@@ -41,8 +43,57 @@ public class IdentityDTOUtils {
         throw new IllegalStateException("Utility class");
     }
 
+    public static Set<Class<? extends IdentityConfigurationComponent>> toIdentityConfigurationComponents(
+            Set<String> componentNames) {
+
+        return componentNames.stream().map(name -> {
+
+            switch (name) {
+            case "AdditionalConfigurations":
+                return AdditionalConfigurations.class;
+            case "AssignedPermissions":
+                return AssignedPermissions.class;
+            case "PasswordConfiguration":
+                return PasswordConfiguration.class;
+            default:
+                throw new IllegalArgumentException("Unknown component name: " + name);
+            }
+
+        }).collect(Collectors.toSet());
+
+    }
+
+    public static IdentityConfigurationDTO fromIdentityConfiguration(IdentityConfiguration identityConfiguration) {
+
+        IdentityConfigurationDTO identityConfigurationDTO = new IdentityConfigurationDTO(
+                new IdentityDTO(identityConfiguration.getName()));
+
+        identityConfiguration.getComponent(AdditionalConfigurations.class)
+                .ifPresent(additionalConfigurations -> identityConfigurationDTO
+                        .setAdditionalConfigurations(fromAdditionalConfigurations(additionalConfigurations)));
+
+        identityConfiguration.getComponent(AssignedPermissions.class)
+                .ifPresent(assignedPermissions -> identityConfigurationDTO
+                        .setPermissionConfiguration(fromPermissionConfiguration(assignedPermissions)));
+
+        identityConfiguration.getComponent(PasswordConfiguration.class)
+                .ifPresent(passwordConfiguration -> identityConfigurationDTO
+                        .setPasswordConfiguration(fromPasswordConfiguration(passwordConfiguration)));
+
+        return identityConfigurationDTO;
+    }
+
+    public static ComponentConfigurationDTO fromComponentConfiguration(ComponentConfiguration componentConfiguration) {
+        return new ComponentConfigurationDTO(componentConfiguration.getPid(), null, DTOUtil
+                .configurationPropertiesToDtos(componentConfiguration.getConfigurationProperties(), null, false));
+    }
+
     public static Permission toPermission(PermissionDTO permissionDTO) {
         return new Permission(permissionDTO.getName());
+    }
+
+    public static PermissionDTO fromPermission(Permission permission) {
+        return new PermissionDTO(permission.getName());
     }
 
     public static ComponentConfiguration toComponentConfiguration(ComponentConfigurationDTO componentConfigurationDTO) {
@@ -63,12 +114,30 @@ public class IdentityDTOUtils {
         );
     }
 
-    public static PasswordConfiguration toPasswordConfiguration(PasswordConfigurationDTO passwordConfigurationDTO) {
+    public static PermissionConfigurationDTO fromPermissionConfiguration(AssignedPermissions assignedPermissions) {
+        PermissionConfigurationDTO permissionsConfigurationDTO = new PermissionConfigurationDTO();
+        permissionsConfigurationDTO.setPermissions(assignedPermissions.getPermissions().stream()
+                .map(IdentityDTOUtils::fromPermission).collect(Collectors.toSet()));
+
+        return permissionsConfigurationDTO;
+    }
+
+    public static PasswordConfigurationDTO fromPasswordConfiguration(PasswordConfiguration passwordConfiguration) {
+        PasswordConfigurationDTO passwordConfigurationDTO = new PasswordConfigurationDTO();
+
+        passwordConfigurationDTO.setPasswordChangeNeeded(passwordConfiguration.isPasswordChangeNeeded());
+        passwordConfigurationDTO.setPasswordAuthEnabled(passwordConfiguration.isPasswordAuthEnabled());
+
+        return passwordConfigurationDTO;
+    }
+
+    public static PasswordConfiguration toPasswordConfiguration(PasswordConfigurationDTO passwordConfigurationDTO,
+            Function<char[], PasswordHash> passwordHashFunction) {
 
         return new PasswordConfiguration(passwordConfigurationDTO.isPasswordChangeNeeded(),
                 passwordConfigurationDTO.isPasswordAuthEnabled(),
-                Optional.ofNullable(passwordConfigurationDTO.getPasswordHash() != null
-                        ? new PasswordHashImpl(passwordConfigurationDTO.getPasswordHash())
+                Optional.ofNullable(passwordConfigurationDTO.getPassword() != null
+                        ? passwordHashFunction.apply(passwordConfigurationDTO.getPassword().toCharArray())
                         : null));
     }
 
@@ -83,7 +152,23 @@ public class IdentityDTOUtils {
         return new AdditionalConfigurations(configurations);
     }
 
-    public static IdentityConfiguration toIdentityConfiguration(IdentityConfigurationDTO identityConfigurationDTO) {
+    public static AdditionalConfigurationsDTO fromAdditionalConfigurations(
+            AdditionalConfigurations additionalConfigurations) {
+
+        AdditionalConfigurationsDTO additionalConfigurationsDTO = new AdditionalConfigurationsDTO();
+
+        Set<ComponentConfigurationDTO> configurations = additionalConfigurations.getConfigurations()//
+                .stream()//
+                .map(IdentityDTOUtils::fromComponentConfiguration)//
+                .collect(Collectors.toSet());
+
+        additionalConfigurationsDTO.setConfigurations(configurations);
+
+        return additionalConfigurationsDTO;
+    }
+
+    public static IdentityConfiguration toIdentityConfiguration(IdentityConfigurationDTO identityConfigurationDTO,
+            Function<char[], PasswordHash> passwordHashFunction) {
         List<IdentityConfigurationComponent> components = new ArrayList<>();
 
         if (identityConfigurationDTO.getPermissionConfiguration() != null) {
@@ -91,7 +176,8 @@ public class IdentityDTOUtils {
         }
 
         if (identityConfigurationDTO.getPasswordConfiguration() != null) {
-            components.add(toPasswordConfiguration(identityConfigurationDTO.getPasswordConfiguration()));
+            components.add(
+                    toPasswordConfiguration(identityConfigurationDTO.getPasswordConfiguration(), passwordHashFunction));
         }
 
         if (identityConfigurationDTO.getAdditionalConfigurations() != null) {
@@ -99,36 +185,6 @@ public class IdentityDTOUtils {
         }
 
         return new IdentityConfiguration(identityConfigurationDTO.getIdentity().getName(), components);
-
-    }
-
-    private static class PasswordHashImpl implements PasswordHash {
-
-        private final String passwordHash;
-
-        public PasswordHashImpl(String passwordHash) {
-            this.passwordHash = passwordHash;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(this.passwordHash);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-
-            if (this == obj) {
-                return true;
-            }
-            if ((obj == null) || (getClass() != obj.getClass())) {
-                return false;
-            }
-
-            PasswordHashImpl other = (PasswordHashImpl) obj;
-
-            return Objects.equals(this.passwordHash, other.passwordHash);
-        }
 
     }
 

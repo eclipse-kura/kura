@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,7 @@ public enum Attributes {
     LAST_ACTIVITY("org.eclipse.kura.web.lastActivity"),
     CREDENTIALS_HASH("org.eclipse.kura.web.credentialsHash"),
     AUDIT_CONTEXT("org.eclipse.kura.audit.context"),
+    XSRF_TOKEN("org.eclipse.kura.xsrf.token"),
     LOCKED("org.eclipse.kura.locked");
 
     private String value;

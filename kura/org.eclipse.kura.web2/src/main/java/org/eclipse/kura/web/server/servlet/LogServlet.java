@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -41,13 +41,13 @@ import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.PrivilegedExecutorService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
+import org.eclipse.kura.web.server.RequiredPermissions.Mode;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gwt.user.client.Cookies;
 
 public class LogServlet extends AuditServlet {
 
@@ -65,6 +65,9 @@ public class LogServlet extends AuditServlet {
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws ServletException {
+        KuraRemoteServiceServlet.requirePermissions(httpServletRequest, Mode.ALL,
+                new String[] { KuraPermission.DEVICE });
+
         // BEGIN XSRF - Servlet dependent code
         try {
             GwtXSRFToken token = new GwtXSRFToken(httpServletRequest.getParameter("xsrfToken"));

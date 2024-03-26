@@ -2,10 +2,7 @@ Eclipse Kura - 5.4.2 - March 2024
 -------------------------------------------------------------------------------------------------
 Description:
 This service release of Eclipse Kura includes the following changes:
-- Fixed NoSuchProviderException when creating new key pairs with keystores/v1 REST APIs
-- Fixed memory leak in org.eclipse.kura.linux.usb when unrecongnized udev events are received
-- Fixed data loss in Wire Record Store implementation for H2 when certain data types are stored
-
+- This service release of Eclipse Kura includes improvements and fixes to the GWT Servlet code.
 
 Target Environments:
  Kura is released as pre-compiled binary installers for the following platforms:

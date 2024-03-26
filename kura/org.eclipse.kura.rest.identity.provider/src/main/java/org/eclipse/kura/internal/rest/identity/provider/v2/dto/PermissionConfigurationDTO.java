@@ -12,16 +12,14 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.identity.provider.v2.dto;
 
-import static java.util.Objects.requireNonNull;
-
+import java.util.HashSet;
 import java.util.Set;
 
 public class PermissionConfigurationDTO {
 
-    private final Set<PermissionDTO> permissions;
+    private Set<PermissionDTO> permissions = new HashSet<>();
 
-    public PermissionConfigurationDTO(Set<PermissionDTO> permissions) {
-        requireNonNull(permissions, "permissions cannot be null");
+    public void setPermissions(Set<PermissionDTO> permissions) {
         this.permissions = permissions;
     }
 

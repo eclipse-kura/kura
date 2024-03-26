@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,7 @@ import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.UserManager;
+import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtPasswordAuthenticationResult;
@@ -57,7 +58,7 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
 
             this.userManager.authenticateWithPassword(username, password);
 
-            context.getProperties().put("session.id", session.getId());
+            context.getProperties().put("session.id", GwtServerUtil.getSessionIdHash(session));
 
             Console.instance().setAuthenticated(session, username, context.copy());
 

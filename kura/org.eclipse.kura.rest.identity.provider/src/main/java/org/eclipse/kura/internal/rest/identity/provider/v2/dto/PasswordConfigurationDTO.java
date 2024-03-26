@@ -16,7 +16,7 @@ public class PasswordConfigurationDTO {
 
     private boolean passwordChangeNeeded;
     private boolean passwordAuthEnabled;
-    private String passwordHash;
+    private String password;
 
     public boolean isPasswordChangeNeeded() {
         return this.passwordChangeNeeded;
@@ -34,18 +34,18 @@ public class PasswordConfigurationDTO {
         this.passwordAuthEnabled = passwordAuthEnabled;
     }
 
-    public String getPasswordHash() {
-        return this.passwordHash;
+    public String getPassword() {
+        return this.password;
     }
 
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
+    public void setPassword(String passwordHash) {
+        this.password = passwordHash;
     }
 
     @Override
     public String toString() {
         return "PasswordConfigurationDTO [passwordChangeNeeded=" + this.passwordChangeNeeded + ", passwordAuthEnabled="
-                + this.passwordAuthEnabled + ", passwordHash=" + this.passwordHash + "]";
+                + this.passwordAuthEnabled + ", password=****]";
     }
 
 }

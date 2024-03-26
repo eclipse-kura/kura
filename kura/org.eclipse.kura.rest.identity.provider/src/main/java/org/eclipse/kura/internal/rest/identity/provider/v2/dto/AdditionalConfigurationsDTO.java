@@ -21,13 +21,6 @@ public class AdditionalConfigurationsDTO {
 
     private Set<ComponentConfigurationDTO> configurations = new HashSet<>();
 
-    public AdditionalConfigurationsDTO() {
-    }
-
-    public AdditionalConfigurationsDTO(Set<ComponentConfigurationDTO> configurations) {
-        this.configurations = configurations;
-    }
-
     public void setConfigurations(Set<ComponentConfigurationDTO> configurations) {
         this.configurations = configurations;
     }

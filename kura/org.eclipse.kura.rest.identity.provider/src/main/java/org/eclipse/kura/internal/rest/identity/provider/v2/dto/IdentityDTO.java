@@ -12,11 +12,17 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.identity.provider.v2.dto;
 
+import static java.util.Objects.requireNonNull;
+import static org.eclipse.kura.internal.rest.identity.provider.util.StringUtils.requireNotEmpty;
+
 public class IdentityDTO {
 
     private final String name;
 
     public IdentityDTO(String name) {
+        requireNonNull(name, "name cannot be null");
+        requireNotEmpty(name, "name cannot be empty");
+
         this.name = name;
     }
 

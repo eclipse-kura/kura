@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements GwtSessionService {
 
-    private static final Logger logger = LoggerFactory.getLogger(GwtSessionServiceImpl.class);
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private final UserManager userManager;
 
@@ -60,10 +60,10 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
 
         if (session != null) {
             final Object username = session.getAttribute(Attributes.AUTORIZED_USER.getValue());
-            final String id = session.getId();
             session.invalidate();
 
-            logger.info("UI Logout - Success - Logout succeeded for user: {}, session {}", username, id);
+            auditLogger.info("{} UI Session - Success - Logout succeeded for user: {}",
+                    AuditContext.currentOrInternal(), username);
 
             Cookie[] cookies = request.getCookies();
             for (Cookie cookie : cookies) {
@@ -102,7 +102,8 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
         try {
             return userManager.getUserConfig((String) username).orElse(null);
         } catch (KuraException e) {
-            logger.warn("failed to get configuration for identiy {}", username);
+            auditLogger.warn("{} UI Session - Failure - Failed to get configuration for user {}",
+                    AuditContext.currentOrInternal(), username);
             return null;
         }
     }
@@ -129,7 +130,8 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
         try {
             this.userManager.authenticateWithPassword(username, oldPassword);
         } catch (KuraException e) {
-            logger.warn("Wrong password");
+            auditLogger.warn("{} UI Session - Failure - Wrong password for user {}", AuditContext.currentOrInternal(),
+                    username);
             throw new GwtKuraException(GwtKuraErrorCode.INVALID_USERNAME_PASSWORD);
         }
 
@@ -139,8 +141,12 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
 
         try {
             this.userManager.setUserPassword(username, newPassword);
+
+            auditLogger.info("{} UI Session - Success - Password updated for user {}", AuditContext.currentOrInternal(),
+                    username);
         } catch (final KuraException e) {
-            logger.warn("Failed to update user password", e);
+            auditLogger.warn("{} UI Session - Failure - Failed to update password for user {}",
+                    AuditContext.currentOrInternal(), username);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
         }
 

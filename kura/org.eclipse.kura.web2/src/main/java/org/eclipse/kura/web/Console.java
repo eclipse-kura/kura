@@ -506,7 +506,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/assetsUpDownload", new ChannelServlet(), null,
                 this.sessionContext);
-        this.httpService.registerServlet(DENALI_MODULE_PATH + "/log", new LogServlet(), null, resourceContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/log", new LogServlet(), null, this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/skin", new SkinServlet(), null, resourceContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/cloudservices", new GwtCloudConnectionServiceImpl(),
                 null, this.sessionContext);

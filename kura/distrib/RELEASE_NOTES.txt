@@ -1,11 +1,8 @@
-Eclipse Kura - 5.4.1 - March 2024
+Eclipse Kura - 5.4.2 - March 2024
 -------------------------------------------------------------------------------------------------
 Description:
 This service release of Eclipse Kura includes the following changes:
-- Fixed NoSuchProviderException when creating new key pairs with keystores/v1 REST APIs
-- Fixed memory leak in org.eclipse.kura.linux.usb when unrecongnized udev events are received
-- Fixed data loss in Wire Record Store implementation for H2 when certain data types are stored
-
+- This service release of Eclipse Kura includes improvements and fixes to the GWT Servlet code.
 
 Target Environments:
  Kura is released as pre-compiled binary installers for the following platforms:
@@ -19,13 +16,7 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
-  * 678d3dd611 - [distrib] added libudev.so.0 symlink [backport release-5.4.0] (#5167) (github-actions[bot])
-  * 443f471a99 - Fixed unnecessary column type changes in H2DbWireRecordStoreImpl [backport release-5.4.0] (#5158) (github-actions[bot])
-  * b0e4b54907 - [linux.usb] memory leak on non-usb udev events [backport release-5.4.0] (#5138) (github-actions[bot])
-  * e2123f3559 - [BaseKeystoreService] Add missing key generator provider [backport release-5.4.0] (#5070) (github-actions[bot])
-
-Target Platform Updates:
-  * cca825718d - update org.eclipse.kura.linux.usb.version from 1.4.0 to 1.4.1-SNAPSHOT (#5145) (Marcello Rinaldo Martina)
+  * e5ef19d594 - GWT servlet review [backport release-5.4.0] (#5191) (nicolatimeus)
 
 Known Issues:
   * The firewall rule applied by the network threat manager that block uncommon TCP MSS values is not applied in the Nvidia Jetson Nano.
@@ -84,12 +75,6 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
-  * 678d3dd611 - fix(distrib): added libudev.so.0 symlink [backport release-5.4.0] (#5167) (github-actions[bot])
-  * f26ed8b694 - chore: add Kura 5.4.1 release notes (#5161) (github-actions[bot])
-  * 9b0737185d - chore: automated uptick to 5.4.1 (#5160) (github-actions[bot])
-  * 443f471a99 - fix: Fixed unnecessary column type changes in H2DbWireRecordStoreImpl [backport release-5.4.0] (#5158) (github-actions[bot])
-  * cca825718d - build(distrib): update org.eclipse.kura.linux.usb.version from 1.4.0 to 1.4.1-SNAPSHOT (#5145) (Marcello Rinaldo Martina)
-  * b0e4b54907 - fix(linux.usb): memory leak on non-usb udev events [backport release-5.4.0] (#5138) (github-actions[bot])
-  * a8d3a333bd - chore: Added known issue for birth publish on modem detect (#5134) (Pierantonio Merlino)
-  * e2123f3559 - fix(BaseKeystoreService): Add missing key generator provider [backport release-5.4.0] (#5070) (github-actions[bot])
-  * 93489213ca - chore: automated uptick to 5.4.1-SNAPSHOT (#5038) (github-actions[bot])
+  * 83477cf365 - chore: automated uptick to 5.4.2 (#5189) (github-actions[bot])
+  * e5ef19d594 - fix: GWT servlet review [backport release-5.4.0] (#5191) (nicolatimeus)
+  * cc449e2eda - chore: automated uptick to 5.4.2-SNAPSHOT (#5171) (github-actions[bot])

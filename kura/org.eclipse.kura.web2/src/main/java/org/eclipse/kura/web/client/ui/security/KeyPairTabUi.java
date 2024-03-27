@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -161,9 +161,6 @@ public class KeyPairTabUi extends Composite implements Tab {
                 MSGS.certificateAliasUsed());
         this.storageAliasInput.addValidator(storageAliasValidator);
 
-        this.certificateInput.addValidator(notEmptyValidator);
-        this.certificateInput.addValidator(GwtValidators.pem(MSGS.securityCertificateFormat()));
-
         this.pidListBox.addChangeHandler(e -> {
             if (this.storageAliasValidator != null) {
                 this.storageAliasInput.removeValidator(this.storageAliasValidator);
@@ -185,6 +182,16 @@ public class KeyPairTabUi extends Composite implements Tab {
             this.storageAliasInput.validate();
             setDirty(true);
         });
+        
+        this.certificateInput.addValidator(notEmptyValidator);
+
+        if (this.type == Type.KEY_PAIR) {
+            this.certificateInput.addValidator(GwtValidators.pem(MSGS.securityCertificateFormat()));
+            this.certificateInput.setPlaceholder(MSGS.settingsPublicCertChainWarning());
+        } else {
+            this.certificateInput.addValidator(GwtValidators.singlePem(MSGS.securityCertificateFormatOneCertificate()));
+            this.certificateInput.setPlaceholder(MSGS.settingsPublicCertWarning());
+        }
 
         this.certificateInput.addKeyUpHandler(e -> {
             this.certificateInput.validate();

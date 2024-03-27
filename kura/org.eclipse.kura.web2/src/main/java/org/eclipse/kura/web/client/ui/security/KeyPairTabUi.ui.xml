@@ -76,7 +76,6 @@
                                 text="{msgs.settingsPublicCertLabel}" />
                             <b:TextArea b:id="certificateInput"
                                 addStyleNames="{style.center-panel}" 
-                                placeholder="{msgs.settingsPublicCertWarning}"
                                 ui:field="certificateInput" />
                             <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
                         </b:FormGroup>

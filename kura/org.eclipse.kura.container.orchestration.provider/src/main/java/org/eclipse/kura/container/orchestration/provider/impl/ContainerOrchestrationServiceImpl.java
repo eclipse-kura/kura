@@ -148,10 +148,9 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                     startEnforcementMonitor();
                     enforceAlreadyRunningContainer();
                 } catch (Exception ex) {
-                    logger.error("Error starting enforcement monitor, disconnecting from docker...", ex);
-                    cleanUpDocker();
+                    logger.error("Error starting enforcement monitor. Due to {}", ex.getMessage());
                     closeEnforcementMonitor();
-                    logger.error("Disconnected from docker");
+                    logger.warn("Enforcement won't be active.");
                 }
             }
         }
@@ -540,6 +539,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             if (containerDescription.isContainerPrivileged()) {
                 configuration = configuration.withPrivileged(containerDescription.isContainerPrivileged());
             }
+
             commandBuilder = commandBuilder.withExposedPorts(this.exposedPorts);
 
             return commandBuilder.withHostConfig(configuration).exec().getId();
@@ -985,14 +985,20 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
     }
 
-    public Set<String> getImageDigestsByContainerName(String containerName) {
+    public Set<String> getImageDigestsByContainerId(String containerId) {
 
         Set<String> imageDigests = new HashSet<>();
 
-        dockerClient.listImagesCmd().withImageNameFilter(containerName).exec().stream().forEach(image -> {
-            List<String> digests = Arrays.asList(image.getRepoDigests());
-            digests.stream().forEach(digest -> imageDigests.add(digest.split("@")[1]));
-        });
+        String containerName = listContainerDescriptors().stream()
+                .filter(container -> container.getContainerId().equals(containerId)).findFirst()
+                .map(container -> container.getContainerName()).orElse(null);
+
+        if (containerName != null) {
+            dockerClient.listImagesCmd().withImageNameFilter(containerName).exec().stream().forEach(image -> {
+                List<String> digests = Arrays.asList(image.getRepoDigests());
+                digests.stream().forEach(digest -> imageDigests.add(digest.split("@")[1]));
+            });
+        }
 
         return imageDigests;
     }

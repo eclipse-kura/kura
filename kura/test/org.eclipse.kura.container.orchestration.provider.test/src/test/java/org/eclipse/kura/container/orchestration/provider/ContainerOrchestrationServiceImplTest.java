@@ -324,8 +324,8 @@ public class ContainerOrchestrationServiceImplTest {
         givenDockerClient();
 
         whenMockForImageDigestsListing();
-
-        whenGetImageDigestsByContainerName(IMAGE_NAME_NGINX);
+        whenDockerClientMockSomeContainers();
+        whenGetImageDigestsByContainerId(CONTAINER_ID_1);
 
         thenDigestsListEqualsExpectedOne(EXPECTED_DIGESTS_ARRAY);
 
@@ -630,8 +630,8 @@ public class ContainerOrchestrationServiceImplTest {
         this.dockerService.listImageInstanceDescriptors();
     }
 
-    private void whenGetImageDigestsByContainerName(String containerName) {
-        this.digestsList = this.dockerService.getImageDigestsByContainerName(containerName);
+    private void whenGetImageDigestsByContainerId(String containerName) {
+        this.digestsList = this.dockerService.getImageDigestsByContainerId(containerName);
     }
 
     /**
@@ -684,7 +684,7 @@ public class ContainerOrchestrationServiceImplTest {
     }
 
     private void thenDigestsListEqualsExpectedOne(String[] digestsArray) {
-        assertEquals(this.digestsList, new HashSet<>(Arrays.asList(digestsArray)));
+        assertEquals(new HashSet<>(Arrays.asList(digestsArray)), this.digestsList);
     }
 
     private void thenContainerInstanceDigestIsAddedToAllowlist() {
@@ -697,9 +697,7 @@ public class ContainerOrchestrationServiceImplTest {
     }
 
     private void thenContainerInstanceDigestIsExpectedOne(String expected) {
-
         List<String> actualDigests = new ArrayList<>(this.dockerService.getContainerInstancesAllowlist());
         assertEquals(actualDigests.get(0), expected);
-
     }
 }

@@ -51,12 +51,11 @@ public class AllowlistEnforcementMonitor extends ResultCallbackTemplate<Allowlis
 
     private void enforceAllowlistFor(String containerId) {
 
-        Set<String> digestsList = this.orchestrationServiceImpl
-                .getImageDigestsByContainerName(getContainerNameById(containerId));
+        Set<String> digestsList = this.orchestrationServiceImpl.getImageDigestsByContainerId(containerId);
 
         Set<String> digestIntersection = this.enforcementAllowlistContent.stream().distinct()
                 .filter(digestsList::contains).collect(Collectors.toSet());
-
+      
         if (digestIntersection.isEmpty()) {
             digestIntersection = this.orchestrationServiceImpl.getContainerInstancesAllowlist().stream().distinct()
                     .filter(digestsList::contains).collect(Collectors.toSet());
@@ -76,12 +75,6 @@ public class AllowlistEnforcementMonitor extends ResultCallbackTemplate<Allowlis
         for (ContainerInstanceDescriptor descriptor : containerDescriptors) {
             enforceAllowlistFor(descriptor.getContainerId());
         }
-    }
-
-    private String getContainerNameById(String containerId) {
-        return this.orchestrationServiceImpl.listContainerDescriptors().stream()
-                .filter(container -> container.getContainerId().equals(containerId)).findFirst()
-                .map(container -> container.getContainerName()).orElse(null);
     }
 
     private void stopContainer(String containerId) {

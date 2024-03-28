@@ -146,12 +146,12 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             if (currentConfig.isEnforcementEnabled()) {
                 try {
                     startEnforcementMonitor();
-                    enforceAlreadyRunningContainer();
                 } catch (Exception ex) {
                     logger.error("Error starting enforcement monitor. Due to {}", ex.getMessage());
                     closeEnforcementMonitor();
                     logger.warn("Enforcement won't be active.");
                 }
+                enforceAlreadyRunningContainer();
             }
         }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -31,22 +31,25 @@ import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV1;
+import org.eclipse.kura.internal.rest.identity.provider.LegacyIdentityService;
 import org.junit.Test;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 
-public class IdentityRestServiceDependenciesTest {
+public class IdentityRestServiceV1DependenciesTest {
 
     private static final String MQTT_APP_ID = "IDN-V1";
     private static final String REST_ROLE_NAME = "identity";
     private static final String KURA_PERMISSION_REST_ROLE = "kura.permission.rest." + REST_ROLE_NAME;
 
     private final IdentityRestServiceV1 service = new IdentityRestServiceV1();
-    private UserAdmin userAdmin;
-    private CryptoService cryptoService;
-    private ConfigurationService configurationService;
 
-    private RequestHandlerRegistry requestHandlerRegistry;
+    private UserAdmin userAdminMock;
+    private CryptoService cryptoServiceMock;
+    private ConfigurationService configurationServiceMock;
+
+    private LegacyIdentityService legacyIdentityServiceMock;
+    private RequestHandlerRegistry requestHandlerRegistryMock;
     private Exception occurredException;
 
     /*
@@ -55,7 +58,7 @@ public class IdentityRestServiceDependenciesTest {
 
     @Test
     public void shouldCreateRoleOnUserAdminBinding() {
-        givenMockUserAdmin();
+        givenUserAdminMock();
 
         whenBindUserAdmin();
 
@@ -100,15 +103,13 @@ public class IdentityRestServiceDependenciesTest {
     }
 
     @Test
-    public void shouldCreateIdentityService() throws KuraException {
-        givenMockUserAdmin();
-        givenMockCryptoService();
+    public void shouldActivateRestIdentityService() throws KuraException {
+        givenUserAdminMock();
+        givenCryptoServiceMock();
         givenMockConfigurationService();
-        givenBoundCryptoService();
-        givensBoundConfigurationService();
-        givenBoundUserAdmin();
+        givenLegacyIdentityServiceMock();
 
-        whenActivate();
+        whenActivateWithDependencies();
 
         thenNoExceptionOccurred();
     }
@@ -117,32 +118,20 @@ public class IdentityRestServiceDependenciesTest {
      * Given
      */
 
-    private void givenMockCryptoService() {
-        this.cryptoService = mock(CryptoService.class);
+    private void givenCryptoServiceMock() {
+        this.cryptoServiceMock = mock(CryptoService.class);
     }
 
     private void givenMockConfigurationService() {
-        this.configurationService = mock(ConfigurationService.class);
+        this.configurationServiceMock = mock(ConfigurationService.class);
     }
 
-    private void givenMockUserAdmin() {
-        this.userAdmin = mock(UserAdmin.class);
-    }
-
-    private void givenBoundCryptoService() {
-        this.service.bindCryptoService(this.cryptoService);
-    }
-
-    private void givensBoundConfigurationService() {
-        this.service.bindConfigurationService(this.configurationService);
-    }
-
-    private void givenBoundUserAdmin() {
-        this.service.bindUserAdmin(this.userAdmin);
+    private void givenUserAdminMock() {
+        this.userAdminMock = mock(UserAdmin.class);
     }
 
     private void givenMockRequestHandlerRegistry() {
-        this.requestHandlerRegistry = mock(RequestHandlerRegistry.class);
+        this.requestHandlerRegistryMock = mock(RequestHandlerRegistry.class);
     }
 
     private void givenBoundRequestHandlerRegistry() {
@@ -150,10 +139,14 @@ public class IdentityRestServiceDependenciesTest {
     }
 
     private void givenFailingMockRequestHandlerRegistry() throws KuraException {
-        this.requestHandlerRegistry = mock(RequestHandlerRegistry.class);
-        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(this.requestHandlerRegistry)
+        this.requestHandlerRegistryMock = mock(RequestHandlerRegistry.class);
+        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(this.requestHandlerRegistryMock)
                 .registerRequestHandler(any(), any());
-        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(this.requestHandlerRegistry).unregister(any());
+        doThrow(new KuraException(KuraErrorCode.BAD_REQUEST)).when(this.requestHandlerRegistryMock).unregister(any());
+    }
+
+    private void givenLegacyIdentityServiceMock() {
+        this.legacyIdentityServiceMock = mock(LegacyIdentityService.class);
     }
 
     /*
@@ -161,7 +154,7 @@ public class IdentityRestServiceDependenciesTest {
      */
 
     private void whenBindUserAdmin() {
-        this.service.bindUserAdmin(this.userAdmin);
+        this.service.bindUserAdmin(this.userAdminMock);
     }
 
     private void whenBindRequestHandlerRegistry() {
@@ -170,14 +163,25 @@ public class IdentityRestServiceDependenciesTest {
 
     private void whenUnbindRequestHandlerRegistry() {
         try {
-            this.service.unbindRequestHandlerRegistry(this.requestHandlerRegistry);
+            this.service.unbindRequestHandlerRegistry(this.requestHandlerRegistryMock);
         } catch (Exception e) {
             this.occurredException = e;
         }
     }
 
-    private void whenActivate() {
-        this.service.activate();
+    private void whenActivateWithDependencies() {
+        try {
+            this.service.bindConfigurationService(this.configurationServiceMock);
+            this.service.bindCryptoService(this.cryptoServiceMock);
+            this.service.bindLegacyIdentityService(this.legacyIdentityServiceMock);
+            this.service.bindRequestHandlerRegistry(this.requestHandlerRegistryMock);
+            this.service.bindUserAdmin(this.userAdminMock);
+
+            this.service.activate();
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+
     }
 
     /*
@@ -185,16 +189,16 @@ public class IdentityRestServiceDependenciesTest {
      */
 
     private void thenRoleIsCreated(String expectedKuraPermission, int expectedRole) {
-        verify(this.userAdmin, times(1)).createRole(expectedKuraPermission, expectedRole);
+        verify(this.userAdminMock, times(1)).createRole(expectedKuraPermission, expectedRole);
     }
 
     private void thenRequestHandlerIsRegistered(String expectedMqttAppId) throws KuraException {
-        verify(this.requestHandlerRegistry, times(1)).registerRequestHandler(eq(expectedMqttAppId),
+        verify(this.requestHandlerRegistryMock, times(1)).registerRequestHandler(eq(expectedMqttAppId),
                 any(RequestHandler.class));
     }
 
     private void thenRequestHandlerIsUnregistered(String expectedMqttAppId) throws KuraException {
-        verify(this.requestHandlerRegistry, times(1)).unregister(expectedMqttAppId);
+        verify(this.requestHandlerRegistryMock, times(1)).unregister(expectedMqttAppId);
     }
 
     private void thenNoExceptionOccurred() {
@@ -212,7 +216,7 @@ public class IdentityRestServiceDependenciesTest {
 
     private void bindRequestHandlerRegistry() {
         try {
-            this.service.bindRequestHandlerRegistry(this.requestHandlerRegistry);
+            this.service.bindRequestHandlerRegistry(this.requestHandlerRegistryMock);
         } catch (Exception e) {
             this.occurredException = e;
         }

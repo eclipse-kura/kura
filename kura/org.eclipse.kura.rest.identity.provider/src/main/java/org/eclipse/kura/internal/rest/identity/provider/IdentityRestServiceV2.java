@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloudconnection.request.RequestHandler;
+import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.identity.AdditionalConfigurations;
 import org.eclipse.kura.identity.AssignedPermissions;
 import org.eclipse.kura.identity.IdentityConfiguration;
@@ -41,39 +44,64 @@ import org.eclipse.kura.identity.IdentityConfigurationComponent;
 import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.PasswordConfiguration;
 import org.eclipse.kura.identity.PasswordHash;
-import org.eclipse.kura.internal.rest.identity.provider.dto.ValidatorOptionsDTO;
+import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.internal.rest.identity.provider.util.IdentityDTOUtils;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityConfigurationDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityConfigurationRequestDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityDTO;
+import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PasswordStrenghtRequirementsDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PermissionDTO;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
-import org.eclipse.kura.util.validation.ValidatorOptions;
+import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
+import org.osgi.service.useradmin.Role;
+import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("restriction")
 @Path("identity/v2")
-public class IdentityRestServiceV2 extends AbstractIdentityRestService {
+public class IdentityRestServiceV2 {
 
     private static final Logger logger = LoggerFactory.getLogger(IdentityRestServiceV2.class);
 
     private static final String MQTT_APP_ID = "IDN-V2";
 
-    private IdentityService identityService;
+    private static final String DEBUG_MESSAGE = "Processing request for method '{}'";
 
-    @Override
-    protected Logger getLogger() {
-        return logger;
+    private static final String REST_ROLE_NAME = "identity";
+    private static final String KURA_PERMISSION_REST_ROLE = "kura.permission.rest." + REST_ROLE_NAME;
+
+    private final RequestHandler requestHandler = new JaxRsRequestHandlerProxy(this);
+
+    private IdentityService identityService;
+    private PasswordStrengthVerificationService passwordStrengthVerificationService;
+
+    public void bindUserAdmin(UserAdmin userAdmin) {
+        userAdmin.createRole(KURA_PERMISSION_REST_ROLE, Role.GROUP);
     }
 
-    @Override
-    protected String getMqttApplicationId() {
-        return MQTT_APP_ID;
+    public void bindRequestHandlerRegistry(RequestHandlerRegistry registry) {
+        try {
+            registry.registerRequestHandler(MQTT_APP_ID, this.requestHandler);
+        } catch (final Exception e) {
+            logger.warn("Failed to register {} request handler", MQTT_APP_ID, e);
+        }
+    }
+
+    public void unbindRequestHandlerRegistry(RequestHandlerRegistry registry) {
+        try {
+            registry.unregister(MQTT_APP_ID);
+        } catch (final Exception e) {
+            logger.warn("Failed to unregister {} request handler", MQTT_APP_ID, e);
+        }
     }
 
     public void bindIdentityService(IdentityService identityService) {
         this.identityService = identityService;
+    }
+
+    public void bindPasswordStrengthVerificationService(
+            PasswordStrengthVerificationService passwordStrengthVerificationService) {
+        this.passwordStrengthVerificationService = passwordStrengthVerificationService;
     }
 
     @POST
@@ -81,11 +109,10 @@ public class IdentityRestServiceV2 extends AbstractIdentityRestService {
     @Path("/identities")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createIdentity(final IdentityDTO identity) {
+        logger.debug(DEBUG_MESSAGE, "createIdentity");
 
         boolean created = false;
-
         try {
-            logger.debug(DEBUG_MESSAGE, "createIdentity");
             created = this.identityService.createIdentity(identity.getName());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
@@ -99,18 +126,12 @@ public class IdentityRestServiceV2 extends AbstractIdentityRestService {
     @Path("/identities")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateIdentity(final IdentityConfigurationDTO identityConfigurationDTO) {
+        logger.debug(DEBUG_MESSAGE, "updateIdentity");
         try {
 
-            logger.debug(DEBUG_MESSAGE, "updateIdentity");
-            Function<char[], PasswordHash> passwordHashFunction = t -> {
-                try {
-                    return this.identityService.computePasswordHash(t);
-                } catch (KuraException e) {
-                    throw DefaultExceptionHandler.toWebApplicationException(e);
-                }
-            };
-            List<IdentityConfiguration> configurations = Collections.singletonList(
-                    IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO, passwordHashFunction));
+            List<IdentityConfiguration> configurations = Collections
+                    .singletonList(IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO,
+                            passwordHashFunction(), validatePasswordFunction()));
 
             this.identityService.validateIdentityConfigurations(configurations);
             this.identityService.updateIdentityConfigurations(configurations);
@@ -128,8 +149,8 @@ public class IdentityRestServiceV2 extends AbstractIdentityRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public IdentityConfigurationDTO getIdentityByName(
             final IdentityConfigurationRequestDTO identityConfigurationRequestDTO) {
+        logger.debug(DEBUG_MESSAGE, "getIdentityByName");
         try {
-            logger.debug(DEBUG_MESSAGE, "getIdentityByName");
             String identityName = identityConfigurationRequestDTO.getIdentity().getName();
 
             Optional<IdentityConfiguration> identityConfiguration = this.identityService.getIdentityConfiguration(
@@ -147,15 +168,38 @@ public class IdentityRestServiceV2 extends AbstractIdentityRestService {
 
     }
 
+    @POST
+    @RolesAllowed(REST_ROLE_NAME)
+    @Path("/identities/default/byName")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public IdentityConfigurationDTO getIdentityDefaultByName(
+            final IdentityConfigurationRequestDTO identityConfigurationRequestDTO) {
+        logger.debug(DEBUG_MESSAGE, "getIdentityDefaultByName");
+
+        String identityName = identityConfigurationRequestDTO.getIdentity().getName();
+
+        try {
+            IdentityConfiguration identityConfiguration = this.identityService.getIdentityDefaultConfiguration(
+                    identityName, //
+                    IdentityDTOUtils.toIdentityConfigurationComponents(
+                            identityConfigurationRequestDTO.getConfigurationComponents()));
+
+            return IdentityDTOUtils.fromIdentityConfiguration(identityConfiguration);
+        } catch (KuraException e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+
+    }
+
     @DELETE
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/identities")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteIdentity(final IdentityDTO identity) {
+        logger.debug(DEBUG_MESSAGE, "deleteIdentity");
         boolean deleted = false;
-
         try {
-            logger.debug(DEBUG_MESSAGE, "deleteIdentity");
             deleted = this.identityService.deleteIdentity(identity.getName());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
@@ -168,8 +212,8 @@ public class IdentityRestServiceV2 extends AbstractIdentityRestService {
     @Path("/definedPermissions")
     @Produces(MediaType.APPLICATION_JSON)
     public Set<PermissionDTO> getDefinedPermissions() {
+        logger.debug(DEBUG_MESSAGE, "getDefinedPermissions");
         try {
-            logger.debug(DEBUG_MESSAGE, "getDefinedPermissions");
             return this.identityService.getPermissions().stream().map(IdentityDTOUtils::fromPermission)
                     .collect(Collectors.toSet());
         } catch (Exception e) {
@@ -182,9 +226,8 @@ public class IdentityRestServiceV2 extends AbstractIdentityRestService {
     @Path("/identities")
     @Produces(MediaType.APPLICATION_JSON)
     public List<IdentityConfigurationDTO> getIdentities() {
+        logger.debug(DEBUG_MESSAGE, "getIdentities");
         try {
-            logger.debug(DEBUG_MESSAGE, "getIdentities");
-
             return this.identityService.getIdentitiesConfiguration(allIdentitiesConfiguration()).stream()
                     .map(IdentityDTOUtils::fromIdentityConfiguration).collect(Collectors.toList());
 
@@ -194,25 +237,93 @@ public class IdentityRestServiceV2 extends AbstractIdentityRestService {
     }
 
     @GET
-    @Path("/passwordRequirements")
+    @Path("/passwordStrenghtRequirements")
     @Produces(MediaType.APPLICATION_JSON)
-    public ValidatorOptionsDTO getPasswordRequirements() {
+    public PasswordStrenghtRequirementsDTO getPasswordStrenghtRequirements() {
+        logger.debug(DEBUG_MESSAGE, "getPasswordStrenghtRequirements");
         try {
-            logger.debug(DEBUG_MESSAGE, "getPasswordRequirements");
-            ValidatorOptions validatorOptions = this.legacyIdentityService.getValidatorOptions();
-            return new ValidatorOptionsDTO(//
-                    validatorOptions.isPasswordMinimumLength(), //
-                    validatorOptions.isPasswordRequireDigits(), //
-                    validatorOptions.isPasswordRequireBothCases(), //
-                    validatorOptions.isPasswordRequireSpecialChars());
+            return IdentityDTOUtils.fromPasswordStrengthRequirements(
+                    this.passwordStrengthVerificationService.getPasswordStrengthRequirements());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
     }
 
+    @POST
+    @RolesAllowed(REST_ROLE_NAME)
+    @Path("/permissions")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response createPermission(final PermissionDTO permissionDTO) {
+        logger.debug(DEBUG_MESSAGE, "createPermission");
+
+        boolean created = false;
+
+        try {
+            created = this.identityService.createPermission(IdentityDTOUtils.toPermission(permissionDTO));
+        } catch (KuraException e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+
+        return created ? Response.ok().build() : Response.status(Status.CONFLICT).build();
+    }
+
+    @DELETE
+    @RolesAllowed(REST_ROLE_NAME)
+    @Path("/permissions")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response deletePermission(final PermissionDTO permissionDTO) {
+        logger.debug(DEBUG_MESSAGE, "deletePermission");
+        boolean deleted = false;
+        try {
+            deleted = this.identityService.deletePermission(null);
+        } catch (KuraException e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+
+        return deleted ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
+    }
+
+    @POST
+    @RolesAllowed(REST_ROLE_NAME)
+    @Path("/identities/validate")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response validateIdentityConfiguration(final IdentityConfigurationDTO identityConfigurationDTO) {
+        try {
+            List<IdentityConfiguration> configurations = Collections
+                    .singletonList(IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO,
+                            passwordHashFunction(), validatePasswordFunction()));
+
+            this.identityService.validateIdentityConfigurations(configurations);
+        } catch (KuraException e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+
+        return Response.ok().build();
+    }
+
     private static Set<Class<? extends IdentityConfigurationComponent>> allIdentitiesConfiguration() {
         return new HashSet<>(
                 Arrays.asList(AdditionalConfigurations.class, AssignedPermissions.class, PasswordConfiguration.class));
+    }
+
+    private Consumer<char[]> validatePasswordFunction() {
+        return psw -> {
+            try {
+                this.passwordStrengthVerificationService.checkPasswordStrength(psw);
+            } catch (KuraException e) {
+                throw DefaultExceptionHandler.toWebApplicationException(e);
+            }
+        };
+    }
+
+    private Function<char[], PasswordHash> passwordHashFunction() {
+        return psw -> {
+            try {
+                return this.identityService.computePasswordHash(psw);
+            } catch (KuraException e) {
+                throw DefaultExceptionHandler.toWebApplicationException(e);
+            }
+        };
     }
 
 }

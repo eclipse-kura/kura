@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -51,7 +51,7 @@ import org.osgi.service.useradmin.User;
 import org.osgi.service.useradmin.UserAdmin;
 
 @SuppressWarnings("restriction")
-public class IdentityServiceTest {
+public class IdentityServiceV1Test {
 
     private static final String KURA_WEB_CONSOLE_SERVICE_PID = "org.eclipse.kura.web.Console";
     private static final String USER_ROLE_NAME_PREFIX = "kura.user.";
@@ -114,14 +114,6 @@ public class IdentityServiceTest {
         thenNoExceptionOccurred();
         thenUserIs("testuser");
 
-    }
-
-    private void whenGettingUser(String username) {
-        try {
-            this.user = this.identityService.getUser(username);
-        } catch (KuraException e) {
-            this.occurredException = e;
-        }
     }
 
     @Test
@@ -283,6 +275,14 @@ public class IdentityServiceTest {
         try {
             this.identityService.updateUser(user);
         } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void whenGettingUser(String username) {
+        try {
+            this.user = this.identityService.getUser(username);
+        } catch (KuraException e) {
             this.occurredException = e;
         }
     }

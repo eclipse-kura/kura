@@ -52,15 +52,14 @@ public class DefaultExceptionHandler {
     public static WebApplicationException toWebApplicationException(final KuraException e) {
         if (e.getCode() == KuraErrorCode.NOT_FOUND) {
             return buildWebApplicationException(Status.NOT_FOUND, e.getMessage());
-        } else if (e.getCode() == KuraErrorCode.BAD_REQUEST) {
+        } else if (e.getCode() == KuraErrorCode.BAD_REQUEST || e.getCode() == KuraErrorCode.CONFIGURATION_ERROR) {
             return buildWebApplicationException(Status.BAD_REQUEST, e.getMessage());
         } else {
             return buildWebApplicationException(Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
-    public static KuraMessage toKuraMessage(final WebApplicationException e,
-            final Optional<Gson> gson) {
+    public static KuraMessage toKuraMessage(final WebApplicationException e, final Optional<Gson> gson) {
         final Response response = e.getResponse();
 
         final KuraPayload responsePayload = new KuraResponsePayload(response.getStatus());

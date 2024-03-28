@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -54,16 +54,16 @@ import com.google.gson.Gson;
 
 @SuppressWarnings("restriction")
 @RunWith(Parameterized.class)
-public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
+public class IdentityV1EndpointsTest extends AbstractRequestHandlerTest {
 
     private static final String MQTT_APP_ID = "IDN-V1";
+    private static final String REST_APP_ID = "identity/v1";
 
     private static final String METHOD_SPEC_GET = "GET";
     private static final String METHOD_SPEC_POST = "POST";
     private static final String METHOD_SPEC_DELETE = "DELETE";
     private static final String MQTT_METHOD_SPEC_DEL = "DEL";
     private static final String METHOD_SPEC_PUT = "PUT";
-    private static final String REST_APP_ID = "identity/v1";
 
     private static LegacyIdentityService identityServiceMock = mock(LegacyIdentityService.class);
 
@@ -72,19 +72,19 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
     private Gson gson = new Gson();
 
     private static final String EXPECTED_GET_USER_CONFIG_RESPONSE = new Scanner(
-            IdentityEndpointsTest.class.getResourceAsStream("/getUserConfigResponse.json"), "UTF-8").useDelimiter("\\A")
-                    .next().replace(" ", "");
+            IdentityV1EndpointsTest.class.getResourceAsStream("/getUserConfigResponse.json"), "UTF-8")
+                    .useDelimiter("\\A").next().replace(" ", "");
 
     private static final String EXPECTED_GET_USER_RESPONSE = new Scanner(
-            IdentityEndpointsTest.class.getResourceAsStream("/getUserResponse.json"), "UTF-8").useDelimiter("\\A")
+            IdentityV1EndpointsTest.class.getResourceAsStream("/getUserResponse.json"), "UTF-8").useDelimiter("\\A")
                     .next().replace(" ", "");
 
     private static final String EXPECTED_GET_PASSWORD_REQUIREMENTS_RESPONSE = new Scanner(
-            IdentityEndpointsTest.class.getResourceAsStream("/getPasswordRequirementsResponse.json"), "UTF-8")
+            IdentityV1EndpointsTest.class.getResourceAsStream("/getPasswordRequirementsResponse.json"), "UTF-8")
                     .useDelimiter("\\A").next().replace(" ", "");
 
     private static final String EXPECTED_NON_EXISTING_USER_RESPONSE = new Scanner(
-            IdentityEndpointsTest.class.getResourceAsStream("/getNonExistingUserResponse.json"), "UTF-8")
+            IdentityV1EndpointsTest.class.getResourceAsStream("/getNonExistingUserResponse.json"), "UTF-8")
                     .useDelimiter("\\A").next();
 
     private static Set<UserDTO> userConfigs;
@@ -96,7 +96,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         return Arrays.asList(new MqttTransport(MQTT_APP_ID), new RestTransport(REST_APP_ID));
     }
 
-    public IdentityEndpointsTest(Transport transport) {
+    public IdentityV1EndpointsTest(Transport transport) {
         super(transport);
     }
 
@@ -257,7 +257,7 @@ public class IdentityEndpointsTest extends AbstractRequestHandlerTest {
         final Dictionary<String, Object> configurationServiceProperties = new Hashtable<>();
         configurationServiceProperties.put("service.ranking", Integer.MIN_VALUE);
         configurationServiceProperties.put("kura.service.pid", "identityServiceMock");
-        identityServiceRegistration = FrameworkUtil.getBundle(IdentityEndpointsTest.class).getBundleContext()
+        identityServiceRegistration = FrameworkUtil.getBundle(IdentityV1EndpointsTest.class).getBundleContext()
                 .registerService(LegacyIdentityService.class, identityServiceMock, configurationServiceProperties);
     }
 

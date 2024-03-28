@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -27,11 +28,13 @@ import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityConfigurationComponent;
 import org.eclipse.kura.identity.PasswordConfiguration;
 import org.eclipse.kura.identity.PasswordHash;
+import org.eclipse.kura.identity.PasswordStrengthRequirements;
 import org.eclipse.kura.identity.Permission;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.AdditionalConfigurationsDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityConfigurationDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PasswordConfigurationDTO;
+import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PasswordStrenghtRequirementsDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PermissionConfigurationDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PermissionDTO;
 import org.eclipse.kura.rest.configuration.api.ComponentConfigurationDTO;
@@ -132,13 +135,19 @@ public class IdentityDTOUtils {
     }
 
     public static PasswordConfiguration toPasswordConfiguration(PasswordConfigurationDTO passwordConfigurationDTO,
-            Function<char[], PasswordHash> passwordHashFunction) {
+            Function<char[], PasswordHash> passwordHashFunction, Consumer<char[]> validatePasswordFunction) {
+
+        Optional<PasswordHash> passwordHash = Optional.empty();
+
+        if (passwordConfigurationDTO.getPassword() != null) {
+            validatePasswordFunction.accept(passwordConfigurationDTO.getPassword().toCharArray());
+
+            passwordHash = Optional
+                    .of(passwordHashFunction.apply(passwordConfigurationDTO.getPassword().toCharArray()));
+        }
 
         return new PasswordConfiguration(passwordConfigurationDTO.isPasswordChangeNeeded(),
-                passwordConfigurationDTO.isPasswordAuthEnabled(),
-                Optional.ofNullable(passwordConfigurationDTO.getPassword() != null
-                        ? passwordHashFunction.apply(passwordConfigurationDTO.getPassword().toCharArray())
-                        : null));
+                passwordConfigurationDTO.isPasswordAuthEnabled(), passwordHash);
     }
 
     public static IdentityConfigurationComponent toAdditionalConfigurations(
@@ -168,7 +177,7 @@ public class IdentityDTOUtils {
     }
 
     public static IdentityConfiguration toIdentityConfiguration(IdentityConfigurationDTO identityConfigurationDTO,
-            Function<char[], PasswordHash> passwordHashFunction) {
+            Function<char[], PasswordHash> passwordHashFunction, Consumer<char[]> validatePasswordFunction) {
         List<IdentityConfigurationComponent> components = new ArrayList<>();
 
         if (identityConfigurationDTO.getPermissionConfiguration() != null) {
@@ -176,8 +185,8 @@ public class IdentityDTOUtils {
         }
 
         if (identityConfigurationDTO.getPasswordConfiguration() != null) {
-            components.add(
-                    toPasswordConfiguration(identityConfigurationDTO.getPasswordConfiguration(), passwordHashFunction));
+            components.add(toPasswordConfiguration(identityConfigurationDTO.getPasswordConfiguration(),
+                    passwordHashFunction, validatePasswordFunction));
         }
 
         if (identityConfigurationDTO.getAdditionalConfigurations() != null) {
@@ -186,6 +195,15 @@ public class IdentityDTOUtils {
 
         return new IdentityConfiguration(identityConfigurationDTO.getIdentity().getName(), components);
 
+    }
+
+    public static PasswordStrenghtRequirementsDTO fromPasswordStrengthRequirements(
+            PasswordStrengthRequirements passwordStrengthRequirements) {
+
+        return new PasswordStrenghtRequirementsDTO(passwordStrengthRequirements.getPasswordMinimumLength(),
+                passwordStrengthRequirements.digitsRequired(), //
+                passwordStrengthRequirements.specialCharactersRequired(),
+                passwordStrengthRequirements.bothCasesRequired());
     }
 
 }

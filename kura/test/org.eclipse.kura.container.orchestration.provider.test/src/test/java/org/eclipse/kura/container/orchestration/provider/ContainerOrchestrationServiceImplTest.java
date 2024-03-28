@@ -23,10 +23,12 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
@@ -99,7 +101,7 @@ public class ContainerOrchestrationServiceImplTest {
     private Map<String, Object> properties;
     private String containerId;
 
-    List<String> digestsList;
+    Set<String> digestsList;
 
     @Test
     public void testServiceActivateEmptyProperties() {
@@ -310,8 +312,8 @@ public class ContainerOrchestrationServiceImplTest {
         givenDockerClient();
 
         whenMockForImageDigestsListing();
-
-        whenGetImageDigestsByContainerName(IMAGE_NAME_NGINX);
+        whenDockerClientMockSomeContainers();
+        whenGetImageDigestsByContainerId(CONTAINER_ID_1);
 
         thenDigestsListEqualsExpectedOne(EXPECTED_DIGESTS_ARRAY);
 
@@ -538,8 +540,8 @@ public class ContainerOrchestrationServiceImplTest {
         this.dockerService.listImageInstanceDescriptors();
     }
 
-    private void whenGetImageDigestsByContainerName(String containerName) {
-        this.digestsList = this.dockerService.getImageDigestsByContainerName(containerName);
+    private void whenGetImageDigestsByContainerId(String containerName) {
+        this.digestsList = this.dockerService.getImageDigestsByContainerId(containerName);
     }
 
     /**
@@ -592,6 +594,6 @@ public class ContainerOrchestrationServiceImplTest {
     }
 
     private void thenDigestsListEqualsExpectedOne(String[] digestsArray) {
-        assertEquals(this.digestsList, Arrays.asList(digestsArray));
+        assertEquals(new HashSet<>(Arrays.asList(digestsArray)), this.digestsList);
     }
 }

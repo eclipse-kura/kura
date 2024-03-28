@@ -144,12 +144,10 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 try {
                     startEnforcementMonitor();
                 } catch (Exception ex) {
-                    logger.error("Error starting enforcement monitor, disconnecting from docker...", ex);
-                    cleanUpDocker();
+                    logger.error("Error starting enforcement monitor. Due to {}", ex.getMessage());
                     closeEnforcementMonitor();
-                    logger.error("Disconnected from docker");
+                    logger.warn("Enforcement won't be active.");
                 }
-
                 enforceAlreadyRunningContainer();
             }
         }
@@ -158,15 +156,19 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     private void startEnforcementMonitor() {
+        logger.info("Enforcement monitor starting...");
         this.allowlistEnforcementMonitor = this.dockerClient.eventsCmd().withEventFilter("start")
                 .exec(new AllowlistEnforcementMonitor(currentConfig.getEnforcementAllowlist(), this));
+        logger.info("Enforcement monitor starting...done.");
     }
 
     private void closeEnforcementMonitor() {
         try {
+            logger.info("Enforcement monitor closing...");
             this.allowlistEnforcementMonitor.close();
             this.allowlistEnforcementMonitor.awaitCompletion(5, TimeUnit.SECONDS);
             this.allowlistEnforcementMonitor = null;
+            logger.info("Enforcement monitor closing...done.");
         } catch (InterruptedException ex) {
             logger.error("Waited too long to close enforcement monitor, stopping it...", ex);
             Thread.currentThread().interrupt();
@@ -176,7 +178,9 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     private void enforceAlreadyRunningContainer() {
+        logger.info("Enforcement check on already running containers...");
         this.allowlistEnforcementMonitor.enforceAllowlistFor(listContainerDescriptors());
+        logger.info("Enforcement check on already running containers...done");
     }
 
     @Override
@@ -522,7 +526,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 configuration = configuration.withPrivileged(containerDescription.isContainerPrivileged());
             }
 
-            commandBuilder.withExposedPorts(this.exposedPorts);
+            commandBuilder = commandBuilder.withExposedPorts(this.exposedPorts);
 
             return commandBuilder.withHostConfig(configuration).exec().getId();
 
@@ -967,14 +971,20 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
     }
 
-    public List<String> getImageDigestsByContainerName(String containerName) {
+    public Set<String> getImageDigestsByContainerId(String containerId) {
 
-        List<String> imageDigests = new ArrayList<>();
+        Set<String> imageDigests = new HashSet<>();
 
-        dockerClient.listImagesCmd().withImageNameFilter(containerName).exec().stream().forEach(image -> {
-            List<String> digests = Arrays.asList(image.getRepoDigests());
-            digests.stream().forEach(digest -> imageDigests.add(digest.split("@")[1]));
-        });
+        String containerName = listContainerDescriptors().stream()
+                .filter(container -> container.getContainerId().equals(containerId)).findFirst()
+                .map(container -> container.getContainerName()).orElse(null);
+
+        if (containerName != null) {
+            dockerClient.listImagesCmd().withImageNameFilter(containerName).exec().stream().forEach(image -> {
+                List<String> digests = Arrays.asList(image.getRepoDigests());
+                digests.stream().forEach(digest -> imageDigests.add(digest.split("@")[1]));
+            });
+        }
 
         return imageDigests;
     }

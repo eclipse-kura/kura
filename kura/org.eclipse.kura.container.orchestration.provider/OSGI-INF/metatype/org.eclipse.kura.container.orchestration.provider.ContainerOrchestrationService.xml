@@ -33,7 +33,7 @@
         <AD
             id="enforcement.allowlist"
             name="Container Image Allowlist "
-            description="List of values containing the image digests. Each entry must be inserted in a new line of the text box|TextArea"
+            description="List of container image digests. Each entry must be separated by a new line of the text box|TextArea"
             type="String"
             cardinality="1"
             required="false"

@@ -14,7 +14,6 @@ package org.eclipse.kura.internal.rest.identity.provider.test;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
@@ -22,14 +21,12 @@ import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
-import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityDTO;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 
 @RunWith(Parameterized.class)
 public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
@@ -46,19 +43,23 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
     private Gson gson = new Gson();
 
     private IdentityDTO identity;
+    private String testUserName;
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Transport> transports() {
-        return Arrays.asList(new MqttTransport(MQTT_APP_ID), new RestTransport(REST_APP_ID));
+    @Parameterized.Parameters(name = "{0} - {1}")
+    public static Collection<?> transports() {
+        return Arrays.asList(new Object[][] { //
+                { new MqttTransport(MQTT_APP_ID), "test-user-for-mqtt" }, //
+                { new RestTransport(REST_APP_ID), "test-user-for-rest" } });
     }
 
-    public IdentityV2EndpointsTest(Transport transport) {
+    public IdentityV2EndpointsTest(Transport transport, String testUserName) {
         super(transport);
+        this.testUserName = testUserName;
     }
 
     @Test
     public void shouldInvokeCreateIdentitySuccessfully() throws KuraException {
-        givenIdentity(new IdentityDTO("test-user"));
+        givenIdentity(new IdentityDTO(this.testUserName));
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/identities", gson.toJson(this.identity));
 

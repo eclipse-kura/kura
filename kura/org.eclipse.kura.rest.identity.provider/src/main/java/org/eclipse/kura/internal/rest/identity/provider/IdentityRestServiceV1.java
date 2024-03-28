@@ -26,31 +26,83 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloudconnection.request.RequestHandler;
+import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
+import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.rest.identity.provider.dto.PermissionDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserConfigDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.ValidatorOptionsDTO;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
+import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.eclipse.kura.util.validation.ValidatorOptions;
+import org.osgi.service.useradmin.Role;
+import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("restriction")
 @Path("identity/v1")
-public class IdentityRestServiceV1 extends AbstractIdentityRestService {
+public class IdentityRestServiceV1 {
 
     private static final Logger logger = LoggerFactory.getLogger(IdentityRestServiceV1.class);
 
     private static final String MQTT_APP_ID = "IDN-V1";
 
-    @Override
-    protected Logger getLogger() {
-        return logger;
+    private static final String DEBUG_MESSAGE = "Processing request for method '{}'";
+
+    private static final String REST_ROLE_NAME = "identity";
+    private static final String KURA_PERMISSION_REST_ROLE = "kura.permission.rest." + REST_ROLE_NAME;
+
+    private final RequestHandler requestHandler = new JaxRsRequestHandlerProxy(this);
+
+    private LegacyIdentityService legacyIdentityService;
+
+    private CryptoService cryptoService;
+    private UserAdmin userAdmin;
+    private ConfigurationService configurationService;
+
+    public void bindCryptoService(CryptoService cryptoService) {
+        this.cryptoService = cryptoService;
     }
 
-    @Override
-    protected String getMqttApplicationId() {
-        return MQTT_APP_ID;
+    public void bindConfigurationService(ConfigurationService configurationService) {
+        this.configurationService = configurationService;
+    }
+
+    public void bindUserAdmin(UserAdmin userAdmin) {
+        this.userAdmin = userAdmin;
+        this.userAdmin.createRole(KURA_PERMISSION_REST_ROLE, Role.GROUP);
+    }
+
+    public void bindRequestHandlerRegistry(RequestHandlerRegistry registry) {
+        try {
+            registry.registerRequestHandler(MQTT_APP_ID, this.requestHandler);
+        } catch (final Exception e) {
+            logger.warn("Failed to register {} request handler", MQTT_APP_ID, e);
+        }
+    }
+
+    public void unbindRequestHandlerRegistry(RequestHandlerRegistry registry) {
+        try {
+            registry.unregister(MQTT_APP_ID);
+        } catch (final Exception e) {
+            logger.warn("Failed to unregister {} request handler", MQTT_APP_ID, e);
+        }
+    }
+
+    // Added mainly for testing purposes. Currently the service is created by activate()
+    public void bindLegacyIdentityService(LegacyIdentityService legacyIdentityService) {
+        this.legacyIdentityService = legacyIdentityService;
+    }
+
+    public void activate() {
+        // create only if not externally set. Added mainly for testing purposes.
+        if (this.legacyIdentityService == null) {
+            this.legacyIdentityService = new LegacyIdentityService(this.cryptoService, this.userAdmin,
+                    this.configurationService);
+        }
     }
 
     @POST

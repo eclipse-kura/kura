@@ -178,6 +178,10 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     private void enforceAlreadyRunningContainer() {
+        if (this.allowlistEnforcementMonitor == null) {
+            logger.warn("Enforcement wasn't started. Check on running containers will not be performed.");
+            return;
+        }
         logger.info("Enforcement check on already running containers...");
         this.allowlistEnforcementMonitor.enforceAllowlistFor(listContainerDescriptors());
         logger.info("Enforcement check on already running containers...done");
@@ -979,12 +983,14 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 .filter(container -> container.getContainerId().equals(containerId)).findFirst()
                 .map(container -> container.getContainerName()).orElse(null);
 
-        if (containerName != null) {
-            dockerClient.listImagesCmd().withImageNameFilter(containerName).exec().stream().forEach(image -> {
-                List<String> digests = Arrays.asList(image.getRepoDigests());
-                digests.stream().forEach(digest -> imageDigests.add(digest.split("@")[1]));
-            });
+        if (containerName == null) {
+            return imageDigests;
         }
+
+        dockerClient.listImagesCmd().withImageNameFilter(containerName).exec().stream().forEach(image -> {
+            List<String> digests = Arrays.asList(image.getRepoDigests());
+            digests.stream().forEach(digest -> imageDigests.add(digest.split("@")[1]));
+        });
 
         return imageDigests;
     }

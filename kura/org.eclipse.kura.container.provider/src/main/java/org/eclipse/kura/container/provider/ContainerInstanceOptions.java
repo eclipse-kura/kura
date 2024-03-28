@@ -394,7 +394,7 @@ public class ContainerInstanceOptions {
                 .setRuntime(getRuntime()).setEnforcementDigest(getEnforcementDigest()).build();
     }
 
-    public ContainerConfiguration getContainerConfiguration(String signatureExtractedDigest) {
+    public ContainerConfiguration getContainerConfigurationBySignature(String signatureExtractedDigest) {
 
         Optional<String> finalEnforcementDigest = (!signatureExtractedDigest.equals("?"))
                 ? Optional.of(signatureExtractedDigest)

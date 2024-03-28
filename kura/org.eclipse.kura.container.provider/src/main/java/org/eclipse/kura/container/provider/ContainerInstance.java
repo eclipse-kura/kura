@@ -354,7 +354,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
             final ContainerConfiguration containerConfiguration = options.getEnforcementDigest().isPresent()
                     ? options.getContainerConfiguration()
-                    : options.getContainerConfiguration(signatureExtractedDigest);
+                    : options.getContainerConfigurationBySignature(signatureExtractedDigest);
 
             int retries = 0;
             while ((unlimitedRetries || retries < maxRetries) && !Thread.currentThread().isInterrupted()) {

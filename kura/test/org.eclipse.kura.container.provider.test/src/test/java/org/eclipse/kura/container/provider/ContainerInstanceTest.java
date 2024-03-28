@@ -57,6 +57,7 @@ public class ContainerInstanceTest {
     private static final String CONTAINER_VERIFY_TLOG = "container.signature.verify.transparency.log";
     private static final String CONTAINER_REGISTRY_USERNAME = "registry.username";
     private static final String CONTAINER_REGISTRY_PASSWORD = "registry.password";
+    private static final String CONTAINER_ENFORCEMENT_DIGEST = "enforcement.digest";
 
     private static final ValidationResult FAILED_VALIDATION = new ValidationResult();
 
@@ -399,7 +400,8 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    public void signatureValidationWorksWithAuthentication() throws KuraException, InterruptedException {
+    public void signatureValidationWorksWithAuthenticationWhenNoDigestProvided()
+            throws KuraException, InterruptedException {
         givenContainerOrchestratorWithNoRunningContainers();
         givenContainerOrchestratorReturningOnStart("1234");
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
@@ -422,6 +424,34 @@ public class ContainerInstanceTest {
         thenWaitForContainerInstanceToBecome(CONTAINER_STATE_CREATED);
         thenStartContainerWasCalledWith(this.properties);
         thenAuthenticatedVerifySignatureWasCalledFor("nginx", "latest", "aRealTrustAnchor ;)", true,
+                new PasswordRegistryCredentials(Optional.empty(), "username", new Password("password")));
+    }
+
+    @Test
+    public void signatureValidationNotCalledIfDigestProvided() throws KuraException, InterruptedException {
+        givenContainerOrchestratorWithNoRunningContainers();
+        givenContainerOrchestratorReturningOnStart("1234");
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
+
+        givenContainerSignatureValidationServiceReturningFailureForAuthenticated("nginx", "latest");
+        givenContainerInstanceWith(this.mockContainerSignatureValidationService);
+
+        givenPropertiesWith(CONTAINER_ENABLED, true);
+        givenPropertiesWith(CONTAINER_NAME, "pippo");
+        givenPropertiesWith(CONTAINER_IMAGE, "nginx");
+        givenPropertiesWith(CONTAINER_IMAGE_TAG, "latest");
+        givenPropertiesWith(CONTAINER_TRUST_ANCHOR, "aRealTrustAnchor ;)");
+        givenPropertiesWith(CONTAINER_VERIFY_TLOG, true);
+        givenPropertiesWith(CONTAINER_REGISTRY_USERNAME, "username");
+        givenPropertiesWith(CONTAINER_REGISTRY_PASSWORD, "password");
+        givenPropertiesWith(CONTAINER_ENFORCEMENT_DIGEST, "sha256:test");
+
+        whenActivateInstanceIsCalledWith(this.properties);
+
+        thenNoExceptionOccurred();
+        thenWaitForContainerInstanceToBecome(CONTAINER_STATE_CREATED);
+        thenStartContainerWasCalledWith(this.properties);
+        thenAuthenticatedVerifySignatureWasNeverCalledFor("nginx", "latest", "aRealTrustAnchor ;)", true,
                 new PasswordRegistryCredentials(Optional.empty(), "username", new Password("password")));
     }
 
@@ -606,6 +636,13 @@ public class ContainerInstanceTest {
     private void thenAuthenticatedVerifySignatureWasCalledFor(String imageName, String imageTag, String trustAnchor,
             boolean verifyTlog, PasswordRegistryCredentials passwordRegistryCredentials) throws KuraException {
         verify(this.mockContainerSignatureValidationService, times(1)).verify(imageName, imageTag, trustAnchor,
+                verifyTlog, passwordRegistryCredentials);
+    }
+
+    private void thenAuthenticatedVerifySignatureWasNeverCalledFor(String imageName, String imageTag,
+            String trustAnchor, boolean verifyTlog, PasswordRegistryCredentials passwordRegistryCredentials)
+            throws KuraException {
+        verify(this.mockContainerSignatureValidationService, never()).verify(imageName, imageTag, trustAnchor,
                 verifyTlog, passwordRegistryCredentials);
     }
 

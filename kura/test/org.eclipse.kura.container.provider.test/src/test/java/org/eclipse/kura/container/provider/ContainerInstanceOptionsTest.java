@@ -764,6 +764,17 @@ public class ContainerInstanceOptionsTest {
         thenEnforcementDigestIs("sha256:test");
     }
 
+    @Test
+    public void testGetContainerConfigurationBySignature() {
+        givenDefaultProperties();
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetContainerConfigurationBySignature("sha256:extractedThroughSignatureVerification");
+
+        thenEnforcementDigestIs("sha256:extractedThroughSignatureVerification");
+
+    }
+
     private void testMemoryOption(String stringValue, Long longValue) {
         givenDefaultProperties();
         givenMemoryProperty(stringValue);
@@ -1022,6 +1033,10 @@ public class ContainerInstanceOptionsTest {
 
     private void whenGetContainerDescriptor() {
         this.containerDescriptor = this.cgdso.getContainerConfiguration();
+    }
+
+    private void whenGetContainerConfigurationBySignature(String signatureExtractedDigest) {
+        this.containerDescriptor = this.cgdso.getContainerConfigurationBySignature(signatureExtractedDigest);
     }
 
     private void thenEnabledStateIs(boolean b) {

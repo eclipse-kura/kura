@@ -16,6 +16,7 @@ package org.eclipse.kura.container.provider;
 import static java.util.Objects.isNull;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -49,8 +50,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     private ContainerOrchestrationService containerOrchestrationService;
     private Set<ContainerSignatureValidationService> availableContainerSignatureValidationService = new HashSet<>();
-    private String signatureExtractedDigest;
-
+    private ConfigurationService configurationService;
     private State state = new Disabled(new ContainerInstanceOptions(Collections.emptyMap()));
 
     public void setContainerOrchestrationService(final ContainerOrchestrationService containerOrchestrationService) {
@@ -69,6 +69,14 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         logger.info("Container signature validation service {} removed.",
                 containerSignatureValidationService.getClass());
         this.availableContainerSignatureValidationService.remove(containerSignatureValidationService);
+    }
+
+    public synchronized void setConfigurationService(final ConfigurationService confService) {
+        this.configurationService = confService;
+    }
+
+    public synchronized void unsetConfigurationService() {
+        this.configurationService = null;
     }
 
     // ----------------------------------------------------------------
@@ -92,7 +100,6 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
         try {
             ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
-            this.signatureExtractedDigest = null;
 
             if (!newProps.getEnforcementDigest().isPresent()) {
 
@@ -101,9 +108,10 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
                 if (newProps.getSignatureTrustAnchor().isPresent()) {
                     ValidationResult containerSignatureValidated = validateContainerImageSignature(newProps);
-                    this.signatureExtractedDigest = containerSignatureValidated.imageDigest().orElse("?");
+                    newProps.setEnforcementDigest(containerSignatureValidated.imageDigest());
+                    updateSnapshotWithSignatureDigest(newProps.getEnforcementDigest(), properties);
                     logger.info("Container signature validation result for {}@{}({}) - {}",
-                            newProps.getContainerImage(), this.signatureExtractedDigest,
+                            newProps.getContainerImage(), newProps.getEnforcementDigest().orElse("?"),
                             newProps.getContainerImageTag(),
                             containerSignatureValidated.isSignatureValid() ? "OK" : "FAIL");
                 } else {
@@ -352,9 +360,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             int maxRetries = options.getMaxDownloadRetries();
             int retryInterval = options.getRetryInterval();
 
-            final ContainerConfiguration containerConfiguration = options.getEnforcementDigest().isPresent()
-                    ? options.getContainerConfiguration()
-                    : options.getContainerConfigurationBySignature(signatureExtractedDigest);
+            final ContainerConfiguration containerConfiguration = options.getContainerConfiguration();
 
             int retries = 0;
             while ((unlimitedRetries || retries < maxRetries) && !Thread.currentThread().isInterrupted()) {
@@ -435,6 +441,21 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             return new Disabled(this.options);
         }
 
+    }
+
+    private void updateSnapshotWithSignatureDigest(Optional<String> enforcementDigest, Map<String, Object> properties) {
+
+        if (enforcementDigest.isPresent()) {
+            try {
+                Map<String, Object> updatedProperties = new HashMap<>(properties);
+                updatedProperties.put("enforcement.digest", enforcementDigest.get());
+                this.configurationService.updateConfiguration(
+                        (String) properties.get(ConfigurationService.KURA_SERVICE_PID), updatedProperties, true);
+            } catch (KuraException ex) {
+                logger.error("Impossible to update snapshot for pid {} due to {}",
+                        properties.get(ConfigurationService.KURA_SERVICE_PID), ex.getMessage());
+            }
+        }
     }
 
 }

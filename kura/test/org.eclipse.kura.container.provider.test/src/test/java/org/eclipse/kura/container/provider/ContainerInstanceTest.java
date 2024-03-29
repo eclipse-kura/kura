@@ -18,7 +18,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -36,6 +40,7 @@ import java.util.Optional;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
@@ -432,6 +437,7 @@ public class ContainerInstanceTest {
         givenContainerOrchestratorWithNoRunningContainers();
         givenContainerOrchestratorReturningOnStart("1234");
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
+        givenMockedConfigurationService();
 
         givenContainerSignatureValidationServiceReturningFailureForAuthenticated("nginx", "latest");
         givenContainerInstanceWith(this.mockContainerSignatureValidationService);
@@ -548,6 +554,12 @@ public class ContainerInstanceTest {
 
     private void givenContainerInstanceWith(ContainerSignatureValidationService signatureValidationService) {
         this.containerInstance.setContainerSignatureValidationService(signatureValidationService);
+    }
+
+    private void givenMockedConfigurationService() throws KuraException {
+        ConfigurationService mockedConfigurationService = mock(ConfigurationService.class);
+        doNothing().when(mockedConfigurationService).updateConfiguration(anyString(), anyMap(), anyBoolean());
+        this.containerInstance.setConfigurationService(mockedConfigurationService);
     }
 
     /*

@@ -105,7 +105,7 @@ public class ContainerInstanceOptions {
     private final Optional<String> signatureTrustAnchor;
     private final Boolean signatureVerifyTransparencyLog;
 
-    private final Optional<String> enforcementDigest;
+    private Optional<String> enforcementDigest;
 
     public ContainerInstanceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -361,6 +361,10 @@ public class ContainerInstanceOptions {
         return this.enforcementDigest;
     }
 
+    public void setEnforcementDigest(Optional<String> digest) {
+        this.enforcementDigest = digest;
+    }
+
     private ImageConfiguration buildImageConfig() {
         return new ImageConfiguration.ImageConfigurationBuilder().setImageName(this.image).setImageTag(this.imageTag)
                 .setImageDownloadTimeoutSeconds(this.imageDownloadTimeout)
@@ -392,22 +396,6 @@ public class ContainerInstanceOptions {
                 .setLoggerParameters(getLoggerParameters()).setEntryPoint(getEntryPoint())
                 .setRestartOnFailure(getRestartOnFailure()).setMemory(getMemory()).setCpus(getCpus()).setGpus(getGpus())
                 .setRuntime(getRuntime()).setEnforcementDigest(getEnforcementDigest()).build();
-    }
-
-    public ContainerConfiguration getContainerConfigurationBySignature(String signatureExtractedDigest) {
-
-        Optional<String> finalEnforcementDigest = (!signatureExtractedDigest.equals("?"))
-                ? Optional.of(signatureExtractedDigest)
-                : getEnforcementDigest();
-
-        return buildPortConfig(ContainerConfiguration.builder()).setContainerName(getContainerName())
-                .setImageConfiguration(buildImageConfig()).setEnvVars(getContainerEnvList())
-                .setVolumes(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
-                .setDeviceList(getContainerDeviceList()).setFrameworkManaged(true).setLoggingType(getLoggingType())
-                .setContainerNetowrkConfiguration(buildContainerNetworkConfig())
-                .setLoggerParameters(getLoggerParameters()).setEntryPoint(getEntryPoint())
-                .setRestartOnFailure(getRestartOnFailure()).setMemory(getMemory()).setCpus(getCpus()).setGpus(getGpus())
-                .setRuntime(getRuntime()).setEnforcementDigest(finalEnforcementDigest).build();
     }
 
     private List<Integer> parsePortString(String ports) {

@@ -466,7 +466,6 @@ public class ContainerInstanceOptions {
                 && Objects.equals(containerName, other.containerName)
                 && Objects.equals(containerNetworkingMode, other.containerNetworkingMode)
                 && Objects.equals(containerPortProtocol, other.containerPortProtocol)
-                && Objects.equals(containerRuntime, other.containerRuntime)
                 && Objects.equals(containerVolumeString, other.containerVolumeString)
                 && Objects.equals(containerVolumes, other.containerVolumes) && enabled == other.enabled
                 && Objects.equals(enforcementDigest, other.enforcementDigest)
@@ -477,6 +476,7 @@ public class ContainerInstanceOptions {
                 && Objects.equals(registryURL, other.registryURL)
                 && Objects.equals(registryUsername, other.registryUsername)
                 && restartOnFailure == other.restartOnFailure && retryInterval == other.retryInterval
+                && Objects.equals(containerRuntime, other.containerRuntime)
                 && Objects.equals(signatureTrustAnchor, other.signatureTrustAnchor)
                 && Objects.equals(signatureVerifyTransparencyLog, other.signatureVerifyTransparencyLog);
     }

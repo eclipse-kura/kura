@@ -84,7 +84,7 @@ To begin configuring the container, look under **Services** and select the item 
 
 - **Restart Container On Failure** - A boolean that tells the container engine to automatically restart the container when it has failed or shut down.
 
-- **Container Image Enforcement Digest** - A string representing the image digest allowed to be run from this container instances. It is used in the [Container Enforcement](#container-enforcement) service provided by the Container Orchestration Service.
+- **Container Image Enforcement Digest** - A string representing the digest for the image that will be allowed to run by this container instance (eg: `sha256:0000000000000000000000000000000000000000000000000000000000000000`). It is used in the [Container Enforcement](#container-enforcement) service provided by the Container Orchestration Service.
 
 After specifying container parameters, ensure to set **Enabled** to **true** and press **Apply**. The container engine will then pull the respective image, spin up and start the container. If the gateway or the framework is power cycled, and the container and Container Orchestration Service are set to **enabled**, the framework will automatically start the container again upon startup.
 
@@ -142,7 +142,9 @@ After the starting phase just described, Kura will continuously monitor the acti
 
 ## Container Instance Enforcement
 
-In the [Container Instance configuration](#configuring-the-container) is included an option that allows to add a specific digest to the enforcement allowlist: this option was designed to allow the authorization of a specific image, but only when a Container Instance run by Kura is using it.
+The [Container Instance configuration](#configuring-the-container) contains an option called *Container Image Enforcement Digest*, that allows to add a specific digest to the enforcement allowlist. When this is specified, only the matching image is allowed to execute. The framework will strictly enforce the policy to the containers running, in order to match a 1:1 relationship between running containers and defined container instances. 
+
+Whenever Kura executes a *digest-scan* on the running containers, the digests provided in the Container Instances configurations are added to the Container Orchestration Allowlist: in this way, the authorized images will be not only the ones identified by the Allowlist digests, but also the ones specified through the *Container Image Enforcement Digest* options.
 
 Everytime the enforcement feature performs a check on its startup or when a new container is started, it will consider as authorized all the digests included in the Container Orchestration Allowlist and those provided by the enabled Container Instances in Kura through the *Container Image Enforcement Digest* option.
 
@@ -150,7 +152,7 @@ Everytime the enforcement feature performs a check on its startup or when a new 
 So the authorization schemas presented in the [previous section](#container-enforcement) are updated like:
 ![Enforcement Flow With Instances](./images/diagramAllowlistWithInstances.png)
 
-As you can see, the *ContainerInstance2* digest is not included in the final allowlist, because it is disabled: so, if a container with digest *DIGEST Y* is started under the image condition, it will then be stopped and deleted.
+As you can see, the *ContainerInstance2* digest is not included in the final allowlist, because it is disabled: so, if a container with digest *DIGEST Y* is started while the enforcement is enabled, it will then be stopped and deleted, because its digest is not included in the allowlist, due to the absence of the disabled *ContainerInstance2*.
 
 Finally, everytime a ContainerInstance is disabled, deleted or updated, the enforcement feature will perform a check on all the running containers. This is done because the enforcement allowlist may no longer include the previously provided digest or the latter may have been replaced with a new one: there may therefore be containers that were previously allowed, But now they are no longer and must be stopped and deleted.
 

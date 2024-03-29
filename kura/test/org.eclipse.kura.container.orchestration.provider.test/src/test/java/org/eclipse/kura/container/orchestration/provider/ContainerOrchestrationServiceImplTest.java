@@ -18,7 +18,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -336,7 +335,7 @@ public class ContainerOrchestrationServiceImplTest {
 
         givenFullProperties(true);
         givenEnforcementEnabledProperty(true);
-        givenDockerServiceImplSpyForContainerInstancesDigests();
+        givenDockerServiceImplSpy();
         givenDockerClient();
 
         whenActivateInstance();
@@ -354,7 +353,7 @@ public class ContainerOrchestrationServiceImplTest {
 
         givenFullProperties(true);
         givenEnforcementEnabledProperty(true);
-        givenDockerServiceImplSpyForContainerInstancesDigests();
+        givenDockerServiceImplSpy();
         givenDockerClient();
 
         whenActivateInstance();
@@ -377,12 +376,6 @@ public class ContainerOrchestrationServiceImplTest {
     private void givenDockerServiceImplSpy() throws KuraException, InterruptedException {
         this.dockerService = Mockito.spy(new ContainerOrchestrationServiceImpl());
         Mockito.doNothing().when(this.dockerService).pullImage(any(ImageConfiguration.class));
-    }
-
-    private void givenDockerServiceImplSpyForContainerInstancesDigests() throws KuraException, InterruptedException {
-        this.dockerService = Mockito.spy(new ContainerOrchestrationServiceImpl());
-        doNothing().when(this.dockerService).pullImage(any(ImageConfiguration.class));
-
     }
 
     private void givenDockerClient() {

@@ -1011,9 +1011,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                     containerId);
             this.containerInstancesDigests.put(containerId, containerInstanceDigest.get());
         } else {
-            logger.info(
-                    "Container {} doesn't contain the enforcement digest. "
-                            + "If enforcement is enabled, be sure that the digest is included in the service allowlist",
+            logger.info("Container {} doesn't contain the enforcement digest. "
+                    + "If enforcement is enabled, be sure that the digest is included in the Orchestration Service allowlist",
                     containerId);
         }
 
@@ -1022,6 +1021,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private void removeContainerInstanceDigest(String containerId) {
         if (this.containerInstancesDigests.containsKey(containerId)) {
             this.containerInstancesDigests.remove(containerId);
+            logger.info("Removed digest of container with ID {} from Container Instances Allowlist", containerId);
             enforceAlreadyRunningContainer();
         }
     }

@@ -144,17 +144,17 @@ After the starting phase just described, Kura will continuously monitor the acti
 
 The [Container Instance configuration](#configuring-the-container) contains an option called *Container Image Enforcement Digest*, that allows to add a specific digest to the enforcement allowlist. When this is specified, only the matching image is allowed to execute. The framework will strictly enforce the policy to the containers running, in order to match a 1:1 relationship between running containers and defined container instances. 
 
-Whenever Kura executes a *digest-scan* on the running containers, the digests provided in the Container Instances configurations are added to the Container Orchestration Allowlist: in this way, the authorized images will be not only the ones identified by the Allowlist digests, but also the ones specified through the *Container Image Enforcement Digest* options.
+Whenever Eclipse Kura executes a *digest-scan* on the running containers, the digests provided in the Container Instances configurations are added to the Container Orchestration Allowlist: in this way, the authorised images will be not only the ones identified by the Allowlist digests, but also the ones specified through the *Container Image Enforcement Digest* options.
 
-Everytime the enforcement feature performs a check on its startup or when a new container is started, it will consider as authorized all the digests included in the Container Orchestration Allowlist and those provided by the enabled Container Instances in Kura through the *Container Image Enforcement Digest* option.
+Everytime the enforcement feature performs a check on its startup or when a new container is started, it will consider as authorized all the digests included in the Container Orchestration Allowlist and those provided by the enabled Container Instances in Eclipse Kura through the *Container Image Enforcement Digest* option.
 
 
 So the authorization schemas presented in the [previous section](#container-enforcement) are updated like:
 ![Enforcement Flow With Instances](./images/diagramAllowlistWithInstances.png)
 
-As you can see, the *ContainerInstance2* digest is not included in the final allowlist, because it is disabled: so, if a container with digest *DIGEST Y* is started while the enforcement is enabled, it will then be stopped and deleted, because its digest is not included in the allowlist, due to the absence of the disabled *ContainerInstance2*.
+As you can see from the image, the final `Enforcement Allowlist` box doesn't contain the *ContainerInstance2*, because, being it disabled, the corresponding digest is ignored: so, if the enforcement is enable and a container with digest *DIGEST Y* is started, it will then be stopped and deleted, because its digest won't be included in the allowlist.
 
-Finally, everytime a ContainerInstance is disabled, deleted or updated, the enforcement feature will perform a check on all the running containers. This is done because the enforcement allowlist may no longer include the previously provided digest or the latter may have been replaced with a new one: there may therefore be containers that were previously allowed, But now they are no longer and must be stopped and deleted.
+Finally, everytime a *Container Image Enforcement Digest* option is updated, or the ContainerInstance is disabled or deleted, the enforcement feature will perform a check on all the already running containers. This is done because if the digest that was previously provided has changed after an instance update, or removed due to disabling or deleting the instance, those containers that were previously authorised by this digest are no longer allowed to run. So they must be stopped and deleted. 
 
 !!! warning
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,20 +21,14 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.audit.AuditContext.Scope;
 import org.eclipse.kura.web.Console;
-import org.eclipse.kura.web.UserManager;
-import org.eclipse.kura.web.server.RequiredPermissions.Mode;
-import org.eclipse.kura.web.session.Attributes;
-import org.eclipse.kura.web.shared.model.GwtUserConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,12 +100,13 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
      * alternative approach.
      *
      * @param request
-     *            the HTTP request being serviced
+     *                      the HTTP request being serviced
      * @param moduleBaseURL
-     *            as specified in the incoming payload
+     *                      as specified in the incoming payload
      * @param strongName
-     *            a strong name that uniquely identifies a serialization policy
-     *            file
+     *                      a strong name that uniquely identifies a serialization
+     *                      policy
+     *                      file
      * @return a {@link SerializationPolicy} for the given module base URL and
      *         strong name, or <code>null</code> if there is none
      */
@@ -244,76 +239,8 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
             return;
         }
 
-        final HttpSession session = getThreadLocalRequest().getSession(false);
-
-        final UserManager userManager = Console.instance().getUserManager();
-
-        final Object rawUserName = session.getAttribute(Attributes.AUTORIZED_USER.getValue());
-
-        if (!(rawUserName instanceof String)) {
-            throw new KuraPermissionException();
-        }
-
-        final String userName = (String) rawUserName;
-
-        final Optional<GwtUserConfig> config = userManager.getUserConfig(userName);
-
-        if (!config.isPresent()) {
-            throw new KuraPermissionException();
-        }
-
-        if (config.get().isAdmin()) {
-            return;
-        }
-
-        if (requiredPermissions.get().mode() == Mode.ALL) {
-            if (!containsAll(requiredPermissions.get().value(), config.get().getPermissions())) {
-                throw new KuraPermissionException();
-            }
-        } else {
-            if (!containsAny(requiredPermissions.get().value(), config.get().getPermissions())) {
-                throw new KuraPermissionException();
-            }
-        }
-
+        requirePermissions(getThreadLocalRequest(), requiredPermissions.get().mode(),
+                requiredPermissions.get().value());
     }
 
-    private static boolean containsAll(final String[] required, final Set<String> actual) {
-        for (final String req : required) {
-            if (!actual.contains(req)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private static boolean containsAny(final String[] required, final Set<String> actual) {
-        for (final String req : required) {
-            if (actual.contains(req)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    protected void doUnexpectedFailure(Throwable e) {
-        if (e instanceof KuraPermissionException) {
-            try {
-                getThreadLocalResponse().sendError(403);
-                return;
-            } catch (IOException e1) {
-                // ignore
-            }
-        }
-        super.doUnexpectedFailure(e);
-    }
-
-    private class KuraPermissionException extends RuntimeException {
-
-        private static final long serialVersionUID = 7782509676228955785L;
-
-    }
 }

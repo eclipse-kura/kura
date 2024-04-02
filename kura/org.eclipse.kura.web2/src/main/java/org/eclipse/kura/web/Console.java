@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -38,6 +39,7 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.KuraConfigReadyEvent;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.api.ClientExtensionBundle;
@@ -90,7 +92,6 @@ import org.osgi.service.event.EventProperties;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,7 +127,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     private CryptoService cryptoService;
     private SslManagerService sslManagerService;
 
-    private UserAdmin userAdmin;
+    private IdentityService identityService;
 
     private EventAdmin eventAdmin;
     private UserManager userManager;
@@ -176,8 +177,8 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         this.eventAdmin = eventAdmin;
     }
 
-    public void setUserAdmin(final UserAdmin userAdmin) {
-        this.userAdmin = userAdmin;
+    public void setIdentityService(final IdentityService identityService) {
+        this.identityService = identityService;
     }
 
     // ----------------------------------------------------------------
@@ -208,7 +209,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         logger.info("activate...");
 
         setComponentContext(context);
-        this.userManager = new UserManager(this.userAdmin, this.cryptoService);
+        this.userManager = new UserManager(this.identityService);
 
         doUpdate(properties);
 
@@ -218,7 +219,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
         try {
             logger.info("initializing useradmin...");
-            this.userManager.update(consoleOptions);
+            this.userManager.update();
             logger.info("initializing useradmin...done");
         } catch (final Exception e) {
             logger.warn("failed to update UserAdmin", e);
@@ -264,7 +265,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         Console.setConsoleOptions(options);
 
         try {
-            this.userManager.update(consoleOptions);
+            this.userManager.update();
         } catch (Exception e) {
             logger.warn("Error Updating Web properties", e);
         }
@@ -505,7 +506,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/assetsUpDownload", new ChannelServlet(), null,
                 this.sessionContext);
-        this.httpService.registerServlet(DENALI_MODULE_PATH + "/log", new LogServlet(), null, resourceContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/log", new LogServlet(), null, this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/skin", new SkinServlet(), null, resourceContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/cloudservices", new GwtCloudConnectionServiceImpl(),
                 null, this.sessionContext);
@@ -671,7 +672,11 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
         context.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), user);
         session.setAttribute(Attributes.AUDIT_CONTEXT.getValue(), context);
-        session.setAttribute(Attributes.CREDENTIALS_HASH.getValue(), this.userManager.getCredentialsHash(user));
+        try {
+            session.setAttribute(Attributes.CREDENTIALS_HASH.getValue(), this.userManager.getCredentialsHash(user));
+        } catch (Exception e) {
+            logger.warn("failed to compute credentials hash", e);
+        }
 
         return CONSOLE_PATH;
     }

@@ -40,6 +40,7 @@ import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.container.orchestration.PortInternetProtocol;
 import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
+import org.eclipse.kura.container.orchestration.provider.impl.enforcement.AllowlistEnforcementMonitor;
 import org.eclipse.kura.crypto.CryptoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +89,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private DockerClient dockerClient;
     private CryptoService cryptoService;
     private List<ExposedPort> exposedPorts;
+    private AllowlistEnforcementMonitor allowlistEnforcementMonitor;
 
     public void setDockerClient(DockerClient dockerClient) {
         this.dockerClient = dockerClient;
@@ -127,17 +129,68 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 return;
             }
 
+            if (this.allowlistEnforcementMonitor != null) {
+                closeEnforcementMonitor();
+            }
+
             connect();
 
             if (!testConnection()) {
                 logger.error("Could not connect to docker CLI.");
                 return;
             }
-
             logger.info("Connection Successful");
+
+            if (currentConfig.isEnforcementEnabled()) {
+                try {
+                    startEnforcementMonitor();
+                } catch (Exception ex) {
+                    logger.error("Error starting enforcement monitor. Due to {}", ex.getMessage());
+                    closeEnforcementMonitor();
+                    logger.warn("Enforcement won't be active.");
+                }
+                enforceAlreadyRunningContainer();
+            }
         }
 
         logger.info("Bundle {} has updated with config!", APP_ID);
+    }
+
+    private void startEnforcementMonitor() {
+        logger.info("Enforcement monitor starting...");
+        this.allowlistEnforcementMonitor = this.dockerClient.eventsCmd().withEventFilter("start")
+                .exec(new AllowlistEnforcementMonitor(currentConfig.getEnforcementAllowlist(), this));
+        logger.info("Enforcement monitor starting...done.");
+    }
+
+    private void closeEnforcementMonitor() {
+
+        if (this.allowlistEnforcementMonitor == null) {
+            return;
+        }
+
+        try {
+            logger.info("Enforcement monitor closing...");
+            this.allowlistEnforcementMonitor.close();
+            this.allowlistEnforcementMonitor.awaitCompletion(5, TimeUnit.SECONDS);
+            this.allowlistEnforcementMonitor = null;
+            logger.info("Enforcement monitor closing...done.");
+        } catch (InterruptedException ex) {
+            logger.error("Waited too long to close enforcement monitor, stopping it...", ex);
+            Thread.currentThread().interrupt();
+        } catch (IOException ex) {
+            logger.error("Failed to close enforcement monitor, stopping it...", ex);
+        }
+    }
+
+    private void enforceAlreadyRunningContainer() {
+        if (this.allowlistEnforcementMonitor == null) {
+            logger.warn("Enforcement wasn't started. Check on running containers will not be performed.");
+            return;
+        }
+        logger.info("Enforcement check on already running containers...");
+        this.allowlistEnforcementMonitor.enforceAllowlistFor(listContainerDescriptors());
+        logger.info("Enforcement check on already running containers...done");
     }
 
     @Override
@@ -337,7 +390,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     @Override
     public void stopContainer(String id) throws KuraException {
         checkRequestEnv(id);
-
         try {
             this.dockerClient.stopContainerCmd(id).exec();
         } catch (Exception e) {
@@ -490,7 +542,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 configuration = configuration.withPrivileged(containerDescription.isContainerPrivileged());
             }
 
-            commandBuilder.withExposedPorts(this.exposedPorts);
+            commandBuilder = commandBuilder.withExposedPorts(this.exposedPorts);
 
             return commandBuilder.withHostConfig(configuration).exec().getId();
 
@@ -770,6 +822,10 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     private void cleanUpDocker() {
 
+        if (this.allowlistEnforcementMonitor != null) {
+            closeEnforcementMonitor();
+        }
+
         if (testConnection()) {
             this.dockerServiceListeners.forEach(ContainerOrchestrationServiceListener::onDisabled);
             disconnect();
@@ -926,6 +982,26 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Delete Container Image",
                     "500 (server error). Image is most likely in use by a container.");
         }
+    }
+
+    public Set<String> getImageDigestsByContainerId(String containerId) {
+
+        Set<String> imageDigests = new HashSet<>();
+
+        String containerName = listContainerDescriptors().stream()
+                .filter(container -> container.getContainerId().equals(containerId)).findFirst()
+                .map(container -> container.getContainerName()).orElse(null);
+
+        if (containerName == null) {
+            return imageDigests;
+        }
+
+        dockerClient.listImagesCmd().withImageNameFilter(containerName).exec().stream().forEach(image -> {
+            List<String> digests = Arrays.asList(image.getRepoDigests());
+            digests.stream().forEach(digest -> imageDigests.add(digest.split("@")[1]));
+        });
+
+        return imageDigests;
     }
 
 }

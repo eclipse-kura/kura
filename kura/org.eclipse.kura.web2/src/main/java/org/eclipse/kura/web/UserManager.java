@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 Eurotech and/or its affiliates
+ * Copyright (c) 2020, 2024 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -10,242 +10,253 @@
 
 package org.eclipse.kura.web;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.util.useradmin.UserAdminHelper;
-import org.eclipse.kura.util.useradmin.UserAdminHelper.AuthenticationException;
-import org.eclipse.kura.util.useradmin.UserAdminHelper.FallibleConsumer;
+import org.eclipse.kura.identity.AdditionalConfigurations;
+import org.eclipse.kura.identity.AssignedPermissions;
+import org.eclipse.kura.identity.IdentityConfiguration;
+import org.eclipse.kura.identity.IdentityConfigurationComponent;
+import org.eclipse.kura.identity.IdentityService;
+import org.eclipse.kura.identity.PasswordConfiguration;
+import org.eclipse.kura.identity.PasswordHash;
+import org.eclipse.kura.identity.Permission;
+import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.shared.KuraPermission;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtUserConfig;
-import org.eclipse.kura.web.shared.model.GwtUserData;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.useradmin.Role;
-import org.osgi.service.useradmin.User;
-import org.osgi.service.useradmin.UserAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("restriction")
 public class UserManager {
 
-    private static final String PERMISSION_ROLE_NAME_PREFIX = "kura.permission.";
-    private static final String USER_ROLE_NAME_PREFIX = "kura.user.";
-    private static final String PASSWORD_PROPERTY = "kura.password";
-    private static final String KURA_NEED_PASSWORD_CHANGE = "kura.need.password.change";
+    private static final Set<Class<? extends IdentityConfigurationComponent>> ALL_COMPONENTS = new HashSet<>(
+            Arrays.asList(PasswordConfiguration.class, AssignedPermissions.class, AdditionalConfigurations.class));
 
-    private final CryptoService cryptoService;
+    private static final Logger logger = LoggerFactory.getLogger(UserManager.class);
 
-    private final UserAdminHelper userAdminHelper;
+    private final IdentityService identityService;
 
-    public UserManager(final UserAdmin userAdmin, final CryptoService cryptoService) {
-        this.cryptoService = cryptoService;
-        this.userAdminHelper = new UserAdminHelper(userAdmin, cryptoService);
+    public UserManager(final IdentityService identityService) {
+        this.identityService = identityService;
     }
 
-    public void update(final ConsoleOptions consoleOptions)
-            throws NoSuchAlgorithmException, UnsupportedEncodingException, KuraException, InvalidSyntaxException {
-        initializeUserAdmin(consoleOptions);
+    public void update() {
+        initializeUserAdmin();
     }
 
     public void authenticateWithPassword(final String username, final String password) throws KuraException {
-        try {
-            this.userAdminHelper.verifyUsernamePassword(username, password);
-        } catch (final AuthenticationException e) {
-            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, e);
-        }
-    }
+        final PasswordConfiguration passwordConfiguration = this.identityService
+                .getIdentityConfiguration(username, Collections.singleton(PasswordConfiguration.class))
+                .flatMap(i -> i.getComponent(PasswordConfiguration.class))
+                .orElseThrow(() -> new KuraException(KuraErrorCode.SECURITY_EXCEPTION));
 
-    public void requirePermissions(final String username, final String... permissions) throws KuraException {
-        try {
-            this.userAdminHelper.requirePermissions(username, permissions);
-        } catch (final AuthenticationException e) {
-            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, e);
-        }
-    }
-
-    public boolean isPasswordChangeRequired(final String username) {
-        return this.userAdminHelper.isPasswordChangeRequired(username);
-    }
-
-    public void createUser(final String userName) {
-        this.userAdminHelper.createUser(userName);
-    }
-
-    public void deleteUser(final String userName) {
-
-        this.userAdminHelper.deleteUser(userName);
-    }
-
-    public boolean setUserPassword(final String userName, final String userPassword) throws KuraException {
-        try {
-            this.userAdminHelper.changeUserPassword(userName, userPassword);
-            return true;
-        } catch (final AuthenticationException e) {
-            if (e.getReason() == AuthenticationException.Reason.PASSWORD_CHANGE_WITH_SAME_PASSWORD) {
-                return false;
-            }
-
+        if (!passwordConfiguration.isPasswordAuthEnabled() || !Objects.equals(passwordConfiguration.getPasswordHash(),
+                Optional.of(this.identityService.computePasswordHash(password.toCharArray())))) {
             throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
         }
     }
 
-    public Set<String> getDefinedPermissions() {
-        return this.userAdminHelper.getDefinedPermissions();
-    }
+    public void requirePermissions(final String username, final String... requiredPermissions) throws KuraException {
 
-    public Set<GwtUserConfig> getUserConfig() {
-        final Map<String, GwtUserConfig> result = new HashMap<>();
+        final AssignedPermissions assignedPermissions = this.identityService
+                .getIdentityConfiguration(username, Collections.singleton(AssignedPermissions.class))
+                .flatMap(i -> i.getComponent(AssignedPermissions.class))
+                .orElseThrow(() -> new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Identity not found"));
 
-        this.userAdminHelper.foreachUser((name, user) -> {
-
-            final GwtUserConfig userData = initUserConfig(user);
-
-            result.put(user.getName(), userData);
-        });
-
-        fillPermissions(result);
-
-        return new HashSet<>(result.values());
-    }
-
-    public Optional<GwtUserConfig> getUserConfig(final String userName) {
-
-        final Optional<User> user = this.userAdminHelper.getUser(userName);
-
-        if (!user.isPresent()) {
-            return Optional.empty();
+        if (assignedPermissions.getPermissions().contains(new Permission("admin"))) {
+            return;
         }
 
-        final GwtUserConfig userConfig = initUserConfig(user.get());
-
-        fillPermissions(Collections.singletonMap(user.get().getName(), userConfig));
-
-        return Optional.of(userConfig);
-
-    }
-
-    public Optional<Integer> getCredentialsHash(final String userName) {
-        return this.userAdminHelper.getCredentialsHash(userName);
-    }
-
-    @SuppressWarnings("unchecked")
-    public void setUserConfig(final Set<GwtUserConfig> userData) throws KuraException {
-        this.userAdminHelper.foreachUser((name, user) -> {
-            if (userData.stream().noneMatch(data -> data.getUserName().equals(name))) {
-                deleteUser(name);
-            }
-        });
-
-        this.userAdminHelper.foreachPermission((permissionName, permissionGroup) -> {
-            for (final GwtUserData data : userData) {
-
-                final User user = this.userAdminHelper.getOrCreateUser(data.getUserName());
-
-                if (data.getPermissions().contains(permissionName)) {
-                    permissionGroup.addMember(user);
-                } else {
-                    permissionGroup.removeMember(user);
-                }
-            }
-        });
-
-        for (final GwtUserConfig config : userData) {
-            final User user = this.userAdminHelper.getOrCreateUser(config.getUserName());
-
-            @SuppressWarnings("rawtypes")
-            final Dictionary credentials = user.getCredentials();
-
-            if (config.isPasswordAuthEnabled()) {
-                final Optional<String> password = config.getNewPassword();
-
-                if (password.isPresent()) {
-                    try {
-                        credentials.put(PASSWORD_PROPERTY, cryptoService.sha256Hash(password.get()));
-                    } catch (final Exception e) {
-                        throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, e);
-                    }
-                }
-            } else {
-                credentials.remove(PASSWORD_PROPERTY);
-            }
-
-            @SuppressWarnings("rawtypes")
-            final Dictionary properties = user.getProperties();
-
-            if (config.isPasswordChangeNeeded()) {
-                properties.put(KURA_NEED_PASSWORD_CHANGE, "true");
-            } else {
-                properties.remove(KURA_NEED_PASSWORD_CHANGE);
+        for (final String requiredPermission : requiredPermissions) {
+            if (!assignedPermissions.getPermissions().contains(new Permission(requiredPermission))) {
+                throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION,
+                        "identity does not have the " + requiredPermission + " perimission");
             }
         }
     }
 
-    private GwtUserConfig initUserConfig(final User user) {
+    public boolean isPasswordChangeRequired(final String username) throws KuraException {
 
-        final boolean isPasswordEnabled = user.getCredentials().get(PASSWORD_PROPERTY) instanceof String;
-        final boolean isPasswordChangeRequired = Objects.equals("true",
-                user.getProperties().get(KURA_NEED_PASSWORD_CHANGE));
+        return this.identityService
+                .getIdentityConfiguration(username, Collections.singleton(PasswordConfiguration.class))
+                .flatMap(p -> p.getComponent(PasswordConfiguration.class))
+                .map(p -> p.isPasswordChangeNeeded())
+                .orElse(false);
 
-        return new GwtUserConfig(getBaseName(user), new HashSet<>(), isPasswordEnabled, isPasswordChangeRequired);
     }
 
-    private void fillPermissions(final Map<String, ? extends GwtUserData> userData) {
-        this.userAdminHelper.foreachPermission((permission, group) -> {
+    public void createUser(final String userName) throws KuraException {
+        this.identityService.createIdentity(userName);
+    }
 
-            forEach(group.getMembers(), member -> {
-                final GwtUserData data = userData.get(member.getName());
+    public void deleteUser(final String userName) throws KuraException {
+        this.identityService.deleteIdentity(userName);
+    }
 
-                if (data != null) {
-                    data.getPermissions().add(permission);
+    public void setUserPassword(final String userName, final String userPassword) throws KuraException {
+
+        this.identityService.updateIdentityConfigurations(Collections.singletonList(new IdentityConfiguration(userName,
+                Collections.singletonList(
+                        new PasswordConfiguration(false, true,
+                                Optional.of(this.identityService.computePasswordHash(userPassword.toCharArray())))))));
+
+    }
+
+    public Set<String> getDefinedPermissions() throws KuraException {
+        return this.identityService.getPermissions().stream().map(Permission::getName).collect(Collectors.toSet());
+    }
+
+    public Set<GwtUserConfig> getUserConfig() throws KuraException {
+
+        return getUserConfig(ALL_COMPONENTS);
+
+    }
+
+    public Set<GwtUserConfig> getUserConfig(
+            final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn)
+            throws KuraException {
+
+        return this.identityService
+                .getIdentitiesConfiguration(componentsToReturn)
+                .stream().map(this::getUserConfig).collect(Collectors.toSet());
+    }
+
+    public GwtUserConfig getUserDefaultConfig(final String name) throws KuraException {
+        return getUserDefaultConfig(name, ALL_COMPONENTS);
+    }
+
+    public GwtUserConfig getUserDefaultConfig(final String name,
+            final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws KuraException {
+        return getUserConfig(this.identityService.getIdentityDefaultConfiguration(name, componentsToReturn));
+    }
+
+    public Optional<GwtUserConfig> getUserConfig(final String name) throws KuraException {
+        return getUserConfig(name, ALL_COMPONENTS);
+    }
+
+    public Optional<GwtUserConfig> getUserConfig(final String name,
+            final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws KuraException {
+        return this.identityService
+                .getIdentityConfiguration(name, componentsToReturn)
+                .map(this::getUserConfig);
+    }
+
+    public GwtUserConfig getUserConfig(final IdentityConfiguration identity) {
+
+        final Optional<PasswordConfiguration> passwordData = identity.getComponent(PasswordConfiguration.class);
+
+        final Set<String> perimissions = identity.getComponent(AssignedPermissions.class)
+                .map(AssignedPermissions::getPermissions).orElseGet(Collections::emptySet)
+                .stream().map(Permission::getName).collect(Collectors.toSet());
+
+        final Map<String, GwtConfigComponent> additionalConfigurations = identity
+                .getComponent(AdditionalConfigurations.class)
+                .map(AdditionalConfigurations::getConfigurations).orElseGet(Collections::emptyList)
+                .stream().map(GwtServerUtil::toGwtConfigComponent).filter(Objects::nonNull)
+                .collect(Collectors.toMap(c -> c.getComponentId(), c -> c));
+
+        return new GwtUserConfig(identity.getName(), perimissions,
+                additionalConfigurations,
+                passwordData.map(PasswordConfiguration::isPasswordAuthEnabled).orElse(false),
+                passwordData.map(PasswordConfiguration::isPasswordChangeNeeded).orElse(false));
+
+    }
+
+    public Optional<Integer> getCredentialsHash(final String userName) throws KuraException {
+
+        return this.identityService
+                .getIdentityConfiguration(userName, Collections.singleton(PasswordConfiguration.class))
+                .flatMap(i -> i.getComponent(PasswordConfiguration.class)).map(i -> i.getPasswordHash().hashCode());
+
+    }
+
+    public void setUserConfig(final Set<GwtUserConfig> userConfigs) throws KuraException {
+
+        final List<IdentityConfiguration> configurations = new ArrayList<>();
+
+        for (final GwtUserConfig config : userConfigs) {
+            configurations.add(buildIdentityConfiguration(config));
+        }
+
+        this.identityService.validateIdentityConfigurations(configurations);
+
+        final Set<String> existingIdentityNames = this.identityService
+                .getIdentitiesConfiguration(Collections.emptySet()).stream()
+                .map(IdentityConfiguration::getName).collect(Collectors.toSet());
+
+        for (final String existingIdentity : existingIdentityNames) {
+            if (userConfigs.stream().noneMatch(data -> data.getUserName().equals(existingIdentity))) {
+                try {
+                    deleteUser(existingIdentity);
+                } catch (Exception e) {
+                    throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
+                            "Failed to delete identity " + existingIdentity);
                 }
-            });
-        });
+            }
+        }
+
+        for (final GwtUserConfig config : userConfigs) {
+            if (!existingIdentityNames.contains(config.getUserName())) {
+                try {
+                    createUser(config.getUserName());
+                } catch (Exception e) {
+                    throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
+                            "Failed to create identity " + config.getUserName());
+                }
+            }
+        }
+
+        this.identityService.updateIdentityConfigurations(configurations);
+
     }
 
-    private static boolean isKuraUser(final Role role) {
-        return role.getName().startsWith(USER_ROLE_NAME_PREFIX);
-    }
+    private IdentityConfiguration buildIdentityConfiguration(final GwtUserConfig config) throws KuraException {
+        final Set<Permission> permissions = config.getPermissions().stream().map(Permission::new)
+                .collect(Collectors.toSet());
+        final AssignedPermissions assignedPermissions = new AssignedPermissions(permissions);
 
-    private static boolean isKuraPermission(final Role role) {
-        return role.getName().startsWith(PERMISSION_ROLE_NAME_PREFIX);
-    }
+        final Optional<String> newPassword = config.getNewPassword();
+        final Optional<PasswordHash> passwordHash;
 
-    private static String getBaseName(final Role role) {
-        final String name = role.getName();
-
-        if (isKuraUser(role)) {
-            return name.substring(USER_ROLE_NAME_PREFIX.length());
-        } else if (isKuraPermission(role)) {
-            return name.substring(PERMISSION_ROLE_NAME_PREFIX.length());
+        if (newPassword.isPresent()) {
+            passwordHash = Optional
+                    .of(this.identityService.computePasswordHash(newPassword.get().toCharArray()));
         } else {
-            throw new IllegalArgumentException("not a Kura role");
+            passwordHash = Optional.empty();
         }
+
+        final PasswordConfiguration passwordData = new PasswordConfiguration(config.isPasswordChangeNeeded(),
+                config.isPasswordAuthEnabled(), passwordHash);
+
+        final AdditionalConfigurations additionalConfigurations = new AdditionalConfigurations(
+                config.getAdditionalConfigurations().values()
+                        .stream().map(c -> GwtServerUtil.fromGwtConfigComponent(c, null))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()));
+
+        return new IdentityConfiguration(config.getUserName(),
+                Arrays.asList(passwordData, assignedPermissions, additionalConfigurations));
     }
 
-    private static <T, E extends Exception> void forEach(final T[] items, final FallibleConsumer<T, E> consumer)
-            throws E {
-        if (items != null) {
-            for (final T item : items) {
-                consumer.accept(item);
-            }
-        }
-    }
-
-    private void initializeUserAdmin(final ConsoleOptions options)
-            throws NoSuchAlgorithmException, UnsupportedEncodingException, KuraException, InvalidSyntaxException {
+    private void initializeUserAdmin() {
 
         for (final String defaultPermission : KuraPermission.DEFAULT_PERMISSIONS) {
-            this.userAdminHelper.getOrCreatePermission(defaultPermission);
+            try {
+                this.identityService.createPermission(new Permission(defaultPermission));
+            } catch (final KuraException e) {
+                logger.warn("Failed to create permission", e);
+            }
         }
     }
 

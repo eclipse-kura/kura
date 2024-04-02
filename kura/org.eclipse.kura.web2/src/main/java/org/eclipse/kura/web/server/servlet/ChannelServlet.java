@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,8 @@ import javax.servlet.http.HttpSession;
 import javax.xml.ws.http.HTTPException;
 
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
+import org.eclipse.kura.web.server.RequiredPermissions.Mode;
+import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,13 +40,20 @@ public class ChannelServlet extends AuditServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        HttpSession session = req.getSession(false);
-        // BEGIN XSRF - Servlet dependent code
+        KuraRemoteServiceServlet.requirePermissions(req, Mode.ALL, new String[] { KuraPermission.WIRES_ADMIN });
 
+        HttpSession session = req.getSession(false);
+
+        // BEGIN XSRF - Servlet dependent code
         try {
             GwtXSRFToken token = new GwtXSRFToken(req.getParameter("xsrfToken"));
             KuraRemoteServiceServlet.checkXSRFToken(req, token);
-            // END XSRF security check
+        } catch (Exception e) {
+            throw new ServletException("Security error: please retry this operation correctly.", e);
+        }
+        // END XSRF security check
+
+        try {
             String assetPid = req.getParameter("assetPid");
             String id = req.getParameter("id");
 

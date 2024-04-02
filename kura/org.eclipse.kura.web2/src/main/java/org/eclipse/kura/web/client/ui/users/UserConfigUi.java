@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,16 +17,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.ConfigurableComponentUi;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.Picker;
 import org.eclipse.kura.web.client.ui.drivers.assets.BooleanInputCell;
 import org.eclipse.kura.web.client.ui.validator.GwtValidators;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtUserConfig;
 import org.eclipse.kura.web.shared.model.GwtUserData;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.Heading;
 import org.gwtbootstrap3.client.ui.InlineRadio;
+import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelFooter;
+import org.gwtbootstrap3.client.ui.PanelHeader;
+import org.gwtbootstrap3.client.ui.constants.HeadingSize;
 import org.gwtbootstrap3.client.ui.constants.InputType;
 import org.gwtbootstrap3.client.ui.form.validator.Validator;
 
@@ -71,6 +78,8 @@ public class UserConfigUi extends Composite {
     CellTable<AssignedPermission> permissionTable;
     @UiField
     PanelFooter tablePanelFooter;
+    @UiField
+    PanelBody additionalConfigurationsPanel;
 
     private final Listener listener;
     private final GwtUserConfig userData;
@@ -89,6 +98,7 @@ public class UserConfigUi extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         initTable(userData, definedPermissions);
         initPasswordWidgets();
+        renderAdditionalConfigurations(userData);
     }
 
     private void initTable(final GwtUserData userData, final Set<String> definedPermissions) {
@@ -162,6 +172,49 @@ public class UserConfigUi extends Composite {
         }
 
         ColumnSortEvent.fire(this.permissionTable, this.permissionTable.getColumnSortList());
+    }
+
+    private void renderAdditionalConfigurations(final GwtUserConfig gwtUserConfig) {
+        for (final GwtConfigComponent additionalConfiguration : gwtUserConfig.getAdditionalConfigurations().values()) {
+            final ConfigurableComponentUi configurableComponentUi = new ConfigurableComponentUi(
+                    additionalConfiguration);
+
+            configurableComponentUi.setListener(new HasConfiguration.Listener() {
+
+                @Override
+                public void onConfigurationChanged(HasConfiguration hasConfiguration) {
+                    addAdditionalConfiguration(hasConfiguration);
+                }
+
+                @Override
+                public void onDirtyStateChanged(HasConfiguration hasConfiguration) {
+                    addAdditionalConfiguration(hasConfiguration);
+                }
+
+                private void addAdditionalConfiguration(HasConfiguration hasConfiguration) {
+                    if (!hasConfiguration.isDirty()) {
+                        return;
+                    }
+                    
+                    if (hasConfiguration.isValid()) {
+                        final GwtConfigComponent updatedConfiguration = hasConfiguration.getConfiguration();
+
+                        userData.getAdditionalConfigurations().put(hasConfiguration.getComponentId(),
+                                updatedConfiguration);
+                        listener.onUserDataChanged(userData);
+                    }
+                }
+                
+            });
+
+            final PanelHeader header = new PanelHeader();
+            final Heading heading = new Heading(HeadingSize.H3);
+            heading.setText(additionalConfiguration.getComponentName());
+            header.add(heading);
+
+            additionalConfigurationsPanel.add(header);
+            additionalConfigurationsPanel.add(configurableComponentUi);
+        }
     }
 
     public void initPasswordWidgets() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -32,6 +32,7 @@ import java.util.stream.Stream;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -778,7 +779,7 @@ public final class GwtServerUtil {
                 if (gwt8021xConfig != null) {
                     gwt8021xConfig.setPassword(PASSWORD_PLACEHOLDER);
                 }
-                
+
             } else if (netConfig instanceof GwtModemInterfaceConfig) {
                 GwtModemInterfaceConfig modemConfig = (GwtModemInterfaceConfig) netConfig;
                 modemConfig.setPassword(PASSWORD_PLACEHOLDER);
@@ -802,5 +803,9 @@ public final class GwtServerUtil {
             logger.warn("password strenght requirements not satisfied: {}", errors);
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
         }
+    }
+
+    public static String getSessionIdHash(final HttpSession session) {
+        return Integer.toUnsignedString(Objects.hash(session.getId()));
     }
 }

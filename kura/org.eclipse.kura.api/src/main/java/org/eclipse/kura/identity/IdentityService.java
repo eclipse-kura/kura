@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.identity;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -106,16 +107,30 @@ public interface IdentityService {
             Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws KuraException;
 
     /**
-     * Updates the configuration of the given identity for the provided
+     * Validates the provided list of identity configurations without performing any
+     * change to the system.
+     * 
+     * @param identityConfigurations the identity configurations that should be
+     *                               validated.
+     * @throws KuraException if any the provided identity configurations is not
+     *                       valid.
+     */
+    public void validateIdentityConfigurations(final Collection<IdentityConfiguration> identityConfigurations)
+            throws KuraException;
+
+    /**
+     * Updates the configuration of the given identities for the provided
      * {@link IdentityConfigurationComponent} types.
-     * The configuration of the
+     * The configuration of the identities or identity
      * components that have not been provided will not be modified.
      * 
-     * @param identityConfiguration the new identity configuration.
+     * @param identityConfigurations the identity configurations that should be
+     *                               updated.
      * @throws KuraException if a failure occurs updating identity
-     *                       configuration.
+     *                       configurations.
      */
-    public void updateIdentityConfiguration(final IdentityConfiguration identityConfiguration) throws KuraException;
+    public void updateIdentityConfigurations(final Collection<IdentityConfiguration> identityConfigurations)
+            throws KuraException;
 
     /**
      * Defines a new permission.
@@ -149,16 +164,6 @@ public interface IdentityService {
      * @throws KuraException if a failure occurs retrieving the permission set.
      */
     public Set<Permission> getPermissions() throws KuraException;
-
-    /**
-     * Returns the password strength requirements that the framework should enforce
-     * for new passwords.
-     * 
-     * @return the password strength requirements.
-     * @throws KuraException if a failure occurs while retrieving the password
-     *                       strength requirements.
-     */
-    public PasswordStrengthRequirements getPasswordStrengthRequirements() throws KuraException;
 
     /**
      * Computes a {@link PasswordHash} for the given plaintext password. The

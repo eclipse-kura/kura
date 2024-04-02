@@ -40,7 +40,7 @@
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.web2.ext</artifactId>
-			<version>1.4.1</version>
+			<version>1.4.2-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

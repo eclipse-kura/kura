@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,7 @@ import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 import org.eclipse.kura.web.shared.validator.NotEmptyValidator;
 import org.eclipse.kura.web.shared.validator.NotInListValidator;
 import org.eclipse.kura.web.shared.validator.PEMValidator;
+import org.eclipse.kura.web.shared.validator.SinglePEMValidator;
 import org.eclipse.kura.web.shared.validator.PKCS8Validator;
 import org.eclipse.kura.web.shared.validator.PasswordStrengthValidators;
 import org.eclipse.kura.web.shared.validator.PredicateValidator;
@@ -86,6 +87,11 @@ public class GwtValidators {
 
     public static Validator<String> pem(final String message) {
         return new ValidatorWrapper<String>(new PEMValidator(message), Priority.MEDIUM) {
+        };
+    }
+    
+    public static Validator<String> singlePem(final String message) {
+        return new ValidatorWrapper<String>(new SinglePEMValidator(message), Priority.MEDIUM) {
         };
     }
 

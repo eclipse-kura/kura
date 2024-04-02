@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -231,8 +231,28 @@ public class UserAdminHelper {
         }
     }
 
+    public Optional<Group> getPermission(final String name) {
+        final String roleName = getPermissionRoleName(name);
+
+        final Role role = userAdmin.getRole(roleName);
+
+        if (!(role instanceof Group)) {
+            return Optional.empty();
+        }
+
+        return Optional.of((Group) role);
+    }
+
     public Group getOrCreatePermission(final String name) {
         return getOrCreateRole(Group.class, getPermissionRoleName(name));
+    }
+
+    public void deletePremission(final String name) {
+        final Role role = this.userAdmin.getRole(getPermissionRoleName(name));
+
+        if (role instanceof Group) {
+            this.userAdmin.removeRole(role.getName());
+        }
     }
 
     public User getOrCreateUser(final String name) {

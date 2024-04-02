@@ -250,6 +250,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.core.identity</artifactId>
+                                    <version>${org.eclipse.kura.core.identity.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.core.inventory</artifactId>
                                     <version>${org.eclipse.kura.core.inventory.version}</version>
                                 </artifactItem>
@@ -770,6 +775,7 @@
                                 <move file="target/plugins/org.eclipse.kura.core.configuration.jar" tofile="target/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.crypto.jar" tofile="target/plugins/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.deployment.jar" tofile="target/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.core.identity.jar" tofile="target/plugins/org.eclipse.kura.core.identity_${org.eclipse.kura.core.identity.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.inventory.jar" tofile="target/plugins/org.eclipse.kura.core.inventory_${org.eclipse.kura.core.inventory.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.tamper.detection.jar" tofile="target/plugins/org.eclipse.kura.core.tamper.detection_${org.eclipse.kura.core.tamper.detection.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.net.jar" tofile="target/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar" />
@@ -2157,6 +2163,7 @@
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.keystore_${org.eclipse.kura.core.keystore.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.http.server.manager_${org.eclipse.kura.http.server.manager.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
+                                        <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.identity_${org.eclipse.kura.core.identity.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.inventory_${org.eclipse.kura.core.inventory.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.system_${org.eclipse.kura.core.system.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />

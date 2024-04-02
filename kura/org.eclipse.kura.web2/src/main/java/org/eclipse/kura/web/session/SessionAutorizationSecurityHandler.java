@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.audit.AuditContext.Scope;
 import org.eclipse.kura.web.Console;
@@ -26,6 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SessionAutorizationSecurityHandler implements SecurityHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(SessionAutorizationSecurityHandler.class);
 
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
@@ -38,6 +41,7 @@ public class SessionAutorizationSecurityHandler implements SecurityHandler {
             final HttpSession session = request.getSession(false);
 
             if (session == null) {
+                auditLogger.warn("{} UI Session - Failure - User session does not exist", auditContext);
                 return false;
             }
 
@@ -50,8 +54,15 @@ public class SessionAutorizationSecurityHandler implements SecurityHandler {
 
             final String userName = (String) authorized;
 
-            final boolean isPasswordSame = Objects.equals(session.getAttribute(Attributes.CREDENTIALS_HASH.getValue()),
-                    Console.instance().getUserManager().getCredentialsHash(userName));
+            boolean isPasswordSame;
+
+            try {
+                isPasswordSame = Objects.equals(session.getAttribute(Attributes.CREDENTIALS_HASH.getValue()),
+                        Console.instance().getUserManager().getCredentialsHash(userName));
+            } catch (KuraException e) {
+                logger.warn("failed to compute credential hash", e);
+                isPasswordSame = false;
+            }
 
             if (!isPasswordSame) {
                 auditLogger.warn("{} UI Session - Failure - Ending session due to identity password change",

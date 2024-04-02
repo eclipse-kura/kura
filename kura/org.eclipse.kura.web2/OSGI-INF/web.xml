@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-   Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+   Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
 
    This program and the accompanying materials are made
    available under the terms of the Eclipse Public License 2.0
@@ -31,5 +31,5 @@
       <provide interface="org.eclipse.kura.web.api.Console"/>
       <provide interface="org.eclipse.kura.configuration.SelfConfiguringComponent"/>
    </service>
-   <reference bind="setUserAdmin" cardinality="1..1" interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin" policy="static"/>
+   <reference bind="setIdentityService" cardinality="1..1" interface="org.eclipse.kura.identity.IdentityService" name="IdentityService" policy="static"/>
 </scr:component>

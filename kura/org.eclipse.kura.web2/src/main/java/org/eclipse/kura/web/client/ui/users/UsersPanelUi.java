@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,6 +21,7 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.Picker;
 import org.eclipse.kura.web.client.ui.Tab;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtUserConfig;
@@ -43,6 +44,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.HasRows;
@@ -154,7 +156,7 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
     }
 
     private void initInterfaceButtons() {
-        this.newIdentity.addClickHandler(e -> this.picker.builder(GwtUserConfig.class) //
+        this.newIdentity.addClickHandler(e -> this.picker.builder(String.class) //
                 .setTitle(MSGS.usersCreateIdentity()) //
                 .setMessage(MSGS.usersIdentityName()) //
                 .setValidator((editor, userName) -> {
@@ -170,11 +172,16 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
                         throw new IllegalArgumentException(MSGS.usersIdentityAlreadyExists());
                     }
 
-                    return new GwtUserConfig(userName, new HashSet<>(), false, false);
-                }).setOnPick(user -> {
-                    this.dataProvider.getList().add(user);
-                    setDirty(true);
-                }).pick());
+                    return userName;
+                }).setOnPick(user ->
+
+                RequestQueue.submit(
+                        c -> this.gwtXsrfService.generateSecurityToken(c.callback(token -> this.gwtUserService
+                                .getUserConfigOrDefault(token, user, c.callback(userConfig -> {
+                                    this.dataProvider.getList().add(userConfig);
+                                    setDirty(true);
+                                }))))))
+                .pick());
 
         this.delete.addClickHandler(e -> this.alertDialog.show(MSGS.usersConfirmDeleteIdentity(), () -> {
             this.dataProvider.getList().remove(this.selectionModel.getSelectedObject());
@@ -229,7 +236,22 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
     private void apply() {
         final Set<GwtUserConfig> asSet = new HashSet<>(this.dataProvider.getList());
         RequestQueue.submit(c -> this.gwtXsrfService.generateSecurityToken(
-                c.callback(token -> this.gwtUserService.setUserConfig(token, asSet, c.callback(result -> refresh())))));
+                c.callback(token -> this.gwtUserService.setUserConfig(token, asSet, c.callback(
+
+                        new AsyncCallback<Void>() {
+                            @Override
+                            public void onSuccess(Void result) {
+                                refresh();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                refresh();
+                                FailureHandler.showErrorMessage(caught.getMessage());
+                            }
+                        }
+
+                )))));
     }
 
     private void showConfigUi(final UserConfigUi ui) {

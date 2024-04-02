@@ -61,6 +61,7 @@ public class AllowlistEnforcementMonitor extends ResultCallbackTemplate<Allowlis
                     .filter(digestsList::contains).collect(Collectors.toSet());
         }
 
+
         if (!digestIntersection.isEmpty()) {
             logger.info(ENFORCEMENT_SUCCESS, digestIntersection, containerId);
         } else {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,27 +12,30 @@
  *******************************************************************************/
 package org.eclipse.kura.web.shared.model;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
-public class GwtUserConfig extends GwtUserData implements IsSerializable {
+public class GwtUserConfig extends GwtUserData {
 
     private static final String PASSWORD_ENABLED_KEY = "password.enabled";
     private static final String PASSWORD_KEY = "password";
     private static final String PASSWORD_CHANGE_NEEDED_KEY = "password.change.needed";
     private static final long serialVersionUID = 8795619406606205153L;
 
+    private Map<String, GwtConfigComponent> additionalConfigurations;
+
     public GwtUserConfig() {
     }
 
-    public GwtUserConfig(final String userName, final Set<String> permissions, final boolean isPasswordAuthEnabled,
+    public GwtUserConfig(final String userName, final Set<String> permissions,
+            final Map<String, GwtConfigComponent> additionalConfigurations, final boolean isPasswordAuthEnabled,
             final boolean isPasswordChangeNeeded) {
         super(userName, permissions);
         setPasswordAuthEnabled(isPasswordAuthEnabled);
         setPasswordChangeNeeded(isPasswordChangeNeeded);
+        setAdditionalConfigurations(additionalConfigurations);
     }
 
     public boolean isPasswordAuthEnabled() {
@@ -61,6 +64,14 @@ public class GwtUserConfig extends GwtUserData implements IsSerializable {
 
     public void setPasswordChangeNeeded(final boolean isPasswordChangeNeeded) {
         set(PASSWORD_CHANGE_NEEDED_KEY, isPasswordChangeNeeded);
+    }
+
+    public Map<String, GwtConfigComponent> getAdditionalConfigurations() {
+        return additionalConfigurations;
+    }
+
+    public void setAdditionalConfigurations(final Map<String, GwtConfigComponent> additionalConfigurations) {
+        this.additionalConfigurations = additionalConfigurations;
     }
 
     @Override

@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -63,7 +64,16 @@ public class ExampleIdentityConfigurationExtension implements IdentityConfigurat
         final IdentityConfiguration result = Optional.ofNullable(this.configurations.get(identityName))
                 .orElseGet(IdentityConfiguration::new);
 
-        return Optional.of(new ComponentConfiguration() {
+        return Optional.of(buildComponentConfiguration(result));
+    }
+
+    @Override
+    public Optional<ComponentConfiguration> getDefaultConfiguration(String identityName) throws KuraException {
+        return Optional.of(buildComponentConfiguration(new IdentityConfiguration()));
+    }
+
+    private ComponentConfiguration buildComponentConfiguration(final IdentityConfiguration configuration) {
+        return new ComponentConfiguration() {
 
             @Override
             public String getPid() {
@@ -77,18 +87,34 @@ public class ExampleIdentityConfigurationExtension implements IdentityConfigurat
 
             @Override
             public Map<String, Object> getConfigurationProperties() {
-                return result.toProperties();
+                return configuration.toProperties();
             }
-        });
+        };
+    }
+
+    @Override
+    public void validateConfiguration(String identityName, ComponentConfiguration configuration) throws KuraException {
+        final IdentityConfiguration config = new IdentityConfiguration(configuration.getConfigurationProperties());
+
+        if (!config.testStringProperty.matches("[a-zA-Z]+")) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
+                    "test.string value must contain only uppercase or lowercase letters");
+        }
     }
 
     @Override
     public synchronized void updateConfiguration(String identityName, ComponentConfiguration configuration)
             throws KuraException {
 
+        validateConfiguration(identityName, configuration);
+
         final IdentityConfiguration config = new IdentityConfiguration(configuration.getConfigurationProperties());
 
         logger.info("received configuration for identity {}: {}", identityName, config);
+
+        if ("failure".equals(config.testStringProperty)) {
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "failed to update configuration");
+        }
 
         this.configurations.put(identityName, config);
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+  Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -46,6 +46,7 @@
         <module>org.eclipse.kura.core.configuration</module>
         <module>org.eclipse.kura.core.crypto</module>
         <module>org.eclipse.kura.core.deployment</module>
+        <module>org.eclipse.kura.core.identity</module>
         <module>org.eclipse.kura.core.inventory</module>
         <module>org.eclipse.kura.core.net</module>
         <module>org.eclipse.kura.core.status</module>

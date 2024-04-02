@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
@@ -181,7 +180,7 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
 
             @Override
             public String getValue(GwtKeystoreEntry object) {
-                return String.join(" ", object.getDistinguishedNames());
+                return object.getDistinguishedNames();
             }
         };
         this.certificatesGrid.addColumn(col1bis, MSGS.certificateDNs());

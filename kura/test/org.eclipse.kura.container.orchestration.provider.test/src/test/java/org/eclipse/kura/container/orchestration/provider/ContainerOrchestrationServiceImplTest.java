@@ -327,7 +327,6 @@ public class ContainerOrchestrationServiceImplTest {
         whenGetImageDigestsByContainerId(CONTAINER_ID_1);
 
         thenDigestsListEqualsExpectedOne(EXPECTED_DIGESTS_ARRAY);
-
     }
 
     @Test

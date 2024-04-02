@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -194,6 +194,7 @@
         <antcall target="core.configuration-config" />
         <antcall target="core.crypto-config" />
         <antcall target="core.deployment-config" />
+        <antcall target="core.identity-config" />
         <antcall target="core.inventory-config" />
         <antcall target="core.tamper-config" />
         <antcall target="core.net-config" />
@@ -729,6 +730,9 @@ fi]]>
                 file="${project.build.directory}/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.core.identity_${org.eclipse.kura.core.identity.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.core.inventory_${org.eclipse.kura.core.inventory.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
@@ -1152,6 +1156,14 @@ fi]]>
             file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar@4:start" />
+        </propertyfile>
+    </target>
+
+    <target name="core.identity-config">
+        <propertyfile
+            file="${project.build.directory}/${build.output.name}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.identity_${org.eclipse.kura.core.identity.version}.jar@4:start" />
         </propertyfile>
     </target>
 

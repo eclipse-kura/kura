@@ -163,6 +163,11 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     private void closeEnforcementMonitor() {
+
+        if (this.allowlistEnforcementMonitor == null) {
+            return;
+        }
+
         try {
             logger.info("Enforcement monitor closing...");
             this.allowlistEnforcementMonitor.close();

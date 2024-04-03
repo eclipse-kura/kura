@@ -40,6 +40,7 @@ import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ImageConfiguration;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
+import org.eclipse.kura.container.orchestration.PortInternetProtocol;
 import org.eclipse.kura.container.orchestration.provider.impl.ContainerOrchestrationServiceImpl;
 import org.junit.Test;
 import org.mockito.Answers;
@@ -91,6 +92,13 @@ public class ContainerOrchestrationServiceImplTest {
     private static final String DEFAULT_REPOSITORY_URL = "";
     private static final String DEFAULT_REPOSITORY_USERNAME = "";
     private static final String DEFAULT_REPOSITORY_PASSWORD = "";
+
+    private static final ContainerPort TCP_CONTAINER_PORT = new ContainerPort().withIp("0.0.0.0").withPrivatePort(100)
+            .withPublicPort(101).withType("tcp");
+    private static final ContainerPort UDP_CONTAINER_PORT = new ContainerPort().withIp("0.0.0.0").withPrivatePort(200)
+            .withPublicPort(201).withType("udp");
+    private static final ContainerPort SCTP_CONTAINER_PORT = new ContainerPort().withIp("0.0.0.0").withPrivatePort(300)
+            .withPublicPort(301).withType("sctp");
 
     private ContainerOrchestrationServiceImpl dockerService;
 
@@ -254,7 +262,18 @@ public class ContainerOrchestrationServiceImplTest {
     }
 
     @Test
-    public void testGetContainerIDbyName() {
+    public void testServiceListContainerByContainerDescriptorWithContainerWithPorts() throws KuraException {
+        givenFullProperties(true);
+        givenDockerServiceImpl();
+        givenDockerClient();
+
+        whenDockerClientMockContainerWithPorts();
+
+        thenContainerPortsInfosArePresent();
+    }
+
+    @Test
+    public void testGetContainerIDbyName() throws KuraException {
         givenFullProperties(true);
         givenDockerServiceImpl();
         givenDockerClient();
@@ -313,7 +332,6 @@ public class ContainerOrchestrationServiceImplTest {
         whenImagesAreListed();
 
         thenCheckIfImagesWereListed();
-
     }
 
     @Test
@@ -503,7 +521,34 @@ public class ContainerOrchestrationServiceImplTest {
         when(this.createContainerCmd.withHostConfig(any()).exec()).thenReturn(this.createContainerResponse);
         when(this.createContainerCmd.withExposedPorts(anyList())).thenReturn(this.createContainerCmd);
         when(this.createContainerCmd.withName(any())).thenReturn(this.createContainerCmd);
+    }
+  
+    private void whenDockerClientMockContainerWithPorts() {
 
+        List<Container> containerListmock = new LinkedList<>();
+        // Build Container Mock
+        Container mcont1 = mock(Container.class);
+        when(mcont1.getId()).thenReturn("1f12d3s23");
+        when(mcont1.toString()).thenReturn("1f12d3s23");
+        when(mcont1.getNames()).thenReturn(new String[] { "jim", "/jim" });
+        when(mcont1.getImage()).thenReturn("nginx");
+        when(mcont1.getPorts())
+                .thenReturn(new ContainerPort[] { TCP_CONTAINER_PORT, UDP_CONTAINER_PORT, SCTP_CONTAINER_PORT });
+        when(mcont1.getState()).thenReturn("running");
+        containerListmock.add(mcont1);
+
+        this.runningContainers = new String[] { mcont1.toString() };
+
+        // Build Respective CD's
+        ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder().setContainerID(mcont1.getId())
+                .setContainerName(mcont1.getNames()[0]).setContainerImage(mcont1.getImage()).build();
+
+        this.runningContainerDescriptor = new ContainerInstanceDescriptor[] { mcontCD1 };
+
+        this.mockedListContainersCmd = mock(ListContainersCmd.class, Mockito.RETURNS_DEEP_STUBS);
+        when(this.localDockerClient.listContainersCmd()).thenReturn(this.mockedListContainersCmd);
+        when(this.mockedListContainersCmd.withShowAll(true)).thenReturn(this.mockedListContainersCmd);
+        when(this.mockedListContainersCmd.exec()).thenReturn(containerListmock);
     }
 
     private void whenMockforContainerCreation() {
@@ -652,6 +697,24 @@ public class ContainerOrchestrationServiceImplTest {
         } else {
             assertEquals(this.dockerService.listContainerDescriptors(), Arrays.asList(this.runningContainerDescriptor));
         }
+    }
+
+    private void thenContainerPortsInfosArePresent() {
+
+        assertFalse(this.dockerService.listContainerDescriptors().isEmpty());
+        List<org.eclipse.kura.container.orchestration.ContainerPort> containerPorts = this.dockerService
+                .listContainerDescriptors().get(0).getContainerPorts();
+
+        List<ContainerPort> expectedContainerPorts = Arrays.asList(TCP_CONTAINER_PORT, UDP_CONTAINER_PORT,
+                SCTP_CONTAINER_PORT);
+        List<PortInternetProtocol> expectedInternetPortProtocols = Arrays.asList(PortInternetProtocol.TCP,
+                PortInternetProtocol.UDP, PortInternetProtocol.SCTP);
+        for (int i = 0; i < containerPorts.size(); i++) {
+            assertEquals((int) expectedContainerPorts.get(i).getPublicPort(), containerPorts.get(i).getExternalPort());
+            assertEquals((int) expectedContainerPorts.get(i).getPrivatePort(), containerPorts.get(i).getInternalPort());
+            assertEquals(expectedInternetPortProtocols.get(i), containerPorts.get(i).getInternetProtocol());
+        }
+
     }
 
     private void thenGetFirstContainerIDbyName() {

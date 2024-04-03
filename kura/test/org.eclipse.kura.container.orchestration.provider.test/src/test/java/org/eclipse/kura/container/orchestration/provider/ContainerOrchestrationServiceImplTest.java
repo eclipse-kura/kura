@@ -515,14 +515,14 @@ public class ContainerOrchestrationServiceImplTest {
 
         this.createContainerCmd = mock(CreateContainerCmd.class, Mockito.RETURNS_DEEP_STUBS);
         this.createContainerResponse = new CreateContainerResponse();
-        this.createContainerResponse.setId("CIAO");
+        this.createContainerResponse.setId("containerId");
         when(this.localDockerClient.createContainerCmd(anyString())).thenReturn(this.createContainerCmd);
         when(this.createContainerCmd.withHostConfig(any())).thenReturn(this.createContainerCmd);
         when(this.createContainerCmd.withHostConfig(any()).exec()).thenReturn(this.createContainerResponse);
         when(this.createContainerCmd.withExposedPorts(anyList())).thenReturn(this.createContainerCmd);
         when(this.createContainerCmd.withName(any())).thenReturn(this.createContainerCmd);
     }
-  
+
     private void whenDockerClientMockContainerWithPorts() {
 
         List<Container> containerListmock = new LinkedList<>();
@@ -641,9 +641,13 @@ public class ContainerOrchestrationServiceImplTest {
                         REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
                 .build();
 
+        org.eclipse.kura.container.orchestration.ContainerPort containerPort = new org.eclipse.kura.container.orchestration.ContainerPort(
+                TCP_CONTAINER_PORT.getPrivatePort(), TCP_CONTAINER_PORT.getPublicPort());
+
         this.containerConfig1 = ContainerConfiguration.builder().setContainerName(CONTAINER_NAME_FRANK)
                 .setImageConfiguration(imageConfig).setVolumes(Collections.singletonMap("test", "~/test/test"))
-                .setEnforcementDigest(Optional.of(CONTAINER_INSTANCE_DIGEST)).setLoggingType("NONE").build();
+                .setEnforcementDigest(Optional.of(CONTAINER_INSTANCE_DIGEST)).setLoggingType("NONE")
+                .setContainerPorts(Arrays.asList(containerPort)).build();
 
         this.runningContainerDescriptor = new ContainerInstanceDescriptor[] { mcontCD1 };
 

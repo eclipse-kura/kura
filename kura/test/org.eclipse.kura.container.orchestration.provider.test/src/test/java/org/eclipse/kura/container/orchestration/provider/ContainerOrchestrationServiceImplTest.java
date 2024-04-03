@@ -259,7 +259,7 @@ public class ContainerOrchestrationServiceImplTest {
 
         whenDockerClientMockContainerWithPorts();
 
-        thenContainerListByContainerDescriptorIsNotEmptyAndContainsPortsInfos();
+        thenContainerPortsInfosArePresent();
     }
 
     @Test
@@ -618,7 +618,7 @@ public class ContainerOrchestrationServiceImplTest {
         }
     }
 
-    private void thenContainerListByContainerDescriptorIsNotEmptyAndContainsPortsInfos() {
+    private void thenContainerPortsInfosArePresent() {
 
         assertFalse(this.dockerService.listContainerDescriptors().isEmpty());
         List<org.eclipse.kura.container.orchestration.ContainerPort> containerPorts = this.dockerService
@@ -629,9 +629,9 @@ public class ContainerOrchestrationServiceImplTest {
         List<PortInternetProtocol> expectedInternetPortProtocols = Arrays.asList(PortInternetProtocol.TCP,
                 PortInternetProtocol.UDP, PortInternetProtocol.SCTP);
         for (int i = 0; i < containerPorts.size(); i++) {
-            assertEquals(containerPorts.get(i).getExternalPort(), (int) expectedContainerPorts.get(i).getPublicPort());
-            assertEquals(containerPorts.get(i).getInternalPort(), (int) expectedContainerPorts.get(i).getPrivatePort());
-            assertEquals(containerPorts.get(i).getInternetProtocol(), expectedInternetPortProtocols.get(i));
+            assertEquals((int) expectedContainerPorts.get(i).getPublicPort(), containerPorts.get(i).getExternalPort());
+            assertEquals((int) expectedContainerPorts.get(i).getPrivatePort(), containerPorts.get(i).getInternalPort());
+            assertEquals(expectedInternetPortProtocols.get(i), containerPorts.get(i).getInternetProtocol());
         }
 
     }

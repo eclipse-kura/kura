@@ -14,13 +14,16 @@ package org.eclipse.kura.container.orchestration.provider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,6 +49,7 @@ import org.mockito.Mockito;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.ListContainersCmd;
 import com.github.dockerjava.api.command.ListImagesCmd;
 import com.github.dockerjava.api.model.Container;
@@ -54,6 +58,7 @@ import com.github.dockerjava.api.model.Image;
 
 public class ContainerOrchestrationServiceImplTest {
 
+    private static final String CONTAINER_INSTANCE_DIGEST = "sha256:test";
     private static final String[] REPO_DIGESTS_ARRAY = new String[] {
             "ubuntu@sha256:c26ae7472d624ba1fafd296e73cecc4f93f853088e6a9c13c0d52f6ca5865107" };
     private static final String[] EXPECTED_DIGESTS_ARRAY = new String[] {
@@ -73,6 +78,8 @@ public class ContainerOrchestrationServiceImplTest {
     private static final String REPOSITORY_URL = "repository.hostname";
     private static final String REPOSITORY_USERNAME = "repository.username";
     private static final String REPOSITORY_PASSWORD = "repository.password";
+
+    private static final String ENFORCEMENT_ENABLED = "enforcement.enabled";
 
     private static final String REGISTRY_URL = "https://test";
     private static final String REGISTRY_USERNAME = "test";
@@ -109,6 +116,9 @@ public class ContainerOrchestrationServiceImplTest {
 
     private Map<String, Object> properties;
     private String containerId;
+
+    CreateContainerCmd createContainerCmd = mock(CreateContainerCmd.class);
+    CreateContainerResponse createContainerResponse = mock(CreateContainerResponse.class);
 
     Set<String> digestsList;
 
@@ -337,6 +347,41 @@ public class ContainerOrchestrationServiceImplTest {
         thenDigestsListEqualsExpectedOne(EXPECTED_DIGESTS_ARRAY);
     }
 
+    @Test
+    public void testContainerInstanceDigestIsAddedToAllowlist() throws KuraException, InterruptedException {
+
+        givenFullProperties(true);
+        givenEnforcementEnabledProperty(true);
+        givenDockerServiceImplSpy();
+        givenDockerClient();
+
+        whenActivateInstance();
+        whenDockerClientMockCreateContainer();
+        whenMockForContainerInstancesDigestAdding();
+        whenRunContainer();
+
+        thenContainerInstanceDigestIsAddedToAllowlist();
+        thenContainerInstanceDigestIsExpectedOne(CONTAINER_INSTANCE_DIGEST);
+    }
+
+    @Test
+    public void testContainerInstanceDigestIsAddedToAndRemovedFromAllowlist()
+            throws KuraException, InterruptedException {
+
+        givenFullProperties(true);
+        givenEnforcementEnabledProperty(true);
+        givenDockerServiceImplSpy();
+        givenDockerClient();
+
+        whenActivateInstance();
+        whenDockerClientMockCreateContainer();
+        whenMockForContainerInstancesDigestAdding();
+        whenRunContainer();
+        whenStopContainer();
+
+        thenContainerInstanceDigestIsNotInAllowlist();
+    }
+
     /**
      * givens
      */
@@ -396,6 +441,10 @@ public class ContainerOrchestrationServiceImplTest {
         this.properties.put(REPOSITORY_USERNAME, "Tester");
         this.properties.put(REPOSITORY_PASSWORD, "ng4#$fuhn834F84nf8nw8GF3");
         this.properties.put(IMAGES_DOWNLOAD_TIMEOUT, DEFAULT_IMAGES_DOWNLOAD_TIMEOUT);
+    }
+
+    private void givenEnforcementEnabledProperty(boolean enabled) {
+        this.properties.put(ENFORCEMENT_ENABLED, enabled);
     }
 
     /**
@@ -460,6 +509,18 @@ public class ContainerOrchestrationServiceImplTest {
         when(this.localDockerClient.listContainersCmd()).thenReturn(this.mockedListContainersCmd);
         when(this.mockedListContainersCmd.withShowAll(true)).thenReturn(this.mockedListContainersCmd);
         when(this.mockedListContainersCmd.exec()).thenReturn(containerListmock);
+    }
+
+    private void whenDockerClientMockCreateContainer() {
+
+        this.createContainerCmd = mock(CreateContainerCmd.class, Mockito.RETURNS_DEEP_STUBS);
+        this.createContainerResponse = new CreateContainerResponse();
+        this.createContainerResponse.setId("containerId");
+        when(this.localDockerClient.createContainerCmd(anyString())).thenReturn(this.createContainerCmd);
+        when(this.createContainerCmd.withHostConfig(any())).thenReturn(this.createContainerCmd);
+        when(this.createContainerCmd.withHostConfig(any()).exec()).thenReturn(this.createContainerResponse);
+        when(this.createContainerCmd.withExposedPorts(anyList())).thenReturn(this.createContainerCmd);
+        when(this.createContainerCmd.withName(any())).thenReturn(this.createContainerCmd);
     }
 
     private void whenDockerClientMockContainerWithPorts() {
@@ -568,13 +629,37 @@ public class ContainerOrchestrationServiceImplTest {
 
     }
 
+    private void whenMockForContainerInstancesDigestAdding() {
+
+        // Build Respective CD's
+        ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder().setContainerID("1d3dewf34r5")
+                .setContainerName(CONTAINER_NAME_FRANK).setContainerImage(IMAGE_NAME_NGINX).build();
+
+        this.imageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName(IMAGE_NAME_NGINX)
+                .setImageTag(IMAGE_TAG_LATEST).setImageDownloadTimeoutSeconds(0)
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+                .build();
+
+        org.eclipse.kura.container.orchestration.ContainerPort containerPort = new org.eclipse.kura.container.orchestration.ContainerPort(
+                TCP_CONTAINER_PORT.getPrivatePort(), TCP_CONTAINER_PORT.getPublicPort());
+
+        this.containerConfig1 = ContainerConfiguration.builder().setContainerName(CONTAINER_NAME_FRANK)
+                .setImageConfiguration(imageConfig).setVolumes(Collections.singletonMap("test", "~/test/test"))
+                .setEnforcementDigest(Optional.of(CONTAINER_INSTANCE_DIGEST)).setLoggingType("NONE")
+                .setContainerPorts(Arrays.asList(containerPort)).build();
+
+        this.runningContainerDescriptor = new ContainerInstanceDescriptor[] { mcontCD1 };
+
+    }
+
     private void whenRunContainer() throws KuraException, InterruptedException {
         // startContainer
         this.containerId = this.dockerService.startContainer(this.containerConfig1);
     }
 
     private void whenStopContainer() throws KuraException {
-        // startContainer
+        // stopContainer
         this.dockerService.stopContainer(this.containerId);
     }
 
@@ -659,5 +744,19 @@ public class ContainerOrchestrationServiceImplTest {
 
     private void thenDigestsListEqualsExpectedOne(String[] digestsArray) {
         assertEquals(new HashSet<>(Arrays.asList(digestsArray)), this.digestsList);
+    }
+
+    private void thenContainerInstanceDigestIsAddedToAllowlist() {
+        assertFalse(this.dockerService.getContainerInstancesAllowlist().isEmpty());
+    }
+
+    private void thenContainerInstanceDigestIsNotInAllowlist() {
+        this.dockerService.getContainerInstancesAllowlist().stream().forEach(System.err::println);
+        assertTrue(this.dockerService.getContainerInstancesAllowlist().isEmpty());
+    }
+
+    private void thenContainerInstanceDigestIsExpectedOne(String expected) {
+        List<String> actualDigests = new ArrayList<>(this.dockerService.getContainerInstancesAllowlist());
+        assertEquals(actualDigests.get(0), expected);
     }
 }

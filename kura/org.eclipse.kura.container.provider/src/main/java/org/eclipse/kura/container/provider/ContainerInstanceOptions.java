@@ -72,6 +72,7 @@ public class ContainerInstanceOptions {
             "");
     private static final Property<Boolean> SIGNATURE_VERIFY_TLOG = new Property<>(
             "container.signature.verify.transparency.log", true);
+    private static final Property<String> ENFORCEMENT_DIGEST = new Property<>("enforcement.digest", "");
 
     private boolean enabled;
     private final String image;
@@ -103,6 +104,8 @@ public class ContainerInstanceOptions {
 
     private final Optional<String> signatureTrustAnchor;
     private final Boolean signatureVerifyTransparencyLog;
+
+    private final Optional<String> enforcementDigest;
 
     public ContainerInstanceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -138,6 +141,7 @@ public class ContainerInstanceOptions {
         this.containerRuntime = parseOptionalString(CONTAINER_RUNTIME.getOptional(properties));
         this.signatureTrustAnchor = parseOptionalString(SIGNATURE_TRUST_ANCHOR.getOptional(properties));
         this.signatureVerifyTransparencyLog = SIGNATURE_VERIFY_TLOG.get(properties);
+        this.enforcementDigest = parseOptionalString(ENFORCEMENT_DIGEST.getOptional(properties));
     }
 
     private Map<String, String> parseVolume(String volumeString) {
@@ -353,6 +357,10 @@ public class ContainerInstanceOptions {
         return this.signatureVerifyTransparencyLog;
     }
 
+    public Optional<String> getEnforcementDigest() {
+        return this.enforcementDigest;
+    }
+
     private ImageConfiguration buildImageConfig() {
         return new ImageConfiguration.ImageConfigurationBuilder().setImageName(this.image).setImageTag(this.imageTag)
                 .setImageDownloadTimeoutSeconds(this.imageDownloadTimeout)
@@ -383,7 +391,7 @@ public class ContainerInstanceOptions {
                 .setContainerNetowrkConfiguration(buildContainerNetworkConfig())
                 .setLoggerParameters(getLoggerParameters()).setEntryPoint(getEntryPoint())
                 .setRestartOnFailure(getRestartOnFailure()).setMemory(getMemory()).setCpus(getCpus()).setGpus(getGpus())
-                .setRuntime(getRuntime()).build();
+                .setRuntime(getRuntime()).setEnforcementDigest(getEnforcementDigest()).build();
     }
 
     private List<Integer> parsePortString(String ports) {
@@ -429,9 +437,10 @@ public class ContainerInstanceOptions {
     public int hashCode() {
         return Objects.hash(containerCpus, containerDevice, containerEntryPoint, containerEnv, containerGpus,
                 containerLoggerType, containerLoggingParameters, containerMemory, containerName,
-                containerNetworkingMode, containerPortProtocol, containerVolumeString, containerVolumes, enabled,
-                externalPorts, image, imageDownloadTimeout, imageTag, internalPorts, maxDownloadRetries, privilegedMode,
-                registryPassword, registryURL, registryUsername, restartOnFailure, retryInterval, containerRuntime);
+                containerNetworkingMode, containerPortProtocol, containerRuntime, containerVolumeString,
+                containerVolumes, enabled, enforcementDigest, externalPorts, image, imageDownloadTimeout, imageTag,
+                internalPorts, maxDownloadRetries, privilegedMode, registryPassword, registryURL, registryUsername,
+                restartOnFailure, retryInterval, signatureTrustAnchor, signatureVerifyTransparencyLog);
     }
 
     @Override
@@ -459,6 +468,7 @@ public class ContainerInstanceOptions {
                 && Objects.equals(containerPortProtocol, other.containerPortProtocol)
                 && Objects.equals(containerVolumeString, other.containerVolumeString)
                 && Objects.equals(containerVolumes, other.containerVolumes) && enabled == other.enabled
+                && Objects.equals(enforcementDigest, other.enforcementDigest)
                 && Objects.equals(externalPorts, other.externalPorts) && Objects.equals(image, other.image)
                 && imageDownloadTimeout == other.imageDownloadTimeout && Objects.equals(imageTag, other.imageTag)
                 && Objects.equals(internalPorts, other.internalPorts) && maxDownloadRetries == other.maxDownloadRetries
@@ -466,7 +476,9 @@ public class ContainerInstanceOptions {
                 && Objects.equals(registryURL, other.registryURL)
                 && Objects.equals(registryUsername, other.registryUsername)
                 && restartOnFailure == other.restartOnFailure && retryInterval == other.retryInterval
-                && Objects.equals(containerRuntime, other.containerRuntime);
+                && Objects.equals(containerRuntime, other.containerRuntime)
+                && Objects.equals(signatureTrustAnchor, other.signatureTrustAnchor)
+                && Objects.equals(signatureVerifyTransparencyLog, other.signatureVerifyTransparencyLog);
     }
 
 }

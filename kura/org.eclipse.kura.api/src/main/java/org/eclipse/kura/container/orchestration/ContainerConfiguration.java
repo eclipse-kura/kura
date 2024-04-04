@@ -57,6 +57,7 @@ public class ContainerConfiguration {
     private Optional<Float> cpus;
     private Optional<String> gpus;
     private Optional<String> runtime;
+    private Optional<String> enforcementDigest;
 
     private ContainerConfiguration() {
     }
@@ -304,6 +305,16 @@ public class ContainerConfiguration {
     }
 
     /**
+     * Return the enforcement digest assigned to the container.
+     *
+     * @return the optional runtime string used by the container
+     * @since 2.7
+     */
+    public Optional<String> getEnforcementDigest() {
+        return this.enforcementDigest;
+    }
+
+    /**
      * Creates a builder for creating a new {@link ContainerConfiguration} instance.
      *
      * @return the builder.
@@ -316,8 +327,9 @@ public class ContainerConfiguration {
     public int hashCode() {
         return Objects.hash(this.containerDevices, this.containerEnvVars, this.containerLoggerParameters,
                 this.containerLoggingType, this.containerName, this.containerPorts, this.containerPrivileged,
-                this.containerVolumes, this.cpus, this.entryPoint, this.gpus, this.imageConfig, this.isFrameworkManaged,
-                this.memory, this.networkConfiguration, this.containerRestartOnFailure, this.runtime);
+                this.containerVolumes, this.cpus, this.enforcementDigest, this.entryPoint, this.gpus, this.imageConfig,
+                this.isFrameworkManaged, this.memory, this.networkConfiguration, this.containerRestartOnFailure,
+                this.runtime);
     }
 
     @Override
@@ -337,8 +349,9 @@ public class ContainerConfiguration {
                 && Objects.equals(this.containerPorts, other.containerPorts)
                 && Objects.equals(this.containerPrivileged, other.containerPrivileged)
                 && Objects.equals(this.containerVolumes, other.containerVolumes)
-                && Objects.equals(this.cpus, other.cpus) && Objects.equals(this.entryPoint, other.entryPoint)
-                && Objects.equals(this.gpus, other.gpus) && Objects.equals(this.imageConfig, other.imageConfig)
+                && Objects.equals(this.cpus, other.cpus) && Objects.equals(enforcementDigest, other.enforcementDigest)
+                && Objects.equals(this.entryPoint, other.entryPoint) && Objects.equals(this.gpus, other.gpus)
+                && Objects.equals(this.imageConfig, other.imageConfig)
                 && Objects.equals(this.isFrameworkManaged, other.isFrameworkManaged)
                 && Objects.equals(this.memory, other.memory)
                 && Objects.equals(this.networkConfiguration, other.networkConfiguration)
@@ -367,6 +380,7 @@ public class ContainerConfiguration {
         private Optional<Float> cpus = Optional.empty();
         private Optional<String> gpus = Optional.empty();
         private Optional<String> runtime = Optional.empty();
+        private Optional<String> enforcementDigest = Optional.empty();
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -547,6 +561,14 @@ public class ContainerConfiguration {
             return this;
         }
 
+        /**
+         * @since 2.7
+         */
+        public ContainerConfigurationBuilder setEnforcementDigest(Optional<String> digest) {
+            this.enforcementDigest = digest;
+            return this;
+        }
+
         public ContainerConfiguration build() {
 
             if (this.containerPorts.isEmpty()) {
@@ -577,6 +599,7 @@ public class ContainerConfiguration {
             result.cpus = this.cpus;
             result.gpus = this.gpus;
             result.runtime = this.runtime;
+            result.enforcementDigest = this.enforcementDigest;
 
             return result;
         }

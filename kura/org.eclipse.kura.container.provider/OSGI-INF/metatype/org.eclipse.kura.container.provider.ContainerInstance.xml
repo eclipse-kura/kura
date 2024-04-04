@@ -175,6 +175,14 @@
         <AD id="container.restart.onfailure" name="Restart Container On Failure" type="Boolean" cardinality="1" required="true" default="false"
             description="Automatically restart the container when it has failed.">
         </AD>
+        
+        <AD
+            id="enforcement.digest"
+            name="Container Image Enforcement Digest "
+            description="Digest of the container image allowed to run on the device if the Container Enforcement Monitor is enabled. If not given, it will be computed by the Container Signature Verification service."
+            type="String" cardinality="1" required="false"
+            default="" />
+            
     </OCD>
     <Designate pid="org.eclipse.kura.container.provider.ContainerInstance"
         factoryPid="org.eclipse.kura.container.provider.ContainerInstance">

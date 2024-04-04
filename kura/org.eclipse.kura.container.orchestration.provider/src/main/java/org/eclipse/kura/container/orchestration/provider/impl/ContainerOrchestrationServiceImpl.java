@@ -17,6 +17,7 @@ import static java.util.Objects.isNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -90,6 +91,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private CryptoService cryptoService;
     private List<ExposedPort> exposedPorts;
     private AllowlistEnforcementMonitor allowlistEnforcementMonitor;
+
+    private Map<String, String> containerInstancesDigests = new HashMap<>();
 
     public void setDockerClient(DockerClient dockerClient) {
         this.dockerClient = dockerClient;
@@ -374,6 +377,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             logger.info("Creating new container instance");
             pullImage(container.getImageConfiguration());
             containerId = createContainer(container);
+            addContainerInstanceDigest(containerId, container.getEnforcementDigest());
             startContainer(containerId);
         }
 
@@ -391,7 +395,13 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     public void stopContainer(String id) throws KuraException {
         checkRequestEnv(id);
         try {
-            this.dockerClient.stopContainerCmd(id).exec();
+
+            if (listContainersIds().contains(id)) {
+                this.dockerClient.stopContainerCmd(id).exec();
+            }
+
+            removeContainerInstanceDigest(id);
+
         } catch (Exception e) {
             logger.error("Could not stop container {}. Caused by {}", id, e);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
@@ -402,7 +412,11 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     public void deleteContainer(String id) throws KuraException {
         checkRequestEnv(id);
         try {
-            this.dockerClient.removeContainerCmd(id).exec();
+
+            if (listContainersIds().contains(id)) {
+                this.dockerClient.removeContainerCmd(id).exec();
+            }
+
             this.frameworkManagedContainers.removeIf(c -> id.equals(c.id));
         } catch (Exception e) {
             logger.error("Could not remove container {}. Caused by {}", id, e);
@@ -1002,6 +1016,33 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         });
 
         return imageDigests;
+    }
+
+    private void addContainerInstanceDigest(String containerId, Optional<String> containerInstanceDigest) {
+
+        if (containerInstanceDigest.isPresent()) {
+            logger.info(
+                    "Container {} presented enforcement digest. Adding it to the digests allowlist: it will be used if the enforcement is enabled.",
+                    containerId);
+            this.containerInstancesDigests.put(containerId, containerInstanceDigest.get());
+        } else {
+            logger.info("Container {} doesn't contain the enforcement digest. "
+                    + "If enforcement is enabled, be sure that the digest is included in the Orchestration Service allowlist",
+                    containerId);
+        }
+
+    }
+
+    private void removeContainerInstanceDigest(String containerId) {
+        if (this.containerInstancesDigests.containsKey(containerId)) {
+            this.containerInstancesDigests.remove(containerId);
+            logger.info("Removed digest of container with ID {} from Container Instances Allowlist", containerId);
+            enforceAlreadyRunningContainer();
+        }
+    }
+
+    public Set<String> getContainerInstancesAllowlist() {
+        return new HashSet<>(this.containerInstancesDigests.values());
     }
 
 }

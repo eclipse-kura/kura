@@ -111,14 +111,16 @@ public class IdentityRestServiceV2 {
     public Response createIdentity(final IdentityDTO identity) {
         logger.debug(DEBUG_MESSAGE, "createIdentity");
 
-        boolean created = false;
         try {
-            created = this.identityService.createIdentity(identity.getName());
+            boolean created = this.identityService.createIdentity(identity.getName());
+            if (!created) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.CONFLICT, "Identity already exists");
+            }
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
-        return created ? Response.ok().build() : Response.status(Status.CONFLICT).build();
+        return Response.ok().build();
     }
 
     @PUT
@@ -198,14 +200,16 @@ public class IdentityRestServiceV2 {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteIdentity(final IdentityDTO identity) {
         logger.debug(DEBUG_MESSAGE, "deleteIdentity");
-        boolean deleted = false;
         try {
-            deleted = this.identityService.deleteIdentity(identity.getName());
+            boolean deleted = this.identityService.deleteIdentity(identity.getName());
+            if (!deleted) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND, "Identity not found");
+            }
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
-        return deleted ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
+        return Response.ok().build();
     }
 
     @GET
@@ -256,15 +260,17 @@ public class IdentityRestServiceV2 {
     public Response createPermission(final PermissionDTO permissionDTO) {
         logger.debug(DEBUG_MESSAGE, "createPermission");
 
-        boolean created = false;
-
         try {
-            created = this.identityService.createPermission(IdentityDTOUtils.toPermission(permissionDTO));
+            boolean created = this.identityService.createPermission(IdentityDTOUtils.toPermission(permissionDTO));
+            if (!created) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.CONFLICT,
+                        "Permission already exists");
+            }
         } catch (KuraException e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
-        return created ? Response.ok().build() : Response.status(Status.CONFLICT).build();
+        return Response.ok().build();
     }
 
     @DELETE

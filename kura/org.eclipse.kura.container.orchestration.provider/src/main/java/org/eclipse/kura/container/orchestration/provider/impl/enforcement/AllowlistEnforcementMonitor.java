@@ -65,7 +65,7 @@ public class AllowlistEnforcementMonitor extends ResultCallbackTemplate<Allowlis
         if (!digestIntersection.isEmpty()) {
             logger.info(ENFORCEMENT_CHECK_SUCCESS, digestIntersection, containerId);
         } else {
-            logger.error(ENFORCEMENT_CHECK_FAILURE, containerId);
+            logger.info(ENFORCEMENT_CHECK_FAILURE, containerId);
             stopContainer(containerId);
             deleteContainer(containerId);
         }

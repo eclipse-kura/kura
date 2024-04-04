@@ -168,7 +168,7 @@ Once the instance digest is added to the enforcement feature, it can be used als
 
 ![Schema with disabled instances](./images/schemaWithoutInstances.png)
 
-As you can see from the image, the merged `Enforcement Allowlist` box doesn't contain the digest associated to the Container Instance, because, being it disabled, the corresponding digest is ignored: so, if the enforcement is enable and a container with digest *DIGEST Z* is started, it will then be stopped and deleted, because its digest won't be included in the allowlist.
+As it can be seen from the image, the merged `Enforcement Allowlist` box doesn't contain the digest associated to the Container Instance, because, being it disabled, the corresponding digest is ignored. If the enforcement is enable and a container with digest *DIGEST Z* is started, it will then be stopped and deleted, because its digest won't be included in the allowlist.
 
 Finally, everytime a *Container Image Enforcement Digest* option is modified, or the ContainerInstance is disabled or deleted, the enforcement feature will perform a check on all the already running containers. This is done because if the digest that was previously provided has changed after an instance update, or removed due to disabling or deleting the instance, those containers that were previously authorised by this digest are no longer allowed to run. So they must be stopped and deleted.
 

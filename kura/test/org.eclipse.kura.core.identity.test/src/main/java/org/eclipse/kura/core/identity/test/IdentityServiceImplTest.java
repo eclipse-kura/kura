@@ -778,7 +778,7 @@ public class IdentityServiceImplTest {
         }
 
         static TestComponentConfiguration forPid(final String pid) {
-            return new TestComponentConfiguration("test.extension", null, Collections.singletonMap("foo", "bar"));
+            return new TestComponentConfiguration(pid, null, Collections.singletonMap("foo", "bar"));
         }
 
         @Override

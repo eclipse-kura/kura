@@ -84,6 +84,8 @@ To begin configuring the container, look under **Services** and select the item 
 
 - **Restart Container On Failure** - A boolean that tells the container engine to automatically restart the container when it has failed or shut down.
 
+- **Container Image Enforcement Digest** - A string representing the digest for the image that will be allowed to run by this container instance (eg: `sha256:0000000000000000000000000000000000000000000000000000000000000000`). It is used in the [Container Enforcement](#container-enforcement) service provided by the Container Orchestration Service.
+
 After specifying container parameters, ensure to set **Enabled** to **true** and press **Apply**. The container engine will then pull the respective image, spin up and start the container. If the gateway or the framework is power cycled, and the container and Container Orchestration Service are set to **enabled**, the framework will automatically start the container again upon startup.
 
 ![Container Orchestration Provider Container Configuration](./images/container-orchestration-provider-container-configuration.png)
@@ -119,7 +121,7 @@ The verification is performed by intersecting the list of digests extracted by t
 
 ![Enforcement Flow](./images/container-orchestration-provider-enforcement-flow.png)
 
-### Example scenario
+### Example scenarios
 
 A user wants to leverage the container enforcement in order to let only docker containers started from an image named `foo_image` to be run on the device. To do this, they should enable the Container Enforcement by setting the `Allowlist Enforcement Enabled` to `true`, and fill the `Container Image Allowlist` field with the digest of the `foo_image` docker image (i.e.`sha256:0000000000000000000000000000000000000000000000000000000000000000` in the example below).
 
@@ -137,3 +139,43 @@ After the starting phase just described, Kura will continuously monitor the acti
 
 ![Container Orchestration Provider Enfrocement Multiple Digests](./images/container-orchestration-provider-enforcement-multiple-digests.png)
 
+
+## Container Instance Enforcement
+
+The [Container Instance configuration](#configuring-the-container) contains an option called *Container Image Enforcement Digest*, that allows to add a specific digest to the enforcement allowlist. When this is specified, only the matching image is allowed to execute. The framework will strictly enforce the policy to the containers running, in order to match a 1:1 relationship between running containers and defined container instances. 
+
+Whenever Eclipse Kura executes a *digest-scan* on the running containers, the digests provided in the Container Instances configurations are added to the Container Orchestration Allowlist: in this way, the authorised images will be not only the ones identified by the Allowlist digests, but also the ones specified through the *Container Image Enforcement Digest* options.
+
+Everytime the enforcement feature performs a check on its startup or when a new container is started, it will consider as authorized all the digests included in the Container Orchestration Allowlist and those provided by the enabled Container Instances in Eclipse Kura through the *Container Image Enforcement Digest* option.
+
+### Example Scenario
+
+#### Container Instance Digest
+
+Let's suppose to have a device on which Eclipse Kura is running with the Container Orchestration Service enabled, its Enforcement feature disabled and a Container Instance named `test-container` up and running on the system.
+
+A user wants to activate the Enforcement feature, so it enables the `Allowlist Enforcement Enabled` option in the Container Orchestration Service, but leaves the `Container Image Allowlist` option blank because it wants that no containers are started outside the framework (for details see the [Container Enforcement paragraph](#container-enforcement)).
+
+As the feature starts, it checks all the container running on the device, including the `test-container`, which will be stopped and deleted: this happens because the container digest is not included in the Container Orchestration Service Allowlist and the Container Instance is not providing any information through its `Container Image Enforcement Digest` option.
+
+![Container Instance Schema Failure](./images/container-instance-enforcement-failure.png)
+
+In order to allow the Container Instance, the user should provide the correct digest in the instance settings. Let's suppose that the digest of the image from which the container is created is `sha256:0000000000000000000000000000000000000000000000000000000000000000` and that the user fills the corresponding option with it: once the Container Instance is updated, the provided digest is included in the Enforcement feature allowlist, so the container will be allowed to run without interference. This case can be summarised as:
+
+![Container Instance Schema Success](./images/container-instance-enforcement-success.png)
+
+Once the instance digest is added to the enforcement feature, it can be used also to authorise container run by the Command Line Interface, or other instances on Eclipse Kura without providing the digest option. But what happen if the Container Instance is disabled? The aim of the Container Instance Enforcement Digest is to be used as an authorization method of the instance itself: this means that its digest is added to the enforcement feature allowlist **only if the instance is enabled**.
+
+![Schema with disabled instances](./images/schemaWithoutInstances.png)
+
+As it can be seen from the image, the merged `Enforcement Allowlist` box doesn't contain the digest associated to the Container Instance, because, being it disabled, the corresponding digest is ignored. If the enforcement is enabled and a container with digest *DIGEST Z* is started, it will then be stopped and deleted, because its digest won't be included in the allowlist.
+
+Finally, everytime a *Container Image Enforcement Digest* option is modified, or the ContainerInstance is disabled or deleted, the enforcement feature will perform a check on all the already running containers. This is done because, if the digest that was previously provided has changed after an instance update, or removed due to disabling or deleting the instance, those containers that were previously authorised by this digest are no longer allowed to run. So they must be stopped and deleted.
+
+!!! warning
+
+    The digests provided through Container Instances allow running also container started by the **C**ommand**L**ine**I**nterface or by other Container Instances in the framework, even without providing the digest.
+    
+    But keep in mind that if the ContainerInstance is disabled (or its digest option changes) the enforcement feature will stop and delete the containers that are no longer matching the provided digest.
+
+    Be careful, then, to rely only on the digests set in the ContainerInstances options. If you think you need to run containers from the CLI, it is preferable to use the allowlist of the Container Orchestration Service. For the Container Instances, is a good practise to provide a digest.

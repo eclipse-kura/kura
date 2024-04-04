@@ -154,7 +154,7 @@ Everytime the enforcement feature performs a check on its startup or when a new 
 
 Let's suppose to have a device on which Eclipse Kura is running with the Container Orchestration Service enabled, its Enforcement feature disabled and a Container Instance named `test-container` up and running on the system.
 
-An user wants to activate the Enforcement feature, so it enables the `Allowlist Enforcement Enabled` option in the Container Orchestration Service, but leaves the `Container Image Allowlist` option blank because it wants that no containers are started outside the framework (for details see the [Container Enforcement paragraph](#container-enforcement)).
+A user wants to activate the Enforcement feature, so it enables the `Allowlist Enforcement Enabled` option in the Container Orchestration Service, but leaves the `Container Image Allowlist` option blank because it wants that no containers are started outside the framework (for details see the [Container Enforcement paragraph](#container-enforcement)).
 
 As the feature starts, it checks all the container running on the device, including the `test-container`, which will be stopped and deleted: this happens because the container digest is not included in the Container Orchestration Service Allowlist and the Container Instance is not providing any information through its `Container Image Enforcement Digest` option.
 
@@ -168,9 +168,9 @@ Once the instance digest is added to the enforcement feature, it can be used als
 
 ![Schema with disabled instances](./images/schemaWithoutInstances.png)
 
-As it can be seen from the image, the merged `Enforcement Allowlist` box doesn't contain the digest associated to the Container Instance, because, being it disabled, the corresponding digest is ignored. If the enforcement is enable and a container with digest *DIGEST Z* is started, it will then be stopped and deleted, because its digest won't be included in the allowlist.
+As it can be seen from the image, the merged `Enforcement Allowlist` box doesn't contain the digest associated to the Container Instance, because, being it disabled, the corresponding digest is ignored. If the enforcement is enabled and a container with digest *DIGEST Z* is started, it will then be stopped and deleted, because its digest won't be included in the allowlist.
 
-Finally, everytime a *Container Image Enforcement Digest* option is modified, or the ContainerInstance is disabled or deleted, the enforcement feature will perform a check on all the already running containers. This is done because if the digest that was previously provided has changed after an instance update, or removed due to disabling or deleting the instance, those containers that were previously authorised by this digest are no longer allowed to run. So they must be stopped and deleted.
+Finally, everytime a *Container Image Enforcement Digest* option is modified, or the ContainerInstance is disabled or deleted, the enforcement feature will perform a check on all the already running containers. This is done because, if the digest that was previously provided has changed after an instance update, or removed due to disabling or deleting the instance, those containers that were previously authorised by this digest are no longer allowed to run. So they must be stopped and deleted.
 
 !!! warning
 

@@ -31,8 +31,8 @@ import com.github.dockerjava.api.model.Event;
 public class AllowlistEnforcementMonitor extends ResultCallbackTemplate<AllowlistEnforcementMonitor, Event> {
 
     private static final Logger logger = LoggerFactory.getLogger(AllowlistEnforcementMonitor.class);
-    private static final String ENFORCEMENT_SUCCESS = "Enforcement allowlist contains image digests {}...container {} is starting";
-    private static final String ENFORCEMENT_FAILURE = "Enforcement allowlist doesn't contain image digests...container {} will be stopped";
+    private static final String ENFORCEMENT_CHECK_SUCCESS = "Enforcement allowlist contains image digests {}...container {} is starting";
+    private static final String ENFORCEMENT_CHECK_FAILURE = "Enforcement allowlist doesn't contain image digests...container {} will be stopped";
     private final Set<String> enforcementAllowlistContent;
     private final ContainerOrchestrationServiceImpl orchestrationServiceImpl;
 
@@ -63,9 +63,9 @@ public class AllowlistEnforcementMonitor extends ResultCallbackTemplate<Allowlis
 
 
         if (!digestIntersection.isEmpty()) {
-            logger.info(ENFORCEMENT_SUCCESS, digestIntersection, containerId);
+            logger.info(ENFORCEMENT_CHECK_SUCCESS, digestIntersection, containerId);
         } else {
-            logger.error(ENFORCEMENT_FAILURE, containerId);
+            logger.error(ENFORCEMENT_CHECK_FAILURE, containerId);
             stopContainer(containerId);
             deleteContainer(containerId);
         }

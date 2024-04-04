@@ -179,7 +179,7 @@
         <AD
             id="enforcement.digest"
             name="Container Image Enforcement Digest "
-            description="Digest of the image wanted to be run, added to the Enforcement Allowlist of the Container Orchestration Service, if the enforcement monitoring is enabled. If not given, it will be computed by the Signature Verification of the service."
+            description="Digest of the container image allowed to run on the device if the Container Enforcement Monitor is enabled. If not given, it will be computed by the Container Signature Verification service."
             type="String" cardinality="1" required="false"
             default="" />
             

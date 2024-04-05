@@ -25,6 +25,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -44,13 +45,17 @@ import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
+import org.eclipse.kura.identity.AssignedPermissions;
+import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityService;
+import org.eclipse.kura.identity.PasswordStrengthRequirements;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.identity.Permission;
 import org.eclipse.kura.identity.configuration.extension.IdentityConfigurationExtension;
 import org.eclipse.kura.internal.rest.identity.provider.util.IdentityDTOUtils;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.AdditionalConfigurationsDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityConfigurationDTO;
+import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityConfigurationRequestDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PasswordConfigurationDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PermissionConfigurationDTO;
@@ -89,6 +94,7 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
     private Gson gson = new Gson();
 
     private IdentityDTO identity;
+    private IdentityConfigurationRequestDTO identityConfigurationRequestDTO;
     private String testUsername;
     private String testPermissionName;
 
@@ -149,6 +155,133 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();
+    }
+
+    @Test
+    public void shouldGetIdentityByName() {
+        givenExistingIdentity(new IdentityDTO(this.testUsername));
+        givenExistingPermission(new PermissionDTO(this.testPermissionName));
+        givenAssignedPermissionToIdentity();
+
+        givenIdentityConfigurationRequestDTO();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/identities/byName",
+                gson.toJson(this.identityConfigurationRequestDTO));
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson("{\"identity\":{\"name\":\"" + this.testUsername
+                + "\"},\"permissionConfiguration\":{\"permissions\":[{\"name\":\"" + this.testPermissionName
+                + "\"}]},\"passwordConfiguration\":{\"passwordChangeNeeded\":false,\"passwordAuthEnabled\":false},\"additionalConfigurations\":{\"configurations\":[]}}");
+    }
+
+    @Test
+    public void shouldGetIdentityDefaultByName() {
+        givenExistingIdentity(new IdentityDTO(this.testUsername));
+        givenExistingPermission(new PermissionDTO(this.testPermissionName));
+        givenIdentityConfigurationRequestDTO();
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/identities/default/byName",
+                gson.toJson(this.identityConfigurationRequestDTO));
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson("{\"identity\":{\"name\":\"" + this.testUsername
+                + "\"},\"permissionConfiguration\":{\"permissions\":[]},\"passwordConfiguration\":{\"passwordChangeNeeded\":false,\"passwordAuthEnabled\":false},\"additionalConfigurations\":{\"configurations\":[]}}");
+    }
+
+    @Test
+    public void shouldDeleteExistingIdentity() {
+        givenExistingIdentity(new IdentityDTO(this.testUsername));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/identities",
+                gson.toJson(new IdentityDTO(this.testUsername)));
+
+        thenRequestSucceeds();
+        thenResponseBodyIsEmpty();
+
+    }
+
+    @Test
+    public void shouldReturnErrorDeletingNonExistingIdentity() {
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/identities",
+                gson.toJson(new IdentityDTO(this.testUsername)));
+
+        thenResponseCodeIs(404);
+        thenResponseBodyEqualsJson("{\"message\":\"Identity not found\"}");
+
+    }
+
+    @Test
+    public void shouldGetDefinedPermissions() {
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/definedPermissions");
+
+        thenRequestSucceeds();
+        thenResponseBodyIsNotEmpty();
+
+    }
+
+    @Test
+    public void shouldGetIdentities() {
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/identities");
+
+        thenRequestSucceeds();
+        thenResponseBodyIsNotEmpty();
+
+    }
+
+    @Test
+    public void shouldGetPasswordStrenghtRequirements() {
+
+        givenPasswordStrenghtServiceMockConfiguration(8, false, false, false);
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/passwordStrenghtRequirements");
+
+        thenRequestSucceeds();
+        thenResponseBodyIsNotEmpty();
+
+    }
+
+    @Test
+    public void shouldCreatePermission() {
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/permissions",
+                gson.toJson(new PermissionDTO(testPermissionName)));
+
+        thenRequestSucceeds();
+        thenResponseBodyIsEmpty();
+
+    }
+
+    @Test
+    public void shouldDeleteExistingPermission() {
+        givenExistingPermission(new PermissionDTO(this.testPermissionName));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/permissions",
+                gson.toJson(new PermissionDTO(this.testPermissionName)));
+
+        thenRequestSucceeds();
+        thenResponseBodyIsEmpty();
+
+    }
+
+    @Test
+    public void shouldReturnErrorDeletingNonExistingPermission() {
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/permissions",
+                gson.toJson(new PermissionDTO(this.testPermissionName)));
+
+        thenResponseCodeIs(404);
+        thenResponseBodyEqualsJson("{\"message\":\"Permission not found\"}");
+
+    }
+
+    @Test
+    public void shouldValidateIdentityConfiguration() {
+        givenExistingIdentity(new IdentityDTO(this.testUsername));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), "/identities/validate",
+                gson.toJson(new IdentityConfigurationDTO(new IdentityDTO(this.testUsername))));
+
+        thenRequestSucceeds();
     }
 
     @BeforeClass
@@ -252,6 +385,37 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
 
     private void givenMockIdentityConfigurationExtension(final String pid) {
         this.extensions.put(pid, new MockExtensionHolder(pid));
+    }
+
+    private void givenIdentityConfigurationRequestDTO() {
+        this.identityConfigurationRequestDTO = new IdentityConfigurationRequestDTO();
+        this.identityConfigurationRequestDTO.setIdentity(new IdentityDTO(testUsername));
+        this.identityConfigurationRequestDTO.setConfigurationComponents(new HashSet<String>(
+                Arrays.asList("AdditionalConfigurations", "AssignedPermissions", "PasswordConfiguration")));
+    }
+
+    private void givenPasswordStrenghtServiceMockConfiguration(int passwordMinimumLength, boolean digitsRequired,
+            boolean specialCharactersRequired, boolean bothCasesRequired) {
+
+        try {
+            Mockito.when(passwordStrengthVerificationServiceMock.getPasswordStrengthRequirements())
+                    .thenReturn(new PasswordStrengthRequirements(passwordMinimumLength, digitsRequired,
+                            specialCharactersRequired, bothCasesRequired));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Unable to configure password strenght requirements");
+        }
+    }
+
+    private void givenAssignedPermissionToIdentity() {
+        try {
+            Set<Permission> permissions = new HashSet<>(Arrays.asList(new Permission(this.testPermissionName)));
+            identityService.updateIdentityConfigurations(Arrays.asList(
+                    new IdentityConfiguration(this.testUsername, Arrays.asList(new AssignedPermissions(permissions)))));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail("Unable to configure identity permissions");
+        }
     }
 
     private static Future<?> disableComponent(final ServiceComponentRuntime scr, final String componentName) {

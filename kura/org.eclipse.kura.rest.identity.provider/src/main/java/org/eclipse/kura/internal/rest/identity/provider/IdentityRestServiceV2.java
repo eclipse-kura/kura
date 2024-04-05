@@ -281,12 +281,16 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "deletePermission");
         boolean deleted = false;
         try {
-            deleted = this.identityService.deletePermission(null);
+            deleted = this.identityService.deletePermission(IdentityDTOUtils.toPermission(permissionDTO));
+            if (!deleted) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND, "Permission not found");
+            }
+
         } catch (KuraException e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
-        return deleted ? Response.ok().build() : Response.status(Status.NOT_FOUND).build();
+        return Response.ok().build();
     }
 
     @POST

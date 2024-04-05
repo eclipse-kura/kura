@@ -112,6 +112,10 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "createIdentity");
 
         try {
+            if (identity.getName().isEmpty()) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                        "Identity name not specified");
+            }
             boolean created = this.identityService.createIdentity(identity.getName());
             if (!created) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.CONFLICT, "Identity already exists");
@@ -261,6 +265,10 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "createPermission");
 
         try {
+            if (permissionDTO.getName().isEmpty()) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                        "Permission not specified");
+            }
             boolean created = this.identityService.createPermission(IdentityDTOUtils.toPermission(permissionDTO));
             if (!created) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.CONFLICT,
@@ -299,6 +307,12 @@ public class IdentityRestServiceV2 {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response validateIdentityConfiguration(final IdentityConfigurationDTO identityConfigurationDTO) {
         try {
+
+            if (identityConfigurationDTO.getIdentity().getName().isEmpty()) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                        "Identity name not specified");
+            }
+
             List<IdentityConfiguration> configurations = Collections
                     .singletonList(IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO,
                             passwordHashFunction(), validatePasswordFunction()));

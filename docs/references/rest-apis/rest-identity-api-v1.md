@@ -1,4 +1,4 @@
-# Rest Identity v1 API
+# Rest Identity V1 API
 !!! note
 
     This API can also be accessed via the RequestHandler with app-id: `IDN-V1`.

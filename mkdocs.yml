@@ -158,7 +158,8 @@ nav:
         - Cloud Connection: references/rest-apis/rest-cloudconnection-api.md
         - Command: references/rest-apis/rest-command-api.md
         - Deploy: references/rest-apis/rest-deploy-api.md
-        - Identity: references/rest-apis/rest-identity-api.md
+        - Identity V1: references/rest-apis/rest-identity-api-v1.md
+        - Identity V2: references/rest-apis/rest-identity-api-v2.md
         - Inventory: references/rest-apis/rest-inventory-api.md
         - Network Configuration: references/rest-apis/rest-network-configuration-api.md
         - Position: references/rest-apis/rest-position-api.md

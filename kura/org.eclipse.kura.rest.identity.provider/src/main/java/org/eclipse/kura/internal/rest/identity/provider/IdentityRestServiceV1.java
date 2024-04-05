@@ -44,21 +44,23 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("restriction")
 @Path("identity/v1")
-public class IdentityRestService {
+public class IdentityRestServiceV1 {
 
-    private static final Logger logger = LoggerFactory.getLogger(IdentityRestService.class);
-    private static final String DEBUG_MESSAGE = "Processing request for method '{}'";
+    private static final Logger logger = LoggerFactory.getLogger(IdentityRestServiceV1.class);
 
     private static final String MQTT_APP_ID = "IDN-V1";
+
+    private static final String DEBUG_MESSAGE = "Processing request for method '{}'";
+
     private static final String REST_ROLE_NAME = "identity";
     private static final String KURA_PERMISSION_REST_ROLE = "kura.permission.rest." + REST_ROLE_NAME;
 
     private final RequestHandler requestHandler = new JaxRsRequestHandlerProxy(this);
 
-    private CryptoService cryptoService;
+    private LegacyIdentityService legacyIdentityService;
 
+    private CryptoService cryptoService;
     private UserAdmin userAdmin;
-    private IdentityService identityService;
     private ConfigurationService configurationService;
 
     public void bindCryptoService(CryptoService cryptoService) {
@@ -82,11 +84,6 @@ public class IdentityRestService {
         }
     }
 
-    // Added mainly for testing purposes. Currently the service is created by this endpoint.
-    public void bindIdentityService(IdentityService identityService) {
-        this.identityService = identityService;
-    }
-
     public void unbindRequestHandlerRegistry(RequestHandlerRegistry registry) {
         try {
             registry.unregister(MQTT_APP_ID);
@@ -95,10 +92,16 @@ public class IdentityRestService {
         }
     }
 
+    // Added mainly for testing purposes. Currently the service is created by activate()
+    public void bindLegacyIdentityService(LegacyIdentityService legacyIdentityService) {
+        this.legacyIdentityService = legacyIdentityService;
+    }
+
     public void activate() {
-        // create only if not set externally. Added mainly for testing purposes.
-        if (this.identityService == null) {
-            this.identityService = new IdentityService(this.cryptoService, this.userAdmin, this.configurationService);
+        // create only if not externally set. Added mainly for testing purposes.
+        if (this.legacyIdentityService == null) {
+            this.legacyIdentityService = new LegacyIdentityService(this.cryptoService, this.userAdmin,
+                    this.configurationService);
         }
     }
 
@@ -109,7 +112,7 @@ public class IdentityRestService {
     public Response createUser(final UserDTO userName) {
         try {
             logger.debug(DEBUG_MESSAGE, "createUser");
-            this.identityService.createUser(userName);
+            this.legacyIdentityService.createUser(userName);
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -124,7 +127,7 @@ public class IdentityRestService {
     public Response updateUser(final UserDTO user) {
         try {
             logger.debug(DEBUG_MESSAGE, "updateUser");
-            this.identityService.updateUser(user);
+            this.legacyIdentityService.updateUser(user);
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -140,7 +143,7 @@ public class IdentityRestService {
     public UserDTO getUser(final UserDTO userName) {
         try {
             logger.debug(DEBUG_MESSAGE, "getUser");
-            return this.identityService.getUser(userName.getUserName());
+            return this.legacyIdentityService.getUser(userName.getUserName());
         } catch (KuraException e) {
             if (e.getCode().equals(KuraErrorCode.NOT_FOUND)) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND, "Identity does not exist");
@@ -160,7 +163,7 @@ public class IdentityRestService {
     public Response deleteUser(final UserDTO userName) {
         try {
             logger.debug(DEBUG_MESSAGE, "deleteUser");
-            this.identityService.deleteUser(userName.getUserName());
+            this.legacyIdentityService.deleteUser(userName.getUserName());
         } catch (KuraException e) {
             if (e.getCode().equals(KuraErrorCode.NOT_FOUND)) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND, "Identity does not exist");
@@ -180,7 +183,7 @@ public class IdentityRestService {
     public PermissionDTO getDefinedPermissions() {
         try {
             logger.debug(DEBUG_MESSAGE, "getDefinedPermissions");
-            return new PermissionDTO(this.identityService.getDefinedPermissions());
+            return new PermissionDTO(this.legacyIdentityService.getDefinedPermissions());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -194,7 +197,7 @@ public class IdentityRestService {
         try {
             logger.debug(DEBUG_MESSAGE, "getUserConfig");
             UserConfigDTO userConfig = new UserConfigDTO();
-            userConfig.setUserConfig(this.identityService.getUserConfig());
+            userConfig.setUserConfig(this.legacyIdentityService.getUserConfig());
             return userConfig;
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
@@ -207,7 +210,7 @@ public class IdentityRestService {
     public ValidatorOptionsDTO getValidatorOptions() {
         try {
             logger.debug(DEBUG_MESSAGE, "getValidatorOptions");
-            ValidatorOptions validatorOptions = this.identityService.getValidatorOptions();
+            ValidatorOptions validatorOptions = this.legacyIdentityService.getValidatorOptions();
             return new ValidatorOptionsDTO(//
                     validatorOptions.isPasswordMinimumLength(), //
                     validatorOptions.isPasswordRequireDigits(), //

@@ -39,7 +39,7 @@ import org.osgi.service.useradmin.User;
 import org.osgi.service.useradmin.UserAdmin;
 
 @SuppressWarnings("restriction")
-public class IdentityService {
+public class LegacyIdentityService {
 
     private static final String IDENTITY = "Identity ";
     private static final String KURA_WEB_CONSOLE_SERVICE_PID = "org.eclipse.kura.web.Console";
@@ -53,7 +53,7 @@ public class IdentityService {
     private final ConfigurationService configurationService;
     private final CryptoService cryptoService;
 
-    public IdentityService(CryptoService cryptoService, UserAdmin userAdmin,
+    public LegacyIdentityService(CryptoService cryptoService, UserAdmin userAdmin,
             ConfigurationService configurationService) {
 
         this.configurationService = configurationService;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -40,7 +40,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.internal.rest.identity.provider.IdentityService;
+import org.eclipse.kura.internal.rest.identity.provider.LegacyIdentityService;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
 import org.eclipse.kura.util.validation.ValidatorOptions;
 import org.junit.Test;
@@ -51,13 +51,13 @@ import org.osgi.service.useradmin.User;
 import org.osgi.service.useradmin.UserAdmin;
 
 @SuppressWarnings("restriction")
-public class IdentityServiceTest {
+public class IdentityServiceV1Test {
 
     private static final String KURA_WEB_CONSOLE_SERVICE_PID = "org.eclipse.kura.web.Console";
     private static final String USER_ROLE_NAME_PREFIX = "kura.user.";
     private static final String PERMISSION_ROLE_NAME_PREFIX = "kura.permission.";
 
-    private IdentityService identityService;
+    private LegacyIdentityService identityService;
     private Exception occurredException;
     private UserDTO user;
     private UserDTO newUser;
@@ -114,14 +114,6 @@ public class IdentityServiceTest {
         thenNoExceptionOccurred();
         thenUserIs("testuser");
 
-    }
-
-    private void whenGettingUser(String username) {
-        try {
-            this.user = this.identityService.getUser(username);
-        } catch (KuraException e) {
-            this.occurredException = e;
-        }
     }
 
     @Test
@@ -213,7 +205,7 @@ public class IdentityServiceTest {
             fail("fail to setup mocks");
         }
 
-        this.identityService = new IdentityService(this.cryptoService, this.userAdmin, this.configurationService);
+        this.identityService = new LegacyIdentityService(this.cryptoService, this.userAdmin, this.configurationService);
 
     }
 
@@ -283,6 +275,14 @@ public class IdentityServiceTest {
         try {
             this.identityService.updateUser(user);
         } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void whenGettingUser(String username) {
+        try {
+            this.user = this.identityService.getUser(username);
+        } catch (KuraException e) {
             this.occurredException = e;
         }
     }

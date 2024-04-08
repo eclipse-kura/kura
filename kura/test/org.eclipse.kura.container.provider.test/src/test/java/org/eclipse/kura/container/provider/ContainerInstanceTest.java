@@ -372,7 +372,7 @@ public class ContainerInstanceTest {
         givenPropertiesWith(CONTAINER_IMAGE_TAG, "latest");
         givenPropertiesWith(CONTAINER_TRUST_ANCHOR, "aRealTrustAnchor ;)");
         givenPropertiesWith(CONTAINER_VERIFY_TLOG, true);
-        givenPropertiesWith("enforcement.digest", "");
+        givenPropertiesWith(CONTAINER_ENFORCEMENT_DIGEST, "");
 
         whenActivateInstanceIsCalledWith(this.properties);
 
@@ -656,9 +656,8 @@ public class ContainerInstanceTest {
                 verifyTlog, passwordRegistryCredentials);
     }
 
-    private void thenSignatureVerificationVerifyWasNeverCalledFor(String imageName, String imageTag,
-            String trustAnchor, boolean verifyTlog, PasswordRegistryCredentials passwordRegistryCredentials)
-            throws KuraException {
+    private void thenSignatureVerificationVerifyWasNeverCalledFor(String imageName, String imageTag, String trustAnchor,
+            boolean verifyTlog, PasswordRegistryCredentials passwordRegistryCredentials) throws KuraException {
         verify(this.mockContainerSignatureValidationService, never()).verify(imageName, imageTag, trustAnchor,
                 verifyTlog, passwordRegistryCredentials);
     }

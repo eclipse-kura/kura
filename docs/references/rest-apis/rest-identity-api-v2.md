@@ -100,7 +100,9 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 
 ```JSON
 {
-    "identity": "userName"
+"identity": {
+        "name": "userName"
+    }
 }
 ```
 

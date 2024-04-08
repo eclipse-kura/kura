@@ -35,6 +35,8 @@ import javax.servlet.SessionCookieConfig;
 
 import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.jetty.JettyCustomizer;
+import org.eclipse.jetty.security.ConstraintMapping;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.ForwardedRequestCustomizer;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -46,6 +48,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 public class KuraJettyCustomizer extends JettyCustomizer {
@@ -66,6 +69,18 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         servletContextHandler.setGzipHandler(gzipHandler);
 
         servletContextHandler.setErrorHandler(new KuraErrorHandler());
+
+        Constraint authConstraint = new Constraint();
+        authConstraint.setAuthenticate(true);
+        ConstraintMapping traceConstraintMapping = new ConstraintMapping();
+        traceConstraintMapping.setPathSpec("/");
+        traceConstraintMapping.setMethod("TRACE");
+        traceConstraintMapping.setConstraint(authConstraint);
+        
+        ConstraintSecurityHandler constraintSecurityHandler = new ConstraintSecurityHandler();
+        constraintSecurityHandler.addConstraintMapping(traceConstraintMapping);
+        
+        servletContextHandler.setSecurityHandler(constraintSecurityHandler);
 
         final SessionCookieConfig cookieConfig = servletContextHandler.getSessionHandler().getSessionCookieConfig();
 

@@ -52,7 +52,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private Set<ContainerSignatureValidationService> availableContainerSignatureValidationService = new HashSet<>();
     private ConfigurationService configurationService;
     private State state = new Disabled(new ContainerInstanceOptions(Collections.emptyMap()));
-    private ContainerInstanceOptions actualOptions = null;
+    private ContainerInstanceOptions currentOptions = null;
 
     public void setContainerOrchestrationService(final ContainerOrchestrationService containerOrchestrationService) {
         this.containerOrchestrationService = containerOrchestrationService;
@@ -100,34 +100,50 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         }
 
         try {
+            ContainerInstanceOptions newOptions = new ContainerInstanceOptions(properties);
 
-            if (this.actualOptions == null || !this.actualOptions.equals(new ContainerInstanceOptions(properties))) {
-
-                this.actualOptions = new ContainerInstanceOptions(properties);
-
-                if (!this.actualOptions.getEnforcementDigest().isPresent()) {
-
-                    logger.info(
-                            "Container configuration doesn't include enforcement digest. Validating with Container Signature Validation service");
-
-                    if (this.actualOptions.getSignatureTrustAnchor().isPresent()) {
-
-                        getDigestFromSignatureVerification(properties);
-
-                    } else {
-                        logger.info("No trust anchor available. Signature validation skipped.");
-                    }
-
-                }
-
-                if (this.actualOptions.isEnabled()) {
-                    this.containerOrchestrationService.registerListener(this);
-                } else {
-                    this.containerOrchestrationService.unregisterListener(this);
-                }
-
-                updateState(s -> s.onConfigurationUpdated(this.actualOptions));
+            if (this.currentOptions != null && this.currentOptions.equals(newOptions)) {
+                return;
             }
+
+            this.currentOptions = newOptions;
+
+            if (!this.currentOptions.getEnforcementDigest().isPresent()) {
+
+                logger.info(
+                        "Container configuration doesn't include enforcement digest. Validating with Container Signature Validation service");
+
+                if (this.currentOptions.getSignatureTrustAnchor().isPresent()) {
+
+                    ValidationResult containerSignatureValidated = validateContainerImageSignature(this.currentOptions);
+
+                    logger.info("Container signature validation result for {}@{}({}) - {}",
+                            this.currentOptions.getContainerImage(),
+                            this.currentOptions.getEnforcementDigest().orElse("?"),
+                            this.currentOptions.getContainerImageTag(),
+                            containerSignatureValidated.isSignatureValid() ? "OK" : "FAIL");
+
+                    containerSignatureValidated.imageDigest().ifPresent(digest -> {
+
+                        Map<String, Object> updatedProperties = updatePropertiesWithSignatureDigest(properties, digest);
+                        this.currentOptions = new ContainerInstanceOptions(updatedProperties);
+                        updateSnapshotWithSignatureDigest(updatedProperties);
+
+                    });
+
+                } else {
+                    logger.info("No trust anchor available. Signature validation skipped.");
+                }
+
+            }
+
+            if (this.currentOptions.isEnabled()) {
+                this.containerOrchestrationService.registerListener(this);
+            } else {
+                this.containerOrchestrationService.unregisterListener(this);
+            }
+
+            updateState(s -> s.onConfigurationUpdated(this.currentOptions));
 
         } catch (Exception e) {
             logger.error("Failed to create container instance. Please check configuration of container: {}. Caused by:",
@@ -442,24 +458,6 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             deleteContainer();
             return new Disabled(this.options);
         }
-
-    }
-
-    private void getDigestFromSignatureVerification(Map<String, Object> properties) {
-
-        ValidationResult containerSignatureValidated = validateContainerImageSignature(this.actualOptions);
-
-        logger.info("Container signature validation result for {}@{}({}) - {}", this.actualOptions.getContainerImage(),
-                this.actualOptions.getEnforcementDigest().orElse("?"), this.actualOptions.getContainerImageTag(),
-                containerSignatureValidated.isSignatureValid() ? "OK" : "FAIL");
-
-        containerSignatureValidated.imageDigest().ifPresent(digest -> {
-
-            Map<String, Object> updatedProperties = updatePropertiesWithSignatureDigest(properties, digest);
-            this.actualOptions = new ContainerInstanceOptions(updatedProperties);
-            updateSnapshotWithSignatureDigest(updatedProperties);
-
-        });
 
     }
 

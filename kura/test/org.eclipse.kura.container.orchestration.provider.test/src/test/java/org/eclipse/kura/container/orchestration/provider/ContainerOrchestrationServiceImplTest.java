@@ -655,17 +655,14 @@ public class ContainerOrchestrationServiceImplTest {
     }
 
     private void whenRunContainer() throws KuraException, InterruptedException {
-        // startContainer
         this.containerId = this.dockerService.startContainer(this.containerConfig1);
     }
 
     private void whenStopContainer() throws KuraException {
-        // stopContainer
         this.dockerService.stopContainer(this.containerId);
     }
 
     private void whenDeleteContainer() throws KuraException {
-        // deleteContainer
         this.dockerService.deleteContainer(this.containerId);
     }
 

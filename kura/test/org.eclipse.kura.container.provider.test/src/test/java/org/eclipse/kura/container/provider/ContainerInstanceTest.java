@@ -74,6 +74,8 @@ public class ContainerInstanceTest {
             ContainerSignatureValidationService.class);
     private Map<String, Object> properties = new HashMap<>();
     private Map<String, Object> newProperties = new HashMap<>();
+    private String signatureExtractedDigest;
+    private Map<String, Object> signatureUpdatedProperties;
     private ContainerInstance containerInstance = new ContainerInstance();
     private Exception occurredException;
 
@@ -372,13 +374,14 @@ public class ContainerInstanceTest {
         givenPropertiesWith(CONTAINER_IMAGE_TAG, "latest");
         givenPropertiesWith(CONTAINER_TRUST_ANCHOR, "aRealTrustAnchor ;)");
         givenPropertiesWith(CONTAINER_VERIFY_TLOG, true);
-        givenPropertiesWith(CONTAINER_ENFORCEMENT_DIGEST, "");
+
+        givenSignatureUpdatedProperties(CONTAINER_ENFORCEMENT_DIGEST, this.signatureExtractedDigest);
 
         whenActivateInstanceIsCalledWith(this.properties);
 
         thenNoExceptionOccurred();
         thenWaitForContainerInstanceToBecome(CONTAINER_STATE_CREATED);
-        thenStartContainerWasCalledWith(this.properties);
+        thenStartContainerWasCalledWith(this.signatureUpdatedProperties);
         thenVerifySignatureWasCalledFor("nginx", "latest", "aRealTrustAnchor ;)", true);
     }
 
@@ -459,8 +462,7 @@ public class ContainerInstanceTest {
         thenNoExceptionOccurred();
         thenWaitForContainerInstanceToBecome(CONTAINER_STATE_CREATED);
         thenStartContainerWasCalledWith(this.properties);
-        thenSignatureVerificationVerifyWasNeverCalledFor("nginx", "latest", "aRealTrustAnchor ;)", true,
-                new PasswordRegistryCredentials(Optional.empty(), "username", new Password("password")));
+        thenVerifySignatureWasNeverCalled();
     }
 
     @After
@@ -482,6 +484,11 @@ public class ContainerInstanceTest {
 
     private void givenNewPropertiesWith(String key, Object value) {
         this.newProperties.put(key, value);
+    }
+
+    private void givenSignatureUpdatedProperties(String key, Object value) {
+        this.signatureUpdatedProperties = new HashMap<>(this.properties);
+        this.signatureUpdatedProperties.put(key, value);
     }
 
     private void givenContainerInstanceActivatedWith(Map<String, Object> configuration) {
@@ -538,12 +545,9 @@ public class ContainerInstanceTest {
     private void givenContainerSignatureValidationServiceReturningSuccessFor(String imageName, String imageTag)
             throws KuraException {
         // Generate random sha256 string
-        String sha256 = "sha256:" + Long.toHexString(Double.doubleToLongBits(Math.random()));
+        this.signatureExtractedDigest = "sha256:" + Long.toHexString(Double.doubleToLongBits(Math.random()));
         when(this.mockContainerSignatureValidationService.verify(eq(imageName), eq(imageTag), any(String.class),
-                any(Boolean.class))).thenAnswer(answer -> {
-                    this.properties.put("enforcement.digest", sha256);
-                    return new ValidationResult(true, sha256);
-                });
+                any(Boolean.class))).thenReturn(new ValidationResult(true, this.signatureExtractedDigest));
     }
 
     private void givenContainerSignatureValidationServiceReturningFailureForAuthenticated(String imageName,
@@ -653,12 +657,6 @@ public class ContainerInstanceTest {
     private void thenAuthenticatedVerifySignatureWasCalledFor(String imageName, String imageTag, String trustAnchor,
             boolean verifyTlog, PasswordRegistryCredentials passwordRegistryCredentials) throws KuraException {
         verify(this.mockContainerSignatureValidationService, times(1)).verify(imageName, imageTag, trustAnchor,
-                verifyTlog, passwordRegistryCredentials);
-    }
-
-    private void thenSignatureVerificationVerifyWasNeverCalledFor(String imageName, String imageTag, String trustAnchor,
-            boolean verifyTlog, PasswordRegistryCredentials passwordRegistryCredentials) throws KuraException {
-        verify(this.mockContainerSignatureValidationService, never()).verify(imageName, imageTag, trustAnchor,
                 verifyTlog, passwordRegistryCredentials);
     }
 

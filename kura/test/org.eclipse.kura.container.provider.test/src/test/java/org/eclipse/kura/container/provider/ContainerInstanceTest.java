@@ -457,7 +457,7 @@ public class ContainerInstanceTest {
         thenNoExceptionOccurred();
         thenWaitForContainerInstanceToBecome(CONTAINER_STATE_CREATED);
         thenStartContainerWasCalledWith(this.properties);
-        thenAuthenticatedVerifySignatureWasNeverCalledFor("nginx", "latest", "aRealTrustAnchor ;)", true,
+        thenSignatureVerificationVerifyWasNeverCalledFor("nginx", "latest", "aRealTrustAnchor ;)", true,
                 new PasswordRegistryCredentials(Optional.empty(), "username", new Password("password")));
     }
 
@@ -651,7 +651,7 @@ public class ContainerInstanceTest {
                 verifyTlog, passwordRegistryCredentials);
     }
 
-    private void thenAuthenticatedVerifySignatureWasNeverCalledFor(String imageName, String imageTag,
+    private void thenSignatureVerificationVerifyWasNeverCalledFor(String imageName, String imageTag,
             String trustAnchor, boolean verifyTlog, PasswordRegistryCredentials passwordRegistryCredentials)
             throws KuraException {
         verify(this.mockContainerSignatureValidationService, never()).verify(imageName, imageTag, trustAnchor,

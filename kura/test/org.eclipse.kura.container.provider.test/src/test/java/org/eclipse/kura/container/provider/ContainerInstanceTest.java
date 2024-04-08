@@ -361,6 +361,7 @@ public class ContainerInstanceTest {
         givenContainerOrchestratorWithNoRunningContainers();
         givenContainerOrchestratorReturningOnStart("1234");
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
+        givenMockedConfigurationService();
 
         givenContainerSignatureValidationServiceReturningSuccessFor("nginx", "latest");
         givenContainerInstanceWith(this.mockContainerSignatureValidationService);
@@ -371,6 +372,7 @@ public class ContainerInstanceTest {
         givenPropertiesWith(CONTAINER_IMAGE_TAG, "latest");
         givenPropertiesWith(CONTAINER_TRUST_ANCHOR, "aRealTrustAnchor ;)");
         givenPropertiesWith(CONTAINER_VERIFY_TLOG, true);
+        givenPropertiesWith("enforcement.digest", "");
 
         whenActivateInstanceIsCalledWith(this.properties);
 
@@ -538,7 +540,10 @@ public class ContainerInstanceTest {
         // Generate random sha256 string
         String sha256 = "sha256:" + Long.toHexString(Double.doubleToLongBits(Math.random()));
         when(this.mockContainerSignatureValidationService.verify(eq(imageName), eq(imageTag), any(String.class),
-                any(Boolean.class))).thenReturn(new ValidationResult(true, sha256));
+                any(Boolean.class))).thenAnswer(answer -> {
+                    this.properties.put("enforcement.digest", sha256);
+                    return new ValidationResult(true, sha256);
+                });
     }
 
     private void givenContainerSignatureValidationServiceReturningFailureForAuthenticated(String imageName,

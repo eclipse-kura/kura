@@ -378,6 +378,7 @@ public class ContainerOrchestrationServiceImplTest {
         whenMockForContainerInstancesDigestAdding();
         whenRunContainer();
         whenStopContainer();
+        whenDeleteContainer();
 
         thenContainerInstanceDigestIsNotInAllowlist();
     }
@@ -663,6 +664,11 @@ public class ContainerOrchestrationServiceImplTest {
         this.dockerService.stopContainer(this.containerId);
     }
 
+    private void whenDeleteContainer() throws KuraException {
+        // deleteContainer
+        this.dockerService.deleteContainer(this.containerId);
+    }
+
     private void whenImageIsDeletedById(String imageId) throws KuraException {
         this.dockerService.deleteImage(imageId);
     }
@@ -751,7 +757,6 @@ public class ContainerOrchestrationServiceImplTest {
     }
 
     private void thenContainerInstanceDigestIsNotInAllowlist() {
-        this.dockerService.getContainerInstancesAllowlist().stream().forEach(System.err::println);
         assertTrue(this.dockerService.getContainerInstancesAllowlist().isEmpty());
     }
 

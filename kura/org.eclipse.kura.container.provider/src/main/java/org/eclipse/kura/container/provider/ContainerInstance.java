@@ -455,7 +455,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
         containerSignatureValidated.imageDigest().ifPresent(digest -> {
 
-            Map<String, Object> updatedProperties = updatePropertiesWithDigest(properties, digest);
+            Map<String, Object> updatedProperties = updatePropertiesWithSignatureDigest(properties, digest);
             this.actualOptions = new ContainerInstanceOptions(updatedProperties);
             updateSnapshotWithSignatureDigest(updatedProperties);
 

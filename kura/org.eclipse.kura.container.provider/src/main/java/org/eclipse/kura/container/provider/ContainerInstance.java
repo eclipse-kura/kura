@@ -52,6 +52,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private Set<ContainerSignatureValidationService> availableContainerSignatureValidationService = new HashSet<>();
     private ConfigurationService configurationService;
     private State state = new Disabled(new ContainerInstanceOptions(Collections.emptyMap()));
+    private ContainerInstanceOptions actualOptions = null;
 
     public void setContainerOrchestrationService(final ContainerOrchestrationService containerOrchestrationService) {
         this.containerOrchestrationService = containerOrchestrationService;
@@ -99,34 +100,35 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         }
 
         try {
-            ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
 
-            if (!newProps.getEnforcementDigest().isPresent()) {
+            if (this.actualOptions == null || !this.actualOptions.equals(new ContainerInstanceOptions(properties))) {
 
-                logger.info(
-                        "Container configuration doesn't include enforcement digest. Validating with Container Signature Validation service");
+                this.actualOptions = new ContainerInstanceOptions(properties);
 
-                if (newProps.getSignatureTrustAnchor().isPresent()) {
-                    ValidationResult containerSignatureValidated = validateContainerImageSignature(newProps);
-                    newProps.setEnforcementDigest(containerSignatureValidated.imageDigest());
-                    updateSnapshotWithSignatureDigest(newProps.getEnforcementDigest(), properties);
-                    logger.info("Container signature validation result for {}@{}({}) - {}",
-                            newProps.getContainerImage(), newProps.getEnforcementDigest().orElse("?"),
-                            newProps.getContainerImageTag(),
-                            containerSignatureValidated.isSignatureValid() ? "OK" : "FAIL");
-                } else {
-                    logger.info("No trust anchor available. Signature validation skipped.");
+                if (!this.actualOptions.getEnforcementDigest().isPresent()) {
+
+                    logger.info(
+                            "Container configuration doesn't include enforcement digest. Validating with Container Signature Validation service");
+
+                    if (this.actualOptions.getSignatureTrustAnchor().isPresent()) {
+
+                        getDigestFromSignatureVerification(properties);
+
+                    } else {
+                        logger.info("No trust anchor available. Signature validation skipped.");
+                    }
+
                 }
 
+                if (this.actualOptions.isEnabled()) {
+                    this.containerOrchestrationService.registerListener(this);
+                } else {
+                    this.containerOrchestrationService.unregisterListener(this);
+                }
+
+                updateState(s -> s.onConfigurationUpdated(this.actualOptions));
             }
 
-            if (newProps.isEnabled()) {
-                this.containerOrchestrationService.registerListener(this);
-            } else {
-                this.containerOrchestrationService.unregisterListener(this);
-            }
-
-            updateState(s -> s.onConfigurationUpdated(newProps));
         } catch (Exception e) {
             logger.error("Failed to create container instance. Please check configuration of container: {}. Caused by:",
                     properties.get(ConfigurationService.KURA_SERVICE_PID), e);
@@ -443,18 +445,41 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     }
 
-    private void updateSnapshotWithSignatureDigest(Optional<String> enforcementDigest, Map<String, Object> properties) {
+    private void getDigestFromSignatureVerification(Map<String, Object> properties) {
 
-        if (enforcementDigest.isPresent()) {
-            try {
-                Map<String, Object> updatedProperties = new HashMap<>(properties);
-                updatedProperties.put("enforcement.digest", enforcementDigest.get());
-                this.configurationService.updateConfiguration(
-                        (String) properties.get(ConfigurationService.KURA_SERVICE_PID), updatedProperties, true);
-            } catch (KuraException ex) {
-                logger.error("Impossible to update snapshot for pid {} due to {}",
-                        properties.get(ConfigurationService.KURA_SERVICE_PID), ex.getMessage());
-            }
+        ValidationResult containerSignatureValidated = validateContainerImageSignature(this.actualOptions);
+
+        logger.info("Container signature validation result for {}@{}({}) - {}", this.actualOptions.getContainerImage(),
+                this.actualOptions.getEnforcementDigest().orElse("?"), this.actualOptions.getContainerImageTag(),
+                containerSignatureValidated.isSignatureValid() ? "OK" : "FAIL");
+
+        containerSignatureValidated.imageDigest().ifPresent(digest -> {
+
+            Map<String, Object> updatedProperties = updatePropertiesWithDigest(properties, digest);
+            this.actualOptions = new ContainerInstanceOptions(updatedProperties);
+            updateSnapshotWithSignatureDigest(updatedProperties);
+
+        });
+
+    }
+
+    private Map<String, Object> updatePropertiesWithSignatureDigest(Map<String, Object> oldProperties,
+            String enforcementDigest) {
+
+        Map<String, Object> updatedProperties = new HashMap<>(oldProperties);
+        updatedProperties.put("enforcement.digest", enforcementDigest);
+        return updatedProperties;
+
+    }
+
+    private void updateSnapshotWithSignatureDigest(Map<String, Object> properties) {
+
+        try {
+            this.configurationService.updateConfiguration(
+                    (String) properties.get(ConfigurationService.KURA_SERVICE_PID), properties, true);
+        } catch (KuraException ex) {
+            logger.error("Impossible to update snapshot for pid {} due to {}",
+                    properties.get(ConfigurationService.KURA_SERVICE_PID), ex.getMessage());
         }
     }
 

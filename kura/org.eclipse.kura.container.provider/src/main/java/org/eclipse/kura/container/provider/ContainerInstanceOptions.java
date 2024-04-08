@@ -105,7 +105,7 @@ public class ContainerInstanceOptions {
     private final Optional<String> signatureTrustAnchor;
     private final Boolean signatureVerifyTransparencyLog;
 
-    private Optional<String> enforcementDigest;
+    private final Optional<String> enforcementDigest;
 
     public ContainerInstanceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -359,10 +359,6 @@ public class ContainerInstanceOptions {
 
     public Optional<String> getEnforcementDigest() {
         return this.enforcementDigest;
-    }
-
-    public void setEnforcementDigest(Optional<String> digest) {
-        this.enforcementDigest = digest;
     }
 
     private ImageConfiguration buildImageConfig() {

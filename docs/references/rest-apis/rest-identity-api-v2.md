@@ -87,7 +87,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ```
 
 - 200 OK status
-- 404 `userName` does not exist
+- 404 Identity does not exist
 - 500 Internal Server Error
 
 #### Get User Default Configuration by Name

@@ -34,6 +34,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
@@ -60,6 +61,8 @@ import org.slf4j.LoggerFactory;
 
 @Path("identity/v2")
 public class IdentityRestServiceV2 {
+
+    private static final String IDENTITY_NAME_NOT_SPECIFIED_ERROR = "Identity name not specified";
 
     private static final Logger logger = LoggerFactory.getLogger(IdentityRestServiceV2.class);
 
@@ -112,9 +115,9 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "createIdentity");
 
         try {
-            if (identity.getName().isEmpty()) {
+            if (StringUtils.isEmpty(identity.getName())) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
-                        "Identity name not specified");
+                        IDENTITY_NAME_NOT_SPECIFIED_ERROR);
             }
             boolean created = this.identityService.createIdentity(identity.getName());
             if (!created) {
@@ -205,6 +208,10 @@ public class IdentityRestServiceV2 {
     public Response deleteIdentity(final IdentityDTO identity) {
         logger.debug(DEBUG_MESSAGE, "deleteIdentity");
         try {
+            if (StringUtils.isEmpty(identity.getName())) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                        IDENTITY_NAME_NOT_SPECIFIED_ERROR);
+            }
             boolean deleted = this.identityService.deleteIdentity(identity.getName());
             if (!deleted) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND, "Identity not found");
@@ -276,6 +283,9 @@ public class IdentityRestServiceV2 {
             }
         } catch (KuraException e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
+        } catch (IllegalArgumentException ex) {
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                    "Permission name can't be composed by spaces only");
         }
 
         return Response.ok().build();
@@ -310,7 +320,7 @@ public class IdentityRestServiceV2 {
 
             if (identityConfigurationDTO.getIdentity().getName().isEmpty()) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
-                        "Identity name not specified");
+                        IDENTITY_NAME_NOT_SPECIFIED_ERROR);
             }
 
             List<IdentityConfiguration> configurations = Collections

@@ -14,23 +14,23 @@ package org.eclipse.kura.internal.rest.identity.provider.v2.dto;
 
 public class PasswordConfigurationDTO {
 
-    private boolean passwordChangeNeeded;
-    private boolean passwordAuthEnabled;
+    private Boolean passwordChangeNeeded;
+    private Boolean passwordAuthEnabled;
     private String password;
 
-    public boolean isPasswordChangeNeeded() {
+    public Boolean isPasswordChangeNeeded() {
         return this.passwordChangeNeeded;
     }
 
-    public void setPasswordChangeNeeded(boolean passwordChangeNeeded) {
+    public void setPasswordChangeNeeded(Boolean passwordChangeNeeded) {
         this.passwordChangeNeeded = passwordChangeNeeded;
     }
 
-    public boolean isPasswordAuthEnabled() {
+    public Boolean isPasswordAuthEnabled() {
         return this.passwordAuthEnabled;
     }
 
-    public void setPasswordAuthEnabled(boolean passwordAuthEnabled) {
+    public void setPasswordAuthEnabled(Boolean passwordAuthEnabled) {
         this.passwordAuthEnabled = passwordAuthEnabled;
     }
 

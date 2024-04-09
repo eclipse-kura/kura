@@ -17,12 +17,12 @@ import java.util.Objects;
 public class PasswordStrenghtRequirementsDTO {
 
     private final int passwordMinimumLength;
-    private final boolean digitsRequired;
-    private final boolean specialCharactersRequired;
-    private final boolean bothCasesRequired;
+    private final Boolean digitsRequired;
+    private final Boolean specialCharactersRequired;
+    private final Boolean bothCasesRequired;
 
-    public PasswordStrenghtRequirementsDTO(int passwordMinimumLength, boolean digitsRequired,
-            boolean specialCharactersRequired, boolean bothCasesRequired) {
+    public PasswordStrenghtRequirementsDTO(int passwordMinimumLength, Boolean digitsRequired,
+            Boolean specialCharactersRequired, Boolean bothCasesRequired) {
 
         this.passwordMinimumLength = passwordMinimumLength;
         this.digitsRequired = digitsRequired;
@@ -34,15 +34,15 @@ public class PasswordStrenghtRequirementsDTO {
         return this.passwordMinimumLength;
     }
 
-    public boolean isDigitsRequired() {
+    public Boolean isDigitsRequired() {
         return this.digitsRequired;
     }
 
-    public boolean isSpecialCharactersRequired() {
+    public Boolean isSpecialCharactersRequired() {
         return this.specialCharactersRequired;
     }
 
-    public boolean isBothCasesRequired() {
+    public Boolean isBothCasesRequired() {
         return this.bothCasesRequired;
     }
 

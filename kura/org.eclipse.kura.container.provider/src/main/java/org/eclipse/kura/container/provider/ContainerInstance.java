@@ -119,7 +119,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
                     logger.info("Container signature validation result for {}@{}({}) - {}",
                             this.currentOptions.getContainerImage(),
-                            this.currentOptions.getEnforcementDigest().orElse("?"),
+                            containerSignatureValidated.imageDigest().orElse("?"),
                             this.currentOptions.getContainerImageTag(),
                             containerSignatureValidated.isSignatureValid() ? "OK" : "FAIL");
 

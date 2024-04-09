@@ -188,7 +188,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ##### Responses
 
 - 200 OK status
-- 400 Bad Request (Permission name not specified)
+- 400 Bad Request (Identity name not specified)
 - 500 Internal Server Error
 
 ## GET methods

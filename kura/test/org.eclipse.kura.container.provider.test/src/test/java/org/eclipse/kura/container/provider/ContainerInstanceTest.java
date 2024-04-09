@@ -62,7 +62,7 @@ public class ContainerInstanceTest {
     private static final String CONTAINER_VERIFY_TLOG = "container.signature.verify.transparency.log";
     private static final String CONTAINER_REGISTRY_USERNAME = "registry.username";
     private static final String CONTAINER_REGISTRY_PASSWORD = "registry.password";
-    private static final String CONTAINER_ENFORCEMENT_DIGEST = "enforcement.digest";
+    private static final String CONTAINER_ENFORCEMENT_DIGEST = "container.signature.enforcement.digest";
 
     private static final ValidationResult FAILED_VALIDATION = new ValidationResult();
 

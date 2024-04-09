@@ -38,8 +38,8 @@
             cardinality="1" required="false" default="true" />
         
         <AD
-            id="enforcement.digest"
-            name="Container Image Enforcement Digest "
+            id="container.signature.enforcement.digest"
+            name="Container Image Enforcement Digest"
             description="Digest of the container image allowed to run on the device if the Container Enforcement Monitor is enabled. If not given, it will be computed by the Container Signature Verification service."
             type="String" cardinality="1" required="false"
             default="" />

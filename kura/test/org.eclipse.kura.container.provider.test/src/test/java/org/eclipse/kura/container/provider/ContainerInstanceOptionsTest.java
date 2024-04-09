@@ -82,7 +82,7 @@ public class ContainerInstanceOptionsTest {
     private static final String CONTAINER_CPUS = "container.cpus";
     private static final String CONTAINER_GPUS = "container.gpus";
     private static final String CONTAINER_RUNTIME = "container.runtime";
-    private static final String ENFORCEMENT_DIGEST = "enforcement.digest";
+    private static final String ENFORCEMENT_DIGEST = "container.signature.enforcement.digest";
 
     private Map<String, Object> properties;
 

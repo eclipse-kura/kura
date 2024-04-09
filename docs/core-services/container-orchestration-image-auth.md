@@ -47,7 +47,7 @@ The verification is performed by intersecting the list of digests extracted by t
 
 A user wants to leverage the container enforcement in order to let only docker containers started from an image named `foo_image` to be run on the device. To do this, they should enable the Container Enforcement by setting the `Allowlist Enforcement Enabled` to `true`, and fill the `Container Image Allowlist` field with the digest of the `foo_image` docker image (i.e.`sha256:0000000000000000000000000000000000000000000000000000000000000000` in the example below).
 
-![Container Orchestration Provider Enfrocement](./images/container-orchestration-provider-enforcement.png)
+![Container Orchestration Provider Enforcement](./images/container-orchestration-provider-enforcement.png)
 
 #### Startup of the Enforcement Feature
 
@@ -59,10 +59,10 @@ The same happens also in case the containers are stopped: if the digests is veri
 
 After the starting phase just described, Kura will continuously monitor the activity of the docker engine. Whenever a container is started on the device, it will check the image digest from which the container was created, comparing it to the ones inside the allowlist: if the container is created from the `foo_image` docker image, it will be allowed to start, otherwise it will be stopped and deleted. If the user wants to add more than one allowed image, for example one named `wanted_image` with digest `sha256:1111111111111111111111111111111111111111111111111111111111111111`), it just needs to add it to the newline-separated list.
 
-![Container Orchestration Provider Enfrocement Multiple Digests](./images/container-orchestration-provider-enforcement-multiple-digests.png)
+![Container Orchestration Provider Enforcement Multiple Digests](./images/container-orchestration-provider-enforcement-multiple-digests.png)
 
 
-## Managed containers and Container Signature verification
+## Managed containers
 
 As explained in the previous section, Managed Containers (i.e. `org.eclipse.kura.container.provider.ContainerInstance`s) support Container Signature validation. To do so we introduced a new API: the [`ContainerSignatureValidationService`](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/container/signature/ContainerSignatureValidationService.java).
 

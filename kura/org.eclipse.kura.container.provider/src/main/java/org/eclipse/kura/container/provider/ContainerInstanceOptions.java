@@ -72,7 +72,8 @@ public class ContainerInstanceOptions {
             "");
     private static final Property<Boolean> SIGNATURE_VERIFY_TLOG = new Property<>(
             "container.signature.verify.transparency.log", true);
-    private static final Property<String> ENFORCEMENT_DIGEST = new Property<>("enforcement.digest", "");
+    private static final Property<String> ENFORCEMENT_DIGEST = new Property<>("container.signature.enforcement.digest",
+            "");
 
     private boolean enabled;
     private final String image;

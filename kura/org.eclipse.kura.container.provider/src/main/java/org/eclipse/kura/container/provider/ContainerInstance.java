@@ -465,7 +465,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             String enforcementDigest) {
 
         Map<String, Object> updatedProperties = new HashMap<>(oldProperties);
-        updatedProperties.put("enforcement.digest", enforcementDigest);
+        updatedProperties.put("container.signature.enforcement.digest", enforcementDigest);
         return updatedProperties;
 
     }

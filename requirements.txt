@@ -4,3 +4,5 @@ mkdocs-material==8.3.9
 mkdocs-markdownextradata-plugin==0.2.5
 mkdocs-minify-plugin==0.5.0
 mkdocs-jupyter==0.22.0
+lxml==5.2.1
+lxml_html_clean==0.1.1

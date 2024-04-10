@@ -241,7 +241,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         this.state = newState;
     }
 
-    private Optional<ContainerInstanceDescriptor> getExistingContainer(final String containerName) {
+    private Optional<ContainerInstanceDescriptor> getExistingContainerByName(final String containerName) {
         return containerOrchestrationService.listContainerDescriptors().stream()
                 .filter(c -> c.getContainerName().equals(containerName)).findAny();
     }
@@ -289,35 +289,37 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         }
 
         private State updateStateInternal(ContainerInstanceOptions newOptions) {
-            if (!newOptions.isEnabled()) {
-                return new Disabled(newOptions);
-            }
 
-            final Optional<String> existingContainerId;
+            final Optional<ContainerInstanceDescriptor> existingContainer;
+            final boolean isInstanceEnabled = newOptions.isEnabled();
 
             try {
-                existingContainerId = getExistingContainer(newOptions.getContainerConfiguration().getContainerName())
-                        .map(ContainerInstanceDescriptor::getContainerName);
+                existingContainer = getExistingContainerByName(newOptions.getContainerConfiguration().getContainerName());
             } catch (final Exception e) {
                 logger.warn("failed to get existing container state", e);
                 return new Disabled(newOptions);
             }
 
-            if (existingContainerId.isPresent()) {
+            if (existingContainer.isPresent()) {
+
                 logger.info("found existing container with name {}",
                         newOptions.getContainerConfiguration().getContainerName());
-
-                if (newOptions.isEnabled()) {
+                if (isInstanceEnabled) {
                     return new Starting(newOptions);
                 } else {
-                    return new Created(newOptions, existingContainerId.get()).onDisabled();
+                    return new Created(newOptions, existingContainer.get().getContainerId()).onDisabled();
                 }
+
             } else {
-                return new Starting(newOptions);
+
+                if (isInstanceEnabled) {
+                    return new Starting(newOptions);
+                } else {
+                    return new Disabled(newOptions);
+                }
+
             }
-
         }
-
     }
 
     private class Starting implements State {
@@ -360,7 +362,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             this.startupFuture.cancel(true);
 
             try {
-                final Optional<ContainerInstanceDescriptor> existingInstance = getExistingContainer(
+                final Optional<ContainerInstanceDescriptor> existingInstance = getExistingContainerByName(
                         this.options.getContainerName());
 
                 if (existingInstance.isPresent()) {

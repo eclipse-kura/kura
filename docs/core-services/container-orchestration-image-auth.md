@@ -25,7 +25,10 @@ This flow applies to both containers managed by Eclipse Kura itself and containe
 - **Unmanaged containers**: Eclipse Kura allows the user to define a list of container images that can be deployed on the platform. This is done by adding the image digests to the allowlist. When a container is started, Eclipse Kura checks if the image digest is in the allowlist and, if so, allows the container to run. This is meant to be used by users who, for any reason, need to run a container _outside_ the Eclipse Kura framework but still want the safety guarantees provided by pinning the images to a specific digest.
 - **Managed containers**: For containers ran by the framework, Eclipse Kura also allows the user to provide a trust anchor to be used for the signature verification process. This allows the user to use a _mutable_ tag when specifying the container image, without giving up the required authenticity checks. Once the image is verified, its digest is stored within the Eclipse Kura allowlist, permitting it to be ran both from Eclipse Kura and the CLI without the need for an Internet connection. When a new image is published, the user can simply trigger the pull. The verification process will update the digest automatically.
 
-Note that the user can still directly provide an image digest when running a Eclipse Kura-managed container, bypassing the signature verification process. This is meant to be used when the user is sure about the image authenticity and does not want to go through the verification process or the image was not signed.
+Note that the user can still directly provide an image digest when running an Eclipse Kura-managed container. This will prevent the Eclipse Kura automatic signature verification process to run. This feature is meant to be used when:
+
+- the user already ensured the image authenticity and does not want to go through the verification process again
+- the image was not signed but the user still wants the enforcement trust guarantees provided by Eclipse Kura
 
 ## Unmanaged containers
 

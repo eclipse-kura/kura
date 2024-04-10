@@ -39,7 +39,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 
 ```JSON
 {
-    "identity": "userName"
+    "identity": "username"
 }
 ```
 
@@ -47,7 +47,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ```JSON
 {
     "identity": {
-        "name": "userName"
+        "name": "username"
     }
 }
 ```
@@ -57,7 +57,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ```JSON
 {
     "identity": {
-        "name": "userName"
+        "name": "username"
     }, 
     "configurationComponents": ["AdditionalConfigurations", "AssignedPermissions", "PasswordConfiguration"]
 }
@@ -67,7 +67,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ```JSON
 {
     "identity": {
-        "name": "userName"
+        "name": "username"
     },
     "permissionConfiguration": {
         "permissions": [
@@ -101,7 +101,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ```JSON
 {
 "identity": {
-        "name": "userName"
+        "name": "username"
     }
 }
 ```
@@ -110,7 +110,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ```JSON
 {
     "identity": {
-        "name": "userName"
+        "name": "username"
     }
 }
 ```
@@ -120,7 +120,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ```JSON
 {
     "identity": {
-        "name": "userName"
+        "name": "username"
     }, 
     "configurationComponents": ["AdditionalConfigurations", "AssignedPermissions", "PasswordConfiguration"]
 }
@@ -130,7 +130,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ```JSON
 {
     "identity": {
-        "name": "userName"
+        "name": "username"
     },
     "permissionConfiguration": {
         "permissions": []
@@ -146,7 +146,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ```
 
 - 200 OK status
-- 404 `userName` does not exist
+- 404 `username` does not exist
 - 500 Internal Server Error
 
 #### Create Permission
@@ -179,7 +179,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ```JSON
 {
     "identity": {
-        "name": "userName"
+        "name": "username"
     }, 
     "configurationComponents": ["AdditionalConfigurations", "AssignedPermissions", "PasswordConfiguration"]
 }
@@ -400,7 +400,7 @@ No specific permission is required to access this resource.
 ```JSON
 {
     "identity": {
-        "name": "userName"
+        "name": "username"
     },
     "permissionConfiguration": {
         "permissions": [
@@ -434,14 +434,14 @@ No specific permission is required to access this resource.
 ##### Request
 ```JSON
 {
-    "name": "userName"
+    "name": "username"
 }
 ```
 
 ##### Responses
 
 - 200 OK status
-- 404 `userName` does not exist
+- 404 `username` does not exist
 - 500 Internal Server Error
 
 #### Delete Permission

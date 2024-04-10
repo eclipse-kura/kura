@@ -294,7 +294,6 @@ public class ContainerInstanceTest {
             throws KuraException, InterruptedException {
 
         givenContainerOrchestratorWithRunningContainer("test-instance", "test-id");
-        givenContainerOrchestratorReturningOnStart("1234");
 
         givenContainerInstanceWith(this.mockContainerOrchestrationService);
 

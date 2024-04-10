@@ -290,6 +290,29 @@ public class ContainerInstanceTest {
     }
 
     @Test
+    public void disabledInstanceDeletesAlreadyRunningContainerWithSameName()
+            throws KuraException, InterruptedException {
+
+        givenContainerOrchestratorWithRunningContainer("test-instance", "test-id");
+        givenContainerOrchestratorReturningOnStart("1234");
+
+        givenContainerInstanceWith(this.mockContainerOrchestrationService);
+
+        givenPropertiesWith(CONTAINER_ENABLED, false);
+        givenPropertiesWith(CONTAINER_IMAGE, "nginx");
+        givenPropertiesWith(CONTAINER_IMAGE_TAG, "latest");
+        givenPropertiesWith(CONTAINER_NAME, "test-instance");
+        givenPropertiesWith("kura.service.pid", "test-instance");
+        givenContainerInstanceActivatedWith(this.properties);
+
+        thenNoExceptionOccurred();
+        thenWaitForContainerInstanceToBecome(CONTAINER_STATE_DISABLED);
+        thenStopContainerWasCalledFor("test-id");
+        thenDeleteContainerWasCalledFor("test-id");
+
+    }
+
+    @Test
     public void signatureValidationDoesntGetCalledWithMissingTrustAnchor() throws KuraException, InterruptedException {
         givenContainerOrchestratorWithNoRunningContainers();
         givenContainerOrchestratorReturningOnStart("1234");

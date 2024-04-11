@@ -35,20 +35,21 @@ import javax.servlet.SessionCookieConfig;
 
 import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.jetty.JettyCustomizer;
-import org.eclipse.jetty.security.ConstraintMapping;
-import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.http.HttpMethod;
+import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.ConnectionFactory;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.ForwardedRequestCustomizer;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
 import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 public class KuraJettyCustomizer extends JettyCustomizer {
@@ -69,18 +70,6 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         servletContextHandler.setGzipHandler(gzipHandler);
 
         servletContextHandler.setErrorHandler(new KuraErrorHandler());
-
-        Constraint authConstraint = new Constraint();
-        authConstraint.setAuthenticate(true);
-        ConstraintMapping traceConstraintMapping = new ConstraintMapping();
-        traceConstraintMapping.setPathSpec("/");
-        traceConstraintMapping.setMethod("TRACE");
-        traceConstraintMapping.setConstraint(authConstraint);
-        
-        ConstraintSecurityHandler constraintSecurityHandler = new ConstraintSecurityHandler();
-        constraintSecurityHandler.addConstraintMapping(traceConstraintMapping);
-        
-        servletContextHandler.setSecurityHandler(constraintSecurityHandler);
 
         final SessionCookieConfig cookieConfig = servletContextHandler.getSessionHandler().getSessionCookieConfig();
 
@@ -104,9 +93,12 @@ public class KuraJettyCustomizer extends JettyCustomizer {
             return null;
         }
 
+        HttpConfiguration httpConfiguration = new HttpConfiguration();
+        httpConfiguration.addCustomizer(new BlockHttpMethods(EnumSet.of(HttpMethod.TRACE)));
+
         for (final int port : ports) {
             final ServerConnector newConnector = new ServerConnector(serverConnector.getServer(),
-                    new HttpConnectionFactory(new HttpConfiguration()));
+                    new HttpConnectionFactory(httpConfiguration));
 
             customizeConnector(newConnector, port);
             serverConnector.getServer().addConnector(newConnector);
@@ -200,6 +192,7 @@ public class KuraJettyCustomizer extends JettyCustomizer {
 
         final HttpConfiguration httpsConfig = new HttpConfiguration();
         httpsConfig.addCustomizer(new SecureRequestCustomizer());
+        httpsConfig.addCustomizer(new BlockHttpMethods(EnumSet.of(HttpMethod.TRACE)));
 
         final ServerConnector connector = new ServerConnector(server,
                 new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(httpsConfig));
@@ -273,7 +266,7 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         }
 
         public Optional<CertStore> getCRLStore() {
-            return crlStore;
+            return this.crlStore;
         }
 
         public void setKeyManagersProvider(Function<String, List<KeyManager>> keyManagersProvider) {
@@ -282,13 +275,31 @@ public class KuraJettyCustomizer extends JettyCustomizer {
 
         @Override
         protected KeyManager[] getKeyManagers(KeyStore keyStore) throws Exception {
-            if (keyManagersProvider.isPresent()) {
-                return keyManagersProvider.get().apply(getKeyManagerFactoryAlgorithm()).toArray(new KeyManager[0]);
+            if (this.keyManagersProvider.isPresent()) {
+                return this.keyManagersProvider.get().apply(getKeyManagerFactoryAlgorithm()).toArray(new KeyManager[0]);
             }
 
             return super.getKeyManagers(keyStore);
         }
 
+    }
+
+    private static class BlockHttpMethods implements HttpConfiguration.Customizer {
+
+        private final Set<HttpMethod> blockedMethods;
+
+        public BlockHttpMethods(Set<HttpMethod> methods) {
+            this.blockedMethods = methods;
+        }
+
+        @Override
+        public void customize(Connector connector, HttpConfiguration channelConfig, Request request) {
+            HttpMethod httpMethod = HttpMethod.fromString(request.getMethod());
+            if (this.blockedMethods.contains(httpMethod)) {
+                request.setHandled(true);
+                request.getResponse().setStatus(HttpStatus.METHOD_NOT_ALLOWED_405);
+            }
+        }
     }
 
     private static final class ClientAuthSslContextFactoryImpl extends BaseSslContextFactory {
@@ -309,7 +320,7 @@ public class KuraJettyCustomizer extends JettyCustomizer {
                 Collection<? extends java.security.cert.CRL> crls) throws Exception {
             PKIXBuilderParameters pbParams = new PKIXBuilderParameters(trustStore, new X509CertSelector());
 
-            final boolean isRevocationEnabled = getOrDefault(settings, "org.eclipse.kura.revocation.check.enabled",
+            final boolean isRevocationEnabled = getOrDefault(this.settings, "org.eclipse.kura.revocation.check.enabled",
                     true);
 
             pbParams.setMaxPathLength(getMaxCertPathLength());
@@ -318,7 +329,7 @@ public class KuraJettyCustomizer extends JettyCustomizer {
             final PKIXRevocationChecker revocationChecker = (PKIXRevocationChecker) CertPathValidator
                     .getInstance("PKIX").getRevocationChecker();
 
-            final EnumSet<PKIXRevocationChecker.Option> revocationOptions = getOrDefault(settings,
+            final EnumSet<PKIXRevocationChecker.Option> revocationOptions = getOrDefault(this.settings,
                     "org.eclipse.kura.revocation.checker.options", EnumSet.noneOf(PKIXRevocationChecker.Option.class));
 
             revocationChecker.setOptions(revocationOptions);

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>examples</artifactId>
-        <version>5.4.2</version>
+        <version>5.4.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.eclipse.kura.example.wire.math.singleport.provider</artifactId>

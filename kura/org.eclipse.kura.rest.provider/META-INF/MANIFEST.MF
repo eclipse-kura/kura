@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Kura Rest Provider
 Bundle-SymbolicName: org.eclipse.kura.rest.provider
-Bundle-Version: 1.5.1
+Bundle-Version: 1.5.2.qualifier
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy

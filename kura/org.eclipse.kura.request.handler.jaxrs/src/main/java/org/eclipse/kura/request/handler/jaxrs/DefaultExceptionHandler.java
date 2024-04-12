@@ -1,31 +1,31 @@
 /*******************************************************************************
  * Copyright (c) 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.request.handler.jaxrs;
 
-import java.awt.PageAttributes.MediaType;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
-import java.util.logging.Logger;
 
-import javax.net.ssl.SSLEngineResult.Status;
 import javax.ws.rs.WebApplicationException;
-import javax.xml.ws.Response;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
@@ -92,7 +92,7 @@ public class DefaultExceptionHandler {
 
         @SuppressWarnings("unused")
         public String getMessage() {
-            return message;
+            return this.message;
         }
     }
 }

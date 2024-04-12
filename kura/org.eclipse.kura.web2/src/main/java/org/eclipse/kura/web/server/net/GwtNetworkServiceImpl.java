@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -1683,8 +1683,7 @@ public class GwtNetworkServiceImpl {
         String wirelessSSID = gwtWifiConfig.getWirelessSsid();
 
         if (isPlaceholder(passKey, security)) {
-            Optional<GwtWifiConfig> oldGwtWifiConfig = wirelessSSID == null ? getOldGwtWifiConfig(interfaceName, mode)
-                    : getOldGwtWifiConfigBySSID(wirelessSSID, interfaceName, mode);
+            Optional<GwtWifiConfig> oldGwtWifiConfig = getOldGwtWifiConfig(interfaceName, mode);
 
             if (oldGwtWifiConfig.isPresent()) {
                 properties.put(wifiPassphrasePropName,
@@ -1704,30 +1703,6 @@ public class GwtNetworkServiceImpl {
     private static boolean isPlaceholder(String passKey, GwtWifiSecurity security) {
         return passKey != null && (passKey.equals(PASSWORD_PLACEHOLDER)
                 || (security != GwtWifiSecurity.netWifiSecurityNONE && passKey.isEmpty()));
-    }
-
-    private static Optional<GwtWifiConfig> getOldGwtWifiConfigBySSID(String wirelessSSID, String interfaceName,
-            String mode) throws GwtKuraException {
-        Optional<GwtWifiConfig> config = Optional.empty();
-        List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations(false);
-        for (GwtNetInterfaceConfig netConfig : result) {
-            if (netConfig instanceof GwtWifiNetInterfaceConfig
-                    && interfaceName.equals(((GwtWifiNetInterfaceConfig) netConfig).getName())) {
-                GwtWifiNetInterfaceConfig oldWifiConfig = (GwtWifiNetInterfaceConfig) netConfig;
-                GwtWifiConfig oldGwtWifiConfig;
-                if (mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
-                    oldGwtWifiConfig = oldWifiConfig.getAccessPointWifiConfig();
-                } else {
-                    oldGwtWifiConfig = oldWifiConfig.getStationWifiConfig();
-                }
-
-                if (oldGwtWifiConfig != null && oldGwtWifiConfig.getWirelessSsid().equals(wirelessSSID)) {
-                    config = Optional.of(oldGwtWifiConfig);
-                    break;
-                }
-            }
-        }
-        return config;
     }
 
     private static Optional<GwtWifiConfig> getOldGwtWifiConfig(String interfaceName, String mode)

@@ -247,7 +247,7 @@
             <properties>
                 <!-- TODO: update when new version is released to be working with Tycho 3. -->
                 <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
-                <tycho-version>3.0.0</tycho-version>
+                <tycho-version>3.0.5</tycho-version>
 
                 <tycho.surefire.testenv.args>
                     -DbuildingWithTycho=true -Dosgi.locking=none

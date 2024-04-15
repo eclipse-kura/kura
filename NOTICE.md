@@ -60,11 +60,11 @@ This project leverages the following third party content.
 * maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.core.jobs/0.10.0-3c97afeac, Apache-2.0, restricted, clearlydefined
 * maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.equinox.preferences/0.10.0-3c97afeac, Apache-2.0, restricted, clearlydefined
 * maven/mavencentral/commons-beanutils/commons-beanutils/1.9.3, Apache-2.0, approved, CQ12654
-* maven/mavencentral/commons-codec/commons-codec/1.13, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/commons-codec/commons-codec/1.16.1, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #9157
 * maven/mavencentral/commons-collections/commons-collections/3.2.2, Apache-2.0, approved, CQ10385
 * maven/mavencentral/commons-fileupload/commons-fileupload/1.5, Apache-2.0, approved, #7109
 * maven/mavencentral/commons-io/commons-io/2.11.0, Apache-2.0, approved, CQ23745
-* maven/mavencentral/commons-io/commons-io/2.6, Apache-2.0, approved, CQ19090
+* maven/mavencentral/commons-io/commons-io/2.15.1, Apache-2.0, approved, #11244
 * maven/mavencentral/commons-lang/commons-lang/2.6, Apache-2.0, approved, CQ6183
 * maven/mavencentral/commons-net/commons-net/3.8.0, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/io.grpc/grpc-api/1.56.1, Apache-2.0, approved, clearlydefined
@@ -102,7 +102,7 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.camel/camel-jms/2.25.3, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.camel/camel-script/2.25.3, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.camel/camel-stream/2.25.3, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/org.apache.commons/commons-compress/1.21, Apache-2.0 AND BSD-3-Clause AND bzip2-1.0.6 AND LicenseRef-Public-Domain, approved, CQ23710
+* maven/mavencentral/org.apache.commons/commons-compress/1.26.1, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #13288
 * maven/mavencentral/org.apache.commons/commons-csv/1.4, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.commons/commons-exec/1.3, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.commons/commons-lang3/3.12.0, Apache-2.0, approved, clearlydefined

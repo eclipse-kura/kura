@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -60,10 +60,15 @@ public class NetworkConfigurationServiceCommon {
         tocd.setId(PID);
         tocd.setDescription("Network Configuration Service");
 
-        Tad tad = buildAttributeDefinition(NET_INTERFACES, NetworkConfigurationPropertyNames.PLATFORM_INTERFACES,
-                Tscalar.STRING);
-        tad.setCardinality(10000);
-        tad.setRequired(true);
+        Tad tad = builder(NET_INTERFACES, NetworkConfigurationPropertyNames.PLATFORM_INTERFACES,
+                Tscalar.STRING)
+                .withCardinality(10000)
+                .withRequired(true)
+                .build();
+//        Tad tad = buildAttributeDefinition(NET_INTERFACES, NetworkConfigurationPropertyNames.PLATFORM_INTERFACES,
+//                Tscalar.STRING);
+//        tad.setCardinality(10000);
+//        tad.setRequired(true);
         tocd.addAD(tad);
 
         // Get the network interfaces on the platform
@@ -149,12 +154,23 @@ public class NetworkConfigurationServiceCommon {
     }
 
     private static void getModemDefinition(Tocd tocd, String ifaceName) {
-        tocd.addAD(buildAttributeDefinition(String.format(PREFIX + "%s.config.enabled", ifaceName),
-                NetworkConfigurationPropertyNames.CONFIG_MODEM_ENABLED, Tscalar.BOOLEAN));
+//        tocd.addAD(buildAttributeDefinition(String.format(PREFIX + "%s.config.enabled", ifaceName),
+//                NetworkConfigurationPropertyNames.CONFIG_MODEM_ENABLED, Tscalar.BOOLEAN));
+        tocd.addAD(builder(String.format(PREFIX + "%s.config.enabled", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_ENABLED, Tscalar.BOOLEAN)
+                .withRequired(true).withDefault("true").build());
+        
+//        tocd.addAD(buildAttributeDefinition(String.format(PREFIX + "%s.config.idle", ifaceName),
+//                NetworkConfigurationPropertyNames.CONFIG_MODEM_IDLE, Tscalar.INTEGER));
 
-        tocd.addAD(buildAttributeDefinition(String.format(PREFIX + "%s.config.idle", ifaceName),
-                NetworkConfigurationPropertyNames.CONFIG_MODEM_IDLE, Tscalar.INTEGER));
-
+        tocd.addAD(builder(String.format(PREFIX + "%s.config.idle", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_IDLE, Tscalar.INTEGER)
+                .withDefault("95").build());
+        
+        tocd.addAD(builder(String.format(PREFIX + "%s.config.username", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_MODEM_USERNAME, Tscalar.STRING)
+                .withRequired(true).build());
+        
         tocd.addAD(buildAttributeDefinition(String.format(PREFIX + "%s.config.username", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_MODEM_USERNAME, Tscalar.STRING));
 
@@ -553,17 +569,75 @@ public class NetworkConfigurationServiceCommon {
                 .collect(Collectors.toSet());
     }
 
-    private static Tad buildAttributeDefinition(String propertyName, NetworkConfigurationPropertyNames messageId,
-            Tscalar type) {
-        Tad tad = objectFactory.createTad();
-        tad.setId(propertyName);
-        tad.setName(propertyName);
-        tad.setType(type);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkConfigurationMessages.getMessage(messageId));
-        return tad;
+//    private static Tad buildAttributeDefinition(String propertyName, NetworkConfigurationPropertyNames messageId,
+//            Tscalar type) {
+//        Tad tad = objectFactory.createTad();
+//        tad.setId(propertyName);
+//        tad.setName(propertyName);
+//        tad.setType(type);
+//        tad.setCardinality(0);
+//        tad.setRequired(false);
+//        tad.setDefault("");
+//        tad.setDescription(NetworkConfigurationMessages.getMessage(messageId));
+//        return tad;
+//    }
+    
+    private static AttributeDefinitionBuilder builder(String propertyName, NetworkConfigurationPropertyNames messageId, Tscalar type) {
+        return new AttributeDefinitionBuilder(propertyName, messageId, type);
+    }
+    
+    private static final class AttributeDefinitionBuilder {
+        private final String name;
+        private final String description;
+        private final Tscalar type;
+        private Integer cardinality;
+        private String min;
+        private String max;
+        private String isDefault;
+        private Boolean required;
+        
+        public AttributeDefinitionBuilder(String name, NetworkConfigurationPropertyNames messageId, Tscalar type) {
+            this.name = name;
+            this.description = NetworkConfigurationMessages.getMessage(messageId);
+            this.type = type;
+        }
+        
+        public AttributeDefinitionBuilder withCardinality(Integer cardinality) {
+            this.cardinality = cardinality;
+            return this;
+        }
+        
+        public AttributeDefinitionBuilder withMin(String min) {
+            this.min = min;
+            return this;
+        }
+        
+        public AttributeDefinitionBuilder withMax(String max) {
+            this.max = max;
+            return this;
+        }
+        
+        public AttributeDefinitionBuilder withDefault(String isDefault) {
+            this.isDefault = isDefault;
+            return this;
+        }
+        
+        public AttributeDefinitionBuilder withRequired(Boolean required) {
+            this.required = required;
+            return this;
+        }
+        
+        public Tad build() {
+            Tad tad = objectFactory.createTad();
+            tad.setId(name);
+            tad.setName(name);
+            tad.setType(type);
+            tad.setCardinality(cardinality);
+            tad.setRequired(required);
+            tad.setDefault(isDefault);
+            tad.setDescription(description);
+            return tad;
+        }
     }
 
 }

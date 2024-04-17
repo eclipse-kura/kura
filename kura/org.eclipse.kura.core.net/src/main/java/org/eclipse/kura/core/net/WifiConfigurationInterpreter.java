@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -23,6 +23,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.net.NetConfig;
+import org.eclipse.kura.net.configuration.NetworkConfigurationConstants;
 import org.eclipse.kura.net.wifi.WifiBgscan;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
@@ -121,68 +122,68 @@ public class WifiConfigurationInterpreter {
 
         wifiConfig.setIgnoreSSID(isSsidIgnored(properties, prefix));
 
-        String pairwiseCiphers = getPairwiseCiphers(properties, prefix);
-        if (!isNull(pairwiseCiphers)) {
-            wifiConfig.setPairwiseCiphers(WifiCiphers.valueOf(pairwiseCiphers));
-        }
+        wifiConfig.setPairwiseCiphers(getPairwiseCiphers(properties, prefix));
 
         if (mode == WifiMode.INFRA) {
             wifiConfig.setBgscan(getBgScan(properties, prefix));
-
-            String groupCiphers = getGroupCiphers(properties, prefix);
-            if (!isNull(groupCiphers)) {
-                wifiConfig.setGroupCiphers(WifiCiphers.valueOf(groupCiphers));
-            }
-
+            wifiConfig.setGroupCiphers(getGroupCiphers(properties, prefix));
             wifiConfig.setPingAccessPoint(isPingAccessPoint(properties, prefix));
-
         }
 
-        String radioMode = getRadioMode(properties, prefix);
-        if (!isNull(radioMode)) {
-            try {
-                wifiConfig.setRadioMode(WifiRadioMode.valueOf(radioMode));
-            } catch (IllegalArgumentException e) {
-                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID,
-                        "Could not parse wifi radio mode " + radioMode);
-            }
-        }
+        wifiConfig.setRadioMode(getRadioMode(properties, prefix));
 
         return wifiConfig;
 
     }
 
-    private static String getRadioMode(Map<String, Object> properties, String prefix) {
-        return (String) properties.get(prefix + WIFI_RADIO_MODE_KEY);
+    private static WifiRadioMode getRadioMode(Map<String, Object> properties, String prefix) throws KuraException {
+        Object radioModeObject = properties.get(prefix + WIFI_RADIO_MODE_KEY);
+        if (radioModeObject instanceof String) {
+            try {
+                return WifiRadioMode.valueOf((String) radioModeObject);
+            } catch (IllegalArgumentException e) {
+                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID,
+                        "Could not parse wifi radio mode", e);
+            }
+        }
+        return NetworkConfigurationConstants.DEFAULT_WIFI_RADIO_MODE_VALUE;
     }
 
     private static boolean isPingAccessPoint(Map<String, Object> properties, String prefix) {
-        boolean pingAccessPoint = false;
+        boolean pingAccessPoint = NetworkConfigurationConstants.DEFAULT_WIFI_PING_AP_VALUE;
         Object value = properties.get(prefix + WIFI_PING_ACCESS_POINT_KEY);
-        if (!isNull(value) && value instanceof Boolean) {
+        if (value instanceof Boolean) {
             pingAccessPoint = (Boolean) value;
         }
         return pingAccessPoint;
     }
 
-    private static String getGroupCiphers(Map<String, Object> properties, String prefix) {
-        return (String) properties.get(prefix + WIFI_GROUP_CIPHERS_KEY);
+    private static WifiCiphers getGroupCiphers(Map<String, Object> properties, String prefix) {
+        Object groupCiphersObject = properties.get(prefix + WIFI_GROUP_CIPHERS_KEY);
+        if (groupCiphersObject instanceof String) {
+            return WifiCiphers.valueOf((String) groupCiphersObject);
+        }
+        return NetworkConfigurationConstants.DEFAULT_WIFI_GROUP_CIPHERS_VALUE;
     }
 
     private static WifiBgscan getBgScan(Map<String, Object> properties, String prefix) {
-        String bgscan = (String) properties.get(prefix + BGSCAN);
-        if (bgscan == null) {
-            bgscan = "";
+        Object bgscanObject = properties.get(prefix + BGSCAN);
+        if (bgscanObject instanceof String) {
+            return new WifiBgscan((String) bgscanObject);
         }
-        return new WifiBgscan(bgscan);
+        return new WifiBgscan(NetworkConfigurationConstants.DEFAULT_WIFI_BGSCAN_VALUE);
     }
 
-    private static String getPairwiseCiphers(Map<String, Object> properties, String prefix) {
-        return (String) properties.get(prefix + WIFI_PAIRWISE_CIPHERS_KEY);
+    private static WifiCiphers getPairwiseCiphers(Map<String, Object> properties, String prefix) {
+        Object pairwireCiphersObject = properties.get(prefix + WIFI_PAIRWISE_CIPHERS_KEY);
+        if (pairwireCiphersObject instanceof String) {
+            return WifiCiphers.valueOf((String) pairwireCiphersObject);
+        }
+        return NetworkConfigurationConstants.DEFAULT_WIFI_PAIRWISE_CIPHERS_VALUE;
     }
 
     private static boolean isSsidIgnored(Map<String, Object> properties, String prefix) {
-        boolean ignoreSSID = false;
+        boolean ignoreSSID = NetworkConfigurationConstants.DEFAULT_WIFI_IGNORE_SSID_VALUE;
         Object value = properties.get(prefix + WIFI_IGNORE_SSID_KEY);
         if (!isNull(value) && value instanceof Boolean) {
             ignoreSSID = (Boolean) value;
@@ -227,7 +228,7 @@ public class WifiConfigurationInterpreter {
             }
         }
 
-        return new int[] { 1 };
+        return new int[] { Integer.parseInt(NetworkConfigurationConstants.DEFAULT_WIFI_CHANNEL_VALUE) };
     }
 
     private static WifiSecurity getWifiSecurity(Map<String, Object> properties, String prefix) throws KuraException {
@@ -241,7 +242,7 @@ public class WifiConfigurationInterpreter {
                         "Could not parse wifi security " + securityString);
             }
         }
-        return WifiSecurity.NONE;
+        return NetworkConfigurationConstants.DEFAULT_WIFI_SECURITY_VALUE;
     }
 
     private static String getDriver(Map<String, Object> properties, String prefix) {

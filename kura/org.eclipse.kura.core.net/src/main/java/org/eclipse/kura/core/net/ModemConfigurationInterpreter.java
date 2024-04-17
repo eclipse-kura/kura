@@ -26,6 +26,7 @@ import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
+import org.eclipse.kura.net.configuration.NetworkConfigurationConstants;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
@@ -39,21 +40,6 @@ public class ModemConfigurationInterpreter {
     private static final Logger logger = LoggerFactory.getLogger(ModemConfigurationInterpreter.class);
 
     private static final String NET_INTERFACE = "net.interface.";
-
-    private static final Boolean DEFAULT_PERSIST_VALUE = true;
-    private static final Integer DEFAULT_HOLDOFF_VALUE = 1;
-    private static final Integer DEFAULT_MAXFAIL_VALUE = 5;
-    private static final Integer DEFAULT_RESET_TIMEOUT_VALUE = 5;
-    private static final Integer DEFAULT_IDLE_VALUE = 95;
-    private static final String DEFAULT_ACTIVE_FILTER_VALUE = "inbound";
-    private static final Integer DEFAULT_LCP_ECHO_FAILURE_VALUE = 0;
-    private static final Integer DEFAULT_LCP_ECHO_INTERVAL_VALUE = 0;
-    private static final Boolean DEFAULT_GPS_ENABLED_VALUE = false;
-    private static final Boolean DEFAULT_DIVERSITY_ENABLED_VALUE = false;
-    private static final Boolean DEFAULT_ENABLED_VALUE = false;
-    private static final Integer DEFAULT_PROFILE_ID_VALUE = 0;
-    private static final Integer DEFAULT_DATA_COMPRESSION_VALUE = 0;
-    private static final Integer DEFAULT_HEADER_COMPRESSION_VALUE = 0;
 
     private ModemConfigurationInterpreter() {
 
@@ -151,80 +137,80 @@ public class ModemConfigurationInterpreter {
 
     private static boolean isGpsEnabled(String prefix, Map<String, Object> properties) {
         String key = prefix + "gpsEnabled";
-        Object value = properties.getOrDefault(key, DEFAULT_GPS_ENABLED_VALUE);
-        return value != null ? (Boolean) value : DEFAULT_GPS_ENABLED_VALUE;
+        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_GPS_ENABLED_VALUE);
+        return value != null ? (Boolean) value : NetworkConfigurationConstants.DEFAULT_MODEM_GPS_ENABLED_VALUE;
     }
 
     private static boolean isDiversityEnabled(String prefix, Map<String, Object> properties) {
         String key = prefix + "diversityEnabled";
-        Object value = properties.getOrDefault(key, DEFAULT_DIVERSITY_ENABLED_VALUE);
-        return value != null ? (Boolean) value : DEFAULT_DIVERSITY_ENABLED_VALUE;
+        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_DIVERSITY_ENABLED_VALUE);
+        return value != null ? (Boolean) value : NetworkConfigurationConstants.DEFAULT_MODEM_DIVERSITY_ENABLED_VALUE;
     }
 
     private static boolean isEnabled(String prefix, Map<String, Object> properties) {
         String key = prefix + "enabled";
-        Object value = properties.getOrDefault(key, DEFAULT_ENABLED_VALUE);
-        return value != null ? (Boolean) value : DEFAULT_ENABLED_VALUE;
+        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_ENABLED_VALUE);
+        return value != null ? (Boolean) value : NetworkConfigurationConstants.DEFAULT_MODEM_ENABLED_VALUE;
     }
 
     private static int getLcpEchoFailure(String prefix, Map<String, Object> properties) {
         String key = prefix + "lcpEchoFailure";
-        Object value = properties.getOrDefault(key, DEFAULT_LCP_ECHO_FAILURE_VALUE);
-        return value != null ? (Integer) value : DEFAULT_LCP_ECHO_FAILURE_VALUE;
+        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_LCP_ECHO_FAILURE_VALUE);
+        return value != null ? (Integer) value : NetworkConfigurationConstants.DEFAULT_MODEM_LCP_ECHO_FAILURE_VALUE;
     }
 
     private static int getLcpEchoInterval(String prefix, Map<String, Object> properties) {
         String key = prefix + "lcpEchoInterval";
-        Object value = properties.getOrDefault(key, DEFAULT_LCP_ECHO_INTERVAL_VALUE);
-        return value != null ? (Integer) value : DEFAULT_LCP_ECHO_INTERVAL_VALUE;
+        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_LCP_ECHO_INTERVAL_VALUE);
+        return value != null ? (Integer) value : NetworkConfigurationConstants.DEFAULT_MODEM_LCP_ECHO_INTERVAL_VALUE;
     }
 
     private static String getActiveFilter(String prefix, Map<String, Object> properties) {
         String key = prefix + "activeFilter";
-        Object value = properties.getOrDefault(key, DEFAULT_ACTIVE_FILTER_VALUE);
-        return value != null ? (String) value : DEFAULT_ACTIVE_FILTER_VALUE;
+        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_ACTIVE_FILTER_VALUE);
+        return value != null ? (String) value : NetworkConfigurationConstants.DEFAULT_MODEM_ACTIVE_FILTER_VALUE;
     }
 
     private static int getIdle(String prefix, Map<String, Object> properties) {
         String key = prefix + "idle";
-        Object value = properties.getOrDefault(key, DEFAULT_IDLE_VALUE);
-        return value != null ? (Integer) value : DEFAULT_IDLE_VALUE;
+        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_IDLE_VALUE);
+        return value != null ? (Integer) value : NetworkConfigurationConstants.DEFAULT_MODEM_IDLE_VALUE;
     }
 
     private static int getResetTimeout(String prefix, Map<String, Object> properties) {
         String key = prefix + "resetTimeout";
-        Object value = properties.getOrDefault(key, DEFAULT_RESET_TIMEOUT_VALUE);
-        return value != null ? (Integer) value : DEFAULT_RESET_TIMEOUT_VALUE;
+        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_RESET_TIMEOUT_VALUE);
+        return value != null ? (Integer) value : NetworkConfigurationConstants.DEFAULT_MODEM_RESET_TIMEOUT_VALUE;
     }
 
     private static int getMaximumFailures(String prefix, Map<String, Object> properties) {
         String key = prefix + "maxFail";
-        Object value = properties.getOrDefault(key, DEFAULT_MAXFAIL_VALUE);
-        return value != null ? (Integer) value : DEFAULT_MAXFAIL_VALUE;
+        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_MAXFAIL_VALUE);
+        return value != null ? (Integer) value : NetworkConfigurationConstants.DEFAULT_MODEM_MAXFAIL_VALUE;
     }
 
     private static boolean isPersist(String prefix, Map<String, Object> properties) {
         String key = prefix + "persist";
-        Object value = properties.getOrDefault(key, DEFAULT_PERSIST_VALUE);
-        return value != null ? (Boolean) value : DEFAULT_PERSIST_VALUE;
+        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_PERSIST_VALUE);
+        return value != null ? (Boolean) value : NetworkConfigurationConstants.DEFAULT_MODEM_PERSIST_VALUE;
     }
 
     private static int getHoldoff(String prefix, Map<String, Object> properties) {
         String key = prefix + "holdoff";
-        Object value = properties.getOrDefault(key, DEFAULT_HOLDOFF_VALUE);
-        return value != null ? (Integer) value : DEFAULT_HOLDOFF_VALUE;
+        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_HOLDOFF_VALUE);
+        return value != null ? (Integer) value : NetworkConfigurationConstants.DEFAULT_MODEM_HOLDOFF_VALUE;
     }
 
     private static int getProfileId(String prefix, Map<String, Object> properties) {
         String key = prefix + "profileId";
-        Object value = properties.getOrDefault(key, DEFAULT_PROFILE_ID_VALUE);
-        return value != null ? (Integer) value : DEFAULT_PROFILE_ID_VALUE;
+        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_PROFILE_ID_VALUE);
+        return value != null ? (Integer) value : NetworkConfigurationConstants.DEFAULT_MODEM_PROFILE_ID_VALUE;
     }
 
     private static PdpType getPdpType(String prefix, Map<String, Object> properties) {
         String key = prefix + "pdpType";
-        Object value = properties.getOrDefault(key, PdpType.IP.name());
-        return value != null ? parsePdpType((String) value) : PdpType.IP;
+        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_PDP_TYPE_VALUE.name());
+        return value != null ? parsePdpType((String) value) : NetworkConfigurationConstants.DEFAULT_MODEM_PDP_TYPE_VALUE;
     }
 
     private static PdpType parsePdpType(String pdpTypeString) {
@@ -232,7 +218,7 @@ public class ModemConfigurationInterpreter {
         try {
             pdpType = PdpType.valueOf(pdpTypeString);
         } catch (IllegalArgumentException e) {
-            pdpType = PdpType.IP;
+            pdpType = NetworkConfigurationConstants.DEFAULT_MODEM_PDP_TYPE_VALUE;
         }
         return pdpType;
     }
@@ -276,8 +262,8 @@ public class ModemConfigurationInterpreter {
 
     private static int getHeaderCompression(String prefix, Map<String, Object> properties) {
         String key = prefix + "headerCompression";
-        Object value = properties.getOrDefault(key, DEFAULT_HEADER_COMPRESSION_VALUE);
-        return value != null ? (Integer) value : DEFAULT_HEADER_COMPRESSION_VALUE;
+        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_HEADER_COMPRESSION_VALUE);
+        return value != null ? (Integer) value : NetworkConfigurationConstants.DEFAULT_MODEM_HEADER_COMPRESSION_VALUE;
     }
 
     private static String getDialString(String prefix, Map<String, Object> properties) {
@@ -287,8 +273,8 @@ public class ModemConfigurationInterpreter {
 
     private static int getDataCompression(String prefix, Map<String, Object> properties) {
         String key = prefix + "dataCompression";
-        Object value = properties.getOrDefault(key, DEFAULT_DATA_COMPRESSION_VALUE);
-        return value != null ? (Integer) value : DEFAULT_DATA_COMPRESSION_VALUE;
+        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_DATA_COMPRESSION_VALUE);
+        return value != null ? (Integer) value : NetworkConfigurationConstants.DEFAULT_MODEM_DATA_COMPRESSION_VALUE;
     }
 
     private static AuthType getAuthenticationType(String prefix, Map<String, Object> properties) throws KuraException {
@@ -300,13 +286,13 @@ public class ModemConfigurationInterpreter {
             authType = parseAuthenticationType(authTypeString);
         } else {
             logger.trace("Auth type is null");
-            authType = AuthType.NONE;
+            authType = NetworkConfigurationConstants.DEFAULT_MODEM_AUTH_TYPE_VALUE;
         }
         return authType;
     }
 
     private static AuthType parseAuthenticationType(String authTypeString) throws KuraException {
-        AuthType authType = AuthType.NONE;
+        AuthType authType = NetworkConfigurationConstants.DEFAULT_MODEM_AUTH_TYPE_VALUE;
         try {
             authType = AuthType.valueOf(authTypeString);
         } catch (IllegalArgumentException e) {

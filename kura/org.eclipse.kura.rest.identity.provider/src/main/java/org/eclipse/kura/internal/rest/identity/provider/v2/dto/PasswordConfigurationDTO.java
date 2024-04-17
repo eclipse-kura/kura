@@ -45,7 +45,7 @@ public class PasswordConfigurationDTO {
     @Override
     public String toString() {
         return "PasswordConfigurationDTO [passwordChangeNeeded=" + this.passwordChangeNeeded + ", passwordAuthEnabled="
-                + this.passwordAuthEnabled + ", password=****]";
+                + this.passwordAuthEnabled + "]";
     }
 
 }

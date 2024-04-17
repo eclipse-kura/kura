@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -98,10 +98,9 @@ public class MqttTransport implements Transport {
             ServiceUtil.updateComponentConfiguration(configurationService, DEFAULT_CLOUD_SERVICE_PID,
                     cloudServiceProperties).get(30, TimeUnit.SECONDS);
 
-            final DataTransportService observer = ServiceUtil
-                    .createFactoryConfiguration(configurationService, DataTransportService.class, "observer",
-                            MQTT_DATA_TRANSPORT_FACTORY_PID, getConfigForLocalBroker("observer"))
-                    .get(30, TimeUnit.SECONDS);
+            final DataTransportService observer = ServiceUtil.createFactoryConfiguration(configurationService,
+                    DataTransportService.class, "observer-" + this.appId, MQTT_DATA_TRANSPORT_FACTORY_PID,
+                    getConfigForLocalBroker("observer-" + this.appId)).get(30, TimeUnit.SECONDS);
             observerInspector = new DataTransportInspector(observer, true);
             final DataTransportInspector underTestInspector = new DataTransportInspector(mqttDataTransport, false);
 

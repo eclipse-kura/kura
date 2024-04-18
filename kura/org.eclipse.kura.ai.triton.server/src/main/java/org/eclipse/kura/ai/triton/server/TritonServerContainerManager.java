@@ -33,6 +33,7 @@ import org.eclipse.kura.container.orchestration.ContainerConfiguration.Container
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.container.orchestration.ContainerPort;
 import org.eclipse.kura.container.orchestration.ContainerState;
 import org.eclipse.kura.container.orchestration.ImageConfiguration.ImageConfigurationBuilder;
 import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
@@ -233,9 +234,8 @@ public class TritonServerContainerManager implements TritonServerInstanceManager
         builder.setContainerName(TRITON_CONTAINER_NAME);
         builder.setFrameworkManaged(TRITON_FRAMEWORK_MANAGED);
         builder.setLoggingType(TRITON_LOGGING_TYPE);
-        builder.setInternalPorts(TRITON_INTERNAL_PORTS);
-        builder.setExternalPorts(
-                Arrays.asList(this.options.getHttpPort(), this.options.getGrpcPort(), this.options.getMetricsPort()));
+        builder.setContainerPorts(parseContainerPorts(TRITON_INTERNAL_PORTS,
+                Arrays.asList(this.options.getHttpPort(), this.options.getGrpcPort(), this.options.getMetricsPort())));
 
         builder.setMemory(this.options.getContainerMemory());
         builder.setCpus(this.options.getContainerCpus());
@@ -267,5 +267,15 @@ public class TritonServerContainerManager implements TritonServerInstanceManager
         builder.setEntryPoint(entrypointOverride);
 
         return builder.build();
+    }
+
+    private List<ContainerPort> parseContainerPorts(List<Integer> internalPorts, List<Integer> externalPorts) {
+        List<ContainerPort> containerPorts = new ArrayList<>();
+
+        for (int i = 0; i < externalPorts.size(); i++) {
+            containerPorts.add(new ContainerPort(internalPorts.get(i), externalPorts.get(i)));
+        }
+
+        return containerPorts;
     }
 }

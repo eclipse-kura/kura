@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +28,7 @@ import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration.ContainerConfigurationBuilder;
 import org.eclipse.kura.container.orchestration.ContainerNetworkConfiguration;
+import org.eclipse.kura.container.orchestration.ContainerPort;
 import org.eclipse.kura.container.orchestration.ImageConfiguration;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.junit.Test;
@@ -40,8 +42,8 @@ public class ContainerConfigurationTest {
     private static final String REGISTRY_URL = "https://test";
     private static final String REGISTRY_USERNAME = "test";
     private static final String REGISTRY_PASSWORD = "test1";
-    private static final List<Integer> CONTAINER_PORTS_EXTERNAL = Arrays.asList(1521, 81);
-    private static final List<Integer> CONTAINER_PORTS_INTERNAL = Arrays.asList(1521, 81);
+    private static final List<ContainerPort> CONTAINER_PORTS = new ArrayList<>(
+            Arrays.asList(new ContainerPort(1521, 1521), new ContainerPort(81, 81)));
     private static final Map<String, String> CONTAINER_VOLUMES = Collections.singletonMap("key1", "val1");
     private static final Map<String, String> CONTAINER_LOGGER_PARAMETERS = Collections.singletonMap("key2", "val2");
     private static final String CONTAINER_LOGGER_TYPE = "test2";
@@ -133,10 +135,9 @@ public class ContainerConfigurationTest {
                 .setImageDownloadTimeoutSeconds(0).build();
 
         this.containerConfigurationBuilder = ContainerConfiguration.builder().setContainerName(CONTAINER_NAME)
-                .setImageConfiguration(firstImageConfig).setExternalPorts(CONTAINER_PORTS_EXTERNAL)
-                .setInternalPorts(CONTAINER_PORTS_INTERNAL).setEnvVars(CONTAINER_ENV_VARS)
-                .setDeviceList(CONTAINER_DEVICE_LIST).setVolumes(CONTAINER_VOLUMES).setPrivilegedMode(false)
-                .setFrameworkManaged(false).setLoggerParameters(CONTAINER_LOGGER_PARAMETERS)
+                .setImageConfiguration(firstImageConfig).setContainerPorts(CONTAINER_PORTS)
+                .setEnvVars(CONTAINER_ENV_VARS).setDeviceList(CONTAINER_DEVICE_LIST).setVolumes(CONTAINER_VOLUMES)
+                .setPrivilegedMode(false).setFrameworkManaged(false).setLoggerParameters(CONTAINER_LOGGER_PARAMETERS)
                 .setLoggingType(CONTAINER_LOGGER_TYPE)
                 .setContainerNetowrkConfiguration(
                         new ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder()
@@ -180,8 +181,7 @@ public class ContainerConfigurationTest {
         assertEquals(CONTAINER_IMAGE, this.firstContainerConfig.getImageConfiguration().getImageName());
         assertEquals(CONTAINER_IMAGE_TAG, this.firstContainerConfig.getImageConfiguration().getImageTag());
 
-        assertEquals(CONTAINER_PORTS_EXTERNAL, this.firstContainerConfig.getContainerPortsExternal());
-        assertEquals(CONTAINER_PORTS_INTERNAL, this.firstContainerConfig.getContainerPortsInternal());
+        assertEquals(CONTAINER_PORTS, this.firstContainerConfig.getContainerPorts());
         assertEquals(CONTAINER_VOLUMES, this.firstContainerConfig.getContainerVolumes());
         assertEquals(CONTAINER_LOGGER_PARAMETERS, this.firstContainerConfig.getLoggerParameters());
         assertEquals(CONTAINER_LOGGER_TYPE, this.firstContainerConfig.getContainerLoggingType());

@@ -22,6 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.container.orchestration.ContainerPort;
 import org.eclipse.kura.container.orchestration.ContainerState;
 import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
 import org.junit.Test;
@@ -52,6 +54,10 @@ public class TritonServerContainerManagerTest {
     private static final String TRITON_INTERNAL_BACKENDS_FOLDER = "/backends";
     private static final String TRITON_BACKENDS_PATH = "/path/to/backends";
 
+    private static final Integer[] EXTERNAL_PORTS = new Integer[] { 4000, 4001, 4002 };
+    private static final List<ContainerPort> CONTAINER_PORTS = new ArrayList<>(
+            Arrays.asList(new ContainerPort(8000, 4000), new ContainerPort(8001, 4001), new ContainerPort(8002, 4002)));
+
     private Map<String, Object> properties = new HashMap<>();
     private TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
 
@@ -66,7 +72,7 @@ public class TritonServerContainerManagerTest {
     public void isServerRunningWorksWhenNotRunning() {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenServiceOptionsBuiltWith(properties);
 
         givenMockContainerOrchestrationService();
@@ -80,7 +86,7 @@ public class TritonServerContainerManagerTest {
     public void isServerRunningWorksWhenRunning() {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenServiceOptionsBuiltWith(properties);
 
         givenMockContainerOrchestrationService();
@@ -94,7 +100,7 @@ public class TritonServerContainerManagerTest {
     public void isServerRunningWorksWhenOrchestratorNotConnected() {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenServiceOptionsBuiltWith(properties);
 
         givenMockContainerOrchestrationService();
@@ -108,7 +114,7 @@ public class TritonServerContainerManagerTest {
     public void stopMethodShouldWork() {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenServiceOptionsBuiltWith(properties);
 
         givenMockContainerOrchestrationService();
@@ -125,7 +131,7 @@ public class TritonServerContainerManagerTest {
     public void stopMethodShouldWorkWhenNotRunning() {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenServiceOptionsBuiltWith(properties);
 
         givenMockContainerOrchestrationService();
@@ -142,7 +148,7 @@ public class TritonServerContainerManagerTest {
     public void killMethodShouldWork() {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenServiceOptionsBuiltWith(properties);
 
         givenMockContainerOrchestrationService();
@@ -160,7 +166,7 @@ public class TritonServerContainerManagerTest {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenServiceOptionsBuiltWith(properties);
 
         givenMockContainerOrchestrationService();
@@ -177,7 +183,7 @@ public class TritonServerContainerManagerTest {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenServiceOptionsBuiltWith(properties);
 
         givenMockContainerOrchestrationService();
@@ -195,7 +201,7 @@ public class TritonServerContainerManagerTest {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenServiceOptionsBuiltWith(properties);
 
         givenMockContainerOrchestrationService();
@@ -213,7 +219,7 @@ public class TritonServerContainerManagerTest {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenServiceOptionsBuiltWith(properties);
 
         givenMockContainerOrchestrationService();
@@ -225,7 +231,7 @@ public class TritonServerContainerManagerTest {
 
         thenContainerOrchestrationStartContainerWasCalled();
         thenContainerConfigurationIsFrameworkManaged(true);
-        thenContainerConfigurationPortsEquals(Arrays.asList(4000, 4001, 4002));
+        thenContainerConfigurationPortsEquals(CONTAINER_PORTS);
         thenContainerConfigurationImageEquals(TRITON_IMAGE_NAME);
         thenContainerConfigurationImageTagEquals(TRITON_IMAGE_TAG);
         thenContainerConfigurationNameEquals(TRITON_CONTAINER_NAME);
@@ -245,7 +251,7 @@ public class TritonServerContainerManagerTest {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenServiceOptionsBuiltWith(properties);
 
         givenMockContainerOrchestrationService();
@@ -264,7 +270,7 @@ public class TritonServerContainerManagerTest {
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
         givenPropertyWith("local.model.repository.password", "hutini");
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenServiceOptionsBuiltWith(properties);
 
         givenMockContainerOrchestrationService();
@@ -284,7 +290,7 @@ public class TritonServerContainerManagerTest {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenPropertyWith("container.memory", "7g");
         givenPropertyWith("container.cpus", 1.5F);
         givenPropertyWith("container.gpus", "all");
@@ -322,7 +328,7 @@ public class TritonServerContainerManagerTest {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenPropertyWith("local.backends.config", "testConfiguration");
         givenServiceOptionsBuiltWith(properties);
 
@@ -335,7 +341,7 @@ public class TritonServerContainerManagerTest {
 
         thenContainerOrchestrationStartContainerWasCalled();
         thenContainerConfigurationIsFrameworkManaged(true);
-        thenContainerConfigurationPortsEquals(Arrays.asList(4000, 4001, 4002));
+        thenContainerConfigurationPortsEquals(CONTAINER_PORTS);
         thenContainerConfigurationImageEquals(TRITON_IMAGE_NAME);
         thenContainerConfigurationEntrypointOverrideContains("--backend-config=testConfiguration");
     }
@@ -345,7 +351,7 @@ public class TritonServerContainerManagerTest {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenServiceOptionsBuiltWith(properties);
 
         givenMockContainerOrchestrationService();
@@ -357,7 +363,7 @@ public class TritonServerContainerManagerTest {
 
         thenContainerOrchestrationStartContainerWasCalled();
         thenContainerConfigurationIsFrameworkManaged(true);
-        thenContainerConfigurationPortsEquals(Arrays.asList(4000, 4001, 4002));
+        thenContainerConfigurationPortsEquals(CONTAINER_PORTS);
         thenContainerConfigurationImageEquals(TRITON_IMAGE_NAME);
         thenContainerConfigurationImageTagEquals(TRITON_IMAGE_TAG);
         thenContainerConfigurationNameEquals(TRITON_CONTAINER_NAME);
@@ -372,7 +378,7 @@ public class TritonServerContainerManagerTest {
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
         givenPropertyWith("local.backends.path", TRITON_BACKENDS_PATH);
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenServiceOptionsBuiltWith(properties);
 
         givenMockContainerOrchestrationService();
@@ -384,16 +390,15 @@ public class TritonServerContainerManagerTest {
 
         thenContainerOrchestrationStartContainerWasCalled();
         thenContainerConfigurationIsFrameworkManaged(true);
-        thenContainerConfigurationPortsEquals(Arrays.asList(4000, 4001, 4002));
+        thenContainerConfigurationPortsEquals(CONTAINER_PORTS);
         thenContainerConfigurationImageEquals(TRITON_IMAGE_NAME);
         thenContainerConfigurationImageTagEquals(TRITON_IMAGE_TAG);
         thenContainerConfigurationNameEquals(TRITON_CONTAINER_NAME);
-        thenContainerConfigurationVolumesEquals(Stream.of(new String[][] {
-                { TRITON_REPOSITORY_PATH, TRITON_INTERNAL_MODEL_REPO },
-                { TRITON_BACKENDS_PATH, TRITON_INTERNAL_BACKENDS_FOLDER },
-        }).collect(Collectors.collectingAndThen(
-                Collectors.toMap(data -> data[0], data -> data[1]),
-                Collections::<String, String>unmodifiableMap)));
+        thenContainerConfigurationVolumesEquals(Stream
+                .of(new String[][] { { TRITON_REPOSITORY_PATH, TRITON_INTERNAL_MODEL_REPO },
+                        { TRITON_BACKENDS_PATH, TRITON_INTERNAL_BACKENDS_FOLDER }, })
+                .collect(Collectors.collectingAndThen(Collectors.toMap(data -> data[0], data -> data[1]),
+                        Collections::<String, String> unmodifiableMap)));
         thenContainerConfigurationEntrypointOverrideContains("--model-control-mode=explicit");
     }
 
@@ -554,8 +559,8 @@ public class TritonServerContainerManagerTest {
         assertEquals(expectedContainerName, this.capturedContainerConfig.getContainerName());
     }
 
-    private void thenContainerConfigurationPortsEquals(List<Integer> expectedPorts) {
-        assertEquals(expectedPorts, this.capturedContainerConfig.getContainerPortsExternal());
+    private void thenContainerConfigurationPortsEquals(List<ContainerPort> expectedPorts) {
+        assertEquals(expectedPorts, this.capturedContainerConfig.getContainerPorts());
     }
 
     private void thenContainerConfigurationVolumesEquals(Map<String, String> expectedVolumes) {

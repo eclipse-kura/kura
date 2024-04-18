@@ -74,7 +74,7 @@ public final class NetworkConfigurationConstants {
     public static final Short DEFAULT_IPV4_PREFIX_VALUE = -1;
     public static final Short DEFAULT_IPV6_PREFIX_VALUE = -1;
 
-    public NetworkConfigurationConstants() {
+    private NetworkConfigurationConstants() {
         // Do nothing...
     }
 

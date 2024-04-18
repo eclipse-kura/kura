@@ -23,6 +23,7 @@ import org.eclipse.kura.net.wifi.WifiSecurity;
 
 public final class NetworkConfigurationConstants {
 
+    // Modem properties default values
     public static final Boolean DEFAULT_MODEM_PERSIST_VALUE = true;
     public static final Integer DEFAULT_MODEM_HOLDOFF_VALUE = 1;
     public static final Integer DEFAULT_MODEM_MAXFAIL_VALUE = 5;
@@ -41,6 +42,7 @@ public final class NetworkConfigurationConstants {
     public static final AuthType DEFAULT_MODEM_AUTH_TYPE_VALUE = AuthType.NONE;
     public static final Integer DEFAULT_MODEM_PPP_NUMBER_VALUE = 0;
 
+    // Wifi properties default values
     public static final Boolean DEFAULT_WIFI_BROADCAST_VALUE = false;
     public static final WifiRadioMode DEFAULT_WIFI_RADIO_MODE_VALUE = WifiRadioMode.RADIO_MODE_80211b;
     public static final WifiSecurity DEFAULT_WIFI_SECURITY_VALUE = WifiSecurity.NONE;
@@ -52,27 +54,25 @@ public final class NetworkConfigurationConstants {
     public static final Boolean DEFAULT_WIFI_PING_AP_VALUE = false;
     public static final WifiMode DEFAULT_WIFI_MODE = WifiMode.UNKNOWN;
 
+    // IP properties default values
     public static final Boolean DEFAULT_IPV4_DHCP_SERVER_ENABLED_VALUE = false;
-    public static final Integer DEFAULT_IPV4_DHCP_SERVER_DEFAULT_LEASE_TIME_VALUE = -1; // ????????
-    public static final Integer DEFAULT_IPV4_DHCP_SERVER_MAX_LEASE_TIME_VALUE = -1; // ????????
-    public static final Short DEFAULT_IPV4_DHCP_SERVER_PREFIX_VALUE = -1; // ????????
+    public static final Integer DEFAULT_IPV4_DHCP_SERVER_DEFAULT_LEASE_TIME_VALUE = -1;
+    public static final Integer DEFAULT_IPV4_DHCP_SERVER_MAX_LEASE_TIME_VALUE = -1;
+    public static final Short DEFAULT_IPV4_DHCP_SERVER_PREFIX_VALUE = -1;
     public static final Boolean DEFAULT_IPV4_DHCP_PASS_DNS_VALUE = false;
     public static final Boolean DEFAULT_IPV4_DHCP_SERVER_NAT_ENABLED_VALUE = false;
-
     public static final Boolean DEFAULT_IPV4_DHCP_CLIENT_ENABLED_VALUE = false;
-
-    public static final Integer DEFAULT_VLAN_FLAGS_VALUE = 1;
-
-//    public static final KuraIp6ConfigurationMethod DEFAULT_IPV6_ADDRESS_METHOD_VALUE = KuraIp6ConfigurationMethod.AUTO;
-    public static final String DEFAULT_IPV6_ADDRESS_METHOD_VALUE = "AUTO"; // ????????
-
     public static final NetInterfaceType DEFAULT_INTERFACE_TYPE_VALUE = NetInterfaceType.UNKNOWN;
     public static final NetInterfaceStatus DEFAULT_IPV4_STATUS_VALUE = NetInterfaceStatus.netIPv4StatusDisabled;
-    public static final NetInterfaceStatus DEFAULT_IPV6_STATUS_VALUE = NetInterfaceStatus.netIPv6StatusDisabled;
     public static final Boolean DEFAULT_AUTOCONNECT_VALUE = false;
     public static final Integer DEFAULT_PROMISC_VALUE = -1;
     public static final Short DEFAULT_IPV4_PREFIX_VALUE = -1;
     public static final Short DEFAULT_IPV6_PREFIX_VALUE = -1;
+    public static final NetInterfaceStatus DEFAULT_IPV6_STATUS_VALUE = NetInterfaceStatus.netIPv6StatusDisabled;
+    public static final String DEFAULT_IPV6_ADDRESS_METHOD_VALUE = "AUTO";
+
+    // VLAN properties default values
+    public static final Integer DEFAULT_VLAN_FLAGS_VALUE = 1;
 
     private NetworkConfigurationConstants() {
         // Do nothing...

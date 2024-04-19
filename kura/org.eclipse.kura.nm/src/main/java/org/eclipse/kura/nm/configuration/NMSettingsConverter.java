@@ -341,6 +341,112 @@ public class NMSettingsConverter {
             return settings;
         }
 
+        KuraIp6ConfigurationMethod ip6ConfigMethod = getIp6ConfigMethod(props, deviceId);
+
+        if (ip6ConfigMethod.equals(KuraIp6ConfigurationMethod.AUTO)) {
+
+            configureIp6MethodAuto(props, deviceId, settings);
+
+        } else if (ip6ConfigMethod.equals(KuraIp6ConfigurationMethod.DHCP)) {
+
+            settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("dhcp"));
+
+        } else if (ip6ConfigMethod.equals(KuraIp6ConfigurationMethod.MANUAL)) {
+
+            configureIp6MethodManual(props, deviceId, ip6Status, settings);
+
+        } else {
+            throw new IllegalArgumentException(
+                    String.format("Unsupported IPv6 address generation mode: \"%s\"", ip6ConfigMethod));
+        }
+
+        if (ip6Status.equals(KuraIpStatus.ENABLEDLAN)) {
+            configureIp6Lan(settings);
+
+        } else if (ip6Status.equals(KuraIpStatus.ENABLEDWAN)) {
+            configureIp6Wan(props, deviceId, settings);
+
+        } else {
+            logger.warn("Unexpected ip status received: \"{}\". Ignoring", ip6Status);
+        }
+
+        configureIp6Mtu(props, deviceId, nmVersion, settings);
+        return settings;
+    }
+
+    private static void configureIp6Mtu(NetworkProperties props, String deviceId, SemanticVersion nmVersion,
+            Map<String, Variant<?>> settings) {
+        Optional<Integer> mtu = props.getOpt(Integer.class, "net.interface.%s.config.ip6.mtu", deviceId);
+        if (nmVersion.isGreaterEqualThan("1.40")) {
+            // ipv6.mtu only supported in NetworkManager 1.40 and above
+            mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
+        } else {
+            logger.warn("Ignoring parameter ipv6.mtu: NetworkManager 1.40 or above is required");
+        }
+    }
+
+    private static void configureIp6Wan(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
+        Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip6.dnsServers",
+                deviceId);
+
+        dnsServers.ifPresent(value -> {
+            settings.put("dns", new Variant<>(convertIp6(value), "aay"));
+            settings.put(NM_SETTINGS_IPV6_IGNORE_AUTO_DNS, new Variant<>(true));
+        });
+
+        Optional<Integer> wanPriority = props.getOpt(Integer.class, "net.interface.%s.config.ip6.wan.priority",
+                deviceId);
+
+        wanPriority.ifPresent(value -> settings.put("route-metric", new Variant<>(value.longValue())));
+    }
+
+    private static void configureIp6Lan(Map<String, Variant<?>> settings) {
+        settings.put(NM_SETTINGS_IPV6_IGNORE_AUTO_DNS, new Variant<>(true));
+        settings.put("ignore-auto-routes", new Variant<>(true));
+    }
+
+    private static void configureIp6MethodManual(NetworkProperties props, String deviceId, KuraIpStatus ip6Status,
+            Map<String, Variant<?>> settings) {
+        settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("manual"));
+
+        String address = props.get(String.class, "net.interface.%s.config.ip6.address", deviceId);
+        Short prefix = props.get(Short.class, "net.interface.%s.config.ip6.prefix", deviceId);
+
+        Map<String, Variant<?>> addressEntry = new HashMap<>();
+        addressEntry.put("address", new Variant<>(address));
+        addressEntry.put("prefix", new Variant<>(new UInt32(prefix)));
+
+        if (ip6Status.equals(KuraIpStatus.ENABLEDWAN)) {
+            Optional<String> gateway = props.getOpt(String.class, "net.interface.%s.config.ip6.gateway", deviceId);
+            gateway.ifPresent(gatewayAddress -> settings.put("gateway", new Variant<>(gatewayAddress)));
+        }
+
+        List<Map<String, Variant<?>>> addressData = Arrays.asList(addressEntry);
+        settings.put("address-data", new Variant<>(addressData, "aa{sv}"));
+    }
+
+    private static void configureIp6MethodAuto(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
+        settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("auto"));
+
+        Optional<String> addressGenerationMode = props.getOpt(String.class,
+                "net.interface.%s.config.ip6.addr.gen.mode", deviceId);
+
+        addressGenerationMode.ifPresent(value -> {
+            KuraIp6AddressGenerationMode ipv6AddressGenerationMode = KuraIp6AddressGenerationMode
+                    .fromString(addressGenerationMode.get());
+            settings.put("addr-gen-mode", new Variant<>(KuraIp6AddressGenerationMode
+                    .toNMSettingIP6ConfigAddrGenMode(ipv6AddressGenerationMode).toInt32()));
+        });
+
+        Optional<String> privacy = props.getOpt(String.class, "net.interface.%s.config.ip6.privacy", deviceId);
+        privacy.ifPresent(value -> {
+            KuraIp6Privacy ip6Privacy = KuraIp6Privacy.fromString(privacy.get());
+            settings.put("ip6-privacy",
+                    new Variant<>(KuraIp6Privacy.toNMSettingIP6ConfigPrivacy(ip6Privacy).toInt32()));
+        });
+    }
+
+    private static KuraIp6ConfigurationMethod getIp6ConfigMethod(NetworkProperties props, String deviceId) {
         KuraIp6ConfigurationMethod ip6ConfigMethod = KuraIp6ConfigurationMethod
                 .fromString(NetworkConfigurationConstants.DEFAULT_IPV6_ADDRESS_METHOD_VALUE);
         try {
@@ -350,86 +456,7 @@ public class NMSettingsConverter {
             logger.warn("IPv6 address method property not found. Using default value: {}",
                     ip6ConfigMethod);
         }
-
-        if (ip6ConfigMethod.equals(KuraIp6ConfigurationMethod.AUTO)) {
-
-            settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("auto"));
-
-            Optional<String> addressGenerationMode = props.getOpt(String.class,
-                    "net.interface.%s.config.ip6.addr.gen.mode", deviceId);
-
-            addressGenerationMode.ifPresent(value -> {
-                KuraIp6AddressGenerationMode ipv6AddressGenerationMode = KuraIp6AddressGenerationMode
-                        .fromString(addressGenerationMode.get());
-                settings.put("addr-gen-mode", new Variant<>(KuraIp6AddressGenerationMode
-                        .toNMSettingIP6ConfigAddrGenMode(ipv6AddressGenerationMode).toInt32()));
-            });
-
-            Optional<String> privacy = props.getOpt(String.class, "net.interface.%s.config.ip6.privacy", deviceId);
-            privacy.ifPresent(value -> {
-                KuraIp6Privacy ip6Privacy = KuraIp6Privacy.fromString(privacy.get());
-                settings.put("ip6-privacy",
-                        new Variant<>(KuraIp6Privacy.toNMSettingIP6ConfigPrivacy(ip6Privacy).toInt32()));
-            });
-
-        } else if (ip6ConfigMethod.equals(KuraIp6ConfigurationMethod.DHCP)) {
-
-            settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("dhcp"));
-
-        } else if (ip6ConfigMethod.equals(KuraIp6ConfigurationMethod.MANUAL)) {
-
-            settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("manual"));
-
-            String address = props.get(String.class, "net.interface.%s.config.ip6.address", deviceId);
-            Short prefix = props.get(Short.class, "net.interface.%s.config.ip6.prefix", deviceId);
-
-            Map<String, Variant<?>> addressEntry = new HashMap<>();
-            addressEntry.put("address", new Variant<>(address));
-            addressEntry.put("prefix", new Variant<>(new UInt32(prefix)));
-
-            if (ip6Status.equals(KuraIpStatus.ENABLEDWAN)) {
-                Optional<String> gateway = props.getOpt(String.class, "net.interface.%s.config.ip6.gateway", deviceId);
-                gateway.ifPresent(gatewayAddress -> settings.put("gateway", new Variant<>(gatewayAddress)));
-            }
-
-            List<Map<String, Variant<?>>> addressData = Arrays.asList(addressEntry);
-            settings.put("address-data", new Variant<>(addressData, "aa{sv}"));
-
-        } else {
-            throw new IllegalArgumentException(
-                    String.format("Unsupported IPv6 address generation mode: \"%s\"", ip6ConfigMethod));
-        }
-
-        if (ip6Status.equals(KuraIpStatus.ENABLEDLAN)) {
-            settings.put(NM_SETTINGS_IPV6_IGNORE_AUTO_DNS, new Variant<>(true));
-            settings.put("ignore-auto-routes", new Variant<>(true));
-
-        } else if (ip6Status.equals(KuraIpStatus.ENABLEDWAN)) {
-            Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip6.dnsServers",
-                    deviceId);
-
-            dnsServers.ifPresent(value -> {
-                settings.put("dns", new Variant<>(convertIp6(value), "aay"));
-                settings.put(NM_SETTINGS_IPV6_IGNORE_AUTO_DNS, new Variant<>(true));
-            });
-
-            Optional<Integer> wanPriority = props.getOpt(Integer.class, "net.interface.%s.config.ip6.wan.priority",
-                    deviceId);
-
-            wanPriority.ifPresent(value -> settings.put("route-metric", new Variant<>(value.longValue())));
-
-        } else {
-            logger.warn("Unexpected ip status received: \"{}\". Ignoring", ip6Status);
-        }
-
-        Optional<Integer> mtu = props.getOpt(Integer.class, "net.interface.%s.config.ip6.mtu", deviceId);
-        if (nmVersion.isGreaterEqualThan("1.40")) {
-            // ipv6.mtu only supported in NetworkManager 1.40 and above
-            mtu.ifPresent(value -> settings.put("mtu", new Variant<>(new UInt32(value))));
-        } else {
-            logger.warn("Ignoring parameter ipv6.mtu: NetworkManager 1.40 or above is required");
-        }
-        return settings;
+        return ip6ConfigMethod;
     }
 
     public static Map<String, Variant<?>> build80211WirelessSettings(NetworkProperties props, String deviceId) {

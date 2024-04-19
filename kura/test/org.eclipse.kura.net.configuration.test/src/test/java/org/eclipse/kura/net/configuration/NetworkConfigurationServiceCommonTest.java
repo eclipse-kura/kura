@@ -714,7 +714,7 @@ public class NetworkConfigurationServiceCommonTest {
             }
 
             if (String.format("net.interface.%s.config.ip6.address.method", interfaceName).equals(ad.getId())) {
-                assertEquals("AUTO", ad.getDefault());
+                assertEquals("netIPv6MethodAuto", ad.getDefault());
                 adsConfigured++;
             }
 

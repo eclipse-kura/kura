@@ -69,7 +69,7 @@ public final class NetworkConfigurationConstants {
     public static final Short DEFAULT_IPV4_PREFIX_VALUE = -1;
     public static final Short DEFAULT_IPV6_PREFIX_VALUE = -1;
     public static final NetInterfaceStatus DEFAULT_IPV6_STATUS_VALUE = NetInterfaceStatus.netIPv6StatusDisabled;
-    public static final String DEFAULT_IPV6_ADDRESS_METHOD_VALUE = "AUTO";
+    public static final String DEFAULT_IPV6_ADDRESS_METHOD_VALUE = "netIPv6MethodAuto";
 
     // VLAN properties default values
     public static final Integer DEFAULT_VLAN_FLAGS_VALUE = 1;

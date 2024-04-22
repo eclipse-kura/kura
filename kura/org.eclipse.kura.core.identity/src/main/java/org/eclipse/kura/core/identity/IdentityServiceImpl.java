@@ -380,11 +380,11 @@ public class IdentityServiceImpl implements IdentityService {
         if (passwordData.isPasswordAuthEnabled() && hash.isPresent()) {
 
             audit(() -> setProperty(credentials, PASSWORD_PROPERTY, hash.get().toString()),
-                    "Update password for identity " + identityName);
+                    "Update Kura password for identity " + identityName);
 
         } else if (!passwordData.isPasswordAuthEnabled() && currentPasswordHash != null) {
             audit(() -> removeProperty(credentials, PASSWORD_PROPERTY),
-                    "Disable password for identity " + identityName);
+                    "Disable Kura password for identity " + identityName);
         }
     }
 

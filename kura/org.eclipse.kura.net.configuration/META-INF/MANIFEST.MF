@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.net.configuration
 Bundle-SymbolicName: org.eclipse.kura.net.configuration;singleton:=true
 Bundle-Version: 1.2.0.qualifier
-Export-Package: org.eclipse.kura.net.configuration;version="1.0.0";x-internal:=true
+Export-Package: org.eclipse.kura.net.configuration;version="1.1.0";x-internal:=true
 Bundle-Vendor: Eclipse Kura
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Import-Package: org.eclipse.kura;version="[1.0,2.0)",

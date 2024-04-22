@@ -360,10 +360,14 @@ public class IdentityServiceImpl implements IdentityService {
     private void updatePassword(final String identityName, final PasswordConfiguration passwordData, final User user) {
         final Dictionary<String, Object> properties = user.getProperties();
 
+        final Object currentIsPasswordChangeNeeded = properties.get(KURA_NEED_PASSWORD_CHANGE);
+
         if (passwordData.isPasswordChangeNeeded()) {
-            audit(() -> setProperty(properties, KURA_NEED_PASSWORD_CHANGE, "true"),
-                    "Enable password change at next login for identity " + identityName);
-        } else if (properties.get(KURA_NEED_PASSWORD_CHANGE) != null) {
+            if (!"true".equals(currentIsPasswordChangeNeeded)) {
+                audit(() -> setProperty(properties, KURA_NEED_PASSWORD_CHANGE, "true"),
+                        "Enable password change at next login for identity " + identityName);
+            }
+        } else if (currentIsPasswordChangeNeeded != null) {
             audit(() -> removeProperty(properties, KURA_NEED_PASSWORD_CHANGE),
                     "Disable password change at next login for identity " + identityName);
         }
@@ -371,12 +375,14 @@ public class IdentityServiceImpl implements IdentityService {
         final Dictionary<String, Object> credentials = user.getCredentials();
         final Optional<PasswordHash> hash = passwordData.getPasswordHash();
 
+        final Object currentPasswordHash = credentials.get(PASSWORD_PROPERTY);
+
         if (passwordData.isPasswordAuthEnabled() && hash.isPresent()) {
 
             audit(() -> setProperty(credentials, PASSWORD_PROPERTY, hash.get().toString()),
                     "Update password for identity " + identityName);
 
-        } else if (!passwordData.isPasswordAuthEnabled()) {
+        } else if (!passwordData.isPasswordAuthEnabled() && currentPasswordHash != null) {
             audit(() -> removeProperty(credentials, PASSWORD_PROPERTY),
                     "Disable password for identity " + identityName);
         }

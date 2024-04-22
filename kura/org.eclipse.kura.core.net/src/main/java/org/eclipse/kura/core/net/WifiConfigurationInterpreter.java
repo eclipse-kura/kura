@@ -175,9 +175,9 @@ public class WifiConfigurationInterpreter {
     }
 
     private static WifiCiphers getPairwiseCiphers(Map<String, Object> properties, String prefix) {
-        Object pairwireCiphersObject = properties.get(prefix + WIFI_PAIRWISE_CIPHERS_KEY);
-        if (pairwireCiphersObject instanceof String) {
-            return WifiCiphers.valueOf((String) pairwireCiphersObject);
+        Object pairwiseCiphersObject = properties.get(prefix + WIFI_PAIRWISE_CIPHERS_KEY);
+        if (pairwiseCiphersObject instanceof String) {
+            return WifiCiphers.valueOf((String) pairwiseCiphersObject);
         }
         return NetworkConfigurationConstants.DEFAULT_WIFI_PAIRWISE_CIPHERS_VALUE;
     }

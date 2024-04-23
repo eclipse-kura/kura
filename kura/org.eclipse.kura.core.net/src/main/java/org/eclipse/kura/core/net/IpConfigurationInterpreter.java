@@ -28,6 +28,7 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetConfigIP6;
 import org.eclipse.kura.net.NetInterfaceStatus;
+import org.eclipse.kura.net.configuration.NetworkConfigurationConstants;
 import org.eclipse.kura.net.dhcp.DhcpServerCfg;
 import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
@@ -272,22 +273,21 @@ public class IpConfigurationInterpreter {
 
     private static NetInterfaceStatus getIp4Status(Map<String, Object> props, String interfaceName,
             boolean virtualInterface) {
-        String configStatus4 = null;
+        NetInterfaceStatus configStatus4 = NetworkConfigurationConstants.DEFAULT_IPV4_STATUS_VALUE;
         String configStatus4Key = NET_INTERFACE + interfaceName + ".config.ip4.status";
         if (props.containsKey(configStatus4Key)) {
-            configStatus4 = (String) props.get(configStatus4Key);
+            configStatus4 = NetInterfaceStatus.valueOf((String) props.get(configStatus4Key));
         } else {
-            configStatus4 = NetInterfaceStatus.netIPv4StatusDisabled.name();
             if (virtualInterface) {
                 SystemService service = getSystemService();
                 if (service != null) {
-                    configStatus4 = NetInterfaceStatus.valueOf(service.getNetVirtualDevicesConfig()).name();
+                    configStatus4 = NetInterfaceStatus.valueOf(service.getNetVirtualDevicesConfig());
                 }
             }
         }
         logger.trace("Status Ipv4? {}", configStatus4);
 
-        return NetInterfaceStatus.valueOf(configStatus4);
+        return configStatus4;
     }
 
     private static IP4Address getIp4StaticGateway(Map<String, Object> props, String interfaceName)
@@ -308,12 +308,12 @@ public class IpConfigurationInterpreter {
     private static Short getIp4StaticPrefix(Map<String, Object> props, String interfaceName) {
         // prefix
         String configIp4Prefix = NET_INTERFACE + interfaceName + ".config.ip4.prefix";
-        Short networkPrefixLength = null;
+        Short networkPrefixLength = NetworkConfigurationConstants.DEFAULT_IPV4_PREFIX_VALUE;
         Object ip4PrefixObj = props.get(configIp4Prefix);
         if (!isNull(ip4PrefixObj)) {
             if (ip4PrefixObj instanceof Short) {
                 networkPrefixLength = (Short) ip4PrefixObj;
-            } else if (ip4PrefixObj instanceof String) {
+            } else if (ip4PrefixObj instanceof String && !((String) ip4PrefixObj).isEmpty()) {
                 networkPrefixLength = Short.parseShort((String) ip4PrefixObj);
             }
         }
@@ -336,7 +336,7 @@ public class IpConfigurationInterpreter {
     }
 
     private static boolean isDhcpServerPassDns(Map<String, Object> props, String interfaceName) {
-        boolean passDns = false;
+        boolean passDns = NetworkConfigurationConstants.DEFAULT_IPV4_DHCP_PASS_DNS_VALUE;
         // passDns
         String configDhcpServerPassDns = NET_INTERFACE + interfaceName + ".config.dhcpServer4.passDns";
         if (props.containsKey(configDhcpServerPassDns)) {
@@ -351,7 +351,7 @@ public class IpConfigurationInterpreter {
     }
 
     private static int getDhcpServerMaxLeaseTime(Map<String, Object> props, String interfaceName) {
-        int maximumLeaseTime = -1;
+        int maximumLeaseTime = NetworkConfigurationConstants.DEFAULT_IPV4_DHCP_SERVER_MAX_LEASE_TIME_VALUE;
         // max lease time
         String configDhcpServerMaxLeaseTime = NET_INTERFACE + interfaceName + ".config.dhcpServer4.maxLeaseTime";
         if (props.containsKey(configDhcpServerMaxLeaseTime)) {
@@ -366,7 +366,7 @@ public class IpConfigurationInterpreter {
     }
 
     private static int getDhcpServer4DefaultLeaseTime(Map<String, Object> props, String interfaceName) {
-        int defaultLeaseTime = -1;
+        int defaultLeaseTime = NetworkConfigurationConstants.DEFAULT_IPV4_DHCP_SERVER_DEFAULT_LEASE_TIME_VALUE;
         // default lease time
         String configDhcpServerDefaultLeaseTime = NET_INTERFACE + interfaceName
                 + ".config.dhcpServer4.defaultLeaseTime";
@@ -413,7 +413,7 @@ public class IpConfigurationInterpreter {
     }
 
     private static short getDhcpServer4Prefix(Map<String, Object> props, String interfaceName) {
-        short prefix = -1;
+        short prefix = NetworkConfigurationConstants.DEFAULT_IPV4_DHCP_SERVER_PREFIX_VALUE;
         // prefix
         String configDhcpServerPrefix = NET_INTERFACE + interfaceName + ".config.dhcpServer4.prefix";
         if (props.containsKey(configDhcpServerPrefix)) {

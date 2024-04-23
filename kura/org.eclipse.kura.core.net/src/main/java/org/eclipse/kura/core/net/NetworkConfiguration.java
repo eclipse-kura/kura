@@ -39,6 +39,7 @@ import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceType;
+import org.eclipse.kura.net.configuration.NetworkConfigurationConstants;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
@@ -131,7 +132,7 @@ public class NetworkConfiguration {
             for (String currentNetInterface : availableInterfaces) {
                 StringBuilder keyBuffer = new StringBuilder();
                 keyBuffer.append(NET_INTERFACE).append(currentNetInterface).append(".type");
-                NetInterfaceType type = NetInterfaceType.UNKNOWN;
+                NetInterfaceType type = NetworkConfigurationConstants.DEFAULT_INTERFACE_TYPE_VALUE;
                 if (properties.get(keyBuffer.toString()) != null) {
                     type = NetInterfaceType.valueOf((String) properties.get(keyBuffer.toString()));
                 }

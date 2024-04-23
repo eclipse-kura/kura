@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,12 @@ import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Scalar;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
+import org.eclipse.kura.net.modem.ModemConfig.AuthType;
+import org.eclipse.kura.net.modem.ModemConfig.PdpType;
+import org.eclipse.kura.net.wifi.WifiCiphers;
+import org.eclipse.kura.net.wifi.WifiMode;
+import org.eclipse.kura.net.wifi.WifiRadioMode;
+import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.junit.Test;
 
 public class NetworkConfigurationServiceCommonTest {
@@ -71,7 +77,7 @@ public class NetworkConfigurationServiceCommonTest {
         whenTocdIsRetrieved();
         thenComponentDefinitionHasModemProperties();
     }
-    
+
     @Test
     public void componentDefinitionShouldHaveVlanPropertiesTest() throws KuraException {
         givenFullProperties();
@@ -134,9 +140,43 @@ public class NetworkConfigurationServiceCommonTest {
         thenReturnedPropertyEquals("net.interface.1-4.config.ip4.prefix", -1);
     }
 
+    @Test
+    public void componentDefinitionShouldHaveCorrectDefaultEthernetValuesTest() throws KuraException {
+        givenEmptyPropertiesForInterface("eth0", "ETHERNET");
+        whenTocdIsRetrieved();
+        thenComponentDefinitionHasDefaultProperties("eth0", "ETHERNET");
+    }
+
+    @Test
+    public void componentDefinitionShouldHaveCorrectDefaultWifiValuesTest() throws KuraException {
+        givenEmptyPropertiesForInterface("wlp1s0", "WIFI");
+        whenTocdIsRetrieved();
+        thenComponentDefinitionHasDefaultProperties("wlp1s0", "WIFI");
+    }
+
+    @Test
+    public void componentDefinitionShouldHaveCorrectDefaultModemValuesTest() throws KuraException {
+        givenEmptyPropertiesForInterface("1-4", "MODEM");
+        whenTocdIsRetrieved();
+        thenComponentDefinitionHasDefaultProperties("1-4", "MODEM");
+    }
+
+    @Test
+    public void componentDefinitionShouldHaveCorrectDefaultVlanValuesTest() throws KuraException {
+        givenEmptyPropertiesForInterface("ens5s0.101", "VLAN");
+        whenTocdIsRetrieved();
+        thenComponentDefinitionHasDefaultProperties("ens5s0.101", "VLAN");
+    }
+
     private void givenPropertiesWithoutInterfaces() {
         this.properties.clear();
         this.properties.put("net.interfaces", "");
+    }
+
+    private void givenEmptyPropertiesForInterface(String interfaceName, String interfaceType) {
+        this.properties.clear();
+        this.properties.put("net.interfaces", interfaceName);
+        this.properties.put(String.format("net.interface.%s.type", interfaceName), interfaceType);
     }
 
     private void givenFullProperties() {
@@ -590,7 +630,7 @@ public class NetworkConfigurationServiceCommonTest {
     private void thenComponentDefinitionHasModemProperties() {
         assertEquals(39, this.ads.stream().filter(ad -> ad.getName().contains("1-4")).count());
     }
-    
+
     private void thenComponentDefinitionHasVlanProperties() {
         assertEquals(34, this.ads.stream().filter(ad -> ad.getName().contains("ens5s0")).count());
     }
@@ -600,6 +640,315 @@ public class NetworkConfigurationServiceCommonTest {
                 .findFirst();
         assertTrue(adOptional.isPresent());
         assertEquals(Scalar.INTEGER, adOptional.get().getType());
+    }
+
+    private void thenComponentDefinitionHasDefaultProperties(String interfaceName, String interfaceType) {
+        if ("ETHERNET".equals(interfaceType)) {
+            thenComponentDefinitionHasEthernetProperties(interfaceName);
+        } else if ("WIFI".equals(interfaceType)) {
+            thenComponentDefinitionHasWifiProperties(interfaceName);
+        } else if ("MODEM".equals(interfaceType)) {
+            thenComponentDefinitionHasModemProperties(interfaceName);
+        } else if ("VLAN".equals(interfaceType)) {
+            thenComponentDefinitionHasVlanProperties(interfaceName);
+        }
+    }
+
+    private void thenComponentDefinitionHasEthernetProperties(String interfaceName) {
+        int adsConfigured = 0;
+        for (AD ad : this.ads) {
+            if (String.format("net.interface.%s.config.dhcpClient4.enabled", interfaceName).equals(ad.getId())) {
+                assertFalse(Boolean.parseBoolean(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.dhcpServer4.defaultLeaseTime", interfaceName)
+                    .equals(ad.getId())) {
+                assertEquals(-1, Integer.parseInt(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.dhcpServer4.enabled", interfaceName).equals(ad.getId())) {
+                assertFalse(Boolean.parseBoolean(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.dhcpServer4.maxLeaseTime", interfaceName).equals(ad.getId())) {
+                assertEquals(-1, Integer.parseInt(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.dhcpServer4.passDns", interfaceName).equals(ad.getId())) {
+                assertFalse(Boolean.parseBoolean(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.dhcpServer4.prefix", interfaceName).equals(ad.getId())) {
+                assertEquals(-1, Short.parseShort(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.dhcpServer4.rangeEnd", interfaceName).equals(ad.getId())) {
+                assertTrue(ad.getDefault().isEmpty());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.dhcpServer4.rangeStart", interfaceName).equals(ad.getId())) {
+                assertTrue(ad.getDefault().isEmpty());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.ip4.address", interfaceName).equals(ad.getId())) {
+                assertTrue(ad.getDefault().isEmpty());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.ip4.gateway", interfaceName).equals(ad.getId())) {
+                assertTrue(ad.getDefault().isEmpty());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.nat.enabled", interfaceName).equals(ad.getId())) {
+                assertFalse(Boolean.parseBoolean(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.ip6.address.method", interfaceName).equals(ad.getId())) {
+                assertEquals("netIPv6MethodAuto", ad.getDefault());
+                adsConfigured++;
+            }
+
+        }
+        assertEquals(12, adsConfigured);
+    }
+
+    private void thenComponentDefinitionHasWifiProperties(String interfaceName) {
+        int adsConfigured = 0;
+        for (AD ad : this.ads) {
+            if (String.format("net.interface.%s.config.dhcpClient4.enabled", interfaceName).equals(ad.getId())) {
+                assertFalse(Boolean.parseBoolean(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.dhcpServer4.defaultLeaseTime", interfaceName)
+                    .equals(ad.getId())) {
+                assertEquals(-1, Integer.parseInt(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.dhcpServer4.enabled", interfaceName).equals(ad.getId())) {
+                assertFalse(Boolean.parseBoolean(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.dhcpServer4.maxLeaseTime", interfaceName).equals(ad.getId())) {
+                assertEquals(-1, Integer.parseInt(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.dhcpServer4.passDns", interfaceName).equals(ad.getId())) {
+                assertFalse(Boolean.parseBoolean(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.dhcpServer4.prefix", interfaceName).equals(ad.getId())) {
+                assertEquals(-1, Short.parseShort(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.dhcpServer4.rangeEnd", interfaceName).equals(ad.getId())) {
+                assertTrue(ad.getDefault().isEmpty());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.dhcpServer4.rangeStart", interfaceName).equals(ad.getId())) {
+                assertTrue(ad.getDefault().isEmpty());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.ip4.address", interfaceName).equals(ad.getId())) {
+                assertTrue(ad.getDefault().isEmpty());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.ip4.gateway", interfaceName).equals(ad.getId())) {
+                assertTrue(ad.getDefault().isEmpty());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.nat.enabled", interfaceName).equals(ad.getId())) {
+                assertFalse(Boolean.parseBoolean(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.infra.channel", interfaceName).equals(ad.getId())) {
+                assertEquals("1", ad.getDefault());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.master.channel", interfaceName).equals(ad.getId())) {
+                assertEquals("1", ad.getDefault());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.infra.groupCiphers", interfaceName).equals(ad.getId())) {
+                assertEquals(WifiCiphers.CCMP_TKIP.name(), ad.getDefault());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.infra.pairwiseCiphers", interfaceName).equals(ad.getId())) {
+                assertEquals(WifiCiphers.CCMP_TKIP.name(), ad.getDefault());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.infra.passphrase", interfaceName).equals(ad.getId())) {
+                assertTrue(ad.getDefault().isEmpty());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.master.passphrase", interfaceName).equals(ad.getId())) {
+                assertTrue(ad.getDefault().isEmpty());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.infra.radioMode", interfaceName).equals(ad.getId())) {
+                assertEquals(WifiRadioMode.RADIO_MODE_80211b.name(), ad.getDefault());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.master.radioMode", interfaceName).equals(ad.getId())) {
+                assertEquals(WifiRadioMode.RADIO_MODE_80211b.name(), ad.getDefault());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.infra.securityType", interfaceName).equals(ad.getId())) {
+                assertEquals(WifiSecurity.NONE.name(), ad.getDefault());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.master.securityType", interfaceName).equals(ad.getId())) {
+                assertEquals(WifiSecurity.NONE.name(), ad.getDefault());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.infra.ssid", interfaceName).equals(ad.getId())) {
+                assertTrue(ad.getDefault().isEmpty());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.master.ssid", interfaceName).equals(ad.getId())) {
+                assertTrue(ad.getDefault().isEmpty());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.mode", interfaceName).equals(ad.getId())) {
+                assertEquals(WifiMode.UNKNOWN.name(), ad.getDefault());
+                adsConfigured++;
+            }
+        }
+        assertEquals(24, adsConfigured);
+    }
+
+    private void thenComponentDefinitionHasModemProperties(String interfaceName) {
+        int adsConfigured = 0;
+        for (AD ad : this.ads) {
+            if (String.format("net.interface.%s.config.persist", interfaceName).equals(ad.getId())) {
+                assertTrue(Boolean.parseBoolean(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.holdoff", interfaceName).equals(ad.getId())) {
+                assertEquals(1, Integer.parseInt(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.maxFail", interfaceName).equals(ad.getId())) {
+                assertEquals(5, Integer.parseInt(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.resetTimeout", interfaceName).equals(ad.getId())) {
+                assertEquals(5, Integer.parseInt(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.idle", interfaceName).equals(ad.getId())) {
+                assertEquals(95, Integer.parseInt(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.activeFilter", interfaceName).equals(ad.getId())) {
+                assertEquals("inbound", ad.getDefault());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.lcpEchoInterval", interfaceName).equals(ad.getId())) {
+                assertEquals(0, Integer.parseInt(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.lcpEchoFailure", interfaceName).equals(ad.getId())) {
+                assertEquals(0, Integer.parseInt(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.gpsEnabled", interfaceName).equals(ad.getId())) {
+                assertFalse(Boolean.parseBoolean(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.diversityEnabled", interfaceName).equals(ad.getId())) {
+                assertFalse(Boolean.parseBoolean(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.enabled", interfaceName).equals(ad.getId())) {
+                assertFalse(Boolean.parseBoolean(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.profileId", interfaceName).equals(ad.getId())) {
+                assertEquals(0, Integer.parseInt(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.dataCompression", interfaceName).equals(ad.getId())) {
+                assertEquals(0, Integer.parseInt(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.headerCompression", interfaceName).equals(ad.getId())) {
+                assertEquals(0, Integer.parseInt(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.pdpType", interfaceName).equals(ad.getId())) {
+                assertEquals(PdpType.IP.name(), ad.getDefault());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.authType", interfaceName).equals(ad.getId())) {
+                assertEquals(AuthType.NONE.name(), ad.getDefault());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.pppNum", interfaceName).equals(ad.getId())) {
+                assertEquals(0, Integer.parseInt(ad.getDefault()));
+                adsConfigured++;
+            }
+        }
+        assertEquals(12, adsConfigured);
+    }
+
+    private void thenComponentDefinitionHasVlanProperties(String interfaceName) {
+        int adsConfigured = 0;
+        for (AD ad : this.ads) {
+            if (String.format("net.interface.%s.config.vlan.flags", interfaceName).equals(ad.getId())) {
+                assertEquals(1, Integer.parseInt(ad.getDefault()));
+                adsConfigured++;
+            }
+        }
+        assertEquals(1, adsConfigured);
     }
 
 }

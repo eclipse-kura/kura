@@ -138,7 +138,7 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * the configuration.
      *
      * @param dhcp
-     *            whether or not dhcp client mode should be used
+     *             whether or not dhcp client mode should be used
      */
     public void setDhcp(boolean dhcp) {
         this.dhcp = dhcp;
@@ -161,7 +161,7 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
      * the NetConfigIP instance used. This is only used if dhcp is set to false.
      *
      * @param address
-     *            - address to be statically assigned to the interface
+     *                - address to be statically assigned to the interface
      */
     public void setAddress(T address) {
         this.address = address;
@@ -459,6 +459,9 @@ public abstract class NetConfigIP<T extends IPAddress> implements NetConfig {
 
     // TODO - only works on IPv4 now
     private T calculateNetmaskFromNetworkPrefix(int networkPrefixLength) throws KuraException {
+        if (networkPrefixLength < 0) {
+            return null;
+        }
         int mask = ~((1 << 32 - networkPrefixLength) - 1);
         StringBuilder sb = new StringBuilder(15);
         for (int shift = 24; shift > 0; shift -= 8) {

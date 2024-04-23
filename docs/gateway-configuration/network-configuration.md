@@ -95,126 +95,132 @@ When applying a new network configuration, Kura changes the configuration files 
 
 The Network configuration can be modified using the Kura Gateway Administration Console, as described above, the [Configuration Service](doc:configuration-service) or appling a proper [snapshot](doc:snapshot-management).
 
-The following table describes all the properties related to the Network Configuration. The network configuration pid is `org.eclipse.kura.net.admin.NetworkConfigurationService`.
+The following table describes all the properties related to the Network Configuration. It includes the name of the property, the type, a description and the default value (if applicable). The network configuration pid is `org.eclipse.kura.net.admin.NetworkConfigurationService`.
 
 ### Common properties
 
-Name                                             | Type     | Description
--------------------------------------------------|----------|------------------------------------------
-`net.interfaces`                                 | String   | Comma-separated list of the interface names in the device
-`net.interface.<interface>.type`        | String	| The type of the network interface; possible values are: ETHERNET, WIFI, MODEM, VLAN and LOOPBACK
-`net.interface.<interface>.config.wifi.mode`   | String   | For wifi interfaces, specify the modality; possible values are INFRA and MASTER
-`net.interface.<interface>.config.nat.enabled` | Boolean  | Enable the NAT feature
-`net.interface.<interface>.config.promisc` | Integer  | Enable the Promiscuous Mode; possible values are: -1 (System default), 0 (Disabled), 1 (Enabled)
+Name                                             | Type     | Description                                                                                      | Default value
+-------------------------------------------------|----------|--------------------------------------------------------------------------------------------------|-----------------------
+`net.interfaces`                                 | String   | Comma-separated list of the interface names in the device                                        |
+`net.interface.<interface>.type`                 | String	| The type of the network interface; possible values are: `ETHERNET`, `WIFI`, `MODEM`, `VLAN`, `LOOPBACK` and `UNKNOWN` | `UNKNOWN`
+`net.interface.<interface>.config.wifi.mode`     | String   | For wifi interfaces, specify the modality; possible values are `INFRA`, `MASTER` and `UNKNOWN`   | `UNKNOWN`
+`net.interface.<interface>.config.nat.enabled`   | Boolean  | Enable the NAT feature                                                                           | false
+`net.interface.<interface>.config.promisc`       | Integer  | Enable the Promiscuous Mode; possible values are: -1 (System default), 0 (Disabled), 1 (Enabled) | -1
 
 ### IPv4 properties
 
-Name                                                | Type     | Description
-----------------------------------------------------|----------|------------------------------------------
-`net.interface.<interface>.config.ip4.status`	    | String   | The status of the interface for the IPv4 configuration; possibile values are: netIPv4StatusDisabled, netIPv4StatusUnmanaged, netIPv4StatusL2Only, netIPv4StatusEnabledLAN, netIPv4StatusEnabledWAN, netIPv4StatusUnknown
-`net.interface.<interface>.config.ip4.wan.priority` | Integer | (NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See [Network Failover](./network-failover.md) for further details
-`net.interface.<interface>.config.ip4.address`    | String   | The IPv4 address assigned to the network interface
-`net.interface.<interface>.config.ip4.prefix`	    | Short    | The IPv4 netmask assigned to the network interface
-`net.interface.<interface>.config.ip4.gateway`    | String   | The IPv4 address of the default gateway
-`net.interface.<interface>.config.ip4.dnsServers`	| String   | Comma-separated list of dns servers
-`net.interface.<interface>.config.ip4.mtu`	| Integer   | The Maximum Transition Unit (MTU) for this interface
+Name                                                | Type     | Description                              | Default value
+----------------------------------------------------|----------|------------------------------------------|----------------------------
+`net.interface.<interface>.config.ip4.status`	    | String   | The status of the interface for the IPv4 configuration; possibile values are: `netIPv4StatusDisabled`, `netIPv4StatusUnmanaged`, `netIPv4StatusL2Only`, `netIPv4StatusEnabledLAN`, `netIPv4StatusEnabledWAN`, `netIPv4StatusUnknown` | `netIPv4StatusDisabled` (see note below)
+`net.interface.<interface>.config.ip4.wan.priority` | Integer  | (NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See [Network Failover](./network-failover.md) for further details | -1
+`net.interface.<interface>.config.ip4.address`      | String   | The IPv4 address assigned to the network interface |
+`net.interface.<interface>.config.ip4.prefix`	    | Short    | The IPv4 netmask assigned to the network interface | -1
+`net.interface.<interface>.config.ip4.gateway`      | String   | The IPv4 address of the default gateway |
+`net.interface.<interface>.config.ip4.dnsServers`	| String   | Comma-separated list of dns servers |
+`net.interface.<interface>.config.ip4.mtu`	        | Integer  | The Maximum Transition Unit (MTU) for this interface
+
+!!! note
+    For physical interfaces the default status is `netIPv4StatusDisabled`. For virtual ones, instead, the default status is defined by the `kura.net.virtual.devices.config` property in the `kura.properties` file.
 
 ### IPv4 DHCP Server properties
 
-Name                                                              | Type    | Description
-------------------------------------------------------------------|---------|------------------------------------------
-`net.interface.<interface>.config.dhcpServer4.enabled`          | Boolean	| Specify if the DHCP server is enabled
-`net.interface.<interface>.config.dhcpServer4.rangeStart`       | String	| First IP address available for clients
-`net.interface.<interface>.config.dhcpServer4.rangeEnd`         | String	| Last IP address available for clients
-`net.interface.<interface>.config.dhcpServer4.defaultLeaseTime` | Integer	| The default lease time
-`net.interface.<interface>.config.dhcpServer4.maxLeaseTime`     | Integer	| The maximum lease time
-`net.interface.<interface>.config.dhcpServer4.prefix`           | Short	| The netmask for the available IP addresses
-`net.interface.<interface>.config.dhcpServer4.passDns`          | Boolean	| Specify if the DNS server addresses has to be passed through DHCP
+Name                                                              | Type    | Description                                | Default value
+------------------------------------------------------------------|---------|--------------------------------------------|----------------------------------
+`net.interface.<interface>.config.dhcpServer4.enabled`          | Boolean	| Specify if the DHCP server is enabled      | false
+`net.interface.<interface>.config.dhcpServer4.rangeStart`       | String	| First IP address available for clients     |
+`net.interface.<interface>.config.dhcpServer4.rangeEnd`         | String	| Last IP address available for clients      |
+`net.interface.<interface>.config.dhcpServer4.defaultLeaseTime` | Integer	| The default lease time                     | -1
+`net.interface.<interface>.config.dhcpServer4.maxLeaseTime`     | Integer	| The maximum lease time                     | -1
+`net.interface.<interface>.config.dhcpServer4.prefix`           | Short	    | The netmask for the available IP addresses | -1
+`net.interface.<interface>.config.dhcpServer4.passDns`          | Boolean	| Specify if the DNS server addresses has to be passed through DHCP | false
 
 ### IPv4 DHCP Client properties
 
-Name                                                     | Type     | Description
----------------------------------------------------------|----------|------------------------------------------
-`net.interface.<interface>.config.dhcpClient4.enabled` | Boolean	| Specify if the DHCP client is enabled
+Name                                                     | Type     | Description                              | Default value
+---------------------------------------------------------|----------|------------------------------------------|------------------
+`net.interface.<interface>.config.dhcpClient4.enabled` | Boolean	| Specify if the DHCP client is enabled    | false
 
 ### IPv6 properties
 
-Name                                                | Type     | Description
-----------------------------------------------------|----------|------------------------------------------
-`net.interface.<interface>.config.ip6.status`	    | String   | The status of the interface for the IPv6 configuration; possibile values are: netIPv6StatusDisabled, netIPv6StatusUnmanaged, netIPv6StatusL2Only, netIPv6StatusEnabledLAN, netIPv6StatusEnabledWAN, netIPv6StatusUnknown
-`net.interface.<interface>.config.ip6.wan.priority` | Integer | (NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See [Network Failover](./network-failover.md) for further details
-`net.interface.<interface>.config.ip6.address.method`    | String   | The IPv6 configuration method; possible values are: AUTO, DHCP, MANUAL.
-`net.interface.<interface>.config.ip6.address`    | String   | The IPv6 address assigned to the network interface
-`net.interface.<interface>.config.ip6.prefix`	    | Short    | The IPv6 netmask assigned to the network interface
-`net.interface.<interface>.config.ip6.gateway`    | String   | The IPv6 address of the default gateway
-`net.interface.<interface>.config.ip6.dnsServers`	| String   | Comma-separated list of dns servers
-`net.interface.<interface>.config.ip6.addr.gen.mode`    | String   | The IPv6 address generation mode; possible values are EUI64, STABLE_PRIVACY;
-`net.interface.<interface>.config.ip6.privacy`    | String   | The IPv6 Privacy Extensions for SLAAC; possible values are DISABLED, ENABLED_PUBLIC_ADD, ENABLED_TEMP_ADD
-`net.interface.<interface>.config.ip6.mtu`	| Integer   | The Maximum Transition Unit (MTU) for Ipv6 traffic on this interface. Requires NetworkManager 1.40 or newer
+Name                                                  | Type     | Description                              | Default value
+------------------------------------------------------|----------|------------------------------------------|----------------------------
+`net.interface.<interface>.config.ip6.status`	      | String   | The status of the interface for the IPv6 configuration; possibile values are: `netIPv6StatusDisabled`, `netIPv6StatusUnmanaged`, `netIPv6StatusL2Only`, `netIPv6StatusEnabledLAN`, `netIPv6StatusEnabledWAN`, `netIPv6StatusUnknown` | `netIPv6StatusDisabled` (see note below)
+`net.interface.<interface>.config.ip6.wan.priority`   | Integer | (NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See [Network Failover](./network-failover.md) for further details | -1
+`net.interface.<interface>.config.ip6.address.method` | String   | The IPv6 configuration method; possible values are: `AUTO`, `DHCP`, `MANUAL`. | `AUTO`
+`net.interface.<interface>.config.ip6.address`        | String   | The IPv6 address assigned to the network interface |
+`net.interface.<interface>.config.ip6.prefix`	      | Short    | The IPv6 netmask assigned to the network interface | -1
+`net.interface.<interface>.config.ip6.gateway`        | String   | The IPv6 address of the default gateway |
+`net.interface.<interface>.config.ip6.dnsServers`	  | String   | Comma-separated list of dns servers |
+`net.interface.<interface>.config.ip6.addr.gen.mode`  | String   | The IPv6 address generation mode; possible values are `EUI64`, `STABLE_PRIVACY` | 
+`net.interface.<interface>.config.ip6.privacy`        | String   | The IPv6 Privacy Extensions for SLAAC; possible values are `DISABLED`, `ENABLED_PUBLIC_ADD`, `ENABLED_TEMP_ADD` |
+`net.interface.<interface>.config.ip6.mtu`	          | Integer  | The Maximum Transition Unit (MTU) for Ipv6 traffic on this interface. Requires NetworkManager 1.40 or newer |
+
+!!! note
+    For physical interfaces the default status is `netIPv6StatusDisabled`. For virtual ones, instead, the default status is defined by the `kura.net.virtual.devices.config` property in the `kura.properties` file.
 
 ### WiFi Master (Access Point) properties
 
-Name                                                             | Type     | Description
----------------------------------------------------|-------------|------------------------------------------
-`net.interface.<interface>.config.wifi.master.driver`	         | String	| The driver used for the connection
-`net.interface.<interface>.config.wifi.master.passphrase`	     | Password	| The password for the access point
-`net.interface.<interface>.config.wifi.master.ssid`	         | String	| The SSID of the access point
-`net.interface.<interface>.config.wifi.master.securityType`    | String	| The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2
-`net.interface.<interface>.config.wifi.master.mode`	         | String	| The mode of the wireless connection; for the access point mode set it to MASTER
-`net.interface.<interface>.config.wifi.master.channel`	     | String	| The channel to be used for the access point
-`net.interface.<interface>.config.wifi.master.radioMode`	     | String	| Specify the 802.11 radio mode; possible values are RADIO_MODE_80211a, RADIO_MODE_80211b, RADIO_MODE_80211g, RADIO_MODE_80211nHT20, RADIO_MODE_80211_AC
-`net.interface.<interface>.config.wifi.master.ignoreSSID`	     | Boolean	| Specify if the SSID broadcast is ignored
-`net.interface.<interface>.config.wifi.master.groupCiphers`    | String   | Group ciphers i.e. group/broadcast encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
-`net.interface.<interface>.config.wifi.master.pairwiseCiphers` | String   | Pairwise ciphers i.e. pairwise encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
+Name                                                             | Type     | Description                   | Default value
+---------------------------------------------------|-------------|------------------------------------------|--------------------------------
+`net.interface.<interface>.config.wifi.master.driver`	         | String	| The driver used for the connection |
+`net.interface.<interface>.config.wifi.master.passphrase`	     | Password	| The password for the access point |
+`net.interface.<interface>.config.wifi.master.ssid`	             | String	| The SSID of the access point |
+`net.interface.<interface>.config.wifi.master.securityType`      | String	| The security protocol for the wireless network; possible values are `SECURITY_NONE`, `SECURITY_WEP`, `SECURITY_WPA`, `SECURITY_WPA2`, `SECURITY_WPA_WPA2` | `SECURITY_NONE`
+`net.interface.<interface>.config.wifi.master.mode`	             | String	| The mode of the wireless connection; for the access point mode set it to `MASTER` | `MASTER`
+`net.interface.<interface>.config.wifi.master.channel`	         | String	| The channel to be used for the access point | 1
+`net.interface.<interface>.config.wifi.master.radioMode`	     | String	| Specify the 802.11 radio mode; possible values are `RADIO_MODE_80211a`, `RADIO_MODE_80211b`, `RADIO_MODE_80211g`, `RADIO_MODE_80211nHT20`, `RADIO_MODE_80211_AC` | `RADIO_MODE_80211b`
+`net.interface.<interface>.config.wifi.master.ignoreSSID`	     | Boolean	| Specify if the SSID broadcast is ignored | false
+`net.interface.<interface>.config.wifi.master.groupCiphers`      | String   | Group ciphers i.e. group/broadcast encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP` | `CCMP_TKIP`
+`net.interface.<interface>.config.wifi.master.pairwiseCiphers`   | String   | Pairwise ciphers i.e. pairwise encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP` | `CCMP_TKIP`
 
 ### WiFi Infra (Station Mode) properties
 
-Name                                                             | Type      | Description
------------------------------------------------------------------|-----------|------------------------------------------
-`net.interface.<interface>.config.wifi.infra.ssid`	             | String	 | The SSID of the wireless network to connect to
-`net.interface.<interface>.config.wifi.infra.channel`	         | String	 | The channel of the wireless network to connect to
-`net.interface.<interface>.config.wifi.infra.bgscan`	         | String	 | Set the background scans; possible values have the form `<mode>:<shortInterval>:<rssiThreshold>:<longInterval>` where `mode` (String) is one of NONE, SIMPLE, or LEARN, `shortInterval` (Integer) sets the Bgscan short interval (secs), `rssiThreshold` (Integer) sets the Bgscan Signal strength threshold (dBm), and `longInterval` (Integer) sets the Bgscan long interval (secs)
-`net.interface.<interface>.config.wifi.infra.passphrase`	     | Password	 | The password for the wireless network
-`net.interface.<interface>.config.wifi.infra.ignoreSSID`	     | Boolean	 | Specify if a scan for SSID is required before attempting to associate
-`net.interface.<interface>.config.wifi.infra.mode`	             | String	 | The mode of the wireless connection; for station mode set to INFRA
-`net.interface.<interface>.config.wifi.infra.pingAccessPoint`	 | Boolean	 | Enable pinging the access point after connection is established
-`net.interface.<interface>.config.wifi.infra.driver`	         | String	 | The driver used for the connection
-`net.interface.<interface>.config.wifi.infra.securityType`       | String	 | The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2
-`net.interface.<interface>.config.wifi.infra.groupCiphers`       | String    | Group ciphers i.e. group/broadcast encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
-`net.interface.<interface>.config.wifi.infra.pairwiseCiphers`    | String    | Pairwise ciphers i.e. pairwise encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
+Name                                                             | Type      | Description                              | Default value
+-----------------------------------------------------------------|-----------|------------------------------------------|--------------------------------
+`net.interface.<interface>.config.wifi.infra.ssid`	             | String	 | The SSID of the wireless network to connect to |
+`net.interface.<interface>.config.wifi.infra.channel`	         | String	 | The channel of the wireless network to connect to | 1
+`net.interface.<interface>.config.wifi.infra.bgscan`	         | String	 | Set the background scans; possible values have the form `<mode>:<shortInterval>:<rssiThreshold>:<longInterval>` where `mode` (String) is one of NONE, SIMPLE, or LEARN, `shortInterval` (Integer) sets the Bgscan short interval (secs), `rssiThreshold` (Integer) sets the Bgscan Signal strength threshold (dBm), and `longInterval` (Integer) sets the Bgscan long interval (secs) | 
+`net.interface.<interface>.config.wifi.infra.passphrase`	     | Password	 | The password for the wireless network |
+`net.interface.<interface>.config.wifi.infra.ignoreSSID`	     | Boolean	 | Specify if a scan for SSID is required before attempting to associate | false
+`net.interface.<interface>.config.wifi.infra.mode`	             | String	 | The mode of the wireless connection; for station mode set to `INFRA` | `INFRA`
+`net.interface.<interface>.config.wifi.infra.pingAccessPoint`	 | Boolean	 | Enable pinging the access point after connection is established | false
+`net.interface.<interface>.config.wifi.infra.driver`	         | String	 | The driver used for the connection | 
+`net.interface.<interface>.config.wifi.infra.securityType`       | String	 | The security protocol for the wireless network; possible values are `SECURITY_NONE`, `SECURITY_WEP`, `SECURITY_WPA`, `SECURITY_WPA2`, `SECURITY_WPA_WPA2` | `SECURITY_NONE`
+`net.interface.<interface>.config.wifi.infra.groupCiphers`       | String    | Group ciphers i.e. group/broadcast encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP` | `CCMP_TKIP`
+`net.interface.<interface>.config.wifi.infra.pairwiseCiphers`    | String    | Pairwise ciphers i.e. pairwise encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP` | `CCMP_TKIP`
 
 ### Cellular Modem properties
 
-Name                                                  | Type     | Description
-------------------------------------------------------|----------|------------------------------------------
-`net.interface.<interface>.config.enabled`	          | Boolean  | Enable the interface
-`net.interface.<interface>.config.idle`               | Integer  | The idle option of the PPP daemon
-`net.interface.<interface>.config.username`           | String   | The username used for the connection
-`net.interface.<interface>.config.password`           | Password | The password used for the connection
-`net.interface.<interface>.config.pdpType`            | String   | The PdP type; possible values are IP, PPP and IPv6
-`net.interface.<interface>.config.maxFail`            | Integer  | The maxfail option of the PPP daemon
-`net.interface.<interface>.config.authType`           | String   | The authentication type; possible values are None, Auto, CHAP and PAP
-`net.interface.<interface>.config.lpcEchoInterval`    | Integer  | The lcp-echo-interval option of the PPP daemon
-`net.interface.<interface>.config.activeFilter`       | String   | The active-filter option of the PPP daemon
-`net.interface.<interface>.config.lpcEchoFailure`     | Integer  | The lcp-echo-failure option of the PPP daemon
-`net.interface.<interface>.config.diversityEnabled`   | Boolean  | Enable the LTE diversity antenna
-`net.interface.<interface>.config.resetTimeout`       | Integer  | The modem reset timeout in minutes
-`net.interface.<interface>.config.gpsEnabled`         | Boolean  | Enable the GPS device in the modem if available
-`net.interface.<interface>.config.persist`            | Boolean  | The persist option of the PPP daemon
-`net.interface.<interface>.config.apn`                | String   | The modem Access Point Name
-`net.interface.<interface>.config.dialString`         | String   | The dial string used for connecting to the APN
-`net.interface.<interface>.config.holdoff`            | Integer  | The holdoff option of the PPP daemon (in seconds)
-`net.interface.<interface>.config.pppNum`             | Integer  | Assigned ppp interface number
+Name                                                  | Type     | Description                                                            | Default value
+------------------------------------------------------|----------|------------------------------------------------------------------------|-----------------------------
+`net.interface.<interface>.config.enabled`	          | Boolean  | Enable the interface                                                   | false
+`net.interface.<interface>.config.idle`               | Integer  | The idle option of the PPP daemon                                      | 95
+`net.interface.<interface>.config.username`           | String   | The username used for the connection                                   |
+`net.interface.<interface>.config.password`           | Password | The password used for the connection                                   |
+`net.interface.<interface>.config.pdpType`            | String   | The PdP type; possible values are IP, PPP and IPv6                     | IP
+`net.interface.<interface>.config.maxFail`            | Integer  | The maxfail option of the PPP daemon                                   | 5
+`net.interface.<interface>.config.authType`           | String   | The authentication type; possible values are `NONE`, `AUTO`, `CHAP` and `PAP`  | `NONE`
+`net.interface.<interface>.config.lpcEchoInterval`    | Integer  | The lcp-echo-interval option of the PPP daemon                         | 0
+`net.interface.<interface>.config.activeFilter`       | String   | The active-filter option of the PPP daemon                             | inbound
+`net.interface.<interface>.config.lpcEchoFailure`     | Integer  | The lcp-echo-failure option of the PPP daemon                          | 0
+`net.interface.<interface>.config.diversityEnabled`   | Boolean  | Enable the LTE diversity antenna                                       | false
+`net.interface.<interface>.config.resetTimeout`       | Integer  | The modem reset timeout in minutes                                     | 5
+`net.interface.<interface>.config.gpsEnabled`         | Boolean  | Enable the GPS device in the modem if available                        | false
+`net.interface.<interface>.config.persist`            | Boolean  | The persist option of the PPP daemon                                   | true
+`net.interface.<interface>.config.apn`                | String   | The modem Access Point Name                                            |
+`net.interface.<interface>.config.dialString`         | String   | The dial string used for connecting to the APN                         |
+`net.interface.<interface>.config.holdoff`            | Integer  | The holdoff option of the PPP daemon (in seconds)                      | 1
+`net.interface.<interface>.config.pppNum`             | Integer  | Assigned ppp interface number                                          | 0
 
 ### VLAN properties
 
-Name                                                  | Type     | Description
-------------------------------------------------------|----------|------------------------------------------
-`net.interface.<interface>.config.vlan.parent`        | String   | Physical interface Vlan is bound to
-`net.interface.<interface>.config.vlan.id`            | Integer  | Vlan tag identifier, between 0 and 4094
-`net.interface.<interface>.config.vlan.ingress`       | String   | Incoming traffic priorities in the format from:to, as comma separated pairs of unsigned integers (Optional)
-`net.interface.<interface>.config.vlan.egress`        | String   | Outgoing traffic priorities in the format from:to, as comma separated pairs of unsigned integer (Optional)
-`net.interface.<interface>.config.vlan.flags`         | String   | Configuration flags, between 0 and 15, default 1 (Optional)
+Name                                                  | Type     | Description                              | Default value
+------------------------------------------------------|----------|------------------------------------------|-------------------------
+`net.interface.<interface>.config.vlan.parent`        | String   | Physical interface Vlan is bound to | 
+`net.interface.<interface>.config.vlan.id`            | Integer  | Vlan tag identifier, between 0 and 4094 | 
+`net.interface.<interface>.config.vlan.ingress`       | String   | Incoming traffic priorities in the format from:to, as comma separated pairs of unsigned integers (Optional) |
+`net.interface.<interface>.config.vlan.egress`        | String   | Outgoing traffic priorities in the format from:to, as comma separated pairs of unsigned integer (Optional) |
+`net.interface.<interface>.config.vlan.flags`         | String   | Configuration flags, between 0 and 15 (Optional) | 1
 
 ### 802.1x properties
 

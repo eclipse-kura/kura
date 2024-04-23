@@ -28,6 +28,7 @@ import org.eclipse.kura.internal.linux.net.dns.DnsServerService;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.IP4Address;
+import org.eclipse.kura.net.IP6Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
@@ -164,6 +165,11 @@ public class DnsServerMonitor {
 
             DhcpServerConfig dhcpServerConfig = (DhcpServerConfig) netConfig;
             IPAddress routerAddress = dhcpServerConfig.getRouterAddress();
+            if (routerAddress instanceof IP6Address) {
+                logger.debug("Skipping router address: {} IPv6 addresses not supported",
+                        routerAddress.getHostAddress());
+                return;
+            }
             short prefix = dhcpServerConfig.getPrefix();
 
             logger.debug("Found an allowed network: {}/{}", routerAddress, prefix);
@@ -199,8 +205,12 @@ public class DnsServerMonitor {
 
         if (dnsServers != null && !dnsServers.isEmpty()) {
             for (IPAddress dnsServerTmp : dnsServers) {
-                logger.debug("Found DNS Server: {}", dnsServerTmp.getHostAddress());
-                forwarders.add((IP4Address) dnsServerTmp);
+                if (dnsServerTmp instanceof IP4Address) {
+                    logger.debug("Found DNS Server: {}", dnsServerTmp.getHostAddress());
+                    forwarders.add((IP4Address) dnsServerTmp);
+                } else {
+                    logger.debug("Skipping DNS Server: {} IPv6 addresses not supported", dnsServerTmp.getHostAddress());
+                }
             }
         }
 

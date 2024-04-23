@@ -4918,7 +4918,7 @@ Since the network configuration shown on the screen may not be synchronized with
 </div>
 <h2 id="network-configuration-properties">Network Configuration properties</h2>
 <p>The Network configuration can be modified using the Kura Gateway Administration Console, as described above, the <a href="doc:configuration-service">Configuration Service</a> or appling a proper <a href="doc:snapshot-management">snapshot</a>.</p>
-<p>The following table describes all the properties related to the Network Configuration. The network configuration pid is <code>org.eclipse.kura.net.admin.NetworkConfigurationService</code>.</p>
+<p>The following table describes all the properties related to the Network Configuration. It includes the name of the property, the type, a description and the default value (if applicable). The network configuration pid is <code>org.eclipse.kura.net.admin.NetworkConfigurationService</code>.</p>
 <h3 id="common-properties">Common properties</h3>
 <table>
 <thead>
@@ -4926,6 +4926,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <th>Name</th>
 <th>Type</th>
 <th>Description</th>
+<th>Default value</th>
 </tr>
 </thead>
 <tbody>
@@ -4933,26 +4934,31 @@ Since the network configuration shown on the screen may not be synchronized with
 <td><code>net.interfaces</code></td>
 <td>String</td>
 <td>Comma-separated list of the interface names in the device</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.type</code></td>
 <td>String</td>
-<td>The type of the network interface; possible values are: ETHERNET, WIFI, MODEM, VLAN and LOOPBACK</td>
+<td>The type of the network interface; possible values are: <code>ETHERNET</code>, <code>WIFI</code>, <code>MODEM</code>, <code>VLAN</code>, <code>LOOPBACK</code> and <code>UNKNOWN</code></td>
+<td><code>UNKNOWN</code></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.mode</code></td>
 <td>String</td>
-<td>For wifi interfaces, specify the modality; possible values are INFRA and MASTER</td>
+<td>For wifi interfaces, specify the modality; possible values are <code>INFRA</code>, <code>MASTER</code> and <code>UNKNOWN</code></td>
+<td><code>UNKNOWN</code></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.nat.enabled</code></td>
 <td>Boolean</td>
 <td>Enable the NAT feature</td>
+<td>false</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.promisc</code></td>
 <td>Integer</td>
 <td>Enable the Promiscuous Mode; possible values are: -1 (System default), 0 (Disabled), 1 (Enabled)</td>
+<td>-1</td>
 </tr>
 </tbody>
 </table>
@@ -4963,46 +4969,58 @@ Since the network configuration shown on the screen may not be synchronized with
 <th>Name</th>
 <th>Type</th>
 <th>Description</th>
+<th>Default value</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip4.status</code></td>
 <td>String</td>
-<td>The status of the interface for the IPv4 configuration; possibile values are: netIPv4StatusDisabled, netIPv4StatusUnmanaged, netIPv4StatusL2Only, netIPv4StatusEnabledLAN, netIPv4StatusEnabledWAN, netIPv4StatusUnknown</td>
+<td>The status of the interface for the IPv4 configuration; possibile values are: <code>netIPv4StatusDisabled</code>, <code>netIPv4StatusUnmanaged</code>, <code>netIPv4StatusL2Only</code>, <code>netIPv4StatusEnabledLAN</code>, <code>netIPv4StatusEnabledWAN</code>, <code>netIPv4StatusUnknown</code></td>
+<td><code>netIPv4StatusDisabled</code> (see note below)</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip4.wan.priority</code></td>
 <td>Integer</td>
 <td>(NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
+<td>-1</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip4.address</code></td>
 <td>String</td>
 <td>The IPv4 address assigned to the network interface</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip4.prefix</code></td>
 <td>Short</td>
 <td>The IPv4 netmask assigned to the network interface</td>
+<td>-1</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip4.gateway</code></td>
 <td>String</td>
 <td>The IPv4 address of the default gateway</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip4.dnsServers</code></td>
 <td>String</td>
 <td>Comma-separated list of dns servers</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip4.mtu</code></td>
 <td>Integer</td>
 <td>The Maximum Transition Unit (MTU) for this interface</td>
+<td></td>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For physical interfaces the default status is <code>netIPv4StatusDisabled</code>. For virtual ones, instead, the default status is defined by the <code>kura.net.virtual.devices.config</code> property in the <code>kura.properties</code> file.</p>
+</div>
 <h3 id="ipv4-dhcp-server-properties">IPv4 DHCP Server properties</h3>
 <table>
 <thead>
@@ -5010,6 +5028,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <th>Name</th>
 <th>Type</th>
 <th>Description</th>
+<th>Default value</th>
 </tr>
 </thead>
 <tbody>
@@ -5017,36 +5036,43 @@ Since the network configuration shown on the screen may not be synchronized with
 <td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.enabled</code></td>
 <td>Boolean</td>
 <td>Specify if the DHCP server is enabled</td>
+<td>false</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.rangeStart</code></td>
 <td>String</td>
 <td>First IP address available for clients</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.rangeEnd</code></td>
 <td>String</td>
 <td>Last IP address available for clients</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.defaultLeaseTime</code></td>
 <td>Integer</td>
 <td>The default lease time</td>
+<td>-1</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.maxLeaseTime</code></td>
 <td>Integer</td>
 <td>The maximum lease time</td>
+<td>-1</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.prefix</code></td>
 <td>Short</td>
 <td>The netmask for the available IP addresses</td>
+<td>-1</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.dhcpServer4.passDns</code></td>
 <td>Boolean</td>
 <td>Specify if the DNS server addresses has to be passed through DHCP</td>
+<td>false</td>
 </tr>
 </tbody>
 </table>
@@ -5057,6 +5083,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <th>Name</th>
 <th>Type</th>
 <th>Description</th>
+<th>Default value</th>
 </tr>
 </thead>
 <tbody>
@@ -5064,6 +5091,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <td><code>net.interface.&lt;interface&gt;.config.dhcpClient4.enabled</code></td>
 <td>Boolean</td>
 <td>Specify if the DHCP client is enabled</td>
+<td>false</td>
 </tr>
 </tbody>
 </table>
@@ -5074,61 +5102,76 @@ Since the network configuration shown on the screen may not be synchronized with
 <th>Name</th>
 <th>Type</th>
 <th>Description</th>
+<th>Default value</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip6.status</code></td>
 <td>String</td>
-<td>The status of the interface for the IPv6 configuration; possibile values are: netIPv6StatusDisabled, netIPv6StatusUnmanaged, netIPv6StatusL2Only, netIPv6StatusEnabledLAN, netIPv6StatusEnabledWAN, netIPv6StatusUnknown</td>
+<td>The status of the interface for the IPv6 configuration; possibile values are: <code>netIPv6StatusDisabled</code>, <code>netIPv6StatusUnmanaged</code>, <code>netIPv6StatusL2Only</code>, <code>netIPv6StatusEnabledLAN</code>, <code>netIPv6StatusEnabledWAN</code>, <code>netIPv6StatusUnknown</code></td>
+<td><code>netIPv6StatusDisabled</code> (see note below)</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip6.wan.priority</code></td>
 <td>Integer</td>
 <td>(NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
+<td>-1</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip6.address.method</code></td>
 <td>String</td>
-<td>The IPv6 configuration method; possible values are: AUTO, DHCP, MANUAL.</td>
+<td>The IPv6 configuration method; possible values are: <code>AUTO</code>, <code>DHCP</code>, <code>MANUAL</code>.</td>
+<td><code>AUTO</code></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip6.address</code></td>
 <td>String</td>
 <td>The IPv6 address assigned to the network interface</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip6.prefix</code></td>
 <td>Short</td>
 <td>The IPv6 netmask assigned to the network interface</td>
+<td>-1</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip6.gateway</code></td>
 <td>String</td>
 <td>The IPv6 address of the default gateway</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip6.dnsServers</code></td>
 <td>String</td>
 <td>Comma-separated list of dns servers</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip6.addr.gen.mode</code></td>
 <td>String</td>
-<td>The IPv6 address generation mode; possible values are EUI64, STABLE_PRIVACY;</td>
+<td>The IPv6 address generation mode; possible values are <code>EUI64</code>, <code>STABLE_PRIVACY</code></td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip6.privacy</code></td>
 <td>String</td>
-<td>The IPv6 Privacy Extensions for SLAAC; possible values are DISABLED, ENABLED_PUBLIC_ADD, ENABLED_TEMP_ADD</td>
+<td>The IPv6 Privacy Extensions for SLAAC; possible values are <code>DISABLED</code>, <code>ENABLED_PUBLIC_ADD</code>, <code>ENABLED_TEMP_ADD</code></td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip6.mtu</code></td>
 <td>Integer</td>
 <td>The Maximum Transition Unit (MTU) for Ipv6 traffic on this interface. Requires NetworkManager 1.40 or newer</td>
+<td></td>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For physical interfaces the default status is <code>netIPv6StatusDisabled</code>. For virtual ones, instead, the default status is defined by the <code>kura.net.virtual.devices.config</code> property in the <code>kura.properties</code> file.</p>
+</div>
 <h3 id="wifi-master-access-point-properties">WiFi Master (Access Point) properties</h3>
 <table>
 <thead>
@@ -5136,6 +5179,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <th>Name</th>
 <th>Type</th>
 <th>Description</th>
+<th>Default value</th>
 </tr>
 </thead>
 <tbody>
@@ -5143,51 +5187,61 @@ Since the network configuration shown on the screen may not be synchronized with
 <td><code>net.interface.&lt;interface&gt;.config.wifi.master.driver</code></td>
 <td>String</td>
 <td>The driver used for the connection</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.master.passphrase</code></td>
 <td>Password</td>
 <td>The password for the access point</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.master.ssid</code></td>
 <td>String</td>
 <td>The SSID of the access point</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.master.securityType</code></td>
 <td>String</td>
-<td>The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2</td>
+<td>The security protocol for the wireless network; possible values are <code>SECURITY_NONE</code>, <code>SECURITY_WEP</code>, <code>SECURITY_WPA</code>, <code>SECURITY_WPA2</code>, <code>SECURITY_WPA_WPA2</code></td>
+<td><code>SECURITY_NONE</code></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.master.mode</code></td>
 <td>String</td>
-<td>The mode of the wireless connection; for the access point mode set it to MASTER</td>
+<td>The mode of the wireless connection; for the access point mode set it to <code>MASTER</code></td>
+<td><code>MASTER</code></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.master.channel</code></td>
 <td>String</td>
 <td>The channel to be used for the access point</td>
+<td>1</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.master.radioMode</code></td>
 <td>String</td>
-<td>Specify the 802.11 radio mode; possible values are RADIO_MODE_80211a, RADIO_MODE_80211b, RADIO_MODE_80211g, RADIO_MODE_80211nHT20, RADIO_MODE_80211_AC</td>
+<td>Specify the 802.11 radio mode; possible values are <code>RADIO_MODE_80211a</code>, <code>RADIO_MODE_80211b</code>, <code>RADIO_MODE_80211g</code>, <code>RADIO_MODE_80211nHT20</code>, <code>RADIO_MODE_80211_AC</code></td>
+<td><code>RADIO_MODE_80211b</code></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.master.ignoreSSID</code></td>
 <td>Boolean</td>
 <td>Specify if the SSID broadcast is ignored</td>
+<td>false</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.master.groupCiphers</code></td>
 <td>String</td>
 <td>Group ciphers i.e. group/broadcast encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are <code>CCMP</code>, <code>TKIP</code>, and <code>CCMP_TKIP</code></td>
+<td><code>CCMP_TKIP</code></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.master.pairwiseCiphers</code></td>
 <td>String</td>
 <td>Pairwise ciphers i.e. pairwise encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are <code>CCMP</code>, <code>TKIP</code>, and <code>CCMP_TKIP</code></td>
+<td><code>CCMP_TKIP</code></td>
 </tr>
 </tbody>
 </table>
@@ -5198,6 +5252,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <th>Name</th>
 <th>Type</th>
 <th>Description</th>
+<th>Default value</th>
 </tr>
 </thead>
 <tbody>
@@ -5205,56 +5260,67 @@ Since the network configuration shown on the screen may not be synchronized with
 <td><code>net.interface.&lt;interface&gt;.config.wifi.infra.ssid</code></td>
 <td>String</td>
 <td>The SSID of the wireless network to connect to</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.infra.channel</code></td>
 <td>String</td>
 <td>The channel of the wireless network to connect to</td>
+<td>1</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.infra.bgscan</code></td>
 <td>String</td>
 <td>Set the background scans; possible values have the form <code>&lt;mode&gt;:&lt;shortInterval&gt;:&lt;rssiThreshold&gt;:&lt;longInterval&gt;</code> where <code>mode</code> (String) is one of NONE, SIMPLE, or LEARN, <code>shortInterval</code> (Integer) sets the Bgscan short interval (secs), <code>rssiThreshold</code> (Integer) sets the Bgscan Signal strength threshold (dBm), and <code>longInterval</code> (Integer) sets the Bgscan long interval (secs)</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.infra.passphrase</code></td>
 <td>Password</td>
 <td>The password for the wireless network</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.infra.ignoreSSID</code></td>
 <td>Boolean</td>
 <td>Specify if a scan for SSID is required before attempting to associate</td>
+<td>false</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.infra.mode</code></td>
 <td>String</td>
-<td>The mode of the wireless connection; for station mode set to INFRA</td>
+<td>The mode of the wireless connection; for station mode set to <code>INFRA</code></td>
+<td><code>INFRA</code></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.infra.pingAccessPoint</code></td>
 <td>Boolean</td>
 <td>Enable pinging the access point after connection is established</td>
+<td>false</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.infra.driver</code></td>
 <td>String</td>
 <td>The driver used for the connection</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.infra.securityType</code></td>
 <td>String</td>
-<td>The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2</td>
+<td>The security protocol for the wireless network; possible values are <code>SECURITY_NONE</code>, <code>SECURITY_WEP</code>, <code>SECURITY_WPA</code>, <code>SECURITY_WPA2</code>, <code>SECURITY_WPA_WPA2</code></td>
+<td><code>SECURITY_NONE</code></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.infra.groupCiphers</code></td>
 <td>String</td>
 <td>Group ciphers i.e. group/broadcast encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are <code>CCMP</code>, <code>TKIP</code>, and <code>CCMP_TKIP</code></td>
+<td><code>CCMP_TKIP</code></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.infra.pairwiseCiphers</code></td>
 <td>String</td>
 <td>Pairwise ciphers i.e. pairwise encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are <code>CCMP</code>, <code>TKIP</code>, and <code>CCMP_TKIP</code></td>
+<td><code>CCMP_TKIP</code></td>
 </tr>
 </tbody>
 </table>
@@ -5265,6 +5331,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <th>Name</th>
 <th>Type</th>
 <th>Description</th>
+<th>Default value</th>
 </tr>
 </thead>
 <tbody>
@@ -5272,91 +5339,109 @@ Since the network configuration shown on the screen may not be synchronized with
 <td><code>net.interface.&lt;interface&gt;.config.enabled</code></td>
 <td>Boolean</td>
 <td>Enable the interface</td>
+<td>false</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.idle</code></td>
 <td>Integer</td>
 <td>The idle option of the PPP daemon</td>
+<td>95</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.username</code></td>
 <td>String</td>
 <td>The username used for the connection</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.password</code></td>
 <td>Password</td>
 <td>The password used for the connection</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.pdpType</code></td>
 <td>String</td>
 <td>The PdP type; possible values are IP, PPP and IPv6</td>
+<td>IP</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.maxFail</code></td>
 <td>Integer</td>
 <td>The maxfail option of the PPP daemon</td>
+<td>5</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.authType</code></td>
 <td>String</td>
-<td>The authentication type; possible values are None, Auto, CHAP and PAP</td>
+<td>The authentication type; possible values are <code>NONE</code>, <code>AUTO</code>, <code>CHAP</code> and <code>PAP</code></td>
+<td><code>NONE</code></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.lpcEchoInterval</code></td>
 <td>Integer</td>
 <td>The lcp-echo-interval option of the PPP daemon</td>
+<td>0</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.activeFilter</code></td>
 <td>String</td>
 <td>The active-filter option of the PPP daemon</td>
+<td>inbound</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.lpcEchoFailure</code></td>
 <td>Integer</td>
 <td>The lcp-echo-failure option of the PPP daemon</td>
+<td>0</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.diversityEnabled</code></td>
 <td>Boolean</td>
 <td>Enable the LTE diversity antenna</td>
+<td>false</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.resetTimeout</code></td>
 <td>Integer</td>
 <td>The modem reset timeout in minutes</td>
+<td>5</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.gpsEnabled</code></td>
 <td>Boolean</td>
 <td>Enable the GPS device in the modem if available</td>
+<td>false</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.persist</code></td>
 <td>Boolean</td>
 <td>The persist option of the PPP daemon</td>
+<td>true</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.apn</code></td>
 <td>String</td>
 <td>The modem Access Point Name</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.dialString</code></td>
 <td>String</td>
 <td>The dial string used for connecting to the APN</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.holdoff</code></td>
 <td>Integer</td>
 <td>The holdoff option of the PPP daemon (in seconds)</td>
+<td>1</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.pppNum</code></td>
 <td>Integer</td>
 <td>Assigned ppp interface number</td>
+<td>0</td>
 </tr>
 </tbody>
 </table>
@@ -5367,6 +5452,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <th>Name</th>
 <th>Type</th>
 <th>Description</th>
+<th>Default value</th>
 </tr>
 </thead>
 <tbody>
@@ -5374,26 +5460,31 @@ Since the network configuration shown on the screen may not be synchronized with
 <td><code>net.interface.&lt;interface&gt;.config.vlan.parent</code></td>
 <td>String</td>
 <td>Physical interface Vlan is bound to</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.vlan.id</code></td>
 <td>Integer</td>
 <td>Vlan tag identifier, between 0 and 4094</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.vlan.ingress</code></td>
 <td>String</td>
 <td>Incoming traffic priorities in the format from:to, as comma separated pairs of unsigned integers (Optional)</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.vlan.egress</code></td>
 <td>String</td>
 <td>Outgoing traffic priorities in the format from:to, as comma separated pairs of unsigned integer (Optional)</td>
+<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.vlan.flags</code></td>
 <td>String</td>
-<td>Configuration flags, between 0 and 15, default 1 (Optional)</td>
+<td>Configuration flags, between 0 and 15 (Optional)</td>
+<td>1</td>
 </tr>
 </tbody>
 </table>

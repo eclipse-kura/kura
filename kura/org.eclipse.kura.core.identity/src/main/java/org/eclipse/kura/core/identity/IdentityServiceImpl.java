@@ -167,7 +167,7 @@ public class IdentityServiceImpl implements IdentityService {
             validateIdentityConfiguration(configuration, failureHandler);
         }
 
-        audit(() -> failureHandler.throwIfFailuresOccurred(), "Validate identity configuration");
+        audit(failureHandler::throwIfFailuresOccurred, "Validate identity configuration");
     }
 
     @Override
@@ -193,13 +193,13 @@ public class IdentityServiceImpl implements IdentityService {
             validateIdentityConfiguration(configuration, failureHandler);
         }
 
-        audit(() -> failureHandler.throwIfFailuresOccurred(), "Validate updated identity configuration");
+        audit(failureHandler::throwIfFailuresOccurred, "Validate updated identity configuration");
 
         for (final IdentityConfiguration configuration : identityConfigurations) {
             updateIdentityConfigurationInternal(users.get(configuration.getName()), configuration, failureHandler);
         }
 
-        failureHandler.throwIfFailuresOccurred();
+        audit(failureHandler::throwIfFailuresOccurred, "Update identity configurations");
     }
 
     @Override

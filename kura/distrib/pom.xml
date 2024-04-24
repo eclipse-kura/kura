@@ -1266,6 +1266,99 @@
         </profile>
 
         <profile>
+            <id>generic-arm32-nn</id>
+            <activation>
+                <property>
+                    <name>buildAll</name>
+                </property>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>create-timestamp</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>generic-arm32-nn-jars</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="buildNumber" value="buildNumber" />
+                                        <property name="project.version" value="${project.version}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
+                                        <property name="build.name" value="generic-arm32-nn" />
+                                        <property name="target.device" value="generic-arm32-nn" />
+                                        <property name="native.tag" value="armv6hf" />
+                                        <property name="kura.os.version" value="raspbian" />
+                                        <property name="kura.arch" value="armv7_hf" />
+                                        <property name="service.manager" value="systemd" />
+                                        <property name="os.base" value="debian" />
+                                        <property name="kura.mem.size" value="512m" />
+                                        <property name="kura.install.dir" value="/opt/eclipse" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.vafer</groupId>
+                        <artifactId>jdeb</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <id>generic-arm32-nn-deb</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jdeb</goal>
+                                </goals>
+                                <configuration>
+                                    <verbose>true</verbose>
+                                    <deb>${basedir}/target/kura_${project.version}_generic-arm32-nn_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/generic-arm32-nn/deb/control</controlDir>
+                                    <dataSet>
+                                        <data>
+                                            <src>${basedir}/target/kura_${project.version}_generic-arm32-nn.zip</src>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/tmp</prefix>
+                                            </mapper>
+                                        </data>
+                                    </dataSet>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
             <id>generic-x86_64</id>
             <activation>
                 <property>
@@ -1364,6 +1457,99 @@
             </build>
         </profile>
 
+		<profile>
+            <id>generic-x86_64-nn</id>
+            <activation>
+                <property>
+                    <name>buildAll</name>
+                </property>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>create-timestamp</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>generic-x86_64-nn-jars</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="buildNumber" value="buildNumber" />
+                                        <property name="project.version" value="${project.version}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
+                                        <property name="build.name" value="generic-x86_64-nn" />
+                                        <property name="target.device" value="generic-x86_64-nn" />
+                                        <property name="native.tag" value="x86_64" />
+                                        <property name="kura.os.version" value="raspbian" />
+                                        <property name="kura.arch" value="x86_64" />
+                                        <property name="service.manager" value="systemd" />
+                                        <property name="os.base" value="debian" />
+                                        <property name="kura.mem.size" value="512m" />
+                                        <property name="kura.install.dir" value="/opt/eclipse" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.vafer</groupId>
+                        <artifactId>jdeb</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <id>generic-x86_64-nn-deb</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jdeb</goal>
+                                </goals>
+                                <configuration>
+                                    <verbose>true</verbose>
+                                    <deb>${basedir}/target/kura_${project.version}_generic-x86_64-nn_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/generic-x86_64-nn/deb/control</controlDir>
+                                    <dataSet>
+                                        <data>
+                                            <src>${basedir}/target/kura_${project.version}_generic-x86_64-nn.zip</src>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/tmp</prefix>
+                                            </mapper>
+                                        </data>
+                                    </dataSet>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
         <profile>
             <id>generic-aarch64</id>
             <activation>
@@ -1463,6 +1649,99 @@
             </build>
         </profile>
 
+		<profile>
+            <id>generic-aarch64-nn</id>
+            <activation>
+                <property>
+                    <name>buildAll</name>
+                </property>
+            </activation>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>create-timestamp</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>generic-aarch64-nn-jars</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <property name="buildNumber" value="buildNumber" />
+                                        <property name="project.version" value="${project.version}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
+                                        <property name="build.name" value="generic-aarch64-nn" />
+                                        <property name="target.device" value="generic-aarch64-nn" />
+                                        <property name="native.tag" value="aarch64" />
+                                        <property name="kura.os.version" value="raspbian" />
+                                        <property name="kura.arch" value="generic-arm64" />
+                                        <property name="service.manager" value="systemd" />
+                                        <property name="os.base" value="debian" />
+                                        <property name="kura.mem.size" value="512m" />
+                                        <property name="kura.install.dir" value="/opt/eclipse" />
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.vafer</groupId>
+                        <artifactId>jdeb</artifactId>
+                        <version>1.0</version>
+                        <executions>
+                            <execution>
+                                <id>generic-aarch64-nn-deb</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jdeb</goal>
+                                </goals>
+                                <configuration>
+                                    <verbose>true</verbose>
+                                    <deb>${basedir}/target/kura_${project.version}_generic-aarch64-nn_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/generic-aarch64-nn/deb/control</controlDir>
+                                    <dataSet>
+                                        <data>
+                                            <src>${basedir}/target/kura_${project.version}_generic-aarch64-nn.zip</src>
+                                            <type>file</type>
+                                            <mapper>
+                                                <type>perm</type>
+                                                <prefix>/tmp</prefix>
+                                            </mapper>
+                                        </data>
+                                    </dataSet>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
         <profile>
             <id>intel-up2-ubuntu-20</id>
             <activation>

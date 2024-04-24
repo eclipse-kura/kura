@@ -1,0 +1,20 @@
+# Logrotate file for Kura.
+# Kura generated file. Do not modify or overwrite.
+
+/var/log/kura*.log
+{
+        missingok
+        notifempty
+        copytruncate
+        compress
+        rotate 7
+        maxsize 10M
+        daily
+        dateext
+        dateformat -%Y%m%d-%s
+        create 0600 root root
+        sharedscripts
+        postrotate
+            reload kura >/dev/null 2>&1 || true
+        endscript
+}

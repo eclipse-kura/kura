@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
@@ -51,6 +52,10 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("restriction")
 public class IdentityServiceImpl implements IdentityService {
 
+    private static final String IDENTITY_SERVICE_FAILURE_FORMAT_STRING = "{} IdentityService - Failure - {}";
+    private static final String IDENTITY_SERVICE_SUCCESS_FORMAT_STRING = "{} IdentityService - Success - {}";
+
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
     private static final Logger logger = LoggerFactory.getLogger(IdentityServiceImpl.class);
 
     private static final String PASSWORD_PROPERTY = "kura.password";
@@ -102,7 +107,7 @@ public class IdentityServiceImpl implements IdentityService {
             return false;
         }
 
-        this.userAdminHelper.createUser(name);
+        audit(() -> this.userAdminHelper.createUser(name), "Create identity " + name);
         return true;
     }
 
@@ -112,7 +117,7 @@ public class IdentityServiceImpl implements IdentityService {
             return false;
         }
 
-        this.userAdminHelper.deleteUser(name);
+        audit(() -> this.userAdminHelper.deleteUser(name), "Delete identity " + name);
         return true;
     }
 
@@ -162,7 +167,7 @@ public class IdentityServiceImpl implements IdentityService {
             validateIdentityConfiguration(configuration, failureHandler);
         }
 
-        failureHandler.throwIfFailuresOccurred();
+        audit(failureHandler::throwIfFailuresOccurred, "Validate identity configuration");
     }
 
     @Override
@@ -188,13 +193,13 @@ public class IdentityServiceImpl implements IdentityService {
             validateIdentityConfiguration(configuration, failureHandler);
         }
 
-        failureHandler.throwIfFailuresOccurred();
+        audit(failureHandler::throwIfFailuresOccurred, "Validate updated identity configuration");
 
         for (final IdentityConfiguration configuration : identityConfigurations) {
             updateIdentityConfigurationInternal(users.get(configuration.getName()), configuration, failureHandler);
         }
 
-        failureHandler.throwIfFailuresOccurred();
+        audit(failureHandler::throwIfFailuresOccurred, "Update identity configurations");
     }
 
     @Override
@@ -241,23 +246,24 @@ public class IdentityServiceImpl implements IdentityService {
     private void updateIdentityConfigurationInternal(final User user, final IdentityConfiguration identity,
             final FailureHandler failureHandler) {
 
+        final String identityName = identity.getName();
         final Optional<PasswordConfiguration> passwordData = identity.getComponent(PasswordConfiguration.class);
 
         if (passwordData.isPresent()) {
-            updatePassword(passwordData.get(), user);
+            updatePassword(identityName, passwordData.get(), user);
         }
 
         final Optional<AssignedPermissions> permissions = identity.getComponent(AssignedPermissions.class);
 
         if (permissions.isPresent()) {
-            updateAssignedPermissions(permissions.get(), user);
+            updateAssignedPermissions(identityName, permissions.get(), user);
         }
 
         final Optional<AdditionalConfigurations> additionalConfigurations = identity
                 .getComponent(AdditionalConfigurations.class);
 
         if (additionalConfigurations.isPresent()) {
-            updateAdditionalConfigurations(identity.getName(), additionalConfigurations.get(), failureHandler);
+            updateAdditionalConfigurations(identityName, additionalConfigurations.get(), failureHandler);
         }
     }
 
@@ -289,8 +295,8 @@ public class IdentityServiceImpl implements IdentityService {
         for (final IdentityConfigurationExtension extension : this.extensions.values()) {
             try {
                 extension.getConfiguration(name).ifPresent(additionalConfigurations::add);
-            } catch (final Exception e) {
-                logger.warn("failed to get identity additional configuration from extension", e);
+            } catch (final Exception ex) {
+                logger.warn("failed to get identity additional configuration from extension", ex);
             }
         }
 
@@ -334,38 +340,51 @@ public class IdentityServiceImpl implements IdentityService {
         }
     }
 
-    private void updateAssignedPermissions(final AssignedPermissions assignedPermissions, final User user) {
+    private void updateAssignedPermissions(final String identityName, final AssignedPermissions assignedPermissions,
+            final User user) {
         this.userAdminHelper.foreachPermission((name, group) -> {
             final Permission permission = new Permission(name);
             final List<Role> members = Optional.ofNullable(group.getMembers()).map(Arrays::asList)
                     .orElse(Collections.emptyList());
 
             if (assignedPermissions.getPermissions().contains(permission) && !members.contains(user)) {
-                group.addMember(user);
+                audit(() -> group.addMember(user),
+                        "Add permission " + permission.getName() + " to identity " + identityName);
             } else if (!assignedPermissions.getPermissions().contains(permission) && members.contains(user)) {
-                group.removeMember(user);
+                audit(() -> group.removeMember(user),
+                        "Remove permission " + permission.getName() + " from identity " + identityName);
             }
         });
     }
 
-    private void updatePassword(final PasswordConfiguration passwordData, final User user) {
+    private void updatePassword(final String identityName, final PasswordConfiguration passwordData, final User user) {
         final Dictionary<String, Object> properties = user.getProperties();
 
+        final Object currentIsPasswordChangeNeeded = properties.get(KURA_NEED_PASSWORD_CHANGE);
+
         if (passwordData.isPasswordChangeNeeded()) {
-            setProperty(properties, KURA_NEED_PASSWORD_CHANGE, "true");
-        } else {
-            removeProperty(properties, KURA_NEED_PASSWORD_CHANGE);
+            if (!"true".equals(currentIsPasswordChangeNeeded)) {
+                audit(() -> setProperty(properties, KURA_NEED_PASSWORD_CHANGE, "true"),
+                        "Enable password change at next login for identity " + identityName);
+            }
+        } else if (currentIsPasswordChangeNeeded != null) {
+            audit(() -> removeProperty(properties, KURA_NEED_PASSWORD_CHANGE),
+                    "Disable password change at next login for identity " + identityName);
         }
 
         final Dictionary<String, Object> credentials = user.getCredentials();
         final Optional<PasswordHash> hash = passwordData.getPasswordHash();
 
+        final Object currentPasswordHash = credentials.get(PASSWORD_PROPERTY);
+
         if (passwordData.isPasswordAuthEnabled() && hash.isPresent()) {
 
-            setProperty(credentials, PASSWORD_PROPERTY, hash.get().toString());
+            audit(() -> setProperty(credentials, PASSWORD_PROPERTY, hash.get().toString()),
+                    "Update Kura password for identity " + identityName);
 
-        } else if (!passwordData.isPasswordAuthEnabled()) {
-            removeProperty(credentials, PASSWORD_PROPERTY);
+        } else if (!passwordData.isPasswordAuthEnabled() && currentPasswordHash != null) {
+            audit(() -> removeProperty(credentials, PASSWORD_PROPERTY),
+                    "Disable Kura password for identity " + identityName);
         }
     }
 
@@ -421,7 +440,8 @@ public class IdentityServiceImpl implements IdentityService {
             }
 
             try {
-                extension.get().updateConfiguration(identityName, config);
+                audit(() -> extension.get().updateConfiguration(identityName, config),
+                        "Update configuration for extension " + pid + " for identity " + identityName);
             } catch (final KuraException e) {
                 failureHandler.addError(identityName, e.getMessage());
             }
@@ -450,4 +470,34 @@ public class IdentityServiceImpl implements IdentityService {
         }
     }
 
+    private static <T, E extends Throwable> T audit(final FallibleSupplier<T, E> task, final String message) throws E {
+        try {
+            final T result = task.get();
+            auditLogger.info(IDENTITY_SERVICE_SUCCESS_FORMAT_STRING, AuditContext.currentOrInternal(), message);
+            return result;
+        } catch (final Exception e) {
+            auditLogger.warn(IDENTITY_SERVICE_FAILURE_FORMAT_STRING, AuditContext.currentOrInternal(), message);
+            throw e;
+        }
+    }
+
+    private static <E extends Throwable> void audit(final FallibleTask<E> task, final String message) throws E {
+        try {
+            task.run();
+            auditLogger.info(IDENTITY_SERVICE_SUCCESS_FORMAT_STRING, AuditContext.currentOrInternal(), message);
+        } catch (final Exception e) {
+            auditLogger.warn(IDENTITY_SERVICE_FAILURE_FORMAT_STRING, AuditContext.currentOrInternal(), message);
+            throw e;
+        }
+    }
+
+    private interface FallibleSupplier<T, E extends Throwable> {
+
+        public T get() throws E;
+    }
+
+    private interface FallibleTask<E extends Throwable> {
+
+        public void run() throws E;
+    }
 }

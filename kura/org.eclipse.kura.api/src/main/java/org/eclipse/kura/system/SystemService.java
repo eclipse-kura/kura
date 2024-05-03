@@ -524,7 +524,7 @@ public interface SystemService {
     public char[] getJavaTrustStorePassword();
 
     /**
-     * Returns a list of services that should be ignored by the Everyware Cloud Console
+     * Returns a list of services that should be ignored by the Cloud services
      *
      * @return
      */

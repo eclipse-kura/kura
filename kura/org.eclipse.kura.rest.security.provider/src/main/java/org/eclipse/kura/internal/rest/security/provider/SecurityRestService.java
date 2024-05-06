@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,7 @@ package org.eclipse.kura.internal.rest.security.provider;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.internal.rest.security.provider.dto.DebugEnabledDTO;
+import org.eclipse.kura.internal.rest.security.provider.dto.SecurityPolicyDTO;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.eclipse.kura.security.SecurityService;
@@ -23,6 +24,8 @@ import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
@@ -31,6 +34,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -143,8 +150,29 @@ public class SecurityRestService {
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/security-policy/upload")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response uploadSecurityPolicy() {
-        return null;
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response uploadSecurityPolicy(SecurityPolicyDTO securityPolicy) {
+        try {
+            logger.debug(DEBUG_MESSAGE, "uploadSecurityPolicy");
+
+            String securityPolicyContent = securityPolicy.getSecurityPolicy();
+            if (SecurityPolicyDTO.isEmptyOrNull(securityPolicyContent)) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                        "Security Policy not specified");
+            }
+
+            if (!isXmlValid(securityPolicyContent)) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                        "Security Policy not valid");
+            }
+
+            saveSecurityPolicy(securityPolicyContent);
+            this.security.reloadSecurityPolicyFingerprint();
+        } catch (Exception e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+
+        return Response.ok().build();
     }
 
     /**
@@ -179,5 +207,31 @@ public class SecurityRestService {
         java.nio.file.Path securityPolicyPath = Paths.get(kuraUserFolder + "/security/security.policy");
         Files.copy(defaultSecurityPolicyPath, securityPolicyPath, StandardCopyOption.REPLACE_EXISTING,
                 StandardCopyOption.COPY_ATTRIBUTES);
+    }
+
+    private void saveSecurityPolicy(String securityPolicyContent) throws IOException {
+        String kuraUserFolder = this.system.getKuraUserConfigDirectory();
+        java.nio.file.Path securityPolicyPath = Paths.get(kuraUserFolder + "/security/security.policy");
+        Files.write(securityPolicyPath, securityPolicyContent.getBytes());
+    }
+
+    // add temporary files....
+
+    private boolean isXmlValid(String xml) throws ParserConfigurationException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        factory.setValidating(false);
+        factory.setNamespaceAware(true);
+        DocumentBuilder parser = factory.newDocumentBuilder();
+
+        try {
+            parser.parse(new InputSource(xml));
+        } catch (SAXException | IOException e) {
+            return false;
+        }
+
+        return true;
     }
 }

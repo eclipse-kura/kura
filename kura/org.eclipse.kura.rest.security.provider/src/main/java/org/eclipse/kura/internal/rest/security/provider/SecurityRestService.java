@@ -211,11 +211,12 @@ public class SecurityRestService {
 
     private void saveSecurityPolicy(String securityPolicyContent) throws IOException {
         String kuraUserFolder = this.system.getKuraUserConfigDirectory();
+        java.nio.file.Path securityPolicyTmpPath = Paths.get(kuraUserFolder + "/security/security.policy.tmp");
         java.nio.file.Path securityPolicyPath = Paths.get(kuraUserFolder + "/security/security.policy");
-        Files.write(securityPolicyPath, securityPolicyContent.getBytes());
+        Files.write(securityPolicyTmpPath, securityPolicyContent.getBytes());
+        Files.copy(securityPolicyTmpPath, securityPolicyPath, StandardCopyOption.REPLACE_EXISTING,
+                StandardCopyOption.COPY_ATTRIBUTES);
     }
-
-    // add temporary files....
 
     private boolean isXmlValid(String xml) throws ParserConfigurationException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

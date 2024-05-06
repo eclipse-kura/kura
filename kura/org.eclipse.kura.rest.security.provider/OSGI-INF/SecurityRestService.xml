@@ -13,10 +13,12 @@
      Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="org.eclipse.kura.internal.rest.security.provider.SecurityRestService">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true"
+               name="org.eclipse.kura.internal.rest.security.provider.SecurityRestService">
     <implementation class="org.eclipse.kura.internal.rest.security.provider.SecurityRestService"/>
 
-    <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.security.provider.SecurityRestService"/>
+    <property name="kura.service.pid" type="String"
+              value="org.eclipse.kura.internal.rest.security.provider.SecurityRestService"/>
 
     <reference interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry"
                bind="bindRequestHandlerRegistry"
@@ -35,6 +37,12 @@
                bind="bindUserAdmin"
                cardinality="1..1"
                name="UserAdmin"
+               policy="static"/>
+
+    <reference interface="org.eclipse.kura.system.SystemService"
+               bind="bindSystemService"
+               cardinality="0..1"
+               name="SystemService"
                policy="static"/>
 
     <service>

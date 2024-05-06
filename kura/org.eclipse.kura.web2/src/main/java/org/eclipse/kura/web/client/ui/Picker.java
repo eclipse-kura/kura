@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,11 +14,12 @@ package org.eclipse.kura.web.client.ui;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FormLabel;
@@ -104,13 +105,18 @@ public class Picker extends Composite implements HasId {
         this.modal.setId(id);
     }
 
-    public <U> Builder<U> builder(final Class<U> classz) {
-        return new Builder<>();
+    public <U> Builder<U> builder(final Class<U> classz, final Function<String, U> provider) {
+        return new Builder<>(provider);
+    }
+
+    public Builder<String> builder() {
+        return new Builder<>(Function.identity());
     }
 
     public class Builder<U> {
 
-        private BiFunction<Editor<String>, String, U> validator;
+        private List<Validator<String>> validators = Collections.emptyList();
+        private final Function<String, U> provider;
         private Consumer<U> consumer;
         private String title;
 
@@ -118,13 +124,17 @@ public class Picker extends Composite implements HasId {
         private Optional<Runnable> onCancel = Optional.empty();
         private Optional<Consumer<Input>> customizer = Optional.empty();
 
+        public Builder(final Function<String, U> provider) {
+            this.provider = provider;
+        }
+
         public Builder<U> setTitle(final String title) {
             this.title = title;
             return this;
         }
 
-        public Builder<U> setValidator(final BiFunction<Editor<String>, String, U> validator) {
-            this.validator = validator;
+        public Builder<U> setValidators(final List<Validator<String>> validators) {
+            this.validators = validators;
             return this;
         }
 
@@ -158,7 +168,8 @@ public class Picker extends Composite implements HasId {
         }
 
         public void pick() {
-            requireNonNull(this.validator, "validator cannot be null");
+            requireNonNull(this.provider, "provider cannot be null");
+            requireNonNull(this.validators, "validators cannot be null");
             requireNonNull(this.consumer, "onPick cannot be null");
             requireNonNull(this.title, "title cannot be null");
 
@@ -172,8 +183,9 @@ public class Picker extends Composite implements HasId {
 
             final Input input = initInput();
 
-            final State<U> localState = new State<>(input, this.validator, this.consumer, this.onCancel.orElse(() -> {
-            }));
+            final State<U> localState = new State<>(input, this.provider, this.validators, this.consumer,
+                    this.onCancel.orElse(() -> {
+                    }));
 
             Picker.this.state = Optional.of(localState);
             Picker.this.dismissAction = Optional.of(State::onCancel);
@@ -189,7 +201,8 @@ public class Picker extends Composite implements HasId {
     private class State<U> implements Validator<String> {
 
         private final Input value;
-        private final BiFunction<Editor<String>, String, U> builder;
+        private final Function<String, U> provider;
+        private final List<Validator<String>> validators;
         private final Consumer<U> consumer;
         private final Runnable onDismiss;
         private final HandlerRegistration submitHandler;
@@ -198,10 +211,12 @@ public class Picker extends Composite implements HasId {
         private Optional<U> currentValue = Optional.empty();
 
         @SuppressWarnings("unchecked")
-        public State(Input value, BiFunction<Editor<String>, String, U> builder, Consumer<U> consumer,
+        public State(Input value, Function<String, U> provider, List<Validator<String>> validators,
+                Consumer<U> consumer,
                 final Runnable onCancel) {
             this.value = value;
-            this.builder = builder;
+            this.provider = provider;
+            this.validators = validators;
             this.consumer = consumer;
             this.onDismiss = onCancel;
             this.value.setValidators(this);
@@ -213,17 +228,6 @@ public class Picker extends Composite implements HasId {
                 }
             });
             this.shownHandler = Picker.this.modal.addShownHandler(e -> value.setFocus(true));
-        }
-
-        public void update(final Editor<String> editor, final String valueString) {
-            try {
-                this.currentValue = Optional.of(this.builder.apply(editor, valueString));
-                Picker.this.yes.setEnabled(true);
-            } catch (final Exception e) {
-                this.currentValue = Optional.empty();
-                Picker.this.yes.setEnabled(false);
-                throw e;
-            }
         }
 
         public void onAccept() {
@@ -252,8 +256,20 @@ public class Picker extends Composite implements HasId {
         @Override
         public List<EditorError> validate(Editor<String> editor, String valueString) {
             try {
-                update(editor, valueString);
-                return Collections.emptyList();
+                final List<EditorError> result = new ArrayList<>();
+
+                for (final Validator<String> validator : this.validators) {
+                    result.addAll(validator.validate(editor, valueString));
+                }
+                if (result.isEmpty()) {
+                    this.currentValue = Optional.of(this.provider.apply(valueString));
+                    Picker.this.yes.setEnabled(true);
+                } else {
+                    this.currentValue = Optional.empty();
+                    Picker.this.yes.setEnabled(false);
+                }
+                return result;
+
             } catch (final Exception e) {
                 return Collections.singletonList(new BasicEditorError(editor, valueString, e.getMessage()));
             }

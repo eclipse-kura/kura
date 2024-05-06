@@ -16,8 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -27,7 +25,6 @@ import org.eclipse.kura.identity.AssignedPermissions;
 import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityConfigurationComponent;
 import org.eclipse.kura.identity.PasswordConfiguration;
-import org.eclipse.kura.identity.PasswordHash;
 import org.eclipse.kura.identity.PasswordStrengthRequirements;
 import org.eclipse.kura.identity.Permission;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.AdditionalConfigurationsDTO;
@@ -134,20 +131,17 @@ public class IdentityDTOUtils {
         return passwordConfigurationDTO;
     }
 
-    public static PasswordConfiguration toPasswordConfiguration(PasswordConfigurationDTO passwordConfigurationDTO,
-            Function<char[], PasswordHash> passwordHashFunction, Consumer<char[]> validatePasswordFunction) {
+    public static PasswordConfiguration toPasswordConfiguration(PasswordConfigurationDTO passwordConfigurationDTO) {
 
-        Optional<PasswordHash> passwordHash = Optional.empty();
+        Optional<char[]> password = Optional.empty();
 
         if (passwordConfigurationDTO.getPassword() != null) {
-            validatePasswordFunction.accept(passwordConfigurationDTO.getPassword().toCharArray());
 
-            passwordHash = Optional
-                    .of(passwordHashFunction.apply(passwordConfigurationDTO.getPassword().toCharArray()));
+            password = Optional.of(passwordConfigurationDTO.getPassword().toCharArray());
         }
 
         return new PasswordConfiguration(passwordConfigurationDTO.isPasswordChangeNeeded(),
-                passwordConfigurationDTO.isPasswordAuthEnabled(), passwordHash);
+                passwordConfigurationDTO.isPasswordAuthEnabled(), password, Optional.empty());
     }
 
     public static IdentityConfigurationComponent toAdditionalConfigurations(
@@ -176,8 +170,7 @@ public class IdentityDTOUtils {
         return additionalConfigurationsDTO;
     }
 
-    public static IdentityConfiguration toIdentityConfiguration(IdentityConfigurationDTO identityConfigurationDTO,
-            Function<char[], PasswordHash> passwordHashFunction, Consumer<char[]> validatePasswordFunction) {
+    public static IdentityConfiguration toIdentityConfiguration(IdentityConfigurationDTO identityConfigurationDTO) {
         List<IdentityConfigurationComponent> components = new ArrayList<>();
 
         if (identityConfigurationDTO.getPermissionConfiguration() != null) {
@@ -185,8 +178,7 @@ public class IdentityDTOUtils {
         }
 
         if (identityConfigurationDTO.getPasswordConfiguration() != null) {
-            components.add(toPasswordConfiguration(identityConfigurationDTO.getPasswordConfiguration(),
-                    passwordHashFunction, validatePasswordFunction));
+            components.add(toPasswordConfiguration(identityConfigurationDTO.getPasswordConfiguration()));
         }
 
         if (identityConfigurationDTO.getAdditionalConfigurations() != null) {

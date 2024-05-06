@@ -13,20 +13,23 @@
 package org.eclipse.kura.web.client.ui.validator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
+import org.eclipse.kura.web.shared.validator.NoWhitespaceCharactersValidator;
 import org.eclipse.kura.web.shared.validator.NotEmptyValidator;
 import org.eclipse.kura.web.shared.validator.NotInListValidator;
 import org.eclipse.kura.web.shared.validator.PEMValidator;
-import org.eclipse.kura.web.shared.validator.SinglePEMValidator;
 import org.eclipse.kura.web.shared.validator.PKCS8Validator;
 import org.eclipse.kura.web.shared.validator.PasswordStrengthValidators;
 import org.eclipse.kura.web.shared.validator.PredicateValidator;
 import org.eclipse.kura.web.shared.validator.RegexValidator;
+import org.eclipse.kura.web.shared.validator.SinglePEMValidator;
 import org.eclipse.kura.web.shared.validator.StringLengthValidator;
 import org.eclipse.kura.web.shared.validator.StringNotInListValidator;
 import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
@@ -44,30 +47,38 @@ public class GwtValidators {
     private GwtValidators() {
     }
 
-    public static List<Validator<String>> passwordStrength(final GwtConsoleUserOptions userOptions) {
-        return PasswordStrengthValidators.fromConfig(userOptions, new PasswordStrengthValidators.Messages() {
+    public static List<Validator<String>> newPassword(final GwtConsoleUserOptions userOptions) {
 
-            @Override
-            public String pwdStrengthDigitsRequired() {
-                return MSGS.pwdStrengthDigitsRequired();
-            }
+        final List<Validator<String>> defaultValidators = Arrays.asList(
+                stringLength(255, MSGS.pwdMaxLength()),
+                noWhitespaceCharacters(MSGS.pwdWhitespaceCharacters()),
+                nonEmpty(MSGS.pwdEmpty()));
 
-            @Override
-            public String pwdStrengthNonAlphanumericRequired() {
-                return MSGS.pwdStrengthNonAlphanumericRequired();
-            }
+        return Stream
+                .concat(PasswordStrengthValidators.fromConfig(userOptions, new PasswordStrengthValidators.Messages() {
 
-            @Override
-            public String pwdStrengthBothCasesRequired() {
-                return MSGS.pwdStrengthBothCasesRequired();
-            }
+                    @Override
+                    public String pwdStrengthDigitsRequired() {
+                        return MSGS.pwdStrengthDigitsRequired();
+                    }
 
-            @Override
-            public String pwdStrengthMinLength(int value) {
-                return MSGS.pwdStrengthMinLength(Integer.toString(value));
-            }
+                    @Override
+                    public String pwdStrengthNonAlphanumericRequired() {
+                        return MSGS.pwdStrengthNonAlphanumericRequired();
+                    }
 
-        }).stream().map(v -> new ValidatorWrapper<>(v, Priority.MEDIUM)).collect(Collectors.toList());
+                    @Override
+                    public String pwdStrengthBothCasesRequired() {
+                        return MSGS.pwdStrengthBothCasesRequired();
+                    }
+
+                    @Override
+                    public String pwdStrengthMinLength(int value) {
+                        return MSGS.pwdStrengthMinLength(Integer.toString(value));
+                    }
+
+                }).stream().map(v -> new ValidatorWrapper<>(v, Priority.MEDIUM)), defaultValidators.stream())
+                .collect(Collectors.toList());
     }
 
     public static Validator<String> nonEmpty(final String message) {
@@ -89,7 +100,7 @@ public class GwtValidators {
         return new ValidatorWrapper<String>(new PEMValidator(message), Priority.MEDIUM) {
         };
     }
-    
+
     public static Validator<String> singlePem(final String message) {
         return new ValidatorWrapper<String>(new SinglePEMValidator(message), Priority.MEDIUM) {
         };
@@ -117,6 +128,11 @@ public class GwtValidators {
 
     public static Validator<String> stringLength(final int minSize, final int maxSize, final String message) {
         return new ValidatorWrapper<String>(new StringLengthValidator(minSize, maxSize, message), Priority.MEDIUM) {
+        };
+    }
+
+    public static Validator<String> noWhitespaceCharacters(final String message) {
+        return new ValidatorWrapper<String>(new NoWhitespaceCharactersValidator(message), Priority.MEDIUM) {
         };
     }
 

@@ -62,7 +62,7 @@ import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.User;
 import org.osgi.service.useradmin.UserAdmin;
 
-public class IdentityServiceImplTest {
+public class IdentityServiceImplTest extends IdentityServiceTestBase {
 
     @Test
     public void shouldCreateIdentity() {
@@ -116,6 +116,39 @@ public class IdentityServiceImplTest {
         thenIdentityServiceReportsPermissionCreated(true);
 
         thenUserAdminRoleExists("kura.permission.foo", Role.GROUP);
+    }
+
+    @Test
+    public void shouldCreatePermissionWithDotsInName() {
+        givenNoUserAdminRoleWithName("kura.permission.foo.bar.baz");
+        whenPermissionIsCreated("foo.bar.baz");
+
+        thenNoExceptionIsThrown();
+        thenIdentityServiceReportsPermissionCreated(true);
+
+        thenUserAdminRoleExists("kura.permission.foo.bar.baz", Role.GROUP);
+    }
+
+    @Test
+    public void shouldCreatePermissionWithBothCasesInName() {
+        givenNoUserAdminRoleWithName("kura.permission.foO.bAr.Baz");
+        whenPermissionIsCreated("foO.bAr.Baz");
+
+        thenNoExceptionIsThrown();
+        thenIdentityServiceReportsPermissionCreated(true);
+
+        thenUserAdminRoleExists("kura.permission.foO.bAr.Baz", Role.GROUP);
+    }
+
+    @Test
+    public void shouldCreatePermissionWithNameContainingNumbers() {
+        givenNoUserAdminRoleWithName("kura.permission.fo1.ba2.ba3");
+        whenPermissionIsCreated("fo1.ba2.ba3");
+
+        thenNoExceptionIsThrown();
+        thenIdentityServiceReportsPermissionCreated(true);
+
+        thenUserAdminRoleExists("kura.permission.fo1.ba2.ba3", Role.GROUP);
     }
 
     @Test
@@ -197,7 +230,7 @@ public class IdentityServiceImplTest {
         whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo",
                 singletonList(new AssignedPermissions(set(new Permission("foo"), new Permission("notexisting"))))));
 
-        thenExceptionThrown(KuraException.class);
+        thenExceptionIsThrown(KuraException.class);
     }
 
     @Test
@@ -209,7 +242,7 @@ public class IdentityServiceImplTest {
         whenIdentityConfigurationIsValidated(new IdentityConfiguration("foo",
                 singletonList(new AssignedPermissions(set(new Permission("foo"), new Permission("notexisting"))))));
 
-        thenExceptionThrown(KuraException.class);
+        thenExceptionIsThrown(KuraException.class);
     }
 
     @Test
@@ -247,13 +280,12 @@ public class IdentityServiceImplTest {
     @Test
     public void shouldSetUserPassword() {
         givenUserAdminUsers("kura.user.foo");
-        givenPasswordHash("foobar");
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo",
-                singletonList(new PasswordConfiguration(false, true, Optional.of(lastPasswordHash())))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
+                new PasswordConfiguration(false, true, Optional.of("adminadmin".toCharArray()), Optional.empty()))));
 
         thenNoExceptionIsThrown();
-        thenUserAdminCredentialIs("kura.user.foo", "kura.password", sha256("foobar"));
+        thenUserAdminCredentialIs("kura.user.foo", "kura.password", sha256("adminadmin"));
     }
 
     @Test
@@ -262,7 +294,7 @@ public class IdentityServiceImplTest {
         givenUserAdminCredential("kura.user.foo", "kura.password", sha256("foobar"));
 
         whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo",
-                singletonList(new PasswordConfiguration(false, true, Optional.empty()))));
+                singletonList(new PasswordConfiguration(false, true, Optional.empty(), Optional.empty()))));
 
         thenNoExceptionIsThrown();
         thenUserAdminCredentialIs("kura.user.foo", "kura.password", sha256("foobar"));
@@ -274,7 +306,7 @@ public class IdentityServiceImplTest {
         givenUserAdminCredential("kura.user.foo", "kura.password", sha256("foobar"));
 
         whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo",
-                singletonList(new PasswordConfiguration(false, false, Optional.empty()))));
+                singletonList(new PasswordConfiguration(false, false, Optional.empty(), Optional.empty()))));
 
         thenNoExceptionIsThrown();
         thenUserAdminCredentialIsNotSet("kura.user.foo", "kura.password");
@@ -283,13 +315,12 @@ public class IdentityServiceImplTest {
     @Test
     public void shouldSetNeedPasswordChange() {
         givenUserAdminUsers("kura.user.foo");
-        givenPasswordHash("foobar");
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo",
-                singletonList(new PasswordConfiguration(true, true, Optional.of(lastPasswordHash())))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
+                new PasswordConfiguration(true, true, Optional.of("adminadmin".toCharArray()), Optional.empty()))));
 
         thenNoExceptionIsThrown();
-        thenUserAdminCredentialIs("kura.user.foo", "kura.password", sha256("foobar"));
+        thenUserAdminCredentialIs("kura.user.foo", "kura.password", sha256("adminadmin"));
         thenUserAdminPropertyIs("kura.user.foo", "kura.need.password.change", "true");
     }
 
@@ -297,39 +328,36 @@ public class IdentityServiceImplTest {
     public void shouldUnsetNeedPasswordChange() {
         givenUserAdminUsers("kura.user.foo");
         givenUserAdminProperty("kura.user.foo", "kura.need.password.change", "true");
-        givenPasswordHash("foobar");
 
-        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo",
-                singletonList(new PasswordConfiguration(false, true, Optional.of(lastPasswordHash())))));
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
+                new PasswordConfiguration(false, true, Optional.of("adminadmin".toCharArray()), Optional.empty()))));
 
         thenNoExceptionIsThrown();
-        thenUserAdminCredentialIs("kura.user.foo", "kura.password", sha256("foobar"));
+        thenUserAdminCredentialIs("kura.user.foo", "kura.password", sha256("adminadmin"));
         thenUserAdminPropertyIsNotSet("kura.user.foo", "kura.need.password.change");
     }
 
     @Test
     public void shouldReturnNeedPasswordChangeTrue() {
         givenUserAdminUsers("kura.user.foo");
-        givenPasswordHash("foobar");
         givenUserAdminProperty("kura.user.foo", "kura.need.password.change", "true");
 
         whenIdentityConfigurationIsRetrieved("foo", set(PasswordConfiguration.class));
 
         thenNoExceptionIsThrown();
         thenIdentityConfigurationEquals(new IdentityConfiguration("foo",
-                singletonList(new PasswordConfiguration(true, false, Optional.empty()))));
+                singletonList(new PasswordConfiguration(true, false, Optional.empty(), Optional.empty()))));
     }
 
     @Test
     public void shouldReturnNeedPasswordChangeFalse() {
         givenUserAdminUsers("kura.user.foo");
-        givenPasswordHash("foobar");
 
         whenIdentityConfigurationIsRetrieved("foo", set(PasswordConfiguration.class));
 
         thenNoExceptionIsThrown();
         thenIdentityConfigurationEquals(new IdentityConfiguration("foo",
-                singletonList(new PasswordConfiguration(false, false, Optional.empty()))));
+                singletonList(new PasswordConfiguration(false, false, Optional.empty(), Optional.empty()))));
     }
 
     @Test
@@ -341,8 +369,8 @@ public class IdentityServiceImplTest {
         whenIdentityConfigurationIsRetrieved("foo", set(PasswordConfiguration.class));
 
         thenNoExceptionIsThrown();
-        thenIdentityConfigurationEquals(new IdentityConfiguration("foo",
-                singletonList(new PasswordConfiguration(false, true, Optional.of(lastPasswordHash())))));
+        thenIdentityConfigurationEquals(new IdentityConfiguration("foo", singletonList(
+                new PasswordConfiguration(false, true, Optional.empty(), Optional.of(lastPasswordHash())))));
     }
 
     @Test
@@ -378,7 +406,180 @@ public class IdentityServiceImplTest {
         whenIdentityConfigurationIsValidated(new IdentityConfiguration("foo", singletonList(
                 new AdditionalConfigurations(singletonList(TestComponentConfiguration.forPid("nonexisting"))))));
 
-        thenExceptionThrown(KuraException.class);
+        thenExceptionIsThrown(KuraException.class);
+    }
+
+    @Test
+    public void shouldNotAllowEmptyPassword() {
+        givenUserAdminUsers("kura.user.foo");
+
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
+                new PasswordConfiguration(false, true, Optional.of("".toCharArray()), Optional.empty()))));
+
+        thenExceptionIsThrown(KuraException.class);
+    }
+
+    @Test
+    public void shouldNotAllowPasswordWithOnlySpaces() {
+        givenUserAdminUsers("kura.user.foo");
+
+        whenIdentityConfigurationIsUpdated(
+                new IdentityConfiguration("foo", singletonList(new PasswordConfiguration(false, true,
+                        Optional.of("                  ".toCharArray()), Optional.empty()))));
+
+        thenExceptionIsThrown(KuraException.class);
+    }
+
+    @Test
+    public void shouldNotAllowPasswordBeginningWithSpaces() {
+        givenUserAdminUsers("kura.user.foo");
+
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
+                new PasswordConfiguration(false, true, Optional.of(" adminadmin".toCharArray()), Optional.empty()))));
+
+        thenExceptionIsThrown(KuraException.class);
+    }
+
+    @Test
+    public void shouldNotAllowPasswordEndingWithSpaces() {
+        givenUserAdminUsers("kura.user.foo");
+
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
+                new PasswordConfiguration(false, true, Optional.of("adminadmin ".toCharArray()), Optional.empty()))));
+
+        thenExceptionIsThrown(KuraException.class);
+    }
+
+    @Test
+    public void shouldNotAllowPasswordContainingSpaces() {
+        givenUserAdminUsers("kura.user.foo");
+
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
+                new PasswordConfiguration(false, true, Optional.of("admin admin ".toCharArray()), Optional.empty()))));
+
+        thenExceptionIsThrown(KuraException.class);
+    }
+
+    @Test
+    public void shouldNotAllowPasswordContainingTab() {
+        givenUserAdminUsers("kura.user.foo");
+
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
+                new PasswordConfiguration(false, true, Optional.of("admin\tadmin ".toCharArray()), Optional.empty()))));
+
+        thenExceptionIsThrown(KuraException.class);
+    }
+
+    @Test
+    public void shouldAllow255CharsPassword() {
+        givenUserAdminUsers("kura.user.foo");
+
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
+                new PasswordConfiguration(false, true, Optional.of(repeat('a', 255)), Optional.empty()))));
+
+        thenNoExceptionIsThrown();
+    }
+
+    @Test
+    public void shouldNotAllowTooLongPassword() {
+        givenUserAdminUsers("kura.user.foo");
+
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
+                new PasswordConfiguration(false, true, Optional.of(repeat('a', 256)), Optional.empty()))));
+
+        thenExceptionIsThrown(KuraException.class);
+    }
+
+    @Test
+    public void shouldNotAllowPasswordNotSatisfyingPasswordStrengthRequirements() {
+        givenConsoleOptions("new.password.min.length", 3, "new.password.require.digits", false,
+                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
+        givenUserAdminUsers("kura.user.foo");
+
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
+                new PasswordConfiguration(false, true, Optional.of("a".toCharArray()), Optional.empty()))));
+
+        thenExceptionIsThrown(KuraException.class);
+    }
+
+    @Test
+    public void shouldNotCreateIdentityWithEmptyName() {
+        givenNoUserAdminRoleWithName("kura.user.");
+        whenIdentityIsCreated("");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.user.");
+    }
+
+    @Test
+    public void shouldNotCreateIdentityWithNameContainingOnlySpaces() {
+        givenNoUserAdminRoleWithName("kura.user.         ");
+        whenIdentityIsCreated("         ");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.user.         ");
+    }
+
+    @Test
+    public void shouldNotCreateIdentityWithNameBeginningWithSpaces() {
+        givenNoUserAdminRoleWithName("kura.user. foo");
+        whenIdentityIsCreated(" foo");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.user. foo");
+    }
+
+    @Test
+    public void shouldNotCreateIdentityWithNameEndingWithSpaces() {
+        givenNoUserAdminRoleWithName("kura.user.foo ");
+        whenIdentityIsCreated("foo ");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.user.foo ");
+    }
+
+    @Test
+    public void shouldNotCreateIdentityWithNameContainingSpaces() {
+        givenNoUserAdminRoleWithName("kura.user.foo bar");
+        whenIdentityIsCreated("foo bar");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.user.foo bar");
+    }
+
+    @Test
+    public void shouldNotCreateIdentityWithNameContainingTab() {
+        givenNoUserAdminRoleWithName("kura.user.foo\tbar");
+        whenIdentityIsCreated("foo\tbar");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.user.foo\tbar");
+    }
+
+    @Test
+    public void shouldAllow255CharactersIdentityName() {
+        givenNoUserAdminRoleWithName("kura.user." + new String(repeat('a', 255)));
+        whenIdentityIsCreated(new String(repeat('a', 255)));
+
+        thenNoExceptionIsThrown();
+
+        thenUserAdminRoleExists("kura.user." + new String(repeat('a', 255)), Role.USER);
+    }
+
+    @Test
+    public void shouldNotCreateIdentityWithTooLongName() {
+        givenNoUserAdminRoleWithName("kura.user." + new String(repeat('a', 256)));
+        whenIdentityIsCreated("         ");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.user." + new String(repeat('a', 256)));
     }
 
     @Test
@@ -389,11 +590,121 @@ public class IdentityServiceImplTest {
         whenIdentityConfigurationIsValidated(new IdentityConfiguration("foobar", singletonList(
                 new AdditionalConfigurations(singletonList(TestComponentConfiguration.forPid("test.extension"))))));
 
-        thenExceptionThrown(KuraException.class);
+        thenExceptionIsThrown(KuraException.class);
     }
 
     @Test
-    public void shouldSupportUpdatingAdditionaConfiguration() {
+    public void shouldNotCreatePermissionWithEmptyName() {
+        givenNoUserAdminRoleWithName("kura.permission.");
+        whenPermissionIsCreated("");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.permission.");
+    }
+
+    @Test
+    public void shouldNotCreatePermissionWithOnlySpaces() {
+        givenNoUserAdminRoleWithName("kura.permission.              ");
+        whenPermissionIsCreated("              ");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.permission.              ");
+    }
+
+    @Test
+    public void shouldNotCreatePermissionBeginningWithSpaces() {
+        givenNoUserAdminRoleWithName("kura.permission. foo");
+        whenPermissionIsCreated(" foo");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.permission. foo");
+    }
+
+    @Test
+    public void shouldNotCreatePermissionEndingWithSpaces() {
+        givenNoUserAdminRoleWithName("kura.permission.foo ");
+        whenPermissionIsCreated("foo ");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.permission.foo ");
+    }
+
+    @Test
+    public void shouldNotCreatePermissionContainingSpaces() {
+        givenNoUserAdminRoleWithName("kura.permission.foo bar");
+        whenPermissionIsCreated("foo bar");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.permission.foo bar");
+    }
+
+    @Test
+    public void shouldNotCreatePermissionContainingTab() {
+        givenNoUserAdminRoleWithName("kura.permission.foo\tbar");
+        whenPermissionIsCreated("foo\tbar");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.permission.foo\tbar");
+    }
+
+    @Test
+    public void shouldNotCreatePermissionStartingWithDot() {
+        givenNoUserAdminRoleWithName("kura.permission..foobar");
+        whenPermissionIsCreated(".foobar");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.permission..foobar");
+    }
+
+    @Test
+    public void shouldNotCreatePermissionEndingWithDot() {
+        givenNoUserAdminRoleWithName("kura.permission.foobar.");
+        whenPermissionIsCreated("foobar.");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.permission.foobar.");
+    }
+
+    @Test
+    public void shouldNotCreatePermissionContainingASequenceOfTwoDots() {
+        givenNoUserAdminRoleWithName("kura.permission.foobar..baz");
+        whenPermissionIsCreated("foobar..baz");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.permission.foobar..baz");
+    }
+
+    @Test
+    public void shouldAllow255CharsPermission() {
+        givenNoUserAdminRoleWithName("kura.permission." + new String(repeat('a', 255)));
+        whenPermissionIsCreated(new String(repeat('a', 255)));
+
+        thenNoExceptionIsThrown();
+
+        thenUserAdminRoleExists("kura.permission." + new String(repeat('a', 255)), Role.GROUP);
+    }
+
+    @Test
+    public void shouldNotAllowTooLongPermissionName() {
+        givenNoUserAdminRoleWithName("kura.permission." + new String(repeat('a', 256)));
+        whenPermissionIsCreated(new String(repeat('a', 256)));
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.permission." + new String(repeat('a', 256)));
+    }
+
+    @Test
+    public void shouldSupportUpdatingAdditionalConfiguration() {
         givenMockIdentityConfigurationExtension("test.extension");
         givenUserAdminUsers("kura.user.foo");
 
@@ -416,6 +727,7 @@ public class IdentityServiceImplTest {
     private final Map<String, MockExtensionHolder> extensions = new HashMap<>();
 
     public IdentityServiceImplTest() {
+        super();
         try {
             this.userAdmin = ServiceUtil.trackService(UserAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
             this.cryptoService = ServiceUtil.trackService(CryptoService.class, Optional.empty()).get(30,
@@ -535,14 +847,14 @@ public class IdentityServiceImplTest {
 
     private void whenIdentityConfigurationIsUpdated(final IdentityConfiguration identityConfiguration) {
         callVoid(() -> {
-            this.identityService.updateIdentityConfigurations(Collections.singleton(identityConfiguration));
+            this.identityService.updateIdentityConfiguration(identityConfiguration);
             return null;
         });
     }
 
     private void whenIdentityConfigurationIsValidated(final IdentityConfiguration identityConfiguration) {
         callVoid(() -> {
-            this.identityService.validateIdentityConfigurations(singletonList(identityConfiguration));
+            this.identityService.validateIdentityConfiguration(identityConfiguration);
             return null;
         });
     }
@@ -561,20 +873,12 @@ public class IdentityServiceImplTest {
         assertEquals(value, this.userAdmin.getRole(role).getProperties().get(key));
     }
 
-    private void thenUserAdminPropertyIsSet(final String role, final String key) {
-        assertNotNull(this.userAdmin.getRole(role).getProperties().get(key));
-    }
-
     private void thenUserAdminPropertyIsNotSet(final String role, final String key) {
         assertNull(this.userAdmin.getRole(role).getProperties().get(key));
     }
 
     private void thenUserAdminCredentialIs(final String user, final String key, final String value) {
         assertEquals(value, ((User) this.userAdmin.getRole(user)).getCredentials().get(key));
-    }
-
-    private void thenUserAdminCredentialIsSet(final String user, final String key) {
-        assertNotNull(((User) this.userAdmin.getRole(user)).getCredentials().get(key));
     }
 
     private void thenUserAdminCredentialIsNotSet(final String user, final String key) {
@@ -643,7 +947,7 @@ public class IdentityServiceImplTest {
         assertEquals(Optional.empty(), this.exception);
     }
 
-    private void thenExceptionThrown(final Class<? extends Exception> clazz) {
+    private void thenExceptionIsThrown(final Class<? extends Exception> clazz) {
         assertEquals(Optional.of(clazz), this.exception.map(Object::getClass));
     }
 
@@ -655,6 +959,16 @@ public class IdentityServiceImplTest {
     private List<Role> getBasicMembers(final String group) {
         return Optional.ofNullable(((Group) this.userAdmin.getRole(group)).getMembers()).map(Arrays::asList)
                 .orElseGet(Collections::emptyList);
+    }
+
+    private char[] repeat(final char c, final int times) {
+        final char[] result = new char[times];
+
+        for (int i = 0; i < times; i++) {
+            result[i] = c;
+        }
+
+        return result;
     }
 
     private PasswordHash lastPasswordHash() {

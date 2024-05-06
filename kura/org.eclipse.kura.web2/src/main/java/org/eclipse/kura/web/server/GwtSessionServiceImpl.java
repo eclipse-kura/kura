@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.UserManager;
@@ -101,7 +100,7 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
 
         try {
             return userManager.getUserConfig((String) username).orElse(null);
-        } catch (KuraException e) {
+        } catch (GwtKuraException e) {
             auditLogger.warn("{} UI Session - Failure - Failed to get configuration for user {}",
                     AuditContext.currentOrInternal(), username);
             return null;
@@ -117,19 +116,21 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
 
         String username = getSessionUsername(session);
 
-        try {
-            Optional<GwtUserConfig> userConfig = this.userManager.getUserConfig(username);
+        final Optional<GwtUserConfig> userConfig;
 
-            if (!userConfig.isPresent() || !userConfig.get().isPasswordAuthEnabled()) {
-                throw new GwtKuraException(GwtKuraErrorCode.OPERATION_NOT_SUPPORTED);
-            }
-        } catch (final KuraException e) {
+        try {
+            userConfig = this.userManager.getUserConfig(username);
+        } catch (final GwtKuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.OPERATION_NOT_SUPPORTED);
+        }
+
+        if (!userConfig.isPresent() || !userConfig.get().isPasswordAuthEnabled()) {
             throw new GwtKuraException(GwtKuraErrorCode.OPERATION_NOT_SUPPORTED);
         }
 
         try {
             this.userManager.authenticateWithPassword(username, oldPassword);
-        } catch (KuraException e) {
+        } catch (GwtKuraException e) {
             auditLogger.warn("{} UI Session - Failure - Wrong password for user {}", AuditContext.currentOrInternal(),
                     username);
             throw new GwtKuraException(GwtKuraErrorCode.INVALID_USERNAME_PASSWORD);
@@ -144,7 +145,7 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
 
             auditLogger.info("{} UI Session - Success - Password updated for user {}", AuditContext.currentOrInternal(),
                     username);
-        } catch (final KuraException e) {
+        } catch (final GwtKuraException e) {
             auditLogger.warn("{} UI Session - Failure - Failed to update password for user {}",
                     AuditContext.currentOrInternal(), username);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);

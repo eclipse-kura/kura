@@ -21,4 +21,5 @@
    <reference bind="setUserAdmin" cardinality="1..1" interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin" policy="static"/>
    <reference bind="setIdentityConfigurationExtension" cardinality="0..n" interface="org.eclipse.kura.identity.configuration.extension.IdentityConfigurationExtension" name="IdentityConfigurationExtension" policy="dynamic" unbind="unsetIdentityConfigurationExtension"/>
    <reference bind="setCryptoService" cardinality="1..1" interface="org.eclipse.kura.crypto.CryptoService" name="CryptoService" policy="static"/>
+   <reference bind="setPasswordStrengthVerificationService" cardinality="1..1" interface="org.eclipse.kura.identity.PasswordStrengthVerificationService" name="PasswordStrengthVerificationService" policy="static"/>
 </scr:component>

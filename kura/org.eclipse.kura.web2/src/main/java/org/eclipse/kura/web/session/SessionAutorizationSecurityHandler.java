@@ -19,10 +19,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.audit.AuditContext.Scope;
 import org.eclipse.kura.web.Console;
+import org.eclipse.kura.web.shared.GwtKuraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +59,7 @@ public class SessionAutorizationSecurityHandler implements SecurityHandler {
             try {
                 isPasswordSame = Objects.equals(session.getAttribute(Attributes.CREDENTIALS_HASH.getValue()),
                         Console.instance().getUserManager().getCredentialsHash(userName));
-            } catch (KuraException e) {
+            } catch (GwtKuraException e) {
                 logger.warn("failed to compute credential hash", e);
                 isPasswordSame = false;
             }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -143,7 +143,7 @@ public class PasswordChangeModal extends Composite {
             public List<EditorError> validate(final Editor<String> editor, final String value) {
                 final List<EditorError> result = new ArrayList<>();
 
-                for (final Validator<String> validator : GwtValidators.passwordStrength(options)) {
+                for (final Validator<String> validator : GwtValidators.newPassword(options)) {
                     result.addAll(validator.validate(editor, value));
                 }
 

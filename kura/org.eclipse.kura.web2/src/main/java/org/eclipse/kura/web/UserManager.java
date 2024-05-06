@@ -29,9 +29,10 @@ import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityConfigurationComponent;
 import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.PasswordConfiguration;
-import org.eclipse.kura.identity.PasswordHash;
 import org.eclipse.kura.identity.Permission;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
+import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtUserConfig;
@@ -55,69 +56,92 @@ public class UserManager {
         initializeUserAdmin();
     }
 
-    public void authenticateWithPassword(final String username, final String password) throws KuraException {
-        final PasswordConfiguration passwordConfiguration = this.identityService
-                .getIdentityConfiguration(username, Collections.singleton(PasswordConfiguration.class))
-                .flatMap(i -> i.getComponent(PasswordConfiguration.class))
-                .orElseThrow(() -> new KuraException(KuraErrorCode.SECURITY_EXCEPTION));
-
-        if (!passwordConfiguration.isPasswordAuthEnabled() || !Objects.equals(passwordConfiguration.getPasswordHash(),
-                Optional.of(this.identityService.computePasswordHash(password.toCharArray())))) {
-            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
+    public void authenticateWithPassword(final String username, final String password) throws GwtKuraException {
+        try {
+            this.identityService.checkPassword(username, password.toCharArray());
+        } catch (Exception e) {
+            throw toGwt(e);
         }
     }
 
-    public void requirePermissions(final String username, final String... requiredPermissions) throws KuraException {
+    public void requirePermissions(final String username, final String... requiredPermissions) throws GwtKuraException {
 
-        final AssignedPermissions assignedPermissions = this.identityService
-                .getIdentityConfiguration(username, Collections.singleton(AssignedPermissions.class))
-                .flatMap(i -> i.getComponent(AssignedPermissions.class))
-                .orElseThrow(() -> new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Identity not found"));
+        try {
+            final AssignedPermissions assignedPermissions = this.identityService
+                    .getIdentityConfiguration(username, Collections.singleton(AssignedPermissions.class))
+                    .flatMap(i -> i.getComponent(AssignedPermissions.class))
+                    .orElseThrow(() -> new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Identity not found"));
 
-        if (assignedPermissions.getPermissions().contains(new Permission("admin"))) {
-            return;
-        }
-
-        for (final String requiredPermission : requiredPermissions) {
-            if (!assignedPermissions.getPermissions().contains(new Permission(requiredPermission))) {
-                throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION,
-                        "identity does not have the " + requiredPermission + " perimission");
+            if (assignedPermissions.getPermissions().contains(new Permission("admin"))) {
+                return;
             }
+
+            for (final String requiredPermission : requiredPermissions) {
+                if (!assignedPermissions.getPermissions().contains(new Permission(requiredPermission))) {
+                    throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION,
+                            "identity does not have the " + requiredPermission + " perimission");
+                }
+            }
+        } catch (final Exception e) {
+            throw toGwt(e);
         }
     }
 
-    public boolean isPasswordChangeRequired(final String username) throws KuraException {
+    public boolean isPasswordChangeRequired(final String username) throws GwtKuraException {
 
-        return this.identityService
-                .getIdentityConfiguration(username, Collections.singleton(PasswordConfiguration.class))
-                .flatMap(p -> p.getComponent(PasswordConfiguration.class))
-                .map(p -> p.isPasswordChangeNeeded())
-                .orElse(false);
-
-    }
-
-    public void createUser(final String userName) throws KuraException {
-        this.identityService.createIdentity(userName);
-    }
-
-    public void deleteUser(final String userName) throws KuraException {
-        this.identityService.deleteIdentity(userName);
-    }
-
-    public void setUserPassword(final String userName, final String userPassword) throws KuraException {
-
-        this.identityService.updateIdentityConfigurations(Collections.singletonList(new IdentityConfiguration(userName,
-                Collections.singletonList(
-                        new PasswordConfiguration(false, true,
-                                Optional.of(this.identityService.computePasswordHash(userPassword.toCharArray())))))));
+        try {
+            return this.identityService
+                    .getIdentityConfiguration(username, Collections.singleton(PasswordConfiguration.class))
+                    .flatMap(p -> p.getComponent(PasswordConfiguration.class))
+                    .map(p -> p.isPasswordChangeNeeded())
+                    .orElse(false);
+        } catch (final Exception e) {
+            throw toGwt(e);
+        }
 
     }
 
-    public Set<String> getDefinedPermissions() throws KuraException {
-        return this.identityService.getPermissions().stream().map(Permission::getName).collect(Collectors.toSet());
+    public void createUser(final String userName) throws GwtKuraException {
+        try {
+            this.identityService.createIdentity(userName);
+        } catch (final Exception e) {
+            logger.warn("failed to create user", e);
+            throw toGwt(e);
+        }
     }
 
-    public Set<GwtUserConfig> getUserConfig() throws KuraException {
+    public void deleteUser(final String userName) throws GwtKuraException {
+        try {
+            this.identityService.deleteIdentity(userName);
+        } catch (final Exception e) {
+            logger.warn("failed to delete user", e);
+            throw toGwt(e);
+        }
+    }
+
+    public void setUserPassword(final String userName, final String userPassword) throws GwtKuraException {
+
+        try {
+            this.identityService.updateIdentityConfiguration(new IdentityConfiguration(userName,
+                    Collections.singletonList(
+                            new PasswordConfiguration(false, true,
+                                    Optional.of(userPassword.toCharArray()), Optional.empty()))));
+        } catch (final Exception e) {
+            throw toGwt(e);
+        }
+
+    }
+
+    public Set<String> getDefinedPermissions() throws GwtKuraException {
+        try {
+            return this.identityService.getPermissions().stream().map(Permission::getName).collect(Collectors.toSet());
+        } catch (final Exception e) {
+            logger.warn("failed to get defined permissions", e);
+            throw toGwt(e);
+        }
+    }
+
+    public Set<GwtUserConfig> getUserConfig() throws GwtKuraException {
 
         return getUserConfig(ALL_COMPONENTS);
 
@@ -125,31 +149,45 @@ public class UserManager {
 
     public Set<GwtUserConfig> getUserConfig(
             final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn)
-            throws KuraException {
+            throws GwtKuraException {
 
-        return this.identityService
-                .getIdentitiesConfiguration(componentsToReturn)
-                .stream().map(this::getUserConfig).collect(Collectors.toSet());
+        try {
+            return this.identityService
+                    .getIdentitiesConfiguration(componentsToReturn)
+                    .stream().map(this::getUserConfig).collect(Collectors.toSet());
+        } catch (final Exception e) {
+            logger.warn("failed to get user configuration", e);
+            throw toGwt(e);
+        }
     }
 
-    public GwtUserConfig getUserDefaultConfig(final String name) throws KuraException {
+    public GwtUserConfig getUserDefaultConfig(final String name) throws GwtKuraException {
         return getUserDefaultConfig(name, ALL_COMPONENTS);
     }
 
     public GwtUserConfig getUserDefaultConfig(final String name,
-            final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws KuraException {
-        return getUserConfig(this.identityService.getIdentityDefaultConfiguration(name, componentsToReturn));
+            final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws GwtKuraException {
+        try {
+            return getUserConfig(this.identityService.getIdentityDefaultConfiguration(name, componentsToReturn));
+        } catch (final Exception e) {
+            logger.warn("failed to get user default configuration", e);
+            throw toGwt(e);
+        }
     }
 
-    public Optional<GwtUserConfig> getUserConfig(final String name) throws KuraException {
+    public Optional<GwtUserConfig> getUserConfig(final String name) throws GwtKuraException {
         return getUserConfig(name, ALL_COMPONENTS);
     }
 
     public Optional<GwtUserConfig> getUserConfig(final String name,
-            final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws KuraException {
-        return this.identityService
-                .getIdentityConfiguration(name, componentsToReturn)
-                .map(this::getUserConfig);
+            final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws GwtKuraException {
+        try {
+            return this.identityService
+                    .getIdentityConfiguration(name, componentsToReturn)
+                    .map(this::getUserConfig);
+        } catch (final Exception e) {
+            throw toGwt(e);
+        }
     }
 
     public GwtUserConfig getUserConfig(final IdentityConfiguration identity) {
@@ -173,71 +211,72 @@ public class UserManager {
 
     }
 
-    public Optional<Integer> getCredentialsHash(final String userName) throws KuraException {
+    public Optional<Integer> getCredentialsHash(final String userName) throws GwtKuraException {
 
-        return this.identityService
-                .getIdentityConfiguration(userName, Collections.singleton(PasswordConfiguration.class))
-                .flatMap(i -> i.getComponent(PasswordConfiguration.class)).map(i -> i.getPasswordHash().hashCode());
+        try {
+            return this.identityService
+                    .getIdentityConfiguration(userName, Collections.singleton(PasswordConfiguration.class))
+                    .flatMap(i -> i.getComponent(PasswordConfiguration.class)).map(i -> i.getPasswordHash().hashCode());
+        } catch (final Exception e) {
+            throw toGwt(e);
+        }
 
     }
 
-    public void setUserConfig(final Set<GwtUserConfig> userConfigs) throws KuraException {
+    public void setUserConfig(final Set<GwtUserConfig> userConfigs) throws GwtKuraException {
 
-        final List<IdentityConfiguration> configurations = new ArrayList<>();
+        try {
+            final List<IdentityConfiguration> configurations = new ArrayList<>();
 
-        for (final GwtUserConfig config : userConfigs) {
-            configurations.add(buildIdentityConfiguration(config));
-        }
+            for (final GwtUserConfig config : userConfigs) {
+                configurations.add(buildIdentityConfiguration(config));
+            }
 
-        this.identityService.validateIdentityConfigurations(configurations);
+            runFallibleTasks(configurations, this.identityService::validateIdentityConfiguration);
 
-        final Set<String> existingIdentityNames = this.identityService
-                .getIdentitiesConfiguration(Collections.emptySet()).stream()
-                .map(IdentityConfiguration::getName).collect(Collectors.toSet());
+            final Set<String> existingIdentityNames = this.identityService
+                    .getIdentitiesConfiguration(Collections.emptySet()).stream()
+                    .map(IdentityConfiguration::getName).collect(Collectors.toSet());
 
-        for (final String existingIdentity : existingIdentityNames) {
-            if (userConfigs.stream().noneMatch(data -> data.getUserName().equals(existingIdentity))) {
-                try {
-                    deleteUser(existingIdentity);
-                } catch (Exception e) {
-                    throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
-                            "Failed to delete identity " + existingIdentity);
+            for (final String existingIdentity : existingIdentityNames) {
+                if (userConfigs.stream().noneMatch(data -> data.getUserName().equals(existingIdentity))) {
+                    try {
+                        deleteUser(existingIdentity);
+                    } catch (Exception e) {
+                        throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
+                                "Failed to delete identity " + existingIdentity);
+                    }
                 }
             }
-        }
 
-        for (final GwtUserConfig config : userConfigs) {
-            if (!existingIdentityNames.contains(config.getUserName())) {
-                try {
-                    createUser(config.getUserName());
-                } catch (Exception e) {
-                    throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
-                            "Failed to create identity " + config.getUserName());
+            for (final GwtUserConfig config : userConfigs) {
+                if (!existingIdentityNames.contains(config.getUserName())) {
+                    try {
+                        createUser(config.getUserName());
+                    } catch (Exception e) {
+                        throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
+                                "Failed to create identity " + config.getUserName());
+                    }
                 }
             }
-        }
 
-        this.identityService.updateIdentityConfigurations(configurations);
+            runFallibleTasks(configurations, this.identityService::updateIdentityConfiguration);
+        } catch (final Exception e) {
+            logger.warn("failed to update user configuration", e);
+            throw toGwt(e);
+        }
 
     }
 
-    private IdentityConfiguration buildIdentityConfiguration(final GwtUserConfig config) throws KuraException {
+    private IdentityConfiguration buildIdentityConfiguration(final GwtUserConfig config) throws GwtKuraException {
         final Set<Permission> permissions = config.getPermissions().stream().map(Permission::new)
                 .collect(Collectors.toSet());
         final AssignedPermissions assignedPermissions = new AssignedPermissions(permissions);
 
-        final Optional<String> newPassword = config.getNewPassword();
-        final Optional<PasswordHash> passwordHash;
-
-        if (newPassword.isPresent()) {
-            passwordHash = Optional
-                    .of(this.identityService.computePasswordHash(newPassword.get().toCharArray()));
-        } else {
-            passwordHash = Optional.empty();
-        }
+        final Optional<char[]> newPassword = config.getNewPassword().map(String::toCharArray);
 
         final PasswordConfiguration passwordData = new PasswordConfiguration(config.isPasswordChangeNeeded(),
-                config.isPasswordAuthEnabled(), passwordHash);
+                config.isPasswordAuthEnabled(), newPassword, Optional.empty());
 
         final AdditionalConfigurations additionalConfigurations = new AdditionalConfigurations(
                 config.getAdditionalConfigurations().values()
@@ -260,4 +299,42 @@ public class UserManager {
         }
     }
 
+    private interface FallibleConsumer<T> {
+        public void apply(final T object) throws Exception;
+    }
+
+    /**
+     * @param <T>
+     * @param configs
+     * @param consumer
+     * @throws KuraException
+     */
+    private <T> void runFallibleTasks(final List<IdentityConfiguration> configs,
+            final FallibleConsumer<IdentityConfiguration> consumer) throws GwtKuraException {
+        final StringBuilder builder = new StringBuilder();
+        boolean hasFailures = false;
+
+        for (final IdentityConfiguration config : configs) {
+            try {
+                consumer.apply(config);
+            } catch (final Exception e) {
+                if (hasFailures) {
+                    builder.append("; ");
+                }
+                hasFailures = true;
+                builder.append(config.getName() + ": " + e.getMessage());
+            }
+        }
+
+        if (hasFailures) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, null, builder.toString());
+        }
+    }
+
+    private GwtKuraException toGwt(final Exception e) {
+        if (e instanceof GwtKuraException) {
+            return (GwtKuraException) e;
+        }
+        return new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, null, e.getMessage());
+    }
 }

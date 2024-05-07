@@ -559,7 +559,7 @@ public class CloudConfigurationHandler implements RequestHandler {
             boolean pidExists = this.configurationService.getConfigurableComponentPids()
                     .contains(componentConfiguration.getPid());
 
-            if (!isServiceFactoryComponent || !pidExists) {
+            if (!isServiceFactoryComponent && !pidExists) {
                 throw new KuraException(KuraErrorCode.BAD_REQUEST,
                         String.format("Component PID %s do not exist and it is not even a factory component.", pid));
             }

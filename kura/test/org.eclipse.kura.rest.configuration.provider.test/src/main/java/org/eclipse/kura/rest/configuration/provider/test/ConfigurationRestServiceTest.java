@@ -274,8 +274,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     @Test
     public void testReturnPlaceholderInsteadOfEncryptedPassword() throws KuraException {
         givenEncryptedPassword("foobar");
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD,
-                new Password(this.encryptedPassword));
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD, new Password(this.encryptedPassword));
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
@@ -287,8 +286,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     @Test
     public void testReturnNoValueForMissingPasswordProperty() throws KuraException {
         givenEncryptedPassword("foobar");
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD,
-                null);
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD, null);
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
@@ -298,19 +296,13 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testGetSnapshotReturnsUnencryptedPassword() throws KuraException {
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD,
-                new Password("foobar".toCharArray()));
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD, new Password("foobar".toCharArray()));
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/snapshots/byId",
-                "{\"id\":1}");
+        whenRequestIsPerformed(new MethodSpec("POST"), "/snapshots/byId", "{\"id\":1}");
 
         thenRequestSucceeds();
         thenTestPropertyTypeIs(Json.value("PASSWORD"));
         thenTestPropertyValueIs(Json.value("foobar"));
-    }
-
-    private void givenEncryptedPassword(final String password) throws KuraException {
-        this.encryptedPassword = this.cryptoService.encryptAes(password.toCharArray());
     }
 
     @Test
@@ -1084,13 +1076,10 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                 "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.parse(
-                "{\"pid\":\"foo\",\"definition\":{\"ad\":[{\"option\":[{\"value\":\"foo\"},"
-                        + "{\"label\":\"pass\",\"value\":\"baz\"}],\"id\":\"fooAdName\",\"type\":\"PASSWORD\","
-                        + "\"cardinality\":0,\"isRequired\":false}],\"id\":\"foo\"},"
-                        + "\"properties\":{\"testProp\":{\"value\":[\""
-                        + "placeholder"
-                        + "\"],\"type\":\"PASSWORD\"}}}"),
+        thenResponseElementIs(Json.parse("{\"pid\":\"foo\",\"definition\":{\"ad\":[{\"option\":[{\"value\":\"foo\"},"
+                + "{\"label\":\"pass\",\"value\":\"baz\"}],\"id\":\"fooAdName\",\"type\":\"PASSWORD\","
+                + "\"cardinality\":0,\"isRequired\":false}],\"id\":\"foo\"},"
+                + "\"properties\":{\"testProp\":{\"value\":[\"" + "placeholder" + "\"],\"type\":\"PASSWORD\"}}}"),
                 self().field("configs").arrayItem(0));
     }
 
@@ -1103,8 +1092,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                                 .withAd(adBuilder("fooAdName", Scalar.STRING) //
                                         .withOption(null, "foo") //
                                         .withOption("pass", "baz") //
-                                        .withDefault("default")
-                                        .build()) //
+                                        .withDefault("default").build()) //
                                 .build()) //
                 .withConfigurationProperties(
                         singletonMap("testProp", new Password[] { new Password(this.encryptedPassword) }))
@@ -1114,13 +1102,12 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                 "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.parse(
-                "{\"pid\":\"foo\",\"definition\":{\"ad\":[{\"option\":[{\"value\":\"foo\"},"
+        thenResponseElementIs(
+                Json.parse("{\"pid\":\"foo\",\"definition\":{\"ad\":[{\"option\":[{\"value\":\"foo\"},"
                         + "{\"label\":\"pass\",\"value\":\"baz\"}],\"id\":\"fooAdName\",\"type\":\"STRING\","
                         + "\"cardinality\":0,\"defaultValue\":\"default\",\"isRequired\":false}]"
                         + ",\"id\":\"foo\"},\"properties\":{\"testProp\":{\"value\":[\""
-                        + new String(this.encryptedPassword)
-                        + "\"],\"type\":\"PASSWORD\"}}}"),
+                        + new String(this.encryptedPassword) + "\"],\"type\":\"PASSWORD\"}}}"),
                 self().field("configs").arrayItem(0));
     }
 
@@ -1171,43 +1158,18 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
             this.receivedConfigsByPid.put(i.getArgument(0, String.class), i.getArgument(1, Map.class));
             return (Void) null;
         };
-        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any());
-        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
+        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService)
+                .updateConfiguration(ArgumentMatchers.any(), ArgumentMatchers.any());
+        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService)
+                .updateConfiguration(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
     }
 
-    private void thenResponseElementIs(final JsonValue expected, final JsonProjection projection) {
-        final JsonValue root = Json
-                .parse(expectResponse().body.orElseThrow(() -> new IllegalStateException("expected body")));
-        final JsonValue actual;
-
-        try {
-            actual = projection.apply(root);
-        } catch (final Exception e) {
-            fail("failed to apply " + projection + " to " + root);
-            throw new IllegalStateException("unreachable");
-        }
-
-        assertEquals("after applying " + projection + " to " + root, expected, actual);
-    }
-
-    private void thenResponseElementExists(final JsonProjection projection) {
-        final JsonValue root = Json
-                .parse(expectResponse().body.orElseThrow(() -> new IllegalStateException("expected body")));
-
-        try {
-            assertNotNull("response element " + projection + " is null", projection.apply(root));
-        } catch (final Exception e) {
-            fail("failed to apply " + projection + " to " + root);
-            throw new IllegalStateException("unreachable");
-        }
+    private void givenEncryptedPassword(final String password) throws KuraException {
+        this.encryptedPassword = this.cryptoService.encryptAes(password.toCharArray());
     }
 
     private void givenMockGetSnapshotsReturnEmpty() throws KuraException {
-        when(configurationService.getSnapshots()).thenReturn(new TreeSet<Long>());
+        when(configurationService.getSnapshots()).thenReturn(new TreeSet<>());
     }
 
     private void givenMockGetSnapshotsReturnSome(int howManySnapshots) throws KuraException {
@@ -1235,7 +1197,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     private void givenMockGetConfigurableComponentPidsReturnEmpty() throws KuraException {
-        when(configurationService.getConfigurableComponentPids()).thenReturn(new HashSet<String>());
+        when(configurationService.getConfigurableComponentPids()).thenReturn(new HashSet<>());
     }
 
     private void givenMockGetConfigurableComponentPidsReturnSome(int howManyComponents) throws KuraException {
@@ -1437,7 +1399,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
             return byPid.get(pid);
         });
 
-        Mockito.when(configurationService.getSnapshot(Mockito.anyLong()))
+        Mockito.when(configurationService.getSnapshot(ArgumentMatchers.anyLong()))
                 .thenReturn(byPid.values().stream().collect(Collectors.toList()));
     }
 
@@ -1450,6 +1412,33 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                                         .build()) //
                                 .build()) //
                 .withConfigurationProperties(singletonMap("testProp", value)).build());
+    }
+
+    private void thenResponseElementIs(final JsonValue expected, final JsonProjection projection) {
+        final JsonValue root = Json
+                .parse(expectResponse().body.orElseThrow(() -> new IllegalStateException("expected body")));
+        final JsonValue actual;
+
+        try {
+            actual = projection.apply(root);
+        } catch (final Exception e) {
+            fail("failed to apply " + projection + " to " + root);
+            throw new IllegalStateException("unreachable");
+        }
+
+        assertEquals("after applying " + projection + " to " + root, expected, actual);
+    }
+
+    private void thenResponseElementExists(final JsonProjection projection) {
+        final JsonValue root = Json
+                .parse(expectResponse().body.orElseThrow(() -> new IllegalStateException("expected body")));
+
+        try {
+            assertNotNull("response element " + projection + " is null", projection.apply(root));
+        } catch (final Exception e) {
+            fail("failed to apply " + projection + " to " + root);
+            throw new IllegalStateException("unreachable");
+        }
     }
 
     private void thenTestPropertyTypeIs(final JsonValue type) {

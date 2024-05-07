@@ -13,7 +13,10 @@
 package org.eclipse.kura.core.identity;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -48,7 +51,7 @@ public class ValidationUtil {
 
         requireMaximumLength(IDENTITY_NAME, identityName, 255);
 
-        new PunctuatedAlphanumericSequenceValidator(IDENTITY_NAME, new char[] { '.', '_' }).validate(identityName);
+        new PunctuatedAlphanumericSequenceValidator(IDENTITY_NAME, Arrays.asList('.', '_')).validate(identityName);
     }
 
     public static void validateNewPermissionName(final String permissionName) throws KuraException {
@@ -56,7 +59,8 @@ public class ValidationUtil {
 
         requireMaximumLength(PERMISSION_NAME, permissionName, 255);
 
-        new PunctuatedAlphanumericSequenceValidator(PERMISSION_NAME, new char[] { '.', }).validate(permissionName);
+        new PunctuatedAlphanumericSequenceValidator(PERMISSION_NAME, Collections.singletonList('.'))
+                .validate(permissionName);
     }
 
     private static void requireMinimumLength(final String parameterName, final String value, final int length)
@@ -88,11 +92,11 @@ public class ValidationUtil {
     private static class PunctuatedAlphanumericSequenceValidator {
 
         private final String parameterName;
-        private final char[] delimiters;
+        private final List<Character> delimiters;
 
         private static final Pattern ALPHANUMERIC_PATTERN = Pattern.compile("[a-zA-Z0-9]+");
 
-        public PunctuatedAlphanumericSequenceValidator(final String parameterName, final char[] delimiters) {
+        public PunctuatedAlphanumericSequenceValidator(final String parameterName, final List<Character> delimiters) {
             this.parameterName = parameterName;
             this.delimiters = delimiters;
         }
@@ -110,8 +114,8 @@ public class ValidationUtil {
         private void requireNonEmptyAlphanumericString(final String value) throws KuraException {
             if (!ALPHANUMERIC_PATTERN.matcher(value).matches()) {
                 throw new KuraException(KuraErrorCode.INVALID_PARAMETER, parameterName
-                        + " must be a composed of one or more non empty alphanumeric characters sequences separated by the following characters: "
-                        + Arrays.toString(delimiters));
+                        + " must be composed of one or more non empty alphanumeric characters sequences separated by the following characters: "
+                        + delimiters.stream().map(c -> "\'" + c + "\'").collect(Collectors.joining(" ")));
             }
         }
 

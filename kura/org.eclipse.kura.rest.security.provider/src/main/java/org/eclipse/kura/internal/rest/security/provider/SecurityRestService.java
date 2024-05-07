@@ -28,7 +28,12 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -39,9 +44,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Base64;
 import java.util.Optional;
 
 @Path("security/v1")
@@ -128,13 +135,14 @@ public class SecurityRestService {
      */
     @POST
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/security-policy/default-load")
+    @Path("/security-policy/load-default-production")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response loadDefaultSecurityPolicy() {
+    public Response loadDefaultProductionSecurityPolicy() {
         try {
-            logger.debug(DEBUG_MESSAGE, "loadDefaultSecurityPolicy");
+            logger.debug(DEBUG_MESSAGE, "loadDefaultProductionSecurityPolicy");
             copyDefaultSecurityPolicy();
             this.security.reloadSecurityPolicyFingerprint();
+            this.security.reloadCommandLineFingerprint();
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -155,11 +163,14 @@ public class SecurityRestService {
         try {
             logger.debug(DEBUG_MESSAGE, "uploadSecurityPolicy");
 
-            String securityPolicyContent = securityPolicy.getSecurityPolicy();
-            if (SecurityPolicyDTO.isEmptyOrNull(securityPolicyContent)) {
+            String securityPolicyContentBase64 = securityPolicy.getSecurityPolicy();
+            if (SecurityPolicyDTO.isEmptyOrNull(securityPolicyContentBase64)) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
                         "Security Policy not specified");
             }
+
+            byte[] securityPolicyContentBytes = Base64.getDecoder().decode(securityPolicyContentBase64);
+            String securityPolicyContent = new String(securityPolicyContentBytes);
 
             if (!isXmlValid(securityPolicyContent)) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
@@ -168,6 +179,7 @@ public class SecurityRestService {
 
             saveSecurityPolicy(securityPolicyContent);
             this.security.reloadSecurityPolicyFingerprint();
+            this.security.reloadCommandLineFingerprint();
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
@@ -228,8 +240,9 @@ public class SecurityRestService {
         DocumentBuilder parser = factory.newDocumentBuilder();
 
         try {
-            parser.parse(new InputSource(xml));
+            parser.parse(new InputSource(new StringReader(xml)));
         } catch (SAXException | IOException e) {
+            logger.error("Error parsing XML security policy", e);
             return false;
         }
 

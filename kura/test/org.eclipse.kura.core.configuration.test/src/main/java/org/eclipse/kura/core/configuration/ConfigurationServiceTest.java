@@ -45,17 +45,12 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.configuration.metatype.OCDService;
-import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
-import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.system.SystemService;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
 
 public class ConfigurationServiceTest {
 

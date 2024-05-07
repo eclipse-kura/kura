@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -14,9 +14,11 @@ package org.eclipse.kura.core.configuration;
 
 import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -24,6 +26,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -43,6 +46,7 @@ import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,7 +139,8 @@ public class CloudConfigurationHandler implements RequestHandler {
             payload = doGetSnapshots(resources);
         } else {
             logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
-            logger.error(CANNOT_FIND_RESOURCE_WITH_NAME_MESSAGE, resources.get(0));
+            String resource = resources.get(0);
+            logger.error(CANNOT_FIND_RESOURCE_WITH_NAME_MESSAGE, resource);
             throw new KuraException(KuraErrorCode.NOT_FOUND);
         }
 
@@ -158,7 +163,8 @@ public class CloudConfigurationHandler implements RequestHandler {
             payload = doPutConfigurations(resources, reqMessage.getPayload());
         } else {
             logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
-            logger.error(CANNOT_FIND_RESOURCE_WITH_NAME_MESSAGE, resources.get(0));
+            String resource = resources.get(0);
+            logger.error(CANNOT_FIND_RESOURCE_WITH_NAME_MESSAGE, resource);
             throw new KuraException(KuraErrorCode.NOT_FOUND);
         }
 
@@ -183,7 +189,8 @@ public class CloudConfigurationHandler implements RequestHandler {
             payload = doExecRollback(resources);
         } else {
             logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
-            logger.error(CANNOT_FIND_RESOURCE_WITH_NAME_MESSAGE, resources.get(0));
+            String resource = resources.get(0);
+            logger.error(CANNOT_FIND_RESOURCE_WITH_NAME_MESSAGE, resource);
             throw new KuraException(KuraErrorCode.NOT_FOUND);
         }
 
@@ -224,7 +231,7 @@ public class CloudConfigurationHandler implements RequestHandler {
             try {
                 sids = this.configurationService.getSnapshots();
             } catch (KuraException e) {
-                logger.error("Error listing snapshots: {}", e);
+                logger.error("Error listing snapshots", e);
                 throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_LISTING, e);
             }
             List<Long> snapshotIds = new ArrayList<>(sids);
@@ -272,7 +279,7 @@ public class CloudConfigurationHandler implements RequestHandler {
                 configs = getConfiguration(pid);
             }
         } catch (KuraException e) {
-            logger.error("Error getting component configurations: {}", e);
+            logger.error("Error getting component configurations", e);
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
@@ -301,46 +308,51 @@ public class CloudConfigurationHandler implements RequestHandler {
 
     private List<ComponentConfiguration> getAllConfigurations() {
 
-        List<ComponentConfiguration> configs = new ArrayList<>();
         List<String> pidsToIgnore = this.systemService.getDeviceManagementServiceIgnore();
 
         // the configuration for all components has been requested
         Set<String> componentPids = this.configurationService.getConfigurableComponentPids();
-        if (pidsToIgnore != null) {
-            Set<String> filteredComponentPids = componentPids.stream()
-                    .filter(((Predicate<String>) pidsToIgnore::contains).negate()).collect(Collectors.toSet());
-            filteredComponentPids.forEach(componentPid -> {
-                ComponentConfiguration cc;
-                try {
-                    cc = this.configurationService.getComponentConfiguration(componentPid);
 
-                    // TODO: define a validate method for ComponentConfiguration
-                    if (cc == null) {
-                        logger.error("null ComponentConfiguration");
-                        return;
-                    }
-                    if (cc.getPid() == null || cc.getPid().isEmpty()) {
-                        logger.error("null or empty ComponentConfiguration PID");
-                        return;
-                    }
-                    if (cc.getDefinition() == null) {
-                        logger.error("null OCD for ComponentConfiguration PID {}", cc.getPid());
-                        return;
-                    }
-                    if (cc.getDefinition().getId() == null || cc.getDefinition().getId().isEmpty()) {
+        Stream<String> componentPidsStream = componentPids.stream();
 
-                        logger.error("null or empty OCD ID for ComponentConfiguration PID {}. OCD ID: {}", cc.getPid(),
-                                cc.getDefinition().getId());
-                        return;
-                    }
-                    configs.add(cc);
-                } catch (KuraException e) {
-                    // Nothing needed here
-                }
-
-            });
+        if (pidsToIgnore != null && !pidsToIgnore.isEmpty()) {
+            componentPidsStream = componentPidsStream.filter(((Predicate<String>) pidsToIgnore::contains).negate());
         }
-        return configs;
+
+        return componentPidsStream //
+                .map(this::toComponentConfigurationIfValid) //
+                .filter(Objects::nonNull) //
+                .collect(Collectors.toList());
+    }
+
+    private ComponentConfiguration toComponentConfigurationIfValid(String pid) {
+        ComponentConfiguration cc = null;
+        try {
+            cc = this.configurationService.getComponentConfiguration(pid);
+
+            if (cc == null) {
+                logger.error("null ComponentConfiguration");
+                return null;
+            }
+            if (cc.getPid() == null || cc.getPid().isEmpty()) {
+                logger.error("null or empty ComponentConfiguration PID");
+                return null;
+            }
+            if (cc.getDefinition() == null) {
+                logger.error("null OCD for ComponentConfiguration PID {}", cc.getPid());
+                return null;
+            }
+            if (cc.getDefinition().getId() == null || cc.getDefinition().getId().isEmpty()) {
+
+                logger.error("null or empty OCD ID for ComponentConfiguration PID {}. OCD ID: {}", cc.getPid(),
+                        cc.getDefinition().getId());
+                return null;
+            }
+        } catch (KuraException ignore) {
+            // Nothing needed here
+        }
+
+        return cc;
     }
 
     private KuraPayload doPutConfigurations(List<String> resources, KuraPayload reqPayload) throws KuraException {
@@ -361,17 +373,16 @@ public class CloudConfigurationHandler implements RequestHandler {
                 throw new IllegalArgumentException("body");
             }
 
-            String s = new String(reqPayload.getBody(), "UTF-8");
+            String s = new String(reqPayload.getBody(), StandardCharsets.UTF_8);
             logger.info("Received new Configuration");
 
             xmlConfigs = unmarshal(s, XmlComponentConfigurations.class);
         } catch (Exception e) {
-            logger.error("Error unmarshalling the request body: {}", e);
+            logger.error("Error unmarshalling the request body", e);
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
-        this.executor.schedule(new UpdateConfigurationsCallable(pid, xmlConfigs, this.configurationService), 1000,
-                TimeUnit.MILLISECONDS);
+        update(pid, xmlConfigs);
 
         return new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
     }
@@ -410,7 +421,7 @@ public class CloudConfigurationHandler implements RequestHandler {
         try {
             snapshotId = this.configurationService.snapshot();
         } catch (KuraException e) {
-            logger.error("Error taking snapshot: {}", e);
+            logger.error("Error taking snapshot", e);
             throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_TAKING, e);
         }
         List<Long> snapshotIds = new ArrayList<>();
@@ -432,17 +443,12 @@ public class CloudConfigurationHandler implements RequestHandler {
         try {
             result = marshal(o);
         } catch (Exception e) {
-            logger.error("Error marshalling snapshots: {}", e);
+            logger.error("Error marshalling snapshots", e);
             throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_LOADING, e);
         }
 
         byte[] body = null;
-        try {
-            body = result.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            logger.error("Error encoding response body: {}", e);
-            throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_LOADING, e);
-        }
+        body = result.getBytes(StandardCharsets.UTF_8);
 
         return body;
     }
@@ -503,93 +509,94 @@ public class CloudConfigurationHandler implements RequestHandler {
         }
         return result;
     }
-}
 
-class UpdateConfigurationsCallable implements Callable<Void> {
-
-    private static Logger logger = LoggerFactory.getLogger(UpdateConfigurationsCallable.class);
-
-    private final String pid;
-    private final XmlComponentConfigurations xmlConfigurations;
-    private final ConfigurationService configurationService;
-    private final AuditContext auditContext;
-
-    public UpdateConfigurationsCallable(String pid, XmlComponentConfigurations xmlConfigurations,
-            ConfigurationService configurationService) {
-        this.pid = pid;
-        this.xmlConfigurations = xmlConfigurations;
-        this.configurationService = configurationService;
-        this.auditContext = AuditContext.currentOrInternal();
-    }
-
-    @Override
-    public Void call() throws Exception {
+    private void update(String pid, XmlComponentConfigurations xmlConfigurations) throws KuraException {
 
         logger.info("Updating configurations");
-        Thread.currentThread().setName(getClass().getSimpleName());
-        //
         // update the configuration
-        try (final Scope scope = AuditContext.openScope(auditContext)) {
-            List<ComponentConfiguration> configImpls = this.xmlConfigurations != null
-                    ? this.xmlConfigurations.getConfigurations()
+        try (final Scope scope = AuditContext.openScope(AuditContext.currentOrInternal())) {
+            List<ComponentConfiguration> configImpls = xmlConfigurations != null ? xmlConfigurations.getConfigurations()
                     : null;
+
             if (configImpls == null) {
-                return null;
+                return;
             }
 
             List<ComponentConfiguration> configs = new ArrayList<>();
             configs.addAll(configImpls);
 
-            if (this.pid == null) {
-                // update all the configurations provided
+            if (pid == null) {
+                validatePids(configs);
                 this.configurationService.updateConfigurations(configs);
             } else {
                 // update only the configuration with the provided id
                 for (ComponentConfiguration config : configs) {
-                    if (this.pid.equals(config.getPid())) {
-                        this.configurationService.updateConfiguration(this.pid, config.getConfigurationProperties());
+                    if (pid.equals(config.getPid())) {
+                        validatePids(Collections.singletonList(config));
+                        this.configurationService.updateConfiguration(pid, config.getConfigurationProperties());
+                        break;
                     }
                 }
             }
         } catch (KuraException e) {
-            logger.error("Error updating configurations: {}", e);
+            logger.error("Error updating configurations", e);
             throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, e);
         }
 
-        return null;
-    }
-}
-
-class RollbackCallable implements Callable<Void> {
-
-    private static Logger logger = LoggerFactory.getLogger(RollbackCallable.class);
-
-    private final Long snapshotId;
-    private final ConfigurationService configurationService;
-    private final AuditContext auditContext;
-
-    public RollbackCallable(Long snapshotId, ConfigurationService configurationService) {
-        super();
-        this.snapshotId = snapshotId;
-        this.configurationService = configurationService;
-        this.auditContext = AuditContext.currentOrInternal();
     }
 
-    @Override
-    public Void call() throws Exception {
-        Thread.currentThread().setName(getClass().getSimpleName());
-        // rollback to the specified snapshot if any
-        try (final Scope scope = AuditContext.openScope(auditContext)) {
-            if (this.snapshotId == null) {
-                this.configurationService.rollback();
-            } else {
-                this.configurationService.rollback(this.snapshotId);
+    // check whether the PIDs are tracked by the configuration service or they are factory components
+    private void validatePids(List<ComponentConfiguration> componentConfigurations) throws KuraException {
+        for (ComponentConfiguration componentConfiguration : componentConfigurations) {
+
+            String pid = componentConfiguration.getPid();
+
+            String serviceFactoryPid = (String) componentConfiguration.getConfigurationProperties()
+                    .get(ConfigurationAdmin.SERVICE_FACTORYPID);
+
+            boolean isServiceFactoryComponent = serviceFactoryPid != null && !serviceFactoryPid.isEmpty();
+
+            boolean pidExists = this.configurationService.getConfigurableComponentPids()
+                    .contains(componentConfiguration.getPid());
+
+            if (!isServiceFactoryComponent || !pidExists) {
+                throw new KuraException(KuraErrorCode.BAD_REQUEST,
+                        String.format("Component PID %s do not exist and it is not even a factory component.", pid));
             }
-        } catch (KuraException e) {
-            logger.error("Error rolling back to snapshot: {}", e);
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ROLLBACK, e);
+        }
+    }
+
+    static class RollbackCallable implements Callable<Void> {
+
+        private static Logger logger = LoggerFactory.getLogger(RollbackCallable.class);
+
+        private final Long snapshotId;
+        private final ConfigurationService configurationService;
+        private final AuditContext auditContext;
+
+        public RollbackCallable(Long snapshotId, ConfigurationService configurationService) {
+            super();
+            this.snapshotId = snapshotId;
+            this.configurationService = configurationService;
+            this.auditContext = AuditContext.currentOrInternal();
         }
 
-        return null;
+        @Override
+        public Void call() throws Exception {
+            Thread.currentThread().setName(getClass().getSimpleName());
+            // rollback to the specified snapshot if any
+            try (final Scope scope = AuditContext.openScope(this.auditContext)) {
+                if (this.snapshotId == null) {
+                    this.configurationService.rollback();
+                } else {
+                    this.configurationService.rollback(this.snapshotId);
+                }
+            } catch (KuraException e) {
+                logger.error("Error rolling back to snapshot", e);
+                throw new KuraException(KuraErrorCode.CONFIGURATION_ROLLBACK, e);
+            }
+
+            return null;
+        }
     }
 }

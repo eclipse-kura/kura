@@ -76,6 +76,39 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     }
 
     @Test
+    public void shouldCreateIdentityWithDotsInName() {
+        givenNoUserAdminRoleWithName("kura.user.foo.bar_baz");
+        whenIdentityIsCreated("foo.bar_baz");
+
+        thenNoExceptionIsThrown();
+        thenIdentityServiceReportsPermissionCreated(true);
+
+        thenUserAdminRoleExists("kura.user.foo.bar_baz", Role.USER);
+    }
+
+    @Test
+    public void shouldCreateIdentityWithBothCasesInName() {
+        givenNoUserAdminRoleWithName("kura.user.foO_bAr.Baz");
+        whenIdentityIsCreated("foO_bAr.Baz");
+
+        thenNoExceptionIsThrown();
+        thenIdentityServiceReportsPermissionCreated(true);
+
+        thenUserAdminRoleExists("kura.user.foO_bAr.Baz", Role.USER);
+    }
+
+    @Test
+    public void shouldCreateIdentityWithNameContainingNumbers() {
+        givenNoUserAdminRoleWithName("kura.user.fo1_ba2_ba3");
+        whenIdentityIsCreated("fo1_ba2_ba3");
+
+        thenNoExceptionIsThrown();
+        thenIdentityServiceReportsPermissionCreated(true);
+
+        thenUserAdminRoleExists("kura.user.fo1_ba2_ba3", Role.USER);
+    }
+
+    @Test
     public void shouldReportIdentityAlreadyExistingOnCreation() {
         givenUserAdminRole("kura.user.foo", Role.USER);
         whenIdentityIsCreated("foo");
@@ -513,6 +546,16 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     }
 
     @Test
+    public void shouldNotCreateIdentityWithTooShortName() {
+        givenNoUserAdminRoleWithName("kura.user.ab");
+        whenIdentityIsCreated("ab");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.user.ab");
+    }
+
+    @Test
     public void shouldNotCreateIdentityWithNameContainingOnlySpaces() {
         givenNoUserAdminRoleWithName("kura.user.         ");
         whenIdentityIsCreated("         ");
@@ -563,6 +606,66 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     }
 
     @Test
+    public void shouldNotCreateIdentityNameStartingWithDot() {
+        givenNoUserAdminRoleWithName("kura.user..foobar");
+        whenIdentityIsCreated(".foobar");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.user..foobar");
+    }
+
+    @Test
+    public void shouldNotCreateIdentityNameEndingWithDot() {
+        givenNoUserAdminRoleWithName("kura.user.foobar.");
+        whenIdentityIsCreated("foobar.");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.user.foobar.");
+    }
+
+    @Test
+    public void shouldNotCreateIdentityContainingASequenceOfTwoDots() {
+        givenNoUserAdminRoleWithName("kura.user.foobar..baz");
+        whenIdentityIsCreated("foobar..baz");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.user.foobar..baz");
+    }
+
+    @Test
+    public void shouldNotCreateIdentityNameStartingWithUnderscore() {
+        givenNoUserAdminRoleWithName("kura.user._foobar");
+        whenIdentityIsCreated("_foobar");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.user._foobar");
+    }
+
+    @Test
+    public void shouldNotCreateIdentityNameEndingWithUnderscore() {
+        givenNoUserAdminRoleWithName("kura.user.foobar_");
+        whenIdentityIsCreated("foobar_");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.user.foobar_");
+    }
+
+    @Test
+    public void shouldNotCreateIdentityContainingASequenceOfTwoUnderscores() {
+        givenNoUserAdminRoleWithName("kura.user.foobar__baz");
+        whenIdentityIsCreated("foobar__baz");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.user.foobar__baz");
+    }
+
+    @Test
     public void shouldAllow255CharactersIdentityName() {
         givenNoUserAdminRoleWithName("kura.user." + new String(repeat('a', 255)));
         whenIdentityIsCreated(new String(repeat('a', 255)));
@@ -601,6 +704,16 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
         thenExceptionIsThrown(KuraException.class);
 
         thenUserAdminRoleDoesNotExists("kura.permission.");
+    }
+
+    @Test
+    public void shouldNotCreatePermissionWithTooShortName() {
+        givenNoUserAdminRoleWithName("kura.permission.ab");
+        whenPermissionIsCreated("ab");
+
+        thenExceptionIsThrown(KuraException.class);
+
+        thenUserAdminRoleDoesNotExists("kura.permission.ab");
     }
 
     @Test

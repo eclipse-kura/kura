@@ -111,8 +111,8 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
     @Parameterized.Parameters(name = "{0} - {1}")
     public static Collection<?> transports() {
         return Arrays.asList(new Object[][] { //
-                { new MqttTransport(MQTT_APP_ID), "test-user-for-mqtt", "test.permission.for.mqtt" }, //
-                { new RestTransport(REST_APP_ID), "test-user-for-rest", "test.permission.for.rest" } });
+                { new MqttTransport(MQTT_APP_ID), "test_user_for_mqtt", "test.permission.for.mqtt" }, //
+                { new RestTransport(REST_APP_ID), "test_user_for_rest", "test.permission.for.rest" } });
     }
 
     @Test

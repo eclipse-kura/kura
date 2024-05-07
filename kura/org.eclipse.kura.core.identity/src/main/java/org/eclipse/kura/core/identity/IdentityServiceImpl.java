@@ -190,7 +190,7 @@ public class IdentityServiceImpl implements IdentityService {
                     .getComponent(AssignedPermissions.class);
 
             if (assignedPermissions.isPresent()) {
-                validateAssignedPermissions(identityConfiguration, assignedPermissions.get());
+                validateAssignedPermissions(assignedPermissions.get());
             }
         }, "Validate configuration for identity" + identityConfiguration.getName());
 
@@ -450,8 +450,7 @@ public class IdentityServiceImpl implements IdentityService {
         }
     }
 
-    private void validateAssignedPermissions(final IdentityConfiguration identityConfiguration,
-            final AssignedPermissions assignedPermissions) throws KuraException {
+    private void validateAssignedPermissions(final AssignedPermissions assignedPermissions) throws KuraException {
         for (final Permission permission : assignedPermissions.getPermissions()) {
             if (!this.userAdminHelper.getPermission(permission.getName()).isPresent()) {
                 throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Permission does not exist");

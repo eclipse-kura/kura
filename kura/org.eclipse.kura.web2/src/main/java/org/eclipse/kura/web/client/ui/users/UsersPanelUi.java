@@ -163,12 +163,13 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
                 .setTitle(MSGS.usersCreateIdentity()) //
                 .setMessage(MSGS.usersIdentityName()) //
                 .setValidators(Arrays.asList(
-                        GwtValidators.nonEmpty(MSGS.usersIdentityNameEmpty()),
-                        GwtValidators.noWhitespaceCharacters(MSGS.usersIdentityNameWhitespaceCharacters()),
-                        GwtValidators.stringLength(255, MSGS.usersIdentityNameTooLong()), //
+                        GwtValidators.nonEmpty(MSGS.usersIdentityNameEmpty()), //
+                        GwtValidators.punctuatedAlphanumericSequence(new char[] { '.', '_' },
+                                MSGS.usersIdentityNameAllowedCharacters()), //
+                        GwtValidators.stringLength(3, 255, MSGS.usersIdentityNameLength()), //
                         GwtValidators.predicate(
-                                userName -> !this.dataProvider.getList().stream()
-                                        .anyMatch(d -> d.getUserName().equals(userName)),
+                                userName -> this.dataProvider.getList().stream()
+                                        .noneMatch(d -> d.getUserName().equals(userName)),
                                 MSGS.usersIdentityAlreadyExists())))
                 .setOnPick(user -> RequestQueue.submit(
                         c -> this.gwtXsrfService.generateSecurityToken(c.callback(token -> this.gwtUserService

@@ -28,6 +28,7 @@ import org.eclipse.kura.web.shared.validator.PEMValidator;
 import org.eclipse.kura.web.shared.validator.PKCS8Validator;
 import org.eclipse.kura.web.shared.validator.PasswordStrengthValidators;
 import org.eclipse.kura.web.shared.validator.PredicateValidator;
+import org.eclipse.kura.web.shared.validator.PunctuatedAlphanumericSequenceValidator;
 import org.eclipse.kura.web.shared.validator.RegexValidator;
 import org.eclipse.kura.web.shared.validator.SinglePEMValidator;
 import org.eclipse.kura.web.shared.validator.StringLengthValidator;
@@ -133,6 +134,11 @@ public class GwtValidators {
 
     public static Validator<String> noWhitespaceCharacters(final String message) {
         return new ValidatorWrapper<String>(new NoWhitespaceCharactersValidator(message), Priority.MEDIUM) {
+        };
+    }
+
+    public static Validator<String> punctuatedAlphanumericSequence(final char[] delimiters, final String message) {
+        return new ValidatorWrapper<String>(new PunctuatedAlphanumericSequenceValidator(delimiters, message), Priority.MEDIUM) {
         };
     }
 

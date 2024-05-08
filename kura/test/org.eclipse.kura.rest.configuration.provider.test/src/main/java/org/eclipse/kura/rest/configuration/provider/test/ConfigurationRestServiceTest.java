@@ -459,6 +459,18 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void testUpdateConfigurationBooleanPropertyTrueAndFactoryComponent() throws KuraException {
+
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
+                + "{\"pid\":\"foo\","
+                + "properties: {\"testProp\":{\"type\":\"BOOLEAN\",\"value\":true},\"service.factoryPid\":{\"type\":\"STRING\",\"value\": \"foo\"}}"
+                + "}" + "]}");
+
+        thenRequestSucceeds();
+        thenReceivedPropertiesForPidContains("foo", "testProp", true);
+    }
+
+    @Test
     public void testUpdateConfigurationBooleanPropertyFalse() throws KuraException {
 
         givenConfigurations(configurationBuilder("foo") //

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -63,7 +63,6 @@ import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -78,7 +77,6 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonValue;
 
-@Ignore
 @RunWith(Parameterized.class)
 public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
@@ -110,7 +108,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/snapshots");
 
-        thenResponseCodeIs(500);
+        thenResponseCodeIs(400);
     }
 
     @Test
@@ -442,6 +440,16 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateConfigurationBooleanPropertyTrue() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.BOOLEAN) //
+                                        .withDefault("false") //
+                                        .build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", Boolean.TRUE)).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"BOOLEAN\",\"value\":true}}" + "}" + "]}");
@@ -452,6 +460,16 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateConfigurationBooleanPropertyFalse() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.BOOLEAN) //
+                                        .withDefault("false") //
+                                        .build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", Boolean.TRUE)).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"BOOLEAN\",\"value\":false}}" + "}" + "]}");
@@ -462,6 +480,16 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateByteProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.BYTE) //
+                                        .withDefault("0") //
+                                        .build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", new Byte((byte) 0))).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"BYTE\",\"value\":15}}" + "}" + "]}");
 
@@ -471,6 +499,16 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateCharProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.CHAR) //
+                                        .withDefault("b") //
+                                        .build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", new Character('b'))).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":\"a\"}}" + "}" + "]}");
 
@@ -480,6 +518,16 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateDoubleProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.DOUBLE) //
+                                        .withDefault("1.0") //
+                                        .build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", new Double(1.0d))).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"DOUBLE\",\"value\":2.0}}" + "}" + "]}");
 
@@ -489,6 +537,16 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateFloatProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.FLOAT) //
+                                        .withDefault("1.0") //
+                                        .build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", new Float(1.0))).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"FLOAT\",\"value\":2.0}}" + "}" + "]}");
 
@@ -498,6 +556,16 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateIntegerProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.INTEGER) //
+                                        .withDefault("12") //
+                                        .build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", new Integer(12))).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"INTEGER\",\"value\":123}}" + "}" + "]}");
 
@@ -507,6 +575,16 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateLongProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.LONG) //
+                                        .withDefault("12") //
+                                        .build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", new Long(12))).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"LONG\",\"value\":123}}" + "}" + "]}");
 
@@ -516,6 +594,16 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdatePasswordProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.PASSWORD) //
+                                        .withDefault("foo") //
+                                        .build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", new Password("foo"))).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"PASSWORD\",\"value\":\"foobar\"}}" + "}" + "]}");
@@ -526,6 +614,16 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateStringProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.STRING) //
+                                        .withDefault("foo") //
+                                        .build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", "foo")).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"STRING\",\"value\":\"test string\"}}" + "}" + "]}");
@@ -536,6 +634,15 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateBooleanArrayProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.BOOLEAN) //
+                                        .withCardinality(Integer.MAX_VALUE).build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", new Boolean[] { false, false, false })).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"BOOLEAN\",\"value\":[false,true,false]}}" + "}"
@@ -547,6 +654,15 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateByteArrayProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.BYTE) //
+                                        .withCardinality(Integer.MAX_VALUE).build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", new Byte[] { 0, 0 })).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"BYTE\",\"value\":[15,12]}}" + "}" + "]}");
@@ -557,6 +673,15 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateCharArrayProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.CHAR) //
+                                        .withCardinality(Integer.MAX_VALUE).build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", new Character[] { 'a', 'a', 'a' })).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":[\"a\",\"b\",\"c\"]}}" + "}" + "]}");
@@ -567,6 +692,15 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateDoubleArrayProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.DOUBLE) //
+                                        .withCardinality(Integer.MAX_VALUE).build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", new Double[] { 0.0, 0.0 })).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"DOUBLE\",\"value\":[2.0,3.0]}}" + "}" + "]}");
@@ -577,6 +711,15 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateFloatArrayProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.FLOAT) //
+                                        .withCardinality(Integer.MAX_VALUE).build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", new Float[] { 0.0f, 0.0f })).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"FLOAT\",\"value\":[2.0,4.0]}}" + "}" + "]}");
@@ -587,6 +730,15 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateIntegerArrayProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.INTEGER) //
+                                        .withCardinality(Integer.MAX_VALUE).build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", new Integer[] { 0, 0, 0 })).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"INTEGER\",\"value\":[1,2,3]}}" + "}" + "]}");
@@ -597,6 +749,15 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateLongArrayProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.LONG) //
+                                        .withCardinality(Integer.MAX_VALUE).build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", new Long[] { 0l, 0l, 0l })).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"LONG\",\"value\":[1,2,3]}}" + "}" + "]}");
@@ -607,6 +768,15 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdatePasswordArrayProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.PASSWORD) //
+                                        .withCardinality(Integer.MAX_VALUE).build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", new Password[] { new Password("") })).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"PASSWORD\",\"value\":[\"foobar\",\"a\"]}}" + "}"
@@ -618,6 +788,15 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateStringArrayProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.STRING) //
+                                        .withCardinality(Integer.MAX_VALUE).build()) //
+                                .build()) //
+                .withConfigurationProperties(singletonMap("testProp", new String[] { "", "" })).build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"STRING\",\"value\":[\"test string\",\"foo\"]}}" + "}"
@@ -629,6 +808,15 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateNullProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.STRING).build()) //
+                                .withAd(adBuilder("otherProp", Scalar.STRING).build()) //
+                                .build())
+                .build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\","
                 + "properties: {\"testProp\":{\"type\":\"STRING\"},\"otherProp\":{\"type\":\"STRING\",\"value\":null}}"
@@ -641,6 +829,15 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testUpdateNullsInArrayProperty() throws KuraException {
+
+        givenConfigurations(configurationBuilder("foo") //
+                .withDefinition( //
+                        ocdBuilder("foo") //
+                                .withAd(adBuilder("testProp", Scalar.STRING) //
+                                        .withCardinality(Integer.MAX_VALUE).build()) //
+                                .build()) //
+                .build());
+
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"STRING\",value:[null,\"foo\",null]}}" + "}" + "]}");
@@ -1397,6 +1594,10 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         Mockito.when(configurationService.getDefaultComponentConfiguration(ArgumentMatchers.any())).thenAnswer(i -> {
             final String pid = i.getArgument(0, String.class);
             return byPid.get(pid);
+        });
+
+        Mockito.when(configurationService.getConfigurableComponentPids()).thenAnswer(i -> {
+            return byPid.keySet();
         });
 
         Mockito.when(configurationService.getSnapshot(ArgumentMatchers.anyLong()))

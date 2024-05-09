@@ -15,6 +15,7 @@ package org.eclipse.kura.core.configuration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -23,6 +24,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,9 +38,11 @@ import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.internal.xml.marshaller.unmarshaller.XmlMarshallUnmarshallImpl;
 import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.system.SystemService;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -68,6 +72,8 @@ public class CloudConfigurationHandlerTest {
                     + "<esf:value>%s</esf:value>" + //
                     "</esf:property>";
 
+    private KuraMessage response;
+
     @Test
     public void shouldUpdateComponentWithExistingPid() {
 
@@ -78,6 +84,7 @@ public class CloudConfigurationHandlerTest {
         whenUpdate();
 
         thenNoExceptionOccurred();
+        thenResponseCodeIs(KuraResponsePayload.RESPONSE_CODE_OK);
     }
 
     @Test
@@ -90,6 +97,7 @@ public class CloudConfigurationHandlerTest {
         whenUpdate();
 
         thenNoExceptionOccurred();
+        thenResponseCodeIs(KuraResponsePayload.RESPONSE_CODE_OK);
     }
 
     @Test
@@ -101,6 +109,20 @@ public class CloudConfigurationHandlerTest {
         whenUpdate();
 
         thenExceptionOccurred(KuraException.class);
+    }
+
+    @Test
+    public void shouldGetAllComponentConfigurations() {
+
+        givenExistingComponentWithPid("testPid", Collections.emptyMap());
+        givenExistingComponentWithPid("testPid2", Collections.emptyMap());
+        givenCloudConfigurationHandler();
+
+        whenGetAllComponentConfigurations();
+
+        thenNoExceptionOccurred();
+        thenResponseCodeIs(KuraResponsePayload.RESPONSE_CODE_OK);
+        thenResponseContainsComponentWithPid("testPid", "testPid2");
     }
 
     private void givenCloudConfigurationHandler() {
@@ -162,19 +184,49 @@ public class CloudConfigurationHandlerTest {
 
     private void whenUpdate() {
         try {
-            this.cloudConfigurationHandler.doPut(mock(RequestHandlerContext.class), this.requestMessage);
+            this.response = this.cloudConfigurationHandler.doPut(mock(RequestHandlerContext.class),
+                    this.requestMessage);
         } catch (KuraException e) {
             this.occurredException = e;
         }
     }
 
-    private Map<String, Object> toPropertyMap(String... properties) {
-        Map<String, Object> map = new HashMap<>();
-        for (int i = 0; i < properties.length; i += 2) {
-            map.put(properties[i], properties[i + 1]);
+    private void whenGetAllComponentConfigurations() {
+        try {
+            List<String> resources = new ArrayList<>();
+            resources.add(CloudConfigurationHandler.RESOURCE_CONFIGURATIONS);
+
+            Map<String, Object> properties = new HashMap<>();
+            properties.put(RequestHandlerMessageConstants.ARGS_KEY.value(), resources);
+            this.requestMessage = new KuraMessage(new KuraPayload(), properties);
+
+            this.response = this.cloudConfigurationHandler.doGet(mock(RequestHandlerContext.class),
+                    this.requestMessage);
+        } catch (KuraException e) {
+            this.occurredException = e;
         }
 
-        return map;
+    }
+
+    private void thenResponseContainsComponentWithPid(String... pids) {
+        try {
+            Set<String> pidSet = new HashSet<>(Arrays.asList(pids));
+            byte[] body = this.response.getPayload().getBody();
+            XmlComponentConfigurations xmlConfigs = this.xmlMarshallerUnmarshall
+                    .unmarshal(new String(body, StandardCharsets.UTF_8), XmlComponentConfigurations.class);
+
+            boolean pidsMatch = xmlConfigs.getConfigurations().stream().map(ComponentConfiguration::getPid)
+                    .allMatch(pidSet::contains);
+            assertTrue(pidsMatch);
+        } catch (KuraException e) {
+            e.printStackTrace();
+            fail("unable to unmarshall KuraPayload body");
+        }
+    }
+
+    private void thenResponseCodeIs(int expectedResponseCode) {
+        int responseCode = (Integer) this.response.getPayload().getMetric(KuraResponsePayload.METRIC_RESPONSE_CODE);
+        assertEquals(expectedResponseCode, responseCode);
     }
 
     private void thenNoExceptionOccurred() {
@@ -193,5 +245,14 @@ public class CloudConfigurationHandlerTest {
     private <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
         assertNotNull(this.occurredException);
         assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
+    }
+
+    private Map<String, Object> toPropertyMap(String... properties) {
+        Map<String, Object> map = new HashMap<>();
+        for (int i = 0; i < properties.length; i += 2) {
+            map.put(properties[i], properties[i + 1]);
+        }
+
+        return map;
     }
 }

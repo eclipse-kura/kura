@@ -4650,17 +4650,28 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>A password may be assigned to an identity by defining a property in <strong>User</strong> <strong>credentials</strong> with the following format:</p>
 </li>
 <li>The property name must be <code>kura.password</code></li>
-<li>
-<p>The property value must be a string containing SHA256 hash of the password, as computed by the
+<li>The property value must be a string containing SHA256 hash of the password, as computed by the
   <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>String org.eclipse.kura.crypto.CryptoService.sha256Hash(String)
 </code></pre></div>
-    method.</p>
+    method.</li>
+</ul>
+<p>Starting from Kura 5.1, it is possible to force an identity to change the password at next login by setting the following property in <strong>User</strong> <strong>properties</strong>:
+  - <code>kura.need.password.change</code> : <code>true</code> encoded as a JSON string.
+  - The property will be cleared automatically after a successful password change on next login.</p>
+<p>Starting from Kura 5.5 the following restrictions will be applied by the IdentityService:</p>
+<ul>
+<li>New Identity Names:<ul>
+<li>must be at least 3 and at most 255 characters long.</li>
+<li>can only be composed by one or more sequences of alphanumeric characters (<code>[A-Za-z0-9]+</code>) separated by the dot or underscore symbols, dot and underscore is not allowed at the beginning or at the end of the permission name, sequences of consecutive dots and/or underscores are not allowed (examples of valid names are <code>foo1.bAr</code>, <code>foo</code>, <code>a.b.c</code>, <code>foo.bar_baz</code>).</li>
+</ul>
 </li>
-<li>
-<p>Starting from Kura 5.1, it is possible to force an identity to change the password at next login by setting the following property in <strong>User</strong> <strong>properties</strong>:</p>
+<li>New Passwords:<ul>
+<li>cannot be empty.</li>
+<li>must satisfy the password strenght requirements configured on the system.</li>
+<li>the maximum allowed length is 255 characters.</li>
+<li>cannot contain whitespace characters.</li>
+</ul>
 </li>
-<li><code>kura.need.password.change</code> : <code>true</code> encoded as a JSON string.</li>
-<li>The property will be cleared automatically after a successful password change on next login.</li>
 </ul>
 <h3 id="permissions">Permissions</h3>
 <p>A Kura permission is represented as a <strong>UserAdmin</strong> <strong>Group</strong> with the following properties:</p>
@@ -4671,6 +4682,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>
 <p>Assigning a permission to a specific identity can be done by adding the <strong>User</strong> representing the identity to the <strong>basic members</strong> of the <strong>Group</strong> representing the permission.</p>
 </li>
+</ul>
+<p>Starting from Kura 5.5 the following restrictions will be applied by the IdentityService to the name new permissions:</p>
+<ul>
+<li>must be at least 3 and at most 255 characters long.</li>
+<li>can only be composed by one or more sequences of alphanumeric characters (<code>[A-Za-z0-9]+</code>) separated by the dot symbol, the dot is not allowed at the beginning or at the end of the permission name (examples of valid permission names are <code>foo1.bAr</code>, <code>foo</code>, <code>a.b.c</code>).</li>
 </ul>
 <h2 id="useradmin-persistence">UserAdmin persistence</h2>
 <p>The <code>org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl</code> Kura service allows to persist the UserAdmin state in Kura configuration snapshot, this includes the defined identities and permissions.</p>

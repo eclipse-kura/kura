@@ -5260,7 +5260,7 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
 <h2 id="post-methods">POST methods</h2>
 <h4 id="create-user">Create User</h4>
 <ul>
-<li>Description: This method allows to create a new user in the system.</li>
+<li>Description: This method allows to create a new identity in the system. Identity name must respect the <a href="/gateway-configuration/authentication-and-authorization/#identities">requirements enforced by the IdentityService</a>.</li>
 <li>Method: POST</li>
 <li>API PATH: <code>services/identity/v2/identities</code></li>
 </ul>
@@ -5272,7 +5272,7 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
 <h5 id="responses">Responses</h5>
 <ul>
 <li>200 OK status</li>
-<li>400 Bad Request (Identity name not specified)</li>
+<li>400 Bad Request (Identity name is not valid)</li>
 <li>409 Conflict (Identity already exists)</li>
 <li>500 Internal Server Error</li>
 </ul>
@@ -5382,7 +5382,7 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
 </ul>
 <h4 id="create-permission">Create Permission</h4>
 <ul>
-<li>Description: This method allows to create a new permission in the system.</li>
+<li>Description: This method allows to create a new permission in the system. Permission name must respect the <a href="/gateway-configuration/authentication-and-authorization/#permissions">requirements enforced by the IdentityService</a>.</li>
 <li>Method: POST</li>
 <li>API PATH: <code>services/identity/v2/permissions</code></li>
 </ul>
@@ -5394,7 +5394,7 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
 <h5 id="responses_1">Responses</h5>
 <ul>
 <li>200 OK status</li>
-<li>400 Bad Request (Permission name not specified)</li>
+<li>400 Bad Request (Permission name not valid)</li>
 <li>409 Conflict (Permission already exists)</li>
 <li>500 Internal Server Error</li>
 </ul>
@@ -5608,7 +5608,7 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
 <h2 id="put-methods">PUT methods</h2>
 <h4 id="update-identity">Update Identity</h4>
 <ul>
-<li>Description: This method allows to update an existing identity in the system.</li>
+<li>Description: This method allows to update an existing identity in the system. New passwords must respect the <a href="/gateway-configuration/authentication-and-authorization/#identities">requirements enforced by the IdentityService</a>.</li>
 <li>Method: PUT</li>
 <li>API PATH: <code>services/identity/v2/identities</code></li>
 </ul>

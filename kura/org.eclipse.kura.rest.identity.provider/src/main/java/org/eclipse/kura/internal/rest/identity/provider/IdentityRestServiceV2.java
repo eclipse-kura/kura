@@ -13,13 +13,10 @@
 package org.eclipse.kura.internal.rest.identity.provider;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
@@ -30,11 +27,12 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.lang3.StringUtils;
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
@@ -44,7 +42,6 @@ import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityConfigurationComponent;
 import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.PasswordConfiguration;
-import org.eclipse.kura.identity.PasswordHash;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.internal.rest.identity.provider.util.IdentityDTOUtils;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityConfigurationDTO;
@@ -61,8 +58,6 @@ import org.slf4j.LoggerFactory;
 
 @Path("identity/v2")
 public class IdentityRestServiceV2 {
-
-    private static final String IDENTITY_NAME_NOT_SPECIFIED_ERROR = "Identity name not specified";
 
     private static final Logger logger = LoggerFactory.getLogger(IdentityRestServiceV2.class);
 
@@ -115,16 +110,12 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "createIdentity");
 
         try {
-            if (StringUtils.isEmpty(identity.getName())) {
-                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
-                        IDENTITY_NAME_NOT_SPECIFIED_ERROR);
-            }
             boolean created = this.identityService.createIdentity(identity.getName());
             if (!created) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.CONFLICT, "Identity already exists");
             }
         } catch (Exception e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
+            throw toWebApplicationException(e);
         }
 
         return Response.ok().build();
@@ -138,14 +129,10 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "updateIdentity");
         try {
 
-            List<IdentityConfiguration> configurations = Collections
-                    .singletonList(IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO,
-                            passwordHashFunction(), validatePasswordFunction()));
-
-            this.identityService.validateIdentityConfigurations(configurations);
-            this.identityService.updateIdentityConfigurations(configurations);
+            this.identityService
+                    .updateIdentityConfiguration(IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO));
         } catch (Exception e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
+            throw toWebApplicationException(e);
         }
 
         return Response.ok().build();
@@ -172,7 +159,7 @@ public class IdentityRestServiceV2 {
 
             return IdentityDTOUtils.fromIdentityConfiguration(identityConfiguration.get());
         } catch (Exception e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
+            throw toWebApplicationException(e);
         }
 
     }
@@ -196,7 +183,7 @@ public class IdentityRestServiceV2 {
 
             return IdentityDTOUtils.fromIdentityConfiguration(identityConfiguration);
         } catch (KuraException e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
+            throw toWebApplicationException(e);
         }
 
     }
@@ -208,16 +195,12 @@ public class IdentityRestServiceV2 {
     public Response deleteIdentity(final IdentityDTO identity) {
         logger.debug(DEBUG_MESSAGE, "deleteIdentity");
         try {
-            if (StringUtils.isEmpty(identity.getName())) {
-                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
-                        IDENTITY_NAME_NOT_SPECIFIED_ERROR);
-            }
             boolean deleted = this.identityService.deleteIdentity(identity.getName());
             if (!deleted) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND, "Identity not found");
             }
         } catch (Exception e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
+            throw toWebApplicationException(e);
         }
 
         return Response.ok().build();
@@ -232,7 +215,7 @@ public class IdentityRestServiceV2 {
             return this.identityService.getPermissions().stream().map(IdentityDTOUtils::fromPermission)
                     .collect(Collectors.toSet());
         } catch (Exception e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
+            throw toWebApplicationException(e);
         }
     }
 
@@ -247,7 +230,7 @@ public class IdentityRestServiceV2 {
                     .map(IdentityDTOUtils::fromIdentityConfiguration).collect(Collectors.toList());
 
         } catch (Exception e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
+            throw toWebApplicationException(e);
         }
     }
 
@@ -260,7 +243,7 @@ public class IdentityRestServiceV2 {
             return IdentityDTOUtils.fromPasswordStrengthRequirements(
                     this.passwordStrengthVerificationService.getPasswordStrengthRequirements());
         } catch (Exception e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
+            throw toWebApplicationException(e);
         }
     }
 
@@ -272,20 +255,13 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "createPermission");
 
         try {
-            if (permissionDTO.getName().isEmpty()) {
-                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
-                        "Permission not specified");
-            }
             boolean created = this.identityService.createPermission(IdentityDTOUtils.toPermission(permissionDTO));
             if (!created) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.CONFLICT,
                         "Permission already exists");
             }
         } catch (KuraException e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
-        } catch (IllegalArgumentException ex) {
-            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
-                    "Permission name can't be composed by spaces only");
+            throw toWebApplicationException(e);
         }
 
         return Response.ok().build();
@@ -305,7 +281,7 @@ public class IdentityRestServiceV2 {
             }
 
         } catch (KuraException e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
+            throw toWebApplicationException(e);
         }
 
         return Response.ok().build();
@@ -317,19 +293,10 @@ public class IdentityRestServiceV2 {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response validateIdentityConfiguration(final IdentityConfigurationDTO identityConfigurationDTO) {
         try {
-
-            if (identityConfigurationDTO.getIdentity().getName().isEmpty()) {
-                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
-                        IDENTITY_NAME_NOT_SPECIFIED_ERROR);
-            }
-
-            List<IdentityConfiguration> configurations = Collections
-                    .singletonList(IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO,
-                            passwordHashFunction(), validatePasswordFunction()));
-
-            this.identityService.validateIdentityConfigurations(configurations);
+            this.identityService
+                    .validateIdentityConfiguration(IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO));
         } catch (KuraException e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
+            throw toWebApplicationException(e);
         }
 
         return Response.ok().build();
@@ -340,24 +307,12 @@ public class IdentityRestServiceV2 {
                 Arrays.asList(AdditionalConfigurations.class, AssignedPermissions.class, PasswordConfiguration.class));
     }
 
-    private Consumer<char[]> validatePasswordFunction() {
-        return psw -> {
-            try {
-                this.passwordStrengthVerificationService.checkPasswordStrength(psw);
-            } catch (KuraException e) {
-                throw DefaultExceptionHandler.toWebApplicationException(e);
-            }
-        };
-    }
-
-    private Function<char[], PasswordHash> passwordHashFunction() {
-        return psw -> {
-            try {
-                return this.identityService.computePasswordHash(psw);
-            } catch (KuraException e) {
-                throw DefaultExceptionHandler.toWebApplicationException(e);
-            }
-        };
+    private WebApplicationException toWebApplicationException(final Exception e) {
+        if (e instanceof KuraException && ((KuraException) e).getCode() == KuraErrorCode.INVALID_PARAMETER) {
+            return DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST, e.getMessage());
+        } else {
+            return DefaultExceptionHandler.toWebApplicationException(e);
+        }
     }
 
 }

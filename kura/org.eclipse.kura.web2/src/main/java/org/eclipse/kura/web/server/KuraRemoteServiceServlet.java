@@ -25,7 +25,6 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.UserManager;
@@ -151,7 +150,7 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
         Optional<GwtUserConfig> config;
         try {
             config = userManager.getUserConfig(userName);
-        } catch (KuraException e) {
+        } catch (GwtKuraException e) {
             throw new KuraPermissionException();
         }
 

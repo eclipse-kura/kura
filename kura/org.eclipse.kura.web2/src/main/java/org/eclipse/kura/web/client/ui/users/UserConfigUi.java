@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.users;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +39,6 @@ import org.gwtbootstrap3.client.ui.constants.InputType;
 import org.gwtbootstrap3.client.ui.form.validator.Validator;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -94,7 +94,7 @@ public class UserConfigUi extends Composite {
         this.listener = listener;
         this.userData = userData;
         this.hasPassword = userData.isPasswordAuthEnabled();
-        this.passwordStrengthValidators = GwtValidators.passwordStrength(EntryClassUi.getUserOptions());
+        this.passwordStrengthValidators = GwtValidators.newPassword(EntryClassUi.getUserOptions());
         initWidget(uiBinder.createAndBindUi(this));
         initTable(userData, definedPermissions);
         initPasswordWidgets();
@@ -195,7 +195,7 @@ public class UserConfigUi extends Composite {
                     if (!hasConfiguration.isDirty()) {
                         return;
                     }
-                    
+
                     if (hasConfiguration.isValid()) {
                         final GwtConfigComponent updatedConfiguration = hasConfiguration.getConfiguration();
 
@@ -204,7 +204,7 @@ public class UserConfigUi extends Composite {
                         listener.onUserDataChanged(userData);
                     }
                 }
-                
+
             });
 
             final PanelHeader header = new PanelHeader();
@@ -271,35 +271,21 @@ public class UserConfigUi extends Composite {
             }
         };
 
-        this.picker.builder(String.class) //
+        this.picker.builder() //
                 .setTitle(MSGS.usersSetPassword()) //
                 .setMessage(MSGS.usersDefineNewPassword()) //
                 .setInputCustomizer(input -> input.setType(InputType.PASSWORD)) //
                 .setOnCancel(onDismiss) //
-                .setValidator((editor, password) -> {
-                    if (password == null || password.trim().isEmpty()) {
-                        throw new IllegalArgumentException(MSGS.usersPasswordEmpty());
-                    }
-                    for (final Validator<String> validator : this.passwordStrengthValidators) {
-                        final List<EditorError> errors = validator.validate(editor, password);
-                        if (!errors.isEmpty()) {
-                            throw new IllegalArgumentException(errors.get(0).getMessage());
-                        }
-                    }
-
-                    return password;
-                }).setOnPick(newPassword -> this.picker.builder(String.class) //
+                .setValidators(this.passwordStrengthValidators) //
+                .setOnPick(newPassword -> this.picker.builder() //
                         .setTitle(MSGS.usersConfirmPassword()) //
                         .setMessage(MSGS.usersRepeatPassword()) //
                         .setInputCustomizer(input -> input.setType(InputType.PASSWORD)) //
                         .setOnCancel(onDismiss) //
-                        .setValidator((e, confirm) -> {
-                            if (!newPassword.equals(confirm)) {
-                                throw new IllegalArgumentException(MSGS.usersPasswordMismatch());
-                            }
-
-                            return confirm;
-                        }).setOnPick(p -> {
+                        .setValidators(Collections.singletonList(
+                                GwtValidators.predicate(confirm -> newPassword.equals(confirm),
+                                        MSGS.usersPasswordMismatch()))) //
+                        .setOnPick(p -> {
                             this.userData.setNewPassword(Optional.of(p));
                             this.listener.onUserDataChanged(this.userData);
                         }).pick())

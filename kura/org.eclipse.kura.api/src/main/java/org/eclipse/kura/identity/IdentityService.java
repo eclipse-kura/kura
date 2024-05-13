@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.identity;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -107,29 +106,29 @@ public interface IdentityService {
             Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws KuraException;
 
     /**
-     * Validates the provided list of identity configurations without performing any
+     * Validates the provided identity configuration without performing any
      * change to the system.
      * 
-     * @param identityConfigurations the identity configurations that should be
-     *                               validated.
-     * @throws KuraException if any the provided identity configurations is not
+     * @param identityConfiguration the identity configuration that should be
+     *                              validated.
+     * @throws KuraException if the provided identity configuration is not
      *                       valid.
      */
-    public void validateIdentityConfigurations(final Collection<IdentityConfiguration> identityConfigurations)
+    public void validateIdentityConfiguration(final IdentityConfiguration identityConfiguration)
             throws KuraException;
 
     /**
-     * Updates the configuration of the given identities for the provided
+     * Updates the configuration of the given identity for the provided
      * {@link IdentityConfigurationComponent} types.
      * The configuration of the identities or identity
      * components that have not been provided will not be modified.
      * 
-     * @param identityConfigurations the identity configurations that should be
-     *                               updated.
+     * @param identityConfiguration the identity configuration that should be
+     *                              updated.
      * @throws KuraException if a failure occurs updating identity
-     *                       configurations.
+     *                       configuration.
      */
-    public void updateIdentityConfigurations(final Collection<IdentityConfiguration> identityConfigurations)
+    public void updateIdentityConfiguration(final IdentityConfiguration identityConfiguration)
             throws KuraException;
 
     /**
@@ -174,4 +173,29 @@ public interface IdentityService {
      * @throws KuraException if a failure occurs computing the password hash
      */
     public PasswordHash computePasswordHash(final char[] password) throws KuraException;
+
+    /**
+     * Checks if the provided password matches the one currently assigned to the
+     * given identity.
+     * 
+     * @param identityName
+     * @param password
+     * @throws KuraException if the passwords do not match of if a failure occurs
+     *                       while
+     *                       performing the check.
+     */
+    public void checkPassword(final String identityName, final char[] password) throws KuraException;
+
+    /**
+     * Checks if the specified permission is currently assigned to the given
+     * identity.
+     * 
+     * @param identityName
+     * @param permission
+     * @throws KuraException if the provided permissio is not currently assigned to
+     *                       the given identity or if occurs while performing the
+     *                       check.
+     * 
+     */
+    public void checkPermission(final String identityName, final Permission permission) throws KuraException;
 }

@@ -13,6 +13,7 @@
 package org.eclipse.kura.web.client.ui.users;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +22,7 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.Picker;
 import org.eclipse.kura.web.client.ui.Tab;
+import org.eclipse.kura.web.client.ui.validator.GwtValidators;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.KuraPermission;
@@ -153,29 +155,23 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
 
             updateButtonState();
         });
+
     }
 
     private void initInterfaceButtons() {
-        this.newIdentity.addClickHandler(e -> this.picker.builder(String.class) //
+        this.newIdentity.addClickHandler(e -> this.picker.builder() //
                 .setTitle(MSGS.usersCreateIdentity()) //
                 .setMessage(MSGS.usersIdentityName()) //
-                .setValidator((editor, userName) -> {
-                    if (userName == null || userName.trim().isEmpty()) {
-                        throw new IllegalArgumentException(MSGS.usersIdentityNameEmpty());
-                    }
-
-                    if (userName.startsWith(" ") || userName.endsWith(" ")) {
-                        throw new IllegalArgumentException(MSGS.usersIdentityLeadingOrTrailingSpaces());
-                    }
-
-                    if (this.dataProvider.getList().stream().anyMatch(d -> d.getUserName().equals(userName))) {
-                        throw new IllegalArgumentException(MSGS.usersIdentityAlreadyExists());
-                    }
-
-                    return userName;
-                }).setOnPick(user ->
-
-                RequestQueue.submit(
+                .setValidators(Arrays.asList(
+                        GwtValidators.nonEmpty(MSGS.usersIdentityNameEmpty()), //
+                        GwtValidators.punctuatedAlphanumericSequence(new char[] { '.', '_' },
+                                MSGS.usersIdentityNameAllowedCharacters()), //
+                        GwtValidators.stringLength(3, 255, MSGS.usersIdentityNameLength()), //
+                        GwtValidators.predicate(
+                                userName -> this.dataProvider.getList().stream()
+                                        .noneMatch(d -> d.getUserName().equals(userName)),
+                                MSGS.usersIdentityAlreadyExists())))
+                .setOnPick(user -> RequestQueue.submit(
                         c -> this.gwtXsrfService.generateSecurityToken(c.callback(token -> this.gwtUserService
                                 .getUserConfigOrDefault(token, user, c.callback(userConfig -> {
                                     this.dataProvider.getList().add(userConfig);

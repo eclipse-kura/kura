@@ -50,7 +50,7 @@ public class PasswordStrengthVerificationServiceImpl implements PasswordStrength
         }
 
         if (!errors.isEmpty()) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Password strenght requirements not satisfied: "
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Password strength requirements not satisfied: "
                     + errors.stream().collect(Collectors.joining("; ")));
         }
     }

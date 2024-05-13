@@ -32,20 +32,16 @@ public class Permission {
     /**
      * Creates a new instance.
      * 
-     * @param name the identity name.
+     * @param name the permission name.
      */
     public Permission(String name) {
         this.name = requireNonNull(name, "name cannot be null");
-
-        if (this.name.trim().isEmpty()) {
-            throw new IllegalArgumentException("name cannot be empty");
-        }
     }
 
     /**
-     * Creates a new instance.
+     * Returns the permission name.
      * 
-     * @return the identity name.
+     * @return the permission name.
      */
     public String getName() {
         return name;

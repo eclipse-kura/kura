@@ -12,19 +12,25 @@
  *******************************************************************************/
 package org.eclipse.kura.web.shared.validator;
 
-public class SinglePEMValidator extends PredicateValidator {
+import java.util.function.Predicate;
 
-    private static final String PEM_REGEX = "^-{5}BEGIN CERTIFICATE-{5}\n[\\W\\w]*?-{5}END CERTIFICATE-{5}";
+public class NoWhitespaceCharactersValidator extends PredicateValidator {
 
-    public SinglePEMValidator(String message) {
-        super(v -> {
-            if (v == null) {
+    private static final Predicate<String> PREDICATE = value -> {
+        if (value == null) {
+            return true;
+        }
+
+        for (int i = 0; i < value.length(); i++) {
+            if (Character.isWhitespace(value.codePointAt(i))) {
                 return false;
             }
-            boolean match = v.matches(PEM_REGEX);
-            String occurrences = v.replaceFirst(PEM_REGEX, "");
-            return match && occurrences.isEmpty();
-        }, message);
+        }
 
+        return true;
+    };
+
+    public NoWhitespaceCharactersValidator(String message) {
+        super(PREDICATE, message);
     }
 }

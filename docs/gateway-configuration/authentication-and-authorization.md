@@ -47,7 +47,7 @@ Starting from Kura 5.5 the following restrictions will be applied by the Identit
 
   * New Identity Names:
     - must be at least 3 and at most 255 characters long.
-    - can only be composed by one or more sequences of alphanumeric characters (`[A-Za-z0-9]+`) separated by the dot or underscore symbols, dot and underscore is not allowed at the beginning or at the end of the permission name, sequeces of consecutive dots and/or underscores are not allowed (examples of valid names are `foo1.bAr`, `foo`, `a.b.c`, `foo.bar_baz`).
+    - can only be composed by one or more sequences of alphanumeric characters (`[A-Za-z0-9]+`) separated by the dot or underscore symbols, dot and underscore is not allowed at the beginning or at the end of the permission name, sequences of consecutive dots and/or underscores are not allowed (examples of valid names are `foo1.bAr`, `foo`, `a.b.c`, `foo.bar_baz`).
   * New Passwords:
     - cannot be empty.
     - must satisfy the password strenght requirements configured on the system.

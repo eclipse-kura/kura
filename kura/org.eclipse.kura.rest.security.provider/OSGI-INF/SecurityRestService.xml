@@ -39,12 +39,6 @@
                name="UserAdmin"
                policy="static"/>
 
-    <reference interface="org.eclipse.kura.system.SystemService"
-               bind="bindSystemService"
-               cardinality="0..1"
-               name="SystemService"
-               policy="static"/>
-
     <service>
         <provide interface="org.eclipse.kura.internal.rest.security.provider.SecurityRestService"/>
     </service>

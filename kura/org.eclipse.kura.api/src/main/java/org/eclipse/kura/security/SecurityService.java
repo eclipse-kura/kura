@@ -45,7 +45,8 @@ public interface SecurityService {
     public boolean isDebugEnabled();
 
     /**
-     * This method allows the application of the default production security policy
+     * This method allows the application of the default production security policy present in the system. After the
+     * copy of the policy, a reload of the fingerprints is performed.
      *
      * @throws KuraException
      *         in case an error is raised during the application of the default production security policy.
@@ -55,10 +56,11 @@ public interface SecurityService {
     public void applyDefaultProductionSecurityPolicy() throws KuraException;
 
     /**
-     * This method allows the application of the provided security policy
+     * This method allows the application of the provided security policy. After the copy of the policy, a reload of the
+     * fingerprints is performed.
      *
      * @param securityPolicy
-     *         the security policy to be loaded
+     *         the security policy to be applied
      * @throws KuraException
      *         in case an error is raised during the application of the security policy.
      * @since 2.7

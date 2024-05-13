@@ -1,4 +1,8 @@
 # Rest Identity V1 API
+!!! warning
+
+    This API id deprecated and superseded by the [Identity V2 REST APIs](./rest-identity-api-v2.md).
+
 !!! note
 
     This API can also be accessed via the RequestHandler with app-id: `IDN-V1`.

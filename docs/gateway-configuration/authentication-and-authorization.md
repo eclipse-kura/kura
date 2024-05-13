@@ -39,9 +39,20 @@ A Kura identity is represented as a **UserAdmin** **User** with the following pr
   ```
     method.
 
-- Starting from Kura 5.1, it is possible to force an identity to change the password at next login by setting the following property in **User** **properties**:
+Starting from Kura 5.1, it is possible to force an identity to change the password at next login by setting the following property in **User** **properties**:
   - `kura.need.password.change` : `true` encoded as a JSON string.
   - The property will be cleared automatically after a successful password change on next login.
+
+Starting from Kura 5.5 the following restrictions will be applied by the IdentityService:
+
+  * New Identity Names:
+    - must be at least 3 and at most 255 characters long.
+    - can only be composed by one or more sequences of alphanumeric characters (`[A-Za-z0-9]+`) separated by the dot or underscore symbols, dot and underscore is not allowed at the beginning or at the end of the permission name, sequeces of consecutive dots and/or underscores are not allowed (examples of valid names are `foo1.bAr`, `foo`, `a.b.c`, `foo.bar_baz`).
+  * New Passwords:
+    - cannot be empty.
+    - must satisfy the password strenght requirements configured on the system.
+    - the maximum allowed length is 255 characters.
+    - cannot contain whitespace characters.
 
 ### Permissions
 
@@ -50,6 +61,11 @@ A Kura permission is represented as a **UserAdmin** **Group** with the following
 - The **Group** name must be in the `kura.permission.${permission_name}` form where `${permission_name}` is a non empty string representing the permission name. The name of a **Group** representing a Kura permission must start with the `kura.permission.` prefix.
 
 - Assigning a permission to a specific identity can be done by adding the **User** representing the identity to the **basic members** of the **Group** representing the permission.
+
+Starting from Kura 5.5 the following restrictions will be applied by the IdentityService to the name new permissions:
+
+  - must be at least 3 and at most 255 characters long.
+  - can only be composed by one or more sequences of alphanumeric characters (`[A-Za-z0-9]+`) separated by the dot symbol, the dot is not allowed at the beginning or at the end of the permission name (examples of valid permission names are `foo1.bAr`, `foo`, `a.b.c`).
 
 ## UserAdmin persistence
 

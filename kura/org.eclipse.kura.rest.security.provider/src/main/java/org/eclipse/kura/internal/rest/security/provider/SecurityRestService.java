@@ -120,9 +120,9 @@ public class SecurityRestService {
     @POST
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/security-policy/apply-default-production")
-    public Response loadDefaultProductionSecurityPolicy() {
+    public Response applyDefaultProductionSecurityPolicy() {
         try {
-            logger.debug(DEBUG_MESSAGE, "loadDefaultProductionSecurityPolicy");
+            logger.debug(DEBUG_MESSAGE, "applyDefaultProductionSecurityPolicy");
 
             this.security.applyDefaultProductionSecurityPolicy();
             this.security.reloadSecurityPolicyFingerprint();
@@ -141,9 +141,9 @@ public class SecurityRestService {
     @POST
     @RolesAllowed(REST_ROLE_NAME)
     @Path("/security-policy/apply")
-    public Response loadSecurityPolicy(InputStream securityPolicyInputStream) {
+    public Response applySecurityPolicy(InputStream securityPolicyInputStream) {
         try {
-            logger.debug(DEBUG_MESSAGE, "loadSecurityPolicy");
+            logger.debug(DEBUG_MESSAGE, "applySecurityPolicy");
 
             this.security.applySecurityPolicy(readSecurityPolicyString(securityPolicyInputStream));
             this.security.reloadSecurityPolicyFingerprint();

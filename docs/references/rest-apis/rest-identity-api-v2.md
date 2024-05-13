@@ -11,7 +11,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 
 #### Create User
 
-- Description: This method allows to create a new user in the system.
+- Description: This method allows to create a new identity in the system. Identity name must respect the [requirements enforced by the IdentityService](/gateway-configuration/authentication-and-authorization/#identities).
 - Method: POST
 - API PATH: `services/identity/v2/identities`
 
@@ -25,7 +25,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ##### Responses
 
 - 200 OK status
-- 400 Bad Request (Identity name not specified)
+- 400 Bad Request (Identity name is not valid)
 - 409 Conflict (Identity already exists)
 - 500 Internal Server Error
 
@@ -153,7 +153,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 
 #### Create Permission
 
-- Description: This method allows to create a new permission in the system.
+- Description: This method allows to create a new permission in the system. Permission name must respect the [requirements enforced by the IdentityService](/gateway-configuration/authentication-and-authorization/#permissions).
 - Method: POST
 - API PATH: `services/identity/v2/permissions`
 
@@ -167,7 +167,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ##### Responses
 
 - 200 OK status
-- 400 Bad Request (Permission name not specified)
+- 400 Bad Request (Permission name not valid)
 - 409 Conflict (Permission already exists)
 - 500 Internal Server Error
 
@@ -393,7 +393,7 @@ No specific permission is required to access this resource.
 
 #### Update Identity
 
-- Description: This method allows to update an existing identity in the system.
+- Description: This method allows to update an existing identity in the system. New passwords must respect the [requirements enforced by the IdentityService](/gateway-configuration/authentication-and-authorization/#identities).
 - Method: PUT
 - API PATH: `services/identity/v2/identities`
 

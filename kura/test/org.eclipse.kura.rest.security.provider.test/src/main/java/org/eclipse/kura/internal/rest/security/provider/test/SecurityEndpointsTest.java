@@ -68,8 +68,8 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
     private static final SecurityService securityServiceMock = mock(SecurityService.class);
     public static final String DEBUG_ENABLED = "/debug-enabled";
     public static final String ADMIN_ADMIN = "admin:admin";
-    public static final String SECURITY_POLICY_LOAD_DEFAULT_PRODUCTION = "/security-policy/load-default-production";
-    public static final String SECURITY_POLICY_LOAD = "/security-policy/load";
+    public static final String SECURITY_POLICY_APPLY_DEFAULT_PRODUCTION = "/security-policy/apply-default-production";
+    public static final String SECURITY_POLICY_APPLY = "/security-policy/apply";
     private static String tooLargeSecurityPolicy;
 
     @Parameterized.Parameters
@@ -177,19 +177,19 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
         givenSecurityService();
         givenRestBasicCredentials(ADMIN_ADMIN);
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_LOAD_DEFAULT_PRODUCTION);
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY_DEFAULT_PRODUCTION);
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();
-        thenLoadDefaultProductionSecurityPolicyIsCalled();
+        thenApplyDefaultProductionSecurityPolicyIsCalled();
     }
 
     @Test
-    public void shouldReloadFingerprintsWhenDefaultSecurityPolicyIsLoaded() throws IOException, KuraException {
+    public void shouldReloadFingerprintsWhenDefaultSecurityPolicyIsApplied() throws IOException, KuraException {
         givenSecurityService();
         givenRestBasicCredentials(ADMIN_ADMIN);
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_LOAD_DEFAULT_PRODUCTION);
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY_DEFAULT_PRODUCTION);
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();
@@ -197,60 +197,60 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void shouldRethrowWebApplicationExceptionOnLoadDefaultProductionSecurityPolicy() throws KuraException {
+    public void shouldRethrowWebApplicationExceptionOnApplyDefaultProductionSecurityPolicy() throws KuraException {
         givenFailingSecurityService();
         givenRestBasicCredentials(ADMIN_ADMIN);
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_LOAD_DEFAULT_PRODUCTION);
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY_DEFAULT_PRODUCTION);
 
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
     @Test
-    public void shouldRethrowWebApplicationExceptionOnLoadNullSecurityPolicy() throws KuraException {
+    public void shouldRethrowWebApplicationExceptionOnApplyNullSecurityPolicy() throws KuraException {
         givenSecurityService();
         givenRestBasicCredentials(ADMIN_ADMIN);
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_LOAD, null);
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY, null);
 
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
         thenResponseBodyEqualsJson("{\"message\":\"Security Policy cannot be null or empty\"}");
     }
 
     @Test
-    public void shouldRethrowWebApplicationExceptionOnLoadEmptySecurityPolicy() throws KuraException {
+    public void shouldRethrowWebApplicationExceptionOnApplyEmptySecurityPolicy() throws KuraException {
         givenSecurityService();
         givenRestBasicCredentials(ADMIN_ADMIN);
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_LOAD, "");
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY, "");
 
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
         thenResponseBodyEqualsJson("{\"message\":\"Security Policy cannot be null or empty\"}");
     }
 
     @Test
-    public void shouldRethrowWebApplicationExceptionOnLoadTooBigSecurityPolicy() throws KuraException {
+    public void shouldRethrowWebApplicationExceptionOnApplyTooBigSecurityPolicy() throws KuraException {
         givenSecurityService();
         givenRestBasicCredentials(ADMIN_ADMIN);
         givenTooLargeSecurityPolicy();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_LOAD, tooLargeSecurityPolicy);
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY, tooLargeSecurityPolicy);
 
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
         thenResponseBodyEqualsJson("{\"message\":\"Security policy too large\"}");
     }
 
     @Test
-    public void shouldLoadSecurityPolicy() throws KuraException {
+    public void shouldApplySecurityPolicy() throws KuraException {
         givenSecurityService();
         givenRestBasicCredentials(ADMIN_ADMIN);
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_LOAD,
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY,
                 "This is a very cool security policy!");
 
         thenRequestSucceeds();
         thenResponseBodyIsEmpty();
-        thenLoadSecurityPolicyIsCalled("This is a very cool security policy!");
+        thenApplySecurityPolicyIsCalled("This is a very cool security policy!");
     }
 
     private static void givenDebugEnabledStatus(boolean debugStatus) {
@@ -267,7 +267,7 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
         reset(securityServiceMock);
 
         when(securityServiceMock.isDebugEnabled()).thenThrow(RuntimeException.class);
-        doThrow(RuntimeException.class).when(securityServiceMock).loadDefaultProductionSecurityPolicy();
+        doThrow(RuntimeException.class).when(securityServiceMock).applyDefaultProductionSecurityPolicy();
         doThrow(RuntimeException.class).when(securityServiceMock).reloadCommandLineFingerprint();
         doThrow(RuntimeException.class).when(securityServiceMock).reloadSecurityPolicyFingerprint();
     }
@@ -345,8 +345,8 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
         }
     }
 
-    private void thenLoadDefaultProductionSecurityPolicyIsCalled() throws KuraException {
-        verify(securityServiceMock, times(1)).loadDefaultProductionSecurityPolicy();
+    private void thenApplyDefaultProductionSecurityPolicyIsCalled() throws KuraException {
+        verify(securityServiceMock, times(1)).applyDefaultProductionSecurityPolicy();
     }
 
     private void thenFingerprintsAreReloaded() throws KuraException {
@@ -354,8 +354,8 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
         verify(securityServiceMock, times(1)).reloadCommandLineFingerprint();
     }
 
-    private void thenLoadSecurityPolicyIsCalled(final String securityPolicy) throws KuraException {
-        verify(securityServiceMock, times(1)).loadSecurityPolicy(securityPolicy);
+    private void thenApplySecurityPolicyIsCalled(final String securityPolicy) throws KuraException {
+        verify(securityServiceMock, times(1)).applySecurityPolicy(securityPolicy);
     }
 
     @BeforeClass

@@ -119,12 +119,12 @@ public class SecurityRestService {
      */
     @POST
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/security-policy/load-default-production")
+    @Path("/security-policy/apply-default-production")
     public Response loadDefaultProductionSecurityPolicy() {
         try {
             logger.debug(DEBUG_MESSAGE, "loadDefaultProductionSecurityPolicy");
 
-            this.security.loadDefaultProductionSecurityPolicy();
+            this.security.applyDefaultProductionSecurityPolicy();
             this.security.reloadSecurityPolicyFingerprint();
             this.security.reloadCommandLineFingerprint();
         } catch (Exception e) {
@@ -140,12 +140,12 @@ public class SecurityRestService {
      */
     @POST
     @RolesAllowed(REST_ROLE_NAME)
-    @Path("/security-policy/load")
+    @Path("/security-policy/apply")
     public Response loadSecurityPolicy(InputStream securityPolicyInputStream) {
         try {
             logger.debug(DEBUG_MESSAGE, "loadSecurityPolicy");
 
-            this.security.loadSecurityPolicy(readSecurityPolicyString(securityPolicyInputStream));
+            this.security.applySecurityPolicy(readSecurityPolicyString(securityPolicyInputStream));
             this.security.reloadSecurityPolicyFingerprint();
             this.security.reloadCommandLineFingerprint();
         } catch (Exception e) {

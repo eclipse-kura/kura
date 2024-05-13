@@ -45,17 +45,17 @@ public interface SecurityService {
     public boolean isDebugEnabled();
 
     /**
-     * This method allows the load of the default production security policy
+     * This method allows the application of the default production security policy
      *
      * @throws KuraException
      *         in case an error is raised during the application of the default production security policy.
      * @since 2.7
      */
 
-    public void loadDefaultProductionSecurityPolicy() throws KuraException;
+    public void applyDefaultProductionSecurityPolicy() throws KuraException;
 
     /**
-     * This method allows the load of the provided security policy
+     * This method allows the application of the provided security policy
      *
      * @param securityPolicy
      *         the security policy to be loaded
@@ -63,5 +63,5 @@ public interface SecurityService {
      *         in case an error is raised during the application of the security policy.
      * @since 2.7
      */
-    public void loadSecurityPolicy(String securityPolicy) throws KuraException;
+    public void applySecurityPolicy(String securityPolicy) throws KuraException;
 }

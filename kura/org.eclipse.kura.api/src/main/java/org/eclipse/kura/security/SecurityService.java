@@ -45,7 +45,7 @@ public interface SecurityService {
     public boolean isDebugEnabled();
 
     /**
-     * This method allows the application of the default production security policy present in the system.
+     * This method allows to apply the default production security policy available in the system.
      *
      * @throws KuraException
      *         in case an error is raised during the application of the default production security policy.

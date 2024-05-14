@@ -45,17 +45,18 @@ public interface SecurityService {
     public boolean isDebugEnabled();
 
     /**
-     * This method allows to apply the default production security policy available in the system.
+     * This method allows to apply the default production security policy available in the system. The changes are
+     * persistent and remain in effect after a framework restart.
      *
      * @throws KuraException
      *         in case an error is raised during the application of the default production security policy.
      * @since 2.7
      */
-
     public void applyDefaultProductionSecurityPolicy() throws KuraException;
 
     /**
-     * This method allows to apply the user provided security policy.
+     * This method allows to apply the user provided security policy. The changes are persistent and remain in effect
+     * after a framework restart.
      *
      * @param securityPolicy
      *         the security policy to be applied

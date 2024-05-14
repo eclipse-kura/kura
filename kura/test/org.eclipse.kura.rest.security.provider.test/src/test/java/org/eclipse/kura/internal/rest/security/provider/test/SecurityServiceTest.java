@@ -1,16 +1,29 @@
 /*******************************************************************************
  * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.security.provider.test;
+
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloudconnection.request.RequestHandler;
+import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
+import org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV1;
+import org.junit.Test;
+import org.osgi.service.useradmin.Role;
+import org.osgi.service.useradmin.UserAdmin;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Objects;
 
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,26 +33,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Objects;
-
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloudconnection.request.RequestHandler;
-import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
-import org.eclipse.kura.internal.rest.security.provider.SecurityRestService;
-import org.junit.Test;
-import org.osgi.service.useradmin.Role;
-import org.osgi.service.useradmin.UserAdmin;
-
 public class SecurityServiceTest {
 
     private static final String MQTT_APP_ID = "SEC-V1";
     private static final String REST_ROLE_NAME = "security";
     private static final String KURA_PERMISSION_REST_ROLE = "kura.permission.rest." + REST_ROLE_NAME;
 
-    private SecurityRestService service = new SecurityRestService();
+    private SecurityRestServiceV1 service = new SecurityRestServiceV1();
     private UserAdmin userAdmin;
     private RequestHandlerRegistry requestHandlerRegistry;
     private Exception occurredException;

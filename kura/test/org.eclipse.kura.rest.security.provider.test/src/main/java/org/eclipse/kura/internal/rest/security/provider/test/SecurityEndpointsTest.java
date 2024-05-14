@@ -20,7 +20,7 @@ import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.internal.rest.security.provider.SecurityRestService;
+import org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV1;
 import org.eclipse.kura.security.SecurityService;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
 import org.junit.BeforeClass;
@@ -380,7 +380,7 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
 
         final ConfigurationAdmin configurationAdmin = WireTestUtil.trackService(ConfigurationAdmin.class,
                 Optional.empty()).get(30, TimeUnit.SECONDS);
-        final Configuration config = configurationAdmin.getConfiguration(SecurityRestService.class.getName(), "?");
+        final Configuration config = configurationAdmin.getConfiguration(SecurityRestServiceV1.class.getName(), "?");
         config.update(properties);
     }
 

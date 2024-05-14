@@ -55,7 +55,7 @@ public interface SecurityService {
     public void applyDefaultProductionSecurityPolicy() throws KuraException;
 
     /**
-     * This method allows the application of the provided security policy.
+     * This method allows to apply the user provided security policy.
      *
      * @param securityPolicy
      *         the security policy to be applied

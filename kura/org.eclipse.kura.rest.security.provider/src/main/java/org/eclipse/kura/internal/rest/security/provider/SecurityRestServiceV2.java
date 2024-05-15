@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.rest.security.provider;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,30 +74,40 @@ public class SecurityRestServiceV2 extends AbstractRestSecurityService {
             this.security.applySecurityPolicy(readSecurityPolicyString(securityPolicyInputStream));
             this.security.reloadSecurityPolicyFingerprint();
             this.security.reloadCommandLineFingerprint();
-        } catch (Exception e) {
+        } catch (KuraException e) {
+            if (KuraErrorCode.INVALID_PARAMETER.equals(e.getCode())) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST, e.getMessage());
+            }
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
         return Response.ok().build();
     }
 
-    private String readSecurityPolicyString(InputStream securityPolicyInputStream) throws IOException {
+    private String readSecurityPolicyString(InputStream securityPolicyInputStream) {
         if (securityPolicyInputStream == null) {
-            throw new IllegalArgumentException("Security Policy cannot be null or empty");
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                    "Security Policy cannot be null or empty");
         }
         int bytesRead;
         int chunksRead = 0;
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         byte[] data = new byte[1024];
-        while ((bytesRead = securityPolicyInputStream.read(data, 0, data.length)) != -1) {
-            if (chunksRead++ > 1024) {
-                throw new IllegalArgumentException("Security policy too large");
+        try {
+            while ((bytesRead = securityPolicyInputStream.read(data, 0, data.length)) != -1) {
+                if (chunksRead++ > 1024) {
+                    throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                            "Security policy too large");
+                }
+                buffer.write(data, 0, bytesRead);
             }
-            buffer.write(data, 0, bytesRead);
+            buffer.flush();
+        } catch (IOException e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
         }
-        buffer.flush();
         if (buffer.size() == 0) {
-            throw new IllegalArgumentException("Security Policy cannot be null or empty");
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                    "Security Policy cannot be null or empty");
         }
         return new String(buffer.toByteArray(), StandardCharsets.UTF_8);
     }

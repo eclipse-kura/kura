@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -23,11 +23,13 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV1;
 import org.eclipse.kura.security.SecurityService;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.useradmin.Group;
@@ -36,7 +38,6 @@ import org.osgi.service.useradmin.User;
 import org.osgi.service.useradmin.UserAdmin;
 
 import javax.ws.rs.core.Response.Status;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -50,12 +51,10 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(Parameterized.class)
-public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
+public class SecurityEndpointsV1Test extends AbstractRequestHandlerTest {
 
     private static final String MQTT_APP_ID = "SEC-V1";
 
@@ -66,11 +65,9 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
     private static final String REST_APP_ID = "security/v1";
 
     private static final SecurityService securityServiceMock = mock(SecurityService.class);
+    private static ServiceRegistration<SecurityService> securityServiceRegistration;
     public static final String DEBUG_ENABLED = "/debug-enabled";
     public static final String ADMIN_ADMIN = "admin:admin";
-    public static final String SECURITY_POLICY_APPLY_DEFAULT_PRODUCTION = "/security-policy/apply-default-production";
-    public static final String SECURITY_POLICY_APPLY = "/security-policy/apply";
-    private static String tooLargeSecurityPolicy;
 
     @Parameterized.Parameters
     public static Collection<Transport> transports() {
@@ -79,7 +76,7 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
 
     private static boolean debugEnabled;
 
-    public SecurityEndpointsTest(Transport transport) {
+    public SecurityEndpointsV1Test(Transport transport) {
         super(transport);
     }
 
@@ -172,87 +169,6 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
         thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
-    @Test
-    public void shouldCopyDefaultSecurityPolicy() throws KuraException {
-        givenSecurityService();
-        givenRestBasicCredentials(ADMIN_ADMIN);
-
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY_DEFAULT_PRODUCTION);
-
-        thenRequestSucceeds();
-        thenResponseBodyIsEmpty();
-        thenApplyDefaultProductionSecurityPolicyIsCalled();
-    }
-
-    @Test
-    public void shouldReloadFingerprintsWhenDefaultSecurityPolicyIsApplied() throws IOException, KuraException {
-        givenSecurityService();
-        givenRestBasicCredentials(ADMIN_ADMIN);
-
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY_DEFAULT_PRODUCTION);
-
-        thenRequestSucceeds();
-        thenResponseBodyIsEmpty();
-        thenFingerprintsAreReloaded();
-    }
-
-    @Test
-    public void shouldRethrowWebApplicationExceptionOnApplyDefaultProductionSecurityPolicy() throws KuraException {
-        givenFailingSecurityService();
-        givenRestBasicCredentials(ADMIN_ADMIN);
-
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY_DEFAULT_PRODUCTION);
-
-        thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-    }
-
-    @Test
-    public void shouldRethrowWebApplicationExceptionOnApplyNullSecurityPolicy() throws KuraException {
-        givenSecurityService();
-        givenRestBasicCredentials(ADMIN_ADMIN);
-
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY, null);
-
-        thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-        thenResponseBodyEqualsJson("{\"message\":\"Security Policy cannot be null or empty\"}");
-    }
-
-    @Test
-    public void shouldRethrowWebApplicationExceptionOnApplyEmptySecurityPolicy() throws KuraException {
-        givenSecurityService();
-        givenRestBasicCredentials(ADMIN_ADMIN);
-
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY, "");
-
-        thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-        thenResponseBodyEqualsJson("{\"message\":\"Security Policy cannot be null or empty\"}");
-    }
-
-    @Test
-    public void shouldRethrowWebApplicationExceptionOnApplyTooBigSecurityPolicy() throws KuraException {
-        givenSecurityService();
-        givenRestBasicCredentials(ADMIN_ADMIN);
-        givenTooLargeSecurityPolicy();
-
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY, tooLargeSecurityPolicy);
-
-        thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
-        thenResponseBodyEqualsJson("{\"message\":\"Security policy too large\"}");
-    }
-
-    @Test
-    public void shouldApplySecurityPolicy() throws KuraException {
-        givenSecurityService();
-        givenRestBasicCredentials(ADMIN_ADMIN);
-
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY,
-                "This is a very cool security policy!");
-
-        thenRequestSucceeds();
-        thenResponseBodyIsEmpty();
-        thenApplySecurityPolicyIsCalled("This is a very cool security policy!");
-    }
-
     private static void givenDebugEnabledStatus(boolean debugStatus) {
         debugEnabled = debugStatus;
     }
@@ -276,7 +192,6 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
      * Utilities
      */
 
-    @SuppressWarnings("unchecked")
     private void givenIdentity(final String username, final Optional<String> password, final List<String> roles,
             final boolean needsPasswordChange) {
         final UserAdmin userAdmin;
@@ -325,14 +240,6 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
         }
     }
 
-    private static void givenTooLargeSecurityPolicy() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 100000; i++) {
-            sb.append("This is a very large security policy!");
-        }
-        tooLargeSecurityPolicy = sb.toString();
-    }
-
     private void thenRestResponseCodeIs(final int expectedStatusCode) {
         if (this.transport instanceof RestTransport) {
             thenResponseCodeIs(expectedStatusCode);
@@ -345,36 +252,31 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
         }
     }
 
-    private void thenApplyDefaultProductionSecurityPolicyIsCalled() throws KuraException {
-        verify(securityServiceMock, times(1)).applyDefaultProductionSecurityPolicy();
-    }
-
-    private void thenFingerprintsAreReloaded() throws KuraException {
-        verify(securityServiceMock, times(1)).reloadSecurityPolicyFingerprint();
-        verify(securityServiceMock, times(1)).reloadCommandLineFingerprint();
-    }
-
-    private void thenApplySecurityPolicyIsCalled(final String securityPolicy) throws KuraException {
-        verify(securityServiceMock, times(1)).applySecurityPolicy(securityPolicy);
-    }
-
     @BeforeClass
     public static void setUp() throws Exception {
         createSecurityServiceMock();
         registerSecurityServiceMock();
+        configureSecurityServiceMock();
+    }
+
+    @AfterClass
+    public static void cleanup() throws Exception {
+        unregisterSecurityServiceMock();
     }
 
     private static void createSecurityServiceMock() {
         givenSecurityService();
+    }
 
+    private static void registerSecurityServiceMock() {
         final Dictionary<String, Object> configurationServiceProperties = new Hashtable<>();
         configurationServiceProperties.put("service.ranking", Integer.MIN_VALUE);
         configurationServiceProperties.put("kura.service.pid", "mockSecurityService");
-        FrameworkUtil.getBundle(SecurityEndpointsTest.class).getBundleContext()
+        securityServiceRegistration = FrameworkUtil.getBundle(SecurityEndpointsV1Test.class).getBundleContext()
                 .registerService(SecurityService.class, securityServiceMock, configurationServiceProperties);
     }
 
-    private static void registerSecurityServiceMock() throws Exception {
+    private static void configureSecurityServiceMock() throws Exception {
         final Dictionary<String, Object> properties = new Hashtable<>();
         properties.put("SecurityService.target", "(kura.service.pid=mockSecurityService)");
 
@@ -382,6 +284,10 @@ public class SecurityEndpointsTest extends AbstractRequestHandlerTest {
                 Optional.empty()).get(30, TimeUnit.SECONDS);
         final Configuration config = configurationAdmin.getConfiguration(SecurityRestServiceV1.class.getName(), "?");
         config.update(properties);
+    }
+
+    private static void unregisterSecurityServiceMock() throws Exception {
+        securityServiceRegistration.unregister();
     }
 
     @SuppressWarnings("unchecked")

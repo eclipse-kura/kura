@@ -164,7 +164,8 @@ nav:
         - Inventory: references/rest-apis/rest-inventory-api.md
         - Network Configuration: references/rest-apis/rest-network-configuration-api.md
         - Position: references/rest-apis/rest-position-api.md
-        - Security: references/rest-apis/rest-security-api.md
+        - Security V1: references/rest-apis/rest-security-api-v1.md
+        - Security V2: references/rest-apis/rest-security-api-v2.md
         - Service Listing: references/rest-apis/rest-service-listing-api.md
         - Session: references/rest-apis/rest-session-api.md
         - System: references/rest-apis/rest-system-api.md

@@ -26,6 +26,11 @@ import javax.ws.rs.core.Response.Status;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 
 @Path("security/v2")
@@ -109,7 +114,20 @@ public class SecurityRestServiceV2 extends AbstractRestSecurityService {
             throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
                     "Security Policy cannot be null or empty");
         }
-        return new String(buffer.toByteArray(), StandardCharsets.UTF_8);
+        CharBuffer charBuffer = getCharBuffer(buffer);
+        return charBuffer.toString();
+    }
+
+    private static CharBuffer getCharBuffer(ByteArrayOutputStream buffer) {
+        final CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT);
+        CharBuffer charBuffer;
+        try {
+            charBuffer = decoder.decode(ByteBuffer.wrap(buffer.toByteArray()));
+        } catch (CharacterCodingException e) {
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                    "Security Policy must be UTF-8 encoded");
+        }
+        return charBuffer;
     }
 
 }

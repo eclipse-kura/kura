@@ -46,7 +46,7 @@ Identities with `rest.security` permissions can access these APIs.
 
 #### Apply security policy
 
-- Description: This method allows to apply the user provided security policy
+- Description: This method allows to apply the user provided security policy. The maximum allowed security policy size is 1MB.
 - Method: POST
 - API PATH: `services/security/v2/security-policy/apply`
 

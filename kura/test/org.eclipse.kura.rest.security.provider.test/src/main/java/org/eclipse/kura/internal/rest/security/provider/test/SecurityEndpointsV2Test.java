@@ -59,7 +59,7 @@ public class SecurityEndpointsV2Test extends AbstractRequestHandlerTest {
     public static final String ADMIN_ADMIN = "admin:admin";
     public static final String SECURITY_POLICY_APPLY_DEFAULT_PRODUCTION = "/security-policy/apply-default-production";
     public static final String SECURITY_POLICY_APPLY = "/security-policy/apply";
-    private static String tooLargeSecurityPolicy;
+    private static String securityPolicy;
 
     @Parameterized.Parameters
     public static Collection<Transport> transports() {
@@ -111,7 +111,7 @@ public class SecurityEndpointsV2Test extends AbstractRequestHandlerTest {
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY, null);
 
-        thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        thenResponseCodeIs(Status.BAD_REQUEST.getStatusCode());
         thenResponseBodyEqualsJson("{\"message\":\"Security Policy cannot be null or empty\"}");
     }
 
@@ -122,7 +122,7 @@ public class SecurityEndpointsV2Test extends AbstractRequestHandlerTest {
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY, "");
 
-        thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        thenResponseCodeIs(Status.BAD_REQUEST.getStatusCode());
         thenResponseBodyEqualsJson("{\"message\":\"Security Policy cannot be null or empty\"}");
     }
 
@@ -132,9 +132,9 @@ public class SecurityEndpointsV2Test extends AbstractRequestHandlerTest {
         givenRestBasicCredentials(ADMIN_ADMIN);
         givenTooLargeSecurityPolicy();
 
-        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY, tooLargeSecurityPolicy);
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_POST), SECURITY_POLICY_APPLY, securityPolicy);
 
-        thenResponseCodeIs(Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        thenResponseCodeIs(Status.BAD_REQUEST.getStatusCode());
         thenResponseBodyEqualsJson("{\"message\":\"Security policy too large\"}");
     }
 
@@ -178,7 +178,7 @@ public class SecurityEndpointsV2Test extends AbstractRequestHandlerTest {
         for (int i = 0; i < 100000; i++) {
             sb.append("This is a very large security policy!");
         }
-        tooLargeSecurityPolicy = sb.toString();
+        securityPolicy = sb.toString();
     }
 
     private void thenApplyDefaultProductionSecurityPolicyIsCalled() throws KuraException {

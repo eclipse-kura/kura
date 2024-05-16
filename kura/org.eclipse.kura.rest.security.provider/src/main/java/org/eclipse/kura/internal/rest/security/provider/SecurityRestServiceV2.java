@@ -95,12 +95,13 @@ public class SecurityRestServiceV2 extends AbstractRestSecurityService {
                     "Security Policy cannot be null or empty");
         }
         int bytesRead;
-        int chunksRead = 0;
+        int totalBytesRead = 0;
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         byte[] data = new byte[1024];
         try {
             while ((bytesRead = securityPolicyInputStream.read(data, 0, data.length)) != -1) {
-                if (chunksRead++ > 1024) {
+                totalBytesRead += bytesRead;
+                if (totalBytesRead > 1024 * 1024) {
                     throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
                             "Security policy too large");
                 }

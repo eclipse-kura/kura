@@ -1,4 +1,8 @@
-# Rest Security v1 API
+# Rest Security V1 API
+!!! warning
+
+    This API id deprecated and superseded by the [Security V2 REST APIs](./rest-security-api-v2.md).
+
 !!! note
 
     This API can also be accessed via the RequestHandler with app-id: `SEC-V1`.

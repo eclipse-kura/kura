@@ -79,7 +79,7 @@
         <setEntry value="org.apache.geronimo.specs.geronimo-jta_1.1_spec@default:default"/>
         <setEntry value="org.apache.logging.log4j.api@default:default"/>
         <setEntry value="org.apache.logging.log4j.core@default:default"/>
-        <setEntry value="org.apache.logging.log4j.slf4j-impl@default:default"/>
+        <setEntry value="org.apache.logging.log4j.slf4j.impl@default:default"/>
         <setEntry value="org.apache.servicemix.bundles.c3p0@default:default"/>
         <setEntry value="org.eclipse.equinox.cm@default:default"/>
         <setEntry value="org.eclipse.equinox.common@2:true"/>

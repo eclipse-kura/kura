@@ -390,7 +390,7 @@
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
-                                <id>org.apache.logging.log4j.slf4j-impl</id>
+                                <id>org.apache.logging.log4j.slf4j.impl</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
@@ -628,7 +628,7 @@
                                 </requirement>
                                 <requirement>
                                     <type>p2-installable-unit</type>
-                                    <id>org.apache.logging.log4j.slf4j-impl</id>
+                                    <id>org.apache.logging.log4j.slf4j.impl</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
                                 <requirement>

@@ -705,6 +705,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                     } catch (IllegalArgumentException e) {
                         logger.error("Invalid internet protocol: {}. Using TCP.", port.getInternetProtocol());
                     }
+                } else {
+                    logger.error("Null internet protocol: {}. Using TCP.", port.getInternetProtocol());
                 }
 
                 ExposedPort exposedPort = new ExposedPort(port.getInternalPort(), ipProtocol);

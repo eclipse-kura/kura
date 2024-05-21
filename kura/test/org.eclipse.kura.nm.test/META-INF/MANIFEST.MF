@@ -6,9 +6,9 @@ Bundle-Version: 5.5.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Bundle-ActivationPolicy: lazy
-Import-Package: org.bouncycastle.jce.provider;version="1.77.0",
- org.bouncycastle.pkcs;version="1.77.0",
- org.bouncycastle.pkcs.jcajce;version="1.77.0",
+Import-Package: org.bouncycastle.jce.provider;version="1.78.1",
+ org.bouncycastle.pkcs;version="1.78.1",
+ org.bouncycastle.pkcs.jcajce;version="1.78.1",
  org.eclipse.kura.configuration.metatype;version="[1.1,2.0)",
  org.eclipse.kura.core.linux.executor;version="1.0.0",
  org.eclipse.kura.core.testutil,

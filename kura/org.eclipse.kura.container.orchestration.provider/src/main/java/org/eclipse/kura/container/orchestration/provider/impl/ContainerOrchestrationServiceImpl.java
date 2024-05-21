@@ -697,7 +697,15 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
             for (org.eclipse.kura.container.orchestration.ContainerPort port : containerPorts) {
 
-                InternetProtocol ipProtocol = InternetProtocol.parse(port.getInternetProtocol().toString());
+                InternetProtocol ipProtocol = InternetProtocol.TCP;
+
+                if (port.getInternetProtocol() != null) {
+                    try {
+                        ipProtocol = InternetProtocol.parse(port.getInternetProtocol().toString());
+                    } catch (IllegalArgumentException e) {
+                        logger.error("Invalid internet protocol: {}. Using TCP.", port.getInternetProtocol());
+                    }
+                }
 
                 ExposedPort exposedPort = new ExposedPort(port.getInternalPort(), ipProtocol);
                 exposedPorts.add(exposedPort);

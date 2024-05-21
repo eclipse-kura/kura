@@ -683,42 +683,35 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         return configuration;
     }
 
-    private HostConfig containerPortManagementHandler(ContainerConfiguration containerDescription,
+    private HostConfig containerPortManagementHandler(ContainerConfiguration containerConfiguration,
             HostConfig hostConfig, CreateContainerCmd commandBuilder) {
 
-        if (containerDescription.getContainerPorts() != null && !containerDescription.getContainerPorts().isEmpty()) {
-            List<ExposedPort> exposedPortsList = new LinkedList<>();
-            Ports portbindings = new Ports();
+        List<ExposedPort> exposedPorts = new LinkedList<>();
+        Ports portbindings = new Ports();
 
-            for (org.eclipse.kura.container.orchestration.ContainerPort port : containerDescription
-                    .getContainerPorts()) {
+        if (containerConfiguration.getContainerPorts() != null
+                && !containerConfiguration.getContainerPorts().isEmpty()) {
 
-                InternetProtocol ipPro;
+            List<org.eclipse.kura.container.orchestration.ContainerPort> containerPorts = containerConfiguration
+                    .getContainerPorts();
 
-                switch (port.getInternetProtocol()) {
-                case UDP:
-                    ipPro = InternetProtocol.UDP;
-                    break;
-                case SCTP:
-                    ipPro = InternetProtocol.SCTP;
-                    break;
-                default:
-                    ipPro = InternetProtocol.TCP;
-                    break;
-                }
+            for (org.eclipse.kura.container.orchestration.ContainerPort port : containerPorts) {
 
-                ExposedPort tempExposedPort = new ExposedPort(port.getInternalPort(), ipPro);
-                exposedPortsList.add(tempExposedPort);
-                portbindings.bind(tempExposedPort, Binding.bindPort(port.getExternalPort()));
+                InternetProtocol ipProtocol = InternetProtocol.parse(port.getInternetProtocol().toString());
+
+                ExposedPort exposedPort = new ExposedPort(port.getInternalPort(), ipProtocol);
+                exposedPorts.add(exposedPort);
+                portbindings.bind(exposedPort, Binding.bindPort(port.getExternalPort()));
             }
 
-            hostConfig.withPortBindings(portbindings);
-            commandBuilder.withExposedPorts(exposedPortsList);
-
-        } else {
-            logger.error("portsExternal and portsInternal must be int[] of the same size or they do not exist: {}",
-                    containerDescription.getContainerName());
+            if (exposedPorts.size() != portbindings.getBindings().size()) {
+                logger.error("portsExternal and portsInternal must have the same size: {}",
+                        containerConfiguration.getContainerName());
+            }
         }
+
+        hostConfig.withPortBindings(portbindings);
+        commandBuilder.withExposedPorts(exposedPorts);
 
         return hostConfig;
     }

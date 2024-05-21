@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -84,12 +85,12 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     private ContainerOrchestrationServiceOptions currentConfig;
 
-    private final Set<ContainerOrchestrationServiceListener> dockerServiceListeners = new HashSet<>();
-    private final Set<FrameworkManagedContainer> frameworkManagedContainers = new HashSet<>();
+    private final Set<ContainerOrchestrationServiceListener> dockerServiceListeners = new CopyOnWriteArraySet<>();
+    private final Set<FrameworkManagedContainer> frameworkManagedContainers = new CopyOnWriteArraySet<>();
 
     private DockerClient dockerClient;
     private CryptoService cryptoService;
-    private List<ExposedPort> exposedPorts;
+
     private AllowlistEnforcementMonitor allowlistEnforcementMonitor;
 
     private Map<String, String> containerInstancesDigests = new HashMap<>();
@@ -539,7 +540,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 configuration = configuration.withRestartPolicy(RestartPolicy.unlessStoppedRestart());
             }
 
-            configuration = containerPortManagementHandler(containerDescription, configuration);
+            configuration = containerPortManagementHandler(containerDescription, configuration, commandBuilder);
 
             configuration = containerLogConfigurationHandler(containerDescription, configuration);
 
@@ -556,8 +557,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             if (containerDescription.isContainerPrivileged()) {
                 configuration = configuration.withPrivileged(containerDescription.isContainerPrivileged());
             }
-
-            commandBuilder = commandBuilder.withExposedPorts(this.exposedPorts);
 
             return commandBuilder.withHostConfig(configuration).exec().getId();
 
@@ -685,7 +684,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     private HostConfig containerPortManagementHandler(ContainerConfiguration containerDescription,
-            HostConfig commandBuilder) {
+            HostConfig hostConfig, CreateContainerCmd commandBuilder) {
 
         if (containerDescription.getContainerPorts() != null && !containerDescription.getContainerPorts().isEmpty()) {
             List<ExposedPort> exposedPortsList = new LinkedList<>();
@@ -713,16 +712,15 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 portbindings.bind(tempExposedPort, Binding.bindPort(port.getExternalPort()));
             }
 
-            commandBuilder.withPortBindings(portbindings);
-
-            this.exposedPorts = exposedPortsList;
+            hostConfig.withPortBindings(portbindings);
+            commandBuilder.withExposedPorts(exposedPortsList);
 
         } else {
             logger.error("portsExternal and portsInternal must be int[] of the same size or they do not exist: {}",
                     containerDescription.getContainerName());
         }
 
-        return commandBuilder;
+        return hostConfig;
     }
 
     private CreateContainerCmd containerEnviromentVariablesHandler(ContainerConfiguration containerDescription,

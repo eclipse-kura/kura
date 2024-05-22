@@ -38,7 +38,8 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ExamplePublisher implements ConfigurableComponent, CloudSubscriberListener, CloudConnectionListener, CloudDeliveryListener {
+public class ExamplePublisher
+        implements ConfigurableComponent, CloudSubscriberListener, CloudConnectionListener, CloudDeliveryListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ExamplePublisher.class);
 
@@ -117,6 +118,13 @@ public class ExamplePublisher implements ConfigurableComponent, CloudSubscriberL
         dumpProperties("Update", properties);
 
         this.examplePublisherOptions = new ExamplePublisherOptions(properties);
+
+        try {
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         // try to kick off a new job
         doUpdate();

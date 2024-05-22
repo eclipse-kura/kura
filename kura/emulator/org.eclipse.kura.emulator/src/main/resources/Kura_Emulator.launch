@@ -78,7 +78,7 @@
         <setEntry value="org.apache.geronimo.specs.geronimo-json_1.0_spec@default:default"/>
         <setEntry value="org.apache.geronimo.specs.geronimo-jta_1.1_spec@default:default"/>
         <setEntry value="org.apache.logging.log4j.api@default:default"/>
-        <setEntry value="org.apache.logging.log4j.core@default:default"/>
+        <setEntry value="org.apache.logging.log4j.core@3:default"/>
         <setEntry value="org.apache.logging.log4j.slf4j.impl@default:default"/>
         <setEntry value="org.apache.servicemix.bundles.c3p0@default:default"/>
         <setEntry value="org.eclipse.equinox.cm@default:default"/>
@@ -153,6 +153,7 @@
         <setEntry value="org.eclipse.kura.linux.bluetooth@default:default"/>
         <setEntry value="org.eclipse.kura.localization.resources@default:false"/>
         <setEntry value="org.eclipse.kura.localization@default:default"/>
+        <setEntry value="org.eclipse.kura.net.configuration@default:default"/>
         <setEntry value="org.eclipse.kura.request.handler.jaxrs@default:default"/>
         <setEntry value="org.eclipse.kura.rest.asset.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.configuration.provider@default:default"/>

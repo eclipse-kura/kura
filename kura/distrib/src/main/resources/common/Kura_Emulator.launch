@@ -57,6 +57,8 @@
         <setEntry value="io.netty.transport-native-kqueue@default:default"/>
         <setEntry value="io.netty.transport-native-unix-common@default:default"/>
         <setEntry value="io.netty.transport@default:default"/>
+        <setEntry value="io.netty.transport-classes-epoll@default:default"/>
+        <setEntry value="io.netty.transport-classes-kqueue@default:default"/>
         <setEntry value="javax.servlet@default:default"/>
         <setEntry value="jcl.over.slf4j@default:default"/>
         <setEntry value="minimal-json@default:default"/>
@@ -86,7 +88,7 @@
         <setEntry value="org.apache.geronimo.specs.geronimo-jta_1.1_spec@default:default"/>
         <setEntry value="log4j2-api-config@default:false"/>
         <setEntry value="org.apache.logging.log4j.api@default:default"/>
-        <setEntry value="org.apache.logging.log4j.core@default:default"/>
+        <setEntry value="org.apache.logging.log4j.core@3:default"/>
         <setEntry value="org.apache.logging.log4j.slf4j.impl@default:default"/>
         <setEntry value="org.eclipse.equinox.cm@default:default"/>
         <setEntry value="org.eclipse.equinox.common@2:true"/>
@@ -149,6 +151,7 @@
         <setEntry value="org.eclipse.kura.linux.bluetooth@default:default"/>
         <setEntry value="org.eclipse.kura.localization.resources@default:false"/>
         <setEntry value="org.eclipse.kura.localization@default:default"/>
+        <setEntry value="org.eclipse.kura.net.configuration@default:default"/>
         <setEntry value="org.eclipse.kura.request.handler.jaxrs@default:default"/>
         <setEntry value="org.eclipse.kura.rest.asset.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.cloudconnection.provider@default:default"/>

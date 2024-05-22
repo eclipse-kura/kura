@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -84,12 +85,12 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     private ContainerOrchestrationServiceOptions currentConfig;
 
-    private final Set<ContainerOrchestrationServiceListener> dockerServiceListeners = new HashSet<>();
-    private final Set<FrameworkManagedContainer> frameworkManagedContainers = new HashSet<>();
+    private final Set<ContainerOrchestrationServiceListener> dockerServiceListeners = new CopyOnWriteArraySet<>();
+    private final Set<FrameworkManagedContainer> frameworkManagedContainers = new CopyOnWriteArraySet<>();
 
     private DockerClient dockerClient;
     private CryptoService cryptoService;
-    private List<ExposedPort> exposedPorts;
+
     private AllowlistEnforcementMonitor allowlistEnforcementMonitor;
 
     private Map<String, String> containerInstancesDigests = new HashMap<>();
@@ -539,7 +540,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 configuration = configuration.withRestartPolicy(RestartPolicy.unlessStoppedRestart());
             }
 
-            configuration = containerPortManagementHandler(containerDescription, configuration);
+            configuration = containerPortManagementHandler(containerDescription, configuration, commandBuilder);
 
             configuration = containerLogConfigurationHandler(containerDescription, configuration);
 
@@ -556,8 +557,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             if (containerDescription.isContainerPrivileged()) {
                 configuration = configuration.withPrivileged(containerDescription.isContainerPrivileged());
             }
-
-            commandBuilder = commandBuilder.withExposedPorts(this.exposedPorts);
 
             return commandBuilder.withHostConfig(configuration).exec().getId();
 
@@ -684,45 +683,45 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         return configuration;
     }
 
-    private HostConfig containerPortManagementHandler(ContainerConfiguration containerDescription,
-            HostConfig commandBuilder) {
+    private HostConfig containerPortManagementHandler(ContainerConfiguration containerConfiguration,
+            HostConfig hostConfig, CreateContainerCmd commandBuilder) {
 
-        if (containerDescription.getContainerPorts() != null && !containerDescription.getContainerPorts().isEmpty()) {
-            List<ExposedPort> exposedPortsList = new LinkedList<>();
-            Ports portbindings = new Ports();
+        List<ExposedPort> exposedPorts = new LinkedList<>();
+        Ports portbindings = new Ports();
 
-            for (org.eclipse.kura.container.orchestration.ContainerPort port : containerDescription
-                    .getContainerPorts()) {
+        if (containerConfiguration.getContainerPorts() != null
+                && !containerConfiguration.getContainerPorts().isEmpty()) {
 
-                InternetProtocol ipPro;
+            List<org.eclipse.kura.container.orchestration.ContainerPort> containerPorts = containerConfiguration
+                    .getContainerPorts();
 
-                switch (port.getInternetProtocol()) {
-                case UDP:
-                    ipPro = InternetProtocol.UDP;
-                    break;
-                case SCTP:
-                    ipPro = InternetProtocol.SCTP;
-                    break;
-                default:
-                    ipPro = InternetProtocol.TCP;
-                    break;
+            for (org.eclipse.kura.container.orchestration.ContainerPort port : containerPorts) {
+
+                InternetProtocol ipProtocol = InternetProtocol.TCP;
+
+                if (port.getInternetProtocol() != null) {
+                    try {
+                        ipProtocol = InternetProtocol.parse(port.getInternetProtocol().toString());
+                    } catch (IllegalArgumentException e) {
+                        logger.warn("Invalid internet protocol: {}. Using TCP.", port.getInternetProtocol());
+                    }
                 }
 
-                ExposedPort tempExposedPort = new ExposedPort(port.getInternalPort(), ipPro);
-                exposedPortsList.add(tempExposedPort);
-                portbindings.bind(tempExposedPort, Binding.bindPort(port.getExternalPort()));
+                ExposedPort exposedPort = new ExposedPort(port.getInternalPort(), ipProtocol);
+                exposedPorts.add(exposedPort);
+                portbindings.bind(exposedPort, Binding.bindPort(port.getExternalPort()));
             }
 
-            commandBuilder.withPortBindings(portbindings);
-
-            this.exposedPorts = exposedPortsList;
-
-        } else {
-            logger.error("portsExternal and portsInternal must be int[] of the same size or they do not exist: {}",
-                    containerDescription.getContainerName());
+            if (exposedPorts.size() != portbindings.getBindings().size()) {
+                logger.error("portsExternal and portsInternal must have the same size: {}",
+                        containerConfiguration.getContainerName());
+            }
         }
 
-        return commandBuilder;
+        hostConfig.withPortBindings(portbindings);
+        commandBuilder.withExposedPorts(exposedPorts);
+
+        return hostConfig;
     }
 
     private CreateContainerCmd containerEnviromentVariablesHandler(ContainerConfiguration containerDescription,

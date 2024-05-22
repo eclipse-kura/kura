@@ -1,23 +1,25 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.core.system.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.test.annotation.TestTarget;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -29,14 +31,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.kura.core.testutil.TestUtil;
-import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandExecutorService;
-import org.eclipse.kura.executor.CommandStatus;
-import org.eclipse.kura.system.SystemService;
-import org.eclipse.kura.test.annotation.TestTarget;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class SystemServiceTest {
 
@@ -44,7 +44,7 @@ public class SystemServiceTest {
     private static final String LINUX = "Linux"; // Ubuntu
     private static SystemService systemService = null;
     private static CommandExecutorService executorService = null;
-    private static CountDownLatch dependencyLatch = new CountDownLatch(2);	// initialize with number of dependencies
+    private static CountDownLatch dependencyLatch = new CountDownLatch(2);    // initialize with number of dependencies
     private boolean onCloudbees = false;
 
     @BeforeClass
@@ -100,9 +100,9 @@ public class SystemServiceTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetPlatform() {
-        String[] expected = { "dynacor",   					// emulated
-                "Ubuntu",   									// Ubuntu
-                "BeagleBone"								// BeagleBone
+        String[] expected = { "DevPlatform", // emulated
+                "Ubuntu",                    // Ubuntu
+                "BeagleBone"                 // BeagleBone
         };
 
         try {
@@ -122,7 +122,7 @@ public class SystemServiceTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetOsDistro() {
-        String[] expected = { "DevOsDitribution",   			// emulated
+        String[] expected = { "DevOsDitribution",            // emulated
                 LINUX };
 
         try {
@@ -142,8 +142,8 @@ public class SystemServiceTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetOsDistroVersion() {
-        String[] expected = { "DevOsDitributionVersion",   	// emulated
-                "N/A" 										// Ubuntu
+        String[] expected = { "DevOsDitributionVersion",    // emulated
+                "N/A"                                        // Ubuntu
         };
 
         try {

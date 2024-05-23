@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -38,7 +38,7 @@ public class GPIOServiceImpl implements GPIOService {
     private static final Logger logger = LoggerFactory.getLogger(GPIOServiceImpl.class);
 
     @SuppressWarnings("checkstyle:constantName")
-    private static final HashSet<JdkDioPin> pins = new HashSet<JdkDioPin>();
+    private static final HashSet<JdkDioPin> pins = new HashSet<>();
 
     private SystemService systemService;
 
@@ -54,9 +54,9 @@ public class GPIOServiceImpl implements GPIOService {
      * Test if a file is available for loading
      *
      * @param path
-     *            the path to test
-     * @return the path from input which can be used for loading, {@code null}
-     *         if the file is not present or should not be used for loading
+     *         the path to test
+     * @return the path from input which can be used for loading, {@code null} if the file is not present or should not
+     *         be used for loading
      */
     private static String whenAvailable(String path) {
         if (path == null) {

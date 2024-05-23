@@ -1,27 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.linux.gpio;
-
-import java.io.IOException;
-
-import org.eclipse.kura.gpio.KuraClosedDeviceException;
-import org.eclipse.kura.gpio.KuraGPIODeviceException;
-import org.eclipse.kura.gpio.KuraGPIODirection;
-import org.eclipse.kura.gpio.KuraGPIOMode;
-import org.eclipse.kura.gpio.KuraGPIOPin;
-import org.eclipse.kura.gpio.KuraGPIOTrigger;
-import org.eclipse.kura.gpio.KuraUnavailableDeviceException;
-import org.eclipse.kura.gpio.PinStatusListener;
 
 import jdk.dio.ClosedDeviceException;
 import jdk.dio.DeviceConfig;
@@ -34,6 +23,19 @@ import jdk.dio.gpio.GPIOPin;
 import jdk.dio.gpio.GPIOPinConfig;
 import jdk.dio.gpio.PinEvent;
 import jdk.dio.gpio.PinListener;
+import org.eclipse.kura.gpio.KuraClosedDeviceException;
+import org.eclipse.kura.gpio.KuraGPIODeviceException;
+import org.eclipse.kura.gpio.KuraGPIODirection;
+import org.eclipse.kura.gpio.KuraGPIOMode;
+import org.eclipse.kura.gpio.KuraGPIOPin;
+import org.eclipse.kura.gpio.KuraGPIOTrigger;
+import org.eclipse.kura.gpio.KuraUnavailableDeviceException;
+import org.eclipse.kura.gpio.PinStatusListener;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class JdkDioPin implements KuraGPIOPin {
 
@@ -64,7 +66,10 @@ public class JdkDioPin implements KuraGPIOPin {
 
     public static JdkDioPin parseFromProperty(Object key, String property) {
         try {
-            int index = Integer.parseInt((String) key);
+            if (!(key instanceof String)) {
+                return null;
+            }
+            int index = parseGpioIndex((String) key);
 
             String[] tokens = property.split(",");
 
@@ -83,6 +88,24 @@ public class JdkDioPin implements KuraGPIOPin {
         }
 
         return null;
+    }
+
+    private static int parseGpioIndex(String key) throws IOException {
+        try {
+            return Integer.parseInt(key);
+        } catch (NumberFormatException e) {
+            return parseGpioSymbolicLink(key);
+        }
+    }
+
+    private static int parseGpioSymbolicLink(String gpioPath) throws IOException {
+        Path path = Paths.get(gpioPath);
+        if (Files.isSymbolicLink(path)) {
+            Path realPath = path.toRealPath();
+            return Integer.parseInt(realPath.getFileName().toString().substring(4));
+        } else {
+            throw new IOException("Path is not a symbolic link");
+        }
     }
 
     private static String getValueByToken(String token, String[] tokens) {

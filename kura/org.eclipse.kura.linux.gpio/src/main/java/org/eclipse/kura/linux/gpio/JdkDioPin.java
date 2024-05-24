@@ -21,7 +21,6 @@ import jdk.dio.UnavailableDeviceException;
 import jdk.dio.UnsupportedDeviceTypeException;
 import jdk.dio.gpio.GPIOPin;
 import jdk.dio.gpio.GPIOPinConfig;
-import jdk.dio.gpio.PinEvent;
 import jdk.dio.gpio.PinListener;
 import org.eclipse.kura.gpio.KuraClosedDeviceException;
 import org.eclipse.kura.gpio.KuraGPIODeviceException;
@@ -31,6 +30,8 @@ import org.eclipse.kura.gpio.KuraGPIOPin;
 import org.eclipse.kura.gpio.KuraGPIOTrigger;
 import org.eclipse.kura.gpio.KuraUnavailableDeviceException;
 import org.eclipse.kura.gpio.PinStatusListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,6 +39,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class JdkDioPin implements KuraGPIOPin {
+
+    private static final Logger logger = LoggerFactory.getLogger(JdkDioPin.class);
 
     private GPIOPin thePin;
     private final int pinIndex;
@@ -172,26 +175,16 @@ public class JdkDioPin implements KuraGPIOPin {
                     getModeInternal(), getTriggerInternal(), false);
             try {
                 this.thePin = DeviceManager.open(GPIOPin.class, config);
-            } catch (InvalidDeviceConfigException e) {
+            } catch (InvalidDeviceConfigException | UnsupportedDeviceTypeException | DeviceNotFoundException
+                    | UnavailableDeviceException e) {
                 throw new KuraGPIODeviceException(e, getPinIndex());
-            } catch (UnsupportedDeviceTypeException e) {
-                throw new KuraGPIODeviceException(e, getPinIndex());
-            } catch (DeviceNotFoundException e) {
-                throw new KuraGPIODeviceException(e, getPinIndex());
-            } catch (UnavailableDeviceException e) {
-                throw new KuraUnavailableDeviceException(e, getPinIndex());
             }
         } else {
             try {
                 this.thePin = DeviceManager.open(getPinIndex());
-            } catch (InvalidDeviceConfigException e) {
+            } catch (InvalidDeviceConfigException | UnsupportedDeviceTypeException | DeviceNotFoundException
+                    | UnavailableDeviceException e) {
                 throw new KuraGPIODeviceException(e, getPinIndex());
-            } catch (UnsupportedDeviceTypeException e) {
-                throw new KuraGPIODeviceException(e, getPinIndex());
-            } catch (DeviceNotFoundException e) {
-                throw new KuraGPIODeviceException(e, getPinIndex());
-            } catch (UnavailableDeviceException e) {
-                throw new KuraUnavailableDeviceException(e, getPinIndex());
             }
         }
     }
@@ -210,14 +203,9 @@ public class JdkDioPin implements KuraGPIOPin {
         }
     }
 
-    private final PinListener privateListener = new PinListener() {
-
-        @Override
-        public void valueChanged(PinEvent pinEvent) {
-
-            if (JdkDioPin.this.localListener != null) {
-                JdkDioPin.this.localListener.pinStatusChange(pinEvent.getValue());
-            }
+    private final PinListener privateListener = pinEvent -> {
+        if (JdkDioPin.this.localListener != null) {
+            JdkDioPin.this.localListener.pinStatusChange(pinEvent.getValue());
         }
     };
 
@@ -249,6 +237,7 @@ public class JdkDioPin implements KuraGPIOPin {
                 return KuraGPIODirection.OUTPUT;
             }
         } catch (Exception e) {
+            logger.debug("Cannot parse pin direction. Defaulting to OUTPUT.");
         }
         return KuraGPIODirection.OUTPUT;
     }
@@ -268,6 +257,7 @@ public class JdkDioPin implements KuraGPIOPin {
                 return KuraGPIOMode.OUTPUT_OPEN_DRAIN;
             }
         } catch (Exception e) {
+            logger.debug("Cannot parse pin mode. Defaulting to OUTPUT_OPEN_DRAIN.");
         }
         return KuraGPIOMode.OUTPUT_OPEN_DRAIN;
     }
@@ -293,6 +283,7 @@ public class JdkDioPin implements KuraGPIOPin {
                 return KuraGPIOTrigger.NONE;
             }
         } catch (Exception e) {
+            logger.debug("Cannot parse pin trigger. Defaulting to NONE.");
         }
         return KuraGPIOTrigger.NONE;
     }
@@ -360,7 +351,7 @@ public class JdkDioPin implements KuraGPIOPin {
 
     @Override
     public boolean isOpen() {
-        return this.thePin != null ? this.thePin.isOpen() : false;
+        return this.thePin != null && this.thePin.isOpen();
     }
 
     @Override

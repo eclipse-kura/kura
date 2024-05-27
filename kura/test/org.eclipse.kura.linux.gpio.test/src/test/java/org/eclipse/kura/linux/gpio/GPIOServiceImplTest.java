@@ -37,11 +37,11 @@ import static org.junit.Assert.assertTrue;
 
 public class GPIOServiceImplTest {
 
-    Path jdkProperties;
-    Path digitalInSymlink;
-    Path digitalOutSymlink;
-    Path digitalIn;
-    Path digitalOut;
+    private Path jdkProperties;
+    private Path digitalInSymlink;
+    private Path digitalOutSymlink;
+    private Path digitalIn;
+    private Path digitalOut;
 
     @Test
     public void testActivateDeactivatePinSearch() throws IOException, NoSuchFieldException {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,18 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.linux.gpio;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Map;
-import java.util.Set;
-
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.gpio.KuraGPIODirection;
 import org.eclipse.kura.gpio.KuraGPIOMode;
@@ -31,29 +19,43 @@ import org.eclipse.kura.gpio.KuraGPIOPin;
 import org.eclipse.kura.gpio.KuraGPIOTrigger;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 
 public class GPIOServiceImplTest {
+
+    private Path jdkProperties;
+    private Path digitalInSymlink;
+    private Path digitalOutSymlink;
+    private Path digitalIn;
+    private Path digitalOut;
 
     @Test
     public void testActivateDeactivatePinSearch() throws IOException, NoSuchFieldException {
         GPIOServiceImpl svc = new GPIOServiceImpl();
 
-        File f = new File("target/jdk.dio.properties");
-        String dioConfigFileName = f.getAbsolutePath();
-        System.setProperty("jdk.dio.registry", "file:///" + dioConfigFileName);
-
-        f.createNewFile();
-
         String led1 = "user led 1";
         String testpin1 = "testpin1";
-        FileWriter fw = new FileWriter(f);
-        fw.write("1=name:" + led1 + ",deviceType:gpio.GPIOPin,direction:1,mode:8,trigger:0\n");
-        fw.write("2=name:" + testpin1 + ",deviceType:gpio.GPIOPin,direction:1,mode:8,trigger:0");
-        fw.close();
+        String content = "1=name:" + led1 + ",deviceType:gpio.GPIOPin,direction:1,mode:8,trigger:0\n" +
+                "2=name:" + testpin1 + ",deviceType:gpio.GPIOPin,direction:1,mode:8,trigger:0";
+
+        createJdkDioPropertiesFile(content);
 
         svc.activate(null);
 
-        f.delete();
+        deleteJdkDioPropertiesFile();
 
         Set<JdkDioPin> pins = (Set) TestUtil.getFieldValue(svc, "pins");
         assertEquals(2, pins.size());
@@ -158,4 +160,78 @@ public class GPIOServiceImplTest {
         f.delete();
     }
 
+    @Test
+    public void shouldParsePinSymlinks() throws IOException, NoSuchFieldException {
+        GPIOServiceImpl svc = new GPIOServiceImpl();
+
+        String content = "target/digital_in_symlink=name:IN1,deviceType:gpio.GPIOPin,direction:0,mode:1,trigger:0\n"
+                + "target/digital_out_symlink=name:OUT1,deviceType:gpio.GPIOPin,direction:1,mode:4,trigger:0";
+
+        createJdkDioPropertiesFile(content);
+        createGpioFiles();
+        createGpioSymlinks();
+
+        svc.activate(null);
+
+        deleteGpioSymlinks();
+        deleteGpioFiles();
+        deleteJdkDioPropertiesFile();
+
+        Set<JdkDioPin> pins = (Set) TestUtil.getFieldValue(svc, "pins");
+        assertEquals(2, pins.size());
+
+        pins.iterator().forEachRemaining(pin -> {
+            assertTrue(111 == pin.getIndex() || 123 == pin.getIndex());
+            if (pin.getIndex() == 111) {
+                assertEquals("IN1", pin.getName());
+                assertEquals(KuraGPIODirection.INPUT, pin.getDirection());
+                assertEquals(KuraGPIOMode.INPUT_PULL_UP, pin.getMode());
+                assertEquals(KuraGPIOTrigger.NONE, pin.getTrigger());
+            } else if (pin.getIndex() == 123) {
+                assertEquals("OUT1", pin.getName());
+                assertEquals(KuraGPIODirection.OUTPUT, pin.getDirection());
+                assertEquals(KuraGPIOMode.OUTPUT_PUSH_PULL, pin.getMode());
+                assertEquals(KuraGPIOTrigger.NONE, pin.getTrigger());
+            }
+        });
+        svc.deactivate(null);
+    }
+
+    private void createJdkDioPropertiesFile(String content) throws IOException {
+        this.jdkProperties = Paths.get("target/jdk.dio.properties");
+        String dioConfigFileName = this.jdkProperties.toAbsolutePath().toString();
+        System.setProperty("jdk.dio.registry", "file:///" + dioConfigFileName);
+
+        Files.write(this.jdkProperties, content.getBytes());
+    }
+
+    private void deleteJdkDioPropertiesFile() throws IOException {
+        Files.delete(this.jdkProperties);
+    }
+
+    private void createGpioFiles() throws IOException {
+        this.digitalIn = Paths.get("target/gpio111");
+        this.digitalOut = Paths.get("target/gpio123");
+
+        Files.createFile(this.digitalIn);
+        Files.createFile(this.digitalOut);
+    }
+
+    private void deleteGpioFiles() throws IOException {
+       Files.delete(this.digitalIn);
+       Files.delete(this.digitalOut);
+    }
+
+    private void createGpioSymlinks() throws IOException {
+        this.digitalInSymlink = Paths.get("target/digital_in_symlink");
+        this.digitalOutSymlink = Paths.get("target/digital_out_symlink");
+
+        Files.createSymbolicLink(this.digitalInSymlink, this.digitalIn.toRealPath());
+        Files.createSymbolicLink(this.digitalOutSymlink, this.digitalOut.toRealPath());
+    }
+
+    private void deleteGpioSymlinks() throws IOException {
+        Files.delete(this.digitalInSymlink);
+        Files.delete(this.digitalOutSymlink);
+    }
 }

@@ -21,6 +21,7 @@ ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
 sed "s|INSTALL_DIR|${INSTALL_DIR}|" ${INSTALL_DIR}/kura/install/kura.service > /lib/systemd/system/kura.service
 systemctl daemon-reload
 systemctl enable kura
+chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 
 # setup snapshot_0 recovery folder
 if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
@@ -69,5 +70,12 @@ fi
 
 #set up systemd-tmpfiles
 cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /etc/tmpfiles.d/kura.conf
+
+# set up kura files permissions
+chmod 700 ${INSTALL_DIR}/kura/bin/*.sh
+chown -R kurad:kurad /opt/eclipse
+chmod -R go-rwx /opt/eclipse
+chmod a+rx /opt/eclipse    
+find /opt/eclipse/kura -type d -exec chmod u+x "{}" \;
 
 keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign -ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit

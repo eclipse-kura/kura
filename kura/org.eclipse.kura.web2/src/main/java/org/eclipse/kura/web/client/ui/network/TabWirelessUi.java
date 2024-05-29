@@ -153,7 +153,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     private boolean dirty;
     private boolean ssidInit;
-    private boolean isNet2;
+    private final boolean isNet2;
     private GwtWifiNetInterfaceConfig selectedNetIfConfig;
     private String tcp4Status;
     private String tcp6Status;
@@ -461,7 +461,11 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             this.activeConfig = this.selectedNetIfConfig.getActiveWifiConfig();
 
-            loadCountryCode();
+            if (!(this.tcp4Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.getValue())
+                    && this.tcp6Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.getValue()))) {
+
+                loadCountryCode();
+            }
         }
     }
 
@@ -638,8 +642,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         String tcpip6Status = this.tcp6Tab.getStatus();
 
         // Tcp/IP disabled
-        if (tcpip4Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.name())
-                && tcpip6Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.name())) {
+        if (tcpip4Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.getValue())
+                && tcpip6Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.getValue())) {
             setForm(false);
         } else {
             setForm(true);
@@ -981,6 +985,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
+                    logger.info("verifyWifiCredentials");
                     TabWirelessUi.this.gwtNetworkService.verifyWifiCredentials(token,
                             TabWirelessUi.this.selectedNetIfConfig.getName(), gwtWifiConfig,
                             new AsyncCallback<Boolean>() {
@@ -1200,7 +1205,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private void initRegDomErrorModal() {
         this.regDomErrorModal.setTitle(MSGS.error());
         this.unavailableChannelErrorText.setText(MSGS.netWifiChannelMissingError());
-        this.regDomErrorModal.addHideHandler(evt -> this.setDirty(true));
+        this.regDomErrorModal.addHideHandler(evt -> setDirty(true));
     }
 
     private List<GwtWifiHotspotEntry> getChannelFrequencyByIndex(int selectedIndex) {
@@ -1297,6 +1302,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                     @Override
                     public void onSuccess(String countryCode) {
+                        logger.info("getWifiCountryCode");
                         TabWirelessUi.this.countryCode.setText(countryCode);
                         TabWirelessUi.this.activeConfig.setCountryCode(countryCode);
 
@@ -1517,6 +1523,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
+                    logger.info("loadSsidData");
                     TabWirelessUi.this.gwtNetworkService.findWifiHotspots(token,
                             TabWirelessUi.this.selectedNetIfConfig.getName(),
                             TabWirelessUi.this.selectedNetIfConfig.getAccessPointWifiConfig().getWirelessSsid(),
@@ -1532,6 +1539,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                                 @Override
                                 public void onSuccess(List<GwtWifiHotspotEntry> result) {
+                                    logger.info("findWifiHotspots");
                                     TabWirelessUi.this.ssidDataProvider.getList().clear();
 
                                     for (GwtWifiHotspotEntry pair : result) {
@@ -1780,6 +1788,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
+                    logger.info("loadChannelFrequencies");
                     GwtWifiRadioMode radioMode = radioValueToRadioMode(TabWirelessUi.this.radio.getSelectedValue());
 
                     TabWirelessUi.this.gwtNetworkService.findFrequencies(token,
@@ -1824,7 +1833,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             this.channelList.setSelectedIndex(selectedChannelValue);
         }
 
-        this.noChannels.setVisible((this.channelList.getItemCount() <= 0));
+        this.noChannels.setVisible(this.channelList.getItemCount() <= 0);
     }
 
     private void addAutomaticChannel(List<GwtWifiChannelFrequency> freqs) {
@@ -1855,6 +1864,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
+                logger.info("loadRadioMode");
 
                 TabWirelessUi.this.gwtNetworkService.isIEEE80211ACSupported(token,
                         TabWirelessUi.this.selectedNetIfConfig.getName(), new AsyncCallback<Boolean>() {
@@ -1892,7 +1902,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private void fillRadioMode(boolean acSupported) {
         if (!this.isNet2) {
             for (GwtWifiRadioMode mode : GwtWifiRadioMode.values()) {
-                if (Boolean.FALSE.equals(acSupported) && mode == GwtWifiRadioMode.netWifiRadioModeANAC) {
+                if (!acSupported && mode == GwtWifiRadioMode.netWifiRadioModeANAC) {
                     continue;
                 }
                 this.radio.addItem(MessageUtils.get(mode.name()));

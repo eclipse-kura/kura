@@ -68,9 +68,6 @@ Starting from Kura 5.5.0, the default pin configuration can be described in the 
 
 where `/dev/digital_in1` points to `/sys/class/gpio/gpioXYZ`. The pin number is set to XYZ and it can be retrieved by name.
 
-!!! warning
-    A pin described as a symlink is supported only by the `GPIOService`, so it cannot be accessed using directly the OpenJDK Device I/O library.
-
 ## OpenJDK Device I/O
 
 Linux-level access in Kura is granted through OpenJDK Device I/O, a third-party library that leverages standard Java ME Device I/O APIs to Java SE. Kura is distributed with the relevant native libraries, together with the default hardware configuration, for each platform on which it runs.

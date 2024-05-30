@@ -1,27 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.linux.gpio;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
 
 import org.eclipse.kura.gpio.GPIOService;
 import org.eclipse.kura.gpio.KuraGPIODirection;
@@ -33,12 +23,23 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Properties;
+
 public class GPIOServiceImpl implements GPIOService {
 
     private static final Logger logger = LoggerFactory.getLogger(GPIOServiceImpl.class);
 
     @SuppressWarnings("checkstyle:constantName")
-    private static final HashSet<JdkDioPin> pins = new HashSet<JdkDioPin>();
+    private static final HashSet<JdkDioPin> pins = new HashSet<>();
+    public static final String FILE = "file:";
 
     private SystemService systemService;
 
@@ -47,24 +48,26 @@ public class GPIOServiceImpl implements GPIOService {
     }
 
     public void unsetSystemService(SystemService systemService) {
-        this.systemService = null;
+        if (this.systemService == systemService) {
+            this.systemService = null;
+        }
     }
 
     /**
      * Test if a file is available for loading
      *
      * @param path
-     *            the path to test
-     * @return the path from input which can be used for loading, {@code null}
-     *         if the file is not present or should not be used for loading
+     *         the path to test
+     * @return the path from input which can be used for loading, {@code null} if the file is not present or should not
+     *         be used for loading
      */
     private static String whenAvailable(String path) {
         if (path == null) {
             return null;
         }
 
-        if (!path.startsWith("file:")) {
-            path = "file:" + path;
+        if (!path.startsWith(FILE)) {
+            path = FILE + path;
         }
 
         try {
@@ -88,8 +91,8 @@ public class GPIOServiceImpl implements GPIOService {
         FileReader fr = null;
         try {
             String configFile = System.getProperty("jdk.dio.registry");
-            if (configFile != null && !configFile.startsWith("file:")) {
-                configFile = "file:" + configFile;
+            if (configFile != null && !configFile.startsWith(FILE)) {
+                configFile = FILE + configFile;
             }
             logger.debug("System property location: {}", configFile);
 
@@ -135,9 +138,7 @@ public class GPIOServiceImpl implements GPIOService {
             } else {
                 logger.warn("File does not exist: {}", dioPropsFile);
             }
-        } catch (IOException e) {
-            logger.error("Exception while accessing resource!", e);
-        } catch (URISyntaxException e) {
+        } catch (IOException | URISyntaxException e) {
             logger.error("Exception while accessing resource!", e);
         } finally {
             if (fr != null) {
@@ -234,7 +235,7 @@ public class GPIOServiceImpl implements GPIOService {
 
     @Override
     public Map<Integer, String> getAvailablePins() {
-        HashMap<Integer, String> result = new HashMap<Integer, String>();
+        HashMap<Integer, String> result = new HashMap<>();
         for (JdkDioPin p : pins) {
             result.put(p.getIndex(), p.getName());
         }

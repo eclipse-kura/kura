@@ -14,7 +14,6 @@ COPY --from=kura_base /kura-install/kura_*_docker-x86_64-nn_installer.sh /kura-i
 
 ENV \
   KURA_DIR=/opt/eclipse/kura \
-  JAVA_HOME=/usr/lib/jvm/jre-1.8.0 \
   SKIP_JAVA_VERSION_CHECK=true \
   LAUNCHER_VERSION="1.5.800.v20200727-1323"
 

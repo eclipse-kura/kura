@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (c) 2020, 2023 Eurotech and/or its affiliates and others
+#  Copyright (c) 2020, 2024 Eurotech and/or its affiliates and others
 #
 #  This program and the accompanying materials are made
 #  available under the terms of the Eclipse Public License 2.0
@@ -84,6 +84,12 @@ ResultAny=yes" >/etc/polkit-1/localauthority/50-local.d/54-fi.w1.wpa_supplicant1
             subject.user == \"kurad\") {
             return polkit.Result.YES;
         }
+        if ((action.id == \"org.freedesktop.login1.reboot-multiple-sessions\" ||
+            action.id == \"org.freedesktop.login1.suspend-multiple-sessions\" ||
+            action.id == \"org.freedesktop.login1.power-off-multiple-sessions\") &&
+            subject.user == \"kurad\") {
+            return polkit.Result.YES;
+        }
     });" >/usr/share/polkit-1/rules.d/kura.rules
             fi
             if [ ! -f /usr/share/polkit-1/rules.d/kura-nm.rules ]; then
@@ -106,6 +112,12 @@ if (action.id == \"org.freedesktop.systemd1.manage-units\" &&
     return polkit.Result.YES;
 }
 if (action.id == \"org.freedesktop.systemd1.manage-unit-files\" &&
+    subject.user == \"kurad\") {
+    return polkit.Result.YES;
+}
+if ((action.id == \"org.freedesktop.login1.reboot-multiple-sessions\" ||
+    action.id == \"org.freedesktop.login1.suspend-multiple-sessions\" ||
+    action.id == \"org.freedesktop.login1.power-off-multiple-sessions\") &&
     subject.user == \"kurad\") {
     return polkit.Result.YES;
 }

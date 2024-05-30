@@ -809,7 +809,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.radio2.setValue(true);
         this.radio4.setValue(true);
 
-        update();
+        if (this.selectedNetIfConfig != null) {
+            update();
+        }
     }
 
     private void initHelpButtons() {
@@ -1774,37 +1776,34 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private void loadChannelFrequencies() {
-        if (this.selectedNetIfConfig != null) {
-            this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-                @Override
-                public void onFailure(Throwable ex) {
-                    FailureHandler.handle(ex);
-                }
+            @Override
+            public void onFailure(Throwable ex) {
+                FailureHandler.handle(ex);
+            }
 
-                @Override
-                public void onSuccess(GwtXSRFToken token) {
-                    GwtWifiRadioMode radioMode = radioValueToRadioMode(TabWirelessUi.this.radio.getSelectedValue());
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                GwtWifiRadioMode radioMode = radioValueToRadioMode(TabWirelessUi.this.radio.getSelectedValue());
 
-                    TabWirelessUi.this.gwtNetworkService.findFrequencies(token,
-                            TabWirelessUi.this.selectedNetIfConfig.getName(), radioMode,
-                            new AsyncCallback<List<GwtWifiChannelFrequency>>() {
+                TabWirelessUi.this.gwtNetworkService.findFrequencies(token,
+                        TabWirelessUi.this.selectedNetIfConfig.getName(), radioMode,
+                        new AsyncCallback<List<GwtWifiChannelFrequency>>() {
 
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    logger.info("findFrequencies Failure");
-                                }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                logger.info("findFrequencies Failure");
+                            }
 
-                                @Override
-                                public void onSuccess(List<GwtWifiChannelFrequency> freqChannels) {
+                            @Override
+                            public void onSuccess(List<GwtWifiChannelFrequency> freqChannels) {
+                                updateChannelListValues(freqChannels);
 
-                                    updateChannelListValues(freqChannels);
-
-                                }
-                            });
-                }
-            });
-        }
+                            }
+                        });
+            }
+        });
 
     }
 

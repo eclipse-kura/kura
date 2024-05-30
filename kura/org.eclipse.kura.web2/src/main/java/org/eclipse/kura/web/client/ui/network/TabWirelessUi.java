@@ -985,7 +985,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
-                    logger.info("verifyWifiCredentials");
                     TabWirelessUi.this.gwtNetworkService.verifyWifiCredentials(token,
                             TabWirelessUi.this.selectedNetIfConfig.getName(), gwtWifiConfig,
                             new AsyncCallback<Boolean>() {
@@ -1302,7 +1301,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                     @Override
                     public void onSuccess(String countryCode) {
-                        logger.info("getWifiCountryCode");
                         TabWirelessUi.this.countryCode.setText(countryCode);
                         TabWirelessUi.this.activeConfig.setCountryCode(countryCode);
 
@@ -1523,7 +1521,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
-                    logger.info("loadSsidData");
                     TabWirelessUi.this.gwtNetworkService.findWifiHotspots(token,
                             TabWirelessUi.this.selectedNetIfConfig.getName(),
                             TabWirelessUi.this.selectedNetIfConfig.getAccessPointWifiConfig().getWirelessSsid(),
@@ -1539,7 +1536,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                                 @Override
                                 public void onSuccess(List<GwtWifiHotspotEntry> result) {
-                                    logger.info("findWifiHotspots");
                                     TabWirelessUi.this.ssidDataProvider.getList().clear();
 
                                     for (GwtWifiHotspotEntry pair : result) {
@@ -1788,7 +1784,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
-                    logger.info("loadChannelFrequencies");
                     GwtWifiRadioMode radioMode = radioValueToRadioMode(TabWirelessUi.this.radio.getSelectedValue());
 
                     TabWirelessUi.this.gwtNetworkService.findFrequencies(token,
@@ -1864,7 +1859,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                logger.info("loadRadioMode");
 
                 TabWirelessUi.this.gwtNetworkService.isIEEE80211ACSupported(token,
                         TabWirelessUi.this.selectedNetIfConfig.getName(), new AsyncCallback<Boolean>() {

@@ -4397,10 +4397,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
 <li>
 <p><strong>Privileged/Unprivileged Command Service Selection</strong>: sets the modality of the command service. When set to privileged, the commands are run using the (privileged) user that started Kura, tipically <em>kurad</em> or <em>root</em>. When set to unprivileged, a standard user will run the commands.</p>
-<div class="admonition info">
-<p class="admonition-title">Info</p>
-<p>On Docker installations, only the Privileged mode is supported.</p>
-</div>
 </li>
 </ul>
 <p>When a command execution is requested in the cloud platform, it sends an MQTT control message to the device requesting that the command be executed. On the device, the Command Service opens a temporary shell in the <em>command.working.directory,</em> sets the <em>command.environment</em> variables (if any), and waits  <em>command.timeout</em> seconds to get command response.</p>

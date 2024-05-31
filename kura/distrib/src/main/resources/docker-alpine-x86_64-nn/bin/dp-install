@@ -2,16 +2,15 @@
 
 set -e
 
-SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+NAME="$1"
+URL="$2"
 
-URL="$1"
-shift
-
-DIR=$(mktemp -d)
-cd "$DIR"
+TMP_DIR=$(mktemp -d)
+cd "$TMP_DIR"
 curl -sLO "$URL"
-DP=$(find . -name "*.dp" -printf '%P\n')
+DOWNLOADED_FILE=$( find . -name "*.dp" | sed "s|^./||" )
+mv "$DOWNLOADED_FILE" "${KURA_DIR}/packages/"
 
-"$SCRIPT_DIR/dp-install-local" "$DP"
+echo "${NAME}=file\:${KURA_DIR}/packages/${DOWNLOADED_FILE}" >> "${KURA_DIR}/packages/dpa.properties"
 
-rm -Rf DIR
+rm -r "${TMP_DIR}"

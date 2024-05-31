@@ -47,11 +47,6 @@ KuraGpioPin customInputPin = gpioServiceInstance.getPinByTerminal(
   KuraGPIOMode.INPUT_PULL_UP, 
   KuraGPIOTrigger.BOTH_LEVELS);
 ```
-## OpenJDK Device I/O
-
-Linux-level access in Kura is granted through OpenJDK Device I/O, a third-party library that leverages standard Java ME Device I/O APIs to Java SE. Kura is distributed with the relevant native libraries, together with the default hardware configuration, for each platform on which it runs.
-
-I2C, SPI, and GPIO resources can be directly accessed through the jdk.dio library present in the target platform. 
 
 ### Default Configuration
 
@@ -64,6 +59,21 @@ gpio.GPIOPin = initValue:0, deviceNumber:0, direction:3, mode:-1, trigger:3
 #Standard PIN configuration
 64 = deviceType: gpio.GPIOPin, pinNumber:64, name:RELAY1
 ```
+
+Starting from Kura 5.5.0, the default pin configuration can be described in the form of symbolic links. The syntax is as follows:
+
+```text
+/dev/digital_in1 = deviceType: gpio.GPIOPin, direction:0, mode=1, name:digital_in1
+```
+
+where `/dev/digital_in1` points to `/sys/class/gpio/gpioXYZ`. The pin number is set to XYZ and it can be retrieved by name.
+
+## OpenJDK Device I/O
+
+Linux-level access in Kura is granted through OpenJDK Device I/O, a third-party library that leverages standard Java ME Device I/O APIs to Java SE. Kura is distributed with the relevant native libraries, together with the default hardware configuration, for each platform on which it runs.
+
+I2C, SPI, and GPIO resources can be directly accessed through the jdk.dio library present in the target platform. 
+
 ### APIs
 
 Kura supports the full set of APIs for the listed device types. Refer to [References](/references/javadoc/) for further API information.

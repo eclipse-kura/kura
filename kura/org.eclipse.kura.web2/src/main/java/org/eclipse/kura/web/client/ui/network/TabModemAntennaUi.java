@@ -218,16 +218,16 @@ public class TabModemAntennaUi extends Composite implements NetworkTab {
                 this.radio2.setValue(true);
                 this.radio1.setValue(false);
             }
+            this.registration.setText(this.selectedModemIfConfig.getHwRegistration());
+            this.imsi.setText(this.selectedModemIfConfig.getHwIMSI());
+            this.iccid.setText(this.selectedModemIfConfig.getHwICCID());
+            this.plmnid.setText(this.selectedModemIfConfig.getHwPLMNID());
+            this.network.setText(this.selectedModemIfConfig.getHwNetwork());
+            this.radio.setText(this.selectedModemIfConfig.getHwRadio());
+            this.band.setText(this.selectedModemIfConfig.getHwBand());
+            this.lac.setText(this.selectedModemIfConfig.getHwLAC());
+            this.ci.setText(this.selectedModemIfConfig.getHwCI());
         }
-        this.registration.setText(this.selectedModemIfConfig.getHwRegistration());
-        this.imsi.setText(this.selectedModemIfConfig.getHwIMSI());
-        this.iccid.setText(this.selectedModemIfConfig.getHwICCID());
-        this.plmnid.setText(this.selectedModemIfConfig.getHwPLMNID());
-        this.network.setText(this.selectedModemIfConfig.getHwNetwork());
-        this.radio.setText(this.selectedModemIfConfig.getHwRadio());
-        this.band.setText(this.selectedModemIfConfig.getHwBand());
-        this.lac.setText(this.selectedModemIfConfig.getHwLAC());
-        this.ci.setText(this.selectedModemIfConfig.getHwCI());
         refreshForm();
     }
 

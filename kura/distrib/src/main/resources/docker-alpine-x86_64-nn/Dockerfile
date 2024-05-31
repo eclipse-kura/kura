@@ -39,8 +39,7 @@ RUN chmod a+x -R /usr/local/bin && \
     mkdir -p ${KURA_DIR}/packages && \
     if [ "$PACKED" == "true" ]; then touch /kura.packed && pack-kura; fi && \
     unpack-kura && \
-    sed -i "s/\-printf \'\%P.n\'//g" /usr/local/bin/dp-install && \
-    dp-install "https://repo1.maven.org/maven2/de/dentrassi/kura/addons/de.dentrassi.kura.addons.utils.fileinstall/0.6.0/de.dentrassi.kura.addons.utils.fileinstall-0.6.0.dp" && \
+    dp-install "de.dentrassi.kura.addons.utils.fileinstall" "https://repo1.maven.org/maven2/de/dentrassi/kura/addons/de.dentrassi.kura.addons.utils.fileinstall/0.6.0/de.dentrassi.kura.addons.utils.fileinstall-0.6.0.dp" && \
     add-config-ini "felix.fileinstall.disableNio2=true" && \
     add-config-ini "felix.fileinstall.dir=/load" && \
     pack-kura

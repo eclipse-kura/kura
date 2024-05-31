@@ -3496,6 +3496,21 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Pin Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -3507,15 +3522,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
     <nav class="md-nav" aria-label="OpenJDK Device I/O">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#default-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Default Configuration
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#apis" class="md-nav__link">
@@ -4492,6 +4498,21 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Pin Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Default Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -4503,15 +4524,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
     <nav class="md-nav" aria-label="OpenJDK Device I/O">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#default-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Default Configuration
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#apis" class="md-nav__link">
@@ -4613,9 +4625,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="n">KuraGPIOMode</span><span class="p">.</span><span class="na">INPUT_PULL_UP</span><span class="p">,</span><span class="w"> </span>
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="n">KuraGPIOTrigger</span><span class="p">.</span><span class="na">BOTH_LEVELS</span><span class="p">);</span>
 </code></pre></div></p>
-<h2 id="openjdk-device-io">OpenJDK Device I/O</h2>
-<p>Linux-level access in Kura is granted through OpenJDK Device I/O, a third-party library that leverages standard Java ME Device I/O APIs to Java SE. Kura is distributed with the relevant native libraries, together with the default hardware configuration, for each platform on which it runs.</p>
-<p>I2C, SPI, and GPIO resources can be directly accessed through the jdk.dio library present in the target platform. </p>
 <h3 id="default-configuration">Default Configuration</h3>
 <p>Default hardware configuration for the hardware platform is defined in the <strong>jdk.dio.properties</strong> file. Standard configuration for complex devices can be added on a per-device basis as shown below.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>#Default PIN configuration. To be overwritten in the following lines
@@ -4624,45 +4633,52 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>#Standard PIN configuration
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>64 = deviceType: gpio.GPIOPin, pinNumber:64, name:RELAY1
 </code></pre></div>
+<p>Starting from Kura 5.5.0, the default pin configuration can be described in the form of symbolic links. The syntax is as follows:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>/dev/digital_in1 = deviceType: gpio.GPIOPin, direction:0, mode=1, name:digital_in1
+</code></pre></div>
+<p>where <code>/dev/digital_in1</code> points to <code>/sys/class/gpio/gpioXYZ</code>. The pin number is set to XYZ and it can be retrieved by name.</p>
+<h2 id="openjdk-device-io">OpenJDK Device I/O</h2>
+<p>Linux-level access in Kura is granted through OpenJDK Device I/O, a third-party library that leverages standard Java ME Device I/O APIs to Java SE. Kura is distributed with the relevant native libraries, together with the default hardware configuration, for each platform on which it runs.</p>
+<p>I2C, SPI, and GPIO resources can be directly accessed through the jdk.dio library present in the target platform. </p>
 <h3 id="apis">APIs</h3>
 <p>Kura supports the full set of APIs for the listed device types. Refer to <a href="/references/javadoc/">References</a> for further API information.</p>
 <h3 id="accessing-a-gpio-pin-with-openjdk-device-io">Accessing a GPIO Pin with OpenJDK Device I/O</h3>
 <p>A GPIO Pin can be accessed by referencing its index in the properties file, or by creating a Pin configuration object and feeding it to the DeviceManager as shown in the code examples below.</p>
 <h4 id="accessing-a-gpio-pin-by-its-index">Accessing a GPIO Pin by its Index</h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="err">#</span><span class="n">Accessing</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">GPIO</span><span class="w"> </span><span class="n">Pin</span><span class="w"> </span><span class="n">number</span><span class="w"> </span><span class="mf">17.</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="n">behaviour</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">defined</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">the</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="err">#</span><span class="n">jdk</span><span class="p">.</span><span class="na">dio</span><span class="p">.</span><span class="na">properties</span><span class="w"> </span><span class="n">file</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="err">#</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="err">#</span><span class="n">i</span><span class="p">.</span><span class="na">e</span><span class="p">.:</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="err">#</span><span class="w"> </span><span class="n">gpio</span><span class="p">.</span><span class="na">GPIOPin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">initValue</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">deviceNumber</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">direction</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">mode</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">trigger</span><span class="p">:</span><span class="mi">3</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="err">#</span><span class="w"> </span><span class="mi">17</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deviceType</span><span class="p">:</span><span class="w"> </span><span class="n">gpio</span><span class="p">.</span><span class="na">GPIOPin</span><span class="p">,</span><span class="w"> </span><span class="n">pinNumber</span><span class="p">:</span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="n">GPIO_USER_1</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="n">GPIOPin</span><span class="w"> </span><span class="n">led</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">GPIOPin</span><span class="p">)</span><span class="n">DeviceManager</span><span class="p">.</span><span class="na">open</span><span class="p">(</span><span class="mi">17</span><span class="p">);</span>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="n">led</span><span class="p">.</span><span class="na">setValue</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span><span class="w"> </span><span class="c1">//Turns the LED on</span>
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="n">led</span><span class="p">.</span><span class="na">setValue</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span><span class="w"> </span><span class="c1">//Turns the LED off</span>
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="kt">boolean</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">led</span><span class="p">.</span><span class="na">getValue</span><span class="p">()</span><span class="w"> </span><span class="c1">//true if the LED is on</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="err">#</span><span class="n">Accessing</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">GPIO</span><span class="w"> </span><span class="n">Pin</span><span class="w"> </span><span class="n">number</span><span class="w"> </span><span class="mf">17.</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="n">behaviour</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">defined</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">the</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="err">#</span><span class="n">jdk</span><span class="p">.</span><span class="na">dio</span><span class="p">.</span><span class="na">properties</span><span class="w"> </span><span class="n">file</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="err">#</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="err">#</span><span class="n">i</span><span class="p">.</span><span class="na">e</span><span class="p">.:</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="err">#</span><span class="w"> </span><span class="n">gpio</span><span class="p">.</span><span class="na">GPIOPin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">initValue</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">deviceNumber</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">direction</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">mode</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">trigger</span><span class="p">:</span><span class="mi">3</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="err">#</span><span class="w"> </span><span class="mi">17</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deviceType</span><span class="p">:</span><span class="w"> </span><span class="n">gpio</span><span class="p">.</span><span class="na">GPIOPin</span><span class="p">,</span><span class="w"> </span><span class="n">pinNumber</span><span class="p">:</span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="n">GPIO_USER_1</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="n">GPIOPin</span><span class="w"> </span><span class="n">led</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">GPIOPin</span><span class="p">)</span><span class="n">DeviceManager</span><span class="p">.</span><span class="na">open</span><span class="p">(</span><span class="mi">17</span><span class="p">);</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="n">led</span><span class="p">.</span><span class="na">setValue</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span><span class="w"> </span><span class="c1">//Turns the LED on</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="n">led</span><span class="p">.</span><span class="na">setValue</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span><span class="w"> </span><span class="c1">//Turns the LED off</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="kt">boolean</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">led</span><span class="p">.</span><span class="na">getValue</span><span class="p">()</span><span class="w"> </span><span class="c1">//true if the LED is on</span>
 </code></pre></div>
 <h4 id="accessing-a-gpio-pin-using-a-device-configuration-object">Accessing a GPIO Pin Using a Device Configuration Object</h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="err">#</span><span class="n">Accessing</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">Pin</span><span class="w"> </span><span class="n">number</span><span class="w"> </span><span class="mi">17</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">custom</span><span class="w"> </span><span class="n">configuration</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">GPIOPinConfig</span><span class="w"> </span><span class="n">pinConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">GPIOPinConfig</span><span class="p">(</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="n">DeviceConfig</span><span class="p">.</span><span class="na">DEFAULT</span><span class="p">,</span><span class="w">                       </span><span class="c1">//GPIO Controller number or name</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="mi">17</span><span class="p">,</span><span class="w">                                                 </span><span class="c1">//GPIO Pin number</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="n">GPIOPinConfig</span><span class="p">.</span><span class="na">DIR_INPUT_ONLY</span><span class="p">,</span><span class="w">               </span><span class="c1">//Pin direction</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="n">GPIOPinConfig</span><span class="p">.</span><span class="na">MODE_INPUT_PULL_DOWN</span><span class="p">,</span><span class="w">     </span><span class="c1">//Pin resistor</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">    </span><span class="n">GPIOPinConfig</span><span class="p">.</span><span class="na">TRIGGER_BOTH_EDGES</span><span class="p">,</span><span class="w">       </span><span class="c1">//Triggers</span>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="kc">false</span><span class="w">                                           </span><span class="c1">//initial value (for outputs)</span>
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="p">);</span>
-<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>
-<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="n">GPIOPin</span><span class="w"> </span><span class="n">button</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">GPIOPin</span><span class="p">)</span><span class="w"> </span><span class="n">DeviceManager</span><span class="p">.</span><span class="na">open</span><span class="p">(</span><span class="n">GPIOPin</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">pinConfig</span><span class="p">);</span>
-<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>
-<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="n">button</span><span class="p">.</span><span class="na">setInputListener</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">PinListener</span><span class="p">(){</span>
-<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">        </span><span class="nd">@Override</span>
-<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">valueChanged</span><span class="p">(</span><span class="n">PinEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="w">            </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;PIN Status Changed!&quot;</span><span class="p">);</span>
-<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="w">            </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="na">getLastTimeStamp</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; - &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="na">getValue</span><span class="p">());</span>
-<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a><span class="p">});</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="err">#</span><span class="n">Accessing</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">Pin</span><span class="w"> </span><span class="n">number</span><span class="w"> </span><span class="mi">17</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">custom</span><span class="w"> </span><span class="n">configuration</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">GPIOPinConfig</span><span class="w"> </span><span class="n">pinConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">GPIOPinConfig</span><span class="p">(</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span><span class="n">DeviceConfig</span><span class="p">.</span><span class="na">DEFAULT</span><span class="p">,</span><span class="w">                       </span><span class="c1">//GPIO Controller number or name</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span><span class="mi">17</span><span class="p">,</span><span class="w">                                                 </span><span class="c1">//GPIO Pin number</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span><span class="n">GPIOPinConfig</span><span class="p">.</span><span class="na">DIR_INPUT_ONLY</span><span class="p">,</span><span class="w">               </span><span class="c1">//Pin direction</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">    </span><span class="n">GPIOPinConfig</span><span class="p">.</span><span class="na">MODE_INPUT_PULL_DOWN</span><span class="p">,</span><span class="w">     </span><span class="c1">//Pin resistor</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">    </span><span class="n">GPIOPinConfig</span><span class="p">.</span><span class="na">TRIGGER_BOTH_EDGES</span><span class="p">,</span><span class="w">       </span><span class="c1">//Triggers</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">    </span><span class="kc">false</span><span class="w">                                           </span><span class="c1">//initial value (for outputs)</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="p">);</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="n">GPIOPin</span><span class="w"> </span><span class="n">button</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">GPIOPin</span><span class="p">)</span><span class="w"> </span><span class="n">DeviceManager</span><span class="p">.</span><span class="na">open</span><span class="p">(</span><span class="n">GPIOPin</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">pinConfig</span><span class="p">);</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="n">button</span><span class="p">.</span><span class="na">setInputListener</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">PinListener</span><span class="p">(){</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">        </span><span class="nd">@Override</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">valueChanged</span><span class="p">(</span><span class="n">PinEvent</span><span class="w"> </span><span class="n">event</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">            </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;PIN Status Changed!&quot;</span><span class="p">);</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">            </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="na">getLastTimeStamp</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; - &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="na">getValue</span><span class="p">());</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="p">});</span>
 </code></pre></div>
 
 

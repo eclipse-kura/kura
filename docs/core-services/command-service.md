@@ -28,7 +28,4 @@ The Command Service provides the following configuration parameters:
 
 - **Privileged/Unprivileged Command Service Selection**: sets the modality of the command service. When set to privileged, the commands are run using the (privileged) user that started Kura, tipically *kurad* or *root*. When set to unprivileged, a standard user will run the commands.
 
-    !!! info
-        On Docker installations, only the Privileged mode is supported.
-
 When a command execution is requested in the cloud platform, it sends an MQTT control message to the device requesting that the command be executed. On the device, the Command Service opens a temporary shell in the _command.working.directory,_ sets the _command.environment_ variables (if any), and waits  _command.timeout_ seconds to get command response.

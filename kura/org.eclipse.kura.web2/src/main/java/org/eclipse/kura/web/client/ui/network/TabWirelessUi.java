@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -153,7 +153,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     private boolean dirty;
     private boolean ssidInit;
-    private boolean isNet2;
+    private final boolean isNet2;
     private GwtWifiNetInterfaceConfig selectedNetIfConfig;
     private String tcp4Status;
     private String tcp6Status;
@@ -461,7 +461,11 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             this.activeConfig = this.selectedNetIfConfig.getActiveWifiConfig();
 
-            loadCountryCode();
+            if (!(this.tcp4Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.getValue())
+                    && this.tcp6Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.getValue()))) {
+
+                loadCountryCode();
+            }
         }
     }
 
@@ -638,8 +642,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         String tcpip6Status = this.tcp6Tab.getStatus();
 
         // Tcp/IP disabled
-        if (tcpip4Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.name())
-                && tcpip6Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.name())) {
+        if (tcpip4Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.getValue())
+                && tcpip6Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.getValue())) {
             setForm(false);
         } else {
             setForm(true);
@@ -805,7 +809,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.radio2.setValue(true);
         this.radio4.setValue(true);
 
-        update();
+        if (this.selectedNetIfConfig != null) {
+            update();
+        }
     }
 
     private void initHelpButtons() {
@@ -1200,7 +1206,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private void initRegDomErrorModal() {
         this.regDomErrorModal.setTitle(MSGS.error());
         this.unavailableChannelErrorText.setText(MSGS.netWifiChannelMissingError());
-        this.regDomErrorModal.addHideHandler(evt -> this.setDirty(true));
+        this.regDomErrorModal.addHideHandler(evt -> setDirty(true));
     }
 
     private List<GwtWifiHotspotEntry> getChannelFrequencyByIndex(int selectedIndex) {
@@ -1770,37 +1776,34 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private void loadChannelFrequencies() {
-        if (this.selectedNetIfConfig != null) {
-            this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-                @Override
-                public void onFailure(Throwable ex) {
-                    FailureHandler.handle(ex);
-                }
+            @Override
+            public void onFailure(Throwable ex) {
+                FailureHandler.handle(ex);
+            }
 
-                @Override
-                public void onSuccess(GwtXSRFToken token) {
-                    GwtWifiRadioMode radioMode = radioValueToRadioMode(TabWirelessUi.this.radio.getSelectedValue());
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                GwtWifiRadioMode radioMode = radioValueToRadioMode(TabWirelessUi.this.radio.getSelectedValue());
 
-                    TabWirelessUi.this.gwtNetworkService.findFrequencies(token,
-                            TabWirelessUi.this.selectedNetIfConfig.getName(), radioMode,
-                            new AsyncCallback<List<GwtWifiChannelFrequency>>() {
+                TabWirelessUi.this.gwtNetworkService.findFrequencies(token,
+                        TabWirelessUi.this.selectedNetIfConfig.getName(), radioMode,
+                        new AsyncCallback<List<GwtWifiChannelFrequency>>() {
 
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    logger.info("findFrequencies Failure");
-                                }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                logger.info("findFrequencies Failure");
+                            }
 
-                                @Override
-                                public void onSuccess(List<GwtWifiChannelFrequency> freqChannels) {
+                            @Override
+                            public void onSuccess(List<GwtWifiChannelFrequency> freqChannels) {
+                                updateChannelListValues(freqChannels);
 
-                                    updateChannelListValues(freqChannels);
-
-                                }
-                            });
-                }
-            });
-        }
+                            }
+                        });
+            }
+        });
 
     }
 
@@ -1824,7 +1827,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             this.channelList.setSelectedIndex(selectedChannelValue);
         }
 
-        this.noChannels.setVisible((this.channelList.getItemCount() <= 0));
+        this.noChannels.setVisible(this.channelList.getItemCount() <= 0);
     }
 
     private void addAutomaticChannel(List<GwtWifiChannelFrequency> freqs) {
@@ -1892,7 +1895,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private void fillRadioMode(boolean acSupported) {
         if (!this.isNet2) {
             for (GwtWifiRadioMode mode : GwtWifiRadioMode.values()) {
-                if (Boolean.FALSE.equals(acSupported) && mode == GwtWifiRadioMode.netWifiRadioModeANAC) {
+                if (!acSupported && mode == GwtWifiRadioMode.netWifiRadioModeANAC) {
                     continue;
                 }
                 this.radio.addItem(MessageUtils.get(mode.name()));

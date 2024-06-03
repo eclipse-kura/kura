@@ -41,6 +41,7 @@ import org.gwtbootstrap3.client.ui.PanelFooter;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -104,6 +105,8 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
     private List<String> pids;
 
     private KeyPairTabUi keyPairTabUi;
+
+    private HandlerRegistration nextStepButtonHandlerRegistration;
 
     public CertificateListTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -371,12 +374,14 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
         this.resetModalButton.setVisible(false);
         this.applyModalButton.setVisible(false);
         this.nextStepButton.setText(MSGS.next());
-        this.nextStepButton.addClickHandler(event -> {
+        if (this.nextStepButtonHandlerRegistration != null) {
+            this.nextStepButtonHandlerRegistration.removeHandler();
+        }
+        this.nextStepButtonHandlerRegistration = this.nextStepButton.addClickHandler(event -> {
             CertType selectedCertType = CertType.fromValue(certType.getSelectedValue());
 
             initCertificateAddModal(selectedCertType);
         });
-
     }
 
     private void initCertificateAddModal(CertType selectedCertType) {

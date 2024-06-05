@@ -202,7 +202,7 @@ public class CloudServiceImpl
     }
 
     public void unsetDataService(DataService dataService) {
-        if (this.dataService.equals(dataService)) {
+        if (this.dataService != null && this.dataService.equals(dataService)) {
             this.dataService = null;
         }
     }
@@ -216,7 +216,7 @@ public class CloudServiceImpl
     }
 
     public void unsetSystemAdminService(SystemAdminService systemAdminService) {
-        if (this.systemAdminService.equals(systemAdminService)) {
+        if (this.systemAdminService != null && this.systemAdminService.equals(systemAdminService)) {
             this.systemAdminService = null;
         }
     }
@@ -230,7 +230,7 @@ public class CloudServiceImpl
     }
 
     public void unsetSystemService(SystemService systemService) {
-        if (this.systemService.equals(systemService)) {
+        if (this.systemService != null && this.systemService.equals(systemService)) {
             this.systemService = null;
         }
     }
@@ -244,7 +244,7 @@ public class CloudServiceImpl
     }
 
     public void unsetNetworkService(NetworkService networkService) {
-        if (this.networkService.equals(networkService)) {
+        if (this.networkService != null && this.networkService.equals(networkService)) {
             this.networkService = null;
         }
     }
@@ -258,7 +258,7 @@ public class CloudServiceImpl
     }
 
     public void unsetPositionService(PositionService positionService) {
-        if (this.positionService.equals(positionService)) {
+        if (this.positionService != null && this.positionService.equals(positionService)) {
             this.positionService = null;
         }
     }
@@ -272,7 +272,7 @@ public class CloudServiceImpl
     }
 
     public void unsetEventAdmin(EventAdmin eventAdmin) {
-        if (this.eventAdmin.equals(eventAdmin)) {
+        if (this.eventAdmin != null && this.eventAdmin.equals(eventAdmin)) {
             this.eventAdmin = null;
         }
     }
@@ -282,7 +282,7 @@ public class CloudServiceImpl
     }
 
     public void unsetJsonUnmarshaller(Unmarshaller jsonUnmarshaller) {
-        if (this.jsonUnmarshaller.equals(jsonUnmarshaller)) {
+        if (this.jsonUnmarshaller != null && this.jsonUnmarshaller.equals(jsonUnmarshaller)) {
             this.jsonUnmarshaller = null;
         }
     }
@@ -292,7 +292,7 @@ public class CloudServiceImpl
     }
 
     public void unsetJsonMarshaller(Marshaller jsonMarshaller) {
-        if (this.jsonMarshaller.equals(jsonMarshaller)) {
+        if (this.jsonMarshaller != null && this.jsonMarshaller.equals(jsonMarshaller)) {
             this.jsonMarshaller = null;
         }
     }
@@ -304,8 +304,10 @@ public class CloudServiceImpl
     }
 
     public void unsetTamperDetectionService(final TamperDetectionService tamperDetectionService) {
-        synchronized (this.tamperDetectionServices) {
-            this.tamperDetectionServices.remove(tamperDetectionService);
+        if (this.tamperDetectionServices != null && this.tamperDetectionServices.contains(tamperDetectionService)) {
+            synchronized (this.tamperDetectionServices) {
+                this.tamperDetectionServices.remove(tamperDetectionService);
+            }
         }
     }
 
@@ -432,8 +434,8 @@ public class CloudServiceImpl
             return;
         }
 
-        if ((EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL.equals(topic)
-                || EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL.equals(topic)) && this.dataService.isConnected()) {
+        if ((EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL.equals(topic) || EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL.equals(topic))
+                && this.dataService.isConnected()) {
             logger.debug("CloudServiceImpl: received install/uninstall event, publishing BIRTH.");
             tryPublishBirthCertificate(false);
         }
@@ -916,9 +918,8 @@ public class CloudServiceImpl
             KuraPayload payload = message.getPayload();
             payload.setTimestamp(new Date());
             byte[] encodedPayload = encodePayload(payload);
-            int id = this.dataService.publish(message.getTopic(), encodedPayload,
-                    message.getQos(), CloudServiceOptions.getLifeCycleMessageRetain(),
-                    CloudServiceOptions.getLifeCycleMessagePriority());
+            int id = this.dataService.publish(message.getTopic(), encodedPayload, message.getQos(),
+                    CloudServiceOptions.getLifeCycleMessageRetain(), CloudServiceOptions.getLifeCycleMessagePriority());
             this.messageId.set(id);
             try {
                 this.messageId.wait(1000);

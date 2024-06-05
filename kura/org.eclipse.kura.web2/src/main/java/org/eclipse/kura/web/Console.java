@@ -183,13 +183,6 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     protected void activate(ComponentContext context, Map<String, Object> properties) {
 
         setInstance(this);
-        try {
-            setConsoleOptions(properties == null ? ConsoleOptions.defaultConfiguration()
-                    : ConsoleOptions.fromProperties(properties));
-        } catch (final Exception e) {
-            logger.warn("failed to build console options", e);
-            return;
-        }
 
         // Check if web interface is enabled.
         boolean webEnabled = Boolean.parseBoolean(this.systemService.getKuraWebEnabled());
@@ -258,21 +251,21 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
             logger.info("Console options changed, reconfiguring...");
             unregisterServlet();
             Console.setConsoleOptions(options);
-        }
 
-        try {
-            this.userManager.update();
-        } catch (Exception e) {
-            logger.warn("Error Updating Web properties", e);
-        }
+            try {
+                this.userManager.update();
+            } catch (Exception e) {
+                logger.warn("Error Updating Web properties", e);
+            }
 
-        setAppRoot(options.getAppRoot());
-        setSessionMaxInactiveInterval(options.getSessionMaxInactivityInterval());
+            setAppRoot(options.getAppRoot());
+            setSessionMaxInactiveInterval(options.getSessionMaxInactivityInterval());
 
-        try {
-            initHTTPService();
-        } catch (NamespaceException | ServletException e) {
-            logger.warn("Error Registering Web Resources", e);
+            try {
+                initHTTPService();
+            } catch (NamespaceException | ServletException e) {
+                logger.warn("Error Registering Web Resources", e);
+            }
         }
     }
 
@@ -289,54 +282,59 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     // ----------------------------------------------------------------
 
     private synchronized void unregisterServlet() {
-        this.httpService.unregister("/");
-        this.httpService.unregister(ADMIN_ROOT);
-        this.httpService.unregister(CONSOLE_PATH);
-        this.httpService.unregister(AUTH_PATH);
+        try {
+            this.httpService.unregister("/");
+            this.httpService.unregister(ADMIN_ROOT);
+            this.httpService.unregister(CONSOLE_PATH);
+            this.httpService.unregister(AUTH_PATH);
 
-        this.httpService.unregister(AUTH_RESOURCE_PATH);
-        this.httpService.unregister(CONSOLE_RESOURCE_PATH);
-        this.httpService.unregister(PASSWORD_AUTH_PATH);
-        this.httpService.unregister(CERT_AUTH_PATH);
-        this.httpService.unregister(LOGIN_MODULE_PATH + "/loginInfo");
-        this.httpService.unregister(DENALI_MODULE_PATH + SESSION);
-        this.httpService.unregister(LOGIN_MODULE_PATH + SESSION);
-        this.httpService.unregister(LOGIN_MODULE_PATH + "/xsrf");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/xsrf");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/status");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/device");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/logservice");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/network");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/component");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/package");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/snapshot");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/certificate");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/security");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/users");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/file");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/device_snapshots");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/assetsUpDownload");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/log");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/skin");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/cloudservices");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/wires");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/wiresSnapshot");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/assetservices");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/extension");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/ssl");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/keystore");
-        this.httpService.unregister(LOGIN_MODULE_PATH + "/extension");
-        this.wiresBlinkService.stop();
-        this.httpService.unregister(ADMIN_ROOT + "/sse");
-        this.eventService.stop();
-        this.httpService.unregister(DENALI_MODULE_PATH + EVENT_PATH);
+            this.httpService.unregister(AUTH_RESOURCE_PATH);
+            this.httpService.unregister(CONSOLE_RESOURCE_PATH);
+            this.httpService.unregister(PASSWORD_AUTH_PATH);
+            this.httpService.unregister(CERT_AUTH_PATH);
+            this.httpService.unregister(LOGIN_MODULE_PATH + "/loginInfo");
+            this.httpService.unregister(DENALI_MODULE_PATH + SESSION);
+            this.httpService.unregister(LOGIN_MODULE_PATH + SESSION);
+            this.httpService.unregister(LOGIN_MODULE_PATH + "/xsrf");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/xsrf");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/status");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/device");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/logservice");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/network");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/component");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/package");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/snapshot");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/certificate");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/security");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/users");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/file");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/device_snapshots");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/assetsUpDownload");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/log");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/skin");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/cloudservices");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/wires");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/wiresSnapshot");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/assetservices");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/extension");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/ssl");
+            this.httpService.unregister(DENALI_MODULE_PATH + "/keystore");
+            this.httpService.unregister(LOGIN_MODULE_PATH + "/extension");
+            this.wiresBlinkService.stop();
+            this.httpService.unregister(ADMIN_ROOT + "/sse");
+            this.eventService.stop();
+            this.httpService.unregister(DENALI_MODULE_PATH + EVENT_PATH);
 
-        for (final ServletRegistration reg : this.securedServlets) {
-            this.httpService.unregister(reg.path);
-        }
+            for (final ServletRegistration reg : this.securedServlets) {
+                this.httpService.unregister(reg.path);
+            }
 
-        for (final ServletRegistration reg : this.loginServlets) {
-            this.httpService.unregister(reg.path);
+            for (final ServletRegistration reg : this.loginServlets) {
+                this.httpService.unregister(reg.path);
+            }
+
+        } catch (final IllegalArgumentException iae) {
+            // nothing to do
         }
     }
 

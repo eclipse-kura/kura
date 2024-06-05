@@ -168,7 +168,7 @@ public class ConsoleOptions {
     }
 
     public String getSslManagerServiceTarget() {
-        return sslManagerServiceTarget.get();
+        return this.sslManagerServiceTarget.get();
     }
 
     public boolean isPortAllowed(final int port) {
@@ -274,19 +274,20 @@ public class ConsoleOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(allowedPorts, appRoot, authenticationMethodProperties, bannerContent, bannerEnabled, config,
-                configurationProperties, passwordMinLength, passwordRequireBothCases, passwordRequireDigits,
-                passwordRequireSpecialCharacters, sessionMaxInactivityInterval, sslManagerServiceTarget);
+        return Objects.hash(this.allowedPorts, this.appRoot, this.authenticationMethodProperties, this.bannerContent,
+                this.bannerEnabled, this.config, this.configurationProperties, this.passwordMinLength,
+                this.passwordRequireBothCases, this.passwordRequireDigits, this.passwordRequireSpecialCharacters,
+                this.sessionMaxInactivityInterval, this.sslManagerServiceTarget);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if ((obj == null) || (getClass() != obj.getClass())) {
             return false;
-        if (getClass() != obj.getClass())
-            return false;
+        }
         ConsoleOptions other = (ConsoleOptions) obj;
 
         return Objects.equals(this.config.getConfigurationProperties(), other.config.getConfigurationProperties());

@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -38,7 +37,6 @@ import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.KuraConfigReadyEvent;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
-import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
@@ -124,7 +122,6 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     private HttpService httpService;
 
     private SystemService systemService;
-    private CryptoService cryptoService;
     private SslManagerService sslManagerService;
 
     private IdentityService identityService;
@@ -167,10 +164,6 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
-    }
-
-    public void setCryptoService(CryptoService cryptoService) {
-        this.cryptoService = cryptoService;
     }
 
     public void setEventAdminService(EventAdmin eventAdmin) {
@@ -590,10 +583,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
             if (this == obj) {
                 return true;
             }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
+            if ((obj == null) || (getClass() != obj.getClass())) {
                 return false;
             }
             ServletRegistration other = (ServletRegistration) obj;

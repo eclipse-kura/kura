@@ -203,14 +203,6 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         props.put("kura.version", this.systemService.getKuraVersion());
         EventProperties eventProps = new EventProperties(props);
 
-        try {
-            logger.info("initializing useradmin...");
-            this.userManager.update();
-            logger.info("initializing useradmin...done");
-        } catch (final Exception e) {
-            logger.warn("failed to update UserAdmin", e);
-        }
-
         logger.info("postInstalledEvent() :: posting KuraConfigReadyEvent");
 
         this.eventAdmin.postEvent(new Event(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC, eventProps));
@@ -282,57 +274,68 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     // ----------------------------------------------------------------
 
     private synchronized void unregisterServlet() {
-        try {
-            this.httpService.unregister("/");
-            this.httpService.unregister(ADMIN_ROOT);
-            this.httpService.unregister(CONSOLE_PATH);
-            this.httpService.unregister(AUTH_PATH);
 
-            this.httpService.unregister(AUTH_RESOURCE_PATH);
-            this.httpService.unregister(CONSOLE_RESOURCE_PATH);
-            this.httpService.unregister(PASSWORD_AUTH_PATH);
-            this.httpService.unregister(CERT_AUTH_PATH);
-            this.httpService.unregister(LOGIN_MODULE_PATH + "/loginInfo");
-            this.httpService.unregister(DENALI_MODULE_PATH + SESSION);
-            this.httpService.unregister(LOGIN_MODULE_PATH + SESSION);
-            this.httpService.unregister(LOGIN_MODULE_PATH + "/xsrf");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/xsrf");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/status");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/device");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/logservice");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/network");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/component");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/package");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/snapshot");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/certificate");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/security");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/users");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/file");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/device_snapshots");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/assetsUpDownload");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/log");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/skin");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/cloudservices");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/wires");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/wiresSnapshot");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/assetservices");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/extension");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/ssl");
-            this.httpService.unregister(DENALI_MODULE_PATH + "/keystore");
-            this.httpService.unregister(LOGIN_MODULE_PATH + "/extension");
+        quietUnregisterServlet("/");
+        quietUnregisterServlet(ADMIN_ROOT);
+        quietUnregisterServlet(CONSOLE_PATH);
+        quietUnregisterServlet(AUTH_PATH);
+
+        quietUnregisterServlet(AUTH_RESOURCE_PATH);
+        quietUnregisterServlet(CONSOLE_RESOURCE_PATH);
+        quietUnregisterServlet(PASSWORD_AUTH_PATH);
+        quietUnregisterServlet(CERT_AUTH_PATH);
+        quietUnregisterServlet(LOGIN_MODULE_PATH + "/loginInfo");
+        quietUnregisterServlet(DENALI_MODULE_PATH + SESSION);
+        quietUnregisterServlet(LOGIN_MODULE_PATH + SESSION);
+        quietUnregisterServlet(LOGIN_MODULE_PATH + "/xsrf");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/xsrf");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/status");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/device");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/logservice");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/network");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/component");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/package");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/snapshot");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/certificate");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/security");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/users");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/file");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/device_snapshots");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/assetsUpDownload");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/log");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/skin");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/cloudservices");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/wires");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/wiresSnapshot");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/assetservices");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/extension");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/ssl");
+        quietUnregisterServlet(DENALI_MODULE_PATH + "/keystore");
+        quietUnregisterServlet(LOGIN_MODULE_PATH + "/extension");
+
+        if (this.wiresBlinkService != null) {
             this.wiresBlinkService.stop();
-            this.httpService.unregister(ADMIN_ROOT + "/sse");
+        }
+        quietUnregisterServlet(ADMIN_ROOT + "/sse");
+
+        if (this.eventService != null) {
             this.eventService.stop();
-            this.httpService.unregister(DENALI_MODULE_PATH + EVENT_PATH);
+        }
+        quietUnregisterServlet(DENALI_MODULE_PATH + EVENT_PATH);
 
-            for (final ServletRegistration reg : this.securedServlets) {
-                this.httpService.unregister(reg.path);
-            }
+        for (final ServletRegistration reg : this.securedServlets) {
+            quietUnregisterServlet(reg.path);
+        }
 
-            for (final ServletRegistration reg : this.loginServlets) {
-                this.httpService.unregister(reg.path);
-            }
+        for (final ServletRegistration reg : this.loginServlets) {
+            quietUnregisterServlet(reg.path);
+        }
 
+    }
+
+    private void quietUnregisterServlet(String path) {
+        try {
+            this.httpService.unregister(path);
         } catch (final IllegalArgumentException iae) {
             // nothing to do
         }

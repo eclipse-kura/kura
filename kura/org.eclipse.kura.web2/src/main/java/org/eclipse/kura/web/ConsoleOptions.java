@@ -13,6 +13,7 @@
 package org.eclipse.kura.web;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -285,12 +286,24 @@ public class ConsoleOptions {
         if (this == obj) {
             return true;
         }
-        if ((obj == null) || (getClass() != obj.getClass())) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         ConsoleOptions other = (ConsoleOptions) obj;
 
-        return Objects.equals(this.config.getConfigurationProperties(), other.config.getConfigurationProperties());
+        return Objects.equals(this.appRoot.get(), other.appRoot.get())
+                && Objects.equals(this.sessionMaxInactivityInterval.get(), other.sessionMaxInactivityInterval.get())
+                && Objects.equals(this.bannerEnabled.get(), other.bannerEnabled.get())
+                && Objects.equals(this.bannerContent.get(), other.bannerContent.get())
+                && Objects.equals(this.passwordMinLength.get(), other.passwordMinLength.get())
+                && Objects.equals(this.passwordRequireDigits.get(), other.passwordRequireDigits.get())
+                && Objects.equals(this.passwordRequireSpecialCharacters.get(),
+                        other.passwordRequireSpecialCharacters.get())
+                && Objects.equals(this.passwordRequireBothCases.get(), other.passwordRequireBothCases.get())
+                && Arrays.equals(this.allowedPorts.get(), other.allowedPorts.get())
+                && Objects.equals(this.sslManagerServiceTarget.get(), other.sslManagerServiceTarget.get())
+                && Objects.equals(getEnabledAuthMethods(), other.getEnabledAuthMethods());
+
     }
 
 }

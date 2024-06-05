@@ -248,7 +248,6 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
             return;
         }
 
-        unregisterServlet();
         doUpdate(properties);
     }
 
@@ -262,7 +261,11 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
             return;
         }
 
-        Console.setConsoleOptions(options);
+        if (!options.equals(Console.getConsoleOptions())) {
+            logger.info("Console options changed, reconfiguring...");
+            unregisterServlet();
+            Console.setConsoleOptions(options);
+        }
 
         try {
             this.userManager.update();

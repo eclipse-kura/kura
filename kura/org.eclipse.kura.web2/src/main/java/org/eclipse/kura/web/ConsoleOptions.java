@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -260,7 +261,7 @@ public class ConsoleOptions {
     }
 
     private static String getAuthenticationMethodPropertyId(final String name) {
-        return "auth.method" + name.replaceAll(" ", ".");
+        return "auth.method" + name.replace(" ", ".");
     }
 
     private void addAuthenticationMethodProperties() {
@@ -269,6 +270,26 @@ public class ConsoleOptions {
         for (final String authMethod : Console.instance().getAuthenticationMethods()) {
             addAuthenticationMethodProperty(authMethod, builtinAuthenticationMethods.contains(authMethod));
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(allowedPorts, appRoot, authenticationMethodProperties, bannerContent, bannerEnabled, config,
+                configurationProperties, passwordMinLength, passwordRequireBothCases, passwordRequireDigits,
+                passwordRequireSpecialCharacters, sessionMaxInactivityInterval, sslManagerServiceTarget);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ConsoleOptions other = (ConsoleOptions) obj;
+
+        return Objects.equals(this.config.getConfigurationProperties(), other.config.getConfigurationProperties());
     }
 
 }

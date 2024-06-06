@@ -283,6 +283,7 @@ public class ConsoleOptions {
 
     @Override
     public boolean equals(Object obj) {
+
         if (this == obj) {
             return true;
         }
@@ -300,7 +301,9 @@ public class ConsoleOptions {
                 && Objects.equals(this.passwordRequireSpecialCharacters.get(),
                         other.passwordRequireSpecialCharacters.get())
                 && Objects.equals(this.passwordRequireBothCases.get(), other.passwordRequireBothCases.get())
-                && Arrays.equals(this.allowedPorts.get(), other.allowedPorts.get())
+                && Arrays.equals(
+                        this.allowedPorts.getOptional().isPresent() ? this.allowedPorts.get() : new Integer[] {},
+                        other.allowedPorts.getOptional().isPresent() ? other.allowedPorts.get() : new Integer[] {})
                 && Objects.equals(this.sslManagerServiceTarget.get(), other.sslManagerServiceTarget.get())
                 && Objects.equals(getEnabledAuthMethods(), other.getEnabledAuthMethods());
 

@@ -12,8 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.identity.provider;
 
-import static java.util.Objects.isNull;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -46,6 +44,7 @@ import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.PasswordConfiguration;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.internal.rest.identity.provider.util.IdentityDTOUtils;
+import org.eclipse.kura.internal.rest.identity.provider.util.StringUtils;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityConfigurationDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityConfigurationRequestDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityDTO;
@@ -198,10 +197,7 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "deleteIdentity");
         try {
 
-            if (isNull(identity.getName())) {
-                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
-                        "Missing 'name' property");
-            }
+            StringUtils.validateInputField("name", identity.getName());
 
             boolean deleted = this.identityService.deleteIdentity(identity.getName());
             if (!deleted) {
@@ -282,9 +278,7 @@ public class IdentityRestServiceV2 {
     public Response deletePermission(final PermissionDTO permissionDTO) {
         logger.debug(DEBUG_MESSAGE, "deletePermission");
 
-        if (isNull(permissionDTO.getName())) {
-            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST, "Missing 'name' property");
-        }
+        StringUtils.validateInputField("name", permissionDTO.getName());
 
         boolean deleted = false;
         try {

@@ -20,9 +20,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import javax.servlet.Servlet;
@@ -122,7 +124,8 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     private HttpService httpService;
 
     private SystemService systemService;
-    private SslManagerService sslManagerService;
+    private final AtomicReference<Optional<SslManagerService>> sslManagerService = new AtomicReference<>(
+            Optional.empty());
 
     private IdentityService identityService;
 
@@ -149,13 +152,20 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     // ----------------------------------------------------------------
 
     public void setSslManagerService(SslManagerService sslManagerService) {
-        this.sslManagerService = sslManagerService;
+        this.sslManagerService.set(Optional.of(sslManagerService));
     }
 
     public void unsetSslManagerService(SslManagerService sslManagerService) {
-        if (sslManagerService == this.sslManagerService) {
-            this.sslManagerService = null;
-        }
+
+        this.sslManagerService.updateAndGet(s -> {
+            final Optional<SslManagerService> service = Optional.ofNullable(sslManagerService);
+
+            if (Objects.equals(s, service)) {
+                return Optional.empty();
+            } else {
+                return s;
+            }
+        });
     }
 
     public void setHttpService(HttpService httpService) {
@@ -479,7 +489,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/component", new GwtComponentServiceImpl(), null,
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/package",
-                new GwtPackageServiceImpl(this.sslManagerService), null, this.sessionContext);
+                new GwtPackageServiceImpl(this.sslManagerService::get), null, this.sessionContext);
 
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/snapshot", new GwtSnapshotServiceImpl(), null,
                 this.sessionContext);

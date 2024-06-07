@@ -151,18 +151,17 @@ if ((action.id == \"org.freedesktop.login1.reboot-multiple-sessions\" ||
             done = 1
         } 1' /etc/dbus-1/system.d/bluetooth.conf >tempfile && mv tempfile /etc/dbus-1/system.d/bluetooth.conf
     fi
-    
+
     # grant kurad user the privileges to manage wpa supplicant via dbus
-    grep -lR kurad /etc/dbus-1/system.d/wpa_supplicant.conf
-    if [ $? != 0 ]; then
+    if ! grep -lR kurad /etc/dbus-1/system.d/wpa_supplicant.conf && [ $NN == "NO" ]; then
         cp /etc/dbus-1/system.d/wpa_supplicant.conf /etc/dbus-1/system.d/wpa_supplicant.conf.save
         awk 'done != 1 && /^<\/busconfig>/ {
-            print "  <policy user=\"kurad\">"
-            print "    <allow own=\"fi.w1.wpa_supplicant1\"/>"
-            print "    <allow send_destination=\"fi.w1.wpa_supplicant1\"/>"
-            print "    <allow send_interface=\"fi.w1.wpa_supplicant1\"/>"
-            print "    <allow receive_sender=\"fi.w1.wpa_supplicant1\" receive_type=\"signal\"/>"
-            print "  </policy>\n"
+            print "    <policy user=\"kurad\">"
+            print "        <allow own=\"fi.w1.wpa_supplicant1\"/>"
+            print "        <allow send_destination=\"fi.w1.wpa_supplicant1\"/>"
+            print "        <allow send_interface=\"fi.w1.wpa_supplicant1\"/>"
+            print "        <allow receive_sender=\"fi.w1.wpa_supplicant1\" receive_type=\"signal\"/>"
+            print "    </policy>\n"
             done = 1
         } 1' /etc/dbus-1/system.d/wpa_supplicant.conf >tempfile && mv tempfile /etc/dbus-1/system.d/wpa_supplicant.conf
     fi
@@ -207,7 +206,7 @@ function delete_users {
         sed -i '/^auth       sufficient pam_rootok.so/ {n;d}' /etc/pam.d/su
     fi
 
-    # recover old dbus config
+    # recover old configs
     mv /etc/dbus-1/system.d/bluetooth.conf.save /etc/dbus-1/system.d/bluetooth.conf
     mv /etc/dbus-1/system.d/wpa_supplicant.conf.save /etc/dbus-1/system.d/wpa_supplicant.conf
 }

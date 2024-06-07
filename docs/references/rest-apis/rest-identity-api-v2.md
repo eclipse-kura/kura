@@ -444,6 +444,7 @@ No specific permission is required to access this resource.
 
 - 200 OK status
 - 404 `username` does not exist
+- 400 Missing or mispelled field `name` (eg: `nme`)
 - 500 Internal Server Error
 
 #### Delete Permission
@@ -463,4 +464,5 @@ No specific permission is required to access this resource.
 
 - 200 OK status
 - 404 `permission` does not exist
+- 400 Missing or mispelled field `name` (eg: `nme`)
 - 500 Internal Server Error

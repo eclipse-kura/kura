@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2023 Eurotech and/or its affiliates and others
+# Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,8 @@ INSTALL_DIR=/opt/eclipse
 WD_TMP_FILE=/tmp/watchdog
 REFRESH_TIME=5
 TIMEOUT_TIME=300
+TIMESTAMP=$(date +%Y%m%d%H%M)
+LOG=/tmp/kura_uninstall_${TIMESTAMP}.log
 
 ##############################################
 # UTILITY FUNCTIONS
@@ -130,9 +132,6 @@ function preRemove {
     fi
 
     restore_netplan
-
-    echo ""
-    echo "Uninstalling KURA... Done!"
 }
 ##############################################
 # END UTILITY FUNCTIONS
@@ -141,10 +140,10 @@ function preRemove {
 ##############################################
 # PRE-REMOVE SCRIPT
 ##############################################
-PIDS=`pgrep java`
-
 echo ""
 echo "Uninstalling KURA..."
+
+PIDS=`pgrep java`
 
 #Kill JVM and monit for installation
 if [ -f "/var/run/kura.pid" ] ; then
@@ -153,12 +152,18 @@ if [ -f "/var/run/kura.pid" ] ; then
   for pid in "${PIDS[@]}"
   do
     if [ "$KURA_PID" == "$pid" ] ; then
-      `kill $pid` >> /tmp/kura_install.log 2>&1
+      `kill $pid` >> "$LOG" 2>&1
     fi
   done
 fi
 
-runPreRemove
+runPreRemove >> "$LOG" 2>&1
+
+mkdir -p /opt/eclipse/kura/log/
+mv "$LOG" /opt/eclipse/kura/log/
+
+echo ""
+echo "Uninstalling KURA... Done!"
 ##############################################
 # END PRE-REMOVE SCRIPT
 ##############################################

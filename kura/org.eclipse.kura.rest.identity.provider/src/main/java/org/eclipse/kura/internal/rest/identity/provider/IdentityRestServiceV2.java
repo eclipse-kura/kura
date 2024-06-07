@@ -279,6 +279,11 @@ public class IdentityRestServiceV2 {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response deletePermission(final PermissionDTO permissionDTO) {
         logger.debug(DEBUG_MESSAGE, "deletePermission");
+
+        if (permissionDTO.getName() == null) {
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST, "Missing 'name' property");
+        }
+
         boolean deleted = false;
         try {
             deleted = this.identityService.deletePermission(IdentityDTOUtils.toPermission(permissionDTO));

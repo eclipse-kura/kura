@@ -212,10 +212,10 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void shouldReturnErrorDeletingWithMalformedRequest() {
+    public void shouldReturnErrorDeletingWithMalformedIdentityRequest() {
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/identities",
-                "{\"nm\":\"test\"}");
+                "{\"nm\":\"identity\"}");
 
         thenResponseCodeIs(400);
         thenResponseBodyEqualsJson("{\"message\":\"Missing 'name' property\"}");
@@ -282,6 +282,17 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
 
         thenResponseCodeIs(404);
         thenResponseBodyEqualsJson("{\"message\":\"Permission not found\"}");
+
+    }
+
+    @Test
+    public void shouldReturnErrorDeletingWithMalformedPermissionRequest() {
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/permissions",
+                "{\"nm\":\"permission\"}");
+
+        thenResponseCodeIs(400);
+        thenResponseBodyEqualsJson("{\"message\":\"Missing 'name' property\"}");
 
     }
 

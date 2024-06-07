@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.identity.provider;
 
+import static java.util.Objects.isNull;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -196,7 +198,7 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "deleteIdentity");
         try {
 
-            if (identity.getName() == null) {
+            if (isNull(identity.getName())) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
                         "Missing 'name' property");
             }
@@ -280,7 +282,7 @@ public class IdentityRestServiceV2 {
     public Response deletePermission(final PermissionDTO permissionDTO) {
         logger.debug(DEBUG_MESSAGE, "deletePermission");
 
-        if (permissionDTO.getName() == null) {
+        if (isNull(permissionDTO.getName())) {
             throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST, "Missing 'name' property");
         }
 

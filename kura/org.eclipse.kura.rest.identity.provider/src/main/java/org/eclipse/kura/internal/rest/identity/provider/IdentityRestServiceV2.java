@@ -195,6 +195,12 @@ public class IdentityRestServiceV2 {
     public Response deleteIdentity(final IdentityDTO identity) {
         logger.debug(DEBUG_MESSAGE, "deleteIdentity");
         try {
+
+            if (identity.getName() == null) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                        "Missing 'name' property");
+            }
+
             boolean deleted = this.identityService.deleteIdentity(identity.getName());
             if (!deleted) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND, "Identity not found");

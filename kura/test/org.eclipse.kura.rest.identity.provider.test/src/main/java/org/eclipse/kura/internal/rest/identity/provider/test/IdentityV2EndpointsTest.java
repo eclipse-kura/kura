@@ -212,6 +212,17 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void shouldReturnErrorDeletingWithMalformedRequest() {
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/identities",
+                "{\"nm\":\"test\"}");
+
+        thenResponseCodeIs(400);
+        thenResponseBodyEqualsJson("{\"message\":\"Missing 'name' property\"}");
+
+    }
+
+    @Test
     public void shouldGetDefinedPermissions() {
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_GET), "/definedPermissions");
 

@@ -46,13 +46,13 @@ import org.eclipse.kura.net.status.modem.ModemBand;
 import org.eclipse.kura.net.status.modem.ModemCapability;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus.ModemInterfaceStatusBuilder;
-import org.eclipse.kura.net.status.vlan.VlanInterfaceStatus;
-import org.eclipse.kura.net.status.vlan.VlanInterfaceStatus.VlanInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.modem.ModemMode;
 import org.eclipse.kura.net.status.modem.ModemModePair;
 import org.eclipse.kura.net.status.modem.ModemPortType;
 import org.eclipse.kura.net.status.modem.Sim;
 import org.eclipse.kura.net.status.modem.SimType;
+import org.eclipse.kura.net.status.vlan.VlanInterfaceStatus;
+import org.eclipse.kura.net.status.vlan.VlanInterfaceStatus.VlanInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.status.wifi.WifiAccessPoint.WifiAccessPointBuilder;
 import org.eclipse.kura.net.status.wifi.WifiCapability;
@@ -167,32 +167,33 @@ public class NMStatusConverter {
 
         return builder.build();
     }
-    
+
     public static NetworkInterfaceStatus buildVlanStatus(String interfaceId,
-            DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties, 
+            DevicePropertiesWrapper devicePropertiesWrapper, Optional<Properties> ip4configProperties,
             Optional<Properties> ip6configProperties, Properties parentProperties) {
 
         VlanInterfaceStatusBuilder builder = VlanInterfaceStatus.builder();
         builder.withInterfaceId(interfaceId).withInterfaceName(interfaceId).withVirtual(true);
-        
+
         NMDeviceState deviceState = NMDeviceState
                 .fromUInt32(devicePropertiesWrapper.getDeviceProperties().Get(NM_DEVICE_BUS_NAME, STATE));
         builder.withState(deviceStateConvert(deviceState));
 
         Optional<Properties> vlanProperties = devicePropertiesWrapper.getDeviceSpecificProperties();
-        
+
         setDeviceStatus(builder, devicePropertiesWrapper);
         setVlanStatus(builder, vlanProperties, parentProperties);
         setIP4Status(builder, ip4configProperties);
         setIP6Status(builder, ip6configProperties);
         return builder.build();
     }
-    
-    private static void setVlanStatus(VlanInterfaceStatusBuilder builder, Optional<Properties> vlanProperties, Properties parentProperties) {
+
+    private static void setVlanStatus(VlanInterfaceStatusBuilder builder, Optional<Properties> vlanProperties,
+            Properties parentProperties) {
         String parentInterfaceName = parentProperties.Get(NM_DEVICE_BUS_NAME, "Interface");
         builder.withParentInterface(parentInterfaceName);
         vlanProperties.ifPresent(properties -> {
-        UInt32 vlanId = properties.Get(NM_DEVICE_VLAN_BUS_NAME, "VlanId");
+            UInt32 vlanId = properties.Get(NM_DEVICE_VLAN_BUS_NAME, "VlanId");
             builder.withVlanId(vlanId.intValue());
         });
     }
@@ -376,7 +377,11 @@ public class NMStatusConverter {
         List<WifiAccessPoint> kuraAccessPoints = new ArrayList<>();
 
         for (Properties prop : nmAccessPoints) {
-            kuraAccessPoints.add(wifiAccessPointConvert(prop));
+            try {
+                kuraAccessPoints.add(wifiAccessPointConvert(prop));
+            } catch (Exception e) {
+                logger.warn("Unable to get data for an access point. Skipping.");
+            }
         }
 
         return kuraAccessPoints;

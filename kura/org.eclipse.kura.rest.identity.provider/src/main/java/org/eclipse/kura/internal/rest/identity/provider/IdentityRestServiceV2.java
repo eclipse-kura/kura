@@ -314,6 +314,9 @@ public class IdentityRestServiceV2 {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response validateIdentityConfiguration(final IdentityConfigurationDTO identityConfigurationDTO) {
         try {
+
+            StringUtils.validateField("name", identityConfigurationDTO.getIdentity().getName());
+
             this.identityService
                     .validateIdentityConfiguration(IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO));
         } catch (KuraException e) {

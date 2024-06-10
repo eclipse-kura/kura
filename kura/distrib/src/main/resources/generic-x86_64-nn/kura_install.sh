@@ -54,7 +54,7 @@ systemctl disable chrony
 # set up users and grant permissions
 cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
-${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i
+${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i -nn
 
 bash "${INSTALL_DIR}/kura/install/customize-installation.sh"
 

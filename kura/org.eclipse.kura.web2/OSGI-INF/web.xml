@@ -19,7 +19,6 @@
    
    <reference bind="setHttpService" interface="org.osgi.service.http.HttpService" name="HttpService"/>   
    <reference bind="setSystemService" interface="org.eclipse.kura.system.SystemService" name="SystemService"/>   
-   <reference bind="setCryptoService" interface="org.eclipse.kura.crypto.CryptoService" name="CryptoService"/>
    <reference bind="setEventAdminService" interface="org.osgi.service.event.EventAdmin" name="EventAdmin"/>
    <reference bind="setSslManagerService" interface="org.eclipse.kura.ssl.SslManagerService" name="SslManagerService" 
               policy="dynamic" cardinality="0..1" unbind="unsetSslManagerService" />

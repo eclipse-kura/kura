@@ -60,6 +60,8 @@ import org.slf4j.LoggerFactory;
 @Path("identity/v2")
 public class IdentityRestServiceV2 {
 
+    private static final String NAME_REQUEST_FIELD = "name";
+
     private static final Logger logger = LoggerFactory.getLogger(IdentityRestServiceV2.class);
 
     private static final String MQTT_APP_ID = "IDN-V2";
@@ -112,7 +114,7 @@ public class IdentityRestServiceV2 {
 
         try {
 
-            StringUtils.validateField("name", identity.getName());
+            StringUtils.validateField(NAME_REQUEST_FIELD, identity.getName());
 
             boolean created = this.identityService.createIdentity(identity.getName());
             if (!created) {
@@ -133,7 +135,7 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "updateIdentity");
         try {
 
-            StringUtils.validateField("name", identityConfigurationDTO.getIdentity().getName());
+            StringUtils.validateField(NAME_REQUEST_FIELD, identityConfigurationDTO.getIdentity().getName());
 
             this.identityService
                     .updateIdentityConfiguration(IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO));
@@ -154,7 +156,7 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "getIdentityByName");
         try {
 
-            StringUtils.validateField("name", identityConfigurationRequestDTO.getIdentity().getName());
+            StringUtils.validateField(NAME_REQUEST_FIELD, identityConfigurationRequestDTO.getIdentity().getName());
 
             String identityName = identityConfigurationRequestDTO.getIdentity().getName();
 
@@ -186,7 +188,7 @@ public class IdentityRestServiceV2 {
 
         try {
 
-            StringUtils.validateField("name", identityName);
+            StringUtils.validateField(NAME_REQUEST_FIELD, identityName);
 
             IdentityConfiguration identityConfiguration = this.identityService.getIdentityDefaultConfiguration(
                     identityName, //
@@ -208,7 +210,7 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "deleteIdentity");
         try {
 
-            StringUtils.validateField("name", identity.getName());
+            StringUtils.validateField(NAME_REQUEST_FIELD, identity.getName());
 
             boolean deleted = this.identityService.deleteIdentity(identity.getName());
             if (!deleted) {
@@ -271,7 +273,7 @@ public class IdentityRestServiceV2 {
 
         try {
 
-            StringUtils.validateField("name", permissionDTO.getName());
+            StringUtils.validateField(NAME_REQUEST_FIELD, permissionDTO.getName());
 
             boolean created = this.identityService.createPermission(IdentityDTOUtils.toPermission(permissionDTO));
             if (!created) {
@@ -292,7 +294,7 @@ public class IdentityRestServiceV2 {
     public Response deletePermission(final PermissionDTO permissionDTO) {
         logger.debug(DEBUG_MESSAGE, "deletePermission");
 
-        StringUtils.validateField("name", permissionDTO.getName());
+        StringUtils.validateField(NAME_REQUEST_FIELD, permissionDTO.getName());
 
         boolean deleted = false;
         try {
@@ -315,7 +317,7 @@ public class IdentityRestServiceV2 {
     public Response validateIdentityConfiguration(final IdentityConfigurationDTO identityConfigurationDTO) {
         try {
 
-            StringUtils.validateField("name", identityConfigurationDTO.getIdentity().getName());
+            StringUtils.validateField(NAME_REQUEST_FIELD, identityConfigurationDTO.getIdentity().getName());
 
             this.identityService
                     .validateIdentityConfiguration(IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO));

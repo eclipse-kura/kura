@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -23,10 +23,11 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
+import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
 import org.eclipse.kura.ssl.SslManagerService;
-import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -58,10 +59,10 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 
     private static final String MARKETPLACE_URL = "https://marketplace.eclipse.org/node/%s/api/p";
 
-    private final SslManagerService sslManagerService;
+    private final Supplier<Optional<SslManagerService>> sslManagerServiceSupplier;
 
-    public GwtPackageServiceImpl(SslManagerService sslManagerService) {
-        this.sslManagerService = sslManagerService;
+    public GwtPackageServiceImpl(Supplier<Optional<SslManagerService>> sslManagerServiceSupplier) {
+        this.sslManagerServiceSupplier = sslManagerServiceSupplier;
     }
 
     @Override
@@ -124,11 +125,15 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 
         GwtMarketplacePackageDescriptor descriptor = new GwtMarketplacePackageDescriptor();
         try {
+            final SslManagerService sslManagerService = this.sslManagerServiceSupplier.get()
+                    .orElseThrow(() -> new IllegalStateException(
+                            "Failed to download package from Eclipse Marketplace, SslManagerService is not bound"));
+
             String url = String.format(MARKETPLACE_URL, nodeId);
             DeploymentAgentService deploymentAgentService = ServiceLocator.getInstance()
                     .getService(DeploymentAgentService.class);
             MarketplacePackageDescriptor marketplacePackageDescriptor = deploymentAgentService
-                    .getMarketplacePackageDescriptor(url, this.sslManagerService);
+                    .getMarketplacePackageDescriptor(url, sslManagerService);
 
             descriptor.setCompatible(marketplacePackageDescriptor.isCompatible());
             descriptor.setDpUrl(marketplacePackageDescriptor.getDpUrl());

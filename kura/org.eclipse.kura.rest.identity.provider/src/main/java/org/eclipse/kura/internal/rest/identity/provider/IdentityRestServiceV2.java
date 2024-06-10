@@ -111,6 +111,9 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "createIdentity");
 
         try {
+
+            StringUtils.validateField("name", identity.getName());
+
             boolean created = this.identityService.createIdentity(identity.getName());
             if (!created) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.CONFLICT, "Identity already exists");
@@ -130,6 +133,8 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "updateIdentity");
         try {
 
+            StringUtils.validateField("name", identityConfigurationDTO.getIdentity().getName());
+
             this.identityService
                     .updateIdentityConfiguration(IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO));
         } catch (Exception e) {
@@ -148,6 +153,9 @@ public class IdentityRestServiceV2 {
             final IdentityConfigurationRequestDTO identityConfigurationRequestDTO) {
         logger.debug(DEBUG_MESSAGE, "getIdentityByName");
         try {
+
+            StringUtils.validateField("name", identityConfigurationRequestDTO.getIdentity().getName());
+
             String identityName = identityConfigurationRequestDTO.getIdentity().getName();
 
             Optional<IdentityConfiguration> identityConfiguration = this.identityService.getIdentityConfiguration(
@@ -177,6 +185,9 @@ public class IdentityRestServiceV2 {
         String identityName = identityConfigurationRequestDTO.getIdentity().getName();
 
         try {
+
+            StringUtils.validateField("name", identityName);
+
             IdentityConfiguration identityConfiguration = this.identityService.getIdentityDefaultConfiguration(
                     identityName, //
                     IdentityDTOUtils.toIdentityConfigurationComponents(
@@ -197,7 +208,7 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "deleteIdentity");
         try {
 
-            StringUtils.validateInputField("name", identity.getName());
+            StringUtils.validateField("name", identity.getName());
 
             boolean deleted = this.identityService.deleteIdentity(identity.getName());
             if (!deleted) {
@@ -259,6 +270,9 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "createPermission");
 
         try {
+
+            StringUtils.validateField("name", permissionDTO.getName());
+
             boolean created = this.identityService.createPermission(IdentityDTOUtils.toPermission(permissionDTO));
             if (!created) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.CONFLICT,
@@ -278,7 +292,7 @@ public class IdentityRestServiceV2 {
     public Response deletePermission(final PermissionDTO permissionDTO) {
         logger.debug(DEBUG_MESSAGE, "deletePermission");
 
-        StringUtils.validateInputField("name", permissionDTO.getName());
+        StringUtils.validateField("name", permissionDTO.getName());
 
         boolean deleted = false;
         try {

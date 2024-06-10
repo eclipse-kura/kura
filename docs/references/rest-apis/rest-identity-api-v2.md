@@ -25,7 +25,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ##### Responses
 
 - 200 OK status
-- 400 Bad Request (Identity name is not valid)
+- 400 Missing or mispelled field `name` (eg: `nme`)
 - 409 Conflict (Identity already exists)
 - 500 Internal Server Error
 
@@ -89,12 +89,13 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ```
 
 - 200 OK status
+- 400 Missing or mispelled field `name` (eg: `nme`)
 - 404 Identity does not exist
 - 500 Internal Server Error
 
 #### Get User Default Configuration by Name
 
-- Description: This method allows to get the default configuration data about an identity in the system. The request body's `identity` field is used to get only the name of specific identity. It is also possible to retrieve information about the specific user's component default configuration, specifying the type of interest.
+- Description: This method allows to get the default configuration data about an identity in the system. The request body's `identity` field is used to get only the name of specific identity. It is also possible to retrieve information about the specific user's component default configuration, specifying the type of interest. This method accepts also non-existing user's name as input: in this way it's possible to retrieve which is the default configuration applied when a user is created with the `name` field only.
 - Method: POST
 - API PATH: `services/identity/v2/identities/default/byName`
 
@@ -148,7 +149,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ```
 
 - 200 OK status
-- 404 `username` does not exist
+- 400 Missing or mispelled field `name` (eg: `nme`)
 - 500 Internal Server Error
 
 #### Create Permission
@@ -190,7 +191,7 @@ Unless otherwise specified, identities with `rest.identity` permissions can acce
 ##### Responses
 
 - 200 OK status
-- 400 Bad Request (Identity name not specified)
+- 400 Missing or mispelled field `name` (eg: `nme`)
 - 500 Internal Server Error
 
 ## GET methods
@@ -422,7 +423,7 @@ No specific permission is required to access this resource.
 ##### Responses
 
 - 200 OK status
-- 400 Bad Request (Body parameter invalid)
+- 400 Missing or mispelled field `name` (eg: `nme`)
 - 500 Internal Server Error
 
 ## DELETE methods

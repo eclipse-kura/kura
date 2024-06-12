@@ -56,7 +56,6 @@ customize_network_interfaces() {
     local TO_BE_PATCHED=()
 
     TO_BE_PATCHED+=("/opt/eclipse/kura/user/snapshots/snapshot_0.xml")
-    TO_BE_PATCHED+=("/opt/eclipse/kura/.data/snapshot_0.xml")
     TO_BE_PATCHED+=("/opt/eclipse/kura/.data/iptables")
 
     if [ ${#TO_BE_PATCHED[@]} -gt 0 ]

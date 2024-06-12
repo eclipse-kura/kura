@@ -38,6 +38,37 @@ setup_libudev() {
     fi
 }
 
+customize_kura_properties() {
+    local BOARD=$1
+
+    sed -i "s/device_name/${BOARD}/g" "/opt/eclipse/kura/framework/kura.properties"
+
+    if python3 -V > /dev/null 2>&1
+    then
+        python3 /opt/eclipse/kura/install/find_net_interfaces.py /opt/eclipse/kura/framework/kura.properties
+    else
+        echo "python3 not found. Could not edit the primary network interface name in /opt/eclipse/kura/framework/kura.properties. Defaulted to eth0."
+    fi
+}
+
+customize_network_interfaces() {
+    local BOARD=$1
+    local TO_BE_PATCHED=()
+
+    TO_BE_PATCHED+=("/opt/eclipse/kura/user/snapshots/snapshot_0.xml")
+    TO_BE_PATCHED+=("/opt/eclipse/kura/.data/iptables")
+
+    if [ ${#TO_BE_PATCHED[@]} -gt 0 ]
+    then
+        if python3 -V > /dev/null 2>&1
+        then
+            python3 "/opt/eclipse/kura/install/find_net_interfaces.py" "${TO_BE_PATCHED[@]}"
+        else
+            echo "python3 not found. The following files may have wrong interface names: ${TO_BE_PATCHED[*]}. Please correct them manually if they mismatch."
+        fi
+    fi
+}
+
 KURA_PLATFORM=$( uname -m )
 sed -i "s/kura_platform/${KURA_PLATFORM}/g" "/opt/eclipse/kura/framework/kura.properties"
 
@@ -73,23 +104,11 @@ fi
 mv "/opt/eclipse/kura/install/jdk.dio.properties-${BOARD}" "/opt/eclipse/kura/framework/jdk.dio.properties"
 mv "/opt/eclipse/kura/install/snapshot_0.xml-${BOARD}" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
 mv "/opt/eclipse/kura/install/iptables-${BOARD}" "/opt/eclipse/kura/.data/iptables"
-sed -i "s/device_name/${BOARD}/g" "/opt/eclipse/kura/framework/kura.properties"
-if python3 -V > /dev/null 2>&1
-then
-    python3 /opt/eclipse/kura/install/find_net_interfaces.py /opt/eclipse/kura/framework/kura.properties
-else
-    echo "python3 not found. Could not edit the primary netowrk interface name in /opt/eclipse/kura/framework/kura.properties. Defaulted to eth0."
-fi
 
-if [ ${BOARD} = "generic-device" ]; then
-    # replace snapshot_0, iptables.init, and kura.properties with correct interface names
-    if python3 -V > /dev/null 2>&1
-    then
-        python3 /opt/eclipse/kura/install/find_net_interfaces.py /opt/eclipse/kura/user/snapshots/snapshot_0.xml /opt/eclipse/kura/.data/iptables
-    else
-        echo "python3 not found. snapshot_0.xml, and iptables.init files may have wrong interface names. Default is eth0 and wlan0. Please correct them manually if they mismatch."
-    fi
-    
+customize_kura_properties "${BOARD}"
+customize_network_interfaces "${BOARD}"
+
+if [ ${BOARD} = "generic-device" ]; then    
     # dynamic RAM assignment
     RAM_KB=$(grep MemTotal /proc/meminfo | awk '{print $2}')
     RAM_MB=$(expr $RAM_KB / 1024)

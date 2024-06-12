@@ -44,6 +44,7 @@ import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.PasswordConfiguration;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.internal.rest.identity.provider.util.IdentityDTOUtils;
+import org.eclipse.kura.internal.rest.identity.provider.util.StringUtils;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityConfigurationDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityConfigurationRequestDTO;
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.IdentityDTO;
@@ -58,6 +59,8 @@ import org.slf4j.LoggerFactory;
 
 @Path("identity/v2")
 public class IdentityRestServiceV2 {
+
+    private static final String NAME_REQUEST_FIELD = "name";
 
     private static final Logger logger = LoggerFactory.getLogger(IdentityRestServiceV2.class);
 
@@ -110,6 +113,9 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "createIdentity");
 
         try {
+
+            StringUtils.validateField(NAME_REQUEST_FIELD, identity.getName());
+
             boolean created = this.identityService.createIdentity(identity.getName());
             if (!created) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.CONFLICT, "Identity already exists");
@@ -129,6 +135,8 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "updateIdentity");
         try {
 
+            StringUtils.validateField(NAME_REQUEST_FIELD, identityConfigurationDTO.getIdentity().getName());
+
             this.identityService
                     .updateIdentityConfiguration(IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO));
         } catch (Exception e) {
@@ -147,6 +155,9 @@ public class IdentityRestServiceV2 {
             final IdentityConfigurationRequestDTO identityConfigurationRequestDTO) {
         logger.debug(DEBUG_MESSAGE, "getIdentityByName");
         try {
+
+            StringUtils.validateField(NAME_REQUEST_FIELD, identityConfigurationRequestDTO.getIdentity().getName());
+
             String identityName = identityConfigurationRequestDTO.getIdentity().getName();
 
             Optional<IdentityConfiguration> identityConfiguration = this.identityService.getIdentityConfiguration(
@@ -176,6 +187,9 @@ public class IdentityRestServiceV2 {
         String identityName = identityConfigurationRequestDTO.getIdentity().getName();
 
         try {
+
+            StringUtils.validateField(NAME_REQUEST_FIELD, identityName);
+
             IdentityConfiguration identityConfiguration = this.identityService.getIdentityDefaultConfiguration(
                     identityName, //
                     IdentityDTOUtils.toIdentityConfigurationComponents(
@@ -195,6 +209,9 @@ public class IdentityRestServiceV2 {
     public Response deleteIdentity(final IdentityDTO identity) {
         logger.debug(DEBUG_MESSAGE, "deleteIdentity");
         try {
+
+            StringUtils.validateField(NAME_REQUEST_FIELD, identity.getName());
+
             boolean deleted = this.identityService.deleteIdentity(identity.getName());
             if (!deleted) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND, "Identity not found");
@@ -255,6 +272,9 @@ public class IdentityRestServiceV2 {
         logger.debug(DEBUG_MESSAGE, "createPermission");
 
         try {
+
+            StringUtils.validateField(NAME_REQUEST_FIELD, permissionDTO.getName());
+
             boolean created = this.identityService.createPermission(IdentityDTOUtils.toPermission(permissionDTO));
             if (!created) {
                 throw DefaultExceptionHandler.buildWebApplicationException(Status.CONFLICT,
@@ -273,6 +293,9 @@ public class IdentityRestServiceV2 {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response deletePermission(final PermissionDTO permissionDTO) {
         logger.debug(DEBUG_MESSAGE, "deletePermission");
+
+        StringUtils.validateField(NAME_REQUEST_FIELD, permissionDTO.getName());
+
         boolean deleted = false;
         try {
             deleted = this.identityService.deletePermission(IdentityDTOUtils.toPermission(permissionDTO));
@@ -293,6 +316,9 @@ public class IdentityRestServiceV2 {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response validateIdentityConfiguration(final IdentityConfigurationDTO identityConfigurationDTO) {
         try {
+
+            StringUtils.validateField(NAME_REQUEST_FIELD, identityConfigurationDTO.getIdentity().getName());
+
             this.identityService
                     .validateIdentityConfiguration(IdentityDTOUtils.toIdentityConfiguration(identityConfigurationDTO));
         } catch (KuraException e) {

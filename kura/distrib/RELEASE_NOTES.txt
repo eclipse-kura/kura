@@ -1,4 +1,4 @@
-Eclipse Kura - 5.5.0 - May 2024
+Eclipse Kura - 5.5.0 - June 2024
 -------------------------------------------------------------------------------------------------
 Description:
 This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces APIs support for Containers signature verification and enforcement.
@@ -6,7 +6,9 @@ This release officially adds support and preference of the framework to run on J
 The release also provides support for a Cloud Connector for Eclipse Sparkplug and general improvements for the network manager based networking. The generic profiles are now the profiles of preference for all the compatible hardware (including Raspberry PI).
 The release contains a number of bug fixes and general feature improvements.
 
+
 Features:
+  * 4d8a098496 - [linux.gpio] Added support to gpio symlinks [backport release-5.5.0] (#5247) (github-actions[bot])
   * 98aa189b0a - [rest.security.provider] Rest Security Update (#5230) (Pierantonio Merlino)
   * 9bab1d8aab - [distrib] Add generic nn profiles (#5223) (Pierantonio Merlino)
   * 137c7aa395 - Added audit log for modifications in IdentityService (#5220) (nicolatimeus)
@@ -57,6 +59,17 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * d6d326c8d7 - [distrib] customize-installation.sh to always patch interface names on snapshot_0.xml and iptables [backport release-5.5.0] (#5278) (github-actions[bot])
+  * 3d2e6a3dcc - [rest.identity] fixed status codes and error messages for malformed requests [backport release-5.5.0] (#5279) (github-actions[bot])
+  * e4e5477af2 - [nm] Avoid querying wifi ap for info if it is not available anymore [backport release-5.5.0] (#5271) (github-actions[bot])
+  * 6533fc5d63 - Fixed console not immediately applying SslManagerService target update [backport release-5.5.0] (#5274) (nicolatimeus)
+  * 0bbbc9499d - [distrib] missing uninstallation logging [backport release-5.5.0] (#5273) (github-actions[bot])
+  * 61be2a7403 - [distrib] add wpa_supplicant dbus permissions only on NN profiles [backport release-5.5.0] (#5270) (github-actions[bot])
+  * 7aea9512a5 - [web2] Removed servlet unregistration during update if options are not changed [backport release-5.5.0] (#5268) (github-actions[bot])
+  * 24feced08e - [core.cloud] [backport] Added null checks to unset reference methods  (#5262) (Salvatore Coppola)
+  * b1ea671a6f - [distrib] kurad installation on docker-alpine-x86_64-nn container [backport release-5.5.0] (#5257) (github-actions[bot])
+  * 16a06ae68f - Allow kurad to shutdown and reboot the system [backport release-5.5.0] (#5254) (github-actions[bot])
+  * ad375f3720 - correct management of wi-fi disabled state and visualization [backport release-5.5.0] (#5256) (github-actions[bot])
   * e7cd70d5f9 - [emulator] Yet another set of small fixes (#5242) (Pierantonio Merlino)
   * 457b953827 - [container.orchestration] Removed exposedPorts from the state of ContainerOrchestrationServiceImpl object. (#5240) (Salvatore Coppola)
   * 0a452069de - [dev-env] Added net.configuration and io.netty bundles to launcher (#5241) (Pierantonio Merlino)
@@ -120,6 +133,7 @@ Target Platform Updates:
   * 597bcf6561 - downgrade helper-maven-plugin for better compatibility (#5078) (Marcello Rinaldo Martina)
 
 Known Issues:
+  * Snapshot rollback operation may fail processing factory component configurations.
   * The firewall rule applied by the network threat manager that block uncommon TCP MSS values is not applied in the Nvidia Jetson Nano.
   * When the IPv6 network threat manager is disabled, the filtering on TCP fragments is disabled only after a reboot.
   * The republish.mqtt.birth.cert.on.modem.detect property in the CloudService configuration is not supported for devices that use NetworkManager. The property value is ignored.
@@ -176,6 +190,19 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * d6d326c8d7 - fix(distrib): customize-installation.sh to always patch interface names on snapshot_0.xml and iptables [backport release-5.5.0] (#5278) (github-actions[bot])
+  * 3d2e6a3dcc - fix(rest.identity): fixed status codes and error messages for malformed requests [backport release-5.5.0] (#5279) (github-actions[bot])
+  * e4e5477af2 - fix(nm): Avoid querying wifi ap for info if it is not available anymore [backport release-5.5.0] (#5271) (github-actions[bot])
+  * 6533fc5d63 - fix: Fixed console not immediately applying SslManagerService target update [backport release-5.5.0] (#5274) (nicolatimeus)
+  * 0bbbc9499d - fix(distrib): missing uninstallation logging [backport release-5.5.0] (#5273) (github-actions[bot])
+  * 61be2a7403 - fix(distrib): add wpa_supplicant dbus permissions only on NN profiles [backport release-5.5.0] (#5270) (github-actions[bot])
+  * 7aea9512a5 - fix(web2): Removed servlet unregistration during update if options are not changed [backport release-5.5.0] (#5268) (github-actions[bot])
+  * 24feced08e - fix(core.cloud): [backport] Added null checks to unset reference methods  (#5262) (Salvatore Coppola)
+  * b1ea671a6f - fix(distrib): kurad installation on docker-alpine-x86_64-nn container [backport release-5.5.0] (#5257) (github-actions[bot])
+  * 16a06ae68f - fix: Allow kurad to shutdown and reboot the system [backport release-5.5.0] (#5254) (github-actions[bot])
+  * ad375f3720 - fix: correct management of wi-fi disabled state and visualization [backport release-5.5.0] (#5256) (github-actions[bot])
+  * 4d8a098496 - feat(linux.gpio): Added support to gpio symlinks [backport release-5.5.0] (#5247) (github-actions[bot])
+  * 0be0b6f8f3 - chore: add Kura 5.5.0 release notes (#5244) (github-actions[bot])
   * b64ef78bfd - chore: Upticked versions for 5.5.0 release  (#5243) (nicolatimeus)
   * e7cd70d5f9 - fix(emulator): Yet another set of small fixes (#5242) (Pierantonio Merlino)
   * 457b953827 - fix(container.orchestration): Removed exposedPorts from the state of ContainerOrchestrationServiceImpl object. (#5240) (Salvatore Coppola)

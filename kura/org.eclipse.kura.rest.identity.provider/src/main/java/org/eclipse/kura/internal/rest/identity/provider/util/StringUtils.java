@@ -12,6 +12,12 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.identity.provider.util;
 
+import static java.util.Objects.isNull;
+
+import javax.ws.rs.core.Response.Status;
+
+import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
+
 public class StringUtils {
 
     private StringUtils() {
@@ -21,6 +27,19 @@ public class StringUtils {
     public static void requireNotEmpty(String value, String message) {
         if (value == null || value.trim().isEmpty()) {
             throw new IllegalArgumentException(message);
+        }
+    }
+
+    public static void validateField(String propertyName, String inputToValidate) {
+
+        if (isNull(inputToValidate)) {
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                    "Missing '" + propertyName + "' property");
+        }
+
+        if (inputToValidate.trim().isEmpty()) {
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                    "`" + propertyName + "` value can't be empty");
         }
     }
 }

@@ -133,6 +133,7 @@ Target Platform Updates:
   * 597bcf6561 - downgrade helper-maven-plugin for better compatibility (#5078) (Marcello Rinaldo Martina)
 
 Known Issues:
+  * Snapshot rollback operation may fail processing factory component configurations.
   * The firewall rule applied by the network threat manager that block uncommon TCP MSS values is not applied in the Nvidia Jetson Nano.
   * When the IPv6 network threat manager is disabled, the filtering on TCP fragments is disabled only after a reboot.
   * The republish.mqtt.birth.cert.on.modem.detect property in the CloudService configuration is not supported for devices that use NetworkManager. The property value is ignored.

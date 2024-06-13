@@ -136,6 +136,8 @@ public abstract class EngineProvider {
 
         this.bindings.putMember("newByteArray", (Function<Integer, byte[]>) size -> new byte[size]);
 
+        this.bindings.putMember("HashMap", (Function<Void, HashMap<?, ?>>) v -> new HashMap<>());
+
         for (DataType type : DataType.values()) {
             this.bindings.putMember(type.name(), type);
         }

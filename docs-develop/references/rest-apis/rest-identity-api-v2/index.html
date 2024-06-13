@@ -5293,7 +5293,7 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
 <h5 id="responses">Responses</h5>
 <ul>
 <li>200 OK status</li>
-<li>400 Bad Request (Identity name is not valid)</li>
+<li>400 Missing or mispelled field <code>name</code> (eg: <code>nme</code>)</li>
 <li>409 Conflict (Identity already exists)</li>
 <li>500 Internal Server Error</li>
 </ul>
@@ -5348,12 +5348,13 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
 </code></pre></div>
 <ul>
 <li>200 OK status</li>
+<li>400 Missing or mispelled field <code>name</code> (eg: <code>nme</code>)</li>
 <li>404 Identity does not exist</li>
 <li>500 Internal Server Error</li>
 </ul>
 <h4 id="get-user-default-configuration-by-name">Get User Default Configuration by Name</h4>
 <ul>
-<li>Description: This method allows to get the default configuration data about an identity in the system. The request body's <code>identity</code> field is used to get only the name of specific identity. It is also possible to retrieve information about the specific user's component default configuration, specifying the type of interest.</li>
+<li>Description: This method allows to get the default configuration data about an identity in the system. The request body's <code>identity</code> field is used to get only the name of specific identity. It is also possible to retrieve information about the specific user's component default configuration, specifying the type of interest. This method accepts also non-existing user's name as input: in this way it's possible to retrieve which is the default configuration applied when a user is created with the <code>name</code> field only.</li>
 <li>Method: POST</li>
 <li>API PATH: <code>services/identity/v2/identities/default/byName</code></li>
 </ul>
@@ -5398,7 +5399,7 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
 </code></pre></div>
 <ul>
 <li>200 OK status</li>
-<li>404 <code>username</code> does not exist</li>
+<li>400 Missing or mispelled field <code>name</code> (eg: <code>nme</code>)</li>
 <li>500 Internal Server Error</li>
 </ul>
 <h4 id="create-permission">Create Permission</h4>
@@ -5436,7 +5437,7 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
 <h5 id="responses_2">Responses</h5>
 <ul>
 <li>200 OK status</li>
-<li>400 Bad Request (Identity name not specified)</li>
+<li>400 Missing or mispelled field <code>name</code> (eg: <code>nme</code>)</li>
 <li>500 Internal Server Error</li>
 </ul>
 <h2 id="get-methods">GET methods</h2>
@@ -5655,7 +5656,7 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
 <h5 id="responses_6">Responses</h5>
 <ul>
 <li>200 OK status</li>
-<li>400 Bad Request (Body parameter invalid)</li>
+<li>400 Missing or mispelled field <code>name</code> (eg: <code>nme</code>)</li>
 <li>500 Internal Server Error</li>
 </ul>
 <h2 id="delete-methods">DELETE methods</h2>
@@ -5674,6 +5675,7 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
 <ul>
 <li>200 OK status</li>
 <li>404 <code>username</code> does not exist</li>
+<li>400 Missing or mispelled field <code>name</code> (eg: <code>nme</code>)</li>
 <li>500 Internal Server Error</li>
 </ul>
 <h4 id="delete-permission">Delete Permission</h4>
@@ -5691,6 +5693,7 @@ Unless otherwise specified, identities with <code>rest.identity</code> permissio
 <ul>
 <li>200 OK status</li>
 <li>404 <code>permission</code> does not exist</li>
+<li>400 Missing or mispelled field <code>name</code> (eg: <code>nme</code>)</li>
 <li>500 Internal Server Error</li>
 </ul>
 

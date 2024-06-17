@@ -100,6 +100,12 @@ public class SslAuthenticationServlet extends HttpServlet {
             sendRedirect(resp, redirectPath);
 
         } catch (final Exception e) {
+            final HttpSession existingSession = req.getSession(false);
+
+            if (existingSession != null) {
+                existingSession.invalidate();
+            }
+
             auditLogger.info("{} UI Login - Failure - Certificate login", auditContext);
             logger.warn("certificate authentication failed", e);
             sendUnauthorized(resp);

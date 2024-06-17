@@ -847,6 +847,32 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void shouldChangeSessionCookieAfterPasswordChange() {
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "new.password.min.length", 1, //
+                "new.password.require.digits", false, //
+                "new.password.require.special.characters", false, //
+                "new.password.require.both.cases", false, //
+                "access.banner.enabled", false);
+        givenService(new RequiresAssetsRole());
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList(), true);
+        givenNoBasicCredentials();
+
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        givenSnapshotOfCurrentCookies();
+        givenCookieInSnapshot("JSESSIONID");
+
+        givenXsrfToken("http", 8080);
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/changePassword",
+                "{\"currentPassword\":\"bar\",\"newPassword\":\"baz\"}");
+
+        thenRequestSucceeds();
+        thenCurrentCookieDiffersFromPreviousSnapshot("JSESSIONID");
+    }
+
+    @Test
     public void shouldChangeSessionCookieRepeatingCertificateAuthentication() {
         givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
         givenNoBasicCredentials();
@@ -1004,6 +1030,62 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
         thenResponseCodeIs(401);
 
+    }
+
+    @Test
+    public void shouldInvalidateSessionAfterFailedPasswordLogin() {
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "access.banner.enabled", false);
+        givenService(new RequiresAssetsRole());
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenNoBasicCredentials();
+
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        givenSnapshotOfCurrentCookies();
+        givenCookieInSnapshot("JSESSIONID");
+
+        givenXsrfToken();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"baz\"}");
+
+        whenCookieIsRestoredFromSnapshot("JSESSIONID");
+        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/xsrfToken", null);
+
+        thenResponseCodeIs(401);
+    }
+
+    @Test
+    public void shouldInvalidateSessionAfterFailedCertificateLogin() {
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenNoBasicCredentials();
+        givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
+        givenService(new RequiresAssetsRole());
+        givenCA("clientCA");
+        givenCA("serverCA");
+        givenKeystoreService("clientKeystore");
+        givenCACertificateInKeystore("clientKeystore", "serverCA");
+        givenKeystoreService("serverKeystore");
+        givenCACertificateInKeystore("serverKeystore", "clientCA");
+        givenKeyPairInKeystore("clientKeystore", "clientCA", "bar");
+        givenKeyPairInKeystore("serverKeystore", "serverCA", "serverCert");
+        givenHttpServiceClientCertAuthEnabled("serverKeystore", 9999);
+        givenClientKeystore("clientKeystore");
+
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        givenSnapshotOfCurrentCookies();
+        givenCookieInSnapshot("JSESSIONID");
+
+        givenXsrfToken();
+
+        whenRequestIsPerformed("https", 9999, new MethodSpec("POST"), "/session/v1/login/certificate", null);
+
+        whenCookieIsRestoredFromSnapshot("JSESSIONID");
+        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/xsrfToken", null);
+
+        thenResponseCodeIs(401);
     }
 
     private List<ServiceRegistration<?>> registeredServices = new ArrayList<>();

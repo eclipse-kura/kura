@@ -57,12 +57,6 @@ public class SslAuthenticationServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         final Console console = Console.instance();
-        final HttpSession session = console.createSession(req);
-
-        if (console.getUsername(session).isPresent()) {
-            sendRedirect(resp, redirectPath);
-            return;
-        }
 
         final AuditContext auditContext = Console.instance().initAuditContext(req);
 
@@ -94,6 +88,8 @@ public class SslAuthenticationServlet extends HttpServlet {
             }
 
             auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), commonName);
+
+            final HttpSession session = console.createNewSession(req);
 
             console.setAuthenticated(session, commonName, auditContext);
             auditContext.getProperties().put("session.id", GwtServerUtil.getSessionIdHash(session));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -354,8 +354,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
         givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
-        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/xsrfToken",
-                null);
+        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/xsrfToken", null);
 
         thenResponseCodeIs(200);
     }
@@ -365,8 +364,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();
 
-        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/xsrfToken",
-                null);
+        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/xsrfToken", null);
 
         thenResponseCodeIs(401);
     }
@@ -407,8 +405,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenXsrfToken();
         givenSuccessfulRequest(new MethodSpec("GET"), "/requireAssets");
-        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/logout",
-                null);
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/logout", null);
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/requireAssets");
 
@@ -422,8 +419,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
         givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
-        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/logout",
-                null);
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/logout", null);
 
         thenResponseCodeIs(401);
     }
@@ -796,8 +792,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/currentIdentity", null);
 
         thenRequestSucceeds();
-        thenResponseBodyEqualsJson(
-                "{\"name\":\"nopermissions\",\"passwordChangeNeeded\":false,\"permissions\":[]}");
+        thenResponseBodyEqualsJson("{\"name\":\"nopermissions\",\"passwordChangeNeeded\":false,\"permissions\":[]}");
     }
 
     @Test
@@ -828,6 +823,187 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         thenResponseCodeIs(200);
         thenResponseBodyEqualsJson(
                 "{\"passwordAuthenticationEnabled\":true,\"certificateAuthenticationEnabled\":false,\"message\":\"foo\"}");
+    }
+
+    @Test
+    public void shouldChangeSessionCookieRepeatingPasswordAuthentication() {
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "access.banner.enabled", false);
+        givenService(new RequiresAssetsRole());
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenNoBasicCredentials();
+
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        givenSnapshotOfCurrentCookies();
+        givenCookieInSnapshot("JSESSIONID");
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+
+        thenResponseCodeIs(200);
+        thenResponseBodyEqualsJson("{\"passwordChangeNeeded\":false}");
+        thenCurrentCookieDiffersFromPreviousSnapshot("JSESSIONID");
+    }
+
+    @Test
+    public void shouldChangeSessionCookieRepeatingCertificateAuthentication() {
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenNoBasicCredentials();
+        givenIdentity("foo", Optional.empty(), Arrays.asList("rest.assets"));
+        givenService(new RequiresAssetsRole());
+        givenCA("clientCA");
+        givenCA("serverCA");
+        givenKeystoreService("clientKeystore");
+        givenCACertificateInKeystore("clientKeystore", "serverCA");
+        givenKeystoreService("serverKeystore");
+        givenCACertificateInKeystore("serverKeystore", "clientCA");
+        givenKeyPairInKeystore("clientKeystore", "clientCA", "foo");
+        givenKeyPairInKeystore("serverKeystore", "serverCA", "serverCert");
+        givenHttpServiceClientCertAuthEnabled("serverKeystore", 9999);
+        givenClientKeystore("clientKeystore");
+
+        givenSuccessfulRequest("https", 9999, new MethodSpec("POST"), "/session/v1/login/certificate", null);
+        givenSnapshotOfCurrentCookies();
+        givenCookieInSnapshot("JSESSIONID");
+
+        whenRequestIsPerformed("https", 9999, new MethodSpec("POST"), "/session/v1/login/certificate", null);
+
+        thenRequestSucceeds();
+        thenCurrentCookieDiffersFromPreviousSnapshot("JSESSIONID");
+    }
+
+    @Test
+    public void shouldChangeSessionCookieAuthenticatingWithPasswordAndThenWithCertificateOnDifferentPort() {
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenNoBasicCredentials();
+        givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
+        givenService(new RequiresAssetsRole());
+        givenCA("clientCA");
+        givenCA("serverCA");
+        givenKeystoreService("clientKeystore");
+        givenCACertificateInKeystore("clientKeystore", "serverCA");
+        givenKeystoreService("serverKeystore");
+        givenCACertificateInKeystore("serverKeystore", "clientCA");
+        givenKeyPairInKeystore("clientKeystore", "clientCA", "foo");
+        givenKeyPairInKeystore("serverKeystore", "serverCA", "serverCert");
+        givenHttpServiceClientCertAuthEnabled("serverKeystore", 9999);
+        givenClientKeystore("clientKeystore");
+
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        givenSnapshotOfCurrentCookies();
+        givenCookieInSnapshot("JSESSIONID");
+
+        whenRequestIsPerformed("https", 9999, new MethodSpec("POST"), "/session/v1/login/certificate", null);
+
+        thenRequestSucceeds();
+        thenCurrentCookieDiffersFromPreviousSnapshot("JSESSIONID");
+    }
+
+    @Test
+    public void shouldChangeSessionCookieAuthenticatingWithCertificateAndThenWithPasswordOnDifferentPort() {
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenNoBasicCredentials();
+        givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
+        givenService(new RequiresAssetsRole());
+        givenCA("clientCA");
+        givenCA("serverCA");
+        givenKeystoreService("clientKeystore");
+        givenCACertificateInKeystore("clientKeystore", "serverCA");
+        givenKeystoreService("serverKeystore");
+        givenCACertificateInKeystore("serverKeystore", "clientCA");
+        givenKeyPairInKeystore("clientKeystore", "clientCA", "foo");
+        givenKeyPairInKeystore("serverKeystore", "serverCA", "serverCert");
+        givenHttpServiceClientCertAuthEnabled("serverKeystore", 9999);
+        givenClientKeystore("clientKeystore");
+
+        givenSuccessfulRequest("https", 9999, new MethodSpec("POST"), "/session/v1/login/certificate", null);
+        givenSnapshotOfCurrentCookies();
+        givenCookieInSnapshot("JSESSIONID");
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        thenRequestSucceeds();
+        thenCurrentCookieDiffersFromPreviousSnapshot("JSESSIONID");
+    }
+
+    @Test
+    public void shouldChangeSessionCookieAuthenticatingWithPasswordAndThenWithCertificateOnSamePort() {
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenNoBasicCredentials();
+        givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
+        givenService(new RequiresAssetsRole());
+        givenCA("clientCA");
+        givenCA("serverCA");
+        givenKeystoreService("clientKeystore");
+        givenCACertificateInKeystore("clientKeystore", "serverCA");
+        givenKeystoreService("serverKeystore");
+        givenCACertificateInKeystore("serverKeystore", "clientCA");
+        givenKeyPairInKeystore("clientKeystore", "clientCA", "foo");
+        givenKeyPairInKeystore("serverKeystore", "serverCA", "serverCert");
+        givenHttpServiceClientCertAuthEnabled("serverKeystore", 9999);
+        givenClientKeystore("clientKeystore");
+
+        givenSuccessfulRequest("https", 9999, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        givenSnapshotOfCurrentCookies();
+        givenCookieInSnapshot("JSESSIONID");
+
+        whenRequestIsPerformed("https", 9999, new MethodSpec("POST"), "/session/v1/login/certificate", null);
+
+        thenRequestSucceeds();
+        thenCurrentCookieDiffersFromPreviousSnapshot("JSESSIONID");
+    }
+
+    @Test
+    public void shouldChangeSessionCookieAuthenticatingWithCertificateAndThenWithPasswordOnSamePort() {
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenNoBasicCredentials();
+        givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
+        givenService(new RequiresAssetsRole());
+        givenCA("clientCA");
+        givenCA("serverCA");
+        givenKeystoreService("clientKeystore");
+        givenCACertificateInKeystore("clientKeystore", "serverCA");
+        givenKeystoreService("serverKeystore");
+        givenCACertificateInKeystore("serverKeystore", "clientCA");
+        givenKeyPairInKeystore("clientKeystore", "clientCA", "foo");
+        givenKeyPairInKeystore("serverKeystore", "serverCA", "serverCert");
+        givenHttpServiceClientCertAuthEnabled("serverKeystore", 9999);
+        givenClientKeystore("clientKeystore");
+
+        givenSuccessfulRequest("https", 9999, new MethodSpec("POST"), "/session/v1/login/certificate", null);
+        givenSnapshotOfCurrentCookies();
+        givenCookieInSnapshot("JSESSIONID");
+
+        whenRequestIsPerformed("https", 9999, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        thenRequestSucceeds();
+        thenCurrentCookieDiffersFromPreviousSnapshot("JSESSIONID");
+    }
+
+    @Test
+    public void shouldNotLoginWithOldCookieAfterNewLogin() {
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "access.banner.enabled", false);
+        givenService(new RequiresAssetsRole());
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenNoBasicCredentials();
+
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        givenSnapshotOfCurrentCookies();
+        givenCookieInSnapshot("JSESSIONID");
+
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+
+        whenCookieIsRestoredFromSnapshot("JSESSIONID");
+        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/xsrfToken", null);
+
+        thenResponseCodeIs(401);
+
     }
 
     private List<ServiceRegistration<?>> registeredServices = new ArrayList<>();
@@ -876,8 +1052,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
                     new File(directoryPath.toFile(), System.nanoTime() + ".ks").getAbsolutePath());
 
             final KeystoreService keystoreService = ServiceUtil
-                    .createFactoryConfiguration(configurationService, KeystoreService.class,
-                            pid, "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl", properties)
+                    .createFactoryConfiguration(configurationService, KeystoreService.class, pid,
+                            "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl", properties)
                     .get(30, TimeUnit.SECONDS);
 
             this.keystoreServices.put(pid, keystoreService);
@@ -915,9 +1091,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
             final KeystoreService keystoreService = this.keystoreServices.get(keystorePid);
 
             final KeyPair keyPair = TestCA.generateKeyPair();
-            final X509Certificate clientCertificate = testCA.createAndSignCertificate(CertificateCreationOptions
-                    .builder(new X500Name("cn=" + certCN + ", dc=bar.com"))
-                    .build(), keyPair);
+            final X509Certificate clientCertificate = testCA.createAndSignCertificate(
+                    CertificateCreationOptions.builder(new X500Name("cn=" + certCN + ", dc=bar.com")).build(), keyPair);
 
             keystoreService.setEntry(certCN, new PrivateKeyEntry(keyPair.getPrivate(),
                     new Certificate[] { clientCertificate, testCA.getCertificate() }));
@@ -932,8 +1107,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
                     .trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
 
             final Map<String, Object> properties = new HashMap<>();
-            properties.put("KeystoreService.target",
-                    "(kura.service.pid=" + keystorePid + ")");
+            properties.put("KeystoreService.target", "(kura.service.pid=" + keystorePid + ")");
             properties.put("https.client.auth.ports", new Integer[] { port });
 
             configurationService.updateConfiguration("org.eclipse.kura.http.server.manager.HttpService", properties);
@@ -964,14 +1138,13 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     private void givenConfiguration(final String pid, final Object... properties) {
         try {
-            final ConfigurationAdmin configAdmin = ServiceUtil
-                    .trackService(ConfigurationAdmin.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            final ConfigurationAdmin configAdmin = ServiceUtil.trackService(ConfigurationAdmin.class, Optional.empty())
+                    .get(30, TimeUnit.SECONDS);
 
             final Configuration configuration = configAdmin.getConfiguration(pid, "?");
 
             final Dictionary<String, Object> configurationProperties = Optional
-                    .ofNullable(configuration.getProperties())
-                    .orElseGet(Hashtable::new);
+                    .ofNullable(configuration.getProperties()).orElseGet(Hashtable::new);
 
             final Iterator<Object> iter = Arrays.asList(properties).iterator();
 
@@ -1088,14 +1261,12 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     }
 
     private void givenSuccessfulRequest(final String proto, final int port, final MethodSpec method,
-            final String resource,
-            final String body) {
+            final String resource, final String body) {
         whenRequestIsPerformed(proto, port, method, resource, body);
         thenRequestSucceeds();
     }
 
-    private void givenSuccessfulRequest(final MethodSpec method,
-            final String resource) {
+    private void givenSuccessfulRequest(final MethodSpec method, final String resource) {
         whenRequestIsPerformed(method, resource);
         thenRequestSucceeds();
     }
@@ -1113,8 +1284,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     }
 
     private void whenRequestIsPerformed(final String proto, final int port, final MethodSpec method,
-            final String resource,
-            final String body) {
+            final String resource, final String body) {
         final RestTransport restTransport = (RestTransport) this.transport;
 
         this.response = Optional
@@ -1129,8 +1299,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         final RestTransport restTransport = (RestTransport) this.transport;
 
         final Response response = restTransport.runRequest(protocol + "://localhost:" + port + "/services",
-                "/session/v1/xsrfToken",
-                new MethodSpec("GET"), null);
+                "/session/v1/xsrfToken", new MethodSpec("GET"), null);
 
         final JsonObject object = Json
                 .parse(response.getBody().orElseThrow(() -> new IllegalStateException("no response body"))).asObject();

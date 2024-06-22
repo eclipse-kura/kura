@@ -1322,16 +1322,16 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             configUserOptions.allowAnyPassword();
         }
 
-        if (this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA_MESSAGE)
+        if (this.security != null && (this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA_MESSAGE)
                 || this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_MESSAGE)
-                || this.security.getSelectedItemText().contentEquals(WIFI_SECURITY_WPA_WPA2_MESSAGE)) {
+                || this.security.getSelectedItemText().contentEquals(WIFI_SECURITY_WPA_WPA2_MESSAGE))) {
 
             this.password.setValidatorsFrom(configUserOptions);
             configUserOptions.setPasswordMinimumLength(Math.min(configUserOptions.getPasswordMinimumLength(), 63));
 
             this.password.addValidator(GwtValidators.regex(REGEX_PASS_WPA, MSGS.netWifiWirelessInvalidWPAPassword()));
 
-        } else if (this.security.getSelectedItemText().equals(WIFI_SECURITY_WEP_MESSAGE)) {
+        } else if (this.security != null && this.security.getSelectedItemText().equals(WIFI_SECURITY_WEP_MESSAGE)) {
 
             configUserOptions.setPasswordRequireSpecialChars(false);
             configUserOptions.setPasswordMinimumLength(Math.min(configUserOptions.getPasswordMinimumLength(), 26));
@@ -1741,14 +1741,14 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private boolean checkPassword() {
         boolean result = true;
 
-        if (!this.password.validate() && this.password.isEnabled()) {
+        if (this.password != null && !this.password.validate() && this.password.isEnabled()) {
             this.groupPassword.setValidationState(ValidationState.ERROR);
             result = false;
         } else {
             this.groupPassword.setValidationState(ValidationState.NONE);
         }
 
-        if (this.verify.isEnabled() && TabWirelessUi.this.password != null
+        if (this.verify != null && this.verify.isEnabled() && TabWirelessUi.this.password != null
                 && !TabWirelessUi.this.verify.getText().equals(TabWirelessUi.this.password.getText())) {
             TabWirelessUi.this.helpVerify.setText(MSGS.netWifiWirelessPasswordDoesNotMatch());
             TabWirelessUi.this.groupVerify.setValidationState(ValidationState.ERROR);
@@ -1820,7 +1820,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         addAutomaticChannel(freqChannels);
         freqChannels.stream().forEach(this::addItemChannelList);
 
-        if (this.activeConfig.getChannels() != null && !this.activeConfig.getChannels().isEmpty()) {
+        if (this.activeConfig != null && this.activeConfig.getChannels() != null
+                && !this.activeConfig.getChannels().isEmpty()) {
             this.netTabs.hardwareTab.channel
                     .setText(this.channelList.getItemText(this.activeConfig.getChannels().get(0)));
 
@@ -1880,7 +1881,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                                 if (selectedRadioMode != null) {
                                     setRadioModeByValue(selectedRadioMode);
-                                } else {
+                                } else if (TabWirelessUi.this.activeConfig != null) {
                                     setRadioModeByValue(TabWirelessUi.this.activeConfig.getRadioMode());
                                 }
 

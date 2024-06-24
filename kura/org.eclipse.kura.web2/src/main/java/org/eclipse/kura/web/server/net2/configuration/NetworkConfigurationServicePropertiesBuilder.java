@@ -64,15 +64,10 @@ public class NetworkConfigurationServicePropertiesBuilder {
         setIpv4DhcpServerProperties();
         set8021xConfig();
 
-        switch (this.gwtConfig.getStatusEnum()) {
-        case netIPv4StatusDisabled:
-            break;
-        case netIPv4StatusUnmanaged:
-            break;
-        default:
+        if (isIPv4StatusEnabledManaged(this.gwtConfig.getStatus())
+                || isIPv6StatusEnabledManaged(this.gwtConfig.getIpv6Status())) {
             setWifiProperties();
             setModemProperties();
-            break;
         }
 
         // Manage GPS independently of device ip status
@@ -81,6 +76,15 @@ public class NetworkConfigurationServicePropertiesBuilder {
         setAdvancedProperties();
 
         return this.properties.getProperties();
+    }
+
+    private boolean isIPv4StatusEnabledManaged(String ipv4Status) {
+        return !(ipv4Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.name())
+                || ipv4Status.equals(GwtNetIfStatus.netIPv4StatusUnmanaged.name()));
+    }
+
+    private boolean isIPv6StatusEnabledManaged(String ipv6Status) {
+        return !ipv6Status.equals(GwtNetIfStatus.netIPv6StatusDisabled.name());
     }
 
     private void setCommonProperties() {
@@ -427,7 +431,7 @@ public class NetworkConfigurationServicePropertiesBuilder {
         this.properties.setIp6Mtu(this.ifname,
                 Objects.nonNull(this.gwtConfig.getIpv6Mtu()) ? this.gwtConfig.getIpv6Mtu() : DEFAULT_MTU);
         this.properties.setPromisc(this.ifname,
-        		Objects.nonNull(this.gwtConfig.getPromisc()) ? this.gwtConfig.getPromisc() : DEFAULT_PROMISC);
+                Objects.nonNull(this.gwtConfig.getPromisc()) ? this.gwtConfig.getPromisc() : DEFAULT_PROMISC);
     }
 
     private static GwtNetInterfaceConfig getConfigsAndStatuses(String ifName) throws GwtKuraException, KuraException {

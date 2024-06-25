@@ -141,6 +141,7 @@
                         <argLine>
                             ${tycho.testArgLine}
                             ${tycho.surefire.testenv.args}
+                            -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml
                         </argLine>
                         <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
                         <dependencies>
@@ -272,6 +273,14 @@
                                 <type>p2-installable-unit</type>
                                 <artifactId>org.eclipse.kura.emulator.position</artifactId>
                             </dependency>
+                            <dependency>
+                                <type>p2-installable-unit</type>
+                                <artifactId>org.apache.logging.log4j.slf4j.impl</artifactId>
+                            </dependency>
+                            <dependency>
+                                <type>p2-installable-unit</type>
+                                <artifactId>org.apache.logging.log4j.core</artifactId>
+                            </dependency>
                         </dependencies>
                         <bundleStartLevel>
                             <bundle>
@@ -381,17 +390,17 @@
                             </bundle>
                             <bundle>
                                 <id>org.apache.logging.log4j.api</id>
-                                <level>4</level>
+                                <level>1</level>
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
                                 <id>org.apache.logging.log4j.core</id>
-                                <level>4</level>
+                                <level>1</level>
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
                                 <id>org.apache.logging.log4j.slf4j.impl</id>
-                                <level>4</level>
+                                <level>1</level>
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>

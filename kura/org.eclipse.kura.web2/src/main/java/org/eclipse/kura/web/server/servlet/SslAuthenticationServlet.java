@@ -57,12 +57,6 @@ public class SslAuthenticationServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         final Console console = Console.instance();
-        final HttpSession session = console.createSession(req);
-
-        if (console.getUsername(session).isPresent()) {
-            sendRedirect(resp, redirectPath);
-            return;
-        }
 
         final AuditContext auditContext = Console.instance().initAuditContext(req);
 
@@ -95,6 +89,8 @@ public class SslAuthenticationServlet extends HttpServlet {
 
             auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), commonName);
 
+            final HttpSession session = console.createNewSession(req);
+
             console.setAuthenticated(session, commonName, auditContext);
             auditContext.getProperties().put("session.id", GwtServerUtil.getSessionIdHash(session));
 
@@ -104,6 +100,12 @@ public class SslAuthenticationServlet extends HttpServlet {
             sendRedirect(resp, redirectPath);
 
         } catch (final Exception e) {
+            final HttpSession existingSession = req.getSession(false);
+
+            if (existingSession != null) {
+                existingSession.invalidate();
+            }
+
             auditLogger.info("{} UI Login - Failure - Certificate login", auditContext);
             logger.warn("certificate authentication failed", e);
             sendUnauthorized(resp);

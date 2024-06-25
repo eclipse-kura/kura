@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -84,8 +84,7 @@ public class SessionRestService {
     @Path(SessionRestServiceConstants.LOGIN_PASSWORD_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public AuthenticationResponseDTO authenticateWithUsernameAndPassword(
-            final UsernamePasswordDTO usernamePassword,
+    public AuthenticationResponseDTO authenticateWithUsernameAndPassword(final UsernamePasswordDTO usernamePassword,
             @Context final HttpServletRequest request) {
 
         if (!options.isSessionManagementEnabled() || !options.isPasswordAuthEnabled()) {
@@ -100,8 +99,7 @@ public class SessionRestService {
 
         try {
 
-            this.userAdminHelper.verifyUsernamePassword(usernamePassword.getUsername(),
-                    usernamePassword.getPassword());
+            this.userAdminHelper.verifyUsernamePassword(usernamePassword.getUsername(), usernamePassword.getPassword());
 
             final HttpSession session = this.restSessionHelper.createNewAuthenticatedSession(request,
                     usernamePassword.getUsername());
@@ -117,8 +115,12 @@ public class SessionRestService {
             return response;
 
         } catch (final AuthenticationException e) {
+            invalidateCurrentSession(request);
             handleAuthenticationException(e);
             throw new IllegalStateException("unreachable");
+        } catch (final Exception e) {
+            invalidateCurrentSession(request);
+            throw e;
         }
     }
 
@@ -131,21 +133,27 @@ public class SessionRestService {
             throw new WebApplicationException(Status.NOT_FOUND);
         }
 
-        final CertificateAuthenticationProvider certificateAuthProvider = new CertificateAuthenticationProvider(
-                userAdminHelper);
+        try {
 
-        final Optional<Principal> principal = certificateAuthProvider.authenticate(requestContext,
-                "Create session via certificate authentication");
+            final CertificateAuthenticationProvider certificateAuthProvider = new CertificateAuthenticationProvider(
+                    userAdminHelper);
 
-        if (principal.isPresent()) {
-            this.restSessionHelper.createNewAuthenticatedSession(request,
-                    principal.get().getName());
-        } else {
-            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
-                    "Certificate authentication failed");
+            final Optional<Principal> principal = certificateAuthProvider.authenticate(requestContext,
+                    "Create session via certificate authentication");
+
+            if (principal.isPresent()) {
+                this.restSessionHelper.createNewAuthenticatedSession(request, principal.get().getName());
+            } else {
+
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
+                        "Certificate authentication failed");
+            }
+
+            return buildAuthenticationResponse(principal.get().getName());
+        } catch (final Exception e) {
+            invalidateCurrentSession(request);
+            throw e;
         }
-
-        return buildAuthenticationResponse(principal.get().getName());
     }
 
     @GET
@@ -159,13 +167,11 @@ public class SessionRestService {
         final Optional<HttpSession> session = this.restSessionHelper.getExistingSession(request);
 
         if (!session.isPresent()) {
-            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
-                    INVALID_SESSION_MESSAGE);
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED, INVALID_SESSION_MESSAGE);
         }
 
         if (!this.restSessionHelper.getCurrentPrincipal(requestContext).isPresent()) {
-            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
-                    INVALID_SESSION_MESSAGE);
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED, INVALID_SESSION_MESSAGE);
         }
 
         return new XsrfTokenDTO(this.restSessionHelper.getOrCreateXsrfToken(session.get()));
@@ -174,8 +180,7 @@ public class SessionRestService {
     @POST
     @Path(SessionRestServiceConstants.CHANGE_PASSWORD_PATH)
     public void updateUserPassword(@Context final ContainerRequestContext requestContext,
-            @Context final HttpServletRequest request,
-            final UpdatePasswordDTO passwordUpdate) {
+            @Context final HttpServletRequest request, final UpdatePasswordDTO passwordUpdate) {
 
         passwordUpdate.validate();
 
@@ -196,13 +201,15 @@ public class SessionRestService {
 
             this.userAdminHelper.changeUserPassword(username.get(), passwordUpdate.getNewPassword());
 
-            final Optional<HttpSession> session = this.restSessionHelper.getExistingSession(request);
+            final HttpSession session = this.restSessionHelper.createNewAuthenticatedSession(request, newPassword);
+            this.restSessionHelper.unlockSession(session);
 
-            if (session.isPresent()) {
-                this.restSessionHelper.unlockSession(session.get());
-            }
         } catch (final AuthenticationException e) {
+            invalidateCurrentSession(request);
             handleAuthenticationException(e);
+        } catch (final Exception e) {
+            invalidateCurrentSession(request);
+            throw e;
         }
     }
 
@@ -215,14 +222,12 @@ public class SessionRestService {
         }
 
         if (!this.restSessionHelper.getCurrentPrincipal(requestContext).isPresent()) {
-            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
-                    INVALID_SESSION_MESSAGE);
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED, INVALID_SESSION_MESSAGE);
         }
 
         this.restSessionHelper.logout(request, response);
 
-        auditLogger.info("{} Rest - Success - Logout succeeded",
-                AuditContext.currentOrInternal());
+        auditLogger.info("{} Rest - Success - Logout succeeded", AuditContext.currentOrInternal());
     }
 
     @GET
@@ -237,14 +242,12 @@ public class SessionRestService {
         final Optional<Principal> currentPrincipal = this.restSessionHelper.getCurrentPrincipal(requestContext);
 
         if (!currentPrincipal.isPresent()) {
-            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
-                    INVALID_SESSION_MESSAGE);
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED, INVALID_SESSION_MESSAGE);
         }
 
         final String identityName = currentPrincipal.get().getName();
         final Set<String> permissions = this.userAdminHelper.getIdentityPermissions(identityName);
-        final boolean needsPasswordChange = this.userAdminHelper
-                .isPasswordChangeRequired(identityName);
+        final boolean needsPasswordChange = this.userAdminHelper.isPasswordChangeRequired(identityName);
 
         return new IdentityInfoDTO(identityName, needsPasswordChange, permissions);
     }
@@ -269,8 +272,7 @@ public class SessionRestService {
         final Map<String, Object> httpServiceConfig = ConfigurationAdminHelper
                 .loadHttpServiceConfigurationProperties(configAdmin);
 
-        final Set<Integer> httpsClientAuthPorts = ConfigurationAdminHelper
-                .getHttpsMutualAuthPorts(httpServiceConfig);
+        final Set<Integer> httpsClientAuthPorts = ConfigurationAdminHelper.getHttpsMutualAuthPorts(httpServiceConfig);
 
         if (!httpsClientAuthPorts.isEmpty()) {
             return new AuthenticationInfoDTO(isPasswordAuthEnabled, true, httpsClientAuthPorts, message);
@@ -299,8 +301,7 @@ public class SessionRestService {
     }
 
     private AuthenticationResponseDTO buildAuthenticationResponse(final String username) {
-        final boolean needsPasswordChange = this.userAdminHelper
-                .isPasswordChangeRequired(username);
+        final boolean needsPasswordChange = this.userAdminHelper.isPasswordChangeRequired(username);
 
         return new AuthenticationResponseDTO(needsPasswordChange);
     }
@@ -309,23 +310,29 @@ public class SessionRestService {
         final AuditContext auditContext = AuditContext.currentOrInternal();
 
         switch (e.getReason()) {
-            case INCORRECT_PASSWORD:
-            case USER_NOT_FOUND:
-                auditLogger.warn(AUDIT_FORMAT_STRING, auditContext, BAD_USERNAME_OR_PASSWORD_MESSAGE);
-                throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
-                        BAD_USERNAME_OR_PASSWORD_MESSAGE);
-            case PASSWORD_CHANGE_WITH_SAME_PASSWORD:
-                auditLogger.warn(AUDIT_FORMAT_STRING, auditContext, PASSWORD_CHANGE_SAME_PASSWORD_MESSAGE);
-                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
-                        PASSWORD_CHANGE_SAME_PASSWORD_MESSAGE);
-            case USER_NOT_IN_ROLE:
-                auditLogger.warn(AUDIT_FORMAT_STRING, auditContext, IDENTITY_NOT_IN_ROLE_MESSAGE);
-                throw DefaultExceptionHandler.buildWebApplicationException(Status.FORBIDDEN,
-                        IDENTITY_NOT_IN_ROLE_MESSAGE);
-            default:
-                throw DefaultExceptionHandler.buildWebApplicationException(Status.INTERNAL_SERVER_ERROR,
-                        "An internal error occurred");
+        case INCORRECT_PASSWORD:
+        case USER_NOT_FOUND:
+            auditLogger.warn(AUDIT_FORMAT_STRING, auditContext, BAD_USERNAME_OR_PASSWORD_MESSAGE);
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
+                    BAD_USERNAME_OR_PASSWORD_MESSAGE);
+        case PASSWORD_CHANGE_WITH_SAME_PASSWORD:
+            auditLogger.warn(AUDIT_FORMAT_STRING, auditContext, PASSWORD_CHANGE_SAME_PASSWORD_MESSAGE);
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                    PASSWORD_CHANGE_SAME_PASSWORD_MESSAGE);
+        case USER_NOT_IN_ROLE:
+            auditLogger.warn(AUDIT_FORMAT_STRING, auditContext, IDENTITY_NOT_IN_ROLE_MESSAGE);
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.FORBIDDEN, IDENTITY_NOT_IN_ROLE_MESSAGE);
+        default:
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.INTERNAL_SERVER_ERROR,
+                    "An internal error occurred");
         }
     }
 
+    private void invalidateCurrentSession(final HttpServletRequest request) {
+        final HttpSession currentSession = request.getSession(false);
+
+        if (currentSession != null) {
+            currentSession.invalidate();
+        }
+    }
 }

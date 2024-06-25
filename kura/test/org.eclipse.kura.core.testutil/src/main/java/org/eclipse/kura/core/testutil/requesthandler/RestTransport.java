@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -191,8 +191,8 @@ public class RestTransport implements Transport {
 
     private void setCookies(final String urlPrefix, final String relativeUri, final HttpURLConnection connection)
             throws IOException, URISyntaxException {
-        for (final Entry<String, List<String>> e : cookieManager.get(new URI(urlPrefix + relativeUri),
-                connection.getRequestProperties()).entrySet()) {
+        for (final Entry<String, List<String>> e : cookieManager
+                .get(new URI(urlPrefix + relativeUri), connection.getRequestProperties()).entrySet()) {
             if (!e.getValue().isEmpty()) {
                 connection.setRequestProperty(e.getKey(), e.getValue().stream().collect(Collectors.joining(",")));
             }

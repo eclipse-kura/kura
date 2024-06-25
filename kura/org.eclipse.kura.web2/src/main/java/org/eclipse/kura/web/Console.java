@@ -377,7 +377,10 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
             existingSession.invalidate();
         }
 
-        return createSession(request);
+        final HttpSession newSession = createSession(request);
+        request.changeSessionId();
+
+        return newSession;
     }
 
     public HttpSession createSession(final HttpServletRequest request) {

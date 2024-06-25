@@ -45,6 +45,7 @@ public class RestSessionHelper {
         }
 
         final HttpSession newSession = request.getSession(true);
+        request.changeSessionId();
 
         newSession.setAttribute(SessionAttributes.AUTORIZED_USER.getValue(), user);
         updateLastActivity(newSession);
@@ -52,8 +53,7 @@ public class RestSessionHelper {
         final Optional<Integer> credentialsHash = userAdminHelper.getCredentialsHash(user);
 
         if (credentialsHash.isPresent()) {
-            newSession.setAttribute(SessionAttributes.CREDENTIALS_HASH.getValue(),
-                    credentialsHash.get());
+            newSession.setAttribute(SessionAttributes.CREDENTIALS_HASH.getValue(), credentialsHash.get());
         }
 
         getOrCreateXsrfToken(newSession);
@@ -95,8 +95,7 @@ public class RestSessionHelper {
     }
 
     public boolean credentialsChanged(final HttpSession session, final String userName) {
-        return !Objects.equals(
-                session.getAttribute(SessionAttributes.CREDENTIALS_HASH.getValue()),
+        return !Objects.equals(session.getAttribute(SessionAttributes.CREDENTIALS_HASH.getValue()),
                 userAdminHelper.getCredentialsHash(userName).orElse(null));
     }
 
@@ -123,8 +122,7 @@ public class RestSessionHelper {
     }
 
     public Optional<String> getXsrfToken(final HttpSession httpSession) {
-        return Optional
-                .ofNullable(httpSession.getAttribute(SessionAttributes.XSRF_TOKEN.getValue()))
+        return Optional.ofNullable(httpSession.getAttribute(SessionAttributes.XSRF_TOKEN.getValue()))
                 .flatMap(t -> t instanceof String ? Optional.of((String) t) : Optional.empty());
     }
 

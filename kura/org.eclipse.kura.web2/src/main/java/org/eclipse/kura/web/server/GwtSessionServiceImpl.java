@@ -151,7 +151,8 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
         }
 
-        setAuthenticated(session, username);
+        final HttpSession newSession = Console.instance().createNewSession(request);
+        setAuthenticated(newSession, username);
     }
 
     private String getSessionUsername(HttpSession session) throws GwtKuraException {

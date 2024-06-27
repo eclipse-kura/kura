@@ -163,7 +163,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                         Certificate[] chain = pke.getCertificateChain();
 
                         if (chain.length > 0) {
-                            Certificate leaf = chain[chain.length - 1];
+                            Certificate leaf = chain[0];
 
                             if (leaf instanceof X509Certificate) {
                                 validityStartDate = ((X509Certificate) leaf).getNotBefore();
@@ -178,7 +178,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                                 Certificate cert = chain[i];
                                 if (cert instanceof X509Certificate) {
                                     X509Certificate x509Cert = CertificateUtil.toJavaX509Certificate(cert);
-                                    distinguishedNames.add(index + x509Cert.getSubjectX500Principal().getName());
+                                    distinguishedNames.add(index + x509Cert.getSubjectX500Principal().toString());
                                 }
                             }
                         }
@@ -192,7 +192,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                             validityEndDate = ((X509Certificate) cert).getNotAfter();
 
                             X509Certificate x509Cert = CertificateUtil.toJavaX509Certificate(cert);
-                            distinguishedNames.add(x509Cert.getSubjectX500Principal().getName());
+                            distinguishedNames.add(x509Cert.getSubjectX500Principal().toString());
                         }
                     } else if (e.getValue() instanceof SecretKeyEntry) {
                         kind = Kind.SECRET_KEY;

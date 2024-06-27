@@ -4,9 +4,9 @@
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Areti
@@ -180,7 +180,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         initListBoxes();
         initTextBoxes();
     }
-    
+
     public String getStatus() {
         return this.status.getSelectedItemText();
     }
@@ -594,6 +594,17 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     public void setNetInterface(GwtNetInterfaceConfig config) {
         setDirty(true);
         this.selectedNetIfConfig = Optional.of(config);
+        updateStatusValues();
+    }
+
+    private void updateStatusValues() {
+        this.status.clear();
+        this.status.addItem(MessageUtils.get(STATUS_DISABLED), STATUS_DISABLED);
+        if (this.selectedNetIfConfig.isPresent()
+                && this.selectedNetIfConfig.get().getHwTypeEnum() != GwtNetIfType.MODEM) {
+            this.status.addItem(MessageUtils.get(STATUS_LAN), STATUS_LAN);
+        }
+        this.status.addItem(MessageUtils.get(STATUS_WAN), STATUS_WAN);
     }
 
     @Override

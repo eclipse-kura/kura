@@ -1,4 +1,4 @@
-Eclipse Kura - 5.5.0 - June 2024
+Eclipse Kura - 5.5.0 - July 2024
 -------------------------------------------------------------------------------------------------
 Description:
 This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces APIs support for Containers signature verification and enforcement.
@@ -59,6 +59,13 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * ed6915cfb9 - Fixed Keypair validity display to link only the leaf [backport release-5.5.0] (#5303) (github-actions[bot])
+  * 23e22f7735 - Fixed wrong IPv6 status for modem interfaces [backport release-5.5.0] (#5299) (github-actions[bot])
+  * 781591d167 - [nm] Fixed dnsmasq behavior on configuration change [backport release-5.5.0] (#5301) (github-actions[bot])
+  * d4969a7fd0 - Added a check to not display the automatic option for the old networking [backport release-5.5.0] (#5297) (github-actions[bot])
+  * 01b2ea6c48 - Always generate new session id on login [backport release-5.5.0] (#5293) (github-actions[bot])
+  * 7e0368d07a - [web2] Removed handler from button in certificate import form (#5… (#5286) (Pierantonio Merlino)
+  * 254b4b33da - fixed null in wi-fi frontend and missing wi-fi update on IPv6 [backport release-5.5.0] (#5292) (github-actions[bot])
   * d6d326c8d7 - [distrib] customize-installation.sh to always patch interface names on snapshot_0.xml and iptables [backport release-5.5.0] (#5278) (github-actions[bot])
   * 3d2e6a3dcc - [rest.identity] fixed status codes and error messages for malformed requests [backport release-5.5.0] (#5279) (github-actions[bot])
   * e4e5477af2 - [nm] Avoid querying wifi ap for info if it is not available anymore [backport release-5.5.0] (#5271) (github-actions[bot])
@@ -190,6 +197,15 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * ed6915cfb9 - fix: Fixed Keypair validity display to link only the leaf [backport release-5.5.0] (#5303) (github-actions[bot])
+  * c30ff1776a - chore: Improved Web UI identity messages [backport release-5.5.0] (#5302) (github-actions[bot])
+  * 23e22f7735 - fix: Fixed wrong IPv6 status for modem interfaces [backport release-5.5.0] (#5299) (github-actions[bot])
+  * 781591d167 - fix(nm): Fixed dnsmasq behavior on configuration change [backport release-5.5.0] (#5301) (github-actions[bot])
+  * d4969a7fd0 - fix: Added a check to not display the automatic option for the old networking [backport release-5.5.0] (#5297) (github-actions[bot])
+  * 01b2ea6c48 - fix: Always generate new session id on login [backport release-5.5.0] (#5293) (github-actions[bot])
+  * 7e0368d07a - fix(web2): Removed handler from button in certificate import form (#5… (#5286) (Pierantonio Merlino)
+  * 254b4b33da - fix: fixed null in wi-fi frontend and missing wi-fi update on IPv6 [backport release-5.5.0] (#5292) (github-actions[bot])
+  * cea7441dbd - chore: add Kura 5.5.0 release notes (#5283) (github-actions[bot])
   * d6d326c8d7 - fix(distrib): customize-installation.sh to always patch interface names on snapshot_0.xml and iptables [backport release-5.5.0] (#5278) (github-actions[bot])
   * 3d2e6a3dcc - fix(rest.identity): fixed status codes and error messages for malformed requests [backport release-5.5.0] (#5279) (github-actions[bot])
   * e4e5477af2 - fix(nm): Avoid querying wifi ap for info if it is not available anymore [backport release-5.5.0] (#5271) (github-actions[bot])

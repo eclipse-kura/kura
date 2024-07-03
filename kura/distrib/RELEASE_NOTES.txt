@@ -59,6 +59,7 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * ba1a7169d8 - Update web2 audit context on session id change [backport release-5.5.0] (#5307) (github-actions[bot])
   * ed6915cfb9 - Fixed Keypair validity display to link only the leaf [backport release-5.5.0] (#5303) (github-actions[bot])
   * 23e22f7735 - Fixed wrong IPv6 status for modem interfaces [backport release-5.5.0] (#5299) (github-actions[bot])
   * 781591d167 - [nm] Fixed dnsmasq behavior on configuration change [backport release-5.5.0] (#5301) (github-actions[bot])
@@ -197,6 +198,8 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * ba1a7169d8 - fix: Update web2 audit context on session id change [backport release-5.5.0] (#5307) (github-actions[bot])
+  * 31726a4786 - chore: add Kura 5.5.0 release notes (#5304) (github-actions[bot])
   * ed6915cfb9 - fix: Fixed Keypair validity display to link only the leaf [backport release-5.5.0] (#5303) (github-actions[bot])
   * c30ff1776a - chore: Improved Web UI identity messages [backport release-5.5.0] (#5302) (github-actions[bot])
   * 23e22f7735 - fix: Fixed wrong IPv6 status for modem interfaces [backport release-5.5.0] (#5299) (github-actions[bot])

@@ -75,6 +75,7 @@ import org.eclipse.kura.web.server.servlet.SkinServlet;
 import org.eclipse.kura.web.server.servlet.SslAuthenticationServlet;
 import org.eclipse.kura.web.server.servlet.WiresBlinkServlet;
 import org.eclipse.kura.web.server.servlet.WiresSnapshotServlet;
+import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.session.BaseSecurityHandler;
 import org.eclipse.kura.web.session.CreateSessionSecurityHandler;
@@ -380,6 +381,8 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         final HttpSession newSession = createSession(request);
         request.changeSessionId();
 
+        updateAuditContext(newSession);
+
         return newSession;
     }
 
@@ -389,7 +392,22 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         session.setMaxInactiveInterval(this.sessionMaxInactiveInterval * 60);
         session.setAttribute(Attributes.LAST_ACTIVITY.getValue(), System.currentTimeMillis());
 
+        updateAuditContext(session);
+
         return session;
+    }
+
+    private void updateAuditContext(final HttpSession session) {
+        final String id = GwtServerUtil.getSessionIdHash(session);
+
+        AuditContext.currentOrInternal().getProperties().put("session.id", id);
+
+        final Object sessionAuditContext = session.getAttribute(Attributes.AUDIT_CONTEXT.getValue());
+
+        if (sessionAuditContext instanceof AuditContext) {
+            ((AuditContext) sessionAuditContext).getProperties().put("session.id", id);
+        }
+
     }
 
     final Set<String> authenticationPaths = new HashSet<>(Arrays.asList(AUTH_PATH, PASSWORD_AUTH_PATH, CERT_AUTH_PATH));

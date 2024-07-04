@@ -205,3 +205,15 @@ Contributing
 ------------
 
 Contributing to Eclipse Kura™ is fun and easy! To start contributing you can follow our guide [here](CONTRIBUTING.md).
+
+### Acknowledgments
+
+![YourKit Logo](https://www.yourkit.com/images/yklogo.png)
+
+Thanks to YourKit for providing us an open source license of YourKit Java Profiler!
+
+YourKit supports open source projects with innovative and intelligent tools
+for monitoring and profiling Java and .NET applications.
+YourKit is the creator of [YourKit Java Profiler](https://www.yourkit.com/java/profiler/),
+[YourKit .NET Profiler](https://www.yourkit.com/.net/profiler/),
+and [YourKit YouMonitor](https://www.yourkit.com/youmonitor/).

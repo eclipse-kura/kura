@@ -93,43 +93,53 @@ following steps:
     | L1 Locale       	| it_IT.UTF-8 UTF-8 	|
     | L4 WLAN Country 	| IT Italy          	|
 
-7. (Optional) Configure the GPIO replacing the content of the file `/opt/eclise/kura/framework/jdk.dio.properties` with the following text:
+7. (Optional) To correctly use the GPIO pins, the user is asked to update the `jdk.dio.properties` file with the proper configuration, based on its own device.
+
+    This is required since the `sysfs` interface has been derecated, and some OS distribution may have already suppressed it. Moreover, the kernel complains if a static base number is assigned to a GPIO controller: indeed, when it assigns the numbers automatically, it usually starts from 511. More information can be found [here](https://forums.raspberrypi.com/viewtopic.php?t=359302).
+    
+    In order to set the correct configuration the user can perform the following steps:
+    
+    - Execute on the device the command `cat /sys/kernel/debug/gpio`, looking for entries similar to `gpio-ABC (GPIxx)`: from this information it is possible to retrieve which number the GPIO controller was assigned to by the OS (in this case the GPIO controller number `xx` is assigned with the number `ABC`). The image below represent an example of this file
+
+    ![Kernel Debug GPIO](./images/kernel-debug-gpio.png)
+
+    - Modify the `/opt/eclipse/kura/framework/jdk.dio.properties` with the number and controllers found in the previous step:
 
     ```
-    0 = deviceType: gpio.GPIOPin, pinNumber:0, name:GPIO0
-    1 = deviceType: gpio.GPIOPin, pinNumber:1, name:GPIO1
-    2 = deviceType: gpio.GPIOPin, pinNumber:2, name:GPI02
-    3 = deviceType: gpio.GPIOPin, pinNumber:3, name:GPIO3
-    4 = deviceType: gpio.GPIOPin, pinNumber:4, name:GPIO4
-    5 = deviceType: gpio.GPIOPin, pinNumber:5, name:GPIO5
-    6 = deviceType: gpio.GPIOPin, pinNumber:6, name:GPIO6
-    7 = deviceType: gpio.GPIOPin, pinNumber:7, name:GPIO7
-    8 = deviceType: gpio.GPIOPin, pinNumber:8, name:GPIO8
-    9 = deviceType: gpio.GPIOPin, pinNumber:9, name:GPIO9
-    10 = deviceType: gpio.GPIOPin, pinNumber:10, name:GPIO10
-    11 = deviceType: gpio.GPIOPin, pinNumber:11, name:GPIO11
-    12 = deviceType: gpio.GPIOPin, pinNumber:12, name:GPIO12
-    13 = deviceType: gpio.GPIOPin, pinNumber:13, name:GPIO13
-    14 = deviceType: gpio.GPIOPin, pinNumber:14, name:GPIO14
-    15 = deviceType: gpio.GPIOPin, pinNumber:14, name:GPIO15
-    16 = deviceType: gpio.GPIOPin, pinNumber:16, name:GPIO16
-    17 = deviceType: gpio.GPIOPin, pinNumber:17, name:GPIO17
-    18 = deviceType: gpio.GPIOPin, pinNumber:18, name:GPIO18
-    19 = deviceType: gpio.GPIOPin, pinNumber:19, name:GPIO19
-    20 = deviceType: gpio.GPIOPin, pinNumber:20, name:GPIO20
-    21 = deviceType: gpio.GPIOPin, pinNumber:21, name:GPIO21
-    22 = deviceType: gpio.GPIOPin, pinNumber:22, name:GPIO22
-    23 = deviceType: gpio.GPIOPin, pinNumber:23, name:GPIO23
-    24 = deviceType: gpio.GPIOPin, pinNumber:24, name:GPIO24
-    25 = deviceType: gpio.GPIOPin, pinNumber:25, name:GPIO25
-    26 = deviceType: gpio.GPIOPin, pinNumber:26, name:GPIO26
-    27 = deviceType: gpio.GPIOPin, pinNumber:27, name:GPIO27
+    573 = deviceType: gpio.GPIOPin, pinNumber:573, name:GPI02
+    574 = deviceType: gpio.GPIOPin, pinNumber:574, name:GPIO3
+    575 = deviceType: gpio.GPIOPin, pinNumber:575, name:GPIO4
+    576 = deviceType: gpio.GPIOPin, pinNumber:576, name:GPIO5
+    577 = deviceType: gpio.GPIOPin, pinNumber:577, name:GPIO6
+    578 = deviceType: gpio.GPIOPin, pinNumber:578, name:GPIO7
+    579 = deviceType: gpio.GPIOPin, pinNumber:579, name:GPIO8
+    580 = deviceType: gpio.GPIOPin, pinNumber:580, name:GPIO9
+    581 = deviceType: gpio.GPIOPin, pinNumber:581, name:GPIO10
+    582 = deviceType: gpio.GPIOPin, pinNumber:582, name:GPIO11
+    583 = deviceType: gpio.GPIOPin, pinNumber:583, name:GPIO12
+    584 = deviceType: gpio.GPIOPin, pinNumber:584, name:GPIO13
+    585 = deviceType: gpio.GPIOPin, pinNumber:585, name:GPIO14
+    586 = deviceType: gpio.GPIOPin, pinNumber:586, name:GPIO15
+    587 = deviceType: gpio.GPIOPin, pinNumber:587, name:GPIO16
+    588 = deviceType: gpio.GPIOPin, pinNumber:588, name:GPIO17
+    589 = deviceType: gpio.GPIOPin, pinNumber:589, name:GPIO18
+    590 = deviceType: gpio.GPIOPin, pinNumber:590, name:GPIO19
+    591 = deviceType: gpio.GPIOPin, pinNumber:591, name:GPIO20
+    592 = deviceType: gpio.GPIOPin, pinNumber:592, name:GPIO21
+    593 = deviceType: gpio.GPIOPin, pinNumber:593, name:GPIO22
+    594 = deviceType: gpio.GPIOPin, pinNumber:594, name:GPIO23
+    595 = deviceType: gpio.GPIOPin, pinNumber:595, name:GPIO24
+    596 = deviceType: gpio.GPIOPin, pinNumber:596, name:GPIO25
+    597 = deviceType: gpio.GPIOPin, pinNumber:597, name:GPIO26
+    598 = deviceType: gpio.GPIOPin, pinNumber:598, name:GPIO27
 
     gpio.GPIOPin = initValue:0, deviceNumber:0, direction:3, mode:-1, trigger:3
     uart.UART = baudRate:19200, parity:0, dataBits:8, stopBits:1, flowControl:0
     ```
 
-    You can check your GPIO device configuration executing the command `pinout`
+    You can also check your GPIO device configuration executing the command `pinout`
+
+
 
 8. Reboot the Raspberry Pi with:
 

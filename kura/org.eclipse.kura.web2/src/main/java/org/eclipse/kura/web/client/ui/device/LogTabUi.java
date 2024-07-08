@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.device;
 
+import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -35,7 +36,9 @@ import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.Row;
-
+import org.gwtbootstrap3.extras.datepicker.client.ui.DatePicker;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -85,12 +88,22 @@ public class LogTabUi extends Composite {
     CheckBox showMoreInfoCheckbox;
     @UiField
     Button openNewWindow;
+    @UiField
+    DatePicker datePickerJournalFrom;
+    @UiField
+    DatePicker datePickerJournalTo;
+    @UiField
+    FormLabel datePickerJournalLabelFrom;
+    @UiField
+    FormLabel datePickerJournalLabelTo;
 
     private static final int CACHE_SIZE_LIMIT = 1500;
     private final LinkedList<GwtLogEntry> logs = new LinkedList<>();
     private boolean hasLogProvider = false;
     private boolean autoFollow = true;
     private boolean initialized = false;
+
+    private final DateTimeFormat iso8601DateFormat = DateTimeFormat.getFormat("yyyy-MM-dd");
 
     private final String nonce = Integer.toString(Random.nextInt());
 
@@ -131,8 +144,9 @@ public class LogTabUi extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
 
         this.logLabel.setText(MSGS.logDownload());
+        this.datePickerJournalLabelFrom.setText(MSGS.logDateFrom());
+        this.datePickerJournalLabelTo.setText(MSGS.logDateTo());
 
-        this.execute.setText(MSGS.download());
         this.execute.addClickHandler(
                 event -> LogTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
@@ -144,7 +158,17 @@ public class LogTabUi extends Composite {
                     @Override
                     public void onSuccess(GwtXSRFToken token) {
                         final StringBuilder sbUrl = new StringBuilder();
-                        sbUrl.append("/log?nonce=").append(LogTabUi.this.nonce);
+                        sbUrl.append("/log?nonce=") //
+                                .append(LogTabUi.this.nonce);
+                        if (datePickerJournalFrom.getValue() != null) {
+                            sbUrl.append("&dateJournalFrom=")
+                                    .append(iso8601DateFormat.format(datePickerJournalFrom.getValue()));
+                        }
+                        if (datePickerJournalTo.getValue() != null) {
+                            sbUrl.append("&dateJournalTo=")
+                                    .append(iso8601DateFormat.format(datePickerJournalTo.getValue()));
+                        }
+
                         DownloadHelper.instance().startDownload(token, sbUrl.toString());
 
                         EntryClassUi.showWaitModal();

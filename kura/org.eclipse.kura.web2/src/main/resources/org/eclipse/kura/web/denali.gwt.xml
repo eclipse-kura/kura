@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-  Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+  Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
 
   This program and the accompanying materials are made
   available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,7 @@
 -->
 <module rename-to='denali'>
 
-  <!-- Inherit the core Web Toolkit stuff.                        -->
+  <!-- Inherit the core Web Toolkit stuff. -->
   <inherits name='com.google.gwt.user.User' />
 
   <inherits name="com.google.gwt.logging.Logging" />
@@ -38,6 +38,7 @@
 
   <!-- Other module inherits                                      -->
   <inherits name='org.gwtbootstrap3.GwtBootstrap3'/>
+  <inherits name="org.gwtbootstrap3.extras.datepicker.DatePicker" />
   <inherits name="com.google.gwt.i18n.I18N"/>
   <inherits name="com.google.gwt.http.HTTP" />
 
@@ -52,7 +53,7 @@
 
   <!--<set-property name='user.agent' value='safari'/>-->
   <!--<set-property name='user.agent' value='gecko1_8' />-->
-  <set-property name="user.agent" value="gecko1_8,safari"/>
+  <set-property name="user.agent" value="gecko1_8"/>
 
   <!-- Specify the paths for translatable code                    -->
   <source path='client' />

@@ -22,9 +22,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -48,6 +51,8 @@ import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gwt.i18n.client.LocaleInfo;
 
 public class LogServlet extends AuditServlet {
 
@@ -112,16 +117,25 @@ public class LogServlet extends AuditServlet {
             }
         });
 
+        String dateJournalFrom = httpServletRequest.getParameter("dateJournalFrom");
+        String dateJournalTo = httpServletRequest.getParameter("dateJournalTo");
+
+        Optional<LocalDate> fromDate = dateJournalFrom != null ? Optional.of(LocalDate.parse(dateJournalFrom))
+                : Optional.empty();
+        Optional<LocalDate> toDate = dateJournalTo != null ? Optional.of(LocalDate.parse(dateJournalTo))
+                : Optional.empty();
+        ;
+
         String outputFields = ss.getProperties().getProperty("kura.log.download.journal.fields",
                 "SYSLOG_IDENTIFIER,PRIORITY,MESSAGE,STACKTRACE");
 
-        if (writeJournalLog(pes, outputFields, KURA_JOURNAL_LOG_FILE, "kura")) {
+        if (writeJournalLog(pes, outputFields, KURA_JOURNAL_LOG_FILE, "kura", fromDate, toDate)) {
             fileList.add(new File(KURA_JOURNAL_LOG_FILE));
         } else {
             logger.warn("Error producing: {}", KURA_JOURNAL_LOG_FILE);
         }
 
-        if (writeJournalLog(pes, outputFields, SYSTEM_JOURNAL_LOG_FILE)) {
+        if (writeJournalLog(pes, outputFields, SYSTEM_JOURNAL_LOG_FILE, fromDate, toDate)) {
             fileList.add(new File(SYSTEM_JOURNAL_LOG_FILE));
         } else {
             logger.warn("Error producing: {}", SYSTEM_JOURNAL_LOG_FILE);
@@ -180,12 +194,13 @@ public class LogServlet extends AuditServlet {
         }
     }
 
-    private boolean writeJournalLog(PrivilegedExecutorService pes, String outputFields, String outputFile) {
-        return writeJournalLog(pes, outputFields, outputFile, null);
+    private boolean writeJournalLog(PrivilegedExecutorService pes, String outputFields, String outputFile,
+            Optional<LocalDate> from, Optional<LocalDate> to) {
+        return writeJournalLog(pes, outputFields, outputFile, null, from, to);
     }
 
-    private boolean writeJournalLog(PrivilegedExecutorService pes, String outputFields, String outputFile,
-            String unit) {
+    private boolean writeJournalLog(PrivilegedExecutorService pes, String outputFields, String outputFile, String unit,
+            Optional<LocalDate> from, Optional<LocalDate> to) {
 
         List<String> commandSequence = new ArrayList<>();
 
@@ -195,6 +210,16 @@ public class LogServlet extends AuditServlet {
         if (!isNull(unit)) {
             commandSequence.add("-u");
             commandSequence.add(unit);
+        }
+
+        if (from.isPresent()) {
+            commandSequence.add("-S");
+            commandSequence.add(from.get().toString());
+        }
+
+        if (to.isPresent()) {
+            commandSequence.add("-U");
+            commandSequence.add(to.get().toString());
         }
 
         commandSequence.add("-o");

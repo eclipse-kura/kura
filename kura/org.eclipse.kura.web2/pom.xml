@@ -1,193 +1,199 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
 
-	SPDX-License-Identifier: EPL-2.0
+    SPDX-License-Identifier: EPL-2.0
 
-	Contributors:
-	 Eurotech
+    Contributors:
+     Eurotech
      Red Hat Inc
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.eclipse.kura</groupId>
-		<artifactId>kura</artifactId>
-		<version>5.5.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>kura</artifactId>
+        <version>5.5.0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>org.eclipse.kura.web2</artifactId>
-	<version>2.5.0-SNAPSHOT</version>
-	<packaging>eclipse-plugin</packaging>
+    <artifactId>org.eclipse.kura.web2</artifactId>
+    <version>2.5.0-SNAPSHOT</version>
+    <packaging>eclipse-plugin</packaging>
 
-	<properties>
-		<kura.basedir>${project.basedir}/..</kura.basedir>
-		<!-- Convenience property to set the GWT version -->
-		<gwtVersion>2.10.0</gwtVersion>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+    <properties>
+        <kura.basedir>${project.basedir}/..</kura.basedir>
+        <!-- Convenience property to set the GWT version -->
+        <gwtVersion>2.10.0</gwtVersion>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.eclipse.kura</groupId>
-			<artifactId>org.eclipse.kura.web2.ext</artifactId>
-			<version>1.5.0-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.web2.ext</artifactId>
+            <version>1.5.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.gwtbootstrap3</groupId>
+            <artifactId>gwtbootstrap3-extras</artifactId>
+            <version>1.0.2</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<!-- Generate compiled stuff in the folder used for developing mode -->
-		<extensions>
-			<extension>
-				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-ssh</artifactId>
-				<version>1.0-beta-6</version>
-			</extension>
-		</extensions>
- 		<plugins>
- 			<plugin>
-        		<groupId>org.apache.maven.plugins</groupId>
-        		<artifactId>maven-checkstyle-plugin</artifactId>
-        		<configuration>
-        			<skip>true</skip>
-        		</configuration>
-        	</plugin>
-			<!-- Remove CSS on clean -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-clean-plugin</artifactId>
-				<version>2.4.1</version>
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>src/main/webapp/denali</directory>
-						</fileset>
-						<fileset>
-							<directory>src/main/webapp/WEB-INF</directory>
-						</fileset>
-					</filesets>
-				</configuration>
-			</plugin>
-			<!-- GWT Maven Plugin -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>gwt-maven-plugin</artifactId>
-				<version>${gwtVersion}</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>compile</goal>
-							<goal>test</goal>
-							<goal>i18n</goal>
-							<goal>generateAsync</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<style>OBF</style> <!-- DETAILED https://support.google.com/code/answer/55203?topic=10212 -->
-					<failOnError>true</failOnError>
-					<extraJvmArgs>-Xmx2048M -Xss1024k -XX:+UseParallelGC</extraJvmArgs>
-					<localWorkers>2</localWorkers>
-					<runTarget>denali.html</runTarget>
-					<i18nMessagesBundle>org.eclipse.kura.web.client.messages.Messages</i18nMessagesBundle>
-					<i18nConstantsWithLookupBundle>org.eclipse.kura.web.client.messages.ValidationMessages</i18nConstantsWithLookupBundle>
-					<outputDirectory>src/main/webapp</outputDirectory>
-				</configuration>
-			</plugin>
+    <build>
+        <!-- Generate compiled stuff in the folder used for developing mode -->
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh</artifactId>
+                <version>1.0-beta-6</version>
+            </extension>
+        </extensions>
+         <plugins>
+             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <!-- Remove CSS on clean -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.4.1</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>src/main/webapp/denali</directory>
+                        </fileset>
+                        <fileset>
+                            <directory>src/main/webapp/WEB-INF</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+            <!-- GWT Maven Plugin -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <version>${gwtVersion}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>test</goal>
+                            <goal>i18n</goal>
+                            <goal>generateAsync</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <style>OBF</style> <!-- DETAILED https://support.google.com/code/answer/55203?topic=10212 -->
+                    <failOnError>true</failOnError>
+                    <extraJvmArgs>-Xmx2048M -Xss1024k -XX:+UseParallelGC</extraJvmArgs>
+                    <localWorkers>2</localWorkers>
+                    <runTarget>denali.html</runTarget>
+                    <i18nMessagesBundle>org.eclipse.kura.web.client.messages.Messages</i18nMessagesBundle>
+                    <i18nConstantsWithLookupBundle>org.eclipse.kura.web.client.messages.ValidationMessages</i18nConstantsWithLookupBundle>
+                    <outputDirectory>src/main/webapp</outputDirectory>
+                </configuration>
+            </plugin>
 
-			<!-- Copy static web files before executing gwt:run -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>3.3.2</version>
-				<executions>
-					<execution>
-						<phase>compile</phase>
-						<goals>
-							<goal>exploded</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<webappDirectory>${webappDirectory}</webappDirectory>
-					<archive>
-						<compress>false</compress>
-						<manifestFile>META-INF/MANIFEST.MF</manifestFile>
-					</archive>
-				</configuration>
-			</plugin>
+            <!-- Copy static web files before executing gwt:run -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.3.2</version>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>exploded</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <webappDirectory>${webappDirectory}</webappDirectory>
+                    <archive>
+                        <compress>false</compress>
+                        <manifestFile>META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
 
-			<plugin>
-			  <groupId>net.alchim31.maven</groupId>
-			  <artifactId>yuicompressor-maven-plugin</artifactId>
-			  <version>1.5.1</version>
-			  <configuration>
-			    <preProcessAggregates>true</preProcessAggregates>
-			    <aggregations>
-			      <aggregation>
-			        <insertNewLine>true</insertNewLine>
-			        <output>src/main/webapp/login.all.js</output>
-			        <inputDir>${basedir}/src/main/resources/org/eclipse/kura/web/js</inputDir>
-			        <includes>
-					    <include>extensions.js</include>
-			        </includes>
-			      </aggregation>
-			      <aggregation>
-			        <insertNewLine>true</insertNewLine>
-			        <output>src/main/webapp/denali.all.js</output>
-			        <inputDir>${basedir}/src/main/resources/org/eclipse/kura/web/js</inputDir>
-			        <includes>
-			          	<include>jquery.min.js</include>
-					    <include>lodash.min.js</include>
-					    <include>backbone.min.js</include>
-					    <include>joint.min.js</include>
-					    <include>joint.shapes.devs.js</include>
-					    <include>dnd_helper.js</include>
-					    <include>wires_composer.js</include>
-					    <include>wires_blink.js</include>
-					    <include>extensions.js</include>
-			        </includes>
-			      </aggregation>
-			      <aggregation>
-			        <insertNewLine>true</insertNewLine>
-			        <output>src/main/webapp/denali.all.css</output>
-			        <inputDir>${basedir}/src/main/resources/org/eclipse/kura/web/css</inputDir>
-			        <includes>
-			        	<include>joint.min.css</include>
-			          	<include>denali.css</include>
-			        </includes>
-			      </aggregation>
-			    </aggregations>
-			    <includes>
-			    	<include>denali.all.js</include>
-			    	<include>login.all.js</include>
-			    	<include>denali.all.css</include>
-			    </includes>
-			    <jswarn>false</jswarn>
-			    <nosuffix>false</nosuffix>
-			    <sourceDirectory>src/main/webapp/</sourceDirectory>
-			    <outputDirectory>src/main/webapp/</outputDirectory>
-			  </configuration>
-			  <executions>
-			    <execution>
-			      <id>compress_js_css</id>
-			      <phase>process-resources</phase>
-			      <goals>
-			        <goal>compress</goal>
-			      </goals>
-			    </execution>
-			  </executions>
-			</plugin>
+            <plugin>
+              <groupId>net.alchim31.maven</groupId>
+              <artifactId>yuicompressor-maven-plugin</artifactId>
+              <version>1.5.1</version>
+              <configuration>
+                <preProcessAggregates>true</preProcessAggregates>
+                <aggregations>
+                  <aggregation>
+                    <insertNewLine>true</insertNewLine>
+                    <output>src/main/webapp/login.all.js</output>
+                    <inputDir>${basedir}/src/main/resources/org/eclipse/kura/web/js</inputDir>
+                    <includes>
+                        <include>extensions.js</include>
+                    </includes>
+                  </aggregation>
+                  <aggregation>
+                    <insertNewLine>true</insertNewLine>
+                    <output>src/main/webapp/denali.all.js</output>
+                    <inputDir>${basedir}/src/main/resources/org/eclipse/kura/web/js</inputDir>
+                    <includes>
+                          <include>jquery.min.js</include>
+                        <include>lodash.min.js</include>
+                        <include>backbone.min.js</include>
+                        <include>joint.min.js</include>
+                        <include>joint.shapes.devs.js</include>
+                        <include>dnd_helper.js</include>
+                        <include>wires_composer.js</include>
+                        <include>wires_blink.js</include>
+                        <include>extensions.js</include>
+                    </includes>
+                  </aggregation>
+                  <aggregation>
+                    <insertNewLine>true</insertNewLine>
+                    <output>src/main/webapp/denali.all.css</output>
+                    <inputDir>${basedir}/src/main/resources/org/eclipse/kura/web/css</inputDir>
+                    <includes>
+                        <include>joint.min.css</include>
+                          <include>denali.css</include>
+                    </includes>
+                  </aggregation>
+                </aggregations>
+                <includes>
+                    <include>denali.all.js</include>
+                    <include>login.all.js</include>
+                    <include>denali.all.css</include>
+                </includes>
+                <jswarn>false</jswarn>
+                <nosuffix>false</nosuffix>
+                <sourceDirectory>src/main/webapp/</sourceDirectory>
+                <outputDirectory>src/main/webapp/</outputDirectory>
+              </configuration>
+              <executions>
+                <execution>
+                  <id>compress_js_css</id>
+                  <phase>process-resources</phase>
+                  <goals>
+                    <goal>compress</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
 
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
@@ -200,63 +206,63 @@
             </plugin>
 
 
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-packaging-plugin</artifactId>
-				<configuration>
-					<additionalFileSets>
-						<fileSet>
-							<directory>src/main/webapp</directory>
-							<prefix>www/</prefix>
-							<excludes>
-								<exclude>**/WEB-INF/**</exclude>
-								<exclude>**/gwt-unitCache/**/*</exclude>
-								<exclude>**/src/main/resources/**/js/*.js</exclude>
-								<exclude>**/src/main/resources/**/css/*.css</exclude>
-								<exclude>**/src/main/webapp/*.all.js</exclude>
-							</excludes>
-						</fileSet>
-					</additionalFileSets>
-				</configuration>
-			</plugin>
-		</plugins>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-packaging-plugin</artifactId>
+                <configuration>
+                    <additionalFileSets>
+                        <fileSet>
+                            <directory>src/main/webapp</directory>
+                            <prefix>www/</prefix>
+                            <excludes>
+                                <exclude>**/WEB-INF/**</exclude>
+                                <exclude>**/gwt-unitCache/**/*</exclude>
+                                <exclude>**/src/main/resources/**/js/*.js</exclude>
+                                <exclude>**/src/main/resources/**/css/*.css</exclude>
+                                <exclude>**/src/main/webapp/*.all.js</exclude>
+                            </excludes>
+                        </fileSet>
+                    </additionalFileSets>
+                </configuration>
+            </plugin>
+        </plugins>
 
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
+        <pluginManagement>
+            <plugins>
+                <!--This plugin's configuration is used to store Eclipse m2e settings
+                    only. It has no influence on the Maven build itself. -->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
 
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-war-plugin
-										</artifactId>
-										<versionRange>
-											[2.1.1,)
-										</versionRange>
-										<goals>
-											<goal>exploded</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.apache.maven.plugins
+                                        </groupId>
+                                        <artifactId>
+                                            maven-war-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [2.1.1,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>exploded</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

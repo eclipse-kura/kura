@@ -95,7 +95,7 @@ following steps:
 
 7. (Optional) To correctly use the GPIO pins, the user is asked to update the `jdk.dio.properties` file with the proper configuration, based on its own device.
 
-    This is required since the `sysfs` interface has been derecated, and some OS distribution may have already suppressed it. Moreover, the kernel complains if a static base number is assigned to a GPIO controller: indeed, when it assigns the numbers automatically, it usually starts from 511. More information can be found [here](https://forums.raspberrypi.com/viewtopic.php?t=359302).
+    This is required since the `sysfs` interface has been deprecated, and some OS distribution may have already suppressed it. Moreover, the kernel complains if a static base number is assigned to a GPIO controller: indeed, when it assigns the numbers automatically, it usually starts from 511. More information can be found [here](https://forums.raspberrypi.com/viewtopic.php?t=359302).
     
     In order to set the correct configuration the user can perform the following steps:
     
@@ -159,6 +159,6 @@ following steps:
 
     ![Proceed trusting the source](./images/untrusted_cert.png)
 
-    Once trusted the source, the user will be redirected to a login page where the following credentianls:
+    Once trusted the source, the user will be redirected to a login page where the following credentials:
     **username**: `admin`
     **password**: `admin`

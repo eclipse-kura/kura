@@ -57,8 +57,8 @@ This project leverages the following third party content.
 * maven/mavencentral/com.google.protobuf/protobuf-java/3.19.3, BSD-3-Clause, approved, clearlydefined
 * maven/mavencentral/com.h2database/h2/2.1.214, (EPL-1.0 AND MPL-2.0) AND (EPL-1.0 AND MPL-2.0 AND LGPL-3.0-or-later) AND BSD-3-Clause AND LicenseRef-Public-Domain, approved, #2713
 * maven/mavencentral/com.sun.xml.bind/jaxb-osgi/2.3.3, BSD-3-Clause, approved, ee4j.jaxb-impl
-* maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.core.jobs/0.10.0-3c97afeac, Apache-2.0, restricted, clearlydefined
-* maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.equinox.preferences/0.10.0-3c97afeac, Apache-2.0, restricted, clearlydefined
+* maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.core.jobs/0.10.0-3c97afeac, EPL-2.0, approved, eclipse.platform
+* maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.equinox.preferences/0.10.0-3c97afeac, EPL-2.0, approved, #7856
 * maven/mavencentral/commons-beanutils/commons-beanutils/1.9.3, Apache-2.0, approved, CQ12654
 * maven/mavencentral/commons-codec/commons-codec/1.16.1, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #9157
 * maven/mavencentral/commons-collections/commons-collections/3.2.2, Apache-2.0, approved, CQ10385

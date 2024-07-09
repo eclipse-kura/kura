@@ -21,11 +21,11 @@
 	<parent>
         <groupId>org.eclipse.kura.example</groupId>
         <artifactId>test</artifactId>
-        <version>5.5.0</version>
+        <version>5.5.1-SNAPSHOT</version>
     </parent>
 
 	<artifactId>org.eclipse.kura.example.identity.configuration.extension.test</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
     <packaging>eclipse-test-plugin</packaging>
 
     <properties>

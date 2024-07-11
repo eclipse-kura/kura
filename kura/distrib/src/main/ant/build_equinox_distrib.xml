@@ -147,21 +147,6 @@
                 </not>
             </and>
         </condition>
-        
-        <condition property="is.nvidia.jetson.nano">
-            <contains string="${build.name}" substring="nvidia-jetson-nano" />
-        </condition>
-
-        <condition property="is.nvidia.jetson.nano">
-            <contains string="${build.name}" substring="nvidia-jetson-nano" />
-        </condition>
-
-        <condition property="is.network.manager">
-            <contains string="${network.provider}" substring="network-manager" />
-        </condition>
-        <condition property="is.kura.network">
-            <contains string="${network.provider}" substring="kura-network" />
-        </condition>
 
         <copy file="src/main/resources/${build.name}/snapshot_0.xml"
             tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" failonerror="false" />
@@ -270,9 +255,6 @@
         <antcall target="linux-debian-config" />
         <antcall target="linux-redhat-config" />
         <antcall target="linux-systemd-config" />
-        <antcall target="ai-wire-config" />
-        <antcall target="nvidia-triton-server-config" />
-        <antcall target="linux-kura-network-config" />
         <antcall target="linux-network-manager-config" />
 
         <!-- Add mToolkit to config.ini -->
@@ -827,8 +809,6 @@ fi]]>
         <antcall target="linux-debian-jars" />
         <antcall target="linux-redhat-jars" />
         <antcall target="linux-systemd-jars" />
-        <antcall target="nvidia-jetson-nano-jars" />
-        <antcall target="linux-kura-network-jars" />
         <antcall target="linux-network-manager-jars" />
 
         <echo message="Building Kura Distribution for ${build.name}-jars..." />
@@ -1769,15 +1749,7 @@ fi]]>
         </propertyfile>
     </target>
 
-    <target name="linux-kura-network-config" if="is.kura.network" depends="linux-config">
-        <propertyfile
-            file="${project.build.directory}/${build.output.name}/config.ini">
-            <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar@5:start" />
-        </propertyfile>
-    </target>
-
-    <target name="linux-network-manager-config" if="is.network.manager" depends="linux-config">
+    <target name="linux-network-manager-config" depends="linux-config">
         <propertyfile
             file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
@@ -1821,22 +1793,6 @@ fi]]>
         </propertyfile>
     </target>
 
-    <target name="ai-wire-config" if="is.nvidia.jetson.nano">
-        <propertyfile
-            file="${project.build.directory}/${build.output.name}/config.ini">
-            <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.wire.ai.component.provider_${org.eclipse.kura.wire.ai.component.provider.version}.jar@4:start" />
-        </propertyfile>
-    </target>
-
-    <target name="nvidia-triton-server-config" if="is.nvidia.jetson.nano">
-        <propertyfile
-            file="${project.build.directory}/${build.output.name}/config.ini">
-            <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar@4:start" />
-        </propertyfile>
-    </target>
-
     <target name="event-publisher-config">
         <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
@@ -1865,16 +1821,7 @@ fi]]>
         </zip>
     </target>
 
-    <target name="linux-kura-network-jars" if="is.kura.network">
-        <zip destfile="${project.build.directory}/${build.output.name}.zip"
-            update="true">
-            <zipfileset
-                file="${project.build.directory}/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar"
-                prefix="${build.output.name}/${plugins.folder}" />
-        </zip>
-    </target>
-
-    <target name="linux-network-manager-jars" if="is.network.manager">
+    <target name="linux-network-manager-jars">
         <zip destfile="${project.build.directory}/${build.output.name}.zip"
             update="true">
             <zipfileset
@@ -1921,18 +1868,6 @@ fi]]>
             update="true">
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.linux.systemd.provider_${org.eclipse.kura.linux.systemd.provider.version}.jar"
-                prefix="${build.output.name}/${plugins.folder}" />
-        </zip>
-    </target>
-
-    <target name="nvidia-jetson-nano-jars" if="is.nvidia.jetson.nano">
-        <zip destfile="${project.build.directory}/${build.output.name}.zip"
-            update="true">
-            <zipfileset
-                file="${project.build.directory}/plugins/org.eclipse.kura.wire.ai.component.provider_${org.eclipse.kura.wire.ai.component.provider.version}.jar"
-                prefix="${build.output.name}/${plugins.folder}" />
-            <zipfileset
-                file="${project.build.directory}/plugins/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
         </zip>
     </target>

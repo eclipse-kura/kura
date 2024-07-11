@@ -42,8 +42,6 @@
         <kura.skip.can>true</kura.skip.can>
         <kura.skip.web>false</kura.skip.web>
         <kura.skip.examples>true</kura.skip.examples>
-        <kura.network.provider>kura-networking</kura.network.provider>
-        <!-- kura-networking or network-manager-->
 
         <!-- used for RPM uninstallation -->
         <kura.install.link>/opt/eclipse/kura</kura.install.link>
@@ -1220,7 +1218,6 @@
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <property name="network.provider" value="network-manager" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
@@ -1412,7 +1409,6 @@
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <property name="network.provider" value="network-manager" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
@@ -1604,7 +1600,6 @@
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <property name="network.provider" value="network-manager" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>

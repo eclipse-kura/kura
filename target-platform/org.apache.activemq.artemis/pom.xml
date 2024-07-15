@@ -103,7 +103,7 @@
                             org.jgroups.*;resolution:=optional,
                             *
                         </Import-Package>
-                        <_exportcontents>org.apache.*</_exportcontents>
+                        <_exportcontents>org.apache.*;version="${org.apache.activemq.artemis.upstream.version}"</_exportcontents>
                         <Require-Capability>
                             osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"
                         </Require-Capability>

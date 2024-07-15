@@ -63,7 +63,7 @@
                         <Bundle-NativeCode>
                             lib/libdkcomm.so; osname=Linux; processor=ARM
                         </Bundle-NativeCode>
-                        <Fragment-Host>org.eclipse.soda.dk.comm;bundle-version="[1.2.4,2.0.0)"</Fragment-Host>
+                        <Fragment-Host>org.eclipse.soda.dk.comm;bundle-version="[2.0.0,3.0.0)"</Fragment-Host>
                     </instructions>
                 </configuration>
             </plugin>

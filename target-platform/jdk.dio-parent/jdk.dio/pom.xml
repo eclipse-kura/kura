@@ -35,7 +35,7 @@
 				<version>${maven-bundle-plugin.version}</version>
 				<configuration>
 				    <instructions>
-				        <Export-Package>jdk.dio.*</Export-Package>
+				        <Export-Package>jdk.dio.*;version="1.5.0"</Export-Package>
 	                    <Import-Package></Import-Package>
 				    </instructions>
 				</configuration>

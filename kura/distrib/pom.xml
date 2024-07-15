@@ -398,11 +398,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.net.admin</artifactId>
-                                    <version>${org.eclipse.kura.net.admin.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.nm</artifactId>
                                     <version>${org.eclipse.kura.nm.version}</version>
                                 </artifactItem>
@@ -798,7 +793,6 @@
                                 <move file="target/plugins/org.eclipse.kura.localization.jar" tofile="target/plugins/org.eclipse.kura.localization_${org.eclipse.kura.localization.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.localization.resources.jar" tofile="target/plugins/org.eclipse.kura.localization.resources_${org.eclipse.kura.localization.resources.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.status.jar" tofile="target/plugins/org.eclipse.kura.core.status_${org.eclipse.kura.core.status.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.net.admin.jar" tofile="target/plugins/org.eclipse.kura.net.admin_${org.eclipse.kura.net.admin.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.nm.jar" tofile="target/plugins/org.eclipse.kura.nm_${org.eclipse.kura.nm.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.net.configuration.jar" tofile="target/plugins/org.eclipse.kura.net.configuration_${org.eclipse.kura.net.configuration.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.net.admin.firewall.jar" tofile="target/plugins/org.eclipse.kura.net.admin.firewall_${org.eclipse.kura.net.admin.firewall.version}.jar" />

@@ -53,7 +53,7 @@ import org.eclipse.kura.web.server.GwtExtensionServiceImpl;
 import org.eclipse.kura.web.server.GwtKeystoreServiceImpl;
 import org.eclipse.kura.web.server.GwtLogServiceImpl;
 import org.eclipse.kura.web.server.GwtLoginInfoServiceImpl;
-import org.eclipse.kura.web.server.GwtNetworkServiceImplFacade;
+import org.eclipse.kura.web.server.GwtNetworkServiceImpl;
 import org.eclipse.kura.web.server.GwtPackageServiceImpl;
 import org.eclipse.kura.web.server.GwtPasswordAuthenticationServiceImpl;
 import org.eclipse.kura.web.server.GwtSecurityServiceImpl;
@@ -505,7 +505,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/logservice", new GwtLogServiceImpl(), null,
                 this.sessionContext);
-        this.httpService.registerServlet(DENALI_MODULE_PATH + "/network", new GwtNetworkServiceImplFacade(), null,
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/network", new GwtNetworkServiceImpl(), null,
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/component", new GwtComponentServiceImpl(), null,
                 this.sessionContext);

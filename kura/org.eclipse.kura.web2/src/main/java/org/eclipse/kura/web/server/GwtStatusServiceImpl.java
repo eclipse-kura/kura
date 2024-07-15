@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -263,10 +263,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         }
 
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
-
-        GwtNetworkServiceImplFacade gwtNetworkService = new GwtNetworkServiceImplFacade();
-        boolean isNet2 = gwtNetworkService.isNet2();
-
+        GwtNetworkServiceImpl gwtNetworkService = new GwtNetworkServiceImpl();
         List<GwtNetInterfaceConfig> gwtNetInterfaceConfigs;
 
         try {
@@ -282,7 +279,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
             Optional<String> statusGroup = getStatusGroup(gwtNetInterfaceConfig);
             Optional<String> statusName = getStatusName(gwtNetInterfaceConfig);
-            Optional<String> statusValue = getStatusValue(gwtNetInterfaceConfig, isNet2);
+            Optional<String> statusValue = getStatusValue(gwtNetInterfaceConfig);
 
             if (statusGroup.isPresent() && statusName.isPresent() && statusValue.isPresent()) {
                 pairs.add(new GwtGroupedNVPair(statusGroup.get(), statusName.get(), statusValue.get()));
@@ -323,20 +320,18 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         }
     }
 
-    private static Optional<String> getStatusValue(GwtNetInterfaceConfig gwtNetInterfaceConfig, boolean isNet2) {
+    private static Optional<String> getStatusValue(GwtNetInterfaceConfig gwtNetInterfaceConfig) {
         StringBuilder sb = new StringBuilder();
         Optional<String> statusIPv4 = getIPv4Status(gwtNetInterfaceConfig);
         statusIPv4.ifPresent(sb::append);
 
-        if (isNet2) {
-            Optional<String> statusIPv6 = getIPv6Status(gwtNetInterfaceConfig, isNet2);
-            statusIPv6.ifPresent(status -> {
-                if (sb.length() != 0) {
-                    sb.append(NL);
-                }
-                sb.append(status);
-            });
-        }
+        Optional<String> statusIPv6 = getIPv6Status(gwtNetInterfaceConfig);
+        statusIPv6.ifPresent(status -> {
+            if (sb.length() != 0) {
+                sb.append(NL);
+            }
+            sb.append(status);
+        });
 
         if (sb.length() == 0) {
             return Optional.empty();
@@ -442,11 +437,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         }
     }
 
-    private static Optional<String> getIPv6Status(GwtNetInterfaceConfig gwtNetInterfaceConfig, boolean isNet2) {
-        if (!isNet2) {
-            return Optional.empty();
-        }
-
+    private static Optional<String> getIPv6Status(GwtNetInterfaceConfig gwtNetInterfaceConfig) {
         String currentIPv6Address = gwtNetInterfaceConfig.getIpv6Address();
         String currentIPv6SubnetMask = String.valueOf(gwtNetInterfaceConfig.getIpv6SubnetMask());
 

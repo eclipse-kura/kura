@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.network;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +34,6 @@ import org.eclipse.kura.web.shared.service.GwtNetworkService;
 import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormControlStatic;
@@ -44,13 +42,11 @@ import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.HelpBlock;
 import org.gwtbootstrap3.client.ui.IntegerBox;
 import org.gwtbootstrap3.client.ui.ListBox;
-import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.TextArea;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
-import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -96,7 +92,6 @@ public class TabIp4Ui extends Composite implements NetworkTab {
     boolean dirty;
     private GwtNetInterfaceConfig selectedNetIfConfig;
     private final NetworkTabsUi tabs;
-    private boolean isNet2;
 
     @UiField
     FormGroup groupPriority;
@@ -166,15 +161,6 @@ public class TabIp4Ui extends Composite implements NetworkTab {
     FormControlStatic dnsRead;
 
     @UiField
-    Modal wanModal;
-
-    @UiField
-    Alert multipleWanWarn;
-
-    @UiField
-    Text multipleWanWarnText;
-
-    @UiField
     HelpButton statusHelp;
     @UiField
     HelpButton priorityHelp;
@@ -189,19 +175,13 @@ public class TabIp4Ui extends Composite implements NetworkTab {
     @UiField
     HelpButton dnsHelp;
 
-    public TabIp4Ui(GwtSession currentSession, NetworkTabsUi netTabs, final boolean isNet2) {
+    public TabIp4Ui(GwtSession currentSession, NetworkTabsUi netTabs) {
         initWidget(uiBinder.createAndBindUi(this));
         this.tabs = netTabs;
         this.helpTitle.setText(MSGS.netHelpTitle());
 
-        this.isNet2 = isNet2;
-
-        initNet2FeaturesOnly(isNet2);
-
         initForm();
         this.dnsRead.setVisible(false);
-
-        initModal();
 
         initHelpButtons();
     }
@@ -266,7 +246,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
                 updatedNetIf.setStatus(IPV4_STATUS_DISABLED);
             }
 
-            if (this.priority.isEnabled() && this.isNet2) {
+            if (this.priority.isEnabled()) {
                 updatedNetIf.setWanPriority(this.priority.getValue());
             }
 
@@ -373,12 +353,6 @@ public class TabIp4Ui extends Composite implements NetworkTab {
 
     // ---------------Private Methods------------
 
-    private void initNet2FeaturesOnly(boolean isNet2) {
-        this.labelPriority.setVisible(isNet2);
-        this.priority.setVisible(isNet2);
-        this.priorityHelp.setVisible(isNet2);
-    }
-
     private void initHelpButtons() {
         this.statusHelp.setHelpText(MSGS.netIPv4ToolTipStatus());
         this.priorityHelp.setHelpText(MSGS.netIPv4ToolTipPriority());
@@ -422,8 +396,12 @@ public class TabIp4Ui extends Composite implements NetworkTab {
     }
 
     private void initPriorityField() {
+        this.labelPriority.setVisible(true);
+        this.priority.setVisible(true);
+        this.priorityHelp.setVisible(true);
+
         this.priority.addMouseOverHandler(event -> {
-            if (TabIp4Ui.this.isNet2 && TabIp4Ui.this.priority.isEnabled()) {
+            if (TabIp4Ui.this.priority.isEnabled()) {
                 TabIp4Ui.this.helpText.clear();
                 TabIp4Ui.this.helpText.add(new Span(MSGS.netIPv4ToolTipPriority()));
             }
@@ -657,42 +635,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
 
             refreshForm();
             resetValidations();
-
-            // Check for other WAN interfaces if current interface is
-            // changed to WAN
-            if (isWanEnabled()) {
-                EntryClassUi.showWaitModal();
-                TabIp4Ui.this.gwtNetworkService.findNetInterfaceConfigurations(false,
-                        new AsyncCallback<List<GwtNetInterfaceConfig>>() {
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
-
-                            @Override
-                            public void onSuccess(List<GwtNetInterfaceConfig> result) {
-                                EntryClassUi.hideWaitModal();
-                                if (!TabIp4Ui.this.isNet2) {
-                                    showMultipleWanModal(result);
-                                }
-                            }
-
-                        });
-            }
         });
-    }
-
-    private void showMultipleWanModal(List<GwtNetInterfaceConfig> configs) {
-        for (GwtNetInterfaceConfig config : configs) {
-            if (config.getStatusEnum().equals(GwtNetIfStatus.netIPv4StatusEnabledWAN)
-                    && !config.getName().equals(TabIp4Ui.this.selectedNetIfConfig.getName())) {
-                logger.log(Level.SEVERE, "Error: Status Invalid");
-                TabIp4Ui.this.wanModal.show();
-                break;
-            }
-        }
     }
 
     private void resetHelp() {
@@ -717,9 +660,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
                 }
             }
 
-            if (this.isNet2) {
-                this.priority.setValue(this.selectedNetIfConfig.getWanPriority());
-            }
+            this.priority.setValue(this.selectedNetIfConfig.getWanPriority());
 
             this.tabs.updateTabs();
             this.ip.setText(this.selectedNetIfConfig.getIpAddress());
@@ -851,9 +792,4 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.helpDns.setText("");
     }
 
-    private void initModal() {
-        this.wanModal.setTitle(MSGS.warning());
-        this.multipleWanWarnText.setText(MSGS.netStatusWarning());
-        this.wanModal.addHideHandler(evt -> this.setDirty(true));
-    }
 }

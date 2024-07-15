@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.eclipse.kura.web.client.ui.network;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.service.GwtNetworkService;
 import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
@@ -25,7 +24,6 @@ import org.gwtbootstrap3.client.ui.html.Span;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -63,26 +61,8 @@ public class NetworkPanelUi extends Composite {
     }
 
     public void initNetworkPanel() {
-
-        this.gwtNetworkService.isNet2(new AsyncCallback<Boolean>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                initNetworkPanel(false);
-                FailureHandler.handle(caught);
-            }
-
-            @Override
-            public void onSuccess(Boolean result) {
-                initNetworkPanel(result);
-            }
-        });
-    }
-
-    private void initNetworkPanel(final boolean isNet2) {
-
         if (!this.isInitialized) {
-            this.tabs = new NetworkTabsUi(this.session, isNet2);
+            this.tabs = new NetworkTabsUi(this.session);
             this.tabsPanel.add(this.tabs);
 
             table = new NetworkInterfacesTableUi(this.session, this.tabs);

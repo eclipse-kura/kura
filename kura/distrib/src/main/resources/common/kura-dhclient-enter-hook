@@ -1,3 +1,0 @@
-#!/bin/sh
-# Don't delete the following entry. Add custom actions after it.
-. /etc/kura-dhclient-resolv-hook

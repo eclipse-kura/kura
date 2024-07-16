@@ -42,8 +42,6 @@
         <kura.skip.can>true</kura.skip.can>
         <kura.skip.web>false</kura.skip.web>
         <kura.skip.examples>true</kura.skip.examples>
-        <kura.network.provider>kura-networking</kura.network.provider>
-        <!-- kura-networking or network-manager-->
 
         <!-- used for RPM uninstallation -->
         <kura.install.link>/opt/eclipse/kura</kura.install.link>
@@ -1220,7 +1218,6 @@
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <property name="network.provider" value="network-manager" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
@@ -1412,7 +1409,6 @@
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <property name="network.provider" value="network-manager" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
@@ -1604,7 +1600,6 @@
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <property name="network.provider" value="network-manager" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
@@ -1742,192 +1737,6 @@
             </build>
         </profile>
         
-        <profile>
-            <id>intel-up2-ubuntu-20</id>
-            <activation>
-                <property>
-                    <name>buildAll</name>
-                </property>
-            </activation>
-            <build>
-                <resources>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <filtering>true</filtering>
-                    </resource>
-                </resources>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>buildnumber-maven-plugin</artifactId>
-                        <version>1.0</version>
-                        <executions>
-                            <execution>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>create-timestamp</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.7</version>
-                        <executions>
-                            <execution>
-                                <id>intel-up2-ubuntu-jars</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <property name="buildNumber" value="buildNumber" />
-                                        <property name="project.version" value="${project.version}" />
-                                        <property name="project.build.profile" value="${project.build.profile}" />
-                                        <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="intel-up2-ubuntu-20" />
-                                        <property name="target.device" value="intel-up2" />
-                                        <property name="native.tag" value="x86_64" />
-                                        <property name="kura.os.version" value="ubuntu" />
-                                        <property name="kura.arch" value="intel-up2-ubuntu-20" />
-                                        <property name="service.manager" value="systemd" />
-                                        <property name="os.base" value="debian" />
-                                        <property name="kura.mem.size" value="1024m" />
-                                        <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <property name="network.provider" value="${kura.network.provider}" />
-                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.vafer</groupId>
-                        <artifactId>jdeb</artifactId>
-                        <version>1.0</version>
-                        <executions>
-                            <execution>
-                                <id>intel-up2-ubuntu-deb</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>jdeb</goal>
-                                </goals>
-                                <configuration>
-                                    <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_intel-up2-ubuntu-20_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/intel-up2-ubuntu-20/deb/control</controlDir>
-                                    <dataSet>
-                                        <data>
-                                            <src>${basedir}/target/kura_${project.version}_intel-up2-ubuntu-20.zip</src>
-                                            <type>file</type>
-                                            <mapper>
-                                                <type>perm</type>
-                                                <prefix>/tmp</prefix>
-                                            </mapper>
-                                        </data>
-                                    </dataSet>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        
-        <profile>
-            <id>intel-up2-ubuntu-20-nn</id>
-            <activation>
-                <property>
-                    <name>buildAll</name>
-                </property>
-            </activation>
-            <build>
-                <resources>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <filtering>true</filtering>
-                    </resource>
-                </resources>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>buildnumber-maven-plugin</artifactId>
-                        <version>1.0</version>
-                        <executions>
-                            <execution>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>create-timestamp</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.7</version>
-                        <executions>
-                            <execution>
-                                <id>intel-up2-ubuntu-nn-jars</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <property name="buildNumber" value="buildNumber" />
-                                        <property name="project.version" value="${project.version}" />
-                                        <property name="project.build.profile" value="${project.build.profile}" />
-                                        <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="intel-up2-ubuntu-20-nn" />
-                                        <property name="target.device" value="intel-up2" />
-                                        <property name="native.tag" value="x86_64" />
-                                        <property name="kura.os.version" value="ubuntu" />
-                                        <property name="kura.arch" value="intel-up2-ubuntu-20" />
-                                        <property name="service.manager" value="systemd" />
-                                        <property name="os.base" value="debian" />
-                                        <property name="kura.mem.size" value="1024m" />
-                                        <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.vafer</groupId>
-                        <artifactId>jdeb</artifactId>
-                        <version>1.0</version>
-                        <executions>
-                            <execution>
-                                <id>intel-up2-ubuntu-nn-deb</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>jdeb</goal>
-                                </goals>
-                                <configuration>
-                                    <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_intel-up2-ubuntu-20-nn_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/intel-up2-ubuntu-20-nn/deb/control</controlDir>
-                                    <dataSet>
-                                        <data>
-                                            <src>${basedir}/target/kura_${project.version}_intel-up2-ubuntu-20-nn.zip</src>
-                                            <type>file</type>
-                                            <mapper>
-                                                <type>perm</type>
-                                                <prefix>/tmp</prefix>
-                                            </mapper>
-                                        </data>
-                                    </dataSet>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <profile>
             <id>docker-x86_64-nn</id>
             <activation>
@@ -2136,192 +1945,6 @@
                           </execution>
                         </executions>
                       </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>nvidia-jetson-nano</id>
-            <activation>
-                <property>
-                    <name>buildAll</name>
-                </property>
-            </activation>
-            <build>
-                <resources>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <filtering>true</filtering>
-                    </resource>
-                </resources>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>buildnumber-maven-plugin</artifactId>
-                        <version>1.0</version>
-                        <executions>
-                            <execution>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>create-timestamp</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.7</version>
-                        <executions>
-                            <execution>
-                                <id>nvidia-jetson-nano-jars</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <property name="buildNumber" value="buildNumber" />
-                                        <property name="project.version" value="${project.version}" />
-                                        <property name="project.build.profile" value="${project.build.profile}" />
-                                        <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="nvidia-jetson-nano" />
-                                        <property name="target.device" value="nvidia-jetson-nano" />
-                                        <property name="native.tag" value="aarch64" />
-                                        <property name="kura.os.version" value="ubuntu" />
-                                        <property name="kura.arch" value="nvidia-jetson-nano" />
-                                        <property name="service.manager" value="systemd" />
-                                        <property name="os.base" value="debian" />
-                                        <property name="kura.mem.size" value="1024m" />
-                                        <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <property name="network.provider" value="${kura.network.provider}" />
-                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.vafer</groupId>
-                        <artifactId>jdeb</artifactId>
-                        <version>1.0</version>
-                        <executions>
-                            <execution>
-                                <id>nvidia-jetson-nano-deb</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>jdeb</goal>
-                                </goals>
-                                <configuration>
-                                    <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_nvidia-jetson-nano_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/nvidia-jetson-nano/deb/control</controlDir>
-                                    <dataSet>
-                                        <data>
-                                            <src>${basedir}/target/kura_${project.version}_nvidia-jetson-nano.zip</src>
-                                            <type>file</type>
-                                            <mapper>
-                                                <type>perm</type>
-                                                <prefix>/tmp</prefix>
-                                            </mapper>
-                                        </data>
-                                    </dataSet>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>nvidia-jetson-nano-nn</id>
-            <activation>
-                <property>
-                    <name>buildAll</name>
-                </property>
-            </activation>
-            <build>
-                <resources>
-                    <resource>
-                        <directory>src/main/resources</directory>
-                        <filtering>true</filtering>
-                    </resource>
-                </resources>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>buildnumber-maven-plugin</artifactId>
-                        <version>1.0</version>
-                        <executions>
-                            <execution>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>create-timestamp</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>1.7</version>
-                        <executions>
-                            <execution>
-                                <id>nvidia-jetson-nano-nn-jars</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <property name="buildNumber" value="buildNumber" />
-                                        <property name="project.version" value="${project.version}" />
-                                        <property name="project.build.profile" value="${project.build.profile}" />
-                                        <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="nvidia-jetson-nano-nn" />
-                                        <property name="target.device" value="nvidia-jetson-nano-nn" />
-                                        <property name="native.tag" value="aarch64" />
-                                        <property name="kura.os.version" value="ubuntu" />
-                                        <property name="kura.arch" value="nvidia-jetson-nano-nn" />
-                                        <property name="service.manager" value="systemd" />
-                                        <property name="os.base" value="debian" />
-                                        <property name="kura.mem.size" value="1024m" />
-                                        <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.vafer</groupId>
-                        <artifactId>jdeb</artifactId>
-                        <version>1.0</version>
-                        <executions>
-                            <execution>
-                                <id>nvidia-jetson-nano-nn-deb</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>jdeb</goal>
-                                </goals>
-                                <configuration>
-                                    <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_nvidia-jetson-nano-nn_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/nvidia-jetson-nano-nn/deb/control</controlDir>
-                                    <dataSet>
-                                        <data>
-                                            <src>${basedir}/target/kura_${project.version}_nvidia-jetson-nano-nn.zip</src>
-                                            <type>file</type>
-                                            <mapper>
-                                                <type>perm</type>
-                                                <prefix>/tmp</prefix>
-                                            </mapper>
-                                        </data>
-                                    </dataSet>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
                 </plugins>
             </build>
         </profile>

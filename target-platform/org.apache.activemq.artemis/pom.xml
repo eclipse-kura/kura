@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright (c) 2017, 2023 Red Hat Inc
+  Copyright (c) 2017, 2024 Red Hat Inc
  
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -19,12 +19,12 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>target-platform</artifactId>
-        <version>5.5.0-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
     <artifactId>org.apache.activemq.artemis</artifactId>
-    <version>2.11.0-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <description>ActiveMQ Artemis dependencies for Eclipse Kura</description>
@@ -103,7 +103,7 @@
                             org.jgroups.*;resolution:=optional,
                             *
                         </Import-Package>
-                        <_exportcontents>org.apache.*</_exportcontents>
+                        <_exportcontents>org.apache.*;version="${org.apache.activemq.artemis.upstream.version}"</_exportcontents>
                         <Require-Capability>
                             osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"
                         </Require-Capability>

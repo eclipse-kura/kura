@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.driver.helper.test
 Bundle-SymbolicName: org.eclipse.kura.driver.helper.test;singleton:=true
-Bundle-Version: 5.5.0.qualifier
+Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Bundle-ClassPath: .
@@ -17,4 +17,4 @@ Import-Package: org.eclipse.kura.configuration.metatype;version="[1.1,2.0)",
  org.mockito.invocation;version="[4.0.0,5.0.0)",
  org.mockito.stubbing;version="[4.0.0,5.0.0)",
  org.slf4j;version="1.7.21"
-Fragment-Host: org.eclipse.kura.driver.helper.provider;bundle-version="[1.0,2.0)"
+Fragment-Host: org.eclipse.kura.driver.helper.provider;bundle-version="[2.0,3.0)"

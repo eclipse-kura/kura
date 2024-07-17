@@ -21,7 +21,7 @@ import org.osgi.service.event.Event;
  * Emitted when an access point disappears from view of the device.
  *
  * @noextend This class is not intended to be subclassed by clients.
- * @deprecated since 3.0.
+ * @deprecated since 3.0
  */
 @ProviderType
 @Deprecated

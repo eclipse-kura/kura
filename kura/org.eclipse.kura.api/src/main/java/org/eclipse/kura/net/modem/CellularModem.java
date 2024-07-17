@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,8 +22,10 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * @noimplement This interface is not intended to be implemented by clients.
+ * @deprecated since version 3.0.
  */
 @ProviderType
+@Deprecated
 public interface CellularModem {
 
     public enum SerialPortType {
@@ -60,7 +62,8 @@ public interface CellularModem {
      * @return IMSI number, null if not known
      * @throws KuraException
      * 
-     * @deprecated since 2.4. Use {@link getMobileSubscriberIdentity(boolean recompute)} instead.
+     * @deprecated since 2.4. Use {@link getMobileSubscriberIdentity(boolean
+     *             recompute)} instead.
      */
     @Deprecated
     public String getMobileSubscriberIdentity() throws KuraException;
@@ -71,7 +74,8 @@ public interface CellularModem {
      * @return ICCID, "N/A" if not applicable
      * @throws KuraException
      * 
-     * @deprecated since 2.4. Use {@link getIntegratedCirquitCardId(boolean recompute)} instead.
+     * @deprecated since 2.4. Use {@link getIntegratedCirquitCardId(boolean
+     *             recompute)} instead.
      */
     @Deprecated
     public String getIntegratedCirquitCardId() throws KuraException;
@@ -95,7 +99,7 @@ public interface CellularModem {
      * Reports if specified port can be opened
      *
      * @param port
-     *            - modem's serial port
+     *             - modem's serial port
      * @return 'true' if port can be opened, 'false' otherwise
      */
     public boolean isPortReachable(String port);
@@ -114,7 +118,8 @@ public interface CellularModem {
      * @throws KuraException
      * @return signal strength
      * 
-     * @deprecated since 2.4. Use {@link getSignalStrength(boolean recompute)} instead.
+     * @deprecated since 2.4. Use {@link getSignalStrength(boolean recompute)}
+     *             instead.
      */
     @Deprecated
     public int getSignalStrength() throws KuraException;
@@ -125,7 +130,8 @@ public interface CellularModem {
      * @throws KuraException
      * @return modem registration status as {@link ModemRegistrationStatus}
      * 
-     * @deprecated since 2.4. Use {@link getRegistrationStatus(boolean recompute)} instead.
+     * @deprecated since 2.4. Use {@link getRegistrationStatus(boolean recompute)}
+     *             instead.
      */
     @Deprecated
     public ModemRegistrationStatus getRegistrationStatus() throws KuraException;
@@ -251,7 +257,8 @@ public interface CellularModem {
      * Reports signal strength in dBm
      * 
      * @param recompute:
-     *            if true the value is recomputed. Otherwise, a cached value is returned
+     *                   if true the value is recomputed. Otherwise, a cached value
+     *                   is returned
      * @return an integer representing the rssi
      * @throws KuraException
      * 
@@ -263,7 +270,8 @@ public interface CellularModem {
      * Reports modem registration status
      *
      * @param recompute:
-     *            if true the value is recomputed. Otherwise, a cached value is returned
+     *                   if true the value is recomputed. Otherwise, a cached value
+     *                   is returned
      * @throws KuraException
      * @return modem registration status as {@link ModemRegistrationStatus}
      * 
@@ -275,7 +283,8 @@ public interface CellularModem {
      * Answers International Mobile Subscribe Identity (IMSI)
      *
      * @param recompute:
-     *            if true the value is recomputed. Otherwise, a cached value is returned
+     *                   if true the value is recomputed. Otherwise, a cached value
+     *                   is returned
      * @return IMSI number, null if not known
      * @throws KuraException
      * 
@@ -287,7 +296,8 @@ public interface CellularModem {
      * Answers Integrated Circuit Card Identification (ICCID)
      *
      * @param recompute:
-     *            if true the value is recomputed. Otherwise, a cached value is returned
+     *                   if true the value is recomputed. Otherwise, a cached value
+     *                   is returned
      * @return ICCID, "N/A" if not applicable
      * @throws KuraException
      * 

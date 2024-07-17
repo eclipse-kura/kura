@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,10 @@ import org.eclipse.kura.net.IPAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated since version 3.0.
+ */
+@Deprecated
 public class ConnectionInfoImpl implements ConnectionInfo {
 
     private static final Logger logger = LoggerFactory.getLogger(ConnectionInfo.class);
@@ -40,10 +44,11 @@ public class ConnectionInfoImpl implements ConnectionInfo {
     private Properties props = null;
 
     /**
-     * Creates a ConnectionInfo instance with the previously persisted connection properties if they existed
+     * Creates a ConnectionInfo instance with the previously persisted connection
+     * properties if they existed
      *
      * @param ifaceName
-     *            The interface name tied to the connection information
+     *                  The interface name tied to the connection information
      * @throws KuraException
      */
     public ConnectionInfoImpl(String ifaceName) throws KuraException {
@@ -100,7 +105,8 @@ public class ConnectionInfoImpl implements ConnectionInfo {
     /**
      * Gets the DNS addresses associated with this interface
      *
-     * @return A List of IP4Address objects representing the DNS of this interface. If there are none it returns an
+     * @return A List of IP4Address objects representing the DNS of this interface.
+     *         If there are none it returns an
      *         empty list.
      */
     @Override

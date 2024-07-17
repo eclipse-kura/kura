@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,8 +18,10 @@ import org.osgi.annotation.versioning.ProviderType;
  * Marker interface for dns server monitoring service
  *
  * @noimplement This interface is not intended to be implemented by clients.
+ * @deprecated since version 3.0.
  */
 @ProviderType
+@Deprecated
 public interface DnsMonitorService {
 
 }

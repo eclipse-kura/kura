@@ -19,19 +19,23 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * Routing agent service is used to control the static routing table. The service is used to specify
- * which interfaces should be used in considering routes and what their priorities should be.
+ * Routing agent service is used to control the static routing table. The
+ * service is used to specify
+ * which interfaces should be used in considering routes and what their
+ * priorities should be.
  *
  * @noimplement This interface is not intended to be implemented by clients.
+ * @deprecated since version 3.0.
  */
 @ProviderType
+@Deprecated
 public interface RoutingAgentService {
 
     /**
      * Sets interface priorities
      *
      * @param priorities
-     *            - list of interface priorities as {@link Map}
+     *                   - list of interface priorities as {@link Map}
      */
     public void setPriorities(Map<String, Integer> priorities);
 
@@ -39,7 +43,7 @@ public interface RoutingAgentService {
      * Adds interface to RoutingAgent
      *
      * @param netIfaceConfig
-     *            - interface configuration as {@link NetInterfaceConfig}
+     *                       - interface configuration as {@link NetInterfaceConfig}
      * @throws KuraException
      */
     @SuppressWarnings("rawtypes")
@@ -49,7 +53,7 @@ public interface RoutingAgentService {
      * Removes interface from RoutingAgent
      *
      * @param interfaceName
-     *            - interface name as {@link String}
+     *                      - interface name as {@link String}
      * @throws KuraException
      */
     void removeInterface(String interfaceName) throws KuraException;

@@ -28,9 +28,9 @@ If you're using the [Raspberry Pi Imager](https://github.com/raspberrypi/rpi-ima
 To install Eclipse Kura with its dependencies on the Raspberry Pi, perform the
 following steps:
 
-1. Boot the Raspberry Pi with the latest Raspbian image (starting from release 5.1.0 Kura is tested with Raspbian 11).
+1. Boot the Raspberry Pi with the latest Raspberry Pi OS image.
 
-2. Make sure your device is connected to the internet. The best installation experience can be obtained when the device is cabled to the local network and the Internet. By default, the Raspberry Pi OS configures the ethernet interface `eth0` in DHCP mode.
+2. Make sure your device is connected to the Internet. The best installation experience can be obtained when the device is cabled to the local network and the Internet. By default, the Raspberry Pi OS configures the ethernet interface `eth0` in DHCP mode.
 
 3. Upgrade the system:
    

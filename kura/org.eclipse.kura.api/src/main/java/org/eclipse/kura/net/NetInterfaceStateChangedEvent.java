@@ -21,7 +21,7 @@ import org.osgi.service.event.Event;
  * Event raised when the state of a network interface has changed.
  *
  * @noextend This class is not intended to be subclassed by clients.
- * @deprecated since version 3.0.
+ * @deprecated since 3.0
  */
 @ProviderType
 @Deprecated

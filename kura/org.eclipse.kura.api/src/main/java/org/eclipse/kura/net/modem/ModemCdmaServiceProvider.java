@@ -13,7 +13,7 @@
 package org.eclipse.kura.net.modem;
 
 /**
- * @deprecated since version 3.0.
+ * @deprecated since 3.0
  */
 @Deprecated
 public enum ModemCdmaServiceProvider {

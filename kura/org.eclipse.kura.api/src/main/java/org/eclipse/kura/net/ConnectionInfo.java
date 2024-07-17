@@ -25,7 +25,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * this information.
  *
  * @noimplement This interface is not intended to be implemented by clients.
- * @deprecated since version 3.0.
+ * @deprecated since 3.0
  */
 @ProviderType
 @Deprecated

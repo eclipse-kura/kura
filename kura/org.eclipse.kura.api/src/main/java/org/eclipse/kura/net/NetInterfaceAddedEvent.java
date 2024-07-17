@@ -21,7 +21,7 @@ import org.osgi.service.event.Event;
  * An event raised when a new network interface has been added to the system.
  *
  * @noextend This class is not intended to be subclassed by clients.
- * @deprecated since version 3.0.
+ * @deprecated since 3.0
  */
 @ProviderType
 @Deprecated

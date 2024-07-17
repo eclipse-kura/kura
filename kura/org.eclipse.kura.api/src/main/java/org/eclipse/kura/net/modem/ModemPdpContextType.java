@@ -14,7 +14,7 @@ package org.eclipse.kura.net.modem;
 
 /**
  * @since 1.4
- * @deprecated since version 3.0.
+ * @deprecated since 3.0
  */
 @Deprecated
 public enum ModemPdpContextType {

@@ -18,7 +18,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * Marker interface for the ModemMonitor
  *
  * @noimplement This interface is not intended to be implemented by clients.
- * @deprecated since version 3.0.
+ * @deprecated since 3.0
  */
 @ProviderType
 @Deprecated

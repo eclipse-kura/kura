@@ -15,7 +15,7 @@ package org.eclipse.kura.net.modem;
 import org.osgi.annotation.versioning.ConsumerType;
 
 /**
- * @deprecated since version 3.0.
+ * @deprecated since 3.0
  */
 @ConsumerType
 @Deprecated

@@ -30,7 +30,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * Service API for getting and setting network interface configurations.
  *
  * @noimplement This interface is not intended to be implemented by clients.
- * @deprecated since version 3.0.
+ * @deprecated since 3.0
  */
 @ProviderType
 @Deprecated

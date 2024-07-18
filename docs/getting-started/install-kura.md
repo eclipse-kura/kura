@@ -92,16 +92,17 @@ To have all the Kura features working, the following dependencies are required:
 - Java: `openjdk-17-jre-headless` or `temurin-17-jdk` or `openjdk-8-jre-headless` or `temurin-8-jdk`.
 - Others: `dos2unix`
 
-### Supported devices
+### Reference devices
 
 Eclipse Kura&trade; has been tested on the following devices and provides full configuration of all the available interfaces and GPIO mappings.
 
 | Device | Architecture | OS |
 | - | - | - |
-| **Raspberry Pi 3/4** | *arm32* | Raspbian "Bookworm" |
+| **Raspberry Pi 3/4** | *arm32* | Raspberry Pi OS "Bookworm" |
+| **Raspberry Pi 3/4** | *arm64* | Raspberry Pi OS "Bookworm" |
 | **Raspberry Pi 3/4** | *arm64* | Ubuntu 20.04 |
-| **ZimaBoard/Blade** | *x86_64* | Ubuntu 20.04 |
-| **NVIDIA Jetson AGX Orin&trade;** | *arm64* | Ubuntu 20.04 |
+| **ZimaBoard/Blade** | *x86_64* | TBD |
+| **NVIDIA Jetson AGX Orin&trade;** | *arm64* | TBD |
 
 Check out the quick start guides for the detailed installation steps and set-up procedures:
 

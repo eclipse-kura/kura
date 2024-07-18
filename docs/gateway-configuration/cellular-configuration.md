@@ -1,8 +1,8 @@
 # Cellular Configuration
 
-If it is not configured, the cellular interface is presented on the interface list either by modem USB address, or if serial modem is used, by modem name. This 'fake' interface name is replaced by 'proper' interface name (e.g., ppp0) when the first modem configuration is submitted.
+If it is not configured, the cellular interface is presented on the interface list by modem USB address (i.e. 2-1). This 'fake' interface name is completed by 'proper' interface name (e.g., ppp0) when the first modem configuration is submitted.
 
-The cellular interface should be configured by first enabling it in the **TCP/IP** tab, and then setting the **Cellular** tab. Note that the cellular interface can only be set as _WAN using DHCP_. The cellular interface configuration options are described below.
+The cellular interface should be configured by first enabling it in the **IPv4** or **IPv6** tab, and then setting the **Cellular** tab. Note that the cellular interface can only be set as _WAN using DHCP_, _Disabled_ or _Not Managed_ (only for IPv4 connections). The cellular interface configuration options are described below.
 
 ## Cellular Configuration
 
@@ -13,6 +13,9 @@ The **Cellular** tab contains the following configuration parameters:
 - **Network Technology**: describes the network technology used by this modem.
     - HSDPA
     - EVDO
+    - EDGE
+
+- **Connection Type**: specifies the type of connection to the modem.
 
 - **Modem Identifier**: provides a unique name for this modem.
 
@@ -50,103 +53,10 @@ The **Cellular** tab contains the following configuration parameters:
 
 - **LCP Echo Failure**: sets the _lcp-echo-failure_ option of the PPP daemon. If set to a positive number, the modem presumes the peer to be dead if a specified number of LCP echo-requests are sent without receiving a valid LCP echo-reply. To disable this option, set it to zero.
 
+The **GPS** tab allows the user to enable or disable the GPS module provided by the cellular modem. The property is:
+
 - **Enable GPS**: enables GPS with the following conditions:
     - One modem port will be dedicated to NMEA data stream.
     - This port may not be used to send AT commands to the modem.
-    - _PositionService_ should be enabled. Serial settings of _PositionService_ should not be changed; it will be redirected to the modem GPS port automatically.
+    - The _PositionService_ should be enabled. Serial settings of the _PositionService_ should not be changed; it will be redirected to the modem GPS port automatically.
 
-# Cellular Linux Configuration
-
-This section describes the changes applied by Kura at the Linux networking configuration. Please read the following note before proceeding with manual changes of the Linux networking configuration.
-
-!!! warning
-    It is **NOT** recommended performing manual editing of the Linux networking configuration files when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.
-
-When the cellular configuration is submitted, Kura generates peer and chat scripts used by the PPP daemon to establish a PPP connection. Examples of these scripts for HSPA and EVDO modems are shown below.
-
-### Example Peer Script for HSPA Modem
-
-```shell
-921600
-unit 0
-logfile /var/log/HE910-D_2-1.5
-debug
-connect 'chat:v:f /etc/ppp/scripts/chat_HE910-D_2-1.5'
-disconnect 'chat:v:f /etc/ppp/scripts/disconnect_HE910-D_2-1.5'
-modem
-lock
-noauth
-noipdefault
-defaultroute
-usepeerdns
-noproxyarp
-novj
-novjccomp
-nobsdcomp
-nodeflate
-nomagic
-idle 95
-active-filter 'inbound'
-persist
-holdoff 1
-maxfail 5
-connect-delay 1000
-```
-
-### Example Chat Script for HSPA Modem
-
-```shell
-ABORT	"BUSY"
-ABORT	"VOICE"
-ABORT	"NO CARRIER"
-ABORT	"NO DIALTONE"
-ABORT	"NO DIAL TONE"
-ABORT	"ERROR"
-""	"+++ath"
-OK	"AT"
-OK	AT+CGDCONT=1,"IP","c1.korem2m.com"
-OK	"\d\d\d"
-""	"atd-99---1#"
-CONNECT	"\c"
-```
-
-### Example Peer Script for EVDO Modem
-
-```shell
-921600
-unit 0
-logfile /var/log/DE910-DUAL_1-1.5
-debug
-connect 'chat:v:f /etc/ppp/scripts/chat_DE910-DUAL_1-1.5'
-disconnect 'chat:v:f /etc/ppp/scripts/disconnect_DE910-DUAL_1-1.5'
-crtscts
-lock
-noauth
-defaultroute
-usepeerdns
-idle 95
-active-filter 'inbound'
-persist
-holdoff 1
-maxfail 5
-connect-delay 10000
-```
-
-## Example Chat Script for EVDO Modem
-
-```shell
-ABORT	"BUSY"
-ABORT	"VOICE"
-ABORT	"NO CARRIER"
-ABORT	"NO DIALTONE"
-ABORT	"NO DIAL TONE"
-ABORT	"ERROR"
-""	"+++ath"
-OK	"AT"
-OK	"ATE1V1&F&D2&C1&C2S0=0"
-OK	"ATE1V1"
-OK	"ATS7=60"
-OK	"\d\d\d"
-""	"atd#777"
-CONNECT	"\c"
-```

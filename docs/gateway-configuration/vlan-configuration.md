@@ -1,7 +1,5 @@
 # VLAN Configuration
 
-For devices running Kura installed using a Generic Profile, it is possible to configure multiple VLAN interfaces. Take a look at our [installer profiles](../getting-started/install-kura.md#installer-types) to know which are supported.
-
 A VLAN, or Virtual Local Area Network, is a network segmentation technology that allows a single physical network to be logically divided into multiple isolated networks. These virtual networks operate as if they are independent, even though they share the same physical infrastructure.
 This is achieved via a VLAN ID, or VLAN tag, a numerical label added to network frames to identify the specific Virtual Local Area Network (VLAN) to which they belong. It's a critical component in VLAN technology, allowing network switches and routers to differentiate and route traffic within a VLAN. VLAN tags are added to the Ethernet frame's header, indicating which virtual network a data packet should be directed to when it traverses the physical network infrastructure. Therefore, VLANs must also be supported and configured on the network equipment a device is connected to.
 

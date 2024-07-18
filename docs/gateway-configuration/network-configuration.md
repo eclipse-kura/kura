@@ -6,30 +6,38 @@ In case of typing errors, the **Reset** button can be used to reload the prior c
 Since the network configuration shown on the screen may not be synchronized with the current state of the system, it can be updated pressing the **Refresh** button. This can be used also to force the reload of specific parameters like the RSSI or dynamic IP addresses. The refresh procedure reads all the needed parameters from the system and can take several seconds before updating.
 
 !!! tip
-    It is recommended that the **TCP/IP** tab is configured first since it defines how the interface is going to be used.
+    It is recommended that the **IPv4** or **IPv6** tab is configured first since it defines how the interface is going to be used.
 
 ## TCP/IP Configuration
 
-The **TCP/IP** tab contains the following configuration parameters:
+The **IPv4** and **IPv6** tabs contain the following configuration parameters:
 
 - **Status**
     - Disabled: disables the selected interface (i.e., administratively down).
     - Enabled for LAN: designates the interface for a local network. It can be set as a DHCP server for hosts on the local network and can serve as a default gateway for those hosts; however, it cannot be set as an actual gateway interface for this device. That is, packets must be routed from this interface to another interface that is configured as WAN. The interface is automatically brought up at boot.
     - Enabled for WAN: designates the interface as a gateway to an external network. The interface is automatically brought up at boot.
-    - Not Managed: the interface will be ignored by Kura.
-    - Layer 2 Only: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot.
+    - Not Managed: the interface will be ignored by Kura (available only for **IPv4**).
+    - Layer 2 Only: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot (available only for **IPv4**).
+- **WAN Priority** - configure the network failover. See [here](network-failover.md) for more details.
 - **Configure**
     - Manually: allows manual entry of the _IP Address_ and _Netmask_ fields, if the interface is configured as LAN; allows manual entry of the _IP Address_, _Netmask_, _Gateway_, and _DNS Servers_ fields, if the interface is designated as WAN.
-    - Using DHCP: configures the interface as a DHCP client obtaining the IP address from a network DHCP server.
+    - Using DHCP/DHCPv6: configures the interface as a DHCP client obtaining the IP address from a network DHCP server.
+    - Stateless Address Auto-Configuration (SLAAC): automatically assign an IP address (available only for **IPv6**).
+- **Address Generation Mode** - defines the method used to automatically generate the IP address with SLAAC (available only for **IPv6**)
+    - EUI64: use EUI-64 method for address generation
+    - Stable-privacy: use RFC7217 method for address generation
 - **IP Address** - defines the IP address of the interface, if manually configured.
 - **Subnet Mask** - defines the subnet mask of the interface, if manually configured.
 - **Gateway** - specifies the default gateway for the unit. (Required field if the interface is designated as WAN and manually configured.)
 - **DNS Servers** - provides a list of DNS servers, if the interface is designated as WAN and is manually configured.
-- **Search Domains** - Not implemented.
+- **Privacy** - configure privacy extension for SLAAC (available only for **IPv6**).
+    - Disabled: disables the privacy extension.
+    - Prefer public addresses: use public address for outgoing traffic.
+    - Prefer temporary addresses: prefer temporary address for outgoing traffic.
 
-If the network interface is *Enabled for LAN* and manually configured (i.e., not a DHCP client), the **DHCP & NAT** tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.
+If the network interface is configured as *Enabled for LAN* and manually configured (i.e., not a DHCP client) in the **IPV4** tab, the **DHCPv4 & NAT** tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.
 
-### More details about the Not Managed interface Status
+### More details about the Not Managed interface Status - (TBD: not applicable in NM)
 
 When a network interface is configured as **Not Managed**, Kura will ignore it and the configuration will not be touched. The user can configure the interface with the network tools provided by the OS, allowing unusual network setups.
 
@@ -48,15 +56,15 @@ To avoid device misconfigurations when **Not Managed** interfaces are used, **do
 
 ![Network Configuration TCP/IP](./images/network-configuration-tcpip.png)
 
-## DHCP & NAT Configuration
+## DHCPv4 & NAT Configuration
 
-The **DHCP & NAT** tab contains the following configuration parameters:
+The **DHCPv4 & NAT** tab contains the following configuration parameters:
 
 - **Router Mode**
-  - DHCP and NAT: indicates that both DHCP server and NAT are enabled.
-  - DHCP Only: indicates that DHCP server is enabled and NAT is disabled.
-  - NAT Only: indicates that NAT is enabled and DHCP server is disabled.
-  - Off: indicates that both DHCP server and NAT are disabled.
+    - DHCP and NAT: indicates that both DHCP server and NAT are enabled.
+    - DHCP Only: indicates that DHCP server is enabled and NAT is disabled.
+    - NAT Only: indicates that NAT is enabled and DHCP server is disabled.
+    - Off: indicates that both DHCP server and NAT are disabled.
 - **DHCP Beginning Address**: specifies the first address of DHCP pool (i.e., first available client IP address).
 - **DHCP Ending Address**: specifies the last address of DHCP pool (i.e., last IP address that can be assigned to a client).
 - **DHCP Subnet Mask**: defines the subnet mask that is assigned to a client.
@@ -64,7 +72,7 @@ The **DHCP & NAT** tab contains the following configuration parameters:
 - **DHCP Max Lease Time**: sets the maximum time (in minutes) that the client retains the provided IP address. It must be greater than 0.
 - **Pass DNS Servers through DHCP**: enables DNS Proxy (i.e., passing DNS servers through DHCP).
 
-If NAT is enabled and there is another interface designated as WAN (e.g., ppp0), the following iptables rules are added to the *custom automatic NAT service rules*_* section of the `/etc/init.d/firewall` script:
+If NAT is enabled and there is another interface designated as WAN (e.g., ppp0), the following iptables rules are added to the *custom automatic NAT service rules* section of the `/etc/init.d/firewall` script:
 
 ```shell
 # custom automatic NAT service rules (if NAT option is enabled for LAN interface)
@@ -80,7 +88,7 @@ Also, IP forwarding is enabled in the kernel as follows:
 echo 1 > /proc/sys/net/ipv4/ip_forward
 ```
 
-The rules shown above create an *Overloaded*_* (i.e., many-to-one) NAT. This type of network address translation maps multiple IP addresses on the LAN side to a single IP address on the WAN side, allowing internet access from hosts on a local network via a gateway (WAN) interface. Note that for NAT rules to be added, it is insufficient to enable NATing through the **DHCP & NAT** tab of the LAN interface; there must also be another interface designated as WAN.
+The rules shown above create an *Overloaded* (i.e., many-to-one) NAT. This type of network address translation maps multiple IP addresses on the LAN side to a single IP address on the WAN side, allowing internet access from hosts on a local network via a gateway (WAN) interface. Note that for NAT rules to be added, it is insufficient to enable NATing through the **DHCPv4 & NAT** tab of the LAN interface; there must also be another interface designated as WAN.
 
 ![Network Configuration DHCP and NAT](./images/network-configuration-dhcp-nat.png)
 

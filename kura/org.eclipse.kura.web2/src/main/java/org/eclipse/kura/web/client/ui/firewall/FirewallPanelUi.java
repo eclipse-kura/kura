@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,6 @@ package org.eclipse.kura.web.client.ui.firewall;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.ui.Tab.RefreshHandler;
-import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.service.GwtNetworkService;
 import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.gwtbootstrap3.client.ui.Anchor;
@@ -28,7 +27,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -86,7 +84,6 @@ public class FirewallPanelUi extends Composite {
     private final Tab.RefreshHandler openPortsIPv6Handler;
     private final Tab.RefreshHandler portForwardingIPv6Handler;
     private final Tab.RefreshHandler ipForwardingIPv6Handler;
-    private boolean isNet2;
 
     public FirewallPanelUi() {
 
@@ -126,15 +123,13 @@ public class FirewallPanelUi extends Composite {
 
         this.portForwardingIPv6Panel.clear();
         this.ipForwardingIPv6Panel.clear();
-        if (this.isNet2) {
-            this.openPortsIPv6Panel.refresh();
-        } else {
-            this.openPortsIPv6Panel.clear();
-        }
+        this.openPortsIPv6Panel.refresh();
+
+        this.openPortsIPv6.setVisible(true);
+        this.portForwardingIPv6.setVisible(true);
+        this.ipForwardingIPv6.setVisible(true);
 
         this.openPorts.showTab();
-
-        detectIfNet2();
     }
 
     public boolean isDirty() {
@@ -200,28 +195,5 @@ public class FirewallPanelUi extends Composite {
         } else {
             return this.openPortsPanel;
         }
-    }
-
-    private void detectIfNet2() {
-        this.gwtNetworkService.isNet2(new AsyncCallback<Boolean>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                FirewallPanelUi.this.isNet2 = false;
-                FailureHandler.handle(caught);
-            }
-
-            @Override
-            public void onSuccess(Boolean result) {
-                FirewallPanelUi.this.isNet2 = result;
-                initNet2FeaturesOnly(result);
-            }
-        });
-    }
-
-    private void initNet2FeaturesOnly(boolean isNet2) {
-        this.openPortsIPv6.setVisible(isNet2);
-        this.portForwardingIPv6.setVisible(isNet2);
-        this.ipForwardingIPv6.setVisible(isNet2);
     }
 }

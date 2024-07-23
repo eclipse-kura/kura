@@ -99,9 +99,6 @@ public interface GwtNetworkService extends RemoteService {
     public boolean verifyWifiCredentials(GwtXSRFToken xsrfToken, String interfaceName, GwtWifiConfig gwtWifiConfig)
             throws GwtKuraException;
 
-    @Audit(componentName = "UI Network", description = "Detect if using Network Manager or legacy networking implementation")
-    public boolean isNet2();
-
     public List<GwtModemPdpEntry> findPdpContextInfo(GwtXSRFToken xsrfToken, String interfaceName)
             throws GwtKuraException;
 

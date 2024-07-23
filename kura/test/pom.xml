@@ -918,7 +918,6 @@
         <module>org.eclipse.kura.linux.position.test</module>
         <module>org.eclipse.kura.linux.usb.test</module>
         <module>org.eclipse.kura.linux.watchdog.test</module>
-        <module>org.eclipse.kura.net.admin.test</module>
         <module>org.eclipse.kura.net.admin.firewall.test</module>
         <module>org.eclipse.kura.nm.test</module>
         <module>org.eclipse.kura.net.configuration.test</module>

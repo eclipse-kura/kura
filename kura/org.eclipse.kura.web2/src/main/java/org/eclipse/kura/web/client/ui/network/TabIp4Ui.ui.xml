@@ -125,17 +125,5 @@
             </b:Column>
         </b:Column>
 
-        <b:Modal closable="true" dataKeyboard="false" dataBackdrop="STATIC" ui:field="wanModal" b:id="wanModal">
-            <b:ModalBody>
-                <b:Panel>
-                    <b:PanelBody>
-                        <b:Alert type="WARNING" ui:field="multipleWanWarn">
-                            <b.html:Text ui:field="multipleWanWarnText" />
-                        </b:Alert>
-                    </b:PanelBody>
-                </b:Panel>
-            </b:ModalBody>
-        </b:Modal>
-
     </b:Container>
 </ui:UiBinder> 

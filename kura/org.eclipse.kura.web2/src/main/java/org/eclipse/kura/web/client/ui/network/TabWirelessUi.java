@@ -153,7 +153,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     private boolean dirty;
     private boolean ssidInit;
-    private final boolean isNet2;
     private GwtWifiNetInterfaceConfig selectedNetIfConfig;
     private String tcp4Status;
     private String tcp6Status;
@@ -345,7 +344,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     Text unavailableChannelErrorText;
 
     public TabWirelessUi(GwtSession currentSession, TabIp4Ui tcp4, TabIp6Ui tcp6,
-            AnchorListItem wireless8021xTabAnchorItem, NetworkTabsUi tabs, final boolean isNet2) {
+            AnchorListItem wireless8021xTabAnchorItem, NetworkTabsUi tabs) {
         this.ssidInit = false;
         initWidget(uiBinder.createAndBindUi(this));
         this.session = currentSession;
@@ -354,8 +353,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.netTabs = tabs;
         this.wireless8021xTabAnchorItem = wireless8021xTabAnchorItem;
 
-        this.isNet2 = isNet2;
-        changeRadioModeToBand(isNet2);
+        changeRadioModeToBand();
 
         initForm();
         initHelpButtons();
@@ -514,11 +512,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     // -----Private methods-------//
 
-    private void changeRadioModeToBand(boolean isNet2) {
-        if (isNet2) {
-            this.radioHelp.setHelpText(MSGS.netWifiToolTipBand());
-            this.labelRadio.setText(MSGS.netWifiBand());
-        }
+    private void changeRadioModeToBand() {
+        this.radioHelp.setHelpText(MSGS.netWifiToolTipBand());
+        this.labelRadio.setText(MSGS.netWifiBand());
     }
 
     private void update() {
@@ -599,18 +595,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     private void setRadioModeByValue(String radioModeValue) {
         if (radioModeValue != null) {
-
-            if (this.isNet2) {
-                setBandFromRadioMode(radioModeValue);
-            } else {
-                for (int i = 0; i < this.radio.getItemCount(); i++) {
-                    if (this.radio.getItemText(i).equals(MessageUtils.get(radioModeValue))
-                            || this.radio.getItemText(i).equals(radioModeValue)) {
-                        this.radio.setSelectedIndex(i);
-                        break;
-                    }
-                }
-            }
+            setBandFromRadioMode(radioModeValue);
         }
     }
 
@@ -674,9 +659,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             this.channelList.setEnabled(true);
             loadRadioMode();
 
-            if (this.isNet2) {
-                this.buttonPassword.setVisible(false);
-            }
+            this.buttonPassword.setVisible(false);
 
             // disable Password if security is none, or if Wifi-Enterprise is enabled
             if (this.security.getSelectedItemText().equals(WIFI_SECURITY_NONE_MESSAGE)
@@ -824,11 +807,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         });
         this.ssidHelp.setHelpText(MSGS.netWifiToolTipNetworkName());
 
-        if (!this.isNet2) {
-            this.radioHelp.setHelpText(MSGS.netWifiToolTipRadioMode());
-        } else {
-            this.radioHelp.setHelpText(MSGS.netWifiToolTipBand());
-        }
+        this.radioHelp.setHelpText(MSGS.netWifiToolTipRadioMode());
         this.securityHelp.setHelpText(MSGS.netWifiToolTipSecurity());
         this.passwordHelp.setHelpText(MSGS.netWifiToolTipPassword());
         this.verifyHelp.setHelpText(MSGS.netWifiToolTipPassword());
@@ -920,20 +899,11 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         });
 
         // Radio Mode
-        if (!this.isNet2) {
-            this.labelRadio.setText(MSGS.netWifiRadioMode());
-        } else {
-            this.labelRadio.setText(MSGS.netWifiBand());
-        }
+        this.labelRadio.setText(MSGS.netWifiBand());
         this.radio.addMouseOverHandler(event -> {
             if (TabWirelessUi.this.radio.isEnabled()) {
                 TabWirelessUi.this.helpText.clear();
-
-                if (!TabWirelessUi.this.isNet2) {
-                    TabWirelessUi.this.helpText.add(new Span(MSGS.netWifiToolTipRadioMode()));
-                } else {
-                    TabWirelessUi.this.helpText.add(new Span(MSGS.netWifiToolTipBand()));
-                }
+                TabWirelessUi.this.helpText.add(new Span(MSGS.netWifiToolTipBand()));
             }
         });
         this.radio.addMouseOutHandler(event -> resetHelp());
@@ -1235,12 +1205,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private void add8021xFromSecurityDropdown() {
-
-        if (!this.isNet2) {
-            remove8021xFromSecurityDropdown();
-            return;
-        }
-
         for (int i = 0; i < this.security.getItemCount(); i++) {
             if (this.security.getItemText(i).equals(WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE)) {
                 return;
@@ -1700,7 +1664,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private GwtWifiRadioMode radioValueToRadioMode(String radioValue) {
 
         for (GwtWifiRadioMode mode : GwtWifiRadioMode.values()) {
-            String modeName = this.isNet2 ? mode.name() : MessageUtils.get(mode.name());
+            String modeName = mode.name();
             if (modeName.equals(radioValue)) {
                 return mode;
             }
@@ -1816,11 +1780,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         }
 
         this.channelList.clear();
+        addAutomaticChannel(freqChannels);
 
-        if (isNet2) {
-            addAutomaticChannel(freqChannels);
-        }
-        
         freqChannels.stream().forEach(this::addItemChannelList);
 
         if (this.activeConfig != null && this.activeConfig.getChannels() != null
@@ -1897,18 +1858,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private void fillRadioMode(boolean acSupported) {
-        if (!this.isNet2) {
-            for (GwtWifiRadioMode mode : GwtWifiRadioMode.values()) {
-                if (!acSupported && mode == GwtWifiRadioMode.netWifiRadioModeANAC) {
-                    continue;
-                }
-                this.radio.addItem(MessageUtils.get(mode.name()));
-            }
-        } else {
-            this.radio.addItem(WIFI_BAND_2GHZ_MESSAGE, WIFI_RADIO_BG);
-            this.radio.addItem(WIFI_BAND_5GHZ_MESSAGE, WIFI_RADIO_A);
-            this.radio.addItem(WIFI_BAND_BOTH_MESSAGE, WIFI_RADIO_BGN);
-        }
+        this.radio.addItem(WIFI_BAND_2GHZ_MESSAGE, WIFI_RADIO_BG);
+        this.radio.addItem(WIFI_BAND_5GHZ_MESSAGE, WIFI_RADIO_A);
+        this.radio.addItem(WIFI_BAND_BOTH_MESSAGE, WIFI_RADIO_BGN);
     }
 
 }

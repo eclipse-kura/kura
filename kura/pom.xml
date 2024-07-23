@@ -78,7 +78,6 @@
         <module>org.eclipse.kura.linux.watchdog</module>
         <module>org.eclipse.kura.localization</module>
         <module>org.eclipse.kura.localization.resources</module>
-        <module>org.eclipse.kura.net.admin</module>
         <module>org.eclipse.kura.net.configuration</module>
         <module>org.eclipse.kura.nm</module>
         <module>org.eclipse.kura.net.admin.firewall</module>

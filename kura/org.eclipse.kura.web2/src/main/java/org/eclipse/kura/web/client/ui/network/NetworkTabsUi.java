@@ -13,11 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.network;
 
-import java.awt.Color;
-import java.nio.channels.AsynchronousCloseException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.MessageUtils;
@@ -38,9 +35,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-import com.google.gwt.dom.client.Style.BorderStyle;
-import com.google.gwt.dom.client.Style.Unit;
-
 public class NetworkTabsUi extends Composite {
 
     private static final String WIFI_ACCESS_POINT = GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name();
@@ -59,8 +53,6 @@ public class NetworkTabsUi extends Composite {
     }
 
     private static final Messages MSGS = GWT.create(Messages.class);
-
-    private boolean isNet2 = false;
 
     AnchorListItem ip4TabAnchorItem;
     AnchorListItem ip6TabAnchorItem;
@@ -100,22 +92,21 @@ public class NetworkTabsUi extends Composite {
      * Initialization
      */
 
-    public NetworkTabsUi(GwtSession session, final boolean isNet2) {
+    public NetworkTabsUi(GwtSession session) {
         initWidget(uiBinder.createAndBindUi(this));
         this.visibleTabs = new LinkedList<>();
         this.session = session;
-        this.isNet2 = isNet2;
-        initTabs(isNet2);
+        initTabs();
     }
 
-    private void initTabs(final boolean isNet2) {
+    private void initTabs() {
         this.tabsPanel.clear();
         this.visibleTabs.clear();
 
-        initIp4Tab(isNet2);
+        initIp4Tab();
         initIp6Tab();
         initWireless8021xTab();
-        initWirelessTab(isNet2);
+        initWirelessTab();
         initModemTab();
         initModemGpsTab();
         initModemAntennaTab();
@@ -129,9 +120,9 @@ public class NetworkTabsUi extends Composite {
         this.content.add(this.ip4Tab);
     }
 
-    private void initIp4Tab(final boolean isNet2) {
+    private void initIp4Tab() {
         this.ip4TabAnchorItem = new AnchorListItem(MSGS.netIPv4());
-        this.ip4Tab = new TabIp4Ui(this.session, this, isNet2);
+        this.ip4Tab = new TabIp4Ui(this.session, this);
 
         this.ip4TabAnchorItem.addClickHandler(event -> {
             setSelected(NetworkTabsUi.this.ip4TabAnchorItem);
@@ -165,10 +156,9 @@ public class NetworkTabsUi extends Composite {
         });
     }
 
-    private void initWirelessTab(final boolean isNet2) {
+    private void initWirelessTab() {
         this.wirelessTabAnchorItem = new AnchorListItem(MSGS.netWifiWireless());
-        this.wirelessTab = new TabWirelessUi(this.session, this.ip4Tab, this.ip6Tab, this.net8021xTabAnchorItem, this,
-                isNet2);
+        this.wirelessTab = new TabWirelessUi(this.session, this.ip4Tab, this.ip6Tab, this.net8021xTabAnchorItem, this);
 
         this.wirelessTabAnchorItem.addClickHandler(event -> {
             setSelected(NetworkTabsUi.this.wirelessTabAnchorItem);
@@ -284,16 +274,9 @@ public class NetworkTabsUi extends Composite {
         removeAllTabs();
 
         insertTab(this.ip4TabAnchorItem);
-
-        if (this.isNet2) {
-            insertTab(this.ip6TabAnchorItem);
-        }
-
+        insertTab(this.ip6TabAnchorItem);
         arrangeOptionalTabs();
-
-        if (this.isNet2) {
-            insertTab(this.advancedTabAnchorItem);
-        }
+        insertTab(this.advancedTabAnchorItem);
         insertTab(this.hardwareTabAnchorItem);
     }
 
@@ -360,13 +343,10 @@ public class NetworkTabsUi extends Composite {
         this.wirelessTabAnchorItem.setEnabled(!interfaceNotEnabled);
 
         insertTab(this.wirelessTabAnchorItem);
-        if (this.isNet2) {
-            if (interfaceNotEnabled) {
-                this.net8021xTabAnchorItem.setEnabled(false);
-            }
-            insertTab(this.net8021xTabAnchorItem);
+        if (interfaceNotEnabled) {
+            this.net8021xTabAnchorItem.setEnabled(false);
         }
-
+        insertTab(this.net8021xTabAnchorItem);
         insertTab(this.dhcp4NatTabAnchorItem);
     }
 
@@ -439,8 +419,8 @@ public class NetworkTabsUi extends Composite {
         if (this.visibleTabs.contains(this.net8021xTabAnchorItem)) {
             this.set8021xTab.refresh();
         }
-        if(this.visibleTabs.contains(this.advancedTabAnchorItem)) {
-        	this.advancedTab.refresh();
+        if (this.visibleTabs.contains(this.advancedTabAnchorItem)) {
+            this.advancedTab.refresh();
         }
     }
 
@@ -481,7 +461,7 @@ public class NetworkTabsUi extends Composite {
         if (this.visibleTabs.contains(this.net8021xTabAnchorItem) && this.set8021xTab.isDirty()) {
             return true;
         }
-        
+
         if (this.visibleTabs.contains(this.advancedTabAnchorItem) && this.advancedTab.isDirty()) {
             return true;
         }
@@ -554,7 +534,7 @@ public class NetworkTabsUi extends Composite {
             this.set8021xTab.getUpdatedNetInterface(updatedNetIf);
         }
         if (this.visibleTabs.contains(this.advancedTabAnchorItem)) {
-        	this.advancedTab.getUpdatedNetInterface(updatedNetIf);
+            this.advancedTab.getUpdatedNetInterface(updatedNetIf);
         }
 
         return updatedNetIf;
@@ -623,7 +603,7 @@ public class NetworkTabsUi extends Composite {
             errorTab(this.net8021xTabAnchorItem);
             return false;
         }
-        
+
         if (this.visibleTabs.contains(this.advancedTabAnchorItem) && this.advancedTabAnchorItem.isEnabled()
                 && !this.advancedTab.isValid()) {
             errorTab(this.advancedTabAnchorItem);

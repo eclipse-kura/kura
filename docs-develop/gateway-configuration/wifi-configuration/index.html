@@ -384,11 +384,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/intel-up-2-quick-start/" class="md-nav__link">
+      <a href="../../getting-started/zima-board-quick-start/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Intel Up² Quick Start
+    ZimaBoard/Blade Quick Start
   </span>
   
 
@@ -405,11 +405,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/nvidia-jetson-nano-quick-start/" class="md-nav__link">
+      <a href="../../getting-started/nvidia-jetson-orin-quick-start/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    NVIDIA Jetson Nano&trade; - Quick Start
+    NVIDIA Jetson AGX Orin&trade; - Quick Start
   </span>
   
 
@@ -691,15 +691,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
   <a href="#wi-fi-station-mode-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       Wi-Fi Station Mode Configuration
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#wi-fi-linux-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Wi-Fi Linux Configuration
     </span>
   </a>
   
@@ -4437,15 +4428,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#wi-fi-linux-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Wi-Fi Linux Configuration
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -4462,7 +4444,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 
 <h1 id="wi-fi-configuration">Wi-Fi Configuration</h1>
-<p>From a configuration standpoint, the Wi-Fi interface (e.g., wlan0) may be viewed as an extension of Ethernet. In addition to the <strong>TCP/IP</strong> and <strong>DHCP &amp; NAT</strong> configuration tabs, it has the <strong>Wireless</strong> tab that allows for the configuration of wireless settings. These configuration options are described below.</p>
+<p>From a configuration standpoint, the Wi-Fi interface (e.g., wlan0) may be viewed as an extension of Ethernet. In addition to the <strong>IPv4</strong>, <strong>IPv6</strong> and <strong>DHCPv4 &amp; NAT</strong> configuration tabs, it has the <strong>Wireless</strong> tab that allows for the configuration of wireless settings. These configuration options are described below.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Before using wifi make sure that you have correctly set the Regulatory Domain on the gateway. You can check the current configuration using the <code>iw reg get</code> command. To set the Regulatory Domain please refer to the specific section in the Gateway Configurations.</p>
@@ -4485,13 +4467,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 </li>
 <li>
-<p><strong>Radio Mode</strong>: defines 802.11 mode.</p>
+<p><strong>Band</strong>: defines the frequency band to use</p>
 <ul>
-<li>802.11 ac/n/a (either in 2.4Ghz or 5Ghz depending on the choosen channel)</li>
-<li>802.11n/g/b (2.4Ghz only)</li>
-<li>802.11g/b (2.4Ghz only)</li>
-<li>802.11b (2.4Ghz only)</li>
-<li>802.11a (either in 2.4Ghz or 5Ghz depending on the choosen channel)</li>
+<li>2.4GHz: use 2.4GHz band</li>
+<li>5GHz: use 5GHz band</li>
+<li>2.4GHz/5GHz: use either in 2.4Ghz or 5Ghz depending on the choosen channel</li>
 </ul>
 </li>
 <li>
@@ -4501,7 +4481,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>WEP: Wired Equivalent Privacy</li>
 <li>WPA: Wi-Fi Protected Access</li>
 <li>WPA2: Wi-Fi Protected Access II</li>
-<li>WPA2/WPA3-Enterprise: Wi-Fi Protected Access II &amp; III with 802.1x Support (Only available in station mode with <a href="../../getting-started/install-kura/">generic profiles</a>)</li>
+<li>WPA2/WPA3-Enterprise: Wi-Fi Protected Access II &amp; III with 802.1x. Please see <a href="../wifi-configuration-8021x/">here</a> for further details. This fearture is available only in station mode</li>
 </ul>
 </li>
 <li>
@@ -4574,7 +4554,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 </li>
 <li>
-<p><strong>Channels table</strong>: allows the selection of desired channel frequencies. The availability of the desired frequency is subject to the Regdom set on the device. For a list of limitations in different countries you can consult the following page: <a href="https://en.wikipedia.org/wiki/List_of_WLAN_channels">List of WLAN channels</a>. Channels marked as No Irradiation and Radar Detection can be used only if DFS (Dynamic Frequency Selection) is supported by the Wi-Fi chip. </p>
+<p><strong>Channels list</strong>: allows the selection of desired channel frequencies. The availability of the desired frequency is subject to the Regdom set on the device. For a list of limitations in different countries you can consult the following page: <a href="https://en.wikipedia.org/wiki/List_of_WLAN_channels">List of WLAN channels</a>. Channels marked as No Irradiation and Radar Detection can be used only if DFS (Dynamic Frequency Selection) is supported by the Wi-Fi chip. </p>
 <ul>
 <li>In <em>Access Point</em> mode, only one channel may be selected.</li>
 <li>In <em>Station</em> mode, the list of available channels depends on the selected Radio Mode. The selected radio mode also affects the ability to select a network in the scan window (if the channel associated with the network is not enabled in the regulatory domain an error message will be shown).</li>
@@ -4583,7 +4563,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 <p><img alt="WiFi Configuration" src="../images/wifi-configuration.png" /></p>
 <h2 id="wi-fi-station-mode-configuration">Wi-Fi Station Mode Configuration</h2>
-<p>In addition to the options described above, the <strong>Wireless</strong> configuration display provides two buttons that help to configure Wi-Fi in the <em>Station</em> mode. These buttons are described below.</p>
+<p>In addition to the options described above, the <strong>Wireless</strong> configuration display the <strong>Access Point Scan</strong> button that help to configure Wi-Fi in the <em>Station</em> mode.</p>
 <ul>
 <li>
 <p><strong>Access Point Scan</strong>: clicking this button triggers access point scan operations. Upon a successful scan, a table containing access points within range is presented. This table contains the following information:</p>
@@ -4595,106 +4575,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>Frequency</li>
 <li>Security</li>
 </ul>
-<p>If you select one of these access points, respective wireless controls (i.e., <em>Network Name</em>, <em>Wireless Security</em>, and <em>Channel</em>) are filled with information obtained during the scan operation.</p>
-</li>
-<li>
-<p><strong>Password Verification</strong>: clicking this button triggers password verification before a full connection is established.</p>
+<p>If you select one of these access points, respective wireless controls (i.e., <em>Network Name</em>, <em>Wireless Security</em>, and <em>Channel</em>) are filled with information obtained during the scan operation. The <em>Force Wireless Network Scan</em> button triggers a manual scan for available access points.</p>
 </li>
 </ul>
-<div class="admonition warning">
-<p class="admonition-title">Generic Profiles Access Point Scan Issue</p>
-<p>Due to a limitation in our current implementation of Access Point scanning in the generic profiles, a scan triggered while the device Wireless Mode is set as <em>Access Point</em> will result in it reporting itself as the only reachable Access Point.</p>
-<p>To retrieve the actual list of nearby Access Points, set your device in <em>Station Mode</em> with a temporary configuration and trigger the scan again.</p>
-</div>
-<h2 id="wi-fi-linux-configuration">Wi-Fi Linux Configuration</h2>
-<p>This section describes the changes applied by Kura at the Linux networking configuration. Please read the following note before proceeding with manual changes of the Linux networking configuration.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>It is <strong>NOT</strong> recommended performing manual editing of the Linux networking configuration files when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.</p>
-</div>
-<p>When the Wi-Fi configuration for the <em>Access Point</em> mode is submitted, Kura generates the <code>/etc/hostapd.conf</code> file and launches the hostapd program as shown below.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>hostapd:B<span class="w"> </span>/etc/hostapd.conf
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># /etc/hostapd/hostapd.conf</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nv">interface</span><span class="o">=</span>wlan0
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nv">driver</span><span class="o">=</span>nl80211
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># SSID to use. This will be the &quot;name&quot; of the accesspoint</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="nv">ssid</span><span class="o">=</span>kura_gateway_00:E0:C7:09:35:D8
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="c1"># basic operational settings</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="nv">hw_mode</span><span class="o">=</span>g
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="nv">wme_enabled</span><span class="o">=</span><span class="m">0</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="nv">ieee80211n</span><span class="o">=</span><span class="m">0</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="nv">channel</span><span class="o">=</span><span class="m">1</span>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="c1"># Logging and debugging settings: more of this in original config file</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="nv">logger_syslog</span><span class="o">=</span>-1
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="nv">logger_syslog_level</span><span class="o">=</span><span class="m">2</span>
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="nv">logger_stdout</span><span class="o">=</span>-1
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="nv">logger_stdout_level</span><span class="o">=</span><span class="m">2</span>
-<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="nv">dump_file</span><span class="o">=</span>/tmp/hostapd.dump
-<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>
-<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="c1"># WPA settings. We&#39;ll use stronger WPA2</span>
-<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="c1"># bit0 = WPA</span>
-<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="c1"># bit1 = IEEE 802.11i/RSN (WPA2) (dot11RSNAEnabled)</span>
-<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="nv">wpa</span><span class="o">=</span><span class="m">2</span>
-<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>
-<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a><span class="c1"># Preshared key of between 8-63 ASCII characters.</span>
-<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a><span class="c1"># If you define the key in here, make sure that the file is not readable</span>
-<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a><span class="c1"># by anyone but root. Alternatively you can use a separate file for the</span>
-<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a><span class="c1"># key; see original hostapd.conf for more information.</span>
-<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a><span class="nv">wpa_passphrase</span><span class="o">=</span>testKEYS
-<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>
-<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a><span class="c1"># Key management algorithm. In this case, a simple pre-shared key (PSK)</span>
-<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a><span class="nv">wpa_key_mgmt</span><span class="o">=</span>WPA-PSK
-<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>
-<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a><span class="c1"># The cipher suite to use. We want to use stronger CCMP cipher.</span>
-<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a><span class="nv">wpa_pairwise</span><span class="o">=</span>CCMP
-<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>
-<a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a><span class="c1"># Change the broadcasted/multicasted keys after this many seconds.</span>
-<a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a><span class="nv">wpa_group_rekey</span><span class="o">=</span><span class="m">600</span>
-<a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>
-<a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a><span class="c1"># Change the master key after this many seconds. Master key is used as a basis</span>
-<a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a><span class="c1"># (source) for the encryption keys.</span>
-<a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a><span class="nv">wpa_gmk_rekey</span><span class="o">=</span><span class="m">86400</span>
-<a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>
-<a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a><span class="c1"># Send empty SSID in beacons and ignore probe request frames that do not</span>
-<a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a><span class="c1"># specify full SSID, i.e., require stations to know SSID.</span>
-<a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a><span class="c1"># default: disabled (0)</span>
-<a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a><span class="c1"># 1 = send empty (length=0) SSID in beacon and ignore probe request for</span>
-<a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a><span class="c1">#     broadcast SSID</span>
-<a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a><span class="c1"># 2 = clear SSID (ASCII 0), but keep the original length (this may be required</span>
-<a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a><span class="c1">#     with some clients that do not support empty SSID) and ignore probe</span>
-<a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a><span class="c1">#     requests for broadcast SSID</span>
-<a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a><span class="nv">ignore_broadcast_ssid</span><span class="o">=</span><span class="m">0</span>
-</code></pre></div>
-<p>When the Wi-Fi configuration for the <em>Station</em> mode is submitted, Kura generates the <code>/etc/wpa_supplicant.conf</code> file and launches the <code>wpa_supplicant</code> program as shown below.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>wpa_supplicant:B:D<span class="w"> </span>nl80211:i<span class="w"> </span>wlan0:c<span class="w"> </span>/etc/wpa_supplicant.conf
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># /etc/wpa_supplicant.conf</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># allow frontend (e.g., wpa_cli) to be used by all users in &#39;wheel&#39; group</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nv">ctrl_interface</span><span class="o">=</span>/var/run/wpa_supplicant
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="nv">ctrl_interface_group</span><span class="o">=</span>wheel
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1"># home network; allow all valid ciphers</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="nv">network</span><span class="o">={</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="nv">mode</span><span class="o">=</span><span class="m">0</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="nv">ssid</span><span class="o">=</span><span class="s2">&quot;Eurotech-INC&quot;</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">    </span><span class="nv">scan_ssid</span><span class="o">=</span><span class="m">1</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">    </span><span class="nv">key_mgmt</span><span class="o">=</span>WPA-PSK
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">    </span><span class="nv">psk</span><span class="o">=</span><span class="s2">&quot;WG4t3101&quot;</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">    </span><span class="nv">proto</span><span class="o">=</span>RSN
-<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">    </span><span class="nv">pairwise</span><span class="o">=</span>CCMP<span class="w"> </span>TKIP
-<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">    </span><span class="nv">group</span><span class="o">=</span>CCMP<span class="w"> </span>TKIP
-<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">    </span><span class="nv">scan_freq</span><span class="o">=</span><span class="m">2412</span>
-<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">    </span><span class="nv">bgscan</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
-<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="o">}</span>
-</code></pre></div>
 
 
 

@@ -384,11 +384,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/intel-up-2-quick-start/" class="md-nav__link">
+      <a href="../../getting-started/zima-board-quick-start/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Intel Up² Quick Start
+    ZimaBoard/Blade Quick Start
   </span>
   
 
@@ -405,11 +405,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/nvidia-jetson-nano-quick-start/" class="md-nav__link">
+      <a href="../../getting-started/nvidia-jetson-orin-quick-start/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    NVIDIA Jetson Nano&trade; - Quick Start
+    NVIDIA Jetson AGX Orin&trade; - Quick Start
   </span>
   
 
@@ -626,9 +626,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#more-details-about-the-not-managed-interface-status" class="md-nav__link">
+  <a href="#more-details-about-the-not-managed-interface-status-tbd-not-applicable-in-nm" class="md-nav__link">
     <span class="md-ellipsis">
-      More details about the Not Managed interface Status
+      More details about the Not Managed interface Status - (TBD: not applicable in NM)
     </span>
   </a>
   
@@ -640,9 +640,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#dhcp-nat-configuration" class="md-nav__link">
+  <a href="#dhcpv4-nat-configuration" class="md-nav__link">
     <span class="md-ellipsis">
-      DHCP &amp; NAT Configuration
+      DHCPv4 &amp; NAT Configuration
     </span>
   </a>
   
@@ -4628,9 +4628,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#more-details-about-the-not-managed-interface-status" class="md-nav__link">
+  <a href="#more-details-about-the-not-managed-interface-status-tbd-not-applicable-in-nm" class="md-nav__link">
     <span class="md-ellipsis">
-      More details about the Not Managed interface Status
+      More details about the Not Managed interface Status - (TBD: not applicable in NM)
     </span>
   </a>
   
@@ -4642,9 +4642,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#dhcp-nat-configuration" class="md-nav__link">
+  <a href="#dhcpv4-nat-configuration" class="md-nav__link">
     <span class="md-ellipsis">
-      DHCP &amp; NAT Configuration
+      DHCPv4 &amp; NAT Configuration
     </span>
   </a>
   
@@ -4863,32 +4863,44 @@ You are viewing the documentation relative to the develop branch or to an outdat
 Since the network configuration shown on the screen may not be synchronized with the current state of the system, it can be updated pressing the <strong>Refresh</strong> button. This can be used also to force the reload of specific parameters like the RSSI or dynamic IP addresses. The refresh procedure reads all the needed parameters from the system and can take several seconds before updating.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>It is recommended that the <strong>TCP/IP</strong> tab is configured first since it defines how the interface is going to be used.</p>
+<p>It is recommended that the <strong>IPv4</strong> or <strong>IPv6</strong> tab is configured first since it defines how the interface is going to be used.</p>
 </div>
 <h2 id="tcpip-configuration">TCP/IP Configuration</h2>
-<p>The <strong>TCP/IP</strong> tab contains the following configuration parameters:</p>
+<p>The <strong>IPv4</strong> and <strong>IPv6</strong> tabs contain the following configuration parameters:</p>
 <ul>
 <li><strong>Status</strong><ul>
 <li>Disabled: disables the selected interface (i.e., administratively down).</li>
 <li>Enabled for LAN: designates the interface for a local network. It can be set as a DHCP server for hosts on the local network and can serve as a default gateway for those hosts; however, it cannot be set as an actual gateway interface for this device. That is, packets must be routed from this interface to another interface that is configured as WAN. The interface is automatically brought up at boot.</li>
 <li>Enabled for WAN: designates the interface as a gateway to an external network. The interface is automatically brought up at boot.</li>
-<li>Not Managed: the interface will be ignored by Kura.</li>
-<li>Layer 2 Only: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot.</li>
+<li>Not Managed: the interface will be ignored by Kura (available only for <strong>IPv4</strong>).</li>
+<li>Layer 2 Only: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot (available only for <strong>IPv4</strong>).</li>
 </ul>
 </li>
+<li><strong>WAN Priority</strong> - configure the network failover. See <a href="../network-failover/">here</a> for more details.</li>
 <li><strong>Configure</strong><ul>
 <li>Manually: allows manual entry of the <em>IP Address</em> and <em>Netmask</em> fields, if the interface is configured as LAN; allows manual entry of the <em>IP Address</em>, <em>Netmask</em>, <em>Gateway</em>, and <em>DNS Servers</em> fields, if the interface is designated as WAN.</li>
-<li>Using DHCP: configures the interface as a DHCP client obtaining the IP address from a network DHCP server.</li>
+<li>Using DHCP/DHCPv6: configures the interface as a DHCP client obtaining the IP address from a network DHCP server.</li>
+<li>Stateless Address Auto-Configuration (SLAAC): automatically assign an IP address (available only for <strong>IPv6</strong>).</li>
+</ul>
+</li>
+<li><strong>Address Generation Mode</strong> - defines the method used to automatically generate the IP address with SLAAC (available only for <strong>IPv6</strong>)<ul>
+<li>EUI64: use EUI-64 method for address generation</li>
+<li>Stable-privacy: use RFC7217 method for address generation</li>
 </ul>
 </li>
 <li><strong>IP Address</strong> - defines the IP address of the interface, if manually configured.</li>
 <li><strong>Subnet Mask</strong> - defines the subnet mask of the interface, if manually configured.</li>
 <li><strong>Gateway</strong> - specifies the default gateway for the unit. (Required field if the interface is designated as WAN and manually configured.)</li>
 <li><strong>DNS Servers</strong> - provides a list of DNS servers, if the interface is designated as WAN and is manually configured.</li>
-<li><strong>Search Domains</strong> - Not implemented.</li>
+<li><strong>Privacy</strong> - configure privacy extension for SLAAC (available only for <strong>IPv6</strong>).<ul>
+<li>Disabled: disables the privacy extension.</li>
+<li>Prefer public addresses: use public address for outgoing traffic.</li>
+<li>Prefer temporary addresses: prefer temporary address for outgoing traffic.</li>
 </ul>
-<p>If the network interface is <em>Enabled for LAN</em> and manually configured (i.e., not a DHCP client), the <strong>DHCP &amp; NAT</strong> tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.</p>
-<h3 id="more-details-about-the-not-managed-interface-status">More details about the Not Managed interface Status</h3>
+</li>
+</ul>
+<p>If the network interface is configured as <em>Enabled for LAN</em> and manually configured (i.e., not a DHCP client) in the <strong>IPV4</strong> tab, the <strong>DHCPv4 &amp; NAT</strong> tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.</p>
+<h3 id="more-details-about-the-not-managed-interface-status-tbd-not-applicable-in-nm">More details about the Not Managed interface Status - (TBD: not applicable in NM)</h3>
 <p>When a network interface is configured as <strong>Not Managed</strong>, Kura will ignore it and the configuration will not be touched. The user can configure the interface with the network tools provided by the OS, allowing unusual network setups.</p>
 <p>Regarding DNS, both Kura and the external tools store the DNS addresses in the <code>/etc/resolv.conf</code> file. So, if multiple interfaces are configured to get the DNS information and store it in the same file, the device can be misconfigured. To avoid that, the following table presents who is responsible to update the DNS file depending on the network interfaces configurations.</p>
 <table>
@@ -4925,14 +4937,16 @@ Since the network configuration shown on the screen may not be synchronized with
 <p>So, the only way to configure the DNS addresses with external tools, is to configure at least one interface as <strong>Not Managed</strong> and not to set any interface as <strong>Enabled For Wan</strong> using Kura. If at least one WAN interface is configured by Kura, it will take the control of the <code>/etc/resolv.conf/</code> file. Finally, if any interface is configured in <strong>Enabled For Wan</strong> or <strong>Not Managed</strong> mode, Kura will empty the file.</p>
 <p>To avoid device misconfigurations when <strong>Not Managed</strong> interfaces are used, <strong>don't</strong> use the <em>dns-nameservers</em> directive in the <code>/etc/network/interfaces</code> file. Please add the DNS addresses directly to the <code>/etc/resolv.conf</code> file.</p>
 <p><img alt="Network Configuration TCP/IP" src="../images/network-configuration-tcpip.png" /></p>
-<h2 id="dhcp-nat-configuration">DHCP &amp; NAT Configuration</h2>
-<p>The <strong>DHCP &amp; NAT</strong> tab contains the following configuration parameters:</p>
+<h2 id="dhcpv4-nat-configuration">DHCPv4 &amp; NAT Configuration</h2>
+<p>The <strong>DHCPv4 &amp; NAT</strong> tab contains the following configuration parameters:</p>
 <ul>
-<li><strong>Router Mode</strong></li>
+<li><strong>Router Mode</strong><ul>
 <li>DHCP and NAT: indicates that both DHCP server and NAT are enabled.</li>
 <li>DHCP Only: indicates that DHCP server is enabled and NAT is disabled.</li>
 <li>NAT Only: indicates that NAT is enabled and DHCP server is disabled.</li>
 <li>Off: indicates that both DHCP server and NAT are disabled.</li>
+</ul>
+</li>
 <li><strong>DHCP Beginning Address</strong>: specifies the first address of DHCP pool (i.e., first available client IP address).</li>
 <li><strong>DHCP Ending Address</strong>: specifies the last address of DHCP pool (i.e., last IP address that can be assigned to a client).</li>
 <li><strong>DHCP Subnet Mask</strong>: defines the subnet mask that is assigned to a client.</li>
@@ -4940,7 +4954,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <li><strong>DHCP Max Lease Time</strong>: sets the maximum time (in minutes) that the client retains the provided IP address. It must be greater than 0.</li>
 <li><strong>Pass DNS Servers through DHCP</strong>: enables DNS Proxy (i.e., passing DNS servers through DHCP).</li>
 </ul>
-<p>If NAT is enabled and there is another interface designated as WAN (e.g., ppp0), the following iptables rules are added to the <em>custom automatic NAT service rules</em>_* section of the <code>/etc/init.d/firewall</code> script:</p>
+<p>If NAT is enabled and there is another interface designated as WAN (e.g., ppp0), the following iptables rules are added to the <em>custom automatic NAT service rules</em> section of the <code>/etc/init.d/firewall</code> script:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># custom automatic NAT service rules (if NAT option is enabled for LAN interface)</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>iptables<span class="w"> </span>-t<span class="w"> </span>nat<span class="w"> </span>-A<span class="w"> </span>POSTROUTING<span class="w"> </span>-o<span class="w"> </span>ppp0<span class="w"> </span>-j<span class="w"> </span>MASQUERADE
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>iptables<span class="w"> </span>-A<span class="w"> </span>FORWARD<span class="w"> </span>-i<span class="w"> </span>ppp0<span class="w"> </span>-o<span class="w"> </span>eth0<span class="w"> </span>-m<span class="w"> </span>state<span class="w"> </span>--state<span class="w"> </span>RELATED,ESTABLISHED<span class="w"> </span>-j<span class="w"> </span>ACCEPT
@@ -4950,7 +4964,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># allow fowarding if any masquerade is defined</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">echo</span><span class="w"> </span><span class="m">1</span><span class="w"> </span>&gt;<span class="w"> </span>/proc/sys/net/ipv4/ip_forward
 </code></pre></div>
-<p>The rules shown above create an <em>Overloaded</em>_<em> (i.e., many-to-one) NAT. This type of network address translation maps multiple IP addresses on the LAN side to a single IP address on the WAN side, allowing internet access from hosts on a local network via a gateway (WAN) interface. Note that for NAT rules to be added, it is insufficient to enable NATing through the </em><em>DHCP &amp; NAT</em>* tab of the LAN interface; there must also be another interface designated as WAN.</p>
+<p>The rules shown above create an <em>Overloaded</em> (i.e., many-to-one) NAT. This type of network address translation maps multiple IP addresses on the LAN side to a single IP address on the WAN side, allowing internet access from hosts on a local network via a gateway (WAN) interface. Note that for NAT rules to be added, it is insufficient to enable NATing through the <strong>DHCPv4 &amp; NAT</strong> tab of the LAN interface; there must also be another interface designated as WAN.</p>
 <p><img alt="Network Configuration DHCP and NAT" src="../images/network-configuration-dhcp-nat.png" /></p>
 <h2 id="network-linux-configuration">Network Linux Configuration</h2>
 <p>When applying a new network configuration, Kura changes the configuration files of the Linux networking subsystem. Please read the following note before proceeding with manual changes of the Linux networking configuration.</p>

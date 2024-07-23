@@ -355,13 +355,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#generic-installers" class="md-nav__link">
+  <a href="#kura-installers" class="md-nav__link">
     <span class="md-ellipsis">
-      Generic installers
+      Kura installers
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Generic installers">
+    <nav class="md-nav" aria-label="Kura installers">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -410,9 +410,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
         
           <li class="md-nav__item">
-  <a href="#supported-devices" class="md-nav__link">
+  <a href="#reference-devices" class="md-nav__link">
     <span class="md-ellipsis">
-      Supported devices
+      Reference devices
     </span>
   </a>
   
@@ -502,11 +502,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../intel-up-2-quick-start/" class="md-nav__link">
+      <a href="../zima-board-quick-start/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Intel Up² Quick Start
+    ZimaBoard/Blade Quick Start
   </span>
   
 
@@ -523,11 +523,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../nvidia-jetson-nano-quick-start/" class="md-nav__link">
+      <a href="../nvidia-jetson-orin-quick-start/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    NVIDIA Jetson Nano&trade; - Quick Start
+    NVIDIA Jetson AGX Orin&trade; - Quick Start
   </span>
   
 
@@ -4476,13 +4476,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#generic-installers" class="md-nav__link">
+  <a href="#kura-installers" class="md-nav__link">
     <span class="md-ellipsis">
-      Generic installers
+      Kura installers
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Generic installers">
+    <nav class="md-nav" aria-label="Kura installers">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -4531,9 +4531,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
         
           <li class="md-nav__item">
-  <a href="#supported-devices" class="md-nav__link">
+  <a href="#reference-devices" class="md-nav__link">
     <span class="md-ellipsis">
-      Supported devices
+      Reference devices
     </span>
   </a>
   
@@ -4560,31 +4560,29 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 
 <h1 id="install-kura">Install Kura</h1>
-<p>Kura is provided using a DEB Linux package. Visit the <a href="https://www.eclipse.org/kura/downloads.php">Kura download page</a> to find the correct installation file for the target system.</p>
+<p>Eclipse Kura&trade; is provided using a Debian Linux package. Visit the <a href="https://www.eclipse.org/kura/downloads.php">Kura download page</a> to find the correct installation file for the target system.</p>
 <h2 id="installer-types">Installer types</h2>
 <p>Several installers can be found on such page, and they fall into one of the following categories:</p>
 <ol>
-<li>specific device profiles, like `kura_5.5.0_nvidia-jetson-nano_installer.deb`` (identified with the device name in the <a href="https://www.eclipse.org/kura/downloads.php">downloads</a> page);</li>
-<li>generic profiles, like <code>kura-5.5.0_generic-arm32_installer.deb</code>; and</li>
-<li>profiles with suffix <strong>nn</strong>, like <code>kura_5.5.0_nvidia-jetson-nano-nn_installer.deb</code></li>
+<li>standard installers, like <code>kura-6.0.0_generic-arm32_installer.deb</code>; and</li>
+<li>installers with suffix <strong>nn</strong>, like <code>kura-6.0.0_generic-arm32-nn_installer.deb</code></li>
 </ol>
-<p>Profiles of types (1) and (2) ship a Kura version with networking functionalities. In particular, the installers of kind (1) use <strong>Kura Networking</strong> for leveraging network interface configurations and are made for a specific device.</p>
-<p>Installers of type (2) can be installed on targets with <a href="https://networkmanager.dev">NetworkManager</a>; a commonly available tool for managing Linux networking. Kura leverages this tool for networking functionalities. Refer to the <a href="#generic-installers">Generic installers</a> section for further information.</p>
-<p>Installers of type (3) with the suffix <code>nn</code> are <strong>No Networking</strong> profiles that do not bundle the Kura Network Manager: all the network configurations need to be done outside of Kura. Functionalities <strong>missing</strong> in <strong>NN profiles</strong> compared to the full Kura profiles:</p>
+<p>Profiles of types (1) ship a Kura version with networking functionalities. In particular, they can be installed on targets with <a href="https://networkmanager.dev">NetworkManager</a>, a commonly available tool for managing Linux networking. Kura leverages this tool for networking functionalities. Refer to the <a href="#kura-installers">Kura installers</a> section for further information.</p>
+<p>Installers of type (2) with the suffix <code>nn</code> are <strong>No Networking</strong> profiles that do not bundle the Kura Network Manager: all the network configurations need to be done outside of Kura. Functionalities <strong>missing</strong> in <strong>NN profiles</strong> compared to the full Kura profiles:</p>
 <ul>
 <li>Networking interfaces management</li>
 <li>Firewall configuration management</li>
 <li>Network Threat management</li>
 </ul>
-<h2 id="generic-installers">Generic installers</h2>
-<p>Kura can be installed using the <strong>generic profiles</strong>:</p>
+<h2 id="kura-installers">Kura installers</h2>
+<p>A user can deploy Kura on a target system using the installer tailored for the device architecture. The installer file looks like:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>kura-&lt;kura-version&gt;_generic-&lt;arch&gt;_installer.deb/rpm
 </code></pre></div>
-<p>where <code>&lt;arch&gt;</code> is one of the <strong>supported architectures</strong>: <em>x86_64</em>, <em>arm32</em>, and <em>arm64</em>. A generic Kura profile can work on systems that have available the dependencies listed in the <a href="#kura-dependencies">Kura dependencies</a> section, and that have <strong>at least one</strong> physical ethernet interface.</p>
+<p>where <code>&lt;arch&gt;</code> is one of the <strong>supported architectures</strong>: <em>x86_64</em>, <em>arm32</em>, and <em>arm64</em>. Kura can work on systems that have available the dependencies listed in the <a href="#kura-dependencies">Kura dependencies</a> section, and that have <strong>at least one</strong> physical ethernet interface.</p>
 <h3 id="java-heap-memory-assignment">Java Heap Memory Assignment</h3>
-<p>Eclipse Kura's Generic profile incorporates an adaptive Heap Memory allocation system during installation. The allocation follows a formula based on your gateway's available memory. If your gateway has less than 1024MB of RAM, Kura will set -Xms and -Xmx to 256MB. For gateways with more than 1024MB, one quarter of the total RAM will be assigned to -Xms and -Xmx.</p>
+<p>The Eclipse Kura&trade;'s installer incorporates an adaptive Heap Memory allocation system during installation. The allocation follows a formula based on your gateway's available memory. If your gateway has less than 1024MB of RAM, Kura will set -Xms and -Xmx to 256MB. For gateways with more than 1024MB, one quarter of the total RAM will be assigned to -Xms and -Xmx.</p>
 <h3 id="initial-network-configuration">Initial network configuration</h3>
-<p>During the installation of a generic profile with network management support, the initial network configuration will be generated dynamically using the rules described below:</p>
+<p>During the installation of a profile with network management support, the initial network configuration will be generated dynamically using the rules described below:</p>
 <ul>
 <li>The existing wired and wireless Ethernet network interface names are sorted in ascending lexicographic order.</li>
 <li>
@@ -4618,9 +4616,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h3 id="initial-firewall-configuration">Initial firewall configuration</h3>
 <p>The initial firewall configuration will be as shown in the screenshot below.</p>
 <p><img alt="" src="../images/firewall-generic.png" /></p>
-<p>Please note that installing a Kura generic profile with network configuration support will replace the current network and firewall configuration with the one shown above.</p>
+<p>Please note that installing Eclipse Kura with network configuration support will replace the current network and firewall configuration with the one shown above.</p>
 <h3 id="other-kura-services">Other Kura services</h3>
-<p>Kura generic profiles do not contain gateway specific customizations, this implies that the values of some configuration parameters may be incorrect and/or missing and must be manually filled after installation. For example the user might want to:</p>
+<p>Eclipse Kura&trade; do not contain gateway specific customizations, this implies that the values of some configuration parameters may be incorrect and/or missing and must be manually filled after installation. For example the user might want to:</p>
 <ul>
 <li>Configure the other network interfaces, if any.</li>
 <li>Setup additional firewall rules.</li>
@@ -4640,8 +4638,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>Java: <code>openjdk-17-jre-headless</code> or <code>temurin-17-jdk</code> or <code>openjdk-8-jre-headless</code> or <code>temurin-8-jdk</code>.</li>
 <li>Others: <code>dos2unix</code></li>
 </ul>
-<h3 id="supported-devices">Supported devices</h3>
-<p>Kura generic has been tested on the following devices and provides full configuration of all the available interfaces and GPIO mappings.</p>
+<h3 id="reference-devices">Reference devices</h3>
+<p>Eclipse Kura&trade; has been tested on the following devices and provides full configuration of all the available interfaces and GPIO mappings.</p>
 <table>
 <thead>
 <tr>
@@ -4654,7 +4652,12 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <tr>
 <td><strong>Raspberry Pi 3/4</strong></td>
 <td><em>arm32</em></td>
-<td>Raspbian "Bookworm"</td>
+<td>Raspberry Pi OS "Bookworm"</td>
+</tr>
+<tr>
+<td><strong>Raspberry Pi 3/4</strong></td>
+<td><em>arm64</em></td>
+<td>Raspberry Pi OS "Bookworm"</td>
 </tr>
 <tr>
 <td><strong>Raspberry Pi 3/4</strong></td>
@@ -4662,14 +4665,14 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <td>Ubuntu 20.04</td>
 </tr>
 <tr>
-<td><strong>Intel Up²</strong></td>
+<td><strong>ZimaBoard/Blade</strong></td>
 <td><em>x86_64</em></td>
-<td>Ubuntu 20.04</td>
+<td>TBD</td>
 </tr>
 <tr>
-<td><strong>NVIDIA Jetson Nano&trade;</strong></td>
+<td><strong>NVIDIA Jetson AGX Orin&trade;</strong></td>
 <td><em>arm64</em></td>
-<td>Ubuntu 20.04</td>
+<td>TBD</td>
 </tr>
 </tbody>
 </table>
@@ -4678,8 +4681,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><a href="../raspberry-pi-raspberryos-quick-start/">Raspberry Pi - Raspberry Pi OS Quick Start</a></li>
 <li><a href="../raspberry-pi-ubuntu-20-quick-start/">Raspberry Pi - Ubuntu 20 Quick Start</a></li>
 <li><a href="../docker-quick-start/">Docker Quick Start</a></li>
-<li><a href="../intel-up-2-quick-start/">Intel Up² Quick Start</a></li>
-<li><a href="../nvidia-jetson-nano-quick-start/">NVIDIA Jetson Nano&trade;</a></li>
+<li><a href="../nvidia-jetson-orin-quick-start/">Nvidia Jetson AGX Orin Quick Start</a></li>
+<li><a href="../zima-board-quick-start/">ZimaBoard/Blade Quick Start</a></li>
 </ul>
 
 

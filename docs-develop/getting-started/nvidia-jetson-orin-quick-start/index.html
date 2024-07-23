@@ -9,7 +9,7 @@
       
       
       
-        <link rel="prev" href="../intel-up-2-quick-start/">
+        <link rel="prev" href="../zima-board-quick-start/">
       
       
         <link rel="next" href="../../gateway-configuration/gateway-administration-console/">
@@ -20,7 +20,7 @@
     
     
       
-        <title>NVIDIA Jetson Nano™ - Quick Start - Eclipse Kura™ Documentation</title>
+        <title>NVIDIA Jetson AGX Orin™ - Quick Start - Eclipse Kura™ Documentation</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#nvidia-jetson-nanotm-quick-start" class="md-skip">
+        <a href="#nvidia-jetson-agx-orintm-quick-start" class="md-skip">
           Skip to content
         </a>
       
@@ -123,7 +123,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              NVIDIA Jetson Nano&trade; - Quick Start
+              NVIDIA Jetson AGX Orin&trade; - Quick Start
             
           </span>
         </div>
@@ -386,11 +386,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../intel-up-2-quick-start/" class="md-nav__link">
+      <a href="../zima-board-quick-start/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Intel Up² Quick Start
+    ZimaBoard/Blade Quick Start
   </span>
   
 
@@ -420,7 +420,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
           
   
   <span class="md-ellipsis">
-    NVIDIA Jetson Nano&trade; - Quick Start
+    NVIDIA Jetson AGX Orin&trade; - Quick Start
   </span>
   
 
@@ -431,7 +431,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
         
   
   <span class="md-ellipsis">
-    NVIDIA Jetson Nano&trade; - Quick Start
+    NVIDIA Jetson AGX Orin&trade; - Quick Start
   </span>
   
 
@@ -456,15 +456,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
   <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
       Overview
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#eclipse-kuratm-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Eclipse Kura&trade; Installation
     </span>
   </a>
   
@@ -4417,15 +4408,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#eclipse-kuratm-installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Eclipse Kura&trade; Installation
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -4441,75 +4423,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
                   
 
 
-<h1 id="nvidia-jetson-nanotm-quick-start">NVIDIA Jetson Nano&trade; - Quick Start</h1>
+<h1 id="nvidia-jetson-agx-orintm-quick-start">NVIDIA Jetson AGX Orin&trade; - Quick Start</h1>
 <h2 id="overview">Overview</h2>
-<p>This section provides Eclipse Kura&trade; quick installation procedures for the NVIDIA Jetson Nano&trade;.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not <a href="https://en.wikipedia.org/wiki/CAN_bus">CAN bus</a> support. For more information on this please visit the <a href="https://websites.eclipseprojects.io/kura/downloads.php">Eclipse Kura download page</a></p>
-</div>
-<p>This quickstart has been tested using the latest Ubuntu 18.04 LTS image provided by NVIDIA <a href="https://developer.nvidia.com/jetson-nano-sd-card-image">here</a> and burned on a SD card with <a href="https://www.balena.io/etcher/">Etcher</a>.</p>
-<p>The official images can be found on the <a href="https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#write">Jetson Nano Developer Kit Getting Starteg Guide</a>. Further information on the Ubuntu installation for the NVIDIA Jetson Nano&trade; can be found <a href="https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#intro">here</a>.</p>
-<h2 id="eclipse-kuratm-installation">Eclipse Kura&trade; Installation</h2>
-<p>To install Eclipse Kura with its dependencies on the NVIDIA Jetson Nano&trade;, perform the
-following steps:</p>
-<ol>
-<li>
-<p>Boot the NVIDIA Jetson Nano&trade; with the latest Jetson Nano Developer Kit SD Card image.</p>
-</li>
-<li>
-<p>Make sure your device is connected to internet. By default, <code>eth0</code> lan network interface is configured in DHCP mode.</p>
-</li>
-<li>
-<p>Upgrade the system:</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>upgrade
-</code></pre></div></p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p><strong>Optional</strong>: Since version 5.3.0 Kura also supports <a href="https://adoptium.net/en-GB/">Eclipse Temurin&trade;</a> as an alternative JVM. To install it you need to perform these additional steps:</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>wget<span class="w"> </span>apt-transport-https<span class="w"> </span>gnupg
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>wget<span class="w"> </span>-O<span class="w"> </span>-<span class="w"> </span>https://packages.adoptium.net/artifactory/api/gpg/key/public<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>apt-key<span class="w"> </span>add<span class="w"> </span>-
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb https://packages.adoptium.net/artifactory/deb </span><span class="k">$(</span>awk<span class="w"> </span>-F<span class="o">=</span><span class="w"> </span><span class="s1">&#39;/^VERSION_CODENAME/{print$2}&#39;</span><span class="w"> </span>/etc/os-release<span class="k">)</span><span class="s2"> main&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/adoptium.list
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>temurin-17-jdk
-</code></pre></div></p>
-</div>
-</li>
-<li>
-<p>Download the Kura package with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_nvidia-jetson-nano_installer.deb
-</code></pre></div>
-<p>Note: replace <code>&lt;version&gt;</code> in the URL above with the version number of the latest release (e.g. 5.2.0).</p>
-</li>
-<li>
-<p>Install Kura with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo apt install ./kura_&lt;version&gt;_nvidia-jetson-nano_installer.deb
-</code></pre></div>
-<p>All the required dependencies will be downloaded and installed.</p>
-</li>
-<li>
-<p>Reboot the NVIDIA Jetson Nano&trade; with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo reboot
-</code></pre></div>
-<p>Kura starts on the target platform after reboot.</p>
-</li>
-<li>
-<p>Kura setups a local web ui that is available using a browser via:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>https://&lt;device-ip&gt;
-</code></pre></div>
-<p>The browser will prompt the user to accept the connection to an endpoint with an untrusted certificate:</p>
-<p><img alt="Proceed trusting the source" src="../images/untrusted_cert.png" /></p>
-<p>Once trusted the source, the user will be redirected to a login page where the following credentianls:
-<strong>username</strong>: <code>admin</code>
-<strong>password</strong>: <code>admin</code></p>
-</li>
-</ol>
 
 
 

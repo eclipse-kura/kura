@@ -384,11 +384,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/intel-up-2-quick-start/" class="md-nav__link">
+      <a href="../../getting-started/zima-board-quick-start/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Intel Up² Quick Start
+    ZimaBoard/Blade Quick Start
   </span>
   
 
@@ -405,11 +405,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/nvidia-jetson-nano-quick-start/" class="md-nav__link">
+      <a href="../../getting-started/nvidia-jetson-orin-quick-start/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    NVIDIA Jetson Nano&trade; - Quick Start
+    NVIDIA Jetson AGX Orin&trade; - Quick Start
   </span>
   
 
@@ -4426,8 +4426,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 
 <h1 id="cellular-configuration">Cellular Configuration</h1>
-<p>If it is not configured, the cellular interface is presented on the interface list either by modem USB address, or if serial modem is used, by modem name. This 'fake' interface name is replaced by 'proper' interface name (e.g., ppp0) when the first modem configuration is submitted.</p>
-<p>The cellular interface should be configured by first enabling it in the <strong>TCP/IP</strong> tab, and then setting the <strong>Cellular</strong> tab. Note that the cellular interface can only be set as <em>WAN using DHCP</em>. The cellular interface configuration options are described below.</p>
+<p>If it is not configured, the cellular interface is presented on the interface list by modem USB address (i.e. 2-1). This 'fake' interface name is completed by 'proper' interface name (e.g., ppp0) when the first modem configuration is submitted.</p>
+<p>The cellular interface should be configured by first enabling it in the <strong>IPv4</strong> or <strong>IPv6</strong> tab, and then setting the <strong>Cellular</strong> tab. Note that the cellular interface can only be set as <em>WAN using DHCP</em>, <em>Disabled</em> or <em>Not Managed</em> (only for IPv4 connections). The cellular interface configuration options are described below.</p>
 <h2 id="cellular-configuration_1">Cellular Configuration</h2>
 <p>The <strong>Cellular</strong> tab contains the following configuration parameters:</p>
 <ul>
@@ -4439,7 +4439,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <ul>
 <li>HSDPA</li>
 <li>EVDO</li>
+<li>EDGE</li>
 </ul>
+</li>
+<li>
+<p><strong>Connection Type</strong>: specifies the type of connection to the modem.</p>
 </li>
 <li>
 <p><strong>Modem Identifier</strong>: provides a unique name for this modem.</p>
@@ -4496,97 +4500,16 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>
 <p><strong>LCP Echo Failure</strong>: sets the <em>lcp-echo-failure</em> option of the PPP daemon. If set to a positive number, the modem presumes the peer to be dead if a specified number of LCP echo-requests are sent without receiving a valid LCP echo-reply. To disable this option, set it to zero.</p>
 </li>
-<li>
-<p><strong>Enable GPS</strong>: enables GPS with the following conditions:</p>
+</ul>
+<p>The <strong>GPS</strong> tab allows the user to enable or disable the GPS module provided by the cellular modem. The property is:</p>
 <ul>
+<li><strong>Enable GPS</strong>: enables GPS with the following conditions:<ul>
 <li>One modem port will be dedicated to NMEA data stream.</li>
 <li>This port may not be used to send AT commands to the modem.</li>
-<li><em>PositionService</em> should be enabled. Serial settings of <em>PositionService</em> should not be changed; it will be redirected to the modem GPS port automatically.</li>
+<li>The <em>PositionService</em> should be enabled. Serial settings of the <em>PositionService</em> should not be changed; it will be redirected to the modem GPS port automatically.</li>
 </ul>
 </li>
 </ul>
-<h1 id="cellular-linux-configuration">Cellular Linux Configuration</h1>
-<p>This section describes the changes applied by Kura at the Linux networking configuration. Please read the following note before proceeding with manual changes of the Linux networking configuration.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>It is <strong>NOT</strong> recommended performing manual editing of the Linux networking configuration files when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.</p>
-</div>
-<p>When the cellular configuration is submitted, Kura generates peer and chat scripts used by the PPP daemon to establish a PPP connection. Examples of these scripts for HSPA and EVDO modems are shown below.</p>
-<h3 id="example-peer-script-for-hspa-modem">Example Peer Script for HSPA Modem</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="m">921600</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>unit<span class="w"> </span><span class="m">0</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>logfile<span class="w"> </span>/var/log/HE910-D_2-1.5
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>debug
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>connect<span class="w"> </span><span class="s1">&#39;chat:v:f /etc/ppp/scripts/chat_HE910-D_2-1.5&#39;</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>disconnect<span class="w"> </span><span class="s1">&#39;chat:v:f /etc/ppp/scripts/disconnect_HE910-D_2-1.5&#39;</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>modem
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>lock
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>noauth
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>noipdefault
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>defaultroute
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>usepeerdns
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>noproxyarp
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>novj
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>novjccomp
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>nobsdcomp
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>nodeflate
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>nomagic
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>idle<span class="w"> </span><span class="m">95</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>active-filter<span class="w"> </span><span class="s1">&#39;inbound&#39;</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>persist
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>holdoff<span class="w"> </span><span class="m">1</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>maxfail<span class="w"> </span><span class="m">5</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>connect-delay<span class="w"> </span><span class="m">1000</span>
-</code></pre></div>
-<h3 id="example-chat-script-for-hspa-modem">Example Chat Script for HSPA Modem</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>ABORT<span class="w">   </span><span class="s2">&quot;BUSY&quot;</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>ABORT<span class="w">   </span><span class="s2">&quot;VOICE&quot;</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>ABORT<span class="w">   </span><span class="s2">&quot;NO CARRIER&quot;</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>ABORT<span class="w">   </span><span class="s2">&quot;NO DIALTONE&quot;</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>ABORT<span class="w">   </span><span class="s2">&quot;NO DIAL TONE&quot;</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>ABORT<span class="w">   </span><span class="s2">&quot;ERROR&quot;</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="s2">&quot;&quot;</span><span class="w">  </span><span class="s2">&quot;+++ath&quot;</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>OK<span class="w">  </span><span class="s2">&quot;AT&quot;</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>OK<span class="w">  </span>AT+CGDCONT<span class="o">=</span><span class="m">1</span>,<span class="s2">&quot;IP&quot;</span>,<span class="s2">&quot;c1.korem2m.com&quot;</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>OK<span class="w">  </span><span class="s2">&quot;\d\d\d&quot;</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="s2">&quot;&quot;</span><span class="w">  </span><span class="s2">&quot;atd-99---1#&quot;</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>CONNECT<span class="w"> </span><span class="s2">&quot;\c&quot;</span>
-</code></pre></div>
-<h3 id="example-peer-script-for-evdo-modem">Example Peer Script for EVDO Modem</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="m">921600</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>unit<span class="w"> </span><span class="m">0</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>logfile<span class="w"> </span>/var/log/DE910-DUAL_1-1.5
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>debug
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>connect<span class="w"> </span><span class="s1">&#39;chat:v:f /etc/ppp/scripts/chat_DE910-DUAL_1-1.5&#39;</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>disconnect<span class="w"> </span><span class="s1">&#39;chat:v:f /etc/ppp/scripts/disconnect_DE910-DUAL_1-1.5&#39;</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>crtscts
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>lock
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>noauth
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>defaultroute
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>usepeerdns
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>idle<span class="w"> </span><span class="m">95</span>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>active-filter<span class="w"> </span><span class="s1">&#39;inbound&#39;</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>persist
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>holdoff<span class="w"> </span><span class="m">1</span>
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>maxfail<span class="w"> </span><span class="m">5</span>
-<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>connect-delay<span class="w"> </span><span class="m">10000</span>
-</code></pre></div>
-<h2 id="example-chat-script-for-evdo-modem">Example Chat Script for EVDO Modem</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>ABORT<span class="w">   </span><span class="s2">&quot;BUSY&quot;</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>ABORT<span class="w">   </span><span class="s2">&quot;VOICE&quot;</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>ABORT<span class="w">   </span><span class="s2">&quot;NO CARRIER&quot;</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>ABORT<span class="w">   </span><span class="s2">&quot;NO DIALTONE&quot;</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>ABORT<span class="w">   </span><span class="s2">&quot;NO DIAL TONE&quot;</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>ABORT<span class="w">   </span><span class="s2">&quot;ERROR&quot;</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="s2">&quot;&quot;</span><span class="w">  </span><span class="s2">&quot;+++ath&quot;</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>OK<span class="w">  </span><span class="s2">&quot;AT&quot;</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>OK<span class="w">  </span><span class="s2">&quot;ATE1V1&amp;F&amp;D2&amp;C1&amp;C2S0=0&quot;</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>OK<span class="w">  </span><span class="s2">&quot;ATE1V1&quot;</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>OK<span class="w">  </span><span class="s2">&quot;ATS7=60&quot;</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>OK<span class="w">  </span><span class="s2">&quot;\d\d\d&quot;</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="s2">&quot;&quot;</span><span class="w">  </span><span class="s2">&quot;atd#777&quot;</span>
-<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>CONNECT<span class="w"> </span><span class="s2">&quot;\c&quot;</span>
-</code></pre></div>
 
 
 

@@ -1,5 +1,5 @@
 # Wi-Fi 802.1x Configuration
-Enterprise Wi-Fi is currently only supported on gateways running our [generic profiles](../getting-started/install-kura.md#installer-types). The following is a list of currently supported 802.1x authentication methods.
+To enable the Enterprise Wi-Fi, the **Wireless Security** property in the **Wireless** tab has to be set to _WPA2/WPA3-Enterprise_. This feature is available only if the _Wireless Mode_ is _Station Mode_. The following is a list of currently supported 802.1x authentication methods.
 
  - [TTLS-MSCHAPv2](#ttls-mschapv2)
  - [PEAP-MSCHAPv2](#peap-mschapv2)

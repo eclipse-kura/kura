@@ -1,6 +1,6 @@
 # Wi-Fi Configuration
 
-From a configuration standpoint, the Wi-Fi interface (e.g., wlan0) may be viewed as an extension of Ethernet. In addition to the **TCP/IP** and **DHCP & NAT** configuration tabs, it has the **Wireless** tab that allows for the configuration of wireless settings. These configuration options are described below.
+From a configuration standpoint, the Wi-Fi interface (e.g., wlan0) may be viewed as an extension of Ethernet. In addition to the **IPv4**, **IPv6** and **DHCPv4 & NAT** configuration tabs, it has the **Wireless** tab that allows for the configuration of wireless settings. These configuration options are described below.
 
 !!! warning
     Before using wifi make sure that you have correctly set the Regulatory Domain on the gateway. You can check the current configuration using the `iw reg get` command. To set the Regulatory Domain please refer to the specific section in the Gateway Configurations.
@@ -17,19 +17,17 @@ The **Wireless** tab contains the following configuration parameters:
     - In _Access Point_ mode, this is the SSID that identifies this wireless network.
     - In _Station_ mode, this is the SSID of a wireless network to connect to.
 
-- **Radio Mode**: defines 802.11 mode.
-    - 802.11 ac/n/a (either in 2.4Ghz or 5Ghz depending on the choosen channel)
-    - 802.11n/g/b (2.4Ghz only)
-    - 802.11g/b (2.4Ghz only)
-    - 802.11b (2.4Ghz only)
-    - 802.11a (either in 2.4Ghz or 5Ghz depending on the choosen channel)
+- **Band**: defines the frequency band to use
+    - 2.4GHz: use 2.4GHz band
+    - 5GHz: use 5GHz band
+    - 2.4GHz/5GHz: use either in 2.4Ghz or 5Ghz depending on the choosen channel
 
 - **Wireless Security**: sets the security protocol for the wireless network.
     - None: No Wi-Fi security
     - WEP: Wired Equivalent Privacy
     - WPA: Wi-Fi Protected Access
     - WPA2: Wi-Fi Protected Access II
-    - WPA2/WPA3-Enterprise: Wi-Fi Protected Access II & III with 802.1x Support (Only available in station mode with [generic profiles](../getting-started/install-kura.md))
+    - WPA2/WPA3-Enterprise: Wi-Fi Protected Access II & III with 802.1x. Please see [here](./wifi-configuration-8021x.md) for further details. This fearture is available only in station mode
 
 - **Wireless Password**: sets the password for the wireless network.
     - WEP: 64-bit or 128-bit encryption key
@@ -72,7 +70,7 @@ The **Wireless** tab contains the following configuration parameters:
     - In _Access Point_ mode, sends an empty SSID in beacons and ignores probe request frames that do not specify full SSID.
     - In _Station_ mode, does not scan for the SSID before attempting to associate.
 
-- **Channels table**: allows the selection of desired channel frequencies. The availability of the desired frequency is subject to the Regdom set on the device. For a list of limitations in different countries you can consult the following page: [List of WLAN channels](https://en.wikipedia.org/wiki/List_of_WLAN_channels). Channels marked as No Irradiation and Radar Detection can be used only if DFS (Dynamic Frequency Selection) is supported by the Wi-Fi chip. 
+- **Channels list**: allows the selection of desired channel frequencies. The availability of the desired frequency is subject to the Regdom set on the device. For a list of limitations in different countries you can consult the following page: [List of WLAN channels](https://en.wikipedia.org/wiki/List_of_WLAN_channels). Channels marked as No Irradiation and Radar Detection can be used only if DFS (Dynamic Frequency Selection) is supported by the Wi-Fi chip. 
     - In _Access Point_ mode, only one channel may be selected.
     - In _Station_ mode, the list of available channels depends on the selected Radio Mode. The selected radio mode also affects the ability to select a network in the scan window (if the channel associated with the network is not enabled in the regulatory domain an error message will be shown).
 
@@ -80,7 +78,7 @@ The **Wireless** tab contains the following configuration parameters:
 
 ## Wi-Fi Station Mode Configuration
 
-In addition to the options described above, the **Wireless** configuration display provides two buttons that help to configure Wi-Fi in the _Station_ mode. These buttons are described below.
+In addition to the options described above, the **Wireless** configuration display the **Access Point Scan** button that help to configure Wi-Fi in the _Station_ mode.
 
 - **Access Point Scan**: clicking this button triggers access point scan operations. Upon a successful scan, a table containing access points within range is presented. This table contains the following information:
     - SSID
@@ -90,111 +88,4 @@ In addition to the options described above, the **Wireless** configuration displ
     - Frequency
     - Security
 
-    If you select one of these access points, respective wireless controls (i.e., _Network Name_, _Wireless Security_, and _Channel_) are filled with information obtained during the scan operation.
-
-- **Password Verification**: clicking this button triggers password verification before a full connection is established.
-
-!!! warning "Generic Profiles Access Point Scan Issue"
-    Due to a limitation in our current implementation of Access Point scanning in the generic profiles, a scan triggered while the device Wireless Mode is set as _Access Point_ will result in it reporting itself as the only reachable Access Point.
-
-    To retrieve the actual list of nearby Access Points, set your device in _Station Mode_ with a temporary configuration and trigger the scan again.
-
-## Wi-Fi Linux Configuration
-
-This section describes the changes applied by Kura at the Linux networking configuration. Please read the following note before proceeding with manual changes of the Linux networking configuration.
-
-!!! warning
-    It is **NOT** recommended performing manual editing of the Linux networking configuration files when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.
-
-When the Wi-Fi configuration for the _Access Point_ mode is submitted, Kura generates the `/etc/hostapd.conf` file and launches the hostapd program as shown below.
-
-```shell
-hostapd:B /etc/hostapd.conf
-```
-
-```shell
-# /etc/hostapd/hostapd.conf
-
-interface=wlan0
-
-driver=nl80211
-
-# SSID to use. This will be the "name" of the accesspoint
-ssid=kura_gateway_00:E0:C7:09:35:D8
-
-# basic operational settings
-hw_mode=g
-
-wme_enabled=0
-ieee80211n=0
-
-channel=1
-
-# Logging and debugging settings: more of this in original config file
-logger_syslog=-1
-logger_syslog_level=2
-logger_stdout=-1
-logger_stdout_level=2
-dump_file=/tmp/hostapd.dump
-
-# WPA settings. We'll use stronger WPA2
-# bit0 = WPA
-# bit1 = IEEE 802.11i/RSN (WPA2) (dot11RSNAEnabled)
-wpa=2
-
-# Preshared key of between 8-63 ASCII characters.
-# If you define the key in here, make sure that the file is not readable
-# by anyone but root. Alternatively you can use a separate file for the
-# key; see original hostapd.conf for more information.
-wpa_passphrase=testKEYS
-
-# Key management algorithm. In this case, a simple pre-shared key (PSK)
-wpa_key_mgmt=WPA-PSK
-
-# The cipher suite to use. We want to use stronger CCMP cipher.
-wpa_pairwise=CCMP
-
-# Change the broadcasted/multicasted keys after this many seconds.
-wpa_group_rekey=600
-
-# Change the master key after this many seconds. Master key is used as a basis
-# (source) for the encryption keys.
-wpa_gmk_rekey=86400
-
-# Send empty SSID in beacons and ignore probe request frames that do not
-# specify full SSID, i.e., require stations to know SSID.
-# default: disabled (0)
-# 1 = send empty (length=0) SSID in beacon and ignore probe request for
-#     broadcast SSID
-# 2 = clear SSID (ASCII 0), but keep the original length (this may be required
-#     with some clients that do not support empty SSID) and ignore probe
-#     requests for broadcast SSID
-ignore_broadcast_ssid=0
-```
-
-When the Wi-Fi configuration for the _Station_ mode is submitted, Kura generates the `/etc/wpa_supplicant.conf` file and launches the `wpa_supplicant` program as shown below.
-
-```shell
-wpa_supplicant:B:D nl80211:i wlan0:c /etc/wpa_supplicant.conf
-```
-
-```shell
-# /etc/wpa_supplicant.conf
-# allow frontend (e.g., wpa_cli) to be used by all users in 'wheel' group
-ctrl_interface=/var/run/wpa_supplicant
-ctrl_interface_group=wheel
-
-# home network; allow all valid ciphers
-network={
-    mode=0
-    ssid="Eurotech-INC"
-    scan_ssid=1
-    key_mgmt=WPA-PSK
-    psk="WG4t3101"
-    proto=RSN
-    pairwise=CCMP TKIP
-    group=CCMP TKIP
-    scan_freq=2412
-    bgscan=""
-}
-```
+    If you select one of these access points, respective wireless controls (i.e., _Network Name_, _Wireless Security_, and _Channel_) are filled with information obtained during the scan operation. The _Force Wireless Network Scan_ button triggers a manual scan for available access points.

@@ -138,11 +138,8 @@ nav:
         - How to Use CAN bus: java-application-development/how-to-use-can-bus.md
         - How to Use Watchdog: java-application-development/how-to-use-watchdog.md
         - How to Manage Network Settings: java-application-development/how-to-manage-network-settings.md
-        - How to Use Legacy Bluetooth LE: java-application-development/how-to-use-legacy-bt-le.md
-        - How to Use Legacy Bluetooth LE Beacons: java-application-development/how-to-use-legacy-bt-le-beacons.md
-        - How to Use Legacy Bluetooth LE Beacon Scanner: java-application-development/how-to-use-legacy-bt-beacon-scanner.md
-        - How to Use New Bluetooth LE APIs: java-application-development/how-to-use-new-bt-le-apis.md
-        - How to Use New Beacon APIs: java-application-development/how-to-use-new-beacon-apis.md
+        - How to Use Bluetooth LE APIs: java-application-development/how-to-use-bt-le-apis.md
+        - How to Use Beacon APIs: java-application-development/how-to-use-beacon-apis.md
         - How to Use Dummy Container Signature Validation Service: java-application-development/how-to-use-dummy-signature-service.md
       - RAM Usage Considerations: java-application-development/ram-usage-considerations.md
       - Contributing: java-application-development/contributing.md

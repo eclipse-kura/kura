@@ -1,19 +1,19 @@
-# How to Use New Bluetooth LE APIs
+# How to Use Bluetooth LE APIs
 
 ## Overview
 
-Starting from version 3.1.0, Eclipse Kura implements a new set of APIs for managing Bluetooth Low Energy and Beacon devices. The new APIs replace the existing Bluetooth APIs, but the old ones are still available and can be used. So, the applications developed before Kura 3.1.0 continue to work.
+Eclipse Kura implements a set of APIs for managing Bluetooth Low Energy and Beacon devices.
 
-The purpose of the new BLE APIs is to simplify the development of applications that interact with Bluetooth LE devices, offering clear and easy-to-use methods, and add new features to correctly manage the connection with remote devices.
+The purpose of the BLE APIs is to simplify the development of applications that interact with Bluetooth LE devices, offering clear and easy-to-use methods, and add new features to correctly manage the connection with remote devices.
 Moreover, the APIs organize the methods in a logical way to access all levels of a GATT client, from GATT services to GATT characteristics and descriptors, using UUIDs to identify the correct resource.
 
 ## Bluez-Dbus - BLE GATT API
 
-The implementation of the new Kura BLE APIs is based on the <a href="https://github.com/hypfvieh/bluez-dbus" about="_blank">Bluez-Dbus</a> library that provides an easy to use Bluetooth LE API based on BlueZ over DBus. The library eases the access to GATT services and the management of BLE connections and discovery, without using any wrapper library as it is based on a newer version of dbus-java which uses jnr-unixsocket.
+The implementation of the Kura BLE APIs is based on the <a href="https://github.com/hypfvieh/bluez-dbus" about="_blank">Bluez-Dbus</a> library that provides an easy to use Bluetooth LE API based on BlueZ over DBus. The library eases the access to GATT services and the management of BLE connections and discovery, without using any wrapper library as it is based on a newer version of dbus-java which uses jnr-unixsocket.
 
 ## APIs description
 
-The new BLE APIs are exported in the **org.eclipse.kura.bluetooth.le** package. The interfaces are briefly described in the following.
+The BLE APIs are exported in the **org.eclipse.kura.bluetooth.le** package. The interfaces are briefly described in the following.
 
 * **BluetoothLeService** is the entry point of the OSGI service. It allows to get all the Bluetooth interfaces installed on the gateway or a specific one using the name of the adapter.
 * **BluetoothLeAdapter** represents the physical Bluetooth adapter on the gateway. It allows to start/stop a discovery, search a specific BLE device based on the BD address, power up/down the adapter and get information about the adapter.
@@ -26,7 +26,7 @@ More information about the APIs can be found in [API Reference](/references/java
 
 ## How to use the Kura BLE API
 
-This section briefly presents how to use the Kura BLE APIs, providing several code snippets to explain how to perform common bluetooth operations. For a complete example, please refer to the new <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ble.tisensortag.dbus" about="_blank">SensorTag application</a>.
+This section briefly presents how to use the Kura BLE APIs, providing several code snippets to explain how to perform common bluetooth operations. For a complete example, please refer to the <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ble.tisensortag.dbus" about="_blank">SensorTag application</a>.
 
 An application that wants to use the Kura BLE APIs should bind the **BluetoothLeService** OSGI service, as shown in the following Java snippet:
 

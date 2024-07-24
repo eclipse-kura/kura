@@ -1,14 +1,14 @@
-# How to Use New Beacon APIs
+# How to Use Beacon APIs
 
 ## Overview
 
-Starting from version 3.1.0, Eclipse Kura implements a new set of APIs for managing Bluetooth Low Energy and Beacon devices. The new APIs replace the existing Bluetooth APIs, but the old ones are still available and can be used. So, the applications developed before Kura 3.1.0 continue to work.
+Eclipse Kura implements a set of APIs for managing Bluetooth Low Energy and Beacon devices.
 
-The purpose of the new BLE Beacon APIs is to simplify the development of applications that interact with Bluetooth LE Beacon devices, offering clear and easy-to-use methods for advertising and scanning. Eclipse Kura offers out-of-the-box the implementation of the Beacon APIs for iBeacon&trade; and Eddystone&trade; technologies. Moreover, the new APIs allow to easily integrate new beacon implementations with Eclipse Kura.
+The purpose of the BLE Beacon APIs is to simplify the development of applications that interact with Bluetooth LE Beacon devices, offering clear and easy-to-use methods for advertising and scanning. Eclipse Kura offers out-of-the-box the implementation of the Beacon APIs for iBeacon&trade; and Eddystone&trade; technologies. 
 
 ## How to use Kura iBeacon&trade; APIs
 
-This section briefly presents how to use the iBeacon&trade; implementation of the Kura Beacon APIs, providing several code snippets to explain how to perform common operations on iBeacons. For a complete example on iBeacon advertising and scanning, please refer to the new <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ibeacon.advertiser" about="_blank">iBeacon&trade; advertiser</a> and <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ibeacon.scanner" about="_blank">iBeacon&trade; scanner</a> examples. For more information about iBeacon&trade; please refer to <a href="https://developer.apple.com/ibeacon/" about="_blank">official page</a>.
+This section briefly presents how to use the iBeacon&trade; implementation of the Kura Beacon APIs, providing several code snippets to explain how to perform common operations on iBeacons. For a complete example on iBeacon advertising and scanning, please refer to the <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ibeacon.advertiser" about="_blank">iBeacon&trade; advertiser</a> and <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ibeacon.scanner" about="_blank">iBeacon&trade; scanner</a> examples. For more information about iBeacon&trade; please refer to <a href="https://developer.apple.com/ibeacon/" about="_blank">official page</a>.
 
 An application that wants to use the iBeacon&trade; implementation of Kura Beacon APIs should bind the **BluetoothLeService** and **BluetoothLeIBeaconService** OSGI services, as shown in the following Java snippet:
 
@@ -48,7 +48,7 @@ and in the component definition:
             unbind="unsetBluetoothLeIBeaconService"/>
 ```
 
-The **BluetoothLeService** is used to get the **BluetoothLeAdapter** to be used with the **BluetoothLeIBeaconScanner** and **BluetoothLeIBeaconAdvertiser**. As explained [here](/java-application-development/how-to-use-new-bt-le-apis/#get-the-bluetooth-adapter), the adapter can be retrieved and powered on as follows:
+The **BluetoothLeService** is used to get the **BluetoothLeAdapter** to be used with the **BluetoothLeIBeaconScanner** and **BluetoothLeIBeaconAdvertiser**. As explained [here](/java-application-development/how-to-use-bt-le-apis/#get-the-bluetooth-adapter), the adapter can be retrieved and powered on as follows:
 
 ```java
 this.bluetoothLeAdapter = this.bluetoothLeService.getAdapter(adapterName);
@@ -160,7 +160,7 @@ this.bluetoothLeIBeaconService.deleteBeaconScanner(scanner);
 
 Eddystone&trade; is a protocol specification that defines a BLE message format for proximity beacon messages. It describes several different frame types that may be used individually or in combinations to create beacons that can be used for a variety of applications. For more information please see <a href="https://developers.google.com/beacons/" about="_blank">here</a> and <a href="https://github.com/google/eddystone" about="_blank">here</a>.
 
-In this section the Eddystone&trade; implementation of the Kura Beacon APIs is presented, providing several code snippets to explain how to perform common operations on them. For a complete example on Eddystone&trade; advertising and scanning, please refer to the new <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.eddystone.advertiser" about="_blank">Eddystone&trade; advertiser</a> and <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.eddystone.scanner" about="_blank">Eddystone&trade; scanner</a> examples.
+In this section the Eddystone&trade; implementation of the Kura Beacon APIs is presented, providing several code snippets to explain how to perform common operations on them. For a complete example on Eddystone&trade; advertising and scanning, please refer to the <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.eddystone.advertiser" about="_blank">Eddystone&trade; advertiser</a> and <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.eddystone.scanner" about="_blank">Eddystone&trade; scanner</a> examples.
 
 !!! warning
     Only Eddystone UID and URL frame types are currently supported.
@@ -203,7 +203,7 @@ and in the component definition:
             unbind="unsetBluetoothLeEddystoneService"/>
 ```
 
-The **BluetoothLeService** is used to get the **BluetoothLeAdapter** to be used with the **BluetoothLeEddystoneScanner** and **BluetoothLeEddystoneAdvertiser**. As explained [here](/java-application-development/how-to-use-new-bt-le-apis/#get-the-bluetooth-adapter), the adapter can be retrieved and powered on as follows:
+The **BluetoothLeService** is used to get the **BluetoothLeAdapter** to be used with the **BluetoothLeEddystoneScanner** and **BluetoothLeEddystoneAdvertiser**. As explained [here](/java-application-development/how-to-use-bt-le-apis/#get-the-bluetooth-adapter), the adapter can be retrieved and powered on as follows:
 
 ```java
 this.bluetoothLeAdapter = this.bluetoothLeService.getAdapter(adapterName);

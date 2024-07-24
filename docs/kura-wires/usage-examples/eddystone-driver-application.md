@@ -1,6 +1,6 @@
 # Eddystone&trade; Driver Application with RuuviTag+
 
-As presented in [Eddystone Driver](../../connect-field-devices/eddystone-driver.md), Kura provides a specific driver that can be used to listen for Eddystone&trade; beacons. The driver is available only for gateways that support the new Kura BLE APIs.
+As presented in [Eddystone Driver](../../connect-field-devices/eddystone-driver.md), Kura provides a specific driver that can be used to listen for Eddystone&trade; beacons.
 
 This tutorial will explain how to configure an Eddystone&trade; driver and put it into a Wire graph that retrieves data from a [RuuviTag+](https://ruuvi.com/ruuvitag-specs/). For further information about RuuviTag see [here](https://lab.ruuvi.com/).
 

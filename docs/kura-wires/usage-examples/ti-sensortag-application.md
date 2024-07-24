@@ -1,6 +1,6 @@
 # TI SensorTag Application
 
-As presented in the [Ti SensorTag Driver](../../connect-field-devices/sensortag-driver.md), Kura provides a specific driver that can be used to interact with Texas Instruments SensorTag devices. The driver is available only for gateways that support the new Bluetooth LE APIs.
+As presented in the [Ti SensorTag Driver](../../connect-field-devices/sensortag-driver.md), Kura provides a specific driver that can be used to interact with Texas Instruments SensorTag devices.
 
 This tutorial will explain how to configure a Wire graph that connects with a SensorTag, reads sensor values and publishes data to a cloud platform.
 

@@ -1,6 +1,6 @@
 # iBeacon&trade; Driver Application
 
-As presented in the [iBeacon&trade; Driver](../../connect-field-devices/ibeacon-driver.md), Kura provides a specific driver that can be used to listen for iBeacons packets. The driver is available only for gateways that support the new Kura BLE APIs.
+As presented in the [iBeacon&trade; Driver](../../connect-field-devices/ibeacon-driver.md), Kura provides a specific driver that can be used to listen for iBeacons packets.
 
 This tutorial will explain how to configure a Wire graph that get iBeacon&trade; data and show them to a logger.
 

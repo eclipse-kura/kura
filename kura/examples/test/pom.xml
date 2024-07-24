@@ -844,7 +844,6 @@
     </properties>
 
     <modules>
-        <module>org.eclipse.kura.example.ble.tisensortag.test</module>
         <module>org.eclipse.kura.example.wire.math.singleport.provider.test</module>
         <module>org.eclipse.kura.example.ble.tisensortag.dbus.test</module>
         <module>org.eclipse.kura.example.testutil</module>

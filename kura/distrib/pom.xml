@@ -368,11 +368,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.linux.bluetooth</artifactId>
-                                    <version>${org.eclipse.kura.linux.bluetooth.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.ble.provider</artifactId>
                                     <version>${org.eclipse.kura.ble.provider.version}</version>
                                 </artifactItem>
@@ -785,7 +780,6 @@
                                 <move file="target/plugins/org.eclipse.kura.linux.usb.armv6hf.jar" tofile="target/plugins/org.eclipse.kura.linux.usb.armv6hf_${org.eclipse.kura.linux.usb.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.usb.x86_64.jar" tofile="target/plugins/org.eclipse.kura.linux.usb.x86_64_${org.eclipse.kura.linux.usb.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.usb.aarch64.jar" tofile="target/plugins/org.eclipse.kura.linux.usb.aarch64_${org.eclipse.kura.linux.usb.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.linux.bluetooth.jar" tofile="target/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.ble.provider.jar" tofile="target/plugins/org.eclipse.kura.ble.provider_${org.eclipse.kura.ble.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.ble.ibeacon.provider.jar" tofile="target/plugins/org.eclipse.kura.ble.ibeacon.provider_${org.eclipse.kura.ble.ibeacon.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.ble.eddystone.provider.jar" tofile="target/plugins/org.eclipse.kura.ble.eddystone.provider_${org.eclipse.kura.ble.eddystone.provider.version}.jar" />
@@ -2065,7 +2059,6 @@
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.system_${org.eclipse.kura.core.system.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.status_${org.eclipse.kura.core.status.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
-                                        <copy file="${project.build.directory}/plugins/org.eclipse.kura.linux.bluetooth_${org.eclipse.kura.linux.bluetooth.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.ble.provider_${org.eclipse.kura.ble.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.ble.ibeacon.provider_${org.eclipse.kura.ble.ibeacon.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.ble.eddystone.provider_${org.eclipse.kura.ble.eddystone.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
@@ -2162,28 +2155,6 @@
                                         <copy overwrite="true" file="src/main/resources/common/projects/demo_heater.project" tofile="${project.build.directory}/staging/demo_heater/.project" />
                                         <move file="${project.build.directory}/staging/demo_heater/demo_heater.classpath" tofile="${project.build.directory}/staging/demo_heater/.classpath" />
 
-                                        <!-- Stage the org.eclipse.kura.example.beacon Project -->
-                                        <copy todir="${project.build.directory}/staging/beacon">
-                                            <fileset dir="../examples/org.eclipse.kura.example.beacon" />
-                                        </copy>
-                                        <delete file="${project.build.directory}/staging/beacon/pom.xml" />
-                                        <delete dir="${project.build.directory}/staging/beacon/bin" />
-                                        <delete dir="${project.build.directory}/staging/beacon/target" />
-                                        <copy file="src/main/resources/common/classpaths/beacon.classpath" tofile="${project.build.directory}/staging/beacon/beacon.classpath" />
-                                        <copy overwrite="true" file="src/main/resources/common/projects/beacon.project" tofile="${project.build.directory}/staging/beacon/.project" />
-                                        <move file="${project.build.directory}/staging/beacon/beacon.classpath" tofile="${project.build.directory}/staging/beacon/.classpath" />
-
-                                        <!-- Stage the org.eclipse.kura.example.beacon.scanner Project -->
-                                        <copy todir="${project.build.directory}/staging/beacon.scanner">
-                                            <fileset dir="../examples/org.eclipse.kura.example.beacon.scanner" />
-                                        </copy>
-                                        <delete file="${project.build.directory}/staging/beacon.scanner/pom.xml" />
-                                        <delete dir="${project.build.directory}/staging/beacon.scanner/bin" />
-                                        <delete dir="${project.build.directory}/staging/beacon.scanner/target" />
-                                        <copy file="src/main/resources/common/classpaths/beacon.scanner.classpath" tofile="${project.build.directory}/staging/beacon.scanner/beacon.scanner.classpath" />
-                                        <copy overwrite="true" file="src/main/resources/common/projects/beacon.scanner.project" tofile="${project.build.directory}/staging/beacon.scanner/.project" />
-                                        <move file="${project.build.directory}/staging/beacon.scanner/beacon.scanner.classpath" tofile="${project.build.directory}/staging/beacon.scanner/.classpath" />
-
                                         <!-- Stage the org.eclipse.kura.example.ibeacon.advertiser Project -->
                                         <copy todir="${project.build.directory}/staging/ibeacon.advertiser">
                                             <fileset dir="../examples/org.eclipse.kura.example.ibeacon.advertiser" />
@@ -2227,17 +2198,6 @@
                                         <copy file="src/main/resources/common/classpaths/eddystone.scanner.classpath" tofile="${project.build.directory}/staging/eddystone.scanner/eddystone.scanner.classpath" />
                                         <copy overwrite="true" file="src/main/resources/common/projects/eddystone.scanner.project" tofile="${project.build.directory}/staging/eddystone.scanner/.project" />
                                         <move file="${project.build.directory}/staging/eddystone.scanner/eddystone.scanner.classpath" tofile="${project.build.directory}/staging/eddystone.scanner/.classpath" />
-
-                                        <!-- Stage the org.eclipse.kura.example.ble.tisensortag Project -->
-                                        <copy todir="${project.build.directory}/staging/tisensortag">
-                                            <fileset dir="../examples/org.eclipse.kura.example.ble.tisensortag" />
-                                        </copy>
-                                        <delete file="${project.build.directory}/staging/tisensortag/pom.xml" />
-                                        <delete dir="${project.build.directory}/staging/tisensortag/bin" />
-                                        <delete dir="${project.build.directory}/staging/tisensortag/target" />
-                                        <copy file="src/main/resources/common/classpaths/tisensortag.classpath" tofile="${project.build.directory}/staging/tisensortag/tisensortag.classpath" />
-                                        <copy overwrite="true" file="src/main/resources/common/projects/tisensortag.project" tofile="${project.build.directory}/staging/tisensortag/.project" />
-                                        <move file="${project.build.directory}/staging/tisensortag/tisensortag.classpath" tofile="${project.build.directory}/staging/tisensortag/.classpath" />
 
                                         <!-- Stage the org.eclipse.kura.example.ble.tisensortag.dbus Project -->
                                         <copy todir="${project.build.directory}/staging/tisensortag.dbus">
@@ -2299,13 +2259,10 @@
                                             <zipfileset dir="${project.build.directory}/staging/target-definition/" prefix="target-definition/" />
                                             <zipfileset dir="${project.build.directory}/staging/emulator/" prefix="org.eclipse.kura.emulator/" />
                                             <zipfileset dir="${project.build.directory}/staging/demo_heater/" prefix="org.eclipse.kura.demo.heater/" />
-                                            <zipfileset dir="${project.build.directory}/staging/beacon/" prefix="org.eclipse.kura.example.beacon/" />
-                                            <zipfileset dir="${project.build.directory}/staging/beacon.scanner/" prefix="org.eclipse.kura.example.beacon.scanner/" />
                                             <zipfileset dir="${project.build.directory}/staging/ibeacon.advertiser/" prefix="org.eclipse.kura.example.ibeacon.advertiser/" />
                                             <zipfileset dir="${project.build.directory}/staging/ibeacon.scanner/" prefix="org.eclipse.kura.example.ibeacon.scanner/" />
                                             <zipfileset dir="${project.build.directory}/staging/eddystone.advertiser/" prefix="org.eclipse.kura.example.eddystone.advertiser/" />
                                             <zipfileset dir="${project.build.directory}/staging/eddystone.scanner/" prefix="org.eclipse.kura.example.eddystone.scanner/" />
-                                            <zipfileset dir="${project.build.directory}/staging/tisensortag/" prefix="org.eclipse.kura.example.ble.tisensortag/" />
                                             <zipfileset dir="${project.build.directory}/staging/tisensortag.dbus/" prefix="org.eclipse.kura.example.ble.tisensortag.dbus/" />
                                             <zipfileset dir="${project.build.directory}/staging/publisher/" prefix="org.eclipse.kura.example.publisher/" />
                                             <zipfileset dir="${project.build.directory}/staging/camel_quickstart/" prefix="org.eclipse.kura.example.camel.quickstart/" />
@@ -2394,12 +2351,6 @@
                                             <groupId>org.eclipse.kura.feature</groupId>
                                             <artifactId>org.eclipse.kura.driver.s7plc</artifactId>
                                             <version>${org.eclipse.kura.driver.s7plc.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.driver.ble.sensortag</artifactId>
-                                            <version>${org.eclipse.kura.driver.ble.sensortag.version}</version>
                                             <type>dp</type>
                                         </artifactItem>
                                         <artifactItem>

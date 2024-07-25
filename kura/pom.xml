@@ -62,7 +62,6 @@
         <module>org.eclipse.kura.driver.ibeacon.provider</module>
         <module>org.eclipse.kura.driver.gpio.provider</module>
         <module>org.eclipse.kura.driver.eddystone.provider</module>
-        <module>org.eclipse.kura.linux.bluetooth</module>
         <module>org.eclipse.kura.ble.provider</module>
         <module>org.eclipse.kura.ble.ibeacon.provider</module>
         <module>org.eclipse.kura.ble.eddystone.provider</module>

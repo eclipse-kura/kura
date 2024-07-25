@@ -9,7 +9,7 @@
       
       
       
-        <link rel="prev" href="../how-to-use-new-bt-le-apis/">
+        <link rel="prev" href="../how-to-use-bt-le-apis/">
       
       
         <link rel="next" href="../how-to-use-dummy-signature-service/">
@@ -20,7 +20,7 @@
     
     
       
-        <title>How to Use New Beacon APIs - Eclipse Kura™ Documentation</title>
+        <title>How to Use Beacon APIs - Eclipse Kura™ Documentation</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#how-to-use-new-beacon-apis" class="md-skip">
+        <a href="#how-to-use-beacon-apis" class="md-skip">
           Skip to content
         </a>
       
@@ -123,7 +123,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              How to Use New Beacon APIs
+              How to Use Beacon APIs
             
           </span>
         </div>
@@ -3540,74 +3540,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../how-to-use-legacy-bt-le/" class="md-nav__link">
+      <a href="../how-to-use-bt-le-apis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    How to Use Legacy Bluetooth LE
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../how-to-use-legacy-bt-le-beacons/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    How to Use Legacy Bluetooth LE Beacons
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../how-to-use-legacy-bt-beacon-scanner/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    How to Use Legacy Bluetooth LE Beacon Scanner
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../how-to-use-new-bt-le-apis/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    How to Use New Bluetooth LE APIs
+    How to Use Bluetooth LE APIs
   </span>
   
 
@@ -3637,7 +3574,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
           
   
   <span class="md-ellipsis">
-    How to Use New Beacon APIs
+    How to Use Beacon APIs
   </span>
   
 
@@ -3648,7 +3585,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
         
   
   <span class="md-ellipsis">
-    How to Use New Beacon APIs
+    How to Use Beacon APIs
   </span>
   
 
@@ -4575,12 +4512,12 @@ You are viewing the documentation relative to the develop branch or to an outdat
                   
 
 
-<h1 id="how-to-use-new-beacon-apis">How to Use New Beacon APIs</h1>
+<h1 id="how-to-use-beacon-apis">How to Use Beacon APIs</h1>
 <h2 id="overview">Overview</h2>
-<p>Starting from version 3.1.0, Eclipse Kura implements a new set of APIs for managing Bluetooth Low Energy and Beacon devices. The new APIs replace the existing Bluetooth APIs, but the old ones are still available and can be used. So, the applications developed before Kura 3.1.0 continue to work.</p>
-<p>The purpose of the new BLE Beacon APIs is to simplify the development of applications that interact with Bluetooth LE Beacon devices, offering clear and easy-to-use methods for advertising and scanning. Eclipse Kura offers out-of-the-box the implementation of the Beacon APIs for iBeacon&trade; and Eddystone&trade; technologies. Moreover, the new APIs allow to easily integrate new beacon implementations with Eclipse Kura.</p>
+<p>Eclipse Kura implements a set of APIs for managing Bluetooth Low Energy and Beacon devices.</p>
+<p>The purpose of the BLE Beacon APIs is to simplify the development of applications that interact with Bluetooth LE Beacon devices, offering clear and easy-to-use methods for advertising and scanning. Eclipse Kura offers out-of-the-box the implementation of the Beacon APIs for iBeacon&trade; and Eddystone&trade; technologies. </p>
 <h2 id="how-to-use-kura-ibeacontm-apis">How to use Kura iBeacon&trade; APIs</h2>
-<p>This section briefly presents how to use the iBeacon&trade; implementation of the Kura Beacon APIs, providing several code snippets to explain how to perform common operations on iBeacons. For a complete example on iBeacon advertising and scanning, please refer to the new <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ibeacon.advertiser" about="_blank">iBeacon&trade; advertiser</a> and <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ibeacon.scanner" about="_blank">iBeacon&trade; scanner</a> examples. For more information about iBeacon&trade; please refer to <a href="https://developer.apple.com/ibeacon/" about="_blank">official page</a>.</p>
+<p>This section briefly presents how to use the iBeacon&trade; implementation of the Kura Beacon APIs, providing several code snippets to explain how to perform common operations on iBeacons. For a complete example on iBeacon advertising and scanning, please refer to the <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ibeacon.advertiser" about="_blank">iBeacon&trade; advertiser</a> and <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ibeacon.scanner" about="_blank">iBeacon&trade; scanner</a> examples. For more information about iBeacon&trade; please refer to <a href="https://developer.apple.com/ibeacon/" about="_blank">official page</a>.</p>
 <p>An application that wants to use the iBeacon&trade; implementation of Kura Beacon APIs should bind the <strong>BluetoothLeService</strong> and <strong>BluetoothLeIBeaconService</strong> OSGI services, as shown in the following Java snippet:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setBluetoothLeService</span><span class="p">(</span><span class="n">BluetoothLeService</span><span class="w"> </span><span class="n">bluetoothLeService</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeService</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bluetoothLeService</span><span class="p">;</span>
@@ -4613,7 +4550,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">            </span><span class="na">policy=</span><span class="s">&quot;static&quot;</span><span class="w"> </span>
 <a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">            </span><span class="na">unbind=</span><span class="s">&quot;unsetBluetoothLeIBeaconService&quot;</span><span class="nt">/&gt;</span>
 </code></pre></div>
-<p>The <strong>BluetoothLeService</strong> is used to get the <strong>BluetoothLeAdapter</strong> to be used with the <strong>BluetoothLeIBeaconScanner</strong> and <strong>BluetoothLeIBeaconAdvertiser</strong>. As explained <a href="/java-application-development/how-to-use-new-bt-le-apis/#get-the-bluetooth-adapter">here</a>, the adapter can be retrieved and powered on as follows:</p>
+<p>The <strong>BluetoothLeService</strong> is used to get the <strong>BluetoothLeAdapter</strong> to be used with the <strong>BluetoothLeIBeaconScanner</strong> and <strong>BluetoothLeIBeaconAdvertiser</strong>. As explained <a href="/java-application-development/how-to-use-bt-le-apis/#get-the-bluetooth-adapter">here</a>, the adapter can be retrieved and powered on as follows:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeAdapter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeService</span><span class="p">.</span><span class="na">getAdapter</span><span class="p">(</span><span class="n">adapterName</span><span class="p">);</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeAdapter</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeAdapter</span><span class="p">.</span><span class="na">isPowered</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
@@ -4697,7 +4634,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </div>
 <h2 id="how-to-use-kura-eddystonetm-apis">How to use Kura Eddystone&trade; APIs</h2>
 <p>Eddystone&trade; is a protocol specification that defines a BLE message format for proximity beacon messages. It describes several different frame types that may be used individually or in combinations to create beacons that can be used for a variety of applications. For more information please see <a href="https://developers.google.com/beacons/" about="_blank">here</a> and <a href="https://github.com/google/eddystone" about="_blank">here</a>.</p>
-<p>In this section the Eddystone&trade; implementation of the Kura Beacon APIs is presented, providing several code snippets to explain how to perform common operations on them. For a complete example on Eddystone&trade; advertising and scanning, please refer to the new <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.eddystone.advertiser" about="_blank">Eddystone&trade; advertiser</a> and <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.eddystone.scanner" about="_blank">Eddystone&trade; scanner</a> examples.</p>
+<p>In this section the Eddystone&trade; implementation of the Kura Beacon APIs is presented, providing several code snippets to explain how to perform common operations on them. For a complete example on Eddystone&trade; advertising and scanning, please refer to the <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.eddystone.advertiser" about="_blank">Eddystone&trade; advertiser</a> and <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.eddystone.scanner" about="_blank">Eddystone&trade; scanner</a> examples.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Only Eddystone UID and URL frame types are currently supported.</p>
@@ -4734,7 +4671,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">            </span><span class="na">policy=</span><span class="s">&quot;static&quot;</span><span class="w"> </span>
 <a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">            </span><span class="na">unbind=</span><span class="s">&quot;unsetBluetoothLeEddystoneService&quot;</span><span class="nt">/&gt;</span>
 </code></pre></div>
-<p>The <strong>BluetoothLeService</strong> is used to get the <strong>BluetoothLeAdapter</strong> to be used with the <strong>BluetoothLeEddystoneScanner</strong> and <strong>BluetoothLeEddystoneAdvertiser</strong>. As explained <a href="/java-application-development/how-to-use-new-bt-le-apis/#get-the-bluetooth-adapter">here</a>, the adapter can be retrieved and powered on as follows:</p>
+<p>The <strong>BluetoothLeService</strong> is used to get the <strong>BluetoothLeAdapter</strong> to be used with the <strong>BluetoothLeEddystoneScanner</strong> and <strong>BluetoothLeEddystoneAdvertiser</strong>. As explained <a href="/java-application-development/how-to-use-bt-le-apis/#get-the-bluetooth-adapter">here</a>, the adapter can be retrieved and powered on as follows:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeAdapter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeService</span><span class="p">.</span><span class="na">getAdapter</span><span class="p">(</span><span class="n">adapterName</span><span class="p">);</span>
 <a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeAdapter</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="na">bluetoothLeAdapter</span><span class="p">.</span><span class="na">isPowered</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>

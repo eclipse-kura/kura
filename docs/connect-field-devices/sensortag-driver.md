@@ -1,6 +1,6 @@
 # TI SensorTag Driver
 
-Eclipse Kura provides a specific driver that can be used to interact with Texas Instruments SensorTag devices. The driver is available only for gateways that support the new Bluetooth LE APIs. 
+Eclipse Kura provides a specific driver that can be used to interact with Texas Instruments SensorTag devices.
 It can be used in the Wires framework, the Asset model or directly using the Driver itself.
 
 !!! warning

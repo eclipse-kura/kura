@@ -1,7 +1,7 @@
 # Eddystone&trade; Driver
 
 Eclipse Kura offers support for Eddystone&trade; protocol via a specific driver.
-The driver is available only for gateways that support the new Bluetooth LE APIs. It can be used into the Wires framework, the Asset model or directly using the Driver itself.
+It can be used into the Wires framework, the Asset model or directly using the Driver itself.
 
 ## Features
 

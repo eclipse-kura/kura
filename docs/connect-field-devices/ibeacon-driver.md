@@ -1,7 +1,7 @@
 # iBeacon&trade; Driver
 
 Eclipse Kura provides a driver specifically developed to manage iBeacon&trade; protocol.
-The driver is available only for gateways that support the new Bluetooth LE APIs. They can be used into the Wires framework, the Asset model or directly using the Driver itself.
+They can be used into the Wires framework, the Asset model or directly using the Driver itself.
 
 ## Features
 

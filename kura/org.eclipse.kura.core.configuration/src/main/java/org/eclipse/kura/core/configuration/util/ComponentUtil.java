@@ -63,7 +63,8 @@ public class ComponentUtil {
     }
 
     /**
-     * Returns a Map with all the MetaType Object Class Definitions contained in the bundle.
+     * Returns a Map with all the MetaType Object Class Definitions contained in the
+     * bundle.
      *
      * @param ctx
      * @param bnd
@@ -144,7 +145,8 @@ public class ComponentUtil {
     }
 
     /**
-     * Returns a Map with all the MetaType Object Class Definitions contained in the bundle.
+     * Returns a Map with all the MetaType Object Class Definitions contained in the
+     * bundle.
      *
      * @param ctx
      * @param bnd
@@ -241,7 +243,7 @@ public class ComponentUtil {
      * contain any extra post-processing of the loaded information.
      *
      * @param resourceUrl
-     *            Url of the MetaData XML file which needs to be loaded
+     *                    Url of the MetaData XML file which needs to be loaded
      * @return
      * @throws IOException
      * @throws XMLStreamException
@@ -380,68 +382,68 @@ public class ComponentUtil {
     private static Object[] getObjectValue(Scalar type, String[] defaultValues, ComponentContext ctx) {
         List<Object> values = new ArrayList<>();
         switch (type) {
-        case BOOLEAN:
-            for (String value : defaultValues) {
-                values.add(Boolean.valueOf(value));
-            }
-            return values.toArray(new Boolean[] {});
-
-        case BYTE:
-            for (String value : defaultValues) {
-                values.add(Byte.valueOf(value));
-            }
-            return values.toArray(new Byte[] {});
-
-        case CHAR:
-            for (String value : defaultValues) {
-                values.add(Character.valueOf(value.charAt(0)));
-            }
-            return values.toArray(new Character[] {});
-
-        case DOUBLE:
-            for (String value : defaultValues) {
-                values.add(Double.valueOf(value));
-            }
-            return values.toArray(new Double[] {});
-
-        case FLOAT:
-            for (String value : defaultValues) {
-                values.add(Float.valueOf(value));
-            }
-            return values.toArray(new Float[] {});
-
-        case INTEGER:
-            for (String value : defaultValues) {
-                values.add(Integer.valueOf(value));
-            }
-            return values.toArray(new Integer[] {});
-
-        case LONG:
-            for (String value : defaultValues) {
-                values.add(Long.valueOf(value));
-            }
-            return values.toArray(new Long[] {});
-
-        case SHORT:
-            for (String value : defaultValues) {
-                values.add(Short.valueOf(value));
-            }
-            return values.toArray(new Short[] {});
-
-        case PASSWORD:
-            ServiceReference<CryptoService> sr = ctx.getBundleContext().getServiceReference(CryptoService.class);
-            CryptoService cryptoService = ctx.getBundleContext().getService(sr);
-            for (String value : defaultValues) {
-                try {
-                    values.add(new Password(cryptoService.encryptAes(value.toCharArray())));
-                } catch (Exception e) {
-                    values.add(new Password(value));
+            case BOOLEAN:
+                for (String value : defaultValues) {
+                    values.add(Boolean.valueOf(value));
                 }
-            }
-            return values.toArray(new Password[] {});
+                return values.toArray(new Boolean[] {});
 
-        case STRING:
-            return defaultValues;
+            case BYTE:
+                for (String value : defaultValues) {
+                    values.add(Byte.valueOf(value));
+                }
+                return values.toArray(new Byte[] {});
+
+            case CHAR:
+                for (String value : defaultValues) {
+                    values.add(Character.valueOf(value.charAt(0)));
+                }
+                return values.toArray(new Character[] {});
+
+            case DOUBLE:
+                for (String value : defaultValues) {
+                    values.add(Double.valueOf(value));
+                }
+                return values.toArray(new Double[] {});
+
+            case FLOAT:
+                for (String value : defaultValues) {
+                    values.add(Float.valueOf(value));
+                }
+                return values.toArray(new Float[] {});
+
+            case INTEGER:
+                for (String value : defaultValues) {
+                    values.add(Integer.valueOf(value));
+                }
+                return values.toArray(new Integer[] {});
+
+            case LONG:
+                for (String value : defaultValues) {
+                    values.add(Long.valueOf(value));
+                }
+                return values.toArray(new Long[] {});
+
+            case SHORT:
+                for (String value : defaultValues) {
+                    values.add(Short.valueOf(value));
+                }
+                return values.toArray(new Short[] {});
+
+            case PASSWORD:
+                ServiceReference<CryptoService> sr = ctx.getBundleContext().getServiceReference(CryptoService.class);
+                CryptoService cryptoService = ctx.getBundleContext().getService(sr);
+                for (String value : defaultValues) {
+                    try {
+                        values.add(new Password(cryptoService.encryptAes(value.toCharArray())));
+                    } catch (Exception e) {
+                        values.add(new Password(value));
+                    }
+                }
+                return values.toArray(new Password[] {});
+
+            case STRING:
+                return defaultValues;
         }
 
         return null;

@@ -57,15 +57,7 @@
             required="true"
             default="false"
             description="Whether or not to republish the MQTT Birth Certificate on GPS lock event"/>
-        
-        <AD id="republish.mqtt.birth.cert.on.modem.detect"
-            name="Republish Mqtt Birth Cert On Modem Detect"
-            type="Boolean"
-            cardinality="0"
-            required="true"
-            default="false"
-            description="Whether or not to republish the MQTT Birth Certificate on modem detection event. This functionality is currently not supported on devices configured to use NetworkManager, in this case the property value is ignored."/>"/>
-        
+
         <AD id="payload.encoding"
             name="Payload Encoding"
             type="String"

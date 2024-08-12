@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -37,7 +37,6 @@ public class CloudServiceOptionsTest {
     private static final String DEVICE_CUSTOM_NAME = "device.custom-name";
     private static final String ENCODE_GZIP = "encode.gzip";
     private static final String REPUB_BIRTH_ON_GPS_LOCK = "republish.mqtt.birth.cert.on.gps.lock";
-    private static final String REPUB_BIRTH_ON_MODEM_DETECT = "republish.mqtt.birth.cert.on.modem.detect";
     private static final String ENABLE_DFLT_SUBSCRIPTIONS = "enable.default.subscriptions";
     private static final String PAYLOAD_ENCODING = "payload.encoding";
 
@@ -52,7 +51,6 @@ public class CloudServiceOptionsTest {
         properties.put(DEVICE_DISPLAY_NAME, "device-name");
         properties.put(ENCODE_GZIP, true);
         properties.put(REPUB_BIRTH_ON_GPS_LOCK, true);
-        properties.put(REPUB_BIRTH_ON_MODEM_DETECT, true);
         properties.put(TOPIC_CONTROL_PREFIX, TEST_TOPIC_CONTROL_PREFIX);
         properties.put(ENABLE_DFLT_SUBSCRIPTIONS, false);
         properties.put(PAYLOAD_ENCODING, "simple-json");
@@ -244,46 +242,6 @@ public class CloudServiceOptionsTest {
     public void testGetRepubBirthCertOnGpsLock() {
 
         boolean republish = options.getRepubBirthCertOnGpsLock();
-
-        assertTrue(republish);
-    }
-
-    @Test
-    public void testGetRepubBirthCertOnModemDetectionNullProps() {
-        CloudServiceOptions options = new CloudServiceOptions(null, systemService);
-
-        boolean republish = options.getRepubBirthCertOnModemDetection();
-
-        assertFalse(republish);
-    }
-
-    @Test
-    public void testGetRepubBirthCertOnModemDetectionPropNull() {
-        Map<String, Object> properties = new HashMap<>();
-
-        CloudServiceOptions options = new CloudServiceOptions(properties, systemService);
-
-        boolean republish = options.getRepubBirthCertOnModemDetection();
-
-        assertFalse(republish);
-    }
-
-    @Test
-    public void testGetRepubBirthCertOnModemDetectionPropNotBoolean() {
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(REPUB_BIRTH_ON_MODEM_DETECT, "invalid");
-
-        CloudServiceOptions options = new CloudServiceOptions(properties, systemService);
-
-        boolean republish = options.getRepubBirthCertOnModemDetection();
-
-        assertFalse(republish);
-    }
-
-    @Test
-    public void testGetRepubBirthCertOnModemDetection() {
-
-        boolean republish = options.getRepubBirthCertOnModemDetection();
 
         assertTrue(republish);
     }

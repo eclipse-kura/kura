@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,8 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.core.cloud;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -43,7 +41,6 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.message.KuraPayload;
-import org.eclipse.kura.net.modem.ModemReadyEvent;
 import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.security.tamper.detection.TamperEvent;
 import org.eclipse.kura.system.SystemAdminService;
@@ -129,18 +126,6 @@ public class BirthMessagesTest {
     @Test
     public void shouldPublishWithDelayOnPositionLockedEvent() throws KuraException {
         givenPositionLockedEvent();
-        givenConfiguredCloudService();
-        givenConnected();
-
-        whenHandleEvent();
-
-        thenNoExceptionOccurred();
-        thenBirthIsPublishedAfter(SEND_DELAY, BIRTH_TOPIC_PREFIX + CloudServiceOptions.getTopicBirthSuffix());
-    }
-
-    @Test
-    public void shouldPublishWithDelayOnModemReadyEvent() throws KuraException {
-        givenModemReadyEvent();
         givenConfiguredCloudService();
         givenConnected();
 
@@ -273,17 +258,6 @@ public class BirthMessagesTest {
         this.event = new Event(PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC, new HashMap<String, Object>());
     }
 
-    private void givenModemReadyEvent() {
-        Map<String, Object> properties = new HashMap<String, Object>();
-        properties.put(ModemReadyEvent.FW_VERSION, "1.1.1");
-        properties.put(ModemReadyEvent.ICCID, "1234");
-        properties.put(ModemReadyEvent.IMEI, "4321");
-        properties.put(ModemReadyEvent.IMSI, "6789");
-        properties.put(ModemReadyEvent.MODEM_DEVICE, "ppp0");
-        properties.put(ModemReadyEvent.RSSI, "9876");
-        this.event = new ModemReadyEvent(properties);
-    }
-
     private void givenTamperEvent() {
         this.event = new Event(TamperEvent.TAMPER_EVENT_TOPIC, new HashMap<String, Object>());
     }
@@ -380,11 +354,6 @@ public class BirthMessagesTest {
         }
 
         assertNull(errorMessage, this.occurredException);
-    }
-
-    private <E extends Exception> void thenExceptionOccurred(Class<E> expectedException) {
-        assertNotNull(this.occurredException);
-        assertEquals(expectedException.getName(), this.occurredException.getClass().getName());
     }
 
     private void thenNoBirthIsPublished() throws KuraStoreException {

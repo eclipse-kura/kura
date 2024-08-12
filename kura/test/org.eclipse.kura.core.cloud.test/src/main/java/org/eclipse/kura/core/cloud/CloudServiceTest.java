@@ -44,12 +44,11 @@ import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.data.transport.listener.DataTransportListener;
 import org.eclipse.kura.message.KuraBirthPayload;
 import org.eclipse.kura.message.KuraDeviceProfile;
-import org.eclipse.kura.net.modem.ModemReadyEvent;
 import org.eclipse.kura.net.status.NetworkStatusService;
 import org.eclipse.kura.net.status.modem.ModemConnectionStatus;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
-import org.eclipse.kura.net.status.modem.Sim;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus.ModemInterfaceStatusBuilder;
+import org.eclipse.kura.net.status.modem.Sim;
 import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
 import org.eclipse.kura.security.tamper.detection.TamperEvent;
 import org.eclipse.kura.security.tamper.detection.TamperStatus;
@@ -80,10 +79,6 @@ public class CloudServiceTest {
     private static final String MODEM_IMEI = "modem_imei";
     private static final String TAMPER_STATUS = "tamper_status";
     private static final String MODEM_FIRMWARE_VERSION = "modem_firmware_version";
-    private static final String FOO_FW_VER = "fooFwVer";
-    private static final String FOO_ICCID = "fooIccid";
-    private static final String FOO_IMSI = "fooImsi";
-    private static final String FOO_IMEI = "fooImei";
     private static final String FOO_FW_VER1 = "fooFwVer1";
     private static final String FOO_ICCID1 = "fooIccid1";
     private static final String FOO_IMSI1 = "fooImsi1";
@@ -247,22 +242,11 @@ public class CloudServiceTest {
             throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
 
         clearNetworkStatusServiceMock();
-        final Map<String, Object> properties = new HashMap<>();
 
-        properties.put(ModemReadyEvent.IMEI, FOO_IMEI);
-        properties.put(ModemReadyEvent.IMSI, FOO_IMSI);
-        properties.put(ModemReadyEvent.ICCID, FOO_ICCID);
-        properties.put(ModemReadyEvent.RSSI, "0");
-        properties.put(ModemReadyEvent.FW_VERSION, FOO_FW_VER);
-
-        final ModemReadyEvent modemReadyEvent = new ModemReadyEvent(properties);
-
-        eventAdmin.sendEvent(modemReadyEvent);
         cloudServiceImpl.setSystemService(createMockSystemService(Optional.empty()));
         final JsonObject metrics = publishBirthAndGetMetrics();
 
         assertEquals("getCpuVersion", metrics.get(KuraDeviceProfile.CPU_VERSION_KEY).asString());
-        assertEquals(FOO_FW_VER, metrics.get(MODEM_FIRMWARE_VERSION).asString());
 
     }
 
@@ -378,32 +362,6 @@ public class CloudServiceTest {
         } finally {
             reg.unregister();
         }
-    }
-
-    @Test
-    public void shouldPublishBirthMessageWithModemInfoWhenEventReceived()
-            throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
-
-        clearNetworkStatusServiceMock();
-        final Map<String, Object> properties = new HashMap<>();
-
-        properties.put(ModemReadyEvent.IMEI, FOO_IMEI);
-        properties.put(ModemReadyEvent.IMSI, FOO_IMSI);
-        properties.put(ModemReadyEvent.ICCID, FOO_ICCID);
-        properties.put(ModemReadyEvent.RSSI, "0");
-        properties.put(ModemReadyEvent.FW_VERSION, FOO_FW_VER);
-
-        final ModemReadyEvent modemReadyEvent = new ModemReadyEvent(properties);
-
-        eventAdmin.sendEvent(modemReadyEvent);
-        final JsonObject metrics = publishBirthAndGetMetrics();
-
-        assertEquals(FOO_IMEI, metrics.get(MODEM_IMEI).asString());
-        assertEquals(FOO_IMSI, metrics.get(MODEM_IMSI).asString());
-        assertEquals(FOO_ICCID, metrics.get(MODEM_ICCID).asString());
-        assertEquals("0", metrics.get(MODEM_RSSI).asString());
-        assertEquals(FOO_FW_VER, metrics.get(MODEM_FIRMWARE_VERSION).asString());
-
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,9 @@ package org.eclipse.kura.net.modem;
 
 /**
  * @since 1.4
+ * @deprecated since 3.0
  */
+@Deprecated
 public class ModemPdpContext {
 
     private final int number;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,10 @@ package org.eclipse.kura.net;
 
 /**
  * Used to specify the route mode of each interface.
+ * 
+ * @deprecated since version 3.0.
  */
+@Deprecated
 public enum NetRouterMode {
     /** DHCP and NAT **/
     netRouterDchpNat,

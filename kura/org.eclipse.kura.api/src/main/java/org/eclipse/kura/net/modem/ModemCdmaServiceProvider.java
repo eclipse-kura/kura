@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,10 @@
  ******************************************************************************/
 package org.eclipse.kura.net.modem;
 
+/**
+ * @deprecated since 3.0
+ */
+@Deprecated
 public enum ModemCdmaServiceProvider {
 
     UNKNOWN(0),

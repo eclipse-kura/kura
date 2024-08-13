@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -30,8 +30,10 @@ import org.osgi.annotation.versioning.ProviderType;
  * Service API for getting and setting network interface configurations.
  *
  * @noimplement This interface is not intended to be implemented by clients.
+ * @deprecated since 3.0
  */
 @ProviderType
+@Deprecated
 public interface NetworkAdminService {
 
     /**
@@ -63,7 +65,7 @@ public interface NetworkAdminService {
      * @param interfaceName
      * @return list of NetConfig for this interface.
      * 
-     * @deprecated since 2.4. Use {@link getNetworkInterfaceConfigs(tring
+     * @deprecated since 2.4. Use {@link getNetworkInterfaceConfigs(String
      *             interfaceName, boolean recompute)} instead.
      */
     @Deprecated
@@ -81,8 +83,9 @@ public interface NetworkAdminService {
      *                      automatic default
      * @throws KuraException
      * 
-     * @deprecated Since 2.4. Use the {@link ConfigurationService} to update the
-     *             configuration of an Ethernet interface.
+     * @deprecated Since 2.4. Use the
+     *             {@link org.eclipse.kura.configuration.ConfigurationService} to
+     *             update the configuration of an Ethernet interface.
      */
     @Deprecated
     public void updateEthernetInterfaceConfig(String interfaceName, boolean autoConnect, int mtu,
@@ -97,8 +100,9 @@ public interface NetworkAdminService {
      *                      - specifies the auto-connect value for the interface
      * @throws KuraException
      * 
-     * @deprecated Since 2.4. Use the {@link ConfigurationService} to update the
-     *             configuration of a Wifi interface.
+     * @deprecated Since 2.4. Use the
+     *             {@link org.eclipse.kura.configuration.ConfigurationService} to
+     *             update the configuration of a Wifi interface.
      */
     @Deprecated
     public void updateWifiInterfaceConfig(String interfaceName, boolean autoConnect, WifiAccessPoint accessPoint,
@@ -124,8 +128,9 @@ public interface NetworkAdminService {
      *                      - list of NetConfigs for this interface
      * @throws KuraException
      * 
-     * @deprecated Since 2.4. Use the {@link ConfigurationService} to update the
-     *             configuration of a Modem interface.
+     * @deprecated Since 2.4. Use the
+     *             {@link org.eclipse.kura.configuration.ConfigurationService} to
+     *             update the configuration of a Modem interface.
      */
     @Deprecated
     public void updateModemInterfaceConfig(String interfaceName, String serialNum, String modemId, int pppNumber,

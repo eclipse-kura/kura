@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,8 +21,10 @@ import org.osgi.service.event.Event;
  * Event raised when the state of a network interface has changed.
  *
  * @noextend This class is not intended to be subclassed by clients.
+ * @deprecated since 3.0
  */
 @ProviderType
+@Deprecated
 public class NetInterfaceStateChangedEvent extends Event {
 
     /** Topic of the NetworkStateChangedEvent */
@@ -96,7 +98,9 @@ public class NetInterfaceStateChangedEvent extends Event {
         /** The device could not be readied for configuration. */
         REASON_CONFIG_FAILED,
 
-        /** IP configuration could not be reserved (no available address, timeout, etc). */
+        /**
+         * IP configuration could not be reserved (no available address, timeout, etc).
+         */
         REASON_CONFIG_UNAVAILABLE,
 
         /** The IP configuration is no longer valid. */
@@ -105,7 +109,10 @@ public class NetInterfaceStateChangedEvent extends Event {
         /** Secrets were required, but not provided. */
         REASON_NO_SECRETS,
 
-        /** The 802.1X supplicant disconnected from the access point or authentication server. */
+        /**
+         * The 802.1X supplicant disconnected from the access point or authentication
+         * server.
+         */
         REASON_SUPPLICANT_DISCONNECT,
 
         /** Configuration of the 802.1X supplicant failed. */

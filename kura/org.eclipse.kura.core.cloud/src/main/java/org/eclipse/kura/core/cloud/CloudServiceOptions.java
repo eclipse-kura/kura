@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -37,7 +37,6 @@ public class CloudServiceOptions {
     private static final String DEVICE_CUSTOM_NAME = "device.custom-name";
     private static final String ENCODE_GZIP = "encode.gzip";
     private static final String REPUB_BIRTH_ON_GPS_LOCK = "republish.mqtt.birth.cert.on.gps.lock";
-    private static final String REPUB_BIRTH_ON_MODEM_DETECT = "republish.mqtt.birth.cert.on.modem.detect";
     private static final String REPUB_BIRTH_ON_TAMPER_EVENT = "republish.mqtt.birth.cert.on.tamper.event";
     private static final String ENABLE_DFLT_SUBSCRIPTIONS = "enable.default.subscriptions";
     private static final String PAYLOAD_ENCODING = "payload.encoding";
@@ -112,21 +111,6 @@ public class CloudServiceOptions {
         boolean repubBirth = false;
         if (this.properties != null && this.properties.get(REPUB_BIRTH_ON_GPS_LOCK) instanceof Boolean) {
             repubBirth = (Boolean) this.properties.get(REPUB_BIRTH_ON_GPS_LOCK);
-        }
-        return repubBirth;
-    }
-
-    /**
-     * Returns true if the current CloudService configuration
-     * specifies the cloud client should republish the MQTT birth
-     * certificate on modem detection events.
-     *
-     * @return a boolean value.
-     */
-    public boolean getRepubBirthCertOnModemDetection() {
-        boolean repubBirth = false;
-        if (this.properties != null && this.properties.get(REPUB_BIRTH_ON_MODEM_DETECT) instanceof Boolean) {
-            repubBirth = (Boolean) this.properties.get(REPUB_BIRTH_ON_MODEM_DETECT);
         }
         return repubBirth;
     }

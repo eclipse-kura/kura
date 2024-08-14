@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
-  
+    Copyright (c) 2018, 2024 Eurotech and/or its affiliates and others
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
-	SPDX-License-Identifier: EPL-2.0
-	
-	Contributors:
-	 Eurotech
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
@@ -57,15 +57,7 @@
             required="true"
             default="false"
             description="Whether or not to republish the MQTT Birth Certificate on GPS lock event"/>
-        
-        <AD id="republish.mqtt.birth.cert.on.modem.detect"
-            name="Republish Mqtt Birth Cert On Modem Detect"
-            type="Boolean"
-            cardinality="0"
-            required="true"
-            default="false"
-            description="Whether or not to republish the MQTT Birth Certificate on modem detection event. This functionality is currently not supported on devices configured to use NetworkManager, in this case the property value is ignored."/>"/>
-        
+
         <AD id="payload.encoding"
             name="Payload Encoding"
             type="String"

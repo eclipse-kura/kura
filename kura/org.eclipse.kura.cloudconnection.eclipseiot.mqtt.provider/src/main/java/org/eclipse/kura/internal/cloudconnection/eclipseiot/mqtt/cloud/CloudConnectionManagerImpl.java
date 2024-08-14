@@ -72,7 +72,6 @@ import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.message.KuraApplicationTopic;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.net.NetworkService;
-import org.eclipse.kura.net.modem.ModemReadyEvent;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceType;
 import org.eclipse.kura.net.status.NetworkStatusService;
@@ -99,8 +98,6 @@ public class CloudConnectionManagerImpl
     private static final String KURA_PAYLOAD = "KuraPayload";
 
     private static final String SETUP_CLOUD_SERVICE_CONNECTION_ERROR_MESSAGE = "Cannot setup cloud service connection";
-
-    private static final String ERROR = "ERROR";
 
     private static final Logger logger = LoggerFactory.getLogger(CloudConnectionManagerImpl.class);
 
@@ -292,8 +289,7 @@ public class CloudConnectionManagerImpl
         //
         // install event listener for GPS locked event
         Dictionary<String, Object> props = new Hashtable<>();
-        String[] eventTopics = { PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC,
-                ModemReadyEvent.MODEM_EVENT_READY_TOPIC, EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL,
+        String[] eventTopics = { PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC, EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL,
                 EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL };
         props.put(EventConstants.EVENT_TOPIC, eventTopics);
         this.cloudServiceRegistration = this.ctx.getBundleContext().registerService(EventHandler.class.getName(), this,
@@ -363,13 +359,8 @@ public class CloudConnectionManagerImpl
             return;
         }
 
-        if (ModemReadyEvent.MODEM_EVENT_READY_TOPIC.contains(topic)) {
-            handleModemReadyEvent(event);
-            return;
-        }
-
-        if ((EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL.equals(topic)
-                || EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL.equals(topic)) && this.dataService.isConnected()) {
+        if ((EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL.equals(topic) || EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL.equals(topic))
+                && this.dataService.isConnected()) {
             logger.debug("CloudConnectionManagerImpl: received install/uninstall event, publishing BIRTH.");
             tryPublishBirthCertificate(false);
         }
@@ -382,35 +373,6 @@ public class CloudConnectionManagerImpl
         if (this.dataService.isConnected() && this.options.getRepubBirthCertOnGpsLock()) {
             tryPublishBirthCertificate(false);
         }
-    }
-
-    private void handleModemReadyEvent(Event event) {
-        logger.info("Handling ModemReadyEvent");
-        ModemReadyEvent modemReadyEvent = (ModemReadyEvent) event;
-        // keep these identifiers around until we can publish the certificate
-        this.imei = (String) modemReadyEvent.getProperty(ModemReadyEvent.IMEI);
-        this.imsi = (String) modemReadyEvent.getProperty(ModemReadyEvent.IMSI);
-        this.iccid = (String) modemReadyEvent.getProperty(ModemReadyEvent.ICCID);
-        this.rssi = (String) modemReadyEvent.getProperty(ModemReadyEvent.RSSI);
-        this.modemFwVer = (String) modemReadyEvent.getProperty(ModemReadyEvent.FW_VERSION);
-        logger.trace("handleEvent() :: IMEI={}", this.imei);
-        logger.trace("handleEvent() :: IMSI={}", this.imsi);
-        logger.trace("handleEvent() :: ICCID={}", this.iccid);
-        logger.trace("handleEvent() :: RSSI={}", this.rssi);
-        logger.trace("handleEvent() :: FW_VERSION={}", this.modemFwVer);
-
-        if (this.dataService.isConnected() && this.options.getRepubBirthCertOnModemDetection() && isModemInfoValid()) {
-            logger.debug("handleEvent() :: publishing BIRTH certificate ...");
-            tryPublishBirthCertificate(false);
-        }
-    }
-
-    private boolean isModemInfoValid(final String modemInfo) {
-        return !(modemInfo == null || modemInfo.length() == 0 || modemInfo.equals(ERROR));
-    }
-
-    public boolean isModemInfoValid() {
-        return isModemInfoValid(this.imei) && isModemInfoValid(this.imsi) && isModemInfoValid(this.iccid);
     }
 
     private void tryPublishBirthCertificate(boolean isNewConnection) {

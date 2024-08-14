@@ -114,22 +114,6 @@
         <condition property="is.docker">
             <contains string="${build.name}" substring="docker" />
         </condition>
-        <condition property="is.sysv">
-            <and>
-                <contains string="${service.manager}" substring="sysv" />
-                <not>
-                    <contains string="${build.name}" substring="-nn" />
-                </not>
-            </and>
-        </condition>
-        <condition property="is.systemd">
-            <and>
-                <contains string="${service.manager}" substring="systemd" />
-                <not>
-                    <contains string="${build.name}" substring="-nn" />
-                </not>
-            </and>
-        </condition>
 
         <condition property="is.debian">
             <and>
@@ -251,7 +235,6 @@
         <antcall target="gpio-config" />
         <antcall target="emulator-gpio-config" />
         <antcall target="emulator-config" />
-        <antcall target="linux-sysv-config" />
         <antcall target="linux-debian-config" />
         <antcall target="linux-redhat-config" />
         <antcall target="linux-systemd-config" />
@@ -747,7 +730,6 @@ fi]]>
         <antcall target="gpio-jar" />
         <antcall target="emulator-gpio-jar" />
         <antcall target="emulator-jars" />
-        <antcall target="linux-sysv-jars" />
         <antcall target="linux-debian-jars" />
         <antcall target="linux-redhat-jars" />
         <antcall target="linux-systemd-jars" />
@@ -1687,6 +1669,11 @@ fi]]>
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar@4" />
         </propertyfile>
+        <propertyfile
+            file="${project.build.directory}/${build.output.name}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.linux.systemd.provider_${org.eclipse.kura.linux.systemd.provider.version}.jar@4" />
+        </propertyfile>
     </target>
 
     <target name="linux-network-manager-config" depends="linux-config">
@@ -1698,14 +1685,6 @@ fi]]>
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.net.admin.firewall_${org.eclipse.kura.net.admin.firewall.version}.jar@5:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.rest.network.status.provider_${org.eclipse.kura.rest.network.status.provider.version}.jar@5:start" />
-        </propertyfile>
-    </target>
-
-    <target name="linux-sysv-config" if="is.sysv" depends="linux-config">
-        <propertyfile
-            file="${project.build.directory}/${build.output.name}/config.ini">
-            <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.linux.sysv.provider_${org.eclipse.kura.linux.sysv.provider.version}.jar@4" />
         </propertyfile>
     </target>
 
@@ -1722,14 +1701,6 @@ fi]]>
             file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.linux.redhat.provider_${org.eclipse.kura.linux.redhat.provider.version}.jar@4" />
-        </propertyfile>
-    </target>
-
-    <target name="linux-systemd-config" if="is.systemd" depends="linux-config">
-        <propertyfile
-            file="${project.build.directory}/${build.output.name}/config.ini">
-            <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.linux.systemd.provider_${org.eclipse.kura.linux.systemd.provider.version}.jar@4" />
         </propertyfile>
     </target>
 
@@ -1759,6 +1730,12 @@ fi]]>
                 file="${project.build.directory}/plugins/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
         </zip>
+        <zip destfile="${project.build.directory}/${build.output.name}.zip"
+            update="true">
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.linux.systemd.provider_${org.eclipse.kura.linux.systemd.provider.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+        </zip>
     </target>
 
     <target name="linux-network-manager-jars">
@@ -1772,15 +1749,6 @@ fi]]>
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.rest.network.status.provider_${org.eclipse.kura.rest.network.status.provider.version}.jar"
-                prefix="${build.output.name}/${plugins.folder}" />
-        </zip>
-    </target>
-	
-    <target name="linux-sysv-jars" if="is.sysv" depends="linux-jars">
-        <zip destfile="${project.build.directory}/${build.output.name}.zip"
-            update="true">
-            <zipfileset
-                file="${project.build.directory}/plugins/org.eclipse.kura.linux.sysv.provider_${org.eclipse.kura.linux.sysv.provider.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
         </zip>
     </target>
@@ -1799,15 +1767,6 @@ fi]]>
             update="true">
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.linux.redhat.provider_${org.eclipse.kura.linux.redhat.provider.version}.jar"
-                prefix="${build.output.name}/${plugins.folder}" />
-        </zip>
-    </target>
-
-    <target name="linux-systemd-jars" if="is.systemd" depends="linux-jars">
-        <zip destfile="${project.build.directory}/${build.output.name}.zip"
-            update="true">
-            <zipfileset
-                file="${project.build.directory}/plugins/org.eclipse.kura.linux.systemd.provider_${org.eclipse.kura.linux.systemd.provider.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
         </zip>
     </target>

@@ -237,7 +237,6 @@
         <antcall target="emulator-config" />
         <antcall target="linux-debian-config" />
         <antcall target="linux-redhat-config" />
-        <antcall target="linux-systemd-config" />
         <antcall target="linux-network-manager-config" />
 
         <!-- Add mToolkit to config.ini -->
@@ -732,7 +731,6 @@ fi]]>
         <antcall target="emulator-jars" />
         <antcall target="linux-debian-jars" />
         <antcall target="linux-redhat-jars" />
-        <antcall target="linux-systemd-jars" />
         <antcall target="linux-network-manager-jars" />
 
         <echo message="Building Kura Distribution for ${build.name}-jars..." />

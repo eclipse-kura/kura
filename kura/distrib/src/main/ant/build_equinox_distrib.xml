@@ -510,12 +510,6 @@ fi]]>
                 prefix="${build.output.name}/${install.folder}/" filemode="700" />
 
             <zipfileset
-                file="${project.build.directory}/${build.output.name}/kura.init.yocto"
-                prefix="${build.output.name}/${install.folder}" filemode="700" />
-            <zipfileset
-                file="${project.build.directory}/${build.output.name}/kura.init.raspbian"
-                prefix="${build.output.name}/${install.folder}" filemode="700" />
-            <zipfileset
                 file="${project.build.directory}/${build.output.name}/kura.service"
                 prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/${build.name}/firewall.service"
@@ -524,22 +518,6 @@ fi]]>
                 prefix="${build.output.name}/${install.folder}" filemode="700" />
             <zipfileset file="src/main/resources/${build.name}/iptables.init"
                 prefix="${build.output.name}/${install.folder}" filemode="700" />
-            <zipfileset file="src/main/resources/${build.name}/hostapd.conf"
-                prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/${build.name}/dhcpd-eth0.conf"
-                prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/${build.name}/dhcpd-wlan0.conf"
-                prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/${build.name}/dhcpd-enp2s0.conf"
-                prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/${build.name}/dhcpd-wlp4s0.conf"
-                prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/${build.name}/ifcfg-enp2s0"
-                prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/${build.name}/ifcfg-enp3s0"
-                prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/${build.name}/ifcfg-wlp4s0"
-                prefix="${build.output.name}/${install.folder}" />
 
             <zipfileset file="src/main/resources/common/kura-tmpfiles.conf"
                 prefix="${build.output.name}/${install.folder}" />
@@ -547,12 +525,6 @@ fi]]>
             <zipfileset file="src/main/resources/${build.name}/kura.logrotate"
                 prefix="${build.output.name}/${install.folder}" />
 
-            <zipfileset file="src/main/resources/common/sysctl.kura.conf"
-                prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/sysctl.kura.raspbian.conf"
-                prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/patch_sysctl.sh"
-                prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/find_net_interfaces.py"
                 prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/comment_interfaces_file.py"
@@ -572,31 +544,15 @@ fi]]>
                 <include name="*" />
             </zipfileset>
             
-            <zipfileset file="src/main/resources/common/named/named.conf"
-                prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/named/named.ca"
                 prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/named/named.rfc1912.zones"
                 prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/named/usr.sbin.named"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/${build.name}/bind.init"
-                prefix="${build.output.name}/${install.folder}" />
-
-            <zipfileset file="src/main/resources/common/ifdown-local"
-                prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/ifup-local"
-                prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/ifup-local.debian"
-                prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/ifup-local.raspbian"
-                prefix="${build.output.name}/${install.folder}" />
 
             <zipfileset file="src/main/resources/common/dnsmasq"
                 prefix="${build.output.name}/${install.folder}" />
-
-            <zipfileset file="${project.build.directory}/${build.output.name}/selinuxKura.pp"
-            	prefix="${build.output.name}/${install.folder}" />
 
             <zipfileset
                 file="${project.build.directory}/${build.output.name}/start_kura.sh"

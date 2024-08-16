@@ -323,11 +323,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.linux.sysv.provider</artifactId>
-                                    <version>${org.eclipse.kura.linux.sysv.provider.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.linux.systemd.provider</artifactId>
                                     <version>${org.eclipse.kura.linux.systemd.provider.version}</version>
                                 </artifactItem>
@@ -771,7 +766,6 @@
                                 <move file="target/plugins/org.eclipse.kura.linux.clock.jar" tofile="target/plugins/org.eclipse.kura.linux.clock_${org.eclipse.kura.linux.clock.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.command.jar" tofile="target/plugins/org.eclipse.kura.linux.command_${org.eclipse.kura.linux.command.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.net.jar" tofile="target/plugins/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.linux.sysv.provider.jar" tofile="target/plugins/org.eclipse.kura.linux.sysv.provider_${org.eclipse.kura.linux.sysv.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.systemd.provider.jar" tofile="target/plugins/org.eclipse.kura.linux.systemd.provider_${org.eclipse.kura.linux.systemd.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.debian.provider.jar" tofile="target/plugins/org.eclipse.kura.linux.debian.provider_${org.eclipse.kura.linux.debian.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.redhat.provider.jar" tofile="target/plugins/org.eclipse.kura.linux.redhat.provider_${org.eclipse.kura.linux.redhat.provider.version}.jar" />
@@ -1202,7 +1196,6 @@
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv7_hf" />
-                                        <property name="service.manager" value="systemd" />
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1300,7 +1293,6 @@
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv7_hf" />
-                                        <property name="service.manager" value="systemd" />
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1393,7 +1385,6 @@
                                         <property name="native.tag" value="x86_64" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="x86_64" />
-                                        <property name="service.manager" value="systemd" />
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1491,7 +1482,6 @@
                                         <property name="native.tag" value="x86_64" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="x86_64" />
-                                        <property name="service.manager" value="systemd" />
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1584,7 +1574,6 @@
                                         <property name="native.tag" value="aarch64" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="generic-arm64" />
-                                        <property name="service.manager" value="systemd" />
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1682,7 +1671,6 @@
                                         <property name="native.tag" value="aarch64" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="generic-arm64" />
-                                        <property name="service.manager" value="systemd" />
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1775,7 +1763,6 @@
                                         <property name="native.tag" value="x86_64" />
                                         <property name="kura.os.version" value="linux" />
                                         <property name="kura.arch" value="x86_64" />
-                                        <property name="service.manager" value="systemd" />
                                         <property name="os.base" value="linux-generic" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />

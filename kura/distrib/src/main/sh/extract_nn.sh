@@ -133,8 +133,8 @@ echo ""
 echo "Installing Kura..."
 echo "Installing Kura..." > $LOG 2>&1
 
-#Kill JVM and monit for installation
-killall monit java >> $LOG 2>&1
+# Kill Kura for installation
+killall java >> $LOG 2>&1
 
 run_kura_install
 exit 0

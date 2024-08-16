@@ -117,7 +117,7 @@ echo "Uninstalling KURA..."
 
 PIDS=`pgrep java`
 
-#Kill JVM and monit for installation
+# Kill Kura for installation
 if [ -f "/var/run/kura.pid" ] ; then
   KURA_PID=`cat /var/run/kura.pid`
 

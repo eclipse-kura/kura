@@ -292,9 +292,9 @@ fi
 trap run_cleanup INT TERM EXIT
 set -e
 
-# kill JVM and monit for upgrade
-echo "Stopping monit and kura" >> $LOG 2>&1
-{ killall monit java || true; } >> $LOG 2>&1
+# Kill Kura for upgrade
+echo "Stopping Kura" >> $LOG 2>&1
+{ killall java || true; } >> $LOG 2>&1
 
 run_kura_upgrade
 exit 0

@@ -28,8 +28,6 @@ The **CloudService** provides the following configuration parameters:
 
 - **republish.mqtt.birth.cert.on.gps.lock**: when set to true, forces a republish of the MQTT Birth Certificate when a GPS correct position lock is received. The device is then registered with its real coordinates. (Required field).
 
-- **republish.mqtt.birth.cert.on.modem.detect**: when set to true, forces a republish of the MQTT Birth Certificate when the service receives a modem detection event. This functionality is currently not supported on devices configured to use [NetworkManager](https://networkmanager.dev), in this case the property value is ignored. (Required field).
-
 - **enable.default.subscriptions**: manages the default subscriptions to the gateway management MQTT topics. When disabled, the gateway will not be remotely manageable.
 
 - **payload.encoding**: specifies the encoding for the messages sent by the specific CloudService instance. 
@@ -67,4 +65,4 @@ The default CloudService implementations publishes the following [lifecycle mess
 
 1. [BIRTH message](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraBirthPayload.java): sent immediately when device is connected to the cloud platform;
 2. [DISCONNECT message](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraDisconnectPayload.java): sent immediately before device is disconnected from the cloud platform;
-3. delayed [BIRTH message](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraBirthPayload.java): sent when new cloud application handler becomes available, a DP is installed or removed, GPS position is locked (can be disabled), or when modem status changes (can be disabled). These messages are cached for 30 seconds before sending. If no other message of such type arrives the message is sent; otherwise the BIRTH is cached and the timeout restarts. This is to avoid sending multiple messages when the framework starts.
+3. delayed [BIRTH message](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/message/KuraBirthPayload.java): sent when new cloud application handler becomes available, a DP is installed or removed, or when the GPS position is locked (can be disabled). These messages are cached for 30 seconds before sending. If no other message of such type arrives the message is sent; otherwise the BIRTH is cached and the timeout restarts. This is to avoid sending multiple messages when the framework starts.

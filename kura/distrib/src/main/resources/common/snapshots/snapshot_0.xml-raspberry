@@ -393,9 +393,6 @@
             <esf:property array="false" encrypted="false" name="payload.encoding" type="String">
                 <esf:value>kura-protobuf</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="republish.mqtt.birth.cert.on.modem.detect" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
                 <esf:value>org.eclipse.kura.cloud.CloudService</esf:value>
             </esf:property>

@@ -20,7 +20,7 @@ Depends: openjdk-17-jre-headless | temurin-17-jdk | openjdk-8-jre-headless | tem
  bluez | bluez5, bluez-hcidump | bluez5-noinst-tools,
  ntpdate, chrony, chronyc | chrony, cron | cronie, logrotate, gpsd
 Recommends: python3
-Architecture: all
+Architecture: amd64
 Maintainer: support@eurotech.com
 Description: Kura is an inclusive software framework that puts a layer
   between the operating system and the customer application, with industry

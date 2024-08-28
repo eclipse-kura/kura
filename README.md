@@ -160,7 +160,7 @@ mvn -f kura/distrib/pom.xml clean install -DbuildAll
 ```
 
 > [!TIP]
-You can skip tests by adding `-Dmaven.test.skip=true` in the commands above and you can compile a specific target by specifying the profile (e.g. `-Praspberry-pi-armhf`).
+You can skip tests by adding `-Dmaven.test.skip=true` in the commands above and you can compile a specific target by specifying the profile (e.g. `-Pgeneric-aarch64`).
 
 #### Build scripts
 
@@ -169,14 +169,6 @@ Alternatively, you can use the build scripts available in the root directory.
 ```bash
 ./build-all.sh
 ```
-
-or
-
-```bash
-./build-menu.sh
-```
-
-and select the profiles you want to build.
 
 ### Building Eclipse Kura™ Containers
 

@@ -710,6 +710,7 @@ fi]]>
         <antcall target="gpio-jar" />
         <antcall target="emulator-gpio-jar" />
         <antcall target="emulator-jars" />
+    	<antcall target="linux-jars" />
         <antcall target="linux-network-manager-jars" />
 
         <echo message="Building Kura Distribution for ${build.name}-jars..." />
@@ -1699,7 +1700,7 @@ fi]]>
         </zip>
     </target>
 
-    <target name="linux-network-manager-jars">
+    <target name="linux-network-manager-jars" depends="linux-jars">
         <zip destfile="${project.build.directory}/${build.output.name}.zip"
             update="true">
             <zipfileset

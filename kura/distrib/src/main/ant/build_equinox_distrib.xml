@@ -165,9 +165,6 @@
         <!-- Rest bundles config -->
         <antcall target="rest-config" />
     	
-    	<!-- Rest network configuration bundle config -->
-    	<antcall target="rest-network-config" />
-
         <!-- Asset bundles config -->
         <antcall target="asset-config" />
 
@@ -189,9 +186,6 @@
 
         <!-- Miscellaneous bundles config -->
         <antcall target="misc-config" />
-
-        <!-- Threat Management bundles config -->
-        <antcall target="threat-management-config" />
 
         <!-- Keystore Management bundles config -->
         <antcall target="keystore-management-config" />
@@ -218,7 +212,7 @@
         <antcall target="gpio-config" />
         <antcall target="emulator-gpio-config" />
         <antcall target="emulator-config" />
-        <antcall target="linux-network-manager-config" />
+        <antcall target="linux-network-config" />
 
         <!-- Add mToolkit to config.ini -->
         <propertyfile
@@ -679,8 +673,6 @@ fi]]>
 
         <antcall target="rest-jar" />
     	
-    	<antcall target="rest-network-config-jar" />
-
         <antcall target="asset-jar" />
 
         <antcall target="artemis-jar" />
@@ -692,8 +684,6 @@ fi]]>
         <antcall target="wires-jar-nashorn-js-engine" />
 
         <antcall target="misc-jar" />
-
-        <antcall target="threat-management-jar" />
 
         <antcall target="keystore-management-jar" />
 
@@ -710,8 +700,7 @@ fi]]>
         <antcall target="gpio-jar" />
         <antcall target="emulator-gpio-jar" />
         <antcall target="emulator-jars" />
-    	<antcall target="linux-jars" />
-        <antcall target="linux-network-manager-jars" />
+        <antcall target="linux-network-jars" />
 
         <echo message="Building Kura Distribution for ${build.name}-jars..." />
 
@@ -1237,14 +1226,6 @@ fi]]>
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.request.handler.jaxrs_${org.eclipse.kura.request.handler.jaxrs.version}.jar@4" />
         </propertyfile>
     </target>
-	
-    <target name="rest-network-config" unless="is.nn">
-	<propertyfile
-	    file="${project.build.directory}/${build.output.name}/config.ini">
-	    <entry key="osgi.bundles" operation="+"
-		value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.rest.network.configuration.provider_${org.eclipse.kura.rest.network.configuration.provider.version}.jar@4:start" />
-	</propertyfile>
-    </target>
 
     <target name="deployment-hooks-config">
         <propertyfile
@@ -1359,15 +1340,6 @@ fi]]>
                 file="${project.build.directory}/plugins/org.eclipse.kura.request.handler.jaxrs_${org.eclipse.kura.request.handler.jaxrs.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
         </zip>
-    </target>
-	
-    <target name="rest-network-config-jar" unless="is.nn">
-	<zip destfile="${project.build.directory}/${build.output.name}.zip"
-	    update="true">
-	    <zipfileset
-		file="${project.build.directory}/plugins/org.eclipse.kura.rest.network.configuration.provider_${org.eclipse.kura.rest.network.configuration.provider.version}.jar"
-		prefix="${build.output.name}/${plugins.folder}" />
-	</zip>
     </target>
 
     <target name="deployment-hooks-jar">
@@ -1641,31 +1613,26 @@ fi]]>
         </propertyfile>
     </target>
 
-    <target name="linux-config" unless="is.nn">
+    <target name="linux-network-config" unless="is.nn">
         <propertyfile
             file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar@4" />
-        </propertyfile>
-        <propertyfile
-            file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.linux.systemd.provider_${org.eclipse.kura.linux.systemd.provider.version}.jar@4" />
-        </propertyfile>
-    </target>
-
-    <target name="linux-network-manager-config" depends="linux-config">
-        <propertyfile
-            file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.nm_${org.eclipse.kura.nm.version}.jar@5:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.net.admin.firewall_${org.eclipse.kura.net.admin.firewall.version}.jar@5:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.rest.network.status.provider_${org.eclipse.kura.rest.network.status.provider.version}.jar@5:start" />
+    	    <entry key="osgi.bundles" operation="+"
+	    		value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.rest.network.configuration.provider_${org.eclipse.kura.rest.network.configuration.provider.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.network.threat.manager_${org.eclipse.kura.network.threat.manager.version}.jar@4:start" />
         </propertyfile>
     </target>
-
+		
     <target name="event-publisher-config">
         <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
@@ -1685,24 +1652,15 @@ fi]]>
         </zip>
     </target>
 
-    <target name="linux-jars" unless="is.nn">
+    <target name="linux-network-jars" unless="is.nn">
         <zip destfile="${project.build.directory}/${build.output.name}.zip"
             update="true">
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.linux.net_${org.eclipse.kura.linux.net.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
-        </zip>
-        <zip destfile="${project.build.directory}/${build.output.name}.zip"
-            update="true">
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.linux.systemd.provider_${org.eclipse.kura.linux.systemd.provider.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
-        </zip>
-    </target>
-
-    <target name="linux-network-manager-jars" depends="linux-jars">
-        <zip destfile="${project.build.directory}/${build.output.name}.zip"
-            update="true">
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.nm_${org.eclipse.kura.nm.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
@@ -1712,9 +1670,15 @@ fi]]>
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.rest.network.status.provider_${org.eclipse.kura.rest.network.status.provider.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
+    	    <zipfileset
+	    		file="${project.build.directory}/plugins/org.eclipse.kura.rest.network.configuration.provider_${org.eclipse.kura.rest.network.configuration.provider.version}.jar"
+	    		prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.network.threat.manager_${org.eclipse.kura.network.threat.manager.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
         </zip>
     </target>
-
+			
     <target name="web2-jar-win" if="is.web2.jar.available">
         <echo
             message="web2-jar-win ${project.build.directory}/${build.output.name}/config.ini..." />
@@ -1797,22 +1761,6 @@ fi]]>
             update="true">
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.misc.cloudcat_${org.eclipse.kura.misc.cloudcat.version}.jar"
-                prefix="${build.output.name}/${plugins.folder}" />
-        </zip>
-    </target>
-
-    <target name="threat-management-config" unless="is.nn">
-        <propertyfile
-            file="${project.build.directory}/${build.output.name}/config.ini">
-            <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.network.threat.manager_${org.eclipse.kura.network.threat.manager.version}.jar@4:start" />
-        </propertyfile>
-    </target>
-    <target name="threat-management-jar" unless="is.nn">
-        <zip destfile="${project.build.directory}/${build.output.name}.zip"
-            update="true">
-            <zipfileset
-                file="${project.build.directory}/plugins/org.eclipse.kura.network.threat.manager_${org.eclipse.kura.network.threat.manager.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
         </zip>
     </target>

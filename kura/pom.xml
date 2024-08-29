@@ -113,6 +113,7 @@
         <module>org.eclipse.kura.rest.command.provider</module>
         <module>org.eclipse.kura.rest.packages.provider</module>
         <module>org.eclipse.kura.rest.position.provider</module>
+        <module>org.eclipse.kura.rest.keystore.provider</module>
         <module>org.eclipse.kura.rest.security.provider</module>
         <module>org.eclipse.kura.rest.service.listing.provider</module>
         <module>org.eclipse.kura.rest.system.provider</module>

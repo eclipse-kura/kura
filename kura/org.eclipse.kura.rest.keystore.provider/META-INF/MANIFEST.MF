@@ -1,0 +1,35 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.rest.keystore.provider
+Bundle-SymbolicName: org.eclipse.kura.rest.keystore.provider;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Import-Package: com.google.gson;version="2.7.0",
+ com.google.gson.annotations;version="2.7.0",
+ javax.annotation.security;version="1.2.0",
+ javax.ws.rs;version="2.0.1",
+ javax.ws.rs.core;version="2.0.1",
+ org.bouncycastle.asn1.pkcs;version="1.78.1",
+ org.bouncycastle.jce.provider;version="1.78.1",
+ org.bouncycastle.openssl;version="1.78.1",
+ org.bouncycastle.openssl.jcajce;version="1.78.1",
+ org.eclipse.kura;version="[1.7,2.0)",
+ org.eclipse.kura.cloudconnection.message;version="[1.0,2.0)",
+ org.eclipse.kura.cloudconnection.request;version="[1.0,2.0)",
+ org.eclipse.kura.core.keystore.util;version="[1.1,2.0)",
+ org.eclipse.kura.marshalling;version="[1.0,2.0)",
+ org.eclipse.kura.message;version="[1.4,2.0)",
+ org.eclipse.kura.request.handler.jaxrs;version="[1.1,2.0)",
+ org.eclipse.kura.rest.utils;version="[1.0,2.0)",
+ org.eclipse.kura.security.keystore;version="[1.1,1.2)",
+ org.eclipse.kura.util.service;version="[1.0,2.0)",
+ org.osgi.framework;version="1.10.0",
+ org.osgi.service.component;version="1.2.0",
+ org.osgi.service.useradmin;version="1.1.0",
+ org.osgi.util.tracker;version="1.5.2",
+ org.slf4j;version="1.7.36"
+Bundle-Vendor: Eclipse Kura
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Bundle-ClassPath: .
+Bundle-ActivationPolicy: lazy
+Service-Component: OSGI-INF/*.xml
+

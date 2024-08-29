@@ -1147,7 +1147,7 @@
             </properties>
         </profile>
         <profile>
-            <id>generic-arm32</id>
+            <id>generic-armhf</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1180,7 +1180,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-arm32-jars</id>
+                                <id>generic-armhf-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1191,8 +1191,8 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-arm32" />
-                                        <property name="target.device" value="generic-arm32" />
+                                        <property name="build.name" value="generic-armhf" />
+                                        <property name="target.device" value="generic-armhf" />
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv7_hf" />
@@ -1211,18 +1211,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-arm32-deb</id>
+                                <id>generic-armhf-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-arm32_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-arm32/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_generic-armhf_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/generic-armhf/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-arm32.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_generic-armhf.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1244,7 +1244,7 @@
         </profile>
 
         <profile>
-            <id>generic-arm32-nn</id>
+            <id>generic-armhf-nn</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1277,7 +1277,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-arm32-nn-jars</id>
+                                <id>generic-armhf-nn-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1288,8 +1288,8 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-arm32-nn" />
-                                        <property name="target.device" value="generic-arm32-nn" />
+                                        <property name="build.name" value="generic-armhf-nn" />
+                                        <property name="target.device" value="generic-armhf-nn" />
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv7_hf" />
@@ -1308,18 +1308,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-arm32-nn-deb</id>
+                                <id>generic-armhf-nn-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-arm32-nn_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-arm32-nn/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_generic-armhf-nn_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/generic-armhf-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-arm32-nn.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_generic-armhf-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1336,7 +1336,7 @@
         </profile>
 
         <profile>
-            <id>generic-x86_64</id>
+            <id>generic-amd64</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1369,7 +1369,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-x86_64-jars</id>
+                                <id>generic-amd64-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1380,8 +1380,8 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-x86_64" />
-                                        <property name="target.device" value="generic-x86_64" />
+                                        <property name="build.name" value="generic-amd64" />
+                                        <property name="target.device" value="generic-amd64" />
                                         <property name="native.tag" value="x86_64" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="x86_64" />
@@ -1400,18 +1400,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-x86_64-deb</id>
+                                <id>generic-amd64-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-x86_64_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-x86_64/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_generic-amd64_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/generic-amd64/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-x86_64.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_generic-amd64.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1433,7 +1433,7 @@
         </profile>
 
 		<profile>
-            <id>generic-x86_64-nn</id>
+            <id>generic-amd64-nn</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1466,7 +1466,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-x86_64-nn-jars</id>
+                                <id>generic-amd64-nn-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1477,8 +1477,8 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-x86_64-nn" />
-                                        <property name="target.device" value="generic-x86_64-nn" />
+                                        <property name="build.name" value="generic-amd64-nn" />
+                                        <property name="target.device" value="generic-amd64-nn" />
                                         <property name="native.tag" value="x86_64" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="x86_64" />
@@ -1497,18 +1497,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-x86_64-nn-deb</id>
+                                <id>generic-amd64-nn-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-x86_64-nn_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-x86_64-nn/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_generic-amd64-nn_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/generic-amd64-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-x86_64-nn.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_generic-amd64-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1525,7 +1525,7 @@
         </profile>
         
         <profile>
-            <id>generic-aarch64</id>
+            <id>generic-arm64</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1558,7 +1558,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-aarch64-jars</id>
+                                <id>generic-arm64-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1569,8 +1569,8 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-aarch64" />
-                                        <property name="target.device" value="generic-aarch64" />
+                                        <property name="build.name" value="generic-arm64" />
+                                        <property name="target.device" value="generic-arm64" />
                                         <property name="native.tag" value="aarch64" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="generic-arm64" />
@@ -1589,18 +1589,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-aarch64-deb</id>
+                                <id>generic-arm64-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-aarch64_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-aarch64/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_generic-arm64_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/generic-arm64/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-aarch64.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_generic-arm64.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1622,7 +1622,7 @@
         </profile>
 
 		<profile>
-            <id>generic-aarch64-nn</id>
+            <id>generic-arm64-nn</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1655,7 +1655,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-aarch64-nn-jars</id>
+                                <id>generic-arm64-nn-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1666,8 +1666,8 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-aarch64-nn" />
-                                        <property name="target.device" value="generic-aarch64-nn" />
+                                        <property name="build.name" value="generic-arm64-nn" />
+                                        <property name="target.device" value="generic-arm64-nn" />
                                         <property name="native.tag" value="aarch64" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="generic-arm64" />
@@ -1686,18 +1686,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-aarch64-nn-deb</id>
+                                <id>generic-arm64-nn-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-aarch64-nn_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-aarch64-nn/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_generic-arm64-nn_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/generic-arm64-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-aarch64-nn.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_generic-arm64-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>

@@ -22,8 +22,4 @@ Depends: openjdk-17-jre-headless | temurin-17-jdk | openjdk-8-jre-headless | tem
 Recommends: python3
 Architecture: amd64
 Maintainer: support@eurotech.com
-Description: Kura is an inclusive software framework that puts a layer
-  between the operating system and the customer application, with industry
-  standard interfaces that shorten custom development time, simplified coding
-  and software that can be easily ported from one hardware platform
-  to another.
+Description: Open-source IoT edge framework based on Java/OSGi.

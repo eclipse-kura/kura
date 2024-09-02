@@ -158,6 +158,7 @@
         <antcall target="linux.usb-config" />
         <antcall target="bluetooth-config" />
         <antcall target="linux.watchdog-config" />
+    	<antcall target="h2db-config" />
 
         <!-- Added Camel bundles configs -->
         <antcall target="camel-config" />
@@ -701,6 +702,7 @@ fi]]>
         <antcall target="emulator-gpio-jar" />
         <antcall target="emulator-jars" />
         <antcall target="linux-network-jars" />
+    	<antcall target="h2db-jars" />
 
         <echo message="Building Kura Distribution for ${build.name}-jars..." />
 
@@ -1281,6 +1283,14 @@ fi]]>
         </propertyfile>
     </target>
 
+    <target name="h2db-config">
+        <propertyfile
+            file="${project.build.directory}/${build.output.name}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.db.h2db.provider_${org.eclipse.kura.db.h2db.provider.version}.jar@4" />
+        </propertyfile>
+    </target>
+        	
     <target name="asset-jar">
         <zip destfile="${project.build.directory}/${build.output.name}.zip"
             update="true">
@@ -1754,6 +1764,15 @@ fi]]>
             todir="${build.install.dir.kura}/kura/plugins" />
     </target>
 
+    <target name="h2db-jars">
+        <zip destfile="${project.build.directory}/${build.output.name}.zip"
+            update="true">
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.db.h2db.provider_${org.eclipse.kura.db.h2db.provider.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+        </zip>
+    </target>
+    	
     <target name="misc-config">
         <propertyfile
             file="${project.build.directory}/${build.output.name}/config.ini">

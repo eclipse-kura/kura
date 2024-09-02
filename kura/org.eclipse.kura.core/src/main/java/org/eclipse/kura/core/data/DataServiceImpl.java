@@ -173,8 +173,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
                             if (service instanceof MessageStoreProvider) {
                                 setMessageStoreProvider((MessageStoreProvider) service);
-//                            } else if (service instanceof H2DbService) {
-//                                setH2DbService((H2DbService) service);
                             } else {
                                 DataServiceImpl.this.componentContext.getBundleContext().ungetService(reference);
                                 return null;
@@ -340,36 +338,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         }
 
     }
-
-//    public synchronized void setH2DbService(H2DbService dbService) {
-//        setMessageStoreProvider(new MessageStoreProvider() {
-//
-//            @SuppressWarnings("restriction")
-//            @Override
-//            public MessageStore openMessageStore(String name) throws KuraStoreException {
-//                return new H2DbMessageStoreImpl(new ConnectionProvider() {
-//
-//                    @Override
-//                    public <T> T withConnection(final SQLFunction<Connection, T> task) throws SQLException {
-//                        return dbService.withConnection(task::call);
-//                    }
-//                }, name);
-//            }
-//
-//            @Override
-//            public void addListener(ConnectionListener listener) {
-//                // Do nothing
-//
-//            }
-//
-//            @Override
-//            public void removeListener(ConnectionListener listener) {
-//                // Do nothing
-//
-//            }
-//        });
-//
-//    }
 
     public synchronized void unsetH2DbService(H2DbService dbService) {
         unsetMessageStoreProvider();

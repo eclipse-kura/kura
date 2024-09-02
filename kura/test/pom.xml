@@ -890,7 +890,6 @@
         <module>org.eclipse.kura.core.cloud.test</module>
         <module>org.eclipse.kura.core.cloud.factory.test</module>
         <module>org.eclipse.kura.core.crypto.test</module>
-        <module>org.eclipse.kura.core.db.test</module>
         <module>org.eclipse.kura.core.deployment.test</module>
         <module>org.eclipse.kura.core.identity.test</module>
         <module>org.eclipse.kura.core.inventory.test</module>

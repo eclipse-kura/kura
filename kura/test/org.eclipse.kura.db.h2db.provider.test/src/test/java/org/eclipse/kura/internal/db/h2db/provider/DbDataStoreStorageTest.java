@@ -28,6 +28,7 @@ import java.util.Arrays;
 
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.db.H2DbService;
+import org.eclipse.kura.db.H2DbService.ConnectionCallable;
 import org.eclipse.kura.message.store.StoredMessage;
 import org.eclipse.kura.message.store.provider.MessageStore;
 import org.eclipse.kura.util.jdbc.ConnectionProvider;

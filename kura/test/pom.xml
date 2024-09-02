@@ -827,11 +827,6 @@
                                 </requirement>
                                 <requirement>
                                     <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.rest.provider</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
                                     <id>org.apache.felix.useradmin</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
@@ -939,6 +934,7 @@
         <module>org.eclipse.kura.core.tamper.detection.test</module>
         <module>org.eclipse.kura.useradmin.store.test</module>
         <module>org.eclipse.kura.core.keystore.test</module>
+        <module>org.eclipse.kura.rest.keystore.provider.test</module>
         <module>org.eclipse.kura.log.filesystem.provider.test</module>
         <module>org.eclipse.kura.rest.provider.test</module>
         <module>org.eclipse.kura.rest.asset.provider.test</module>

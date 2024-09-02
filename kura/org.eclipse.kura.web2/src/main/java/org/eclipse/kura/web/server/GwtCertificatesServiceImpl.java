@@ -33,7 +33,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.certificate.CertificatesService;
 import org.eclipse.kura.certificate.KuraCertificateEntry;
 import org.eclipse.kura.core.keystore.util.CertificateUtil;
-import org.eclipse.kura.core.keystore.util.KeystoreRemoteService;
+import org.eclipse.kura.core.keystore.util.KeystoreUtils;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
@@ -62,7 +62,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
         checkXSRFToken(xsrfToken);
 
         try {
-            PrivateKeyEntry entry = KeystoreRemoteService.createPrivateKey(privateKey, publicCert);
+            PrivateKeyEntry entry = KeystoreUtils.createPrivateKey(privateKey, publicCert);
 
             if (entry == null) {
                 throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
@@ -91,7 +91,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
         checkXSRFToken(xsrfToken);
 
         try {
-            X509Certificate[] certs = KeystoreRemoteService.parsePublicCertificates(certificate);
+            X509Certificate[] certs = KeystoreUtils.parsePublicCertificates(certificate);
 
             if (certs.length == 0) {
                 throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);

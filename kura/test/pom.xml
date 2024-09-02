@@ -281,6 +281,10 @@
                                 <type>p2-installable-unit</type>
                                 <artifactId>org.apache.logging.log4j.core</artifactId>
                             </dependency>
+                            <dependency>
+                                <type>p2-installable-unit</type>
+                                <artifactId>org.eclipse.kura.db.h2db.provider</artifactId>
+                            </dependency>
                         </dependencies>
                         <bundleStartLevel>
                             <bundle>
@@ -840,6 +844,11 @@
                                     <id>org.eclipse.kura.emulator.position</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.db.h2db.provider</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
                             </extraRequirements>
                         </dependency-resolution>
                     </configuration>
@@ -956,6 +965,7 @@
         <module>org.eclipse.kura.container.provider.test</module>
         <module>org.eclipse.kura.ai.triton.server.test</module>
         <module>org.eclipse.kura.db.sqlite.provider.test</module>
+        <module>org.eclipse.kura.db.h2db.provider.test</module>
         <module>org.eclipse.kura.message.store.provider.test</module>
         <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test</module>
         <!--

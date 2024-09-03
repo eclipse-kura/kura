@@ -404,8 +404,11 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
         try {
             this.executor.submit(() -> {
             }).get();
-        } catch (final Exception e) {
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
+        } catch (final Exception e1) {
+            throw new IllegalStateException(e1);
         }
     }
 

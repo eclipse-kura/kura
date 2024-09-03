@@ -114,7 +114,9 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
     }
 
     public void unsetCryptoService(CryptoService cryptoService) {
-        this.cryptoService = null;
+        if (this.cryptoService.equals(cryptoService)) {
+            this.cryptoService = null;
+        }
     }
 
     // ----------------------------------------------------------------

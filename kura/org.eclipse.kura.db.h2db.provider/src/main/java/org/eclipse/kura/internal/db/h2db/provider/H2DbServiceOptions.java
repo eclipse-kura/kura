@@ -106,15 +106,7 @@ class H2DbServiceOptions {
             }
         }
 
-        if ("mem".equals(protocol)) {
-            this.isInMemory = true;
-        } else if ("file".equals(protocol)) {
-            this.isFileBased = true;
-        } else if ("zip".equals(protocol)) {
-            this.isZipBased = true;
-        } else {
-            this.isRemote = true;
-        }
+        parseProtocol(protocol);
 
         this.baseUrl = "jdbc:h2:" + protocol + ':' + url;
 
@@ -128,6 +120,18 @@ class H2DbServiceOptions {
         }
 
         this.isFileBasedLogLevelSpecified = FILE_LOG_LEVEL_PATTERN.matcher(this.dbUrl).find();
+    }
+
+    private void parseProtocol(String protocol) {
+        if ("mem".equals(protocol)) {
+            this.isInMemory = true;
+        } else if ("file".equals(protocol)) {
+            this.isFileBased = true;
+        } else if ("zip".equals(protocol)) {
+            this.isZipBased = true;
+        } else {
+            this.isRemote = true;
+        }
     }
 
     public String getDbUrl() {

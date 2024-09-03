@@ -31,7 +31,9 @@ public class H2DbHelper {
     }
 
     protected void unsetConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = null;
+        if (this.configurationService.equals(configurationService)) {
+            this.configurationService = null;
+        }
     }
 
     private void startDefaultDbServiceInstance() {

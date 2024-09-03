@@ -41,6 +41,7 @@
         <module>org.eclipse.kura.core.certificates</module>
         <module>org.eclipse.kura.core.keystore</module>
         <module>org.eclipse.kura.core.cloud</module>
+        <module>org.eclipse.kura.core.cloud.command</module>
         <module>org.eclipse.kura.core.cloud.factory</module>
         <module>org.eclipse.kura.core.comm</module>
         <module>org.eclipse.kura.core.configuration</module>

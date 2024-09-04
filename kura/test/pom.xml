@@ -701,11 +701,6 @@
                                 </requirement>
                                 <requirement>
                                     <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.core.cloud</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.core.cloud.command</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
@@ -854,6 +849,11 @@
                                     <id>org.eclipse.kura.db.h2db.provider</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.cloudconnection.kapua.mqtt.provider</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>                                
                             </extraRequirements>
                         </dependency-resolution>
                     </configuration>

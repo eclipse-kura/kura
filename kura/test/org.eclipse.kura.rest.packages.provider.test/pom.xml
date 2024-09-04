@@ -595,11 +595,6 @@
                             </requirement>
                             <requirement>
                                 <type>eclipse-plugin</type>
-                                <id>org.eclipse.kura.core.cloud</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.core.cloud.factory</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
@@ -726,6 +721,11 @@
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.emulator.position</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.eclipse.kura.cloudconnection.kapua.mqtt.provider</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                         </extraRequirements>

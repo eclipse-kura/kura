@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.db.h2db.provider;
 
+import static java.util.Objects.isNull;
+
 import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -20,8 +22,6 @@ import java.util.Optional;
 
 import org.eclipse.kura.util.jdbc.ConnectionProvider;
 import org.eclipse.kura.util.wire.store.AbstractJdbcQueryableWireRecordStoreImpl;
-
-import static java.util.Objects.isNull;
 
 @SuppressWarnings("restriction")
 public class H2DbQueryableWireRecordStoreImpl extends AbstractJdbcQueryableWireRecordStoreImpl {

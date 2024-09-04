@@ -892,7 +892,6 @@
         <module>org.eclipse.kura.core.certificates.test</module>
         <module>org.eclipse.kura.core.comm.test</module>
         <module>org.eclipse.kura.core.configuration.test</module>
-        <module>org.eclipse.kura.core.cloud.test</module>
         <module>org.eclipse.kura.core.cloud.command.test</module>
         <module>org.eclipse.kura.core.cloud.factory.test</module>
         <module>org.eclipse.kura.core.crypto.test</module>
@@ -973,6 +972,7 @@
         <module>org.eclipse.kura.db.h2db.provider.test</module>
         <module>org.eclipse.kura.message.store.provider.test</module>
         <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test</module>
+        <module>org.eclipse.kura.cloudconnection.kapua.mqtt.provider.test</module>
         <!--
         <module>org.eclipse.kura.raspberrypi.sensehat.test</module>
         -->

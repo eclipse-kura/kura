@@ -40,7 +40,6 @@
         <module>org.eclipse.kura.core</module>
         <module>org.eclipse.kura.core.certificates</module>
         <module>org.eclipse.kura.core.keystore</module>
-        <module>org.eclipse.kura.core.cloud</module>
         <module>org.eclipse.kura.core.cloud.command</module>
         <module>org.eclipse.kura.core.cloud.factory</module>
         <module>org.eclipse.kura.core.comm</module>
@@ -129,6 +128,7 @@
         <module>org.eclipse.kura.db.h2db.provider</module>
         <module>org.eclipse.kura.rest.network.status.provider</module>
         <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</module>
+        <module>org.eclipse.kura.cloudconnection.kapua.mqtt.provider</module>
         <module>emulator</module>
         <module>test-util</module>
     </modules>

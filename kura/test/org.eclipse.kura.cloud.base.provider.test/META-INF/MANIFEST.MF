@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: org.eclipse.kura.core.test
-Bundle-SymbolicName: org.eclipse.kura.core.test;singleton:=true
+Bundle-Name: org.eclipse.kura.cloud.base.provider.test
+Bundle-SymbolicName: org.eclipse.kura.cloud.base.provider.test;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
@@ -9,6 +9,7 @@ Import-Package: javax.comm,
  javax.xml.parsers,
  javax.xml.stream,
  junit.framework,
+ org.bouncycastle.asn1.x500;version="1.78.1",
  org.eclipse.kura.cloud;version="[1.0,2.0)",
  org.eclipse.kura.comm;version="[1.0,2.0)",
  org.eclipse.kura.core.configuration;version="[2.0,3.0)",
@@ -23,10 +24,10 @@ Import-Package: javax.comm,
  org.eclipse.kura.core.testutil.event;version="[1.0,2.0)",
  org.eclipse.kura.core.testutil.http;version="[1.0,2.0)",
  org.eclipse.kura.core.testutil.pki;version="[1.0,2.0)",
- org.eclipse.kura.data;version="[1.1,2.0)",
  org.eclipse.kura.executor;version="[1.0,2.0)",
  org.eclipse.kura.marshalling;version="1.0.0",
  org.eclipse.kura.message;version="[1.0,2.0)",
+ org.eclipse.kura.security.keystore;version="[1.1,2.0)",
  org.eclipse.kura.util.service;version="1.0.0",
  org.eclipse.kura.util.wire.test;version="1.1.0",
  org.eclipse.kura.watchdog;version="[1.0,2.0)",
@@ -48,7 +49,7 @@ Import-Package: javax.comm,
  org.slf4j;version="1.6.4",
  org.w3c.dom,
  org.xml.sax
-Fragment-Host: org.eclipse.kura.core
+Fragment-Host: org.eclipse.kura.cloud.base.provider
 Bundle-ActivationPolicy: lazy
 Comment: org.eclipse.kura.emulator is needed as we need to start-up the emulator to run the tests!!
 Require-Bundle: org.eclipse.equinox.io;bundle-version="1.0.400",

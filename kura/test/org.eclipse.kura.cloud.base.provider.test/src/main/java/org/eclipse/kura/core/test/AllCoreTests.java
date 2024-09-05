@@ -31,9 +31,8 @@ import org.slf4j.LoggerFactory;
 import io.moquette.broker.Server;
 
 @RunWith(Suite.class)
-@SuiteClasses({ InventoryHandlerTest.class, CloudDeploymentHandlerTest.class, CommURITest.class,
-        ComponentConfigurationImplTest.class, ConfigurationServiceTest.class, NetUtilTest.class,
-        NetworkServiceTest.class, SystemAdminServiceTest.class })
+@SuiteClasses({ MqttDataTransportTest.class, DataServiceTest.class,
+        CloudServiceTest.class })
 public class AllCoreTests {
 
     private static final Logger s_logger = LoggerFactory.getLogger(AllCoreTests.class);

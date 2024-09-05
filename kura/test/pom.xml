@@ -285,6 +285,10 @@
                                 <type>p2-installable-unit</type>
                                 <artifactId>org.eclipse.kura.db.h2db.provider</artifactId>
                             </dependency>
+                            <dependency>
+                                <type>p2-installable-unit</type>
+                                <artifactId>org.eclipse.kura.cloud.base.provider</artifactId>
+                            </dependency>
                         </dependencies>
                         <bundleStartLevel>
                             <bundle>
@@ -853,7 +857,12 @@
                                     <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.cloudconnection.kapua.mqtt.provider</id>
                                     <versionRange>0.0.0</versionRange>
-                                </requirement>                                
+                                </requirement>      
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.cloud.base.provider</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
                             </extraRequirements>
                         </dependency-resolution>
                     </configuration>
@@ -973,6 +982,7 @@
         <module>org.eclipse.kura.message.store.provider.test</module>
         <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test</module>
         <module>org.eclipse.kura.cloudconnection.kapua.mqtt.provider.test</module>
+        <module>org.eclipse.kura.cloud.base.provider.test</module>
         <!--
         <module>org.eclipse.kura.raspberrypi.sensehat.test</module>
         -->

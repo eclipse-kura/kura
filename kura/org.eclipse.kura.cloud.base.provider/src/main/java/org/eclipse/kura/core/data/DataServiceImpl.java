@@ -49,7 +49,6 @@ import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.data.listener.DataServiceListener;
 import org.eclipse.kura.data.transport.listener.DataTransportListener;
-import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.message.store.StoredMessage;
 import org.eclipse.kura.message.store.provider.MessageStore;
 import org.eclipse.kura.message.store.provider.MessageStoreProvider;
@@ -337,10 +336,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
             this.storeState = Optional.empty();
         }
 
-    }
-
-    public synchronized void unsetH2DbService(H2DbService dbService) {
-        unsetMessageStoreProvider();
     }
 
     public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {

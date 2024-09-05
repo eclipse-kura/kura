@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -33,53 +33,52 @@ import io.moquette.broker.Server;
 @RunWith(Suite.class)
 @SuiteClasses({ MqttDataTransportTest.class, DataServiceTest.class,
         CloudServiceTest.class })
-public class AllCoreTests {
+public class BaseCloudTests {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(AllCoreTests.class);
+    private static final Logger logger = LoggerFactory.getLogger(BaseCloudTests.class);
 
-    /** A latch to be initialized with the no of OSGi dependencies needed */
     private static CountDownLatch dependencyLatch = new CountDownLatch(3);
-
-    private static ConfigurationService s_configService;
-    private static DataService s_dataService;
-    private static SystemService s_sysService;
+    private static ConfigurationService configService;
+    private static DataService dataService;
+    private static SystemService systemService;
 
     public void setConfigService(ConfigurationService configService) {
-        s_configService = configService;
+        BaseCloudTests.configService = configService;
         dependencyLatch.countDown();
     }
 
     public void unsetConfigService(ConfigurationService configService) {
-        s_configService = configService;
+        if (BaseCloudTests.configService.equals(configService)) {
+            BaseCloudTests.configService = null;
+        }
     }
 
     public void setDataService(DataService dataService) {
-        s_dataService = dataService;
+        BaseCloudTests.dataService = dataService;
         dependencyLatch.countDown();
     }
 
     public void unsetDataService(DataService dataService) {
-        s_dataService = dataService;
+        if (BaseCloudTests.dataService.equals(dataService)) {
+            BaseCloudTests.dataService = null;
+        }
     }
 
-    public void setSystemService(SystemService sysService) {
-        s_sysService = sysService;
+    public void setSystemService(SystemService systemService) {
+        BaseCloudTests.systemService = systemService;
         dependencyLatch.countDown();
     }
 
-    public void unsetSystemService(SystemService sysService) {
-        s_sysService = sysService;
+    public void unsetSystemService(SystemService systemService) {
+        if (BaseCloudTests.systemService.equals(systemService)) {
+            BaseCloudTests.systemService = null;
+        }
     }
 
     @BeforeClass
-    public static void setUpClass() throws Exception {
-        s_logger.info("setUpClass...");
-
-        // start Moquette
+    public static void setupTestClass() throws Exception {
+        logger.info("setupTestClass...");
         Server.main(new String[] {});
-
-        // Wait for OSGi dependencies
-        s_logger.info("Setting Up The Testcase....");
         try {
             dependencyLatch.await(10, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
@@ -88,65 +87,55 @@ public class AllCoreTests {
         }
 
         try {
-            // update the settings
-            ComponentConfiguration mqttConfig = s_configService
+            ComponentConfiguration mqttConfig = configService
                     .getComponentConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport");
             Map<String, Object> mqttProps = mqttConfig.getConfigurationProperties();
 
-            // mqttProps.put("broker-url", "mqtt://iot.eclipse.org:1883/");
-            // mqttProps.put("topic.context.account-name", "guest");
-            // mqttProps.put("username", "guest");
-            // mqttProps.put("password", "welcome");
-
-            s_logger.info("Changing cloud credentials...");
+            logger.info("Changing cloud credentials...");
             mqttProps.put("broker-url", "mqtt://localhost:1883/");
             mqttProps.put("topic.context.account-name", "ethdev");
             mqttProps.put("username", "");
             mqttProps.put("password", "");
 
-            // cloudbees fails in getting the primary MAC address
-            // we need to compensate for it.
             String clientId = null;
             try {
-                clientId = s_sysService.getPrimaryMacAddress();
+                clientId = systemService.getPrimaryMacAddress();
             } catch (Throwable t) {
-                // ignore.
+                // do nothing
             }
             if (clientId == null || clientId.isEmpty()) {
                 clientId = "cloudbees-kura";
             }
             mqttProps.put("client-id", clientId);
-            s_configService.updateConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",
+            configService.updateConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",
                     mqttProps);
 
-            ComponentConfiguration dataConfig = s_configService
+            ComponentConfiguration dataConfig = configService
                     .getComponentConfiguration("org.eclipse.kura.data.DataService");
             Map<String, Object> dataProps = dataConfig.getConfigurationProperties();
             dataProps.put("connect.auto-on-startup", false);
             dataProps.put("enable.rate.limit", false);
-            s_configService.updateConfiguration("org.eclipse.kura.data.DataService", dataProps);
+            configService.updateConfiguration("org.eclipse.kura.data.DataService", dataProps);
 
-            // waiting for the configuration to be applied
             try {
                 Thread.sleep(1000);
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         } catch (Exception e) {
             throw new Exception("Failed to reconfigure the broker settings - failing out", e);
         }
 
-        // connect
-        if (!s_dataService.isConnected()) {
-            s_dataService.connect();
+        if (!dataService.isConnected()) {
+            dataService.connect();
         }
     }
 
     @AfterClass
-    public static void tearDownClass() throws Exception {
-        s_logger.info("tearDownClass...");
-        if (s_dataService != null && s_dataService.isConnected()) {
-            s_dataService.disconnect(0);
+    public static void teardownTestClass() throws Exception {
+        logger.info("teardownTestClass...");
+        if (dataService != null && dataService.isConnected()) {
+            dataService.disconnect(0);
         }
     }
 }

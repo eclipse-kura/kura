@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,7 +27,7 @@ import junit.framework.TestCase;
 
 public class CloudServiceTest extends TestCase implements CloudClientListener {
 
-    private static CountDownLatch dependencyLatch = new CountDownLatch(1);	// initialize with number of dependencies
+    private static CountDownLatch dependencyLatch = new CountDownLatch(1); // initialize with number of dependencies
     private static CloudService cloudService;
 
     private int publishedMsgId;

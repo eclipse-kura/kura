@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.core.cloud;
 
+import static org.eclipse.kura.util.wire.test.WireTestUtil.createFactoryConfiguration;
+import static org.eclipse.kura.util.wire.test.WireTestUtil.updateComponentConfiguration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;

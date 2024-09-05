@@ -125,6 +125,7 @@
         <module>org.eclipse.kura.configuration.change.manager</module>
         <module>org.eclipse.kura.wire.script.tools</module>
         <module>org.eclipse.kura.db.sqlite.provider</module>
+        <module>org.eclipse.kura.db.h2db.provider</module>
         <module>org.eclipse.kura.rest.network.status.provider</module>
         <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</module>
         <module>emulator</module>

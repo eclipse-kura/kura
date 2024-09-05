@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,18 +12,17 @@
  *******************************************************************************/
 package org.eclipse.kura.core.data;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.db.H2DbService;
 import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.util.Objects.requireNonNull;
 
 public class DataServiceOptions {
 
@@ -55,7 +54,7 @@ public class DataServiceOptions {
     private static final boolean AUTOCONNECT_PROP_DEFAULT = false;
     private static final int CONNECT_DELAY_DEFAULT = 60;
     private static final int DISCONNECT_DELAY_DEFAULT = 10;
-    private static final String DB_SERVICE_INSTANCE_DEFAULT = H2DbService.DEFAULT_INSTANCE_PID;
+    private static final String DB_SERVICE_INSTANCE_DEFAULT = "org.eclipse.kura.db.H2DbService";
     private static final int STORE_HOUSEKEEPER_INTERVAL_DEFAULT = 900;
     private static final int STORE_PURGE_AGE_DEFAULT = 60;
     private static final int STORE_CAPACITY_DEFAULT = 10000;
@@ -181,11 +180,11 @@ public class DataServiceOptions {
     }
 
     public Optional<CronExpression> getConnectionScheduleExpression() {
-        
+
         if (!this.isConnectionScheduleEnabled()) {
             return Optional.empty();
         }
-        
+
         try {
             return Optional.of(new CronExpression((String) this.properties.get(CONNECTION_SCHECULE_EXPRESSION)));
         } catch (final Exception e) {

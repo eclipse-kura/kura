@@ -6,7 +6,6 @@ Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Import-Package: org.eclipse.kura;version="[1.0,2.0)",
- org.eclipse.kura.core.util;version="[1.0,2.0)",
  org.mockito;version="[4.0.0,5.0.0)",
  org.mockito.mock;version="1.10.19",
  org.mockito.stubbing;version="[4.0.0,5.0.0)",

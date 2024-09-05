@@ -24,8 +24,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.core.data.util.MqttTopicUtil;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
-import org.eclipse.kura.core.util.MqttTopicUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;

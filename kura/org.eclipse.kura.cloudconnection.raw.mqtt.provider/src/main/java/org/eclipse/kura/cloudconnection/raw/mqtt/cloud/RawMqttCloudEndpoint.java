@@ -39,7 +39,7 @@ import org.eclipse.kura.cloudconnection.raw.mqtt.subscriber.SubscribeOptions;
 import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.core.util.MqttTopicUtil;
+import org.eclipse.kura.core.data.util.MqttTopicUtil;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.listener.DataServiceListener;
 import org.eclipse.kura.message.KuraPayload;

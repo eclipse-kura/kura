@@ -12,8 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.core.cloud;
 
-import static org.eclipse.kura.util.wire.test.WireTestUtil.createFactoryConfiguration;
-import static org.eclipse.kura.util.wire.test.WireTestUtil.updateComponentConfiguration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -37,7 +35,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.core.util.MqttTopicUtil;
+import org.eclipse.kura.core.data.util.MqttTopicUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;

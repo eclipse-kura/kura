@@ -13,7 +13,7 @@
 package org.eclipse.kura.core.cloud.subscriber;
 
 import org.eclipse.kura.core.cloud.CloudServiceOptions;
-import org.eclipse.kura.core.util.MqttTopicUtil;
+import org.eclipse.kura.core.data.util.MqttTopicUtil;
 
 public class CloudSubscriptionRecord {
 

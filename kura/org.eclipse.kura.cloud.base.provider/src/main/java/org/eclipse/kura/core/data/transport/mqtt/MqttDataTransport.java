@@ -361,7 +361,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
             throw new KuraConnectException(e, "Cannot connect");
         } finally {
-            // Always unregister from CloudConnectionStatus service so to switch to the previous state
+            // Always unregister from CloudConnectionStatus service so to switch to the
+            // previous state
             this.cloudConnectionStatusService.unregister(this);
         }
 
@@ -686,7 +687,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     @Override
     public void onConfigurationUpdated() {
 
-        // The SSL service was updated, build a new socket connection and close the current SSL client session
+        // The SSL service was updated, build a new socket connection and close the
+        // current SSL client session
         if (this.mqttClient != null && isSSL(this.mqttClient.getServerURI())) {
             closeMqttClient();
         }
@@ -898,7 +900,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
         // We need to construct a new client instance only if either the broker URL
         // or the client ID changes.
-        // We also need to construct a new instance if the persistence type (file or memory) changes.
+        // We also need to construct a new instance if the persistence type (file or
+        // memory) changes.
         // We MUST avoid to construct a new client instance every time because
         // in that case the MQTT message ID is reset to 1.
         if (this.mqttClient != null) {
@@ -1058,12 +1061,12 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     private static String getMqttVersionLabel(int mqttVersion) {
 
         switch (mqttVersion) {
-        case MqttConnectOptions.MQTT_VERSION_3_1:
-            return "3.1";
-        case MqttConnectOptions.MQTT_VERSION_3_1_1:
-            return "3.1.1";
-        default:
-            return String.valueOf(mqttVersion);
+            case MqttConnectOptions.MQTT_VERSION_3_1:
+                return "3.1";
+            case MqttConnectOptions.MQTT_VERSION_3_1_1:
+                return "3.1.1";
+            default:
+                return String.valueOf(mqttVersion);
         }
     }
 }

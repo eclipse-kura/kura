@@ -611,6 +611,16 @@
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
+                            <bundle>
+                                <id>org.eclipse.kura.cloud.base.provider</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.eclipse.kura.cloudconnection.kapua.mqtt.provider</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
                         </bundleStartLevel>
                     </configuration>
                 </plugin>

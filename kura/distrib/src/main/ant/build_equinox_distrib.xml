@@ -592,6 +592,9 @@ fi]]>
                 file="${project.build.directory}/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.cloud.base.provider_${org.eclipse.kura.cloud.base.provider.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud.command_${org.eclipse.kura.core.cloud.command.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
@@ -985,7 +988,7 @@ fi]]>
         <propertyfile
             file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar@4:start" />
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.cloud.base.provider_${org.eclipse.kura.cloud.base.provider.version}.jar@4:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.cloud.command_${org.eclipse.kura.core.cloud.command.version}.jar@4:start" />
             <entry key="osgi.bundles" operation="+"

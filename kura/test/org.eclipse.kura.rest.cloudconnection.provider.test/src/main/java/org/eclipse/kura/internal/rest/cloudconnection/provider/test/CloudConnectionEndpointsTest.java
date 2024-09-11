@@ -20,7 +20,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
@@ -140,9 +143,11 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void shouldDeleteCloudEndpoint() {
-        givenExistingCloudEndpoint("org.eclipse.kura.cloud.CloudService-toDelete" + this.getTransportType());
+    public void shouldDeleteCloudEndpoint() throws InterruptedException, ExecutionException, TimeoutException {
+        givenNewCloudEndpoint("org.eclipse.kura.cloud.CloudService-toDelete" + this.getTransportType());
         givenCloudConnectionFactoryPidAndCloudEndpointPid("org.eclipse.kura.cloud.CloudService",
+                "org.eclipse.kura.cloud.CloudService-toDelete" + this.getTransportType());
+        givenExistingCloudEndpoint("org.eclipse.kura.cloud.CloudService",
                 "org.eclipse.kura.cloud.CloudService-toDelete" + this.getTransportType());
 
         whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_DELETE, MQTT_METHOD_SPEC_DEL), "/cloudEndpoint",
@@ -287,7 +292,7 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
         this.pidSet = new PidSet(new HashSet<String>(Arrays.asList(pids)));
     }
 
-    private void givenExistingCloudEndpoint(String cloudEndpointPid) {
+    private void givenNewCloudEndpoint(String cloudEndpointPid) {
         try {
             cloudConnectionFactory.createConfiguration(cloudEndpointPid);
 
@@ -295,6 +300,13 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
             e.printStackTrace();
             fail("Unable to create the test CloudService");
         }
+    }
+
+    private void givenExistingCloudEndpoint(String cloudConnectionFactoryPid, String cloudEndpointPid)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        CompletableFuture<Object> trackFuture = ServiceUtil.trackService(cloudConnectionFactoryPid,
+                Optional.of(String.format("(kura.service.pid=%s)", cloudEndpointPid)));
+        trackFuture.get(5, TimeUnit.SECONDS);
     }
 
     private void givenPubSubInstance(String pid, String factoryPid, String cloudEndpointPid) {

@@ -140,6 +140,7 @@
         <antcall target="core.system-config" />
         <antcall target="core.certificates-config" />
         <antcall target="core.cloud-config" />
+    	<antcall target="cloud.mqtt.kapua-config" />
         <antcall target="cloud.mqtt.eclipseiot-config" />
         <antcall target="cloud.mqtt.raw-config" />
         <antcall target="core.comm-config" />
@@ -591,7 +592,10 @@ fi]]>
                 file="${project.build.directory}/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
-                file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"
+                file="${project.build.directory}/plugins/org.eclipse.kura.cloud.base.provider_${org.eclipse.kura.cloud.base.provider.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud.command_${org.eclipse.kura.core.cloud.command.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud.factory_${org.eclipse.kura.core.cloud.factory.version}.jar"
@@ -601,6 +605,9 @@ fi]]>
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.cloudconnection.raw.mqtt.provider_${org.eclipse.kura.cloudconnection.raw.mqtt.provider.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.cloudconnection.kapua.mqtt.provider_${org.eclipse.kura.cloudconnection.kapua.mqtt.provider.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"
@@ -981,12 +988,22 @@ fi]]>
         <propertyfile
             file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar@4:start" />
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.cloud.base.provider_${org.eclipse.kura.cloud.base.provider.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.cloud.command_${org.eclipse.kura.core.cloud.command.version}.jar@4:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.cloud.factory_${org.eclipse.kura.core.cloud.factory.version}.jar@4:start" />
         </propertyfile>
     </target>
-
+	
+    <target name="cloud.mqtt.kapua-config">
+        <propertyfile
+            file="${project.build.directory}/${build.output.name}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.cloudconnection.kapua.mqtt.provider_${org.eclipse.kura.cloudconnection.kapua.mqtt.provider.version}.jar@4:start" />
+        </propertyfile>
+    </target>
+	
     <target name="cloud.mqtt.eclipseiot-config">
         <propertyfile
             file="${project.build.directory}/${build.output.name}/config.ini">

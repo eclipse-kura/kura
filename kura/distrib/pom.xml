@@ -218,8 +218,13 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.core.cloud</artifactId>
-                                    <version>${org.eclipse.kura.core.cloud.version}</version>
+                                    <artifactId>org.eclipse.kura.cloud.base.provider</artifactId>
+                                    <version>${org.eclipse.kura.cloud.base.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.core.cloud.command</artifactId>
+                                    <version>${org.eclipse.kura.core.cloud.command.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -553,6 +558,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.cloudconnection.kapua.mqtt.provider</artifactId>
+                                    <version>${org.eclipse.kura.cloudconnection.kapua.mqtt.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.useradmin.store</artifactId>
                                     <version>${org.eclipse.kura.useradmin.store.version}</version>
                                 </artifactItem>
@@ -752,7 +762,8 @@
                                 <move file="target/plugins/org.eclipse.kura.core.jar" tofile="target/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.system.jar" tofile="target/plugins/org.eclipse.kura.core.system_${org.eclipse.kura.core.system.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.certificates.jar" tofile="target/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.core.cloud.jar" tofile="target/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.cloud.base.provider.jar" tofile="target/plugins/org.eclipse.kura.cloud.base.provider_${org.eclipse.kura.cloud.base.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.core.cloud.command.jar" tofile="target/plugins/org.eclipse.kura.core.cloud.command_${org.eclipse.kura.core.cloud.command.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.cloud.factory.jar" tofile="target/plugins/org.eclipse.kura.core.cloud.factory_${org.eclipse.kura.core.cloud.factory.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.comm.jar" tofile="target/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.configuration.jar" tofile="target/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar" />
@@ -815,6 +826,7 @@
                                 <move file="target/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider.jar" tofile="target/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider_${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.component.join.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.component.join.provider_${org.eclipse.kura.wire.component.join.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.jar" tofile="target/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider_${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.cloudconnection.kapua.mqtt.provider.jar" tofile="target/plugins/org.eclipse.kura.cloudconnection.kapua.mqtt.provider_${org.eclipse.kura.cloudconnection.kapua.mqtt.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.http.server.manager.jar" tofile="target/plugins/org.eclipse.kura.http.server.manager_${org.eclipse.kura.http.server.manager.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.cloudconnection.raw.mqtt.provider.jar" tofile="target/plugins/org.eclipse.kura.cloudconnection.raw.mqtt.provider_${org.eclipse.kura.cloudconnection.raw.mqtt.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.useradmin.store.jar" tofile="target/plugins/org.eclipse.kura.useradmin.store_${org.eclipse.kura.useradmin.store.version}.jar" />
@@ -2025,7 +2037,8 @@
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
-                                        <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
+                                        <copy file="${project.build.directory}/plugins/org.eclipse.kura.cloud.base.provider_${org.eclipse.kura.cloud.base.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
+                                        <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud.command_${org.eclipse.kura.core.cloud.command.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud.factory_${org.eclipse.kura.core.cloud.factory.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.core.configuration_${org.eclipse.kura.core.configuration.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
@@ -2084,7 +2097,7 @@
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider_${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
 
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider_${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
-
+										<copy file="${project.build.directory}/plugins/org.eclipse.kura.cloudconnection.kapua.mqtt.provider_${org.eclipse.kura.cloudconnection.kapua.mqtt.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.cloudconnection.raw.mqtt.provider_${org.eclipse.kura.cloudconnection.raw.mqtt.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.wire.ai.component.provider_${org.eclipse.kura.wire.ai.component.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />

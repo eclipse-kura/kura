@@ -17,7 +17,7 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.raw.mqtt.cloud.Qos;
 import org.eclipse.kura.cloudconnecton.raw.mqtt.util.Property;
-import org.eclipse.kura.core.util.MqttTopicUtil;
+import org.eclipse.kura.core.data.util.MqttTopicUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

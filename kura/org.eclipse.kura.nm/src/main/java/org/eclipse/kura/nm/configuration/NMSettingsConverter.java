@@ -425,7 +425,8 @@ public class NMSettingsConverter {
         settings.put("address-data", new Variant<>(addressData, "aa{sv}"));
     }
 
-    private static void configureIp6MethodAuto(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
+    private static void configureIp6MethodAuto(NetworkProperties props, String deviceId,
+            Map<String, Variant<?>> settings) {
         settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("auto"));
 
         Optional<String> addressGenerationMode = props.getOpt(String.class,
@@ -568,8 +569,8 @@ public class NMSettingsConverter {
     public static Map<String, Variant<?>> buildGsmSettings(NetworkProperties props, String deviceId) {
         Map<String, Variant<?>> settings = new HashMap<>();
 
-        String apn = props.get(String.class, "net.interface.%s.config.apn", deviceId);
-        settings.put("apn", new Variant<>(apn));
+        Optional<String> apn = props.getOpt(String.class, "net.interface.%s.config.apn", deviceId);
+        apn.ifPresent(apnString -> settings.put("apn", new Variant<>(apnString)));
 
         Optional<String> username = props.getOpt(String.class, "net.interface.%s.config.username", deviceId);
         username.ifPresent(usernameString -> settings.put("username", new Variant<>(usernameString)));

@@ -89,6 +89,7 @@ public class TabModemUi extends Composite implements NetworkTab {
     private final SingleSelectionModel<GwtModemPdpEntry> pdpSelectionModel = new SingleSelectionModel<>();
 
     private boolean pdpInit;
+    private boolean isNet2;
 
     @UiField
     FormGroup groupReset;
@@ -271,8 +272,9 @@ public class TabModemUi extends Composite implements NetworkTab {
     @UiField
     HelpButton failureHelp;
 
-    public TabModemUi(GwtSession currentSession, TabIp4Ui tcp, NetworkTabsUi tabs) {
+    public TabModemUi(GwtSession currentSession, TabIp4Ui tcp, NetworkTabsUi tabs, final boolean isNet2) {
         this.pdpInit = false;
+        this.isNet2 = isNet2;
         initWidget(uiBinder.createAndBindUi(this));
         this.session = currentSession;
         this.tcpTab = tcp;
@@ -305,6 +307,13 @@ public class TabModemUi extends Composite implements NetworkTab {
     public boolean isValid() {
         if (this.dial.getText() == null || "".equals(this.dial.getText().trim())) {
             this.groupDial.setValidationState(ValidationState.ERROR);
+        }
+        if (!isNet2) {
+            if (this.apn.getText() == null || "".equals(this.apn.getText().trim())) {
+                if (this.apn.isEnabled()) {
+                    this.groupApn.setValidationState(ValidationState.ERROR);
+                }
+            }
         }
         if (this.maxfail.getText() == null || "".equals(this.maxfail.getText().trim())) {
             this.groupMaxfail.setValidationState(ValidationState.ERROR);
@@ -542,7 +551,11 @@ public class TabModemUi extends Composite implements NetworkTab {
         });
 
         // APN
-        this.labelApn.setText(MSGS.netModemAPN());
+        if (isNet2) {
+            this.labelApn.setText(MSGS.netModemAPN());
+        } else {
+            this.labelApn.setText(MSGS.netModemAPN() + "*");
+        }
         this.apn.addMouseOverHandler(event -> {
             if (TabModemUi.this.apn.isEnabled()) {
                 TabModemUi.this.helpText.clear();
@@ -550,7 +563,22 @@ public class TabModemUi extends Composite implements NetworkTab {
             }
         });
         this.apn.addMouseOutHandler(event -> resetHelp());
-        this.apn.addValueChangeHandler(event -> setDirty(true));
+        if (isNet2) {
+            this.apn.addValueChangeHandler(event -> setDirty(true));
+        } else {
+            this.apn.addValueChangeHandler(event -> {
+                setDirty(true);
+                if (TabModemUi.this.apn.getText() == null || "".equals(TabModemUi.this.apn.getText().trim())) {
+                    if (TabModemUi.this.apn.isEnabled()) {
+                        TabModemUi.this.groupApn.setValidationState(ValidationState.ERROR);
+                    } else {
+                        TabModemUi.this.groupApn.setValidationState(ValidationState.NONE);
+                    }
+                } else {
+                    TabModemUi.this.groupApn.setValidationState(ValidationState.NONE);
+                }
+            });
+        }
 
         // AUTH TYPE
         this.labelAuth.setText(MSGS.netModemAuthType());

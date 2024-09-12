@@ -13,11 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.network;
 
-import java.awt.Color;
-import java.nio.channels.AsynchronousCloseException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.MessageUtils;
@@ -37,9 +34,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-
-import com.google.gwt.dom.client.Style.BorderStyle;
-import com.google.gwt.dom.client.Style.Unit;
 
 public class NetworkTabsUi extends Composite {
 
@@ -116,7 +110,7 @@ public class NetworkTabsUi extends Composite {
         initIp6Tab();
         initWireless8021xTab();
         initWirelessTab(isNet2);
-        initModemTab();
+        initModemTab(isNet2);
         initModemGpsTab();
         initModemAntennaTab();
         initDhcp4NatTab();
@@ -178,9 +172,9 @@ public class NetworkTabsUi extends Composite {
         });
     }
 
-    private void initModemTab() {
+    private void initModemTab(final boolean isNet2) {
         this.modemTabAnchorItem = new AnchorListItem(MSGS.netModemCellular());
-        this.modemTab = new TabModemUi(this.session, this.ip4Tab, this);
+        this.modemTab = new TabModemUi(this.session, this.ip4Tab, this, isNet2);
 
         this.modemTabAnchorItem.addClickHandler(event -> {
             setSelected(NetworkTabsUi.this.modemTabAnchorItem);
@@ -439,8 +433,8 @@ public class NetworkTabsUi extends Composite {
         if (this.visibleTabs.contains(this.net8021xTabAnchorItem)) {
             this.set8021xTab.refresh();
         }
-        if(this.visibleTabs.contains(this.advancedTabAnchorItem)) {
-        	this.advancedTab.refresh();
+        if (this.visibleTabs.contains(this.advancedTabAnchorItem)) {
+            this.advancedTab.refresh();
         }
     }
 
@@ -481,7 +475,7 @@ public class NetworkTabsUi extends Composite {
         if (this.visibleTabs.contains(this.net8021xTabAnchorItem) && this.set8021xTab.isDirty()) {
             return true;
         }
-        
+
         if (this.visibleTabs.contains(this.advancedTabAnchorItem) && this.advancedTab.isDirty()) {
             return true;
         }
@@ -554,7 +548,7 @@ public class NetworkTabsUi extends Composite {
             this.set8021xTab.getUpdatedNetInterface(updatedNetIf);
         }
         if (this.visibleTabs.contains(this.advancedTabAnchorItem)) {
-        	this.advancedTab.getUpdatedNetInterface(updatedNetIf);
+            this.advancedTab.getUpdatedNetInterface(updatedNetIf);
         }
 
         return updatedNetIf;
@@ -623,7 +617,7 @@ public class NetworkTabsUi extends Composite {
             errorTab(this.net8021xTabAnchorItem);
             return false;
         }
-        
+
         if (this.visibleTabs.contains(this.advancedTabAnchorItem) && this.advancedTabAnchorItem.isEnabled()
                 && !this.advancedTab.isValid()) {
             errorTab(this.advancedTabAnchorItem);

@@ -306,11 +306,6 @@ public class TabModemUi extends Composite implements NetworkTab {
         if (this.dial.getText() == null || "".equals(this.dial.getText().trim())) {
             this.groupDial.setValidationState(ValidationState.ERROR);
         }
-        if (this.apn.getText() == null || "".equals(this.apn.getText().trim())) {
-            if (this.apn.isEnabled()) {
-                this.groupApn.setValidationState(ValidationState.ERROR);
-            }
-        }
         if (this.maxfail.getText() == null || "".equals(this.maxfail.getText().trim())) {
             this.groupMaxfail.setValidationState(ValidationState.ERROR);
         }
@@ -547,7 +542,7 @@ public class TabModemUi extends Composite implements NetworkTab {
         });
 
         // APN
-        this.labelApn.setText(MSGS.netModemAPN() + "*");
+        this.labelApn.setText(MSGS.netModemAPN());
         this.apn.addMouseOverHandler(event -> {
             if (TabModemUi.this.apn.isEnabled()) {
                 TabModemUi.this.helpText.clear();
@@ -555,18 +550,7 @@ public class TabModemUi extends Composite implements NetworkTab {
             }
         });
         this.apn.addMouseOutHandler(event -> resetHelp());
-        this.apn.addValueChangeHandler(event -> {
-            setDirty(true);
-            if (TabModemUi.this.apn.getText() == null || "".equals(TabModemUi.this.apn.getText().trim())) {
-                if (TabModemUi.this.apn.isEnabled()) {
-                    TabModemUi.this.groupApn.setValidationState(ValidationState.ERROR);
-                } else {
-                    TabModemUi.this.groupApn.setValidationState(ValidationState.NONE);
-                }
-            } else {
-                TabModemUi.this.groupApn.setValidationState(ValidationState.NONE);
-            }
-        });
+        this.apn.addValueChangeHandler(event -> setDirty(true));
 
         // AUTH TYPE
         this.labelAuth.setText(MSGS.netModemAuthType());
@@ -672,7 +656,7 @@ public class TabModemUi extends Composite implements NetworkTab {
                 TabModemUi.this.groupMaxfail.setValidationState(ValidationState.NONE);
             }
         });
-        
+
         this.labelHoldoff.setText(MSGS.netModemHoldoff() + "*");
         this.holdoff.addMouseOverHandler(event -> {
             if (TabModemUi.this.holdoff.isEnabled()) {

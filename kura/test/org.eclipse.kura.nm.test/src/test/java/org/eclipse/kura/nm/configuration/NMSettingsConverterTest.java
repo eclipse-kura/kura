@@ -1129,12 +1129,12 @@ public class NMSettingsConverterTest {
     }
 
     @Test
-    public void buildGsmSettingsShouldThrowWithMissingRequiredArgument() {
+    public void buildGsmSettingsShouldNotThrowWithNoArgument() {
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildGsmSettingsIsRunWith(this.networkProperties, "ttyACM0");
 
-        thenExceptionOccurred(NoSuchElementException.class);
+        thenNoExceptionOccurred();
     }
 
     @Test

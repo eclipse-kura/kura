@@ -3,5 +3,6 @@
 set -e
 
 for i in $*; do
+	echo >> "${KURA_DIR}/framework/config.ini"
 	echo "$i" >> "${KURA_DIR}/framework/config.ini"
 done

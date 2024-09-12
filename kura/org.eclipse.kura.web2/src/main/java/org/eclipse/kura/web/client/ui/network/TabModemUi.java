@@ -22,8 +22,6 @@ import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.shared.model.GwtModemAuthType;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
-import org.eclipse.kura.web.shared.model.GwtModemPdpEntry;
-import org.eclipse.kura.web.shared.model.GwtModemPdpType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -79,16 +77,10 @@ public class TabModemUi extends Composite implements NetworkTab {
     private final NetworkTabsUi tabs;
     private boolean dirty;
     private GwtModemInterfaceConfig selectedNetIfConfig;
-    private final Map<String, String> defaultDialString = new HashMap<>();
-    private String dialString;
 
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
 
-    private final ListDataProvider<GwtModemPdpEntry> pdpDataProvider = new ListDataProvider<>();
-    private final SingleSelectionModel<GwtModemPdpEntry> pdpSelectionModel = new SingleSelectionModel<>();
-
-    private boolean pdpInit;
 
     @UiField
     FormGroup groupReset;
@@ -105,8 +97,6 @@ public class TabModemUi extends Composite implements NetworkTab {
     @UiField
     FormGroup groupNumber;
     @UiField
-    FormGroup groupDial;
-    @UiField
     FormGroup groupApn;
 
     @UiField
@@ -119,8 +109,6 @@ public class TabModemUi extends Composite implements NetworkTab {
     FormLabel labelModem;
     @UiField
     FormLabel labelNumber;
-    @UiField
-    FormLabel labelDial;
     @UiField
     FormLabel labelApn;
     @UiField
@@ -171,10 +159,6 @@ public class TabModemUi extends Composite implements NetworkTab {
     @UiField
     TextBox number;
     @UiField
-    TextBox dial;
-    @UiField
-    Button buttonPdp;
-    @UiField
     TextBox apn;
     @UiField
     TextBox username;
@@ -192,29 +176,6 @@ public class TabModemUi extends Composite implements NetworkTab {
     TextBox interval;
     @UiField
     TextBox failure;
-
-    @UiField
-    Modal pdpModal;
-
-    @UiField
-    PanelHeader pdpTitle;
-
-    @UiField
-    CellTable<GwtModemPdpEntry> pdpGrid = new CellTable<>();
-
-    @UiField
-    Alert searching;
-    @UiField
-    Alert noPdp;
-    @UiField
-    Alert pdpFail;
-
-    @UiField
-    Text searchingText;
-    @UiField
-    Text noPdpText;
-    @UiField
-    Text pdpFailText;
 
     @UiField
     FormControlStatic model;
@@ -245,8 +206,6 @@ public class TabModemUi extends Composite implements NetworkTab {
     @UiField
     HelpButton numberHelp;
     @UiField
-    HelpButton dialHelp;
-    @UiField
     HelpButton apnHelp;
     @UiField
     HelpButton authHelp;
@@ -272,15 +231,11 @@ public class TabModemUi extends Composite implements NetworkTab {
     HelpButton failureHelp;
 
     public TabModemUi(GwtSession currentSession, TabIp4Ui tcp, NetworkTabsUi tabs) {
-        this.pdpInit = false;
         initWidget(uiBinder.createAndBindUi(this));
         this.session = currentSession;
         this.tcpTab = tcp;
         this.tabs = tabs;
 
-        this.defaultDialString.put(HE910, "atd*99***1#");
-        this.defaultDialString.put(LE910, "atd*99***2#");
-        this.defaultDialString.put(DE910, "atd#777");
         initForm();
 
         initHelpButtons();
@@ -303,9 +258,6 @@ public class TabModemUi extends Composite implements NetworkTab {
 
     @Override
     public boolean isValid() {
-        if (this.dial.getText() == null || "".equals(this.dial.getText().trim())) {
-            this.groupDial.setValidationState(ValidationState.ERROR);
-        }
         if (this.maxfail.getText() == null || "".equals(this.maxfail.getText().trim())) {
             this.groupMaxfail.setValidationState(ValidationState.ERROR);
         }
@@ -323,7 +275,6 @@ public class TabModemUi extends Composite implements NetworkTab {
         }
 
         if (this.groupNumber.getValidationState().equals(ValidationState.ERROR)
-                || this.groupDial.getValidationState().equals(ValidationState.ERROR)
                 || this.groupApn.getValidationState().equals(ValidationState.ERROR)
                 || this.groupMaxfail.getValidationState().equals(ValidationState.ERROR)
                 || this.groupHoldoff.getValidationState().equals(ValidationState.ERROR)
@@ -365,13 +316,11 @@ public class TabModemUi extends Composite implements NetworkTab {
     @Override
     public void getUpdatedNetInterface(GwtNetInterfaceConfig updatedNetIf) {
         GwtModemInterfaceConfig updatedModemNetIf = (GwtModemInterfaceConfig) updatedNetIf;
-        updatedModemNetIf.setPdpType(GwtModemPdpType.netModemPdpIP);
 
         if (this.model.getText() != null && this.service.getText() != null) {
             // note - status is set in tcp/ip tab
             updatedModemNetIf.setPppNum(Integer.parseInt(this.number.getText()));
             updatedModemNetIf.setModemId(this.modem.getText().trim() != null ? this.modem.getText().trim() : "");
-            updatedModemNetIf.setDialString(this.dial.getText().trim() != null ? this.dial.getText().trim() : "");
             updatedModemNetIf.setApn(this.apn.getText().trim() != null ? this.apn.getText().trim() : "");
 
             String authValue = this.auth.getSelectedValue();
@@ -402,7 +351,6 @@ public class TabModemUi extends Composite implements NetworkTab {
 
             updatedModemNetIf.setPppNum(this.selectedNetIfConfig.getPppNum());
             updatedModemNetIf.setModemId(this.selectedNetIfConfig.getModemId());
-            updatedModemNetIf.setDialString(this.selectedNetIfConfig.getDialString());
             updatedModemNetIf.setApn(this.selectedNetIfConfig.getApn());
             updatedModemNetIf.setAuthType(this.selectedNetIfConfig.getAuthType());
             updatedModemNetIf.setUsername(this.selectedNetIfConfig.getUsername());
@@ -424,13 +372,6 @@ public class TabModemUi extends Composite implements NetworkTab {
         this.networkHelp.setHelpText(MSGS.netModemToolTipNetworkTopology());
         this.modemHelp.setHelpText(MSGS.netModemToolTipModemIndentifier());
         this.numberHelp.setHelpText(MSGS.netModemToolTipModemInterfaceNumber());
-        this.dialHelp.setHelpTextProvider(() -> {
-            if ("".equals(TabModemUi.this.dialString)) {
-                return MSGS.netModemToolTipDialStringDefault();
-            } else {
-                return MSGS.netModemToolTipDialString(TabModemUi.this.dial.getText());
-            }
-        });
         this.apnHelp.setHelpText(MSGS.netModemToolTipApn());
         this.authHelp.setHelpText(MSGS.netModemToolTipAuthentication());
         this.usernameHelp.setHelpText(MSGS.netModemToolTipUsername());
@@ -487,59 +428,6 @@ public class TabModemUi extends Composite implements NetworkTab {
             TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipModemInterfaceNumber()));
         });
         this.number.addMouseOutHandler(event -> resetHelp());
-
-        // DIAL STRING
-        this.labelDial.setText(MSGS.netModemDialString() + "*");
-
-        this.dial.addMouseOutHandler(event -> resetHelp());
-        this.dialString = "";
-        String modemModel;
-        if (this.selectedNetIfConfig != null) {
-            modemModel = this.selectedNetIfConfig.getModel();
-            if (modemModel != null && !modemModel.isEmpty()) {
-                if (modemModel.contains(HE910)) {
-                    this.dialString = this.defaultDialString.get(HE910);
-                } else if (modemModel.contains(LE910)) {
-                    this.dialString = this.defaultDialString.get(LE910);
-                } else if (modemModel.contains(DE910)) {
-                    this.dialString = this.defaultDialString.get(DE910);
-                } else {
-                    this.dialString = "";
-                }
-            }
-        }
-        this.dial.addMouseOverHandler(event -> {
-            if (TabModemUi.this.dial.isEnabled()) {
-                TabModemUi.this.helpText.clear();
-                if (TabModemUi.this.dialString.equals("")) {
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipDialStringDefault()));
-                } else {
-                    TabModemUi.this.helpText
-                            .add(new Span(MSGS.netModemToolTipDialString(TabModemUi.this.dial.getText())));
-                }
-            }
-        });
-        this.dial.addValueChangeHandler(event -> {
-            setDirty(true);
-            if (TabModemUi.this.dial.getText() == null || "".equals(TabModemUi.this.dial.getText().trim())) {
-                TabModemUi.this.groupDial.setValidationState(ValidationState.ERROR);
-            } else {
-                TabModemUi.this.groupDial.setValidationState(ValidationState.NONE);
-            }
-        });
-
-        this.buttonPdp.addClickHandler(event -> {
-            if (!TabModemUi.this.pdpInit) {
-                initPdp();
-                TabModemUi.this.pdpDataProvider.getList().clear();
-                TabModemUi.this.searching.setVisible(true);
-                TabModemUi.this.noPdp.setVisible(false);
-                TabModemUi.this.pdpGrid.setVisible(false);
-                TabModemUi.this.pdpFail.setVisible(false);
-            }
-            initModal();
-            loadPdpData();
-        });
 
         // APN
         this.labelApn.setText(MSGS.netModemAPN());
@@ -765,7 +653,6 @@ public class TabModemUi extends Composite implements NetworkTab {
 
     private void resetValidations() {
         this.groupApn.setValidationState(ValidationState.NONE);
-        this.groupDial.setValidationState(ValidationState.NONE);
         this.groupFailure.setValidationState(ValidationState.NONE);
         this.groupIdle.setValidationState(ValidationState.NONE);
         this.groupInterval.setValidationState(ValidationState.NONE);
@@ -803,7 +690,6 @@ public class TabModemUi extends Composite implements NetworkTab {
             this.service.setText(this.selectedNetIfConfig.getConnectionType());
             this.modem.setText(this.selectedNetIfConfig.getModemId());
             this.number.setText(String.valueOf(this.selectedNetIfConfig.getPppNum()));
-            this.dial.setText(this.selectedNetIfConfig.getDialString());
             this.apn.setText(this.selectedNetIfConfig.getApn());
 
             GwtModemAuthType authType = GwtModemAuthType.netModemAuthNONE;
@@ -842,8 +728,6 @@ public class TabModemUi extends Composite implements NetworkTab {
         this.network.setEnabled(true);
         this.modem.setEnabled(true);
         this.number.setEnabled(false);
-        this.dial.setEnabled(true);
-        this.buttonPdp.setEnabled(true);
         this.apn.setEnabled(true);
         this.auth.setEnabled(true);
         this.username.setEnabled(true);
@@ -875,7 +759,6 @@ public class TabModemUi extends Composite implements NetworkTab {
                     this.auth.setEnabled(false);
                     this.username.setEnabled(false);
                     this.password.setEnabled(false);
-                    this.buttonPdp.setEnabled(false);
                 }
             }
         }
@@ -887,7 +770,6 @@ public class TabModemUi extends Composite implements NetworkTab {
         this.service.setText(null);
         this.modem.setText(null);
         this.number.setText(null);
-        this.dial.setText(null);
         this.apn.setText(null);
         this.auth.setSelectedIndex(1);
         this.username.setText(null);
@@ -902,128 +784,6 @@ public class TabModemUi extends Composite implements NetworkTab {
         this.interval.setText(null);
         this.failure.setText(null);
         update();
-    }
-
-    private void initModal() {
-        this.pdpModal.setTitle("PDP Context Information");
-        this.pdpTitle.setText("Available PDP Profiles");
-        this.pdpModal.show();
-
-        this.searchingText.setText(MSGS.netModemAlertObtainingPdpInfo());
-        this.noPdpText.setText(MSGS.netModemAlertNoPdp());
-        this.pdpFailText.setText(MSGS.netModemAlertObtainPdpInfoFail());
-    }
-
-    private void initPdp() {
-        this.pdpInit = true;
-        TextColumn<GwtModemPdpEntry> col1 = new TextColumn<GwtModemPdpEntry>() {
-
-            @Override
-            public String getValue(GwtModemPdpEntry object) {
-                return String.valueOf(object.getContextNumber());
-            }
-        };
-        col1.setCellStyleNames("status-table-row");
-        this.pdpGrid.addColumn(col1, "Context Number");
-        this.pdpGrid.setColumnWidth(col1, "70px");
-
-        TextColumn<GwtModemPdpEntry> col2 = new TextColumn<GwtModemPdpEntry>() {
-
-            @Override
-            public String getValue(GwtModemPdpEntry object) {
-                return object.getPdpType();
-            }
-        };
-        col2.setCellStyleNames("status-table-row");
-        this.pdpGrid.addColumn(col2, "PDP Type");
-        this.pdpGrid.setColumnWidth(col2, "85px");
-
-        TextColumn<GwtModemPdpEntry> col3 = new TextColumn<GwtModemPdpEntry>() {
-
-            @Override
-            public String getValue(GwtModemPdpEntry object) {
-                return object.getApn();
-            }
-        };
-        col3.setCellStyleNames("status-table-row");
-        this.pdpGrid.addColumn(col3, "Access Point Name (APN)");
-        this.pdpGrid.setColumnWidth(col3, "400px");
-
-        this.pdpDataProvider.addDataDisplay(this.pdpGrid);
-        this.pdpGrid.setSelectionModel(this.pdpSelectionModel);
-
-        this.pdpSelectionModel.addSelectionChangeHandler(event -> {
-            GwtModemPdpEntry modemPdpEntry = TabModemUi.this.pdpSelectionModel.getSelectedObject();
-            if (modemPdpEntry != null) {
-                TabModemUi.this.dial.setValue(formDialString(modemPdpEntry.getContextNumber()));
-                if (!modemPdpEntry.getApn().contains("new PDP context")) {
-                    TabModemUi.this.apn.setValue(modemPdpEntry.getApn());
-                } else {
-                    TabModemUi.this.apn.setValue("");
-                }
-                TabModemUi.this.pdpModal.hide();
-            }
-        });
-    }
-
-    private String formDialString(int pdpContextNo) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("atd*99***");
-        sb.append(pdpContextNo);
-        sb.append("#");
-        return sb.toString();
-    }
-
-    private void loadPdpData() {
-        this.pdpDataProvider.getList().clear();
-        this.searching.setVisible(true);
-        this.noPdp.setVisible(false);
-        this.pdpGrid.setVisible(false);
-        this.pdpFail.setVisible(false);
-
-        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(Throwable ex) {
-                FailureHandler.handle(ex);
-            }
-
-            @Override
-            public void onSuccess(GwtXSRFToken token) {
-                TabModemUi.this.gwtNetworkService.findPdpContextInfo(token,
-                        TabModemUi.this.selectedNetIfConfig.getName(), new AsyncCallback<List<GwtModemPdpEntry>>() {
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                TabModemUi.this.searching.setVisible(false);
-                                TabModemUi.this.noPdp.setVisible(false);
-                                TabModemUi.this.pdpGrid.setVisible(false);
-                                TabModemUi.this.pdpFail.setVisible(true);
-                            }
-
-                            @Override
-                            public void onSuccess(List<GwtModemPdpEntry> result) {
-                                for (GwtModemPdpEntry pair : result) {
-                                    TabModemUi.this.pdpDataProvider.getList().add(pair);
-                                }
-                                TabModemUi.this.pdpDataProvider.flush();
-                                if (!TabModemUi.this.pdpDataProvider.getList().isEmpty()) {
-                                    TabModemUi.this.searching.setVisible(false);
-                                    TabModemUi.this.noPdp.setVisible(false);
-                                    int size = TabModemUi.this.pdpDataProvider.getList().size();
-                                    TabModemUi.this.pdpGrid.setVisibleRange(0, size);
-                                    TabModemUi.this.pdpGrid.setVisible(true);
-                                    TabModemUi.this.pdpFail.setVisible(false);
-                                } else {
-                                    TabModemUi.this.searching.setVisible(false);
-                                    TabModemUi.this.noPdp.setVisible(true);
-                                    TabModemUi.this.pdpGrid.setVisible(false);
-                                    TabModemUi.this.pdpFail.setVisible(false);
-                                }
-                            }
-                        });
-            }
-        });
     }
 
 }

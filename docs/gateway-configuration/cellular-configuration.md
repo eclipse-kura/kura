@@ -25,7 +25,7 @@ The **Cellular** tab contains the following configuration parameters:
     - HSPA modem: atd&ast;99&ast;&ast;&ast;1#
     - EVDO/CDMA modem: atd#777
 
-- **APN**: defines the modem access point name (HSPA modems only).
+- **APN**: defines the modem access point name (HSPA modems only). This parameter is optional.
 
 - **Auth Type**: specifies the authentication type (HSPA modems only).
     - None
@@ -60,3 +60,7 @@ The **GPS** tab allows the user to enable or disable the GPS module provided by 
     - This port may not be used to send AT commands to the modem.
     - The _PositionService_ should be enabled. Serial settings of the _PositionService_ should not be changed; it will be redirected to the modem GPS port automatically.
 
+### Notes about the APN parameter
+The Access Point Name is an optional parameter. If left empty, the value is automatically picked up from the Mobile Broadband Provider the modem is registered to. If a value is filled, the APN value is esplicitely configured and the default value is overridden.
+
+A good practice is to set the interface status to **Disabled** and then **Enable For WAN** when the APN is explicitely set. NetworkManager, indeed, will fallback to the default value if a wrong APN is specified, causing misleading behaviors. This does not happen if the interface is disabled and re-enabled after APN changes.

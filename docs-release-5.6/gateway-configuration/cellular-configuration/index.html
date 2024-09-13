@@ -4455,7 +4455,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 </li>
 <li>
-<p><strong>APN</strong>: defines the modem access point name (HSPA modems only).</p>
+<p><strong>APN</strong>: defines the modem access point name (HSPA modems only). This parameter is mandatory for standard profiles and optional for generic ones. 
+  In the case of generic profiles, if it is left empty, the value is automatically picked up from the Mobile Broadband Provider the modem is registered to. If a value is filled, the APN value is explicitly configured and the default value is overridden.<br />
+  A good practice is to set the interface status to <strong>Disabled</strong> and then <strong>Enable For WAN</strong> when the APN is explicitly set. NetworkManager, indeed, will fallback to the default value if a wrong APN is specified, causing misleading behaviors. This does not happen if the interface is disabled and re-enabled after APN changes.</p>
 </li>
 <li>
 <p><strong>Auth Type</strong>: specifies the authentication type (HSPA modems only).</p>

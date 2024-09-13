@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -78,6 +78,7 @@ public class TabModemUi extends Composite implements NetworkTab {
     private final TabIp4Ui tcpTab;
     private final NetworkTabsUi tabs;
     private boolean dirty;
+    private final boolean isNet2;
     private GwtModemInterfaceConfig selectedNetIfConfig;
     private final Map<String, String> defaultDialString = new HashMap<>();
     private String dialString;
@@ -89,8 +90,7 @@ public class TabModemUi extends Composite implements NetworkTab {
     private final SingleSelectionModel<GwtModemPdpEntry> pdpSelectionModel = new SingleSelectionModel<>();
 
     private boolean pdpInit;
-    private boolean isNet2;
-
+    
     @UiField
     FormGroup groupReset;
     @UiField
@@ -305,7 +305,7 @@ public class TabModemUi extends Composite implements NetworkTab {
 
     @Override
     public boolean isValid() {
-        if (this.dial.getText() == null || "".equals(this.dial.getText().trim())) {
+        if (!isNet2 && (this.dial.getText() == null || "".equals(this.dial.getText().trim()))) {
             this.groupDial.setValidationState(ValidationState.ERROR);
         }
         if (!isNet2) {
@@ -498,57 +498,63 @@ public class TabModemUi extends Composite implements NetworkTab {
         this.number.addMouseOutHandler(event -> resetHelp());
 
         // DIAL STRING
-        this.labelDial.setText(MSGS.netModemDialString() + "*");
+        if (this.isNet2) {
+            this.labelDial.setVisible(false);
+            this.dial.setVisible(false);
+            this.buttonPdp.setVisible(false);
+        } else {
+            this.labelDial.setText(MSGS.netModemDialString() + "*");
 
-        this.dial.addMouseOutHandler(event -> resetHelp());
-        this.dialString = "";
-        String modemModel;
-        if (this.selectedNetIfConfig != null) {
-            modemModel = this.selectedNetIfConfig.getModel();
-            if (modemModel != null && !modemModel.isEmpty()) {
-                if (modemModel.contains(HE910)) {
-                    this.dialString = this.defaultDialString.get(HE910);
-                } else if (modemModel.contains(LE910)) {
-                    this.dialString = this.defaultDialString.get(LE910);
-                } else if (modemModel.contains(DE910)) {
-                    this.dialString = this.defaultDialString.get(DE910);
-                } else {
-                    this.dialString = "";
+            this.dial.addMouseOutHandler(event -> resetHelp());
+            this.dialString = "";
+            String modemModel;
+            if (this.selectedNetIfConfig != null) {
+                modemModel = this.selectedNetIfConfig.getModel();
+                if (modemModel != null && !modemModel.isEmpty()) {
+                    if (modemModel.contains(HE910)) {
+                        this.dialString = this.defaultDialString.get(HE910);
+                    } else if (modemModel.contains(LE910)) {
+                        this.dialString = this.defaultDialString.get(LE910);
+                    } else if (modemModel.contains(DE910)) {
+                        this.dialString = this.defaultDialString.get(DE910);
+                    } else {
+                        this.dialString = "";
+                    }
                 }
             }
+            this.dial.addMouseOverHandler(event -> {
+                if (TabModemUi.this.dial.isEnabled()) {
+                    TabModemUi.this.helpText.clear();
+                    if (TabModemUi.this.dialString.equals("")) {
+                        TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipDialStringDefault()));
+                    } else {
+                        TabModemUi.this.helpText
+                                .add(new Span(MSGS.netModemToolTipDialString(TabModemUi.this.dial.getText())));
+                    }
+                }
+            });
+            this.dial.addValueChangeHandler(event -> {
+                setDirty(true);
+                if (TabModemUi.this.dial.getText() == null || "".equals(TabModemUi.this.dial.getText().trim())) {
+                    TabModemUi.this.groupDial.setValidationState(ValidationState.ERROR);
+                } else {
+                    TabModemUi.this.groupDial.setValidationState(ValidationState.NONE);
+                }
+            });
+            this.buttonPdp.addClickHandler(event -> {
+                if (!TabModemUi.this.pdpInit) {
+                    initPdp();
+                    TabModemUi.this.pdpDataProvider.getList().clear();
+                    TabModemUi.this.searching.setVisible(true);
+                    TabModemUi.this.noPdp.setVisible(false);
+                    TabModemUi.this.pdpGrid.setVisible(false);
+                    TabModemUi.this.pdpFail.setVisible(false);
+                }
+                initModal();
+                loadPdpData();
+            });
         }
-        this.dial.addMouseOverHandler(event -> {
-            if (TabModemUi.this.dial.isEnabled()) {
-                TabModemUi.this.helpText.clear();
-                if (TabModemUi.this.dialString.equals("")) {
-                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipDialStringDefault()));
-                } else {
-                    TabModemUi.this.helpText
-                            .add(new Span(MSGS.netModemToolTipDialString(TabModemUi.this.dial.getText())));
-                }
-            }
-        });
-        this.dial.addValueChangeHandler(event -> {
-            setDirty(true);
-            if (TabModemUi.this.dial.getText() == null || "".equals(TabModemUi.this.dial.getText().trim())) {
-                TabModemUi.this.groupDial.setValidationState(ValidationState.ERROR);
-            } else {
-                TabModemUi.this.groupDial.setValidationState(ValidationState.NONE);
-            }
-        });
 
-        this.buttonPdp.addClickHandler(event -> {
-            if (!TabModemUi.this.pdpInit) {
-                initPdp();
-                TabModemUi.this.pdpDataProvider.getList().clear();
-                TabModemUi.this.searching.setVisible(true);
-                TabModemUi.this.noPdp.setVisible(false);
-                TabModemUi.this.pdpGrid.setVisible(false);
-                TabModemUi.this.pdpFail.setVisible(false);
-            }
-            initModal();
-            loadPdpData();
-        });
 
         // APN
         if (isNet2) {

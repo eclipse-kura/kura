@@ -45,7 +45,6 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
-import org.eclipse.kura.web.shared.model.GwtModemPdpEntry;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
@@ -106,16 +105,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
-
-    @Override
-    public List<GwtModemPdpEntry> findPdpContextInfo(GwtXSRFToken xsrfToken, String interfaceName)
-            throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        logger.debug("Method findPdpContextInfo not implemented yet. Returning empty list.");
-        return new ArrayList<>();
-    }
-
+    
     @Override
     public boolean verifyWifiCredentials(GwtXSRFToken xsrfToken, String interfaceName, GwtWifiConfig gwtWifiConfig)
             throws GwtKuraException {

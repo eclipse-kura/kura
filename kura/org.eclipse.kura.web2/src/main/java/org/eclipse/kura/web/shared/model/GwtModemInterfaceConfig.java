@@ -168,18 +168,6 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig {
         set("profileID", id);
     }
 
-    public GwtModemPdpType getPdpType() {
-        if (get("pdpType") != null) {
-            return GwtModemPdpType.valueOf((String) get("pdpType"));
-        } else {
-            return null;
-        }
-    }
-
-    public void setPdpType(GwtModemPdpType pdpType) {
-        set("pdpType", pdpType.name());
-    }
-
     public String getApn() {
         return get("apn");
     }

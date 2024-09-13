@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,13 +16,11 @@ import java.util.Optional;
 
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
-import org.eclipse.kura.net.modem.ModemConfig.PdpType;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.eclipse.kura.web.shared.model.GwtModemAuthType;
-import org.eclipse.kura.web.shared.model.GwtModemPdpType;
 import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
 import org.eclipse.kura.web.shared.model.GwtWifiCiphers;
 import org.eclipse.kura.web.shared.model.GwtWifiRadioMode;
@@ -356,50 +354,6 @@ public class EnumsParser {
         }
 
         return AuthType.NONE.name();
-    }
-
-    /**
-     * Converts values of {@link PdpType} to {@link GwtModemPdpType}
-     * 
-     */
-    public static GwtModemPdpType getGwtModemPdpType(Optional<String> pdpType) {
-        if (pdpType.isPresent()) {
-            if (pdpType.get().equals(PdpType.IP.name())) {
-                return GwtModemPdpType.netModemPdpIP;
-            }
-
-            if (pdpType.get().equals(PdpType.PPP.name())) {
-                return GwtModemPdpType.netModemPdpPPP;
-            }
-
-            if (pdpType.get().equals(PdpType.IPv6.name())) {
-                return GwtModemPdpType.netModemPdpIPv6;
-            }
-        }
-
-        return GwtModemPdpType.netModemPdpUnknown;
-    }
-
-    /**
-     * Converts values of {@link GwtModemPdpType} to {@link PdpType.name()}
-     * 
-     */
-    public static String getPdpType(Optional<GwtModemPdpType> gwtModemPdpType) {
-        if (gwtModemPdpType.isPresent()) {
-            switch (gwtModemPdpType.get()) {
-            case netModemPdpIP:
-                return PdpType.IP.name();
-            case netModemPdpIPv6:
-                return PdpType.IPv6.name();
-            case netModemPdpPPP:
-                return PdpType.PPP.name();
-            case netModemPdpUnknown:
-            default:
-                break;
-            }
-        }
-
-        return PdpType.UNKNOWN.name();
     }
 
 }

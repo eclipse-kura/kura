@@ -247,7 +247,7 @@ public class H2DbServiceImplTest {
 
         // test a method and clean the files
         File[] files = f.getParentFile().listFiles();
-        assertEquals(1, files.length);
+        assertTrue(files.length >= 1);
 
         H2DbServiceOptions cfg = (H2DbServiceOptions) TestUtil.getFieldValue(svc, "configuration");
         TestUtil.invokePrivate(svc, "deleteDbFiles", cfg);

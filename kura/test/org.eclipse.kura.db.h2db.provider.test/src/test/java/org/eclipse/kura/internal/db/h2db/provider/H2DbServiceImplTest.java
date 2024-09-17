@@ -23,6 +23,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -247,7 +248,7 @@ public class H2DbServiceImplTest {
 
         // test a method and clean the files
         File[] files = f.getParentFile().listFiles();
-        assertTrue(files.length >= 1);
+        assertEquals(String.format("Found: %s", Arrays.toString(files)), 1, files.length);
 
         H2DbServiceOptions cfg = (H2DbServiceOptions) TestUtil.getFieldValue(svc, "configuration");
         TestUtil.invokePrivate(svc, "deleteDbFiles", cfg);

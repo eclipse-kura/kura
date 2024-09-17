@@ -181,10 +181,6 @@
 
         <!-- Wires bundles config -->
         <antcall target="wires-config" />
-        <available
-            file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.conditional.provider_${org.eclipse.kura.wire.component.conditional.provider.version}.jar"
-            property="is.nashorn.conditional.component.present" />
-        <antcall target="wires-config-nashorn-js-engine" />
 
         <!-- Miscellaneous bundles config -->
         <antcall target="misc-config" />
@@ -689,7 +685,6 @@ fi]]>
         <antcall target="deployment-hooks-jar" />
 
         <antcall target="wires-jar" />
-        <antcall target="wires-jar-nashorn-js-engine" />
 
         <antcall target="misc-jar" />
 
@@ -1293,13 +1288,6 @@ fi]]>
         </propertyfile>
     </target>
 
-    <target name="wires-config-nashorn-js-engine" if="is.nashorn.conditional.component.present">
-        <propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
-            <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.wire.component.conditional.provider_${org.eclipse.kura.wire.component.conditional.provider.version}.jar@5:start" />
-        </propertyfile>
-    </target>
-
     <target name="h2db-config">
         <propertyfile
             file="${project.build.directory}/${build.output.name}/config.ini">
@@ -1436,14 +1424,6 @@ fi]]>
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.join.provider_${org.eclipse.kura.wire.component.join.provider.version}.jar"
-                prefix="${build.output.name}/${plugins.folder}" />
-        </zip>
-    </target>
-
-    <target name="wires-jar-nashorn-js-engine" if="is.nashorn.conditional.component.present">
-        <zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
-            <zipfileset
-                file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.conditional.provider_${org.eclipse.kura.wire.component.conditional.provider.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
         </zip>
     </target>

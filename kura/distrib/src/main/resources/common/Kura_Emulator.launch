@@ -167,7 +167,6 @@
         <setEntry value="org.eclipse.kura.useradmin.store@default:default"/>
         <setEntry value="org.eclipse.kura.util@default:default"/>
         <setEntry value="org.eclipse.kura.web2@default:default"/>
-        <setEntry value="org.eclipse.kura.wire.component.conditional.provider@default:default"/>
         <setEntry value="org.eclipse.kura.wire.component.join.provider@default:default"/>
         <setEntry value="org.eclipse.kura.wire.component.provider@default:default"/>
         <setEntry value="org.eclipse.kura.wire.db.component.provider@default:default"/>

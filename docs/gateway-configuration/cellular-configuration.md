@@ -22,11 +22,19 @@ The **Cellular** tab contains the following configuration parameters:
     - HSPA modem: atd&ast;99&ast;&ast;&ast;1#
     - EVDO/CDMA modem: atd#777
 
-- **APN**: defines the modem access point name (HSPA modems only). This parameter is mandatory for standard profiles and optional for generic ones. 
-  In the case of generic profiles, if it is left empty, the value is automatically picked up from the Mobile Broadband Provider the modem is registered to. If a value is filled, the APN value is explicitly configured and the default value is overridden.  
-  A good practice is to set the interface status to **Disabled** and then **Enable For WAN** when the APN is explicitly set. NetworkManager, indeed, will fallback to the default value if a wrong APN is specified, causing misleading behaviors. This does not happen if the interface is disabled and re-enabled after APN changes.
+- **APN**: defines the modem access point name.
 
-- **Auth Type**: specifies the authentication type (HSPA modems only).
+    This parameter is mandatory for standard profiles and optional for generic ones. 
+    In the case of generic profiles, if it is left empty, the value is automatically picked up from the Mobile Broadband Provider the modem is registered to. If a value is filled, the APN value is explicitly configured.
+
+    To avoid misconfiguration issues, it is strongly recommended to set it manually.
+  
+    !!! note
+        **APN value configuration**
+
+        A good practice is to set the interface status to **Disabled** and then **Enable For WAN** when the APN is explicitly set. NetworkManager, indeed, will fallback to the default value if a wrong APN is specified, causing misleading behaviors. This does not happen if the interface is disabled and re-enabled after APN changes.
+
+- **Auth Type**: specifies the authentication type.
     - None
     - Auto
     - CHAP

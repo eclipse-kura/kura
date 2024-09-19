@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -90,7 +90,7 @@ public class TabModemUi extends Composite implements NetworkTab {
     private final SingleSelectionModel<GwtModemPdpEntry> pdpSelectionModel = new SingleSelectionModel<>();
 
     private boolean pdpInit;
-    
+
     @UiField
     FormGroup groupReset;
     @UiField
@@ -440,7 +440,11 @@ public class TabModemUi extends Composite implements NetworkTab {
                 return MSGS.netModemToolTipDialString(TabModemUi.this.dial.getText());
             }
         });
-        this.apnHelp.setHelpText(MSGS.netModemToolTipApn());
+        if (this.isNet2) {
+            this.apnHelp.setHelpText(MSGS.netModemToolTipApnForNet2());
+        } else {
+            this.apnHelp.setHelpText(MSGS.netModemToolTipApn());
+        }
         this.authHelp.setHelpText(MSGS.netModemToolTipAuthentication());
         this.usernameHelp.setHelpText(MSGS.netModemToolTipUsername());
         this.passwordHelp.setHelpText(MSGS.netModemToolTipPassword());
@@ -555,7 +559,6 @@ public class TabModemUi extends Composite implements NetworkTab {
             });
         }
 
-
         // APN
         if (isNet2) {
             this.labelApn.setText(MSGS.netModemAPN());
@@ -565,7 +568,11 @@ public class TabModemUi extends Composite implements NetworkTab {
         this.apn.addMouseOverHandler(event -> {
             if (TabModemUi.this.apn.isEnabled()) {
                 TabModemUi.this.helpText.clear();
-                TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipApn()));
+                if (isNet2) {
+                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipApnForNet2()));
+                } else {
+                    TabModemUi.this.helpText.add(new Span(MSGS.netModemToolTipApn()));
+                }
             }
         });
         this.apn.addMouseOutHandler(event -> resetHelp());

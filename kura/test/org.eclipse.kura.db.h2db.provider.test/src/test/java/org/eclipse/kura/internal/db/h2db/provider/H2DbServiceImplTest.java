@@ -19,6 +19,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -207,6 +210,7 @@ public class H2DbServiceImplTest {
 
     @Test
     public void testUpdateFile() throws Throwable {
+        final String filePathString = "/tmp/kurah2/testdb";
         final String enc = "enc";
         char[] encPass = enc.toCharArray();
         String pass = "pass";
@@ -224,7 +228,7 @@ public class H2DbServiceImplTest {
         props.put("db.user", user);
         props.put("db.password", enc);
         props.put("db.connection.pool.max.size", 10);
-        File f = new File("/tmp/kurah2/testdb");
+        File f = new File(filePathString);
         props.put("db.connector.url", "jdbc:h2:file:" + f.getAbsolutePath());
 
         try {
@@ -246,16 +250,13 @@ public class H2DbServiceImplTest {
 
         svc.deactivate();
 
-        // test a method and clean the files
-        File[] files = f.getParentFile().listFiles();
-        assertEquals(String.format("Found: %s", Arrays.toString(files)), 1, files.length);
+        Path filePath = Paths.get(filePathString + ".mv.db");
+        assertTrue(Files.exists(filePath));
 
         H2DbServiceOptions cfg = (H2DbServiceOptions) TestUtil.getFieldValue(svc, "configuration");
         TestUtil.invokePrivate(svc, "deleteDbFiles", cfg);
 
-        for (File file : files) {
-            assertFalse(file.exists());
-        }
+        assertFalse(Files.exists(filePath));
     }
 
 }

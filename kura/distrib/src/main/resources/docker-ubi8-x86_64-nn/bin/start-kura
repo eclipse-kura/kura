@@ -13,7 +13,7 @@ if [ $JAVA_VERSION_NUM -gt 001008 ] ; then
 fi
 
 mkdir -p /tmp/.kura/configuration
-cp "${KURA_DIR}/framework/config.ini" /tmp/.kura/configuration/
+"${KURA_DIR}/bin/gen_config_ini.sh" "${KURA_DIR}"/framework/config.ini "${KURA_DIR}"/plugins > /tmp/.kura/configuration/config.ini
 
 JAVA_INT_OPTS="$JAVA_INT_OPTS -XX:+IgnoreUnrecognizedVMOptions"
 

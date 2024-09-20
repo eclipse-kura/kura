@@ -17,7 +17,7 @@
     basedir="../../../">
 
     <target name="install-plugin">
-        <echo message="Installing ${bundle.file}, strart level: ${start.level}, start: ${start}"/>
+        <echo message="Installing ${bundle.file}, start level: ${start.level}, start: ${start}"/>
         <copy todir="${project.build.directory}/${build.output.name}/plugins/${start.level}${start}" failonerror="false" overwrite="false" file="${project.build.directory}/plugins/${bundle.file}" />
         <copy todir="${project.build.directory}/${build.output.name}/plugins/${start.level}${start}" failonerror="false" overwrite="false" file="../target-definition/common/source/plugins/${bundle.file}" />
         <copy todir="${project.build.directory}/${build.output.name}/plugins/${start.level}${start}" failonerror="false" overwrite="false" file="${kura.osgi.repo}/plugins/${bundle.file}" />

@@ -4,7 +4,7 @@ TEMPLATE=$1
 ROOT=$2
 
 usage() {
-    >&2 echo "Usage: gen_config_ini.sh <config.ini template> <plugin root DIR_NAMEectory>"
+    >&2 echo "Usage: gen_config_ini.sh <config.ini template> <plugin root directory>"
 }
 
 abspath() {

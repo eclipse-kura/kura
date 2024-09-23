@@ -42,6 +42,16 @@ EOF
     fi
 }
 
+should_disable_systemd_resolved_stub() {
+
+    SYSTEMD_VERSION=$(systemd --version | (IFS=" " read -r _ignore SYSTEMD_VERSION _ignore; echo "${SYSTEMD_VERSION}") || true)
+
+    [ "${SYSTEMD_VERSION}" -lt 248 ] && 
+    [ -L /etc/resolv.conf ] && 
+    grep "^nameserver[ ]\+127.0.0.53" < /etc/resolv.conf > /dev/null 2>&1 && 
+    [ -e /run/systemd/resolve/resolv.conf ]
+}
+
 INSTALL_DIR=/opt/eclipse
 
 # create known kura install location
@@ -104,6 +114,10 @@ if [ -d /etc/cloud/cloud.cfg.d ]; then
 fi
 
 disable_netplan
+
+if should_disable_systemd_resolved_stub; then
+    ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+fi
 
 if [ -d /usr/lib/NetworkManager/conf.d/ ]; then
     TO_REMOVE=$( find /usr/lib/NetworkManager/conf.d/ -type f -name  "*-globally-managed-devices.conf" | awk 'NR==1{print $1}' )

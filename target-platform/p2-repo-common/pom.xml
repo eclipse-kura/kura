@@ -520,7 +520,7 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <move file="target/source/plugins/com.codeminders.hidapi.jar" tofile="target/source/plugins/com.codeminders.hidapi_${com.codeminders.hidapi.version}.jar"/>
                                 <move file="target/source/plugins/com.codeminders.hidapi.armv6hf.jar" tofile="target/source/plugins/com.codeminders.hidapi.armv6hf_${com.codeminders.hidapi.version}.jar"/>
                                 <move file="target/source/plugins/com.codeminders.hidapi.x86_64.jar" tofile="target/source/plugins/com.codeminders.hidapi.x86_64_${com.codeminders.hidapi.version}.jar"/>
@@ -607,7 +607,7 @@
                                 <move file="target/source/plugins/org.apache.felix.useradmin.jar" tofile="target/source/plugins/org.apache.felix.useradmin_${org.apache.felix.useradmin.version}.jar"/>
                                 <move file="target/source/plugins/bcpkix-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcpkix-jdk15on_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/bcprov-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcprov-jdk15on_${org.bouncycastle.version}.jar"/>
-                            </tasks>
+                            </target>
                         </configuration>
                     </execution>
                     <execution>
@@ -617,7 +617,7 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <delete dir="../../kura/target-definition/common/"/>
                                 <mkdir dir="../../kura/target-definition/common/repository"/>
                                 <copy todir="../../kura/target-definition/common/repository">
@@ -626,7 +626,7 @@
                                 <copy todir="../../kura/target-definition/common/source">
                                     <fileset dir="${project.build.directory}/source"/>
                                 </copy>
-                            </tasks>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>

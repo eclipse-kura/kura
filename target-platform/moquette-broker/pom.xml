@@ -27,22 +27,9 @@
     <version>1.0.0-SNAPSHOT</version>
 
     <properties>
-        <maven-bundle-plugin.version>3.0.1</maven-bundle-plugin.version>
-        <moquette-broker.version>0.8.1</moquette-broker.version>
+        <maven-bundle-plugin.version>5.1.8</maven-bundle-plugin.version>
+        <moquette-broker.version>0.15</moquette-broker.version>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>bintray</id>
-            <url>https://jcenter.bintray.com</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
@@ -98,6 +85,7 @@
                         <Embed-Transitive>true</Embed-Transitive>
                         <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
                         <_noee>true</_noee>
+                        <_fixupmessages>"Classes found in the wrong directory";is:=warning</_fixupmessages>
                     </instructions>
                 </configuration>
             </plugin>

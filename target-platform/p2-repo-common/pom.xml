@@ -619,7 +619,7 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <move file="target/source/plugins/com.codeminders.hidapi.jar" tofile="target/source/plugins/com.codeminders.hidapi_${com.codeminders.hidapi.version}.jar"/>
                                 <move file="target/source/plugins/com.codeminders.hidapi.armv6hf.jar" tofile="target/source/plugins/com.codeminders.hidapi.armv6hf_${com.codeminders.hidapi.version}.jar"/>
                                 <move file="target/source/plugins/com.codeminders.hidapi.x86_64.jar" tofile="target/source/plugins/com.codeminders.hidapi.x86_64_${com.codeminders.hidapi.version}.jar"/>
@@ -710,7 +710,7 @@
                                 <move file="target/source/plugins/bcutil-jdk18on.jar" tofile="target/source/plugins/bcutil_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/bcpg-jdk18on.jar" tofile="target/source/plugins/bcpg_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/gpsd4java.jar" tofile="target/source/plugins/com.eurotech.gpsd4java_${com.eurotech.gpsd4java.version}.jar"/>
-                            </tasks>
+                            </target>
                         </configuration>
                     </execution>
                     <execution>
@@ -720,7 +720,7 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <delete dir="../../kura/target-definition/common/"/>
                                 <mkdir dir="../../kura/target-definition/common/repository"/>
                                 <copy todir="../../kura/target-definition/common/repository">
@@ -729,7 +729,7 @@
                                 <copy todir="../../kura/target-definition/common/source">
                                     <fileset dir="${project.build.directory}/source"/>
                                 </copy>
-                            </tasks>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>

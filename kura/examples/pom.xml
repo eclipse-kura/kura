@@ -25,7 +25,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <tycho-version>1.6.0</tycho-version>
+        <tycho-version>1.7.0</tycho-version>
 
         <!-- SCM: Note that we are in the "kura" sub-dir here already -->
         <tycho.scmUrl>scm:git:ssh://github.com/eclipse/kura/kura</tycho.scmUrl>
@@ -289,7 +289,7 @@
                     <!-- make us aware of warnings -->
                     <showWarnings>true</showWarnings>
                     <!-- Kura does not set bootdelegation, we let the compiler check for this -->
-                    <requireJREPackageImports>true</requireJREPackageImports>
+                    <requireJavaPackageImports>true</requireJavaPackageImports>
                 </configuration>
             </plugin>
             <plugin>

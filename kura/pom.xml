@@ -223,7 +223,6 @@
             -->
             <modules>
                 <module>org.eclipse.kura.wire.script.filter.provider</module>
-                <module>org.eclipse.kura.wire.component.conditional.provider</module>
                 <module>features</module>
                 <module>org.eclipse.kura-p2</module>
             </modules>

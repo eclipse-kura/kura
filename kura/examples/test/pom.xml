@@ -256,7 +256,6 @@
                             <goal>prepare-agent</goal>
                         </goals>
                         <configuration>
-                            <destFile>${sonar.jacoco.reportPath}</destFile>
                             <propertyName>jacocoArgs</propertyName>
                         </configuration>
                     </execution>
@@ -267,9 +266,9 @@
 
     <properties>
         <kura.basedir>${project.basedir}/../..</kura.basedir>
-        <tycho.argline>${jacocoArgs} -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml</tycho.argline>
-        <jacoco.reportDir>target/jacoco/</jacoco.reportDir>
-        <sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
+        <tycho.argline>
+            ${jacocoArgs}
+            -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml</tycho.argline>
     </properties>
 
     <modules>

@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -93,17 +93,6 @@
                                     ui:field="helpNumber" />
                                 <b:TextBox b:id="number"
                                     ui:field="number" />
-                            </b:FormGroup>
-
-                            <b:FormGroup ui:field="groupDial">
-                                <b:FormLabel for="dial"
-                                    ui:field="labelDial" />
-                                <util:HelpButton
-                                    ui:field="dialHelp" />
-                                <b:TextBox b:id="dial"
-                                    ui:field="dial" />
-                                <b:Button ui:field="buttonPdp"
-                                    icon="SEARCH" iconFixedWidth="true" />
                             </b:FormGroup>
                             
                             <b:FormGroup ui:field="groupApn">
@@ -253,29 +242,6 @@
                 </b:Row>
             </b:Column>
         </b:Column>
-
-        <!-- Modem (PDP) Modal -->
-        <b:Modal closable="true" dataKeyboard="true" ui:field="pdpModal" b:id="pdpModal">
-            <b:ModalBody>
-                <b:Panel>
-                    <b:PanelHeader ui:field="pdpTitle" />
-                    <b:PanelBody addStyleNames='{style.scrollable}'>
-                        <gwt:CellTable bordered="true"
-                            condensed="true" striped="true" hover="true"
-                            ui:field="pdpGrid" />
-                        <b:Alert type="INFO" ui:field="searching">
-                            <b.html:Text ui:field="searchingText" />
-                        </b:Alert>
-                        <b:Alert type="WARNING" ui:field="noPdp">
-                            <b.html:Text ui:field="noPdpText" />
-                        </b:Alert>
-                        <b:Alert type="DANGER" ui:field="pdpFail">
-                            <b.html:Text ui:field="pdpFailText" />
-                        </b:Alert>
-                    </b:PanelBody>
-                </b:Panel>
-            </b:ModalBody>
-        </b:Modal>
 
     </b:Container>
 </ui:UiBinder> 

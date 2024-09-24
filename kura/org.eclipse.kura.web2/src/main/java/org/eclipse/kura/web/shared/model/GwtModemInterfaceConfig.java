@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -166,18 +166,6 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig {
 
     public void setProfileID(int id) {
         set("profileID", id);
-    }
-
-    public GwtModemPdpType getPdpType() {
-        if (get("pdpType") != null) {
-            return GwtModemPdpType.valueOf((String) get("pdpType"));
-        } else {
-            return null;
-        }
-    }
-
-    public void setPdpType(GwtModemPdpType pdpType) {
-        set("pdpType", pdpType.name());
     }
 
     public String getApn() {

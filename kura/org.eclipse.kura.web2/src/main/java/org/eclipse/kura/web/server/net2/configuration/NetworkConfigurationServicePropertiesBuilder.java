@@ -381,8 +381,6 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
             this.properties.setModemAuthType(this.ifname,
                     EnumsParser.getAuthType(Optional.ofNullable(gwtModemConfig.getAuthType())));
-            this.properties.setModemPdpType(this.ifname,
-                    EnumsParser.getPdpType(Optional.ofNullable(gwtModemConfig.getPdpType())));
             this.properties.setModemDialString(this.ifname, gwtModemConfig.getDialString());
             this.properties.setModemUsername(this.ifname, gwtModemConfig.getUsername());
 

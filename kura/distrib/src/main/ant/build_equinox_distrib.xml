@@ -208,10 +208,6 @@
 
         <!-- Wires bundles config -->
         <antcall target="wires-plugins" />
-        <available
-            file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.conditional.provider_${org.eclipse.kura.wire.component.conditional.provider.version}.jar"
-            property="is.nashorn.conditional.component.present" />
-        <antcall target="wires-config-nashorn-js-engine" />
 
         <!-- Miscellaneous bundles config -->
         <antcall target="misc-plugins" />
@@ -1483,14 +1479,6 @@ fi]]>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.eclipse.kura.wire.component.join.provider_${org.eclipse.kura.wire.component.join.provider.version}.jar" />
-            <param name="start.level" value="5" />
-            <param name="start" value="s" />
-        </antcall>
-    </target>
-
-    <target name="wires-config-nashorn-js-engine" if="is.nashorn.conditional.component.present">
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.kura.wire.component.conditional.provider_${org.eclipse.kura.wire.component.conditional.provider.version}.jar" />
             <param name="start.level" value="5" />
             <param name="start" value="s" />
         </antcall>

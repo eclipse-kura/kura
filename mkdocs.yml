@@ -200,8 +200,8 @@ theme:
     repo: fontawesome/brands/github # Alternate icon for repo link
 
 # Repo link
-repo_name: eclipse/kura
-repo_url: https://github.com/eclipse/kura
+repo_name: eclipse-kura/kura
+repo_url: https://github.com/eclipse-kura/kura
 edit_uri: "" # Remove edit button
 
 plugins:

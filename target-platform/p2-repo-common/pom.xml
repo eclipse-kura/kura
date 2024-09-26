@@ -76,9 +76,9 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <tasks>
+                                    <target>
                                         <move file="target/source/plugins/libsocket-can-osgi.jar" tofile="target/source/plugins/libsocket-can-osgi_${libsocket-can-osgi.version}.jar"/>
-                                    </tasks>
+                                    </target>
                                 </configuration>
                             </execution>
                         </executions>

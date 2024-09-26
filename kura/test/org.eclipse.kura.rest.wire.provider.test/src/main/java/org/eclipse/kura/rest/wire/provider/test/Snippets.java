@@ -96,6 +96,25 @@ public class Snippets {
             + "            \"isRequired\": true\n" //
             + "        },\n" //
             + "        {\n" //
+            + "            \"option\": [\n" //
+            + "                {\n" //
+            + "                    \"label\": \"DEFINED_BY_VALUE_TYPE\",\n" //
+            + "                    \"value\": \"DEFINED_BY_VALUE_TYPE\"\n" //
+            + "                },\n" //
+            + "                {\n" //
+            + "                    \"label\": \"DOUBLE\",\n" //
+            + "                    \"value\": \"DOUBLE\"\n" //
+            + "                }\n" //
+            + "            ],\n" //
+            + "            \"name\": \"scaleoffset.type\",\n" //
+            + "            \"description\": \"Scale/Offset type of the channel\",\n" //
+            + "            \"id\": \"+scaleoffset.type\",\n" //
+            + "            \"type\": \"STRING\",\n" //
+            + "            \"cardinality\": 0,\n" //
+            + "            \"defaultValue\": \"DEFINED_BY_VALUE_TYPE\",\n" //
+            + "            \"isRequired\": false\n" //
+            + "        },\n" //
+            + "        {\n" //
             + "            \"name\": \"scale\",\n" //
             + "            \"description\": \"Scale to be applied to the numeric value of the channel\",\n" //
             + "            \"id\": \"+scale\",\n" //
@@ -413,7 +432,7 @@ public class Snippets {
             + "                    \"cardinality\": 0,\n" //
             + "                    \"defaultValue\": \"10\",\n" //
             + "                    \"isRequired\": true\n" //
-            + "                },\n" //     
+            + "                },\n" //
             + "                {\n" //
             + "                    \"option\": [\n" //
             + "                        {\n" //

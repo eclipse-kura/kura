@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -44,6 +44,9 @@ public enum AssetConstants {
 
     /** Value type Property to be used in the configuration. */
     VALUE_TYPE(CHANNEL_DEFAULT_PROPERTY_PREFIX.value() + "value.type"),
+
+    /** Scale Offset type Property to be used in the configuration. */
+    SCALE_OFFSET_TYPE(CHANNEL_DEFAULT_PROPERTY_PREFIX.value() + "scaleoffset.type"),
 
     /** Scale Property to be used in the configuration. */
     VALUE_SCALE(CHANNEL_DEFAULT_PROPERTY_PREFIX.value() + "scale"),

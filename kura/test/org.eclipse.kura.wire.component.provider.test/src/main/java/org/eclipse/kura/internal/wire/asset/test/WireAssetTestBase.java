@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -28,10 +28,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.OptionalDouble;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.channel.ChannelType;
+import org.eclipse.kura.channel.ScaleOffsetType;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
@@ -53,27 +53,29 @@ public class WireAssetTestBase {
 
     private TestEmitterReceiver testReceiver;
     private TestEmitterReceiver testEmitter;
-    private MockDriver driver = new MockDriver();
+    private final MockDriver driver = new MockDriver();
 
-    private List<WireEnvelope> envelopes = new ArrayList<>();
+    private final List<WireEnvelope> envelopes = new ArrayList<>();
 
     protected void givenAssetChannel(final String name, final boolean listen, final DataType dataType,
-            final OptionalDouble scale, final OptionalDouble offset) {
+            final ScaleOffsetType scaleOffsetType, final Optional<? extends Number> scale,
+            final Optional<? extends Number> offset) {
         final Map<String, Object> config = new HashMap<>();
 
         config.put("driver.pid", "testDriver");
         config.put(name + "#+name", name);
         config.put(name + "#+type", ChannelType.READ.name());
         config.put(name + "#+value.type", dataType.name());
+        config.put(name + "#+scaleoffset.type", scaleOffsetType.name());
         config.put(name + "#+enabled", true);
         config.put(name + "#+listen", listen);
 
         if (scale.isPresent()) {
-            config.put(name + "#+scale", Double.toString(scale.getAsDouble()));
+            config.put(name + "#+scale", scale.get().toString());
         }
 
         if (offset.isPresent()) {
-            config.put(name + "#+offset", Double.toString(offset.getAsDouble()));
+            config.put(name + "#+offset", offset.get().toString());
         }
 
         givenAssetConfig(config);
@@ -88,8 +90,7 @@ public class WireAssetTestBase {
             final BundleContext bundleContext = FrameworkUtil.getBundle(OnChangeCacheTest.class).getBundleContext();
 
             final WireGraphService wireGraphService = WireTestUtil
-                    .trackService(WireGraphService.class, Optional.empty())
-                    .get(30, TimeUnit.SECONDS);
+                    .trackService(WireGraphService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
 
             final GraphBuilder graphBuilder = new GraphBuilder().addTestEmitterReceiver("emitter")
                     .addTestEmitterReceiver("receiver")
@@ -101,11 +102,11 @@ public class WireAssetTestBase {
 
             graphBuilder.replaceExistingGraph(bundleContext, wireGraphService).get(30, TimeUnit.SECONDS);
 
-            testEmitter = graphBuilder.getTrackedWireComponent("emitter");
-            testReceiver = graphBuilder.getTrackedWireComponent("receiver");
+            this.testEmitter = graphBuilder.getTrackedWireComponent("emitter");
+            this.testReceiver = graphBuilder.getTrackedWireComponent("receiver");
 
-            testReceiver.setConsumer(e -> {
-                synchronized (envelopes) {
+            this.testReceiver.setConsumer(e -> {
+                synchronized (this.envelopes) {
                     this.envelopes.add(e);
                     this.envelopes.notifyAll();
                 }
@@ -114,10 +115,10 @@ public class WireAssetTestBase {
             final Dictionary<String, Object> properties = new Hashtable<>();
             properties.put("kura.service.pid", "testDriver");
 
-            driverRegistration = Optional.of(bundleContext.registerService(Driver.class, driver, properties));
+            driverRegistration = Optional.of(bundleContext.registerService(Driver.class, this.driver, properties));
 
             try {
-                driver.preparedReadCalled.get(30, TimeUnit.SECONDS);
+                this.driver.preparedReadCalled.get(30, TimeUnit.SECONDS);
             } catch (Exception e) {
                 fail("driver not ready");
             }
@@ -131,12 +132,11 @@ public class WireAssetTestBase {
 
                 return split[1].equals("+listen");
 
-            }).filter(k -> Objects.equals(true, assetConfig.get(k)))
-                    .count();
+            }).filter(k -> Objects.equals(true, assetConfig.get(k))).count();
 
-            synchronized (driver.listeners) {
-                while (driver.listeners.size() != listenChannelCount) {
-                    driver.listeners.wait(30000);
+            synchronized (this.driver.listeners) {
+                while (this.driver.listeners.size() != listenChannelCount) {
+                    this.driver.listeners.wait(30000);
                 }
             }
 
@@ -146,7 +146,7 @@ public class WireAssetTestBase {
     }
 
     protected void givenChannelValue(final String key, final Object value) {
-        driver.addReadResult(key, TypedValues.newTypedValue(value));
+        this.driver.addReadResult(key, TypedValues.newTypedValue(value));
     }
 
     protected void givenChannelValues(final String key, final Object... values) {
@@ -157,7 +157,7 @@ public class WireAssetTestBase {
 
     protected void whenAssetReceivesEnvelope() {
 
-        testEmitter.emit();
+        this.testEmitter.emit();
     }
 
     protected void whenDriverEmitsEvents(final Object... values) {
@@ -167,7 +167,7 @@ public class WireAssetTestBase {
             final String channelName = (String) iter.next();
             final TypedValue<?> value = TypedValues.newTypedValue(iter.next());
 
-            driver.emitChannelEvent(channelName, value);
+            this.driver.emitChannelEvent(channelName, value);
         }
     }
 
@@ -178,15 +178,15 @@ public class WireAssetTestBase {
     }
 
     protected void awaitEnvelope(final int index) {
-        synchronized (envelopes) {
-            if (index >= envelopes.size()) {
+        synchronized (this.envelopes) {
+            if (index >= this.envelopes.size()) {
                 try {
-                    envelopes.wait(30000);
+                    this.envelopes.wait(30000);
                 } catch (InterruptedException e) {
                     throw new IllegalStateException("Interrupted while waiting for envelope");
                 }
 
-                if (index >= envelopes.size()) {
+                if (index >= this.envelopes.size()) {
                     fail("expected to receive at least " + (index + 1) + " envelopes");
                 }
             }
@@ -196,7 +196,7 @@ public class WireAssetTestBase {
     protected void thenAssetOutputContains(final int index, final Object... properties) {
         awaitEnvelope(index);
 
-        final WireEnvelope envelope = envelopes.get(index);
+        final WireEnvelope envelope = this.envelopes.get(index);
 
         final Iterator<Object> iter = Arrays.asList(properties).iterator();
 
@@ -211,7 +211,7 @@ public class WireAssetTestBase {
     protected void thenAssetOutputContainsKey(final int index, final String key) {
         awaitEnvelope(index);
 
-        final WireEnvelope envelope = envelopes.get(index);
+        final WireEnvelope envelope = this.envelopes.get(index);
 
         assertTrue(envelope.getRecords().get(0).getProperties().containsKey(key));
     }
@@ -219,7 +219,7 @@ public class WireAssetTestBase {
     protected void thenAssetOutputPropertyCountIs(final int index, final int expectedCount) {
         awaitEnvelope(index);
 
-        final WireEnvelope envelope = envelopes.get(index);
+        final WireEnvelope envelope = this.envelopes.get(index);
 
         assertEquals(expectedCount, envelope.getRecords().get(0).getProperties().size());
     }
@@ -227,13 +227,9 @@ public class WireAssetTestBase {
     protected void thenAssetOutputDoesNotContain(final int index, final String... properties) {
         awaitEnvelope(index);
 
-        final WireEnvelope envelope = envelopes.get(index);
+        final WireEnvelope envelope = this.envelopes.get(index);
 
-        final Iterator<String> iter = Arrays.asList(properties).iterator();
-
-        while (iter.hasNext()) {
-            final String key = (String) iter.next();
-
+        for (String key : Arrays.asList(properties)) {
             assertFalse(envelope.getRecords().get(0).getProperties().containsKey(key));
         }
     }
@@ -245,7 +241,7 @@ public class WireAssetTestBase {
             throw new IllegalStateException("sleep interrupted");
         }
 
-        assertEquals(expectedCount, envelopes.size());
+        assertEquals(expectedCount, this.envelopes.size());
     }
 
 }

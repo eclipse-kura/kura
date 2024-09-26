@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -24,6 +24,7 @@ import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_UNIT;
 import java.util.List;
 
 import org.eclipse.kura.channel.ChannelType;
+import org.eclipse.kura.channel.ScaleOffsetType;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Toption;
@@ -60,6 +61,15 @@ import org.eclipse.kura.util.collection.CollectionUtil;
  * <li>BOOLEAN</li>
  * <li>STRING</li>
  * <li>BYTE_ARRAY</li>
+ * </ul>
+ * 
+ * The <b><i>scaleoffset.type</i></b> would be one of the following:
+ * <ul>
+ * <li>DEFINED_BY_VALUE_TYPE</li>
+ * <li>INTEGER</li>
+ * <li>DOUBLE</li>
+ * <li>FLOAT</li>
+ * <li>LONG</li>
  * </ul>
  *
  * @see org.eclipse.kura.asset.AssetConfiguration
@@ -132,6 +142,18 @@ public class BaseChannelDescriptor implements ChannelDescriptor {
         addOptions(valueType, DataType.values());
 
         this.defaultElements.add(valueType);
+
+        final Tad scaleOffsetType = new Tad();
+        scaleOffsetType.setName(AssetConstants.SCALE_OFFSET_TYPE.value().substring(1));
+        scaleOffsetType.setId(AssetConstants.SCALE_OFFSET_TYPE.value());
+        scaleOffsetType.setDescription("Scale/Offset type of the channel");
+        scaleOffsetType.setType(Tscalar.STRING);
+        scaleOffsetType.setRequired(false);
+        scaleOffsetType.setDefault(ScaleOffsetType.DEFINED_BY_VALUE_TYPE.name());
+
+        addOptions(scaleOffsetType, ScaleOffsetType.values());
+
+        this.defaultElements.add(scaleOffsetType);
 
         final Tad valueScale = new Tad();
         valueScale.setName(VALUE_SCALE.value().substring(1));

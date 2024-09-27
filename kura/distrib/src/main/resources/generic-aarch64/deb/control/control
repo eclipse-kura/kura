@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2023 Eurotech and/or its affiliates and others
+# Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -19,7 +19,7 @@ Depends: openjdk-17-jre-headless | temurin-17-jdk | openjdk-8-jre-headless | tem
  polkit | policykit-1, ssh | openssh, openssl, busybox, openvpn,
  bluez | bluez5, bluez-hcidump | bluez5-noinst-tools,
  ntpdate, chrony, chronyc | chrony, cron | cronie,
- network-manager | networkmanager, bind9 | bind, dnsmasq | isc-dhcp-server | dhcp-server, dnsmasq | isc-dhcp-server | dhcp-client, iw, iptables, modemmanager,
+ network-manager | networkmanager, bind9 | bind, dnsmasq | isc-dhcp-server | dhcp-server, dnsmasq-base | isc-dhcp-server | dhcp-server, isc-dhcp-client | dhcp-client, iw, iptables, modemmanager,
  logrotate,
  gpsd
 Recommends: python3

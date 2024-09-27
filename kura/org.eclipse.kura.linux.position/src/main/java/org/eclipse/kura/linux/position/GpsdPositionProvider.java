@@ -18,7 +18,11 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -40,6 +44,7 @@ import de.taimos.gpsd4java.types.ATTObject;
 import de.taimos.gpsd4java.types.DeviceObject;
 import de.taimos.gpsd4java.types.DevicesObject;
 import de.taimos.gpsd4java.types.ENMEAMode;
+import de.taimos.gpsd4java.types.SATObject;
 import de.taimos.gpsd4java.types.SKYObject;
 import de.taimos.gpsd4java.types.TPVObject;
 import de.taimos.gpsd4java.types.subframes.SUBFRAMEObject;
@@ -49,6 +54,7 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     private static final Logger logger = LoggerFactory.getLogger(GpsdPositionProvider.class);
     private final AtomicReference<GpsdInternalState> internalStateReference = new AtomicReference<>(
             new GpsdInternalState());
+    private final AtomicReference<GNSSType> gnssType = new AtomicReference<>(GNSSType.UNKNOWN);
 
     private GPSdEndpoint gpsEndpoint;
     private PositionServiceOptions configuration;
@@ -165,6 +171,11 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     }
 
     @Override
+    public GNSSType getGnssType() {
+        return this.gnssType.get();
+    }
+
+    @Override
     public void handleATT(ATTObject att) {
         // Noting to do.
     }
@@ -181,7 +192,25 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     @Override
     public void handleSKY(SKYObject sky) {
-        // Noting to do.
+
+        List<SATObject> satellites = sky.getSatellites();
+        Set<Integer> prnList = new HashSet<>();
+
+        for (SATObject object : satellites) {
+            if (object.getUsed()) {
+                prnList.add(object.getPRN());
+            }
+        }
+
+        if (prnList.isEmpty()) {
+            this.gnssType.set(GNSSType.UNKNOWN);
+        } else if (prnList.size() == 1) {
+            this.gnssType.set(GNSSType.fromPrn(new ArrayList<>(prnList).get(0)));
+        } else {
+            this.gnssType.set(GNSSType.MIXED_GNSS_TYPE);
+        }
+        logger.info("\n\nTYPE: {}\n\n", this.gnssType.get().getValue());
+
     }
 
     @Override

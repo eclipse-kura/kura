@@ -113,6 +113,11 @@ public interface PositionService {
     public String getLastSentence();
 
     /**
+     * Returns the GNSS System used to retrieve the position information.
+     */
+    public String getGnssSystem();
+
+    /**
      * Registers position listener
      *
      * @param listenerId

@@ -240,4 +240,9 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
     public LocalDateTime getDateTime() {
         return LocalDateTime.ofInstant(this.currentTime.toInstant(), ZoneId.systemDefault());
     }
+
+    @Override
+    public String getGnssSystem() {
+        return "Gps";
+    }
 }

@@ -227,6 +227,11 @@ public class SerialDevicePositionProvider implements PositionProvider {
         return PositionProviderType.SERIAL;
     }
 
+    @Override
+    public GNSSType getGnssType() {
+        return this.gpsDevice.getGnssType();
+    }
+
     protected GpsDevice getGpsDevice() {
         return this.gpsDevice;
     }

@@ -14,13 +14,18 @@ package org.eclipse.kura.linux.position;
 
 import static java.lang.Math.toRadians;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.kura.position.NmeaPosition;
 import org.osgi.util.measurement.Measurement;
 import org.osgi.util.measurement.Unit;
 import org.osgi.util.position.Position;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implements NMEA sentences parser functions.
@@ -46,6 +51,8 @@ public class NMEAParser {
     private char validFix = 0;
     private char latitudeHemisphere = 0;
     private char longitudeHemisphere = 0;
+    private Set<String> gnssTypeList = new HashSet<>();
+    private GNSSType gnssType = GNSSType.UNKNOWN;
 
     /**
      * Fill the fields of GPS position depending of the type of the sentence
@@ -70,6 +77,9 @@ public class NMEAParser {
          * $GS = Glonass
          * $GN = GNSS, that is GPS + Glonass + possibly others
          */
+
+        parseGnssType(tokens.get(0));
+
         if (!tokens.get(0).startsWith("$G")) {
             // Not a valid token. Return.
             throw new ParseException(Code.INVALID);
@@ -90,6 +100,24 @@ public class NMEAParser {
         }
 
         return this.validPosition;
+    }
+
+    private static final Logger logger = LoggerFactory.getLogger(NMEAParser.class);
+
+    private void parseGnssType(String token) {
+
+        String id = token.substring(1, 3);
+        this.gnssTypeList.add(id);
+
+        if (this.gnssTypeList.isEmpty()) {
+            this.gnssType = GNSSType.UNKNOWN;
+        } else if (this.gnssTypeList.size() == 1) {
+            this.gnssType = GNSSType.fromTypes(new ArrayList<>(this.gnssTypeList).get(0));
+        } else {
+            this.gnssType = GNSSType.MIXED_GNSS_TYPE;
+        }
+
+        logger.info("\n\nTYPE: {}\n\n", this.gnssType.getValue());
     }
 
     private void parseVTGSentence(List<String> tokens) {
@@ -370,6 +398,10 @@ public class NMEAParser {
 
     public char getLongitudeHemisphere() {
         return this.longitudeHemisphere;
+    }
+
+    public GNSSType getGnssType() {
+        return this.gnssType;
     }
 
     public enum Code {

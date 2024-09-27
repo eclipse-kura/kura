@@ -200,6 +200,11 @@ public class PositionServiceImpl
     }
 
     @Override
+    public String getGnssSystem() {
+        return this.currentProvider.getGnssType().getValue();
+    }
+
+    @Override
     public void registerListener(String listenerId, PositionListener positionListener) {
         this.positionListeners.put(listenerId, positionListener);
     }

@@ -38,8 +38,9 @@ Once defined the Channels in an Asset, a simple Java application that leverages 
 - **name**: unique user-friendly name for a channel
 - **type**: represents the type of operation supported. Possible values are: _READ_, _WRITE_, _READ/WRITE_
 - **value.type**: represents the data type that will be used when creating the Wire Envelope for the connected components.
-- **scale**: an optional scaling factor to be applied only to the numeric values retrieved from the field. It is represented as a double and if the value.type is, for example, an integer, the scaling factor multiplier will be casted to integer before multiplying it to the retrieved value.
-- **offset**: an optional offset value that will be added only to the numeric values retrieved from the field. It is a double in the asset definition, and will be casted to the value.type of the retrieved value before being applied.
+- **scaleoffset.type**: represent the data type that will be used for the scale and offset value. Default data type is Double.
+- **scale**: an optional scaling factor to be applied only to the numeric values retrieved from the field. If used the scale operation will be done with the type specified by **scaleoffset.type** and then casted to **value.type**.
+- **offset**: an optional offset value that will be added only to the numeric values retrieved from the field. If used the offset operation will be done with the type specified by **scaleoffset.type** and then casted to **value.type**.
 - **unit**: an optional string value that will be added to the asset channel read to represent the unit of measure associated to that specific channel.
 - **listen**: if supported by the associated driver, allows to receive notifications by the driver on events. This flag currently has effect only inside Kura Wires.
 

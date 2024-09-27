@@ -7,8 +7,8 @@ Eclipse Kura™
 
 <div align="center">
 
-[![GitHub Tag](https://img.shields.io/github/v/tag/eclipse/kura?label=Latest%20Tag)](https://github.com/eclipse/kura/tags)
-[![GitHub](https://img.shields.io/github/license/eclipse/kura?label=License)](https://github.com/eclipse/kura/blob/develop/LICENSE)
+[![GitHub Tag](https://img.shields.io/github/v/tag/eclipse/kura?label=Latest%20Tag)](https://github.com/eclipse-kura/kura/tags)
+[![GitHub](https://img.shields.io/github/license/eclipse/kura?label=License)](https://github.com/eclipse-kura/kura/blob/develop/LICENSE)
 
 [![Jenkins](https://img.shields.io/jenkins/build?jobUrl=https:%2F%2Fci.eclipse.org%2Fkura%2Fjob%2Fmultibranch%2Fjob%2Fdevelop&label=Jenkins%20Build&logo=jenkins)](https://ci.eclipse.org/kura/job/multibranch/job/develop/)
 [![Jenkins](https://img.shields.io/jenkins/tests?compact_message&failed_label=%E2%9D%8C&jobUrl=https:%2F%2Fci.eclipse.org%2Fkura%2Fjob%2Fmultibranch%2Fjob%2Fdevelop%2F&label=Jenkins%20CI&passed_label=%E2%9C%85&skipped_label=%E2%9D%95&logo=jenkins)](https://ci.eclipse.org/kura/job/multibranch/) <br/>
@@ -39,14 +39,14 @@ If you want to scale, and manage many instances of Eclipse Kura™, check out [*
 Documentation
 -------------------
 
-- [**User Documentation**](https://eclipse.github.io/kura/latest/): here you'll find information on how to **use** Eclipse Kura™ i.e. installation instructions, informations on how to use the web UI and tutorials.
-- [**Developer Documentation**](https://github.com/eclipse/kura/wiki): the Eclipse Kura™ Github Wiki serves as a reference for **developers** who want to contribute to the Eclipse Kura™ project and/or develop new add-ons. Here you'll find Eclipse Kura™ development/release model, guidelines on how to import internal packages, creating new bundles and development environment tips & tricks.
+- [**User Documentation**](https://eclipse-kura.github.io/kura/latest/): here you'll find information on how to **use** Eclipse Kura™ i.e. installation instructions, informations on how to use the web UI and tutorials.
+- [**Developer Documentation**](https://github.com/eclipse-kura/kura/wiki): the Eclipse Kura™ Github Wiki serves as a reference for **developers** who want to contribute to the Eclipse Kura™ project and/or develop new add-ons. Here you'll find Eclipse Kura™ development/release model, guidelines on how to import internal packages, creating new bundles and development environment tips & tricks.
 - [**Docker Containers Documentation**](https://hub.docker.com/r/eclipse/kura/): the Eclipse Kura™ team also provides Docker containers for the project. Information on how to build and run them are available at the project's Docker Hub page.
-- [**Developer Quickstart Guide**](https://github.com/eclipse/kura#build): a quick guide on how to setup the development environment and build the project is also provided in this README.
+- [**Developer Quickstart Guide**](https://github.com/eclipse-kura/kura#build): a quick guide on how to setup the development environment and build the project is also provided in this README.
 
 Additionally, we provide two channels for reporting any issue you find with the project
-- [**Github Issues**](https://github.com/eclipse/kura/issues): for bug reporting.
-- [**Github Discussions**](https://github.com/eclipse/kura/discussions): for receiving feedback, asking questions, making new proposals and generally talking about the project.
+- [**Github Issues**](https://github.com/eclipse-kura/kura/issues): for bug reporting.
+- [**Github Discussions**](https://github.com/eclipse-kura/kura/discussions): for receiving feedback, asking questions, making new proposals and generally talking about the project.
 
 Install
 -------
@@ -55,7 +55,7 @@ Eclipse Kura™ is compatible with Java 8 and Java 17.
 
 ### Target Gateways Installers
 Eclipse Kura™ provides pre-built installers for common development boards. Check the following [link](https://www.eclipse.org/kura/downloads.php) to download the desired installers.
-Take a look at [our documentation](https://eclipse.github.io/kura/latest/getting-started/install-kura/) for further information on supported platforms and installer types.
+Take a look at [our documentation](https://eclipse-kura.github.io/kura/latest/getting-started/install-kura/) for further information on supported platforms and installer types.
 
 ### Docker Image
 Eclipse Kura™ is also available as a [Docker container](https://hub.docker.com/r/eclipse/kura/).
@@ -190,8 +190,8 @@ IDE Setups
 
 We currently support two setups for Eclipse Kura™ development:
 
-- [**Eclipse Kura™ Development Environment Setup**](https://eclipse.github.io/kura/latest/java-application-development/development-environment-setup/): This is the full setup allowing you to contribute to the core Eclipse Kura™ project codebase. It will install all the IDE plugins and formatters to have a pleasant development experience and clone the Eclipse Kura™ source code on your workstation.
-- [**Add-on Development Environment Setup**](https://eclipse.github.io/kura/latest/java-application-development/kura-workspace-setup/): This setup will allow you to develop applications or bundles running on Eclipse Kura™. It will install only the APIs and the examples and is best suited for developing Eclipse Kura™ add-ons.
+- [**Eclipse Kura™ Development Environment Setup**](https://eclipse-kura.github.io/kura/latest/java-application-development/development-environment-setup/): This is the full setup allowing you to contribute to the core Eclipse Kura™ project codebase. It will install all the IDE plugins and formatters to have a pleasant development experience and clone the Eclipse Kura™ source code on your workstation.
+- [**Add-on Development Environment Setup**](https://eclipse-kura.github.io/kura/latest/java-application-development/kura-workspace-setup/): This setup will allow you to develop applications or bundles running on Eclipse Kura™. It will install only the APIs and the examples and is best suited for developing Eclipse Kura™ add-ons.
 
 Contributing
 ------------

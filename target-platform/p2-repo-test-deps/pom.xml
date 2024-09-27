@@ -135,13 +135,13 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <delete dir="../../kura/target-definition/test-deps/" />
                                 <mkdir dir="../../kura/target-definition/test-deps/repository" />
                                 <copy todir="../../kura/target-definition/test-deps/repository">
                                     <fileset dir="${project.build.directory}/repository" />
                                 </copy>
-                            </tasks>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>

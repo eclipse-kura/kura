@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -51,7 +51,6 @@ import org.eclipse.kura.channel.ChannelType;
 import org.eclipse.kura.channel.listener.ChannelEvent;
 import org.eclipse.kura.channel.listener.ChannelListener;
 import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.Tad;
@@ -158,9 +157,9 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      * OSGi service component callback while activation.
      *
      * @param componentContext
-     *                         the component context
+     *            the component context
      * @param properties
-     *                         the service properties
+     *            the service properties
      */
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.info("activating...");
@@ -174,7 +173,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      * OSGi service component update callback.
      *
      * @param properties
-     *                   the service properties
+     *            the service properties
      */
     public void updated(final Map<String, Object> properties) {
 
@@ -194,7 +193,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      * OSGi service component callback while deactivation.
      *
      * @param context
-     *                the component context
+     *            the component context
      */
     protected void deactivate(final ComponentContext context) {
         logger.debug("deactivating...");
@@ -213,9 +212,9 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
      * PID.
      *
      * @param driverId
-     *                 the identifier of the driver
+     *            the identifier of the driver
      * @throws NullPointerException
-     *                              if driver id provided is null
+     *             if driver id provided is null
      */
     private void reopenDriverTracker(final String driverId) {
         requireNonNull(driverId, "Driver PID cannot be null");
@@ -293,15 +292,13 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
         final Map<String, Object> properties = this.config.getProperties();
 
-        final String componentName = properties.get(ConfigurationService.KURA_SERVICE_PID).toString();
-
         Tocd ocd = this.config.getDefinition();
 
         if (ocd == null) {
             ocd = getOCD();
         }
 
-        return new ComponentConfigurationImpl(componentName, ocd, new HashMap<>(properties));
+        return new ComponentConfigurationImpl(getKuraServicePid(), ocd, new HashMap<>(properties));
     }
 
     /**
@@ -313,7 +310,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         return CONF_PID;
     }
 
-    protected String getKuraServicePid() throws KuraException {
+    protected String getKuraServicePid() {
         return this.config.getKuraServicePid();
     }
 
@@ -405,14 +402,13 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     }
 
     protected List<ChannelRecord> getFinalRecords(List<ChannelRecord> channelRecords, Map<String, Channel> channels) {
-        channelRecords.stream()
-                .forEach(channelRecord -> {
-                    Channel channel = channels.get(channelRecord.getChannelName());
+        channelRecords.stream().forEach(channelRecord -> {
+            Channel channel = channels.get(channelRecord.getChannelName());
 
-                    if (shouldApplyScaleAndOffset(channelRecord, channel)) {
-                        applyScaleAndOffset(channelRecord, channel);
-                    }
-                });
+            if (shouldApplyScaleAndOffset(channelRecord, channel)) {
+                applyScaleAndOffset(channelRecord, channel);
+            }
+        });
 
         return channelRecords;
     }
@@ -427,19 +423,17 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         final double channelOffset = channel.getValueOffset();
 
         if (channelRecord.getValueType().equals(DataType.DOUBLE)) {
-            channelRecord.setValue(new DoubleValue(
-                    (double) channelRecord.getValue().getValue() * channelScale + channelOffset));
-        } else if (channelRecord.getValueType().equals(DataType.FLOAT)) {
             channelRecord.setValue(
-                    new FloatValue((float) channelRecord.getValue().getValue() * (float) channelScale
-                            + (float) channelOffset));
+                    new DoubleValue((double) channelRecord.getValue().getValue() * channelScale + channelOffset));
+        } else if (channelRecord.getValueType().equals(DataType.FLOAT)) {
+            channelRecord.setValue(new FloatValue(
+                    (float) channelRecord.getValue().getValue() * (float) channelScale + (float) channelOffset));
         } else if (channelRecord.getValueType().equals(DataType.INTEGER)) {
             channelRecord.setValue(new IntegerValue(
                     (int) channelRecord.getValue().getValue() * (int) channelScale + (int) channelOffset));
         } else if (channelRecord.getValueType().equals(DataType.LONG)) {
-            channelRecord
-                    .setValue(new LongValue((long) channelRecord.getValue().getValue() * (long) channelScale
-                            + (long) channelOffset));
+            channelRecord.setValue(new LongValue(
+                    (long) channelRecord.getValue().getValue() * (long) channelScale + (long) channelOffset));
         }
     }
 
@@ -619,8 +613,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         private final ChannelListener listener;
         private final Channel channel;
 
-        public ChannelListenerHolder(Channel channel,
-                ChannelListener listener) {
+        public ChannelListenerHolder(Channel channel, ChannelListener listener) {
             this.channel = channel;
             this.listener = listener;
         }
@@ -637,10 +630,10 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         public void onChannelEvent(ChannelEvent event) {
             final ChannelRecord originaRecord = event.getChannelRecord();
 
-            if (shouldApplyScaleAndOffset(originaRecord, channel)) {
+            if (shouldApplyScaleAndOffset(originaRecord, this.channel)) {
                 final ChannelRecord cloned = cloneRecord(originaRecord);
 
-                applyScaleAndOffset(cloned, channel);
+                applyScaleAndOffset(cloned, this.channel);
 
                 this.listener.onChannelEvent(new ChannelEvent(cloned));
             } else {

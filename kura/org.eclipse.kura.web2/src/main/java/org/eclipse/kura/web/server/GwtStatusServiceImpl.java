@@ -309,8 +309,8 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 || gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.WIFI) {
             return Optional.of(gwtNetInterfaceConfig.getName());
         } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
-            String name = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getName();
-            String interfaceName = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getInterfaceName();
+            String name = (gwtNetInterfaceConfig).getName();
+            String interfaceName = (gwtNetInterfaceConfig).getInterfaceName();
             if (Objects.nonNull(interfaceName) && !interfaceName.isEmpty()) {
                 name = name + " (" + interfaceName + ")";
             }
@@ -371,13 +371,11 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 sb.append("<b>IPv4</b>").append(NL).append(TAB)
                         .append(gwtNetInterfaceConfig.getStatusEnum().getValue());
             } else {
-                sb.append("<b>IPv4</b>").append(NL)
-                        .append(TAB).append(currentAddress).append(NL)
-                        .append(TAB).append(TAB).append(SUBNET_MASK).append(currentSubnetMask).append(NL)
-                        .append(TAB).append(TAB).append(MODE).append(gwtNetInterfaceConfig.getStatusEnum().getValue())
-                        .append(NL)
-                        .append(TAB).append(TAB).append(IP_ACQUISITION).append(currentConfigMode).append(NL)
-                        .append(TAB).append(TAB).append("Router Mode: ").append(currentRouterMode);
+                sb.append("<b>IPv4</b>").append(NL).append(TAB).append(currentAddress).append(NL).append(TAB)
+                        .append(TAB).append(SUBNET_MASK).append(currentSubnetMask).append(NL).append(TAB).append(TAB)
+                        .append(MODE).append(gwtNetInterfaceConfig.getStatusEnum().getValue()).append(NL).append(TAB)
+                        .append(TAB).append(IP_ACQUISITION).append(currentConfigMode).append(NL).append(TAB).append(TAB)
+                        .append("Router Mode: ").append(currentRouterMode);
             }
             return Optional.of(sb.toString());
         } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.WIFI
@@ -397,21 +395,19 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 sb.append("<b>IPv4</b>").append(NL).append(TAB)
                         .append(gwtNetInterfaceConfig.getStatusEnum().getValue());
             } else {
-                sb.append("<b>IPv4</b>").append(NL)
-                        .append(TAB).append(currentAddress).append(NL)
-                        .append(TAB).append(TAB).append(SUBNET_MASK).append(currentSubnetMask).append(NL)
-                        .append(TAB).append(TAB).append(MODE).append(gwtNetInterfaceConfig.getStatusEnum().getValue())
-                        .append(NL)
-                        .append(TAB).append(TAB).append(IP_ACQUISITION).append(currentConfigMode).append(NL)
-                        .append(TAB).append(TAB).append("Router Mode: ").append(currentRouterMode).append(NL)
-                        .append(TAB).append(TAB).append("Wireless Mode:").append(currentWifiMode).append(NL)
-                        .append(TAB).append(TAB).append("SSID: ").append(currentWifiSsid).append(NL);
+                sb.append("<b>IPv4</b>").append(NL).append(TAB).append(currentAddress).append(NL).append(TAB)
+                        .append(TAB).append(SUBNET_MASK).append(currentSubnetMask).append(NL).append(TAB).append(TAB)
+                        .append(MODE).append(gwtNetInterfaceConfig.getStatusEnum().getValue()).append(NL).append(TAB)
+                        .append(TAB).append(IP_ACQUISITION).append(currentConfigMode).append(NL).append(TAB).append(TAB)
+                        .append("Router Mode: ").append(currentRouterMode).append(NL).append(TAB).append(TAB)
+                        .append("Wireless Mode:").append(currentWifiMode).append(NL).append(TAB).append(TAB)
+                        .append("SSID: ").append(currentWifiSsid).append(NL);
             }
             return Optional.of(sb.toString());
         } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
             String currentModemApn = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getApn();
-            String name = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getName();
-            String interfaceName = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getInterfaceName();
+            String name = (gwtNetInterfaceConfig).getName();
+            String interfaceName = (gwtNetInterfaceConfig).getInterfaceName();
             if (Objects.nonNull(interfaceName) && !interfaceName.isEmpty()) {
                 name = name + " (" + interfaceName + ")";
             }
@@ -421,15 +417,12 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 sb.append("<b>IPv4</b>").append(NL).append(TAB)
                         .append(gwtNetInterfaceConfig.getStatusEnum().getValue());
             } else {
-                sb.append("<b>IPv4</b>").append(NL)
-                        .append(TAB).append(currentAddress).append(NL)
-                        .append(TAB).append(TAB).append(SUBNET_MASK).append(currentSubnetMask)
-                        .append(NL).append(TAB).append(TAB).append(MODE)
-                        .append(gwtNetInterfaceConfig.getStatusEnum().getValue()).append(NL)
-                        .append(TAB).append(TAB).append(IP_ACQUISITION)
-                        .append(currentConfigMode).append(NL)
-                        .append(TAB).append(TAB).append("APN: ").append(currentModemApn).append(NL)
-                        .append(TAB).append(TAB).append("Interface: ").append(interfaceName);
+                sb.append("<b>IPv4</b>").append(NL).append(TAB).append(currentAddress).append(NL).append(TAB)
+                        .append(TAB).append(SUBNET_MASK).append(currentSubnetMask).append(NL).append(TAB).append(TAB)
+                        .append(MODE).append(gwtNetInterfaceConfig.getStatusEnum().getValue()).append(NL).append(TAB)
+                        .append(TAB).append(IP_ACQUISITION).append(currentConfigMode).append(NL).append(TAB).append(TAB)
+                        .append("APN: ").append(currentModemApn).append(NL).append(TAB).append(TAB)
+                        .append("Interface: ").append(interfaceName);
             }
             return Optional.of(sb.toString());
         } else {
@@ -463,17 +456,14 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
         StringBuilder sb = new StringBuilder();
         if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.ETHERNET) {
-            if (statusIPv6.equals("netIPv6StatusDisabled")
-                    || statusIPv6.equals("netIPv6StatusUnmanaged")
+            if (statusIPv6.equals("netIPv6StatusDisabled") || statusIPv6.equals("netIPv6StatusUnmanaged")
                     || statusIPv6.equals("netIPv6StatusL2Only")) {
-                sb.append("<b>IPv6</b>").append(NL).append(TAB)
-                        .append(convertIPv6Status(statusIPv6));
+                sb.append("<b>IPv6</b>").append(NL).append(TAB).append(convertIPv6Status(statusIPv6));
             } else {
-                sb.append("<b>IPv6</b>").append(NL)
-                        .append(TAB).append(currentIPv6Address).append(NL)
-                        .append(TAB).append(TAB).append(SUBNET_MASK).append(currentIPv6SubnetMask).append(NL)
-                        .append(TAB).append(TAB).append(MODE).append(convertIPv6Status(statusIPv6)).append(NL)
-                        .append(TAB).append(TAB).append(IP_ACQUISITION).append(currentIPv6ConfigMode);
+                sb.append("<b>IPv6</b>").append(NL).append(TAB).append(currentIPv6Address).append(NL).append(TAB)
+                        .append(TAB).append(SUBNET_MASK).append(currentIPv6SubnetMask).append(NL).append(TAB)
+                        .append(TAB).append(MODE).append(convertIPv6Status(statusIPv6)).append(NL).append(TAB)
+                        .append(TAB).append(IP_ACQUISITION).append(currentIPv6ConfigMode);
             }
             return Optional.of(sb.toString());
         } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.WIFI
@@ -487,39 +477,35 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
             if (gwtActiveWifiConfig != null) {
                 currentWifiSsid = gwtActiveWifiConfig.getWirelessSsid();
             }
-            if (statusIPv6.equals("netIPv6StatusDisabled")
-                    || statusIPv6.equals("netIPv6StatusUnmanaged")
+            if (statusIPv6.equals("netIPv6StatusDisabled") || statusIPv6.equals("netIPv6StatusUnmanaged")
                     || statusIPv6.equals("netIPv6StatusL2Only")) {
                 sb.append("<b>IPv6</b>").append(NL).append(TAB).append(convertIPv6Status(statusIPv6));
             } else {
-                sb.append("<b>IPv6</b>").append(NL)
-                        .append(TAB).append(currentIPv6Address).append(NL)
-                        .append(TAB).append(TAB).append(SUBNET_MASK).append(currentIPv6SubnetMask).append(NL)
-                        .append(TAB).append(TAB).append(MODE).append(convertIPv6Status(statusIPv6)).append(NL)
-                        .append(TAB).append(TAB).append(IP_ACQUISITION).append(currentIPv6ConfigMode).append(NL)
-                        .append(TAB).append(TAB).append("Wireless Mode:").append(currentWifiMode).append(NL)
-                        .append(TAB).append(TAB).append("SSID: ").append(currentWifiSsid).append(NL);
+                sb.append("<b>IPv6</b>").append(NL).append(TAB).append(currentIPv6Address).append(NL).append(TAB)
+                        .append(TAB).append(SUBNET_MASK).append(currentIPv6SubnetMask).append(NL).append(TAB)
+                        .append(TAB).append(MODE).append(convertIPv6Status(statusIPv6)).append(NL).append(TAB)
+                        .append(TAB).append(IP_ACQUISITION).append(currentIPv6ConfigMode).append(NL).append(TAB)
+                        .append(TAB).append("Wireless Mode:").append(currentWifiMode).append(NL).append(TAB).append(TAB)
+                        .append("SSID: ").append(currentWifiSsid).append(NL);
             }
             return Optional.of(sb.toString());
         } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
             String currentModemApn = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getApn();
-            String name = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getName();
-            String interfaceName = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getInterfaceName();
+            String name = (gwtNetInterfaceConfig).getName();
+            String interfaceName = (gwtNetInterfaceConfig).getInterfaceName();
             if (Objects.nonNull(interfaceName) && !interfaceName.isEmpty()) {
                 name = name + " (" + interfaceName + ")";
             }
-            if (statusIPv6.equals("netIPv6StatusDisabled")
-                    || statusIPv6.equals("netIPv6StatusUnmanaged")
+            if (statusIPv6.equals("netIPv6StatusDisabled") || statusIPv6.equals("netIPv6StatusUnmanaged")
                     || statusIPv6.equals("netIPv6StatusL2Only")) {
                 sb.append("<b>IPv6</b>").append(NL).append(TAB).append(convertIPv6Status(statusIPv6));
             } else {
-                sb.append("<b>IPv6</b>").append(NL)
-                        .append(TAB).append(currentIPv6Address).append(NL)
-                        .append(TAB).append(TAB).append(SUBNET_MASK).append(currentIPv6SubnetMask).append(NL)
-                        .append(TAB).append(TAB).append(MODE).append(convertIPv6Status(statusIPv6)).append(NL)
-                        .append(TAB).append(TAB).append(IP_ACQUISITION).append(currentIPv6ConfigMode).append(NL)
-                        .append(TAB).append(TAB).append("APN: ").append(currentModemApn).append(NL)
-                        .append(TAB).append(TAB).append("Interface: ").append(interfaceName);
+                sb.append("<b>IPv6</b>").append(NL).append(TAB).append(currentIPv6Address).append(NL).append(TAB)
+                        .append(TAB).append(SUBNET_MASK).append(currentIPv6SubnetMask).append(NL).append(TAB)
+                        .append(TAB).append(MODE).append(convertIPv6Status(statusIPv6)).append(NL).append(TAB)
+                        .append(TAB).append(IP_ACQUISITION).append(currentIPv6ConfigMode).append(NL).append(TAB)
+                        .append(TAB).append("APN: ").append(currentModemApn).append(NL).append(TAB).append(TAB)
+                        .append("Interface: ").append(interfaceName);
             }
             return Optional.of(sb.toString());
         } else {
@@ -533,20 +519,20 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
             return "netIPv6StatusDisabled";
         }
         switch (status) {
-            case "netIPv6StatusDisabled":
-                return "Disabled";
-            case "netIPv6StatusUnmanaged":
-                return "Unmanaged";
-            case "netIPv6StatusL2Only":
-                return "L2Only";
-            case "netIPv6StatusEnabledLAN":
-                return "LAN";
-            case "netIPv6StatusEnabledWAN":
-                return "WAN";
-            case "netIPv6StatusUnknown":
-                return "Unknown";
-            default:
-                return "Unknown";
+        case "netIPv6StatusDisabled":
+            return "Disabled";
+        case "netIPv6StatusUnmanaged":
+            return "Unmanaged";
+        case "netIPv6StatusL2Only":
+            return "L2Only";
+        case "netIPv6StatusEnabledLAN":
+            return "LAN";
+        case "netIPv6StatusEnabledWAN":
+            return "WAN";
+        case "netIPv6StatusUnknown":
+            return "Unknown";
+        default:
+            return "Unknown";
         }
 
     }

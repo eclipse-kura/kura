@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.eclipse.kura.internal.rest.position.PositionRestService;
 import org.eclipse.kura.position.GNSSType;

@@ -16,11 +16,9 @@ import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.Optional;
 
-import javax.annotation.Priority;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.container.ContainerRequestContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
@@ -28,6 +26,9 @@ import org.eclipse.kura.rest.auth.AuthenticationProvider;
 import org.eclipse.kura.util.useradmin.UserAdminHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.container.ContainerRequestContext;
 
 @SuppressWarnings("restriction")
 @Priority(100)
@@ -73,7 +74,7 @@ public class CertificateAuthenticationProvider implements AuthenticationProvider
 
         try {
 
-            final Object clientCertificatesRaw = requestContext.getProperty("javax.servlet.request.X509Certificate");
+            final Object clientCertificatesRaw = requestContext.getProperty("jakarta.servlet.request.X509Certificate");
 
             if (!(clientCertificatesRaw instanceof X509Certificate[])) {
                 throw new CertificateAuthException(CertificateAuthException.Reason.CLIENT_CERTIFICATE_CHAIN_MISSING);

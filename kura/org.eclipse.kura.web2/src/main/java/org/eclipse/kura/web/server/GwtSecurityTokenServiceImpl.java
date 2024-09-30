@@ -15,8 +15,8 @@ package org.eclipse.kura.web.server;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;

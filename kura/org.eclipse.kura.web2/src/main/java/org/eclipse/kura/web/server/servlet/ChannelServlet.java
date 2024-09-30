@@ -15,18 +15,17 @@ package org.eclipse.kura.web.server.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.xml.ws.http.HTTPException;
-
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.RequiredPermissions.Mode;
 import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 public class ChannelServlet extends AuditServlet {
 
@@ -62,7 +61,8 @@ public class ChannelServlet extends AuditServlet {
             final String result = (String) session.getAttribute(attributeKey);
 
             if (result == null) {
-                throw new HTTPException(404);
+                resp.setStatus(404);
+                return;
             }
 
             session.removeAttribute(attributeKey);
@@ -71,6 +71,7 @@ public class ChannelServlet extends AuditServlet {
             resp.setContentType("text/csv");
             resp.setHeader("Content-Disposition", "attachment; filename=asset_" + assetPid + ".csv");
             resp.setHeader("Cache-Control", "no-transform, max-age=0");
+
             try (PrintWriter writer = resp.getWriter()) {
                 writer.write(result);
             }

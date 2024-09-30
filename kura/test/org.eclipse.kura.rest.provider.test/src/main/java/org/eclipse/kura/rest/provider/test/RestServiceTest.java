@@ -42,16 +42,10 @@ import java.util.StringTokenizer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Priority;
-import javax.annotation.security.RolesAllowed;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.container.ContainerRequestContext;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -79,6 +73,13 @@ import org.osgi.service.useradmin.UserAdmin;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
+
+import jakarta.annotation.Priority;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.container.ContainerRequestContext;
 
 public class RestServiceTest extends AbstractRequestHandlerTest {
 

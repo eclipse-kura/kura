@@ -29,9 +29,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
+import java.util.zip.Deflater;
 
 import javax.net.ssl.KeyManager;
-import javax.servlet.SessionCookieConfig;
 
 import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.jetty.JettyCustomizer;
@@ -50,9 +50,16 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.util.compression.CompressionPool;
+import org.eclipse.jetty.util.compression.DeflaterPool;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
+import jakarta.servlet.SessionCookieConfig;
+
 public class KuraJettyCustomizer extends JettyCustomizer {
+
+    private DeflaterPool deflaterPool = new DeflaterPool(CompressionPool.DEFAULT_CAPACITY, Deflater.BEST_COMPRESSION,
+            true);
 
     @Override
     public Object customizeContext(Object context, Dictionary<String, ?> settings) {
@@ -65,9 +72,9 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         servletContextHandler.getServer().setErrorHandler(new KuraErrorHandler());
 
         final GzipHandler gzipHandler = new GzipHandler();
-        gzipHandler.setCompressionLevel(9);
+        gzipHandler.setDeflaterPool(this.deflaterPool);
 
-        servletContextHandler.setGzipHandler(gzipHandler);
+        servletContextHandler.insertHandler(gzipHandler);
 
         servletContextHandler.setErrorHandler(new KuraErrorHandler());
 
@@ -234,17 +241,6 @@ public class KuraJettyCustomizer extends JettyCustomizer {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T getOrDefault(final Dictionary<String, ?> properties, final String key, final T defaultValue) {
-        final Object raw = properties.get(key);
-
-        if (defaultValue.getClass().isInstance(raw)) {
-            return (T) raw;
-        }
-
-        return defaultValue;
-    }
-
-    @SuppressWarnings("unchecked")
     private static <T> Optional<T> getOptional(final Dictionary<String, ?> properties, final String key,
             final Class<T> classz) {
         final Object raw = properties.get(key);
@@ -349,6 +345,18 @@ public class KuraJettyCustomizer extends JettyCustomizer {
             }
 
             return pbParams;
+        }
+
+        @SuppressWarnings("unchecked")
+        private static <T> T getOrDefault(final Dictionary<String, ?> properties, final String key,
+                final T defaultValue) {
+            final Object raw = properties.get(key);
+
+            if (defaultValue.getClass().isInstance(raw)) {
+                return (T) raw;
+            }
+
+            return defaultValue;
         }
     }
 

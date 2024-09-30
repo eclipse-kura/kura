@@ -18,11 +18,11 @@ import java.util.Optional;
 
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -66,7 +66,7 @@ public class SslAuthenticationServlet extends HttpServlet {
             }
 
             final X509Certificate[] clientCertificates = (X509Certificate[]) req
-                    .getAttribute("javax.servlet.request.X509Certificate");
+                    .getAttribute("jakarta.servlet.request.X509Certificate");
 
             if (clientCertificates == null || clientCertificates.length == 0) {
                 throw new IllegalArgumentException("Certificate chain is empty");

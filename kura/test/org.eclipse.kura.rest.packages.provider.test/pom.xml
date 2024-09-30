@@ -444,31 +444,6 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>com.eclipsesource.jaxrs.jersey-min</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>com.eclipsesource.jaxrs.provider.gson</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>com.eclipsesource.jaxrs.provider.multipart</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>com.eclipsesource.jaxrs.provider.security</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>com.eclipsesource.jaxrs.publisher</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.apache.felix.useradmin</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
@@ -536,11 +511,6 @@
                             <requirement>
                                 <type>p2-installable-unit</type>
                                 <id>org.apache.logging.log4j.slf4j.impl</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>p2-installable-unit</type>
-                                <id>com.eclipsesource.jaxrs.jersey-min</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                             <requirement>
@@ -661,31 +631,6 @@
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>org.eclipse.equinox.http.jetty</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>com.eclipsesource.jaxrs.jersey-min</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>com.eclipsesource.jaxrs.provider.gson</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>com.eclipsesource.jaxrs.provider.multipart</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>com.eclipsesource.jaxrs.provider.security</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>com.eclipsesource.jaxrs.publisher</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                             <requirement>

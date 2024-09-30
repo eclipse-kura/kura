@@ -12,17 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.rest.security.provider;
 
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraException;
-import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +22,22 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+
+@JakartarsResource
+@JakartarsName("securityRestServiceV2")
 @Path("security/v2")
 public class SecurityRestServiceV2 extends AbstractRestSecurityService {
 
@@ -45,7 +50,8 @@ public class SecurityRestServiceV2 extends AbstractRestSecurityService {
     }
 
     /**
-     * POST method <br /> This method replaces the security policy with the default production one. Then a fingerprint
+     * POST method <br />
+     * This method replaces the security policy with the default production one. Then a fingerprint
      * reload is performed.
      */
     @POST
@@ -66,7 +72,8 @@ public class SecurityRestServiceV2 extends AbstractRestSecurityService {
     }
 
     /**
-     * POST method <br /> This method replaces the security policy with the provided one. Then a fingerprint reload is
+     * POST method <br />
+     * This method replaces the security policy with the provided one. Then a fingerprint reload is
      * performed.
      */
     @POST

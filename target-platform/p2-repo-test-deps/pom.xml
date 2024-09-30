@@ -112,6 +112,27 @@
                                     <artifactId>objenesis</artifactId>
                                     <version>${objenesis.version}</version>
                                 </artifactItem>
+                                <!-- jersey -->
+                                <artifactItem>
+                                    <groupId>org.glassfish.jersey.core</groupId>
+                                    <artifactId>jersey-client</artifactId>
+                                    <version>${org.glassfish.jersey.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.glassfish.jersey.core</groupId>
+                                    <artifactId>jersey-common</artifactId>
+                                    <version>${org.glassfish.jersey.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>jakarta.inject</groupId>
+                                    <artifactId>jakarta.inject-api</artifactId>
+                                    <version>${jakarta.inject-api.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.jvnet.mimepull</groupId>
+                                    <artifactId>mimepull</artifactId>
+                                    <version>${org.jvnet.mimepull.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

@@ -14,7 +14,7 @@ package org.eclipse.kura.internal.rest.identity.provider.util;
 
 import static java.util.Objects.isNull;
 
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 

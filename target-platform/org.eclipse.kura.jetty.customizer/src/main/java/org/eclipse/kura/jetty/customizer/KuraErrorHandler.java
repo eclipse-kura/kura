@@ -15,9 +15,9 @@ package org.eclipse.kura.jetty.customizer;
 import java.io.IOException;
 import java.io.Writer;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.eclipse.jetty.server.handler.ErrorHandler;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public class KuraErrorHandler extends ErrorHandler {
 
@@ -26,4 +26,5 @@ public class KuraErrorHandler extends ErrorHandler {
             boolean showStacks) throws IOException {
         // Not needed
     }
+
 }

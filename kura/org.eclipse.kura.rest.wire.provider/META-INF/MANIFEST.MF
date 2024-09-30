@@ -8,10 +8,10 @@ Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
 Import-Package: com.google.gson;version="2.7.0",
- javax.annotation.security;version="1.2.0",
- javax.ws.rs,
- javax.ws.rs.core;version="2.0.1",
- org.apache.commons.io;version="2.4.0",
+ jakarta.annotation.security;version="2.1.1",
+ jakarta.ws.rs;version="3.1.0",
+ jakarta.ws.rs.core;version="3.1.0",
+ org.apache.commons.io;version="2.11.0",
  org.eclipse.kura;version="[1.6,2.0)",
  org.eclipse.kura.asset;version="[1.0,2.0)",
  org.eclipse.kura.asset.provider;version="[2.0,3.0)",
@@ -31,6 +31,7 @@ Import-Package: com.google.gson;version="2.7.0",
  org.osgi.framework;version="1.10.0",
  org.osgi.service.cm;version="1.6.0",
  org.osgi.service.component;version="1.4.0",
+ org.osgi.service.jakartars.whiteboard.propertytypes;version="2.0.0",
  org.osgi.service.useradmin;version="1.1.0",
  org.slf4j;version="1.7.32"
 Export-Package: org.eclipse.kura.rest.wire.api;version="1.0.0"

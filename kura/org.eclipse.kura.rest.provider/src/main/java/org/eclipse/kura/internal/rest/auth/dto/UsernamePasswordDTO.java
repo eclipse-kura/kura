@@ -12,7 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.auth.dto;
 
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 

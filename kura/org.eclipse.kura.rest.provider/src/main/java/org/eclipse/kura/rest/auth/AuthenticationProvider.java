@@ -15,10 +15,11 @@ package org.eclipse.kura.rest.auth;
 import java.security.Principal;
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.container.ContainerRequestContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.osgi.annotation.versioning.ProviderType;
+
+import jakarta.ws.rs.container.ContainerRequestContext;
 
 /**
  * A service interface that allows to register custom authentication providers for the {@code RestService}.
@@ -30,8 +31,8 @@ import org.osgi.annotation.versioning.ProviderType;
  * will determine a successful authentication.
  * If all providers return an empty optional the call failing with 401 status.<br>
  * 
- * The order in which the providers are called can be configured with the {@link javax.annotation.Priority} annotation.
- * Lower {@link javax.annotation.Priority#value()} values mean higher priority.
+ * The order in which the providers are called can be configured with the {@link jakarta.annotation.Priority} annotation.
+ * Lower {@link jakarta.annotation.Priority#value()} values mean higher priority.
  * The priorities of the built-in authentication providers is the following:
  * <ul>
  * <li>Certificate authentication: 100</li>

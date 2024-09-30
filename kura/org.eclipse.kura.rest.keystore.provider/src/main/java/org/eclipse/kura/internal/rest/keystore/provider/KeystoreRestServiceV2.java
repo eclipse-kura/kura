@@ -14,15 +14,19 @@ package org.eclipse.kura.internal.rest.keystore.provider;
 
 import static org.eclipse.kura.rest.utils.Validable.validate;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.MediaType;
-
 import org.eclipse.kura.internal.rest.keystore.request.PrivateKeyWriteRequest;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.MediaType;
+
+@JakartarsResource
+@JakartarsName("keystoreRestServiceV1")
 @Path("/keystores/v2")
 public class KeystoreRestServiceV2 extends KeystoreRestService {
 

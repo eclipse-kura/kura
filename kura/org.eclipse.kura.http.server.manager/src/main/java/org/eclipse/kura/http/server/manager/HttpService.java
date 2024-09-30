@@ -36,9 +36,13 @@ import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import org.osgi.service.http.whiteboard.annotations.RequireHttpWhiteboard;
+import org.osgi.service.jakartars.whiteboard.annotations.RequireJakartarsWhiteboard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@RequireHttpWhiteboard
+@RequireJakartarsWhiteboard
 public class HttpService implements ConfigurableComponent, EventHandler {
 
     private static final String KURA_JETTY_PID = "kura.default";

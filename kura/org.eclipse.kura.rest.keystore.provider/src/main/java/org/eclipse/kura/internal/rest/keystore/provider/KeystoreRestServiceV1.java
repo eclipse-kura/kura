@@ -12,8 +12,13 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.keystore.provider;
 
-import javax.ws.rs.Path;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
+import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 
+import jakarta.ws.rs.Path;
+
+@JakartarsResource
+@JakartarsName("keystoreRestServiceV1")
 @Path("/keystores/v1")
 public class KeystoreRestServiceV1 extends KeystoreRestService {
 

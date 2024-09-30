@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,13 +16,13 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.request.handler.jaxrs.consumer.ResponseBodyHandler;
 
 import com.google.gson.Gson;
+
+import jakarta.ws.rs.core.Response;
 
 public final class ResponseBodyHandlers {
 

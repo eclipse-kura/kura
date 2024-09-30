@@ -17,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
@@ -34,11 +35,6 @@ import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSessionService;
 import org.eclipse.kura.web.shared.service.GwtSessionServiceAsync;
-import org.eclipse.kura.web2.ext.AlertSeverity;
-import org.eclipse.kura.web2.ext.AuthenticationHandler;
-import org.eclipse.kura.web2.ext.Context;
-import org.eclipse.kura.web2.ext.ExtensionRegistry;
-import org.eclipse.kura.web2.ext.WidgetFactory;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.Icon;
@@ -67,7 +63,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class LoginUi extends Composite implements Context {
+public class LoginUi extends Composite {
 
     private final GwtPasswordAuthenticationServiceAsync pwdAutenticationService = GWT
             .create(GwtPasswordAuthenticationService.class);
@@ -140,8 +136,6 @@ public class LoginUi extends Composite implements Context {
 
         authenticationMethod.addChangeHandler(e -> setAuthenticationMethod(authenticationMethod.getSelectedItemText()));
 
-        ExtensionRegistry.get().addExtensionConsumer(e -> e.onLoad(LoginUi.this));
-
     }
 
     @Override
@@ -192,13 +186,13 @@ public class LoginUi extends Composite implements Context {
             this.authenticationMethodWidget = null;
         }
 
-        final WidgetFactory factory = this.authenticationHandler.getLoginDialogElement();
+        final Supplier<Widget> factory = this.authenticationHandler.getLoginDialogElement();
 
         if (factory == null) {
             return;
         }
 
-        this.authenticationMethodWidget = factory.buildWidget();
+        this.authenticationMethodWidget = factory.get();
 
         if (this.authenticationMethodWidget != null) {
             this.loginModalBody.add(this.authenticationMethodWidget);
@@ -219,17 +213,6 @@ public class LoginUi extends Composite implements Context {
         this.waitModal.hide();
     }
 
-    @Override
-    public void addSidenavComponent(String name, String icon, WidgetFactory element) {
-        // not supported
-    }
-
-    @Override
-    public void addSettingsComponent(String name, WidgetFactory element) {
-        // not supported
-    }
-
-    @Override
     public void addAuthenticationHandler(final AuthenticationHandler authenticationHandler) {
         final String name = authenticationHandler.getName();
 
@@ -252,12 +235,6 @@ public class LoginUi extends Composite implements Context {
         this.authenticationMethodGroup.setVisible(this.authenticationHandlers.size() >= 2);
     }
 
-    @Override
-    public void getXSRFToken(Callback<String, String> callback) {
-        callback.onFailure("not supported");
-    }
-
-    @Override
     public Callback<Void, String> startLongRunningOperation() {
         this.waitModal.show();
         return new Callback<Void, String>() {
@@ -275,13 +252,6 @@ public class LoginUi extends Composite implements Context {
                 LoginUi.this.waitModal.hide();
             }
         };
-    }
-
-    @Override
-    public void showAlertDialog(String message, AlertSeverity severity, Consumer<Boolean> callback) {
-        this.alertDialog.show(message,
-                severity == AlertSeverity.INFO ? AlertDialog.Severity.INFO : AlertDialog.Severity.ALERT,
-                callback::accept);
     }
 
     private class PasswordAuthenticationHandler implements AuthenticationHandler {
@@ -340,7 +310,7 @@ public class LoginUi extends Composite implements Context {
         }
 
         @Override
-        public WidgetFactory getLoginDialogElement() {
+        public Supplier<Widget> getLoginDialogElement() {
             return () -> {
                 this.passwordInput.setValue("");
                 return this.group;
@@ -393,10 +363,8 @@ public class LoginUi extends Composite implements Context {
 
         private void setNewPassword(final String oldPassword, final String newPassword, final Consumer<Void> onSuccess,
                 final Consumer<Throwable> onFailure) {
-            gwtXsrfService.generateSecurityToken(asyncCallback(
-                    token -> gwtSessionService.updatePassword(token, oldPassword, newPassword,
-                            asyncCallback(onSuccess, onFailure)),
-                    onFailure));
+            gwtXsrfService.generateSecurityToken(asyncCallback(token -> gwtSessionService.updatePassword(token,
+                    oldPassword, newPassword, asyncCallback(onSuccess, onFailure)), onFailure));
 
         }
 
@@ -442,7 +410,7 @@ public class LoginUi extends Composite implements Context {
         }
 
         @Override
-        public WidgetFactory getLoginDialogElement() {
+        public Supplier<Widget> getLoginDialogElement() {
             return () -> {
                 final Paragraph paragraph = new Paragraph();
                 paragraph.setText(MSGS.loginCertificateDescription());

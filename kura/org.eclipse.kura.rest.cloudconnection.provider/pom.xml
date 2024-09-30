@@ -25,12 +25,11 @@
 
     <properties>
         <kura.basedir>${project.basedir}/..</kura.basedir>
-        <sonar.coverage.jacoco.xmlReportPaths>
-            ${project.basedir}/../test/*/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/*/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <artifactId>org.eclipse.kura.rest.cloudconnection.provider</artifactId>
     <packaging>eclipse-plugin</packaging>
     <version>2.0.0-SNAPSHOT</version>
-    
+
 </project>

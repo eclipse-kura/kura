@@ -16,9 +16,9 @@ import java.security.Principal;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Priority;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.container.ContainerRequestContext;
+import jakarta.annotation.Priority;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.container.ContainerRequestContext;
 
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
 import org.slf4j.Logger;

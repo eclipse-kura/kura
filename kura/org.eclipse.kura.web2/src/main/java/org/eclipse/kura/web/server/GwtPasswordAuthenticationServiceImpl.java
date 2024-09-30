@@ -12,7 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;

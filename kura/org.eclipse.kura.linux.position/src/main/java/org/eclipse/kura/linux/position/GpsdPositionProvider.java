@@ -194,18 +194,18 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     public void handleSKY(SKYObject sky) {
 
         List<SATObject> satellites = sky.getSatellites();
-        Set<Integer> prnList = new HashSet<>();
+        Set<GNSSType> prnList = new HashSet<>();
 
         for (SATObject object : satellites) {
             if (object.getUsed()) {
-                prnList.add(object.getPRN());
+                prnList.add(GNSSType.fromPrn(object.getPRN()));
             }
         }
 
         if (prnList.isEmpty()) {
             this.gnssType.set(GNSSType.UNKNOWN);
         } else if (prnList.size() == 1) {
-            this.gnssType.set(GNSSType.fromPrn(new ArrayList<>(prnList).get(0)));
+            this.gnssType.set(new ArrayList<>(prnList).get(0));
         } else {
             this.gnssType.set(GNSSType.MIXED_GNSS_TYPE);
         }

@@ -77,6 +77,7 @@ public class UseGpsdPositionProviderTest {
         whenNMEAStreamArriveFrom(DEVICE_2_1_JSON_STREAM);
 
         thenPositionIsNotNull();
+        thenGnssTypeIs(GNSSType.MIXED_GNSS_TYPE);
     }
 
     @Test
@@ -163,6 +164,39 @@ public class UseGpsdPositionProviderTest {
         givenGpsdProviderIsStarted();
 
         thenPositionIsZero();
+    }
+
+    @Test
+    public void getGnssTypeFromDevice1Stream() {
+        givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
+        givenGpsdProviderIsStarted();
+
+        whenNMEAStreamArriveFrom(DEVICE1_JSON_STREAM);
+
+        thenGnssTypeIs(GNSSType.GPS);
+    }
+
+    @Test
+    public void getGnssTypeFromDevice2Stream() {
+        givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
+        givenGpsdProviderIsStarted();
+
+        whenNMEAStreamArriveFrom(DEVICE_2_1_JSON_STREAM);
+
+        thenGnssTypeIs(GNSSType.MIXED_GNSS_TYPE);
+    }
+
+    @Test
+    public void getGnssTypeFromDevice2Stream2() {
+        givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
+        givenGpsdProviderIsStarted();
+
+        whenNMEAStreamArriveFrom(BOLTGATE_10_12_JSON_STREAM_2);
+
+        thenGnssTypeIs(GNSSType.MIXED_GNSS_TYPE);
     }
 
     private void givenGpsdPositionProvider() {
@@ -265,6 +299,10 @@ public class UseGpsdPositionProviderTest {
 
     private void thenPositionIsLocked() {
         assertTrue(this.gpsdPositionProvider.isLocked());
+    }
+
+    private void thenGnssTypeIs(GNSSType type) {
+        assertEquals(type, this.gpsdPositionProvider.getGnssType());
     }
 
     private void gpsdPositionProviderStart() {

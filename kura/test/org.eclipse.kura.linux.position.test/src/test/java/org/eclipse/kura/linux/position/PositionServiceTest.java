@@ -520,6 +520,7 @@ public class PositionServiceTest {
         final String date = fixture.ps.getNmeaDate();
         final String time = fixture.ps.getNmeaTime();
         final String lastSentence = fixture.ps.getLastSentence();
+        final String gnssType = fixture.ps.getGnssSystem();
 
         // from GGA
         assertEquals(1, nmeaPosition.getFixQuality());
@@ -549,6 +550,8 @@ public class PositionServiceTest {
         assertEquals(12.34 / 3.6, position.getSpeed().getValue(), EPS);
 
         assertEquals("$GNVTG,,,,,,,12.34,,,,*4a\n", lastSentence);
+
+        assertEquals("MixedGNSSTypes", gnssType);
 
         fixture.ps.deactivate();
 

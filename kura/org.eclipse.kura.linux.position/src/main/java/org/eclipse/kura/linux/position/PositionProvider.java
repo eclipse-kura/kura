@@ -16,6 +16,7 @@ package org.eclipse.kura.linux.position;
 import java.time.LocalDateTime;
 
 import org.eclipse.kura.linux.position.GpsDevice.Listener;
+import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.osgi.util.position.Position;
 

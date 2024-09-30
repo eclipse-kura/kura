@@ -37,6 +37,7 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
+import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionListener;
 import org.eclipse.kura.position.PositionLockedEvent;
@@ -520,7 +521,7 @@ public class PositionServiceTest {
         final String date = fixture.ps.getNmeaDate();
         final String time = fixture.ps.getNmeaTime();
         final String lastSentence = fixture.ps.getLastSentence();
-        final String gnssType = fixture.ps.getGnssSystem();
+        final GNSSType gnssType = fixture.ps.getGnssType();
 
         // from GGA
         assertEquals(1, nmeaPosition.getFixQuality());
@@ -551,7 +552,7 @@ public class PositionServiceTest {
 
         assertEquals("$GNVTG,,,,,,,12.34,,,,*4a\n", lastSentence);
 
-        assertEquals("MixedGNSSTypes", gnssType);
+        assertEquals(GNSSType.MIXED_GNSS_TYPE, gnssType);
 
         fixture.ps.deactivate();
 

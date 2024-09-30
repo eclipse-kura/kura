@@ -17,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.linux.position.GpsDevice.Listener;
+import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.osgi.service.io.ConnectionFactory;
 import org.osgi.util.measurement.Measurement;

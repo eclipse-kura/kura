@@ -115,7 +115,7 @@ public interface PositionService {
     /**
      * Returns the GNSS System used to retrieve the position information.
      */
-    public String getGnssSystem();
+    public GNSSType getGnssType();
 
     /**
      * Registers position listener

@@ -28,6 +28,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionListener;
 import org.eclipse.kura.position.PositionLockedEvent;
@@ -242,7 +243,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
     }
 
     @Override
-    public String getGnssSystem() {
-        return "Gps";
+    public GNSSType getGnssType() {
+        return GNSSType.GPS;
     }
 }

@@ -21,6 +21,7 @@ import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.linux.position.NMEAParser.Code;
 import org.eclipse.kura.linux.position.NMEAParser.ParseException;
+import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionException;
 import org.eclipse.kura.position.PositionListener;

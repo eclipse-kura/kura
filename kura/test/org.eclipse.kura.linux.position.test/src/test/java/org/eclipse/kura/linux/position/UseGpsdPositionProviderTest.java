@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.position.GNSSType;
 import org.junit.Test;
 import org.osgi.util.measurement.Measurement;
 import org.osgi.util.measurement.Unit;

@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.linux.position.GpsDevice.Listener;
+import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.osgi.util.measurement.Measurement;
 import org.osgi.util.measurement.Unit;
@@ -198,7 +199,7 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
         for (SATObject object : satellites) {
             if (object.getUsed()) {
-                prnList.add(GNSSType.fromPrn(object.getPRN()));
+                prnList.add(getGnssTypeFromPrn(object.getPRN()));
             }
         }
 
@@ -289,6 +290,16 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     private Measurement toMetersPerSecondMeasurement(double value, double error) {
         return new Measurement(Double.isNaN(value) ? 0.0d : value, Double.isNaN(error) ? 0.0d : error, Unit.m_s);
+    }
+
+    private GNSSType getGnssTypeFromPrn(int prnId) {
+        if (prnId >= 1 && prnId <= 63) {
+            return GNSSType.GPS;
+        } else if (prnId >= 64 && prnId <= 96) {
+            return GNSSType.GLONASS;
+        } else {
+            return GNSSType.OTHER;
+        }
     }
 
     private class GpsdInternalState {

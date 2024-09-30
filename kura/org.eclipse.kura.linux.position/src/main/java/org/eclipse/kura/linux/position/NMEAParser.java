@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.osgi.util.measurement.Measurement;
 import org.osgi.util.measurement.Unit;
@@ -112,12 +113,34 @@ public class NMEAParser {
         if (this.gnssTypeList.isEmpty()) {
             this.gnssType = GNSSType.UNKNOWN;
         } else if (this.gnssTypeList.size() == 1) {
-            this.gnssType = GNSSType.fromTypes(new ArrayList<>(this.gnssTypeList).get(0));
+            this.gnssType = getGnssTypeFromSentenceId(new ArrayList<>(this.gnssTypeList).get(0));
         } else {
             this.gnssType = GNSSType.MIXED_GNSS_TYPE;
         }
 
         logger.info("\n\nTYPE: {}\n\n", this.gnssType.getValue());
+    }
+
+    private GNSSType getGnssTypeFromSentenceId(String type) {
+
+        switch (type) {
+
+        case "GP":
+            return GNSSType.GPS;
+
+        case "BD":
+        case "GB":
+            return GNSSType.BEIDOU;
+
+        case "GA":
+            return GNSSType.GALILEO;
+
+        case "GL":
+            return GNSSType.GLONASS;
+
+        default:
+            return GNSSType.UNKNOWN;
+        }
     }
 
     private void parseVTGSentence(List<String> tokens) {

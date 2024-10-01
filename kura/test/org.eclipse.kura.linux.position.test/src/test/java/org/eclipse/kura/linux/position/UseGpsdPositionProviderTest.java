@@ -22,8 +22,11 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.position.GNSSType;
@@ -78,7 +81,7 @@ public class UseGpsdPositionProviderTest {
         whenNMEAStreamArriveFrom(DEVICE_2_1_JSON_STREAM);
 
         thenPositionIsNotNull();
-        thenGnssTypeIs(GNSSType.MIXED_GNSS_TYPE);
+        thenGnssTypeIs(new HashSet<>(Arrays.asList(GNSSType.GPS, GNSSType.GLONASS)));
     }
 
     @Test
@@ -175,7 +178,7 @@ public class UseGpsdPositionProviderTest {
 
         whenNMEAStreamArriveFrom(DEVICE1_JSON_STREAM);
 
-        thenGnssTypeIs(GNSSType.GPS);
+        thenGnssTypeIs(new HashSet<>(Arrays.asList(GNSSType.GPS)));
     }
 
     @Test
@@ -186,7 +189,7 @@ public class UseGpsdPositionProviderTest {
 
         whenNMEAStreamArriveFrom(DEVICE_2_1_JSON_STREAM);
 
-        thenGnssTypeIs(GNSSType.MIXED_GNSS_TYPE);
+        thenGnssTypeIs(new HashSet<>(Arrays.asList(GNSSType.GPS, GNSSType.GLONASS)));
     }
 
     @Test
@@ -197,7 +200,7 @@ public class UseGpsdPositionProviderTest {
 
         whenNMEAStreamArriveFrom(BOLTGATE_10_12_JSON_STREAM_2);
 
-        thenGnssTypeIs(GNSSType.MIXED_GNSS_TYPE);
+        thenGnssTypeIs(new HashSet<>(Arrays.asList(GNSSType.GPS, GNSSType.GLONASS)));
     }
 
     private void givenGpsdPositionProvider() {
@@ -302,8 +305,8 @@ public class UseGpsdPositionProviderTest {
         assertTrue(this.gpsdPositionProvider.isLocked());
     }
 
-    private void thenGnssTypeIs(GNSSType type) {
-        assertEquals(type, this.gpsdPositionProvider.getGnssType());
+    private void thenGnssTypeIs(Set<GNSSType> types) {
+        assertEquals(types, this.gpsdPositionProvider.getGnssType());
     }
 
     private void gpsdPositionProviderStart() {

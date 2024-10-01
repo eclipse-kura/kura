@@ -14,6 +14,7 @@ package org.eclipse.kura.linux.position;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Set;
 
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.linux.position.GpsDevice.Listener;
@@ -229,7 +230,7 @@ public class SerialDevicePositionProvider implements PositionProvider {
     }
 
     @Override
-    public GNSSType getGnssType() {
+    public Set<GNSSType> getGnssType() {
         return this.gpsDevice.getGnssType();
     }
 

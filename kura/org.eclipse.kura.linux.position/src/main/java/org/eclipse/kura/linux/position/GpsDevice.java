@@ -16,6 +16,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.util.Set;
 
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
@@ -82,7 +83,7 @@ public class GpsDevice {
         return this.nmeaParser.getTimeNmea();
     }
 
-    public synchronized GNSSType getGnssType() {
+    public synchronized Set<GNSSType> getGnssType() {
         return this.nmeaParser.getGnssType();
     }
 

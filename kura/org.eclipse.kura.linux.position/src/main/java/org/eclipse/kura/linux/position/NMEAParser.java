@@ -14,7 +14,6 @@ package org.eclipse.kura.linux.position;
 
 import static java.lang.Math.toRadians;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -25,8 +24,6 @@ import org.eclipse.kura.position.NmeaPosition;
 import org.osgi.util.measurement.Measurement;
 import org.osgi.util.measurement.Unit;
 import org.osgi.util.position.Position;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Implements NMEA sentences parser functions.
@@ -52,8 +49,10 @@ public class NMEAParser {
     private char validFix = 0;
     private char latitudeHemisphere = 0;
     private char longitudeHemisphere = 0;
-    private Set<String> gnssTypeList = new HashSet<>();
-    private GNSSType gnssType = GNSSType.UNKNOWN;
+
+    private Set<GNSSType> gnssType = new HashSet<>();
+    private int gnssTypeUpdateCounter = 0;
+    private static final int GNSSTYPE_RESET_COUNTER = 50;
 
     /**
      * Fill the fields of GPS position depending of the type of the sentence
@@ -103,20 +102,22 @@ public class NMEAParser {
         return this.validPosition;
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(NMEAParser.class);
-
     private void parseGnssType(String token) {
 
-        String id = token.substring(1, 3);
-        this.gnssTypeList.add(id);
-
-        if (this.gnssTypeList.isEmpty()) {
-            this.gnssType = GNSSType.UNKNOWN;
-        } else if (this.gnssTypeList.size() == 1) {
-            this.gnssType = getGnssTypeFromSentenceId(new ArrayList<>(this.gnssTypeList).get(0));
-        } else {
-            this.gnssType = GNSSType.MIXED_GNSS_TYPE;
+        if (this.gnssTypeUpdateCounter > GNSSTYPE_RESET_COUNTER) {
+            this.gnssType.clear();
+            this.gnssTypeUpdateCounter = 0;
         }
+
+        String id = token.substring(1, 3);
+
+        GNSSType type = getGnssTypeFromSentenceId(id);
+
+        if (!type.equals(GNSSType.UNKNOWN)) {
+            this.gnssType.add(type);
+        }
+
+        this.gnssTypeUpdateCounter++;
     }
 
     private GNSSType getGnssTypeFromSentenceId(String type) {
@@ -310,7 +311,6 @@ public class NMEAParser {
         final int starpos = nmeaMessageIn.indexOf('*');
         final String strChecksum = nmeaMessageIn.substring(starpos + 1, nmeaMessageIn.length() - 1);
         final int parsedChecksum = Integer.parseInt(strChecksum, 16); // Check sum is coded in hex string
-
         int actualChecksum = 0;
         for (int i = 1; i < starpos; i++) {
             actualChecksum ^= nmeaMessageIn.charAt(i);
@@ -421,7 +421,7 @@ public class NMEAParser {
         return this.longitudeHemisphere;
     }
 
-    public GNSSType getGnssType() {
+    public Set<GNSSType> getGnssType() {
         return this.gnssType;
     }
 

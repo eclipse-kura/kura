@@ -14,6 +14,7 @@
 package org.eclipse.kura.linux.position;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import org.eclipse.kura.linux.position.GpsDevice.Listener;
 import org.eclipse.kura.position.GNSSType;
@@ -45,6 +46,6 @@ public interface PositionProvider {
 
     public PositionProviderType getType();
 
-    public GNSSType getGnssType();
+    public Set<GNSSType> getGnssType();
 
 }

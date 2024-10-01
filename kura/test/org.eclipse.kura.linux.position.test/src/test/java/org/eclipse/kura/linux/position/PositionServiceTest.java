@@ -31,8 +31,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
@@ -499,6 +502,7 @@ public class PositionServiceTest {
     public void testPositionDataFromGps() throws IOException, InterruptedException {
         final PositionServiceTestFixture fixture = new PositionServiceTestFixture(
                 "$GPGGA,121041.000,4655.3772,N,01513.6390,E,1,06,1.7,478.3,M,44.7,M,,0000*5d\n"
+                        + "$GLGSA,A,3,72,84,86,74,66,65,85,75,,,,,1.18,0.51,1.07*1C\n"
                         + "$GPGSA,A,3,25,23,07,27,20,04,,,,,,,4.9,1.7,4.6*39\n"
                         + "$GPRMC,121041.000,A,4655.3772,N,01513.6390,E,0.31,319.55,220517,,*7\n"
                         + "$GNVTG,,,,,,,12.34,,,,*4a\n");
@@ -510,7 +514,7 @@ public class PositionServiceTest {
 
         Thread.sleep(5000);
 
-        verify(listener, times(4)).newNmeaSentence(any());
+        verify(listener, times(5)).newNmeaSentence(any());
         verify(fixture.eventAdmin, times(1)).postEvent(argThat(isPositionLockedEvent));
         verify(fixture.eventAdmin, times(0)).postEvent(argThat(isPositionLostEvent));
 
@@ -521,7 +525,7 @@ public class PositionServiceTest {
         final String date = fixture.ps.getNmeaDate();
         final String time = fixture.ps.getNmeaTime();
         final String lastSentence = fixture.ps.getLastSentence();
-        final GNSSType gnssType = fixture.ps.getGnssType();
+        final Set<GNSSType> gnssType = fixture.ps.getGnssType();
 
         // from GGA
         assertEquals(1, nmeaPosition.getFixQuality());
@@ -552,7 +556,7 @@ public class PositionServiceTest {
 
         assertEquals("$GNVTG,,,,,,,12.34,,,,*4a\n", lastSentence);
 
-        assertEquals(GNSSType.MIXED_GNSS_TYPE, gnssType);
+        assertEquals(new HashSet<>(Arrays.asList(GNSSType.GPS, GNSSType.GLONASS)), gnssType);
 
         fixture.ps.deactivate();
 

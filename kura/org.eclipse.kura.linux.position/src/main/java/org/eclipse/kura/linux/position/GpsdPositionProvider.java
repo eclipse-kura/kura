@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.OptionalInt;
@@ -55,7 +54,7 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     private static final Logger logger = LoggerFactory.getLogger(GpsdPositionProvider.class);
     private final AtomicReference<GpsdInternalState> internalStateReference = new AtomicReference<>(
             new GpsdInternalState());
-    private final AtomicReference<GNSSType> gnssType = new AtomicReference<>(GNSSType.UNKNOWN);
+    private final AtomicReference<Set<GNSSType>> gnssType = new AtomicReference<>(new HashSet<>());
 
     private GPSdEndpoint gpsEndpoint;
     private PositionServiceOptions configuration;
@@ -172,7 +171,7 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     }
 
     @Override
-    public GNSSType getGnssType() {
+    public Set<GNSSType> getGnssType() {
         return this.gnssType.get();
     }
 
@@ -195,21 +194,15 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     public void handleSKY(SKYObject sky) {
 
         List<SATObject> satellites = sky.getSatellites();
-        Set<GNSSType> prnList = new HashSet<>();
+        Set<GNSSType> newGnssTypeSet = new HashSet<>();
 
         for (SATObject object : satellites) {
             if (object.getUsed()) {
-                prnList.add(getGnssTypeFromPrn(object.getPRN()));
+                newGnssTypeSet.add(getGnssTypeFromPrn(object.getPRN()));
             }
         }
 
-        if (prnList.isEmpty()) {
-            this.gnssType.set(GNSSType.UNKNOWN);
-        } else if (prnList.size() == 1) {
-            this.gnssType.set(new ArrayList<>(prnList).get(0));
-        } else {
-            this.gnssType.set(GNSSType.MIXED_GNSS_TYPE);
-        }
+        this.gnssType.set(newGnssTypeSet);
 
     }
 

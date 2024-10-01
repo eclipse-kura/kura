@@ -16,9 +16,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -243,7 +246,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
     }
 
     @Override
-    public GNSSType getGnssType() {
-        return GNSSType.GPS;
+    public Set<GNSSType> getGnssType() {
+        return new HashSet<>(Arrays.asList(GNSSType.GPS));
     }
 }

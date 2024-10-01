@@ -13,6 +13,7 @@
 package org.eclipse.kura.position;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.util.position.Position;
@@ -113,9 +114,13 @@ public interface PositionService {
     public String getLastSentence();
 
     /**
-     * Returns the GNSS System used to retrieve the position information.
+     * Returns the GNSS System used to get the position information. Could be one or more system (eg: GPS + GLONASS).
+     * 
+     * If empty, no recognized GNSS System Type is available.
+     * 
+     * @since 2.8
      */
-    public GNSSType getGnssType();
+    public Set<GNSSType> getGnssType();
 
     /**
      * Registers position listener

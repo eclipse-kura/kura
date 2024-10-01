@@ -9,7 +9,6 @@ public enum GNSSType {
     GALILEO("Galileo"),
     GLONASS("Glonass"),
     GPS("Gps"),
-    MIXED_GNSS_TYPE("MixedGNSSTypes"),
     OTHER("Other"),
     UNKNOWN("Unknown");
 

@@ -210,7 +210,6 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
         } else {
             this.gnssType.set(GNSSType.MIXED_GNSS_TYPE);
         }
-        logger.info("\n\nTYPE: {}\n\n", this.gnssType.get().getValue());
 
     }
 

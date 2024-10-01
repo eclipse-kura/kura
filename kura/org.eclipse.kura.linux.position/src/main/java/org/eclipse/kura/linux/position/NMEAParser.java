@@ -117,8 +117,6 @@ public class NMEAParser {
         } else {
             this.gnssType = GNSSType.MIXED_GNSS_TYPE;
         }
-
-        logger.info("\n\nTYPE: {}\n\n", this.gnssType.getValue());
     }
 
     private GNSSType getGnssTypeFromSentenceId(String type) {

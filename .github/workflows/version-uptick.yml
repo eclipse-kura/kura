@@ -68,3 +68,4 @@ jobs:
         commit-message: "chore: automated uptick to ${{ steps.get-version.outputs.version }}"
         body: "Automated changes by _Version uptick automation_ action: automated uptick to ${{ steps.get-version.outputs.version }} version"
         branch-suffix: timestamp
+        token: ${{ secrets.BOT_GITHUB_TOKEN }}

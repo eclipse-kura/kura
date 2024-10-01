@@ -156,8 +156,7 @@
                                 <!--
                                     - direct mirror link: http://www.eclipse.org/downloads/download.php?file=/equinox/drops/R-Neon.1-201609071200/equinox-SDK-Neon.1.zip&amp;r=1
                                 -->
-                                <get src="${equinox.download.url}" dest="${project.build.directory}/download/equinox.zip"
-                                    usetimestamp="true" />
+                                <get src="${equinox.download.url}" dest="${project.build.directory}/download/equinox.zip" usetimestamp="true" />
 
                                 <delete dir="${project.build.directory}/source/plugins" />
                                 <mkdir dir="${project.build.directory}/source/plugins" />
@@ -180,6 +179,7 @@
                                         <include name="plugins/org.eclipse.core*.jar" />
                                         <include name="plugins/org.eclipse.equinox*.jar" />
                                         <include name="plugins/org.eclipse.osgi*.jar" />
+                                        <include name="plugins/org.osgi.*.jar" />
 
                                         <include name="plugins/org.apache.felix*.jar" />
 

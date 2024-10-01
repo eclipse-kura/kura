@@ -12,6 +12,11 @@ on:
           description: Overwrite the content of TODO fields in generated release notes (typically needed for RC1 notes)
           required: true
           default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   main:
     name: Generate Release Notes
@@ -34,7 +39,7 @@ jobs:
           -Pjava8
         )\" >> \"${GITHUB_OUTPUT}\""
       shell: bash
-    
+
     - name: Check file existence
       id: check_files
       continue-on-error: true
@@ -70,7 +75,7 @@ jobs:
         -t .github/release_notes_template/template.hbs \
         -hhf .github/release_notes_template/helper.hbs \
         -of ./kura/distrib/RELEASE_NOTES.txt
-    
+
     - name: Files exist write description
       id: get-description
       if: steps.check_files.outputs.exists == 'true' && github.event.inputs.overwrite == 'false'
@@ -80,7 +85,7 @@ jobs:
           awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' target-env.txt done=0 ./kura/distrib/RELEASE_NOTES.txt > tmpfile && mv tmpfile ./kura/distrib/RELEASE_NOTES.txt
           awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' known-issues.txt done=0 ./kura/distrib/RELEASE_NOTES.txt > tmpfile && mv tmpfile ./kura/distrib/RELEASE_NOTES.txt
       shell: bash
-        
+
     - name: Files exist clean up
       id: clean-up-files
       if: steps.check_files.outputs.exists == 'true' && github.event.inputs.overwrite == 'false'

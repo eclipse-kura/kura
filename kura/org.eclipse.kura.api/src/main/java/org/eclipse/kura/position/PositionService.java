@@ -114,7 +114,7 @@ public interface PositionService {
     public String getLastSentence();
 
     /**
-     * * Returns the GNSS System used to get the position information @reference GNSSType. Could be one or more system (eg: GPS + GLONASS).
+     * Returns the GNSS System used to get the position information @reference GNSSType. Could be one or more system (eg: GPS + GLONASS).
      * 
      * If empty, no recognized GNSS System Type is available.
      * 

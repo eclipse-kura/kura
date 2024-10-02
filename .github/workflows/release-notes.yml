@@ -102,3 +102,4 @@ jobs:
         commit-message: "chore: add Kura ${{ steps.get-version.outputs.resolved-version }} release notes"
         body: "Automated changes by _Release Notes automation_ action: add Kura ${{ steps.get-version.outputs.resolved-version }} version release notes since commit `${{ github.event.inputs.starting_commit }}`"
         branch-suffix: short-commit-hash
+        token: ${{ secrets.BOT_GITHUB_TOKEN }}

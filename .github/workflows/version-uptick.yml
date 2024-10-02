@@ -18,6 +18,10 @@ on:
             - uptick_snapshot_to_release.yml
           required: true
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   uptick:
     runs-on: ubuntu-latest

@@ -4,15 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum GNSSType {
-
+    UNKNOWN("Unknown"),
+    OTHER("Other"),
     BEIDOU("Beidou"),
     GALILEO("Galileo"),
     GLONASS("Glonass"),
     GPS("Gps"),
     IRNSS("IRNSS"),
-    OTHER("Other"),
-    QZSS("QZSS"),
-    UNKNOWN("Unknown");
+    QZSS("QZSS");
 
     private String value;
 

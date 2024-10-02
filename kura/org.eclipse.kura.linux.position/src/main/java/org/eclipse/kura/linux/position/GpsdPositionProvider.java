@@ -284,6 +284,10 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
         return new Measurement(Double.isNaN(value) ? 0.0d : value, Double.isNaN(error) ? 0.0d : error, Unit.m_s);
     }
 
+    /*
+     * GNSS Type PRNs ranges retrieved from
+     * {@link https://github.com/taimos/GPSd4Java/blob/6c92bac30d98121bb212bcc7f2426c48ce592433/src/main/java/de/taimos/gpsd4java/types/SATObject.java#L44}
+     */
     private GNSSType getGnssTypeFromPrn(int prnId) {
         if (prnId >= 1 && prnId <= 63) {
             return GNSSType.GPS;

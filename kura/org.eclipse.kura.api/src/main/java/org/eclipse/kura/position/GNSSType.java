@@ -9,7 +9,9 @@ public enum GNSSType {
     GALILEO("Galileo"),
     GLONASS("Glonass"),
     GPS("Gps"),
+    IRNSS("IRNSS"),
     OTHER("Other"),
+    QZSS("QZSS"),
     UNKNOWN("Unknown");
 
     private String value;

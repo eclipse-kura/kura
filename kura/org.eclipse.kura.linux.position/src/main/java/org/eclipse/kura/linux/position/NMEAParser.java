@@ -120,6 +120,19 @@ public class NMEAParser {
         this.gnssTypeUpdateCounter++;
     }
 
+    /*
+     * Also 'GN' is a possible GNSSType, representing the Mixed GNSS System (GPS+GALILEO or GPS+GLONASS for example).
+     * 
+     * But, if the device is capable to emit GN sentences, it must emit also the single-id ones. So we are still able to
+     * extract the specific GNSS System. See {@link
+     * https://receiverhelp.trimble.com/alloy-gnss/en-us/NMEA-0183messages_GNS.html}
+     * 
+     * As example, if the device emits GN messages due to a GP/GA combination, it will emit three sentences: GN, GP, GA.
+     * 
+     * Info about the correlation GNSS System / NMEA Sentence at
+     * {@link https://en.wikipedia.org/wiki/NMEA_0183#NMEA_sentence_format}
+     * 
+     */
     private GNSSType getGnssTypeFromSentenceId(String type) {
 
         switch (type) {
@@ -136,6 +149,12 @@ public class NMEAParser {
 
         case "GL":
             return GNSSType.GLONASS;
+
+        case "GI":
+            return GNSSType.IRNSS;
+
+        case "GQ":
+            return GNSSType.QZSS;
 
         default:
             return GNSSType.UNKNOWN;

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (c) 2023 Eurotech and/or its affiliates and others
+# Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,7 @@
 import shutil
 import logging
 from os.path import exists
-from find_net_interfaces import get_eth_wlan_interfaces_names
+from network_tools import get_eth_wlan_interfaces_names
 
 INTERFACES_PATH = "/etc/network/interfaces"
 INTERFACES_OLD_PATH = INTERFACES_PATH + ".old"

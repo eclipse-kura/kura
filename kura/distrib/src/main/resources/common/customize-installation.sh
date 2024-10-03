@@ -38,34 +38,44 @@ setup_libudev() {
     fi
 }
 
+customize_snapshot() {
+    local BOARD=$1
+
+    if [ ${BOARD} = "generic-device" ]; then 
+	    if python3 -V > /dev/null 2>&1
+	    then
+	        python3 "/opt/eclipse/kura/install/customize_snapshot.py"
+	    else
+	    	# fallback to RaspberryPi configuration to have something working...
+	    	mv "/opt/eclipse/kura/install/snapshot_0.xml-raspberry" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
+	        echo "python3 not found. The snapshot_0.xml file may have wrong interface names. Please correct them manually if they mismatch."
+	    fi
+	fi
+}
+
+customize_iptables() {
+    local BOARD=$1
+
+    if [ ${BOARD} = "generic-device" ]; then 
+	    if python3 -V > /dev/null 2>&1
+	    then
+	        python3 "/opt/eclipse/kura/install/customize_iptables.py"
+	    else
+	    	# fallback to RaspberryPi configuration to have something working...
+	    	mv "/opt/eclipse/kura/install/iptables-raspberry" "/opt/eclipse/kura/.data/iptables"
+	        echo "python3 not found. The iptables file may have wrong interface names. Please correct them manually if they mismatch."
+	    fi
+	fi
+}
+
 customize_kura_properties() {
     local BOARD=$1
 
-    sed -i "s/device_name/${BOARD}/g" "/opt/eclipse/kura/framework/kura.properties"
-
     if python3 -V > /dev/null 2>&1
     then
-        python3 /opt/eclipse/kura/install/find_net_interfaces.py /opt/eclipse/kura/framework/kura.properties
+        python3 "/opt/eclipse/kura/install/customize_kura_properties.py" "${BOARD}"
     else
-        echo "python3 not found. Could not edit the primary network interface name in /opt/eclipse/kura/framework/kura.properties. Defaulted to eth0."
-    fi
-}
-
-customize_network_interfaces() {
-    local BOARD=$1
-    local TO_BE_PATCHED=()
-
-    TO_BE_PATCHED+=("/opt/eclipse/kura/user/snapshots/snapshot_0.xml")
-    TO_BE_PATCHED+=("/opt/eclipse/kura/.data/iptables")
-
-    if [ ${#TO_BE_PATCHED[@]} -gt 0 ]
-    then
-        if python3 -V > /dev/null 2>&1
-        then
-            python3 "/opt/eclipse/kura/install/find_net_interfaces.py" "${TO_BE_PATCHED[@]}"
-        else
-            echo "python3 not found. The following files may have wrong interface names: ${TO_BE_PATCHED[*]}. Please correct them manually if they mismatch."
-        fi
+        echo "python3 not found. Could not edit the primary network interface and device name in /opt/eclipse/kura/framework/kura.properties. Defaulted to eth0 and generic name."
     fi
 }
 
@@ -90,8 +100,9 @@ mv "/opt/eclipse/kura/install/jdk.dio.properties-${BOARD}" "/opt/eclipse/kura/fr
 mv "/opt/eclipse/kura/install/snapshot_0.xml-${BOARD}" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
 mv "/opt/eclipse/kura/install/iptables-${BOARD}" "/opt/eclipse/kura/.data/iptables"
 
+customize_snapshot "${BOARD}"
+customize_iptables "${BOARD}"
 customize_kura_properties "${BOARD}"
-customize_network_interfaces "${BOARD}"
 
 if [ ${BOARD} = "generic-device" ]; then    
     # dynamic RAM assignment
@@ -100,10 +111,10 @@ if [ ${BOARD} = "generic-device" ]; then
     RAM_MB_FOR_KURA=$(expr $RAM_MB / 4)
 
     if [ "$RAM_MB" -lt 1024 ]; then
-        RAM_REPLACEMENT_STRING="-Xms256m -Xmx256m"
+        RAM_MB_FOR_KURA="256"
     fi
 
-    echo "Setting kura RAM to ${RAM_REPLACEMENT_STRING}"
+    echo "Setting kura RAM to ${RAM_MB_FOR_KURA}"
     start_scripts_to_change=("start_kura.sh" "start_kura_debug.sh" "start_kura_background.sh")
 
     RAM_REPLACEMENT_STRING="-Xms${RAM_MB_FOR_KURA}m -Xmx${RAM_MB_FOR_KURA}m"

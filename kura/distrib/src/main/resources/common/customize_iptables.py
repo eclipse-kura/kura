@@ -39,6 +39,7 @@ def main():
     
     logging.info("%s : starting editing", iptables_filename)
     iptables = open(iptables_filename, 'r+', encoding='utf-8')
+    iptables_content = ""
     if wlan_number == 0:
         for line in iptables:
             if 'WIFI_INTERFACE_0' not in line:

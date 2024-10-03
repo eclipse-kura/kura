@@ -30,7 +30,7 @@
             <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.mtu" array="false" encrypted="false" type="Integer">
                 <esf:value>0</esf:value>
             </esf:property>
-            <esf:property name="net.interface.LAN_INTERFACE_PLACEHOLDER.config.ip4.gateway" array="false" encrypted="false" type="String">
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.gateway" array="false" encrypted="false" type="String">
                 <esf:value/>
             </esf:property>
             <esf:property name="net.interface.ETH_INTERFACE_0.config.dhcpClient4.enabled" array="false" encrypted="false" type="Boolean">

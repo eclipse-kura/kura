@@ -38,11 +38,33 @@ Once defined the Channels in an Asset, a simple Java application that leverages 
 - **name**: unique user-friendly name for a channel
 - **type**: represents the type of operation supported. Possible values are: _READ_, _WRITE_, _READ/WRITE_
 - **value.type**: represents the data type that will be used when creating the Wire Envelope for the connected components.
-- **scaleoffset.type**: represent the data type that will be used for the scale and offset value. Default data type is Double.
+- **scaleoffset.type**: represent the data type that will be used for the scale and offset value. Default data type is `DEFINED_BY_VALUE_TYPE`.
 - **scale**: an optional scaling factor to be applied only to the numeric values retrieved from the field. If used the scale operation will be done with the type specified by **scaleoffset.type** and then casted to **value.type**.
 - **offset**: an optional offset value that will be added only to the numeric values retrieved from the field. If used the offset operation will be done with the type specified by **scaleoffset.type** and then casted to **value.type**.
 - **unit**: an optional string value that will be added to the asset channel read to represent the unit of measure associated to that specific channel.
 - **listen**: if supported by the associated driver, allows to receive notifications by the driver on events. This flag currently has effect only inside Kura Wires.
+
+### Arithmetic with scale and offset
+**scaleoffset.type** parameter allow to specify the datatype used in the scale offset operation. The default one is `DEFINED_BY_VALUE_TYPE` that means the type of **value.type** will be used to perform the operation. Using a different type, like `INTEGER` or `DOUBLE` will determine the use of the selected type for all value involved in the operation.
+See the following examples:
+
+Example 1:
+channel configured with:
+ -**value.type**: INTEGER
+ -**scaleoffset.type**: `DEFINED_BY_VALUE_TYPE`
+ -**scale**: 2.0
+ -**offset**: 1.5
+
+the result will be: (int) <value_read> * int (2.0) + int (1.5) .
+
+Example 2:
+channel configured with:
+ -**value.type**: INTEGER
+ -**scaleoffset.type**: `DOUBLE`
+ -**scale**: 2.0
+ -**offset**: 1.5
+
+the result will be: (int) ( (double) <value_read> * double (2.0) + double (1.5) ) .
 
 ### Driver specific parameters
 

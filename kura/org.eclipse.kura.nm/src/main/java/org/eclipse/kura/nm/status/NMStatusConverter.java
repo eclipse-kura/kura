@@ -690,18 +690,18 @@ public class NMStatusConverter {
     }
 
     private static boolean isGpsSupported(Properties properties) {
-        boolean isSupported = false;
         try {
             UInt32 locationSources = properties.Get(MM_MODEM_LOCATION_BUS_NAME, "Capabilities");
             Set<MMModemLocationSource> modemLocationSources = MMModemLocationSource
                     .toMMModemLocationSourceFromBitMask(locationSources);
-            if (modemLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED)) {
-                isSupported = true;
-            }
+
+            return modemLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED)
+                    || (modemLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW)
+                            && modemLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA));
         } catch (DBusExecutionException e) {
             logger.debug("Cannot retrieve location object", e);
+            return false;
         }
-        return isSupported;
     }
 
     private static boolean isSimLocked(Properties properties) {

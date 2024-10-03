@@ -86,11 +86,11 @@ setup_libudev
 
 BOARD="generic-device"
 
-#if uname -a | grep -q 'raspberry' > /dev/null 2>&1
-#then
-#    BOARD="raspberry"
-#    echo "Customizing installation for Raspberry PI"
-#fi
+if uname -a | grep -q 'raspberry' > /dev/null 2>&1
+then
+    BOARD="raspberry"
+    echo "Customizing installation for Raspberry PI"
+fi
 
 if [ ! -d "/opt/eclipse/kura/user/snapshots/" ]; then
     mkdir /opt/eclipse/kura/user/snapshots/

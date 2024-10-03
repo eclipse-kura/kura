@@ -18,7 +18,10 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.HashSet;
+import java.util.List;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -27,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.linux.position.GpsDevice.Listener;
+import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.osgi.util.measurement.Measurement;
 import org.osgi.util.measurement.Unit;
@@ -40,6 +44,7 @@ import de.taimos.gpsd4java.types.ATTObject;
 import de.taimos.gpsd4java.types.DeviceObject;
 import de.taimos.gpsd4java.types.DevicesObject;
 import de.taimos.gpsd4java.types.ENMEAMode;
+import de.taimos.gpsd4java.types.SATObject;
 import de.taimos.gpsd4java.types.SKYObject;
 import de.taimos.gpsd4java.types.TPVObject;
 import de.taimos.gpsd4java.types.subframes.SUBFRAMEObject;
@@ -49,6 +54,7 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     private static final Logger logger = LoggerFactory.getLogger(GpsdPositionProvider.class);
     private final AtomicReference<GpsdInternalState> internalStateReference = new AtomicReference<>(
             new GpsdInternalState());
+    private final AtomicReference<Set<GNSSType>> gnssType = new AtomicReference<>(new HashSet<>());
 
     private GPSdEndpoint gpsEndpoint;
     private PositionServiceOptions configuration;
@@ -165,6 +171,11 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     }
 
     @Override
+    public Set<GNSSType> getGnssType() {
+        return this.gnssType.get();
+    }
+
+    @Override
     public void handleATT(ATTObject att) {
         // Noting to do.
     }
@@ -181,7 +192,18 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     @Override
     public void handleSKY(SKYObject sky) {
-        // Noting to do.
+
+        List<SATObject> satellites = sky.getSatellites();
+        Set<GNSSType> newGnssTypeSet = new HashSet<>();
+
+        for (SATObject object : satellites) {
+            if (object.getUsed()) {
+                newGnssTypeSet.add(getGnssTypeFromPrn(object.getPRN()));
+            }
+        }
+
+        this.gnssType.set(newGnssTypeSet);
+
     }
 
     @Override
@@ -260,6 +282,21 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     private Measurement toMetersPerSecondMeasurement(double value, double error) {
         return new Measurement(Double.isNaN(value) ? 0.0d : value, Double.isNaN(error) ? 0.0d : error, Unit.m_s);
+    }
+
+    /*
+     * GNSS Type PRNs ranges retrieved from
+     * {@link https://github.com/taimos/GPSd4Java/blob/6c92bac30d98121bb212bcc7f2426c48ce592433/src/main/java/de/taimos/
+     * gpsd4java/types/SATObject.java#L44}
+     */
+    private GNSSType getGnssTypeFromPrn(int prnId) {
+        if (prnId >= 1 && prnId <= 63) {
+            return GNSSType.GPS;
+        } else if (prnId >= 64 && prnId <= 96) {
+            return GNSSType.GLONASS;
+        } else {
+            return GNSSType.OTHER;
+        }
     }
 
     private class GpsdInternalState {

@@ -17,11 +17,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionListener;
 import org.eclipse.kura.position.PositionLockedEvent;
@@ -197,6 +199,11 @@ public class PositionServiceImpl
         } else {
             return null;
         }
+    }
+
+    @Override
+    public Set<GNSSType> getGnssType() {
+        return this.currentProvider.getGnssType();
     }
 
     @Override

@@ -14,9 +14,11 @@ package org.eclipse.kura.linux.position;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Set;
 
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.linux.position.GpsDevice.Listener;
+import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.osgi.service.io.ConnectionFactory;
 import org.osgi.util.measurement.Measurement;
@@ -225,6 +227,11 @@ public class SerialDevicePositionProvider implements PositionProvider {
     @Override
     public PositionProviderType getType() {
         return PositionProviderType.SERIAL;
+    }
+
+    @Override
+    public Set<GNSSType> getGnssType() {
+        return this.gpsDevice.getGnssType();
     }
 
     protected GpsDevice getGpsDevice() {

@@ -42,7 +42,8 @@ public class ModemManagerDbusWrapper {
         this.dbusConnection = dbusConnection;
     }
 
-    protected void setGPS(Optional<String> modemDevicePath, Optional<Boolean> enableGPS) throws DBusException {
+    protected void setGPS(Optional<String> modemDevicePath, Optional<Boolean> enableGPS, Optional<String> gpsModeString)
+            throws DBusException {
         if (!modemDevicePath.isPresent()) {
             logger.warn("Cannot retrieve MM.Modem from NM.Modem. Skipping GPS configuration.");
             return;
@@ -51,6 +52,8 @@ public class ModemManagerDbusWrapper {
         enableModem(modemDevicePath.get());
 
         boolean isGPSSourceEnabled = enableGPS.isPresent() && enableGPS.get();
+        KuraModemGPSMode desiredGPSMode = gpsModeString.isPresent() ? KuraModemGPSMode.fromString(gpsModeString.get())
+                : KuraModemGPSMode.UNMANAGED;
 
         Location modemLocation = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemDevicePath.get(),
                 Location.class);
@@ -76,12 +79,13 @@ public class ModemManagerDbusWrapper {
         }
 
         if (isGPSSourceEnabled) {
-            if (!availableLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED)) {
-                logger.warn("Cannot setup Modem.Location, MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED not supported for {}",
+            desiredLocationSources = KuraModemGPSMode.toMMModemLocationSources(desiredGPSMode);
+
+            if (!availableLocationSources.containsAll(desiredLocationSources)) {
+                logger.warn("Cannot setup Modem.Location, {} not supported for {}", desiredLocationSources,
                         modemLocationProperties.getObjectPath());
                 return;
             }
-            desiredLocationSources = EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED);
         }
 
         logger.debug("Modem location setup {} for modem {}", currentLocationSources, modemDevicePath.get());

@@ -53,7 +53,7 @@ public class ModemManagerDbusWrapper {
 
         boolean isGPSSourceEnabled = enableGPS.isPresent() && enableGPS.get();
         KuraModemGPSMode desiredGPSMode = gpsModeString.isPresent() ? KuraModemGPSMode.fromString(gpsModeString.get())
-                : KuraModemGPSMode.UNMANAGED;
+                : KuraModemGPSMode.KURA_MODEM_GPS_MODE_UNMANAGED;
 
         Location modemLocation = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemDevicePath.get(),
                 Location.class);

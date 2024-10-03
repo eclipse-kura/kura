@@ -656,7 +656,7 @@ public class NMDbusConnectorTest {
         givenNetworkConfigMapWith("net.interface.1-5.config.dhcpClient4.enabled", true);
         givenNetworkConfigMapWith("net.interface.1-5.config.apn", "myAwesomeAPN");
         givenNetworkConfigMapWith("net.interface.1-5.config.gpsEnabled", true);
-        givenNetworkConfigMapWith("net.interface.1-5.config.gpsMode", "unmanaged");
+        givenNetworkConfigMapWith("net.interface.1-5.config.gpsMode", "kuraModemGpsModeUnmanaged");
         givenNetworkConfigMapWith("net.interface.1-5.config.resetTimeout", 0);
 
         whenApplyIsCalledWith(this.netConfig);
@@ -679,7 +679,7 @@ public class NMDbusConnectorTest {
         givenNetworkConfigMapWith("net.interface.1-5.config.dhcpClient4.enabled", true);
         givenNetworkConfigMapWith("net.interface.1-5.config.apn", "myAwesomeAPN");
         givenNetworkConfigMapWith("net.interface.1-5.config.gpsEnabled", true);
-        givenNetworkConfigMapWith("net.interface.1-5.config.gpsMode", "managed-gps");
+        givenNetworkConfigMapWith("net.interface.1-5.config.gpsMode", "kuraModemGpsModeManagedGps");
         givenNetworkConfigMapWith("net.interface.1-5.config.resetTimeout", 0);
 
         whenApplyIsCalledWith(this.netConfig);

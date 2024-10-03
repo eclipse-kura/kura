@@ -1,51 +1,59 @@
 package org.eclipse.kura.nm;
 
 import java.util.EnumSet;
-import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.kura.nm.enums.MMModemLocationSource;
 
 public enum KuraModemGPSMode {
 
-    UNMANAGED,
-    MANAGED_GPS;
+    KURA_MODEM_GPS_MODE_UNMANAGED("kuraModemGpsModeUnmanaged"),
+    KURA_MODEM_GPS_MODE_MANAGED_GPS("kuraModemGpsModeManagedGps");
 
-    public static KuraModemGPSMode fromString(String mode) {
-        switch (mode) {
-        case "unmanaged":
-            return KuraModemGPSMode.UNMANAGED;
-        case "managed-gps":
-            return KuraModemGPSMode.MANAGED_GPS;
-        default:
-            throw new IllegalArgumentException(String.format("Unsupported modem GPS mode value: \"%s\"", mode));
-        }
+    private final String value;
+
+    private KuraModemGPSMode(String value) {
+        this.value = value;
     }
 
-    public static Optional<KuraModemGPSMode> fromString(Optional<String> mode) {
-        if (mode.isPresent()) {
-            switch (mode.get()) {
-            case "unmanaged":
-                return Optional.of(KuraModemGPSMode.UNMANAGED);
-            case "managed-gps":
-                return Optional.of(KuraModemGPSMode.MANAGED_GPS);
-            default:
-                return Optional.empty();
+    public String getValue() {
+        return this.value;
+    }
+
+    public static KuraModemGPSMode fromString(String name) {
+        for (KuraModemGPSMode auth : KuraModemGPSMode.values()) {
+            if (auth.getValue().equals(name)) {
+                return auth;
             }
-        } else {
-            return Optional.empty();
         }
+
+        throw new IllegalArgumentException("Invalid modem GPS mode in snapshot: " + name);
     }
 
     public static Set<MMModemLocationSource> toMMModemLocationSources(KuraModemGPSMode mode) {
         switch (mode) {
-        case UNMANAGED:
+        case KURA_MODEM_GPS_MODE_UNMANAGED:
             return EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED);
-        case MANAGED_GPS:
+        case KURA_MODEM_GPS_MODE_MANAGED_GPS:
             return EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
                     MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA);
         default:
             throw new IllegalArgumentException(String.format("Unsupported modem GPS mode value: \"%s\"", mode));
         }
+    }
+
+    public static Set<KuraModemGPSMode> fromMMModemLocationSources(Set<MMModemLocationSource> sources) {
+        Set<KuraModemGPSMode> modes = EnumSet.noneOf(KuraModemGPSMode.class);
+
+        if (sources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED)) {
+            modes.add(KuraModemGPSMode.KURA_MODEM_GPS_MODE_UNMANAGED);
+        }
+
+        if (sources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW)
+                && sources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA)) {
+            modes.add(KuraModemGPSMode.KURA_MODEM_GPS_MODE_MANAGED_GPS);
+        }
+
+        return modes;
     }
 }

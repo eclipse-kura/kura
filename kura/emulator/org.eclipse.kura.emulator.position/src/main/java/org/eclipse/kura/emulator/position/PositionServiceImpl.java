@@ -16,9 +16,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -28,6 +31,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionListener;
 import org.eclipse.kura.position.PositionLockedEvent;
@@ -239,5 +243,10 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
     @Override
     public LocalDateTime getDateTime() {
         return LocalDateTime.ofInstant(this.currentTime.toInstant(), ZoneId.systemDefault());
+    }
+
+    @Override
+    public Set<GNSSType> getGnssType() {
+        return new HashSet<>(Arrays.asList(GNSSType.GPS));
     }
 }

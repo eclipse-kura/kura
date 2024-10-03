@@ -16,11 +16,13 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.util.Set;
 
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.linux.position.NMEAParser.Code;
 import org.eclipse.kura.linux.position.NMEAParser.ParseException;
+import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionException;
 import org.eclipse.kura.position.PositionListener;
@@ -79,6 +81,10 @@ public class GpsDevice {
 
     public synchronized String getTimeNmea() {
         return this.nmeaParser.getTimeNmea();
+    }
+
+    public synchronized Set<GNSSType> getGnssType() {
+        return this.nmeaParser.getGnssType();
     }
 
     public void disconnect() {

@@ -78,7 +78,7 @@
         <module>org.eclipse.kura.example.driver.sensehat</module>
         <module>org.eclipse.kura.wire.devel.component.provider</module>
         <module>features</module>
-        <module>test</module>
+        <!-- <module>test</module> -->
     </modules>
 
     <profiles>

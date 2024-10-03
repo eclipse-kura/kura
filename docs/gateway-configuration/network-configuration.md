@@ -221,6 +221,15 @@ Name                                                  | Type     | Description  
 `net.interface.<interface>.config.holdoff`            | Integer  | The holdoff option of the PPP daemon (in seconds)                      | 1
 `net.interface.<interface>.config.pppNum`             | Integer  | Assigned ppp interface number                                          | 0
 
+#### GPS Mode
+
+The GPS mode can be set to one of the following values:
+
+- `kuraModemGpsModeUnmanaged`: the GPS device of the modem will be setup but not directly managed, therefore freeing the serial port for other services to use. This can be used in order to perform the setup of the GPS and then have another service (like `gpsd`) parse the NMEA strings in order to extract the position informations. This is the default value.
+- `kuraModemGpsModeManagedGps`: the GPS device of the modem will be setup and directly managed (typically by ModemManager) therefore the serial port won't be available for other services to use.
+
+For older versions compatibility, if the `net.interface.<interface>.config.gpsMode` property is not set, the GPS mode will be automatically set to the `kuraModemGpsModeUnmanaged` equivalent.
+
 ### VLAN properties
 
 Name                                                  | Type     | Description                              | Default value

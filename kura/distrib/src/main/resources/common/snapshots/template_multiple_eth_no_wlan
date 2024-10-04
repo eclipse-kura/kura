@@ -18,7 +18,7 @@
             <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.status" array="false" encrypted="false" type="String">
                 <esf:value>netIPv4StatusEnabledLAN</esf:value>
             </esf:property>
-            <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.address" array="false" encrypted="false"type="String">
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.address" array="false" encrypted="false" type="String">
                 <esf:value>172.16.0.1</esf:value>
             </esf:property>
             <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.prefix" array="false" encrypted="false" type="Short">

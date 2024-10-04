@@ -1,4 +1,4 @@
-   <esf:configuration pid="org.eclipse.kura.net.admin.NetworkConfigurationService">
+    <esf:configuration pid="org.eclipse.kura.net.admin.NetworkConfigurationService">
         <esf:properties>
             <esf:property name="net.interfaces" array="false" encrypted="false" type="String">
                 <esf:value>INTERFACES_LIST</esf:value>
@@ -18,7 +18,7 @@
             <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.status" array="false" encrypted="false" type="String">
                 <esf:value>netIPv4StatusEnabledLAN</esf:value>
             </esf:property>
-            <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.address" array="false" encrypted="false"type="String">
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.address" array="false" encrypted="false" type="String">
                 <esf:value>172.16.0.1</esf:value>
             </esf:property>
             <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.prefix" array="false" encrypted="false" type="Short">
@@ -33,6 +33,9 @@
             <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.gateway" array="false" encrypted="false" type="String">
                 <esf:value/>
             </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.nat.enabled" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
             <esf:property name="net.interface.ETH_INTERFACE_0.config.dhcpClient4.enabled" array="false" encrypted="false" type="Boolean">
                 <esf:value>false</esf:value>
             </esf:property>
@@ -40,7 +43,7 @@
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property name="net.interface.ETH_INTERFACE_0.config.dhcpServer4.passDns" array="false" encrypted="false" type="Boolean">
-                <esf:value>false</esf:value>
+                <esf:value>true</esf:value>
             </esf:property>
             <esf:property name="net.interface.ETH_INTERFACE_0.config.dhcpServer4.prefix" array="false" encrypted="false" type="Short">
                 <esf:value>24</esf:value>

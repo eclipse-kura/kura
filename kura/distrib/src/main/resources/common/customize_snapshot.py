@@ -52,7 +52,7 @@ def main():
             firewall_configuration_template = "/opt/eclipse/kura/install/template_firewall_eth"
         else:
             network_configuration_template = "/opt/eclipse/kura/install/template_multiple_eth_one_wlan"
-            firewall_configuration_template = "/opt/eclipse/kura/install/template_firewall_wlan"
+            firewall_configuration_template = "/opt/eclipse/kura/install/template_firewall_eth_wlan"
     
     
     logging.info("%s : starting editing", snapshot_filename)

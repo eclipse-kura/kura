@@ -305,7 +305,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
+            <!-- <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-surefire-plugin</artifactId>
                 <version>${tycho-version}</version>
@@ -319,7 +319,7 @@
                         </dependency>
                     </dependencies>
                 </configuration>
-            </plugin>
+            </plugin> -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
@@ -420,7 +420,7 @@
                     <configuration>
                         <lifecycleMappingMetadata>
                             <pluginExecutions>
-                                <pluginExecution>
+                                <!-- <pluginExecution>
                                     <pluginExecutionFilter>
                                         <groupId>
                                             org.jacoco
@@ -440,7 +440,7 @@
                                     <action>
                                         <ignore></ignore>
                                     </action>
-                                </pluginExecution>
+                                </pluginExecution> -->
                                 <pluginExecution>
                                     <pluginExecutionFilter>
                                         <groupId>

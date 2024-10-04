@@ -44,6 +44,7 @@ import org.eclipse.kura.net.status.modem.BearerIpType;
 import org.eclipse.kura.net.status.modem.ESimStatus;
 import org.eclipse.kura.net.status.modem.ModemBand;
 import org.eclipse.kura.net.status.modem.ModemCapability;
+import org.eclipse.kura.net.status.modem.ModemGpsMode;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus.ModemInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.modem.ModemMode;
@@ -618,6 +619,7 @@ public class NMStatusConverter {
             builder.withSupportedBands(getModemBands(properties, "SupportedBands"));
             builder.withCurrentBands(getModemBands(properties, "CurrentBands"));
             builder.withGpsSupported(isGpsSupported(properties));
+            builder.withSupportedGpsModes(getSupportedGpsModes(properties));
             builder.withSimLocked(isSimLocked(properties));
             builder.withConnectionStatus(MMModemState.toModemState(properties.Get(MM_MODEM_BUS_NAME, STATE)));
             builder.withAccessTechnologies(MMModemAccessTechnology
@@ -701,6 +703,29 @@ public class NMStatusConverter {
         } catch (DBusExecutionException e) {
             logger.debug("Cannot retrieve location object", e);
             return false;
+        }
+    }
+
+    private static Set<ModemGpsMode> getSupportedGpsModes(Properties properties) {
+        try {
+            UInt32 locationSources = properties.Get(MM_MODEM_LOCATION_BUS_NAME, "Capabilities");
+            Set<MMModemLocationSource> modemLocationSources = MMModemLocationSource
+                    .toMMModemLocationSourceFromBitMask(locationSources);
+
+            Set<ModemGpsMode> gpsModes = new HashSet<>();
+            if (modemLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED)) {
+                gpsModes.add(ModemGpsMode.UNMANAGED);
+            }
+
+            if (modemLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA)
+                    && modemLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW)) {
+                gpsModes.add(ModemGpsMode.MANAGED_GPS);
+            }
+
+            return gpsModes;
+        } catch (DBusExecutionException e) {
+            logger.debug("Cannot retrieve location object", e);
+            return Collections.emptySet();
         }
     }
 

@@ -47,6 +47,7 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
     private final Set<ModemBand> supportedBands;
     private final Set<ModemBand> currentBands;
     private final boolean gpsSupported;
+    private final Set<ModemGpsMode> supportedGpsModes;
     private final List<Sim> availableSims;
     private final boolean simLocked;
     private final List<Bearer> bearers;
@@ -75,6 +76,7 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         this.supportedBands = builder.supportedBands;
         this.currentBands = builder.currentBands;
         this.gpsSupported = builder.gpsSupported;
+        this.supportedGpsModes = builder.supportedGpsModes;
         this.availableSims = builder.availableSims;
         this.simLocked = builder.simLocked;
         this.bearers = builder.bearers;
@@ -147,6 +149,13 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         return this.gpsSupported;
     }
 
+    /*
+     * @since 2.8
+     */
+    public Set<ModemGpsMode> getSupporteGpsModes() {
+        return this.supportedGpsModes;
+    }
+
     public List<Sim> getAvailableSims() {
         return this.availableSims;
     }
@@ -209,6 +218,7 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         private Set<ModemBand> supportedBands = EnumSet.of(ModemBand.UNKNOWN);
         private Set<ModemBand> currentBands = EnumSet.of(ModemBand.UNKNOWN);
         private boolean gpsSupported = false;
+        private Set<ModemGpsMode> supportedGpsModes = Collections.emptySet();
         private List<Sim> availableSims = Collections.emptyList();
         private boolean simLocked = false;
         private List<Bearer> bearers = Collections.emptyList();
@@ -293,6 +303,11 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
 
         public ModemInterfaceStatusBuilder withGpsSupported(Boolean gpsSupported) {
             this.gpsSupported = gpsSupported;
+            return getThis();
+        }
+
+        public ModemInterfaceStatusBuilder withSupportedGpsModes(Set<ModemGpsMode> supportedGpsModes) {
+            this.supportedGpsModes = supportedGpsModes;
             return getThis();
         }
 

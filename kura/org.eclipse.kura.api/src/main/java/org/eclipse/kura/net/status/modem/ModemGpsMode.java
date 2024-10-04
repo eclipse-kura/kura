@@ -15,6 +15,8 @@ package org.eclipse.kura.net.status.modem;
 
 /*
  * The GPS mode supported by the modem.
+ *
+ * @since 2.8
  */
 public enum ModemGpsMode {
     /*

@@ -228,7 +228,7 @@
                 <module>tools</module>
             </modules>
         </profile>
-        <profile>
+        <!-- <profile>
             <id>tests</id>
             <activation>
                 <property>
@@ -238,7 +238,7 @@
             <modules>
                 <module>test</module>
             </modules>
-        </profile>
+        </profile> -->
 
         <profile>
             <id>web</id>

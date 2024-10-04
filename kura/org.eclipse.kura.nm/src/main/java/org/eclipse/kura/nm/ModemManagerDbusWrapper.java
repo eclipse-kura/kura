@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.nm;
 
 import java.util.ArrayList;
@@ -42,7 +54,8 @@ public class ModemManagerDbusWrapper {
         this.dbusConnection = dbusConnection;
     }
 
-    protected void setGPS(Optional<String> modemDevicePath, Optional<Boolean> enableGPS) throws DBusException {
+    protected void setGPS(Optional<String> modemDevicePath, Optional<Boolean> enableGPS, Optional<String> gpsModeString)
+            throws DBusException {
         if (!modemDevicePath.isPresent()) {
             logger.warn("Cannot retrieve MM.Modem from NM.Modem. Skipping GPS configuration.");
             return;
@@ -51,6 +64,8 @@ public class ModemManagerDbusWrapper {
         enableModem(modemDevicePath.get());
 
         boolean isGPSSourceEnabled = enableGPS.isPresent() && enableGPS.get();
+        KuraModemGPSMode desiredGPSMode = gpsModeString.isPresent() ? KuraModemGPSMode.fromString(gpsModeString.get())
+                : KuraModemGPSMode.KURA_MODEM_GPS_MODE_UNMANAGED;
 
         Location modemLocation = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemDevicePath.get(),
                 Location.class);
@@ -76,12 +91,13 @@ public class ModemManagerDbusWrapper {
         }
 
         if (isGPSSourceEnabled) {
-            if (!availableLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED)) {
-                logger.warn("Cannot setup Modem.Location, MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED not supported for {}",
+            desiredLocationSources = KuraModemGPSMode.toMMModemLocationSources(desiredGPSMode);
+
+            if (!availableLocationSources.containsAll(desiredLocationSources)) {
+                logger.warn("Cannot setup Modem.Location, {} not supported for {}", desiredLocationSources,
                         modemLocationProperties.getObjectPath());
                 return;
             }
-            desiredLocationSources = EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED);
         }
 
         logger.debug("Modem location setup {} for modem {}", currentLocationSources, modemDevicePath.get());

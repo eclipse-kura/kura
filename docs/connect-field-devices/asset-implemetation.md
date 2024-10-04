@@ -45,26 +45,50 @@ Once defined the Channels in an Asset, a simple Java application that leverages 
 - **listen**: if supported by the associated driver, allows to receive notifications by the driver on events. This flag currently has effect only inside Kura Wires.
 
 ### Arithmetic with scale and offset
-**scaleoffset.type** parameter allow to specify the datatype used in the scale offset operation. The default one is `DEFINED_BY_VALUE_TYPE` that means the type of **value.type** will be used to perform the operation. Using a different type, like `INTEGER` or `DOUBLE` will determine the use of the selected type for all value involved in the operation.
-See the following examples:
+The following **mode**s are supported for computing scale and offset:
+- `DOUBLE`
+- `INTEGER`
+- `LONG`
+- `FLOAT`
 
-Example 1:
-channel configured with:
- -**value.type**: INTEGER
- -**scaleoffset.type**: `DEFINED_BY_VALUE_TYPE`
- -**scale**: 2.0
- -**offset**: 1.5
+In all cases the channel value, the scale and the offset are converted to the selected **mode** type using the java casting and then the following operation is performed: `channel_value * scale + offset`. The result is casted again to **value.type**.
+Scale and offset are internally represented with a double.
 
-the result will be: (int) <value_read> * int (2.0) + int (1.5) .
+The **mode** can be selected in the following way:
+- if the **scaleoffset.type** is set to `DOUBLE` the corrisponding **mode** will be used.
+- if the **scaleoffset.type** value is `DEFINED_BY_VALUE_TYPE` the operation **mode** is determinated by **value.type**.
 
-Example 2:
+Example of `DOUBLE` **mode** with input value 5:
 channel configured with:
  -**value.type**: INTEGER
  -**scaleoffset.type**: `DOUBLE`
- -**scale**: 2.0
+ -**scale**: 3.25
  -**offset**: 1.5
 
-the result will be: (int) ( (double) <value_read> * double (2.0) + double (1.5) ) .
+the result is: `(int) ((double) channel_value * (double) 2.7d + (double) 1.5d)` = 17.
+
+!!! warning loss of precision
+    If the **mode** is `LONG` or `INTEGER` the decimal part of the **scale** and **offset** value  will be discarded.
+
+Example of `INTEGER` **mode** with input value 5:
+channel configured with:
+ -**value.type**: INTEGER
+ -**scaleoffset.type**: `DEFINED_BY_VALUE_TYPE`
+ -**scale**: 3.25
+ -**offset**: 1.5
+
+the result is: `(int) (channel_value * (int) 2.7d + (int) 1.5d)` = 16.
+
+Example of `DOUBLE` **mode** with input value 5:
+channel configured with:
+ -**value.type**: DOUBLE
+ -**scaleoffset.type**: `DEFINED_BY_VALUE_TYPE`
+ -**scale**: 3.25
+ -**offset**: 1.5
+
+the result is: `(double) (channel_value * (double) 2.7d + (double) 1.5d)` = 17.75.
+
+As the examples show the final result can be different depending on the used **mode** and **value.type**.
 
 ### Driver specific parameters
 

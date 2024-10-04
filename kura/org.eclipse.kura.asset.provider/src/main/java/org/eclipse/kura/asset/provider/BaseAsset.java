@@ -52,7 +52,6 @@ import org.eclipse.kura.channel.ScaleOffsetType;
 import org.eclipse.kura.channel.listener.ChannelEvent;
 import org.eclipse.kura.channel.listener.ChannelListener;
 import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.Tad;
@@ -292,15 +291,13 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
         final Map<String, Object> properties = this.config.getProperties();
 
-        final String componentName = properties.get(ConfigurationService.KURA_SERVICE_PID).toString();
-
         Tocd ocd = this.config.getDefinition();
 
         if (ocd == null) {
             ocd = getOCD();
         }
 
-        return new ComponentConfigurationImpl(componentName, ocd, new HashMap<>(properties));
+        return new ComponentConfigurationImpl(getKuraServicePid(), ocd, new HashMap<>(properties));
     }
 
     /**
@@ -312,7 +309,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         return CONF_PID;
     }
 
-    protected String getKuraServicePid() throws KuraException {
+    protected String getKuraServicePid() {
         return this.config.getKuraServicePid();
     }
 
@@ -710,10 +707,10 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         public void onChannelEvent(ChannelEvent event) {
             final ChannelRecord originaRecord = event.getChannelRecord();
 
-            if (shouldApplyScaleAndOffset(originaRecord, channel)) {
+            if (shouldApplyScaleAndOffset(originaRecord, this.channel)) {
                 final ChannelRecord cloned = cloneRecord(originaRecord);
 
-                applyScaleAndOffset(cloned, channel);
+                applyScaleAndOffset(cloned, this.channel);
 
                 this.listener.onChannelEvent(new ChannelEvent(cloned));
             } else {

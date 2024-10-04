@@ -68,7 +68,7 @@ channel configured with:
 - **scale**: 3.25
 - **offset**: 1.5
 
-the result is: `(int) ((double) channel_value * (double) 2.7d + (double) 1.5d) = 17`.
+the result is: `(int) ((double) channel_value * (double) 3.25d + (double) 1.5d) = 17`.
 
 !!! warning loss of precision
     If the **mode** is `LONG` or `INTEGER` the decimal part of the **scale** and **offset** value  will be discarded.
@@ -81,7 +81,7 @@ channel configured with:
 - **scale**: 3.25
 - **offset**: 1.5
 
-the result is: `(int) (channel_value * (int) 2.7d + (int) 1.5d) = 16`.
+the result is: `(int) (channel_value * (int) 3.25d + (int) 1.5d) = 16`.
 
 Example of `DOUBLE` **mode** with input value 5:
 channel configured with:
@@ -91,7 +91,7 @@ channel configured with:
 - **scale**: 3.25
 - **offset**: 1.5
 
-the result is: `(double) (channel_value * (double) 2.7d + (double) 1.5d) = 17.75`.
+the result is: `(double) (channel_value * (double) 3.25d + (double) 1.5d) = 17.75`.
 
 As the examples show the final result can be different depending on the used **mode** and **value.type**.
 

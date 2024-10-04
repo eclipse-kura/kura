@@ -46,6 +46,7 @@ Once defined the Channels in an Asset, a simple Java application that leverages 
 
 ### Arithmetic with scale and offset
 The following **mode**s are supported for computing scale and offset:
+
 - `DOUBLE`
 - `INTEGER`
 - `LONG`
@@ -55,38 +56,42 @@ In all cases the channel value, the scale and the offset are converted to the se
 Scale and offset are internally represented with a double.
 
 The **mode** can be selected in the following way:
+
 - if the **scaleoffset.type** is set to `DOUBLE` the corrisponding **mode** will be used.
 - if the **scaleoffset.type** value is `DEFINED_BY_VALUE_TYPE` the operation **mode** is determinated by **value.type**.
 
 Example of `DOUBLE` **mode** with input value 5:
 channel configured with:
- -**value.type**: INTEGER
- -**scaleoffset.type**: `DOUBLE`
- -**scale**: 3.25
- -**offset**: 1.5
 
-the result is: `(int) ((double) channel_value * (double) 2.7d + (double) 1.5d)` = 17.
+- **value.type**: INTEGER
+- **scaleoffset.type**: `DOUBLE`
+- **scale**: 3.25
+- **offset**: 1.5
+
+the result is: `(int) ((double) channel_value * (double) 2.7d + (double) 1.5d) = 17`.
 
 !!! warning loss of precision
     If the **mode** is `LONG` or `INTEGER` the decimal part of the **scale** and **offset** value  will be discarded.
 
 Example of `INTEGER` **mode** with input value 5:
 channel configured with:
- -**value.type**: INTEGER
- -**scaleoffset.type**: `DEFINED_BY_VALUE_TYPE`
- -**scale**: 3.25
- -**offset**: 1.5
 
-the result is: `(int) (channel_value * (int) 2.7d + (int) 1.5d)` = 16.
+- **value.type**: INTEGER
+- **scaleoffset.type**: `DEFINED_BY_VALUE_TYPE`
+- **scale**: 3.25
+- **offset**: 1.5
+
+the result is: `(int) (channel_value * (int) 2.7d + (int) 1.5d) = 16`.
 
 Example of `DOUBLE` **mode** with input value 5:
 channel configured with:
- -**value.type**: DOUBLE
- -**scaleoffset.type**: `DEFINED_BY_VALUE_TYPE`
- -**scale**: 3.25
- -**offset**: 1.5
 
-the result is: `(double) (channel_value * (double) 2.7d + (double) 1.5d)` = 17.75.
+- **value.type**: DOUBLE
+- **scaleoffset.type**: `DEFINED_BY_VALUE_TYPE`
+- **scale**: 3.25
+- **offset**: 1.5
+
+the result is: `(double) (channel_value * (double) 2.7d + (double) 1.5d) = 17.75`.
 
 As the examples show the final result can be different depending on the used **mode** and **value.type**.
 

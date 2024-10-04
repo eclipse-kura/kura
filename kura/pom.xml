@@ -121,11 +121,11 @@
         <kura.build.version>${maven.build.timestamp}</kura.build.version>
 
         <!-- Jacoco version -->
-        <jacoco.version>0.8.1</jacoco.version>
+        <!-- <jacoco.version>0.8.1</jacoco.version>
         <jacoco.reportDir>target/jacoco/</jacoco.reportDir>
         <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
+        <sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath> -->
 
         <!-- BND baseline plugin -->
         <bnd.baseline.version>3.4.0</bnd.baseline.version>
@@ -353,7 +353,7 @@
                 </configuration>
             </plugin>
 
-            <plugin>
+            <!-- <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
@@ -369,7 +369,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin> -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
@@ -565,7 +565,7 @@
                     <configuration>
                         <lifecycleMappingMetadata>
                             <pluginExecutions>
-                                <pluginExecution>
+                                <!-- <pluginExecution>
                                     <pluginExecutionFilter>
                                         <groupId>
                                             org.jacoco
@@ -585,7 +585,7 @@
                                     <action>
                                         <ignore></ignore>
                                     </action>
-                                </pluginExecution>
+                                </pluginExecution> -->
                                 <pluginExecution>
                                     <pluginExecutionFilter>
                                         <groupId>

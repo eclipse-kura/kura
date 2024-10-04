@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -114,7 +114,8 @@ public interface PositionService {
     public String getLastSentence();
 
     /**
-     * Returns the GNSS System used to get the position information @reference GNSSType. Could be one or more system (eg: GPS + GLONASS).
+     * Returns the GNSS System used to get the position information @reference GNSSType. Could be one or more system
+     * (eg: GPS + GLONASS).
      * 
      * If empty, no recognized GNSS System Type is available.
      * 

@@ -312,7 +312,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         return CONF_PID;
     }
 
-    protected String getKuraServicePid() throws KuraException {
+    protected String getKuraServicePid() {
         return this.config.getKuraServicePid();
     }
 

@@ -38,10 +38,73 @@ Once defined the Channels in an Asset, a simple Java application that leverages 
 - **name**: unique user-friendly name for a channel
 - **type**: represents the type of operation supported. Possible values are: _READ_, _WRITE_, _READ/WRITE_
 - **value.type**: represents the data type that will be used when creating the Wire Envelope for the connected components.
-- **scale**: an optional scaling factor to be applied only to the numeric values retrieved from the field. It is represented as a double and if the value.type is, for example, an integer, the scaling factor multiplier will be casted to integer before multiplying it to the retrieved value.
-- **offset**: an optional offset value that will be added only to the numeric values retrieved from the field. It is a double in the asset definition, and will be casted to the value.type of the retrieved value before being applied.
+
+- **scale**: an optional scaling factor to be applied only to the numeric values retrieved from the field. It is parsed as a double. See below for more details.
+- **offset**: an optional offset value that will be added only to the numeric values retrieved from the field. It is parsed as a double. See below for more details.
+- **scaleoffset.type**: Allows to customise the way scale and offset is applied. See below for more details.
 - **unit**: an optional string value that will be added to the asset channel read to represent the unit of measure associated to that specific channel.
 - **listen**: if supported by the associated driver, allows to receive notifications by the driver on events. This flag currently has effect only inside Kura Wires.
+
+### Arithmetic with scale and offset
+The Asset supports applying a scale and offset to the values obtained by the attached Driver during read operations and to the values received in listen mode.
+
+!!! warning
+    Application of scale and offset for write operations is not supported.
+
+The following **mode**s are implemented for computing scale and offset:
+
+- `DOUBLE`
+- `INTEGER`
+- `LONG`
+- `FLOAT`
+
+The values of the **scale** and **offset** configuration parameters and the value obtained from the Driver are all converted to the **mode** type using the Java casting and then the following operation is performed: `channel_value * scale + offset`. The operation result is casted again to **value.type** to produce the final channel value.
+
+The values of the **scale** and **offset** parameters are parsed from channel configuration as doubles.
+
+The **mode** can be selected in the following way:
+
+- If the **scaleoffset.type** is set to `DOUBLE` the corrisponding **mode** will be used.
+- If the **scaleoffset.type** value is `DEFINED_BY_VALUE_TYPE` the operation **mode** is determinated by **value.type**.
+
+Example of `DOUBLE` **mode**:
+channel configured with:
+
+- **value.type**: INTEGER
+- **scaleoffset.type**: `DOUBLE`
+- **scale**: 3.25
+- **offset**: 1.5
+
+Since **scaleoffset.type** is `DOUBLE`, the scale and offset **mode** is forced to `DOUBLE`.
+
+If `channel_value` is 5 (INTEGER) the result is: `(int) ((double) channel_value * (double) 3.25d + (double) 1.5d) = 17`.
+
+Example of `INTEGER` **mode**:
+channel configured with:
+
+- **value.type**: INTEGER
+- **scaleoffset.type**: `DEFINED_BY_VALUE_TYPE`
+- **scale**: 3.25
+- **offset**: 1.5
+
+Since **scaleoffset.type** is `DEFINED_BY_VALUE_TYPE`, the **mode** determined by the **value.type** parameter (`INTEGER`) will be used.
+
+If `channel_value` is 5 (INTEGER) the result is: `(int) (channel_value * (int) 3.25d + (int) 1.5d) = 16`.
+
+Example of `DOUBLE` **mode**:
+channel configured with:
+
+- **value.type**: DOUBLE
+- **scaleoffset.type**: `DEFINED_BY_VALUE_TYPE`
+- **scale**: 3.25
+- **offset**: 1.5
+
+If `channel_value` is 5 (DOUBLE) the result is: `(double) (channel_value * (double) 3.25d + (double) 1.5d) = 17.75`.
+
+!!! warning
+    If the **mode** is `LONG` or `INTEGER` the decimal part of the **scale** and **offset** value will be discarded.
+
+As the examples show the final result can be different depending on the used **mode** and **value.type**.
 
 ### Driver specific parameters
 

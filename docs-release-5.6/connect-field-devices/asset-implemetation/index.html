@@ -2261,6 +2261,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#arithmetic-with-scale-and-offset" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arithmetic with scale and offset
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#driver-specific-parameters" class="md-nav__link">
     <span class="md-ellipsis">
       Driver specific parameters
@@ -4494,6 +4503,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#arithmetic-with-scale-and-offset" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arithmetic with scale and offset
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#driver-specific-parameters" class="md-nav__link">
     <span class="md-ellipsis">
       Driver specific parameters
@@ -4663,12 +4681,71 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><strong>enabled</strong>: each channel can be separately enabled using this flag.</li>
 <li><strong>name</strong>: unique user-friendly name for a channel</li>
 <li><strong>type</strong>: represents the type of operation supported. Possible values are: <em>READ</em>, <em>WRITE</em>, <em>READ/WRITE</em></li>
-<li><strong>value.type</strong>: represents the data type that will be used when creating the Wire Envelope for the connected components.</li>
-<li><strong>scale</strong>: an optional scaling factor to be applied only to the numeric values retrieved from the field. It is represented as a double and if the value.type is, for example, an integer, the scaling factor multiplier will be casted to integer before multiplying it to the retrieved value.</li>
-<li><strong>offset</strong>: an optional offset value that will be added only to the numeric values retrieved from the field. It is a double in the asset definition, and will be casted to the value.type of the retrieved value before being applied.</li>
+<li>
+<p><strong>value.type</strong>: represents the data type that will be used when creating the Wire Envelope for the connected components.</p>
+</li>
+<li>
+<p><strong>scale</strong>: an optional scaling factor to be applied only to the numeric values retrieved from the field. It is parsed as a double. See below for more details.</p>
+</li>
+<li><strong>offset</strong>: an optional offset value that will be added only to the numeric values retrieved from the field. It is parsed as a double. See below for more details.</li>
+<li><strong>scaleoffset.type</strong>: Allows to customise the way scale and offset is applied. See below for more details.</li>
 <li><strong>unit</strong>: an optional string value that will be added to the asset channel read to represent the unit of measure associated to that specific channel.</li>
 <li><strong>listen</strong>: if supported by the associated driver, allows to receive notifications by the driver on events. This flag currently has effect only inside Kura Wires.</li>
 </ul>
+<h3 id="arithmetic-with-scale-and-offset">Arithmetic with scale and offset</h3>
+<p>The Asset supports applying a scale and offset to the values obtained by the attached Driver during read operations and to the values received in listen mode.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Application of scale and offset for write operations is not supported.</p>
+</div>
+<p>The following <strong>mode</strong>s are implemented for computing scale and offset:</p>
+<ul>
+<li><code>DOUBLE</code></li>
+<li><code>INTEGER</code></li>
+<li><code>LONG</code></li>
+<li><code>FLOAT</code></li>
+</ul>
+<p>The values of the <strong>scale</strong> and <strong>offset</strong> configuration parameters and the value obtained from the Driver are all converted to the <strong>mode</strong> type using the Java casting and then the following operation is performed: <code>channel_value * scale + offset</code>. The operation result is casted again to <strong>value.type</strong> to produce the final channel value.</p>
+<p>The values of the <strong>scale</strong> and <strong>offset</strong> parameters are parsed from channel configuration as doubles.</p>
+<p>The <strong>mode</strong> can be selected in the following way:</p>
+<ul>
+<li>If the <strong>scaleoffset.type</strong> is set to <code>DOUBLE</code> the corrisponding <strong>mode</strong> will be used.</li>
+<li>If the <strong>scaleoffset.type</strong> value is <code>DEFINED_BY_VALUE_TYPE</code> the operation <strong>mode</strong> is determinated by <strong>value.type</strong>.</li>
+</ul>
+<p>Example of <code>DOUBLE</code> <strong>mode</strong>:
+channel configured with:</p>
+<ul>
+<li><strong>value.type</strong>: INTEGER</li>
+<li><strong>scaleoffset.type</strong>: <code>DOUBLE</code></li>
+<li><strong>scale</strong>: 3.25</li>
+<li><strong>offset</strong>: 1.5</li>
+</ul>
+<p>Since <strong>scaleoffset.type</strong> is <code>DOUBLE</code>, the scale and offset <strong>mode</strong> is forced to <code>DOUBLE</code>.</p>
+<p>If <code>channel_value</code> is 5 (INTEGER) the result is: <code>(int) ((double) channel_value * (double) 3.25d + (double) 1.5d) = 17</code>.</p>
+<p>Example of <code>INTEGER</code> <strong>mode</strong>:
+channel configured with:</p>
+<ul>
+<li><strong>value.type</strong>: INTEGER</li>
+<li><strong>scaleoffset.type</strong>: <code>DEFINED_BY_VALUE_TYPE</code></li>
+<li><strong>scale</strong>: 3.25</li>
+<li><strong>offset</strong>: 1.5</li>
+</ul>
+<p>Since <strong>scaleoffset.type</strong> is <code>DEFINED_BY_VALUE_TYPE</code>, the <strong>mode</strong> determined by the <strong>value.type</strong> parameter (<code>INTEGER</code>) will be used.</p>
+<p>If <code>channel_value</code> is 5 (INTEGER) the result is: <code>(int) (channel_value * (int) 3.25d + (int) 1.5d) = 16</code>.</p>
+<p>Example of <code>DOUBLE</code> <strong>mode</strong>:
+channel configured with:</p>
+<ul>
+<li><strong>value.type</strong>: DOUBLE</li>
+<li><strong>scaleoffset.type</strong>: <code>DEFINED_BY_VALUE_TYPE</code></li>
+<li><strong>scale</strong>: 3.25</li>
+<li><strong>offset</strong>: 1.5</li>
+</ul>
+<p>If <code>channel_value</code> is 5 (DOUBLE) the result is: <code>(double) (channel_value * (double) 3.25d + (double) 1.5d) = 17.75</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If the <strong>mode</strong> is <code>LONG</code> or <code>INTEGER</code> the decimal part of the <strong>scale</strong> and <strong>offset</strong> value will be discarded.</p>
+</div>
+<p>As the examples show the final result can be different depending on the used <strong>mode</strong> and <strong>value.type</strong>.</p>
 <h3 id="driver-specific-parameters">Driver specific parameters</h3>
 <p>The parameters that are not included in list of driver independent parameters above are driver specific. These parameters are used to identify the resource addressed by the channel.</p>
 <p>Driver specific parameters are described in the driver documentation.</p>

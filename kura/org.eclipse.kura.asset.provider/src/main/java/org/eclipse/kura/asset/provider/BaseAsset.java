@@ -48,9 +48,11 @@ import org.eclipse.kura.channel.Channel;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.ChannelStatus;
 import org.eclipse.kura.channel.ChannelType;
+import org.eclipse.kura.channel.ScaleOffsetType;
 import org.eclipse.kura.channel.listener.ChannelEvent;
 import org.eclipse.kura.channel.listener.ChannelListener;
 import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.Tad;
@@ -60,10 +62,8 @@ import org.eclipse.kura.driver.PreparedRead;
 import org.eclipse.kura.internal.asset.provider.BaseAssetConfiguration;
 import org.eclipse.kura.internal.asset.provider.DriverTrackerCustomizer;
 import org.eclipse.kura.type.DataType;
-import org.eclipse.kura.type.DoubleValue;
-import org.eclipse.kura.type.FloatValue;
-import org.eclipse.kura.type.IntegerValue;
-import org.eclipse.kura.type.LongValue;
+import org.eclipse.kura.type.TypedValue;
+import org.eclipse.kura.type.TypedValues;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -224,10 +224,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             this.driverServiceTracker.close();
             this.driverServiceTracker = null;
         }
-        final DriverTrackerCustomizer driverTrackerCustomizer = new DriverTrackerCustomizer(
-                this.context.getBundleContext(), this, driverId);
         this.driverServiceTracker = new ServiceTracker<>(this.context.getBundleContext(), Driver.class.getName(),
-                driverTrackerCustomizer);
+                new DriverTrackerCustomizer(this.context.getBundleContext(), this, driverId));
         this.driverServiceTracker.open();
 
         logger.debug("Attaching driver instance...Done");
@@ -292,13 +290,15 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
         final Map<String, Object> properties = this.config.getProperties();
 
+        final String componentName = properties.get(ConfigurationService.KURA_SERVICE_PID).toString();
+
         Tocd ocd = this.config.getDefinition();
 
         if (ocd == null) {
             ocd = getOCD();
         }
 
-        return new ComponentConfigurationImpl(getKuraServicePid(), ocd, new HashMap<>(properties));
+        return new ComponentConfigurationImpl(componentName, ocd, new HashMap<>(properties));
     }
 
     /**
@@ -379,16 +379,16 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 validateChannel(channel, EnumSet.of(READ, READ_WRITE),
                         "Channel type not within expected types (READ or READ_WRITE)");
             } catch (Exception e) {
-                final ChannelRecord record = ChannelRecord.createStatusRecord(name,
+                final ChannelRecord channelRecord = ChannelRecord.createStatusRecord(name,
                         new ChannelStatus(FAILURE, e.getMessage(), e));
-                record.setTimestamp(System.currentTimeMillis());
-                channelRecords.add(record);
+                channelRecord.setTimestamp(System.currentTimeMillis());
+                channelRecords.add(channelRecord);
                 continue;
             }
 
-            final ChannelRecord record = channel.createReadRecord();
-            validRecords.add(record);
-            channelRecords.add(record);
+            final ChannelRecord channelRecord = channel.createReadRecord();
+            validRecords.add(channelRecord);
+            channelRecords.add(channelRecord);
         }
 
         if (!validRecords.isEmpty()) {
@@ -414,27 +414,103 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     }
 
     private boolean shouldApplyScaleAndOffset(final ChannelRecord channelRecord, final Channel channel) {
-        return !isNull(channelRecord) && !isNull(channelRecord.getValueType()) && !isNull(channelRecord.getValue())
-                && (channel.getValueScale() != 1.0d || channel.getValueOffset() != 0.0d);
+        return !isNull(channelRecord) && //
+                !isNull(channelRecord.getValueType()) && //
+                !isNull(channelRecord.getValue()) && //
+                (!channel.getValueScaleAsNumber().equals(1.0d) || !channel.getValueOffsetAsNumber().equals(0.0d));
     }
 
+    @SuppressWarnings("unchecked")
     private void applyScaleAndOffset(final ChannelRecord channelRecord, final Channel channel) {
-        final double channelScale = channel.getValueScale();
-        final double channelOffset = channel.getValueOffset();
+        final Number channelScale = channel.getValueScaleAsNumber();
+        final Number channelOffset = channel.getValueOffsetAsNumber();
 
-        if (channelRecord.getValueType().equals(DataType.DOUBLE)) {
-            channelRecord.setValue(
-                    new DoubleValue((double) channelRecord.getValue().getValue() * channelScale + channelOffset));
-        } else if (channelRecord.getValueType().equals(DataType.FLOAT)) {
-            channelRecord.setValue(new FloatValue(
-                    (float) channelRecord.getValue().getValue() * (float) channelScale + (float) channelOffset));
-        } else if (channelRecord.getValueType().equals(DataType.INTEGER)) {
-            channelRecord.setValue(new IntegerValue(
-                    (int) channelRecord.getValue().getValue() * (int) channelScale + (int) channelOffset));
-        } else if (channelRecord.getValueType().equals(DataType.LONG)) {
-            channelRecord.setValue(new LongValue(
-                    (long) channelRecord.getValue().getValue() * (long) channelScale + (long) channelOffset));
+        switch (channel.getValueType()) {
+        case DOUBLE:
+        case FLOAT:
+        case INTEGER:
+        case LONG:
+            TypedValue<? extends Number> newValue;
+            if (channel.getScaleOffsetType() == ScaleOffsetType.DEFINED_BY_VALUE_TYPE) {
+                newValue = calculateScaleAndOffsetByTypedValue((TypedValue<? extends Number>) channelRecord.getValue(),
+                        channelScale, channelOffset);
+            } else {
+                newValue = calculateScaleAndOffset((TypedValue<? extends Number>) channelRecord.getValue(),
+                        channel.getScaleOffsetType(), channelScale, channelOffset);
+            }
+
+            channelRecord.setValue(newValue);
+            break;
+        case BOOLEAN:
+        case BYTE_ARRAY:
+        case STRING:
+            // DO NOTHING
+            break;
+        default:
+            throw new IllegalStateException("Unsupported channel type: " + channel.getValueType());
         }
+
+    }
+
+    // legacy method
+    private TypedValue<? extends Number> calculateScaleAndOffsetByTypedValue(TypedValue<? extends Number> typedValue,
+            Number scale, Number offset) {
+
+        Number result;
+
+        switch (typedValue.getType()) {
+        case DOUBLE:
+            result = (double) typedValue.getValue() * scale.doubleValue() + offset.doubleValue();
+            break;
+        case FLOAT:
+            result = (float) typedValue.getValue() * scale.floatValue() + offset.floatValue();
+            break;
+        case INTEGER:
+            result = (int) typedValue.getValue() * scale.intValue() + offset.intValue();
+            break;
+        case LONG:
+            result = (long) typedValue.getValue() * scale.longValue() + offset.longValue();
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown value type" + typedValue.getType());
+        }
+
+        return toTypedValue(typedValue.getType(), result);
+
+    }
+
+    private TypedValue<? extends Number> calculateScaleAndOffset(TypedValue<? extends Number> typedValue,
+            ScaleOffsetType scaleOffsetType, Number scale, Number offset) {
+
+        Number result = null;
+
+        if (ScaleOffsetType.DOUBLE.equals(scaleOffsetType)) {
+            result = scale.doubleValue() * typedValue.getValue().doubleValue() + offset.doubleValue();
+        } else {
+            throw new IllegalArgumentException("Invalid scale/offset type");
+        }
+
+        return toTypedValue(typedValue.getType(), result);
+
+    }
+
+    private static TypedValue<? extends Number> toTypedValue(final DataType type, final Number value) {
+        Objects.requireNonNull(type, "type cannot be null");
+        Objects.requireNonNull(value, "value cannot be null");
+
+        switch (type) {
+        case DOUBLE:
+            return TypedValues.newDoubleValue(value.doubleValue());
+        case FLOAT:
+            return TypedValues.newFloatValue(value.floatValue());
+        case INTEGER:
+            return TypedValues.newIntegerValue(value.intValue());
+        case LONG:
+            return TypedValues.newLongValue(value.longValue());
+        default:
+            throw new IllegalArgumentException(value + " cannot be converted into a TypedValue of type " + type);
+        }
+
     }
 
     public boolean hasReadChannels() {

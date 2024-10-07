@@ -484,11 +484,9 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
         Number result = null;
 
-        switch (scaleOffsetType) {
-        case DOUBLE:
+        if (ScaleOffsetType.DOUBLE.equals(scaleOffsetType)) {
             result = scale.doubleValue() * typedValue.getValue().doubleValue() + offset.doubleValue();
-            break;
-        default:
+        } else {
             throw new IllegalArgumentException("Invalid scale/offset type");
         }
 

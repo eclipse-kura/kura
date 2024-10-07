@@ -20,6 +20,7 @@ import org.eclipse.kura.web.shared.model.GwtSession;
 import org.gwtbootstrap3.client.ui.FieldSet;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.InlineRadio;
+import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.html.Span;
 
@@ -47,11 +48,16 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
 
     @UiField
     FormLabel labelGps;
+    @UiField
+    FormLabel labelGpsMode;
 
     @UiField
     InlineRadio radio1;
     @UiField
     InlineRadio radio2;
+
+    @UiField
+    ListBox gpsMode;
 
     @UiField
     PanelHeader helpTitle;
@@ -64,6 +70,9 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
 
     @UiField
     HelpButton gpsHelp;
+
+    @UiField
+    HelpButton gpsModeHelp;
 
     public TabModemGpsUi(GwtSession currentSession, NetworkTabsUi tabs) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -155,6 +164,11 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
         this.radio1.setValue(true);
         this.radio2.setValue(false);
         this.formInitialized = true;
+
+        // GPS Mode
+        this.labelGpsMode.setText(MSGS.netModemGpsMode());
+        this.gpsMode.addItem("UNMANAGED");
+        this.gpsMode.addItem("MANAGED_GPS");
     }
 
     private void resetHelp() {

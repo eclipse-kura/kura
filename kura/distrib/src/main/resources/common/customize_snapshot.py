@@ -26,7 +26,7 @@ def main():
         ]
     )
     
-    snapshot_filename = "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
+    SNAPSHOT_FILENAME = "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
     
     (eth_names, wlan_names) = get_eth_wlan_interfaces_names()
     
@@ -55,8 +55,8 @@ def main():
             firewall_configuration_template = "/opt/eclipse/kura/install/template_firewall_eth_wlan"
     
     
-    logging.info("%s : starting editing", snapshot_filename)
-    snapshot = open(snapshot_filename, 'r+', encoding='utf-8')
+    logging.info("%s : starting editing", SNAPSHOT_FILENAME)
+    snapshot = open(SNAPSHOT_FILENAME, 'r+', encoding='utf-8')
     network_template = open(network_configuration_template, 'r', encoding='utf-8')
     firewall_template = open(firewall_configuration_template, 'r', encoding='utf-8')
 
@@ -73,14 +73,14 @@ def main():
             break
         snapshot_content = snapshot_content.replace('ETH_INTERFACE_' + str(i), eth_name)
         interfaces_list += "," + eth_name
-        logging.info("%s : replaced ETH_INTERFACE_%s with %s", snapshot_filename, str(i), eth_name)
+        logging.info("%s : replaced ETH_INTERFACE_%s with %s", SNAPSHOT_FILENAME, str(i), eth_name)
 
     for i, wlan_name in enumerate(wlan_names):
         if i > 0:
             break
         snapshot_content = snapshot_content.replace('WIFI_INTERFACE_' + str(i), wlan_name)
         interfaces_list += "," + wlan_name
-        logging.info("%s : replaced WIFI_INTERFACE_%s with %s", snapshot_filename, str(i), wlan_name)
+        logging.info("%s : replaced WIFI_INTERFACE_%s with %s", SNAPSHOT_FILENAME, str(i), wlan_name)
         
     snapshot_content = snapshot_content.replace('INTERFACES_LIST', interfaces_list)
     
@@ -89,7 +89,7 @@ def main():
     snapshot.write(snapshot_content)
     snapshot.close()
         
-    logging.info("%s : successfully edited", snapshot_filename)
+    logging.info("%s : successfully edited", SNAPSHOT_FILENAME)
             
 if __name__ == "__main__":
     main()

@@ -26,7 +26,7 @@ def main():
         ]
     )
     
-    iptables_filename = "/opt/eclipse/kura/.data/iptables"
+    IPTABLES_FILENAME = "/opt/eclipse/kura/.data/iptables"
     
     (eth_names, wlan_names) = get_eth_wlan_interfaces_names()
     
@@ -37,8 +37,8 @@ def main():
         logging.info("ERROR: no ethernet interface found")
         exit(1)
     
-    logging.info("%s : starting editing", iptables_filename)
-    iptables = open(iptables_filename, 'r+', encoding='utf-8')
+    logging.info("%s : starting editing", IPTABLES_FILENAME)
+    iptables = open(IPTABLES_FILENAME, 'r+', encoding='utf-8')
     iptables_content = ""
     if wlan_number == 0:
         for line in iptables:
@@ -54,7 +54,7 @@ def main():
     iptables.write(iptables_content)
     iptables.close()
         
-    logging.info("%s : successfully edited", iptables_filename)
+    logging.info("%s : successfully edited", IPTABLES_FILENAME)
             
 if __name__ == "__main__":
     main()

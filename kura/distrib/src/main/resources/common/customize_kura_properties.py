@@ -32,7 +32,7 @@ def main():
         logging.info("ERROR: invalid arguments length")
         exit(1)
         
-    kura_properties_filename = "/opt/eclipse/kura/framework/kura.properties"
+    KURA_PROPERTIES_FILENAME = "/opt/eclipse/kura/framework/kura.properties"
     
     (eth_names, wlan_names) = get_eth_wlan_interfaces_names()
     
@@ -40,8 +40,8 @@ def main():
         logging.info("ERROR: no ethernet interface found")
         exit(1)
     
-    logging.info("%s : starting editing", kura_properties_filename)
-    kura_properties = open(kura_properties_filename, 'r+', encoding='utf-8')
+    logging.info("%s : starting editing", KURA_PROPERTIES_FILENAME)
+    kura_properties = open(KURA_PROPERTIES_FILENAME, 'r+', encoding='utf-8')
 
     kura_properties_content = kura_properties.read()
     kura_properties_content = kura_properties_content.replace('device_name', board_name[0])
@@ -52,7 +52,7 @@ def main():
     kura_properties.write(kura_properties_content)
     kura_properties.close()
         
-    logging.info("%s : successfully edited", kura_properties_filename)
+    logging.info("%s : successfully edited", KURA_PROPERTIES_FILENAME)
             
 if __name__ == "__main__":
     main()

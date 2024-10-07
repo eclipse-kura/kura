@@ -43,8 +43,8 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
     private static final String NET_MODEM_MODE_UNMANAGED = "kuraModemGpsModeUnmanaged";
     private static final String NET_MODEM_MODE_MANAGED_GPS = "kuraModemGpsModeManagedGps";
 
-    private static final String MODEM_GPS_UNMANAGED = "UNMANAGED";
-    private static final String MODEM_GPS_MANAGED_GPS = "MANAGED_GPS";
+    private static final String DROPDOWN_MODEM_GPS_UNMANAGED = "UNMANAGED";
+    private static final String DROPDOWN_MODEM_GPS_MANAGED_GPS = "MANAGED_GPS";
 
     private final GwtSession session;
     private final NetworkTabsUi tabs;
@@ -121,7 +121,7 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
         if (this.formInitialized) {
             updatedModemNetIf.setGpsEnabled(this.radio1.getValue());
 
-            if (MODEM_GPS_UNMANAGED.equals(this.gpsMode.getSelectedValue())) {
+            if (DROPDOWN_MODEM_GPS_UNMANAGED.equals(this.gpsMode.getSelectedValue())) {
                 updatedModemNetIf.setGpsMode(NET_MODEM_MODE_UNMANAGED);
             } else { // MANAGED_GPS
                 updatedModemNetIf.setGpsMode(NET_MODEM_MODE_MANAGED_GPS);
@@ -186,8 +186,8 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
         // GPS Mode
         this.labelGpsMode.setText(MSGS.netModemGpsMode());
         // WIP: Populate the list box with the available GPS modes
-        this.gpsMode.addItem(MODEM_GPS_UNMANAGED);
-        this.gpsMode.addItem(MODEM_GPS_MANAGED_GPS);
+        this.gpsMode.addItem(DROPDOWN_MODEM_GPS_UNMANAGED);
+        this.gpsMode.addItem(DROPDOWN_MODEM_GPS_MANAGED_GPS);
 
         this.gpsMode.addMouseOverHandler(event -> {
             TabModemGpsUi.this.helpText.clear();

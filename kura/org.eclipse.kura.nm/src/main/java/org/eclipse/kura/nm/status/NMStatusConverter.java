@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -692,18 +692,18 @@ public class NMStatusConverter {
     }
 
     private static boolean isGpsSupported(Properties properties) {
-        boolean isSupported = false;
         try {
             UInt32 locationSources = properties.Get(MM_MODEM_LOCATION_BUS_NAME, "Capabilities");
             Set<MMModemLocationSource> modemLocationSources = MMModemLocationSource
                     .toMMModemLocationSourceFromBitMask(locationSources);
-            if (modemLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED)) {
-                isSupported = true;
-            }
+
+            return modemLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED)
+                    || (modemLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW)
+                            && modemLocationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA));
         } catch (DBusExecutionException e) {
             logger.debug("Cannot retrieve location object", e);
+            return false;
         }
-        return isSupported;
     }
 
     private static Set<ModemGpsMode> getSupportedGpsModes(Properties properties) {

@@ -60,6 +60,7 @@ import org.eclipse.kura.net.status.modem.ESimStatus;
 import org.eclipse.kura.net.status.modem.ModemBand;
 import org.eclipse.kura.net.status.modem.ModemCapability;
 import org.eclipse.kura.net.status.modem.ModemConnectionStatus;
+import org.eclipse.kura.net.status.modem.ModemGpsMode;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
 import org.eclipse.kura.net.status.modem.ModemMode;
 import org.eclipse.kura.net.status.modem.ModemModePair;
@@ -1657,6 +1658,7 @@ public class NMDbusConnectorTest {
         assertTrue(modemStatus.getCurrentBands().contains(ModemBand.EUTRAN_10));
         assertTrue(modemStatus.getCurrentBands().contains(ModemBand.EUTRAN_39));
         assertTrue(modemStatus.isGpsSupported());
+        assertEquals(EnumSet.of(ModemGpsMode.UNMANAGED, ModemGpsMode.MANAGED_GPS), modemStatus.getSupporteGpsModes());
         assertFalse(modemStatus.isSimLocked());
         assertEquals(ModemConnectionStatus.REGISTERED, modemStatus.getConnectionStatus());
         assertEquals(1, modemStatus.getAccessTechnologies().size());

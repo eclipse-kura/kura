@@ -168,8 +168,14 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
             }
         });
         this.radio2.addMouseOutHandler(event -> resetHelp());
-        this.radio1.addValueChangeHandler(event -> setDirty(true));
-        this.radio2.addValueChangeHandler(event -> setDirty(true));
+        this.radio1.addValueChangeHandler(event -> {
+            setDirty(true);
+            this.gpsMode.setEnabled(this.radio1.getValue());
+        });
+        this.radio2.addValueChangeHandler(event -> {
+            setDirty(true);
+            this.gpsMode.setEnabled(this.radio1.getValue());
+        });
 
         this.helpTitle.setText(MSGS.netHelpTitle());
         this.radio1.setText(MSGS.trueLabel());

@@ -114,9 +114,16 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
         GwtModemInterfaceConfig updatedModemNetIf = (GwtModemInterfaceConfig) updatedNetIf;
         if (this.formInitialized) {
             updatedModemNetIf.setGpsEnabled(this.radio1.getValue());
+
+            if (this.gpsMode.getSelectedItemText().equals("UNMANAGED")) {
+                updatedModemNetIf.setGpsMode("kuraModemGpsModeUnmanaged");
+            } else { // MANAGED_GPS
+                updatedModemNetIf.setGpsMode("kuraModemGpsModeManagedGps");
+            }
         } else {
             // initForm hasn't been called yet
             updatedModemNetIf.setGpsEnabled(this.selectedModemIfConfig.isGpsEnabled());
+            updatedModemNetIf.setGpsMode(this.selectedModemIfConfig.getGpsMode());
         }
     }
 
@@ -194,6 +201,12 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
                 this.radio1.setValue(false);
                 this.radio2.setValue(true);
             }
+
+            if (this.selectedModemIfConfig.getGpsMode().equals("kuraModemGpsModeUnmanaged")) {
+                this.gpsMode.setSelectedIndex(0);
+            } else {
+                this.gpsMode.setSelectedIndex(1);
+            }
         }
         refreshForm();
     }
@@ -206,6 +219,12 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
             } else {
                 this.radio1.setEnabled(false);
                 this.radio2.setEnabled(false);
+            }
+
+            if (this.selectedModemIfConfig.getGpsMode().equals("kuraModemGpsModeUnmanaged")) {
+                this.gpsMode.setSelectedIndex(0);
+            } else {
+                this.gpsMode.setSelectedIndex(1);
             }
         }
     }

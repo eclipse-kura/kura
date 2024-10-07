@@ -422,6 +422,7 @@ public class NetworkConfigurationServicePropertiesBuilder {
             GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) this.gwtConfig;
 
             this.properties.setModemGpsEnabled(this.ifname, gwtModemConfig.isGpsEnabled());
+            this.properties.setModemGpsMode(this.ifname, gwtModemConfig.getGpsMode());
         }
     }
 

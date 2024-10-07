@@ -1,347 +1,51 @@
-Eclipse Kura - 5.5.0 - July 2024
+Eclipse Kura - 5.6.0-SNAPSHOT - October 2024
 -------------------------------------------------------------------------------------------------
 Description:
-This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces APIs support for Containers signature verification and enforcement.
-This release officially adds support and preference of the framework to run on Java 17.
-The release also provides support for a Cloud Connector for Eclipse Sparkplug and general improvements for the network manager based networking. The generic profiles are now the profiles of preference for all the compatible hardware (including Raspberry PI).
-The release contains a number of bug fixes and general feature improvements.
+[TODO]
 
 
 Features:
-  * 4d8a098496 - [linux.gpio] Added support to gpio symlinks [backport release-5.5.0] (#5247) (github-actions[bot])
-  * 98aa189b0a - [rest.security.provider] Rest Security Update (#5230) (Pierantonio Merlino)
-  * 9bab1d8aab - [distrib] Add generic nn profiles (#5223) (Pierantonio Merlino)
-  * 137c7aa395 - Added audit log for modifications in IdentityService (#5220) (nicolatimeus)
-  * ab254e3a47 - [rest.identity.provider] Added REST Identity API V2  (#5201) (Salvatore Coppola)
-  * 8280d6ebc6 - Disable HTTP trace (#5204) (Matteo Maiero)
-  * 9cb2dcadf4 - Signature Verification Digest Update of Container Instances (#5203) (sfiorani)
-  * 024e264f7d - [container.provider] added container instances enforcement allowlist (#5197) (sfiorani)
-  * a058d79535 - [container.orchestration.provider] implemented enforcement allowlist (#5162) (sfiorani)
-  * ccbc1369d2 - Limit the UI certificate add to a single PEM cert (#5183) (Matteo Maiero)
-  * 29fbc21dce - First implementationn of identity service APIs (#5173) (nicolatimeus)
-  * 6564e84695 - [container.provider] add container image signature validation (#5129) (Mattia Dal Ben)
-  * fad45842f5 - [web2] separation between wlan channel configuration and status (#5140) (sfiorani)
-  * 94341de5c4 - [examples] add DummyContainerSignatureValidationService (#5126) (Mattia Dal Ben)
-  * fe0a8bfbdd - Added identity configuration extension example (#5139) (nicolatimeus)
-  * 4014bae53a - [container.signature] add image digest to ContainerSignatureValidationService API output (#5136) (Mattia Dal Ben)
-  * 538fddc5c6 - Added IdentityService APIs (#5132) (nicolatimeus)
-  * 1c36691d5d - [sparkplug] added SparkplugSubscriber (#5119) (Marcello Rinaldo Martina)
-  * 1017d5e237 - [container.signature] add ContainerSignatureValidationService APIs (#5125) (Mattia Dal Ben)
-  * a47167f698 - Switch to java 17 for runtime (#5118) (Matteo Maiero)
-  * 6223fa5225 - Container Orchestration and Triton Container service improvements (#5121) (Pierantonio Merlino)
-  * 4fd031885b - [sparkplug] added SSL support, fixed some issues (#5111) (Marcello Rinaldo Martina)
-  * d5c541b1c6 - [sparkplug] implementation of CloudPublisher as Sparkplug Device (#5107) (Marcello Rinaldo Martina)
-  * 3488d028a9 - [sparkplug] Edge Node implementation at Data Transport level (#5098) (Marcello Rinaldo Martina)
-  * aba8988109 - [web2] Added warning message for Certificates field (#5089) (Salvatore Coppola)
-  * 106389319c - [web2] added 'Advanced' tab for MTUs and Promiscuous mode (#5087) (Fabio Di Zazzo)
-  * f4994ee59d - [web2] Added Distinguished Names to the certificate table (#5079) (Salvatore Coppola)
-  * 52977487e9 - [sparkplug] added DataTransport layer (#5077) (Marcello Rinaldo Martina)
-  * 4b06742f33 - [sparkplug] added Sparkplug B Protobuf Payload support and utility classes (#5072) (Marcello Rinaldo Martina)
-  * 9480be5b39 - [sparkplug] added Sparkplug cloud connection boilerplate (#5059) (Marcello Rinaldo Martina)
-  * 5baef7d295 - [nm] promiscuous mode configuration via snapshot (#4957) (fdizazzo)
-  * d94ccbf11c - [rest.network.configuration.provider] Added factoryComponents APIs (#4994) (sfiorani)
-  * ee2c973f7b - [rest.network.configuration.provider] new rest api for network configuration management (#4915) (sfiorani)
-  * 037d68e43f - [rest.cloudconnection.provider] Cloud Connections REST Api (#4950) (Salvatore Coppola)
-  * 5b7b71cd83 - [rest.packages.provider] add endpoint for Package Descriptor retrieval (#4934) (Mattia Dal Ben)
-  * 087b214283 - Session REST API improvements (#4947) (nicolatimeus)
-  * 1fb4c42a5a - [web2] IPv6 Network on Status tab (#4944) (Pierantonio Merlino)
+  * e3ad041b6b - [asset.provider] Added type for Scale and Offset in Channels [backport release-5.6.0] (#5426) (eclipse-kura-bot)
+  * 1824c77800 - [nm] add managed GPS mode [backport release-5.6.0] (#5417) (eclipse-kura-bot)
+  * e2c372da05 - [api] add getSupportedGpsModes() to modem status API [backport release-5.6.0] (#5422) (eclipse-kura-bot)
+  * df160ae038 - Improve container service description [backport release-5.6.0] (#5425) (eclipse-kura-bot)
+  * cf7fb669d1 - Added asset name in error logs [backport release-5.6.0] (#5416) (eclipse-kura-bot)
+  * 94c76d2ed3 - [api] added gnss type data to PositionService (#5381) [backport release-5.6.0] (#5407) (sfiorani)
+  * 728ee0ce99 - [linux.net] Modified dhcp server selection order [backport release-5.6.0] (#5402) (Pierantonio Merlino)
+  * 392ee9413c - Modified modem APN tooltip (backport) (#5360) (Pierantonio Merlino)
+  * d5a020ab82 - Add net2 check to hide pdp if not needed (#5356) (Matteo Maiero)
+  * 766a3328e2 - [nm] Modem APN as an optional parameter [backport release-5.6.0] (#5353) (github-actions[bot])
 
 Target Environments:
- Kura is released as pre-compiled binary installers for the following platforms:
-  * Intel Up Squared board running Ubuntu 20.04 (Kura networking)
-  * Nvidia Jetson Nano board running Ubuntu 18 (Kura networking)
-  * Generic Debian Package for x86_64 (NetworkManager)
-  * Generic Debian Package for arm32 (NetworkManager)
-  * Generic Debian Package for arm64 (NetworkManager)
- Kura no longer provides a dedicated installer for the following platforms, but support is still provided through the Generic Debian Packages (see https://github.com/eclipse/kura/discussions/5224):
-  * Raspberry Pi 2/3/4 based on Raspberry Pi OS (32 bits)
-  * Raspberry Pi 3/4 based on 64 bits OS
- Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
+[TODO]
 
 Bug Fixes:
-  * ba1a7169d8 - Update web2 audit context on session id change [backport release-5.5.0] (#5307) (github-actions[bot])
-  * ed6915cfb9 - Fixed Keypair validity display to link only the leaf [backport release-5.5.0] (#5303) (github-actions[bot])
-  * 23e22f7735 - Fixed wrong IPv6 status for modem interfaces [backport release-5.5.0] (#5299) (github-actions[bot])
-  * 781591d167 - [nm] Fixed dnsmasq behavior on configuration change [backport release-5.5.0] (#5301) (github-actions[bot])
-  * d4969a7fd0 - Added a check to not display the automatic option for the old networking [backport release-5.5.0] (#5297) (github-actions[bot])
-  * 01b2ea6c48 - Always generate new session id on login [backport release-5.5.0] (#5293) (github-actions[bot])
-  * 7e0368d07a - [web2] Removed handler from button in certificate import form (#5… (#5286) (Pierantonio Merlino)
-  * 254b4b33da - fixed null in wi-fi frontend and missing wi-fi update on IPv6 [backport release-5.5.0] (#5292) (github-actions[bot])
-  * d6d326c8d7 - [distrib] customize-installation.sh to always patch interface names on snapshot_0.xml and iptables [backport release-5.5.0] (#5278) (github-actions[bot])
-  * 3d2e6a3dcc - [rest.identity] fixed status codes and error messages for malformed requests [backport release-5.5.0] (#5279) (github-actions[bot])
-  * e4e5477af2 - [nm] Avoid querying wifi ap for info if it is not available anymore [backport release-5.5.0] (#5271) (github-actions[bot])
-  * 6533fc5d63 - Fixed console not immediately applying SslManagerService target update [backport release-5.5.0] (#5274) (nicolatimeus)
-  * 0bbbc9499d - [distrib] missing uninstallation logging [backport release-5.5.0] (#5273) (github-actions[bot])
-  * 61be2a7403 - [distrib] add wpa_supplicant dbus permissions only on NN profiles [backport release-5.5.0] (#5270) (github-actions[bot])
-  * 7aea9512a5 - [web2] Removed servlet unregistration during update if options are not changed [backport release-5.5.0] (#5268) (github-actions[bot])
-  * 24feced08e - [core.cloud] [backport] Added null checks to unset reference methods  (#5262) (Salvatore Coppola)
-  * b1ea671a6f - [distrib] kurad installation on docker-alpine-x86_64-nn container [backport release-5.5.0] (#5257) (github-actions[bot])
-  * 16a06ae68f - Allow kurad to shutdown and reboot the system [backport release-5.5.0] (#5254) (github-actions[bot])
-  * ad375f3720 - correct management of wi-fi disabled state and visualization [backport release-5.5.0] (#5256) (github-actions[bot])
-  * e7cd70d5f9 - [emulator] Yet another set of small fixes (#5242) (Pierantonio Merlino)
-  * 457b953827 - [container.orchestration] Removed exposedPorts from the state of ContainerOrchestrationServiceImpl object. (#5240) (Salvatore Coppola)
-  * 0a452069de - [dev-env] Added net.configuration and io.netty bundles to launcher (#5241) (Pierantonio Merlino)
-  * 71def61f37 - Improved parameter validation in IdentityService (#5229) (nicolatimeus)
-  * 1116017869 - [distrib] Fixed `kura.name` in Jetson Nano kura.properties (#5233) (Salvatore Coppola)
-  * 48bd62b725 - [nm] Added check for IPv4 address in DNSServerMonitor (#5221) (Pierantonio Merlino)
-  * d889f25509 - [net.configuration] Fix network properties default values (#5218) (Pierantonio Merlino)
-  * da36fbb744 - Fixed error on null password when AP name changed (#5200) (Matteo Maiero)
-  * 64804b6634 - [container.instance] refactored code to remove unreachable code (#5212) (sfiorani)
-  * 6339a1e0cf - [web2] Added additional configuration also on configuration change (#5192) (Pierantonio Merlino)
-  * 3e47263588 - GWT servlet review (#5190) (nicolatimeus)
-  * dcbcceb1e8 - [web2] Added better error message for password never set (#5163) (Salvatore Coppola)
-  * 48f793fe96 - [web2] Workaround for fix GWT strange behavior when deleting a certificate entry after DNs have been added as column in the table. (#5165) (Salvatore Coppola)
-  * 1115703130 - [distrib] added libudev.so.0 symlink (#5164) (Marcello Rinaldo Martina)
-  * 9d119146d9 - Fixed unnecessary column type changes in H2DbWireRecordStoreImpl (#5157) (nicolatimeus)
-  * cd1d0ee0e9 - [core.keystore.test] Fixed package name (#5152) (Salvatore Coppola)
-  * e486af07f9 - Corrected default container max-size for logging (#5150) (Matteo Maiero)
-  * 5d3cfc1e15 - [linux.usb] memory leak on non-usb udev events (#5130) (Marcello Rinaldo Martina)
-  * 574e54dd79 - added modem infos to birth message when the NetworkStatusService is used (#5128) (Pierantonio Merlino)
-  * 588c0a237e - [Container.orchestrator] add default log limit to created docker containers (#5065) (G_Ivo)
-  * d53ec833b7 - Network Advanced tab positioning (#5106) (Matteo Maiero)
-  * 83b85914dc - [nm] 802.1x TLS Private Key encryption (#5099) (Mattia Dal Ben)
-  * e32251a760 - [nm] remove unusable 802.1x password parameters (#5097) (Mattia Dal Ben)
-  * 8bac6f59fa - [nm] 802.1x CA cert should be really "Optional" (#5096) (Mattia Dal Ben)
-  * b48ebb1d79 - Gwt error message consistency with wire graph (#5085) (Matteo Maiero)
-  * 9b371f4458 - optional fields wpa enterprise (#5043) (G_Ivo)
-  * 57f0cd9e54 - [nm] 802.1x EAP-TLS on platforms where NetworkManager uses `nss` (#5075) (Mattia Dal Ben)
-  * c054d59f00 - fixed data service code flow in case of configuration change (#5074) (Matteo Maiero)
-  * 5684ef29ae - [BaseKeystoreService] Add missing key generator provider (#4862) (gnunzi)
-  * 94ea937b14 - [data.service] correctly stopping reconnection thread (#5058) (sfiorani)
-  * 4db9733ed9 - [rest.identity] adding specific error messages when user is not found (#5047) (sfiorani)
-  * f978be3148 - 802.1x tab displaying and refresh (#5055) (Matteo Maiero)
-  * 6b701c3421 - Aligned the 802.1x tab to the behaviour of other wireless tabs (#5051) (Matteo Maiero)
-  * aaf6d5c971 - unhide keystore field and add error correction that prevents ca-cert being filled and keystore being null (#5030) (G_Ivo)
-  * 5d587153fd - added catch to exception to prevent failure when keystores don't exist (#5029) (G_Ivo)
-  * 3488f31f60 - [web2] Fixed network radio mode value passing in the old networking. (#5026) (Salvatore Coppola)
-  * 14e1b7c5e2 - [rest.identity] fixed passswordAuthEnabled property (#5020) (sfiorani)
-  * a626f444e9 - [nm] load dhcp server configuration after change (#5018) (Mattia Dal Ben)
-  * e7b8bc06e2 - enforced mandatory UserAdmin static reference on rest bundles that create permissions (#5014) (Marcello Rinaldo Martina)
-  * f0ed0e8a93 - [distrib] Added missing rest permissions for rest.security, rest.system and rest.cloudconnection in snapshot_0.xml files. (#5008) (Salvatore Coppola)
-  * f13eae90af - Added guava new dependency to dev-env start script (#5007) (Matteo Maiero)
-  * 423a7a4938 - wireless tab and cellular tab will show up when only ipv6 is enabled (#4999) (G_Ivo)
-  * 5a5a9b3de2 - Fixed web ui access for identity with limited permissions (#4988) (nicolatimeus)
-  * 23e9d926a7 - wire record query unbind error (#4983) (Matteo Maiero)
-  * 13f5f1959a - metatype typo in container orchestrator (#4981) (G_Ivo)
-  * 5509ed8f4b - Disable REST basic and legacy certificate auth by default (#4972) (nicolatimeus)
-  * 63282947d8 - Return login banner message before authentication (#4969) (nicolatimeus)
-  * 47169aa1d6 - [core.cloud] Set min value to command timeout metatype (#4965) (Pierantonio Merlino)
-  * 2ef7d20505 - changed bind-interfaces with bind-dynamic (#4959) (G_Ivo)
-  * d320e80601 - Allow any authenticated identity to access security/v1/debug-enabled (#4949) (nicolatimeus)
-
-Target Platform Updates:
-  * 6629ddf759 - Updated Bouncy Castle to version 1.78.1 (#5234) (Salvatore Coppola)
-  * 676e475b0a - Updated log4j2 to 2.23.1 (#5238) (Salvatore Coppola)
-  * 4b3d0a1319 - Removed unused `dash-licenses-snapshots` maven repository (#5236) (Salvatore Coppola)
-  * 49f9b1aa81 - Commons-compress and related libs update (#5214) (Matteo Maiero)
-  * 2bc2cc3fec - bumped tycho version for jre 17 to 3.0.5 and maven to 3.9.6 (#5215) (Salvatore Coppola)
-  * 523744fdc0 - corrected MANIFEST for compatibility with Kura 5.2+ (#5133) (Marcello Rinaldo Martina)
-  * 1064870aad - updated GraalVM deps from 21.3.5 to 21.3.9 (#5115) (Marcello Rinaldo Martina)
-  * a73c7af6c1 - Update Bouncycastle to 1.77.0 (#5027) (Matteo Maiero)
-  * 597bcf6561 - downgrade helper-maven-plugin for better compatibility (#5078) (Marcello Rinaldo Martina)
+  * e5eae5fa61 - [distrib] Fix DHCP dependencies for Debian installer [backport release-5.6.0 (#5401) (Pierantonio Merlino)
+  * ccd2e08db6 - Updated the Eclipse Marketplace certificate [backport release-5.6.0] (#5395) (github-actions[bot])
+  * 6ca13b211c - Disable systemd-resolved stub mode on systemd versions less than 248 [backport release-5.6.0] (#5369) (github-actions[bot])
+  * b3dff8ffdb - Connection Scheduler metatype improvement. [backport release-5.6.0] (#5365) (github-actions[bot])
 
 Known Issues:
-  * Snapshot rollback operation may fail processing factory component configurations.
-  * The firewall rule applied by the network threat manager that block uncommon TCP MSS values is not applied in the Nvidia Jetson Nano.
-  * When the IPv6 network threat manager is disabled, the filtering on TCP fragments is disabled only after a reboot.
-  * The republish.mqtt.birth.cert.on.modem.detect property in the CloudService configuration is not supported for devices that use NetworkManager. The property value is ignored.
-  * When dnsmasq is used as DHCP server, only one file is used to store the leases.
-  * When dnsmasq is used as DHCP server, the DHCP List field in the DHCP and NAT tab shows the leases for all the interfaces.
-  * The system reboot command cannot be issued even with a privileged user in Debian Bookworm due to an OS issue related to the CAP_SYS_BOOT capability.
-  * The Wi-Fi AP scanning may fail in Debian Bookworm on the first scanning attempt in the specific Raspberry PI profile. A forced rescan can succeed and properly display the available APs.
-  * The nvidia-jetson-nano installer disables FAN protocol support due to compatibility issues (see #4593)
-  * The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
-  * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is
-    built and run immediately after installation.
-  * An update to the sslmanagerservice where the pid of the keystoreservice is updated can lead to an error in the following reconnection.
-    The issue impact is limited, if the dataservice reconnect option is enabled.
-  * The implementation of the CryptoService performs encryption using a
-    password that is hardcoded and published.
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * WiFi on Raspberry Pi 2 has only been tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipset.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported with old networking. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * #4212: Wrong order of BIRTH/APPLICATION certificates for custom APP IDs registration
-  * #3972: Topic name validation: issue with names containing "//" (Cloud Subscriber)
-  * #4141: Sometimes user is not logged in after changing password
-  * #3796: Server manager does not close properly
-  * #3211: Kura Docker | Bluetooth error in log during starting service
-  * #3005: Kura Gets Stuck in Loading View if Services Clicked Too Fast
-  * #2843: Access Banner Content All in One Line
-  * #2747: No Spacing Between "Wire Components" and Error in Wire Graph
-  * #2728: WireGraph Component Description Windows Too Wide
-  * #2725: Different Pop-up Windows for Warnings
-  * #2702: Error Message For Long Item Names Not Displayed Properly
-  * #2696: Component Name Inteferes With Wire Graph Border
-  * #2695: Component Names in Wires Not Limited
-  * #2410: Deployment handler and URLs with many query parameters
-  * #2038: [Kura 3.2.0 QA] Package uninstallation log
-  * #1993: Search Domains Are Not Supported
-  * #1663: Authentication Issue with Deploy V2
-  * #1572: serial modbus has errors on some hardware
-  * #1529: OSGI console is not redirected to Eclipse IDE with Kura 3.0
-  * #1161: Incorrectly configuring a component can be irreversable.
-  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
-  * #1016: ConfigurationServiceImpl creates duplicate instances
-  * #797:  Design of ServiceUtil is broken
-  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
-  * #654:  Clean up static initialization around "modem" functionality
-  * #645:  Clean up internal dependencies in Kura
-  * #522:  [Net] Modem monitor should monitor interfaces, not modems
-  * #486:  Build environment broken on Windows
-  * #406:  Replace System.get* with calls to SystemService.getProperties
-  * #329:  [DEPLOY-V2] Review/refactoring needed
-  * #297:  [Status led] What connection instance controls the status led?
-  * #253:  Check if bundle contexes correctly unget services after invoking getService
-  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
+[TODO]
 
 Changelog:
-  * ba1a7169d8 - fix: Update web2 audit context on session id change [backport release-5.5.0] (#5307) (github-actions[bot])
-  * 31726a4786 - chore: add Kura 5.5.0 release notes (#5304) (github-actions[bot])
-  * ed6915cfb9 - fix: Fixed Keypair validity display to link only the leaf [backport release-5.5.0] (#5303) (github-actions[bot])
-  * c30ff1776a - chore: Improved Web UI identity messages [backport release-5.5.0] (#5302) (github-actions[bot])
-  * 23e22f7735 - fix: Fixed wrong IPv6 status for modem interfaces [backport release-5.5.0] (#5299) (github-actions[bot])
-  * 781591d167 - fix(nm): Fixed dnsmasq behavior on configuration change [backport release-5.5.0] (#5301) (github-actions[bot])
-  * d4969a7fd0 - fix: Added a check to not display the automatic option for the old networking [backport release-5.5.0] (#5297) (github-actions[bot])
-  * 01b2ea6c48 - fix: Always generate new session id on login [backport release-5.5.0] (#5293) (github-actions[bot])
-  * 7e0368d07a - fix(web2): Removed handler from button in certificate import form (#5… (#5286) (Pierantonio Merlino)
-  * 254b4b33da - fix: fixed null in wi-fi frontend and missing wi-fi update on IPv6 [backport release-5.5.0] (#5292) (github-actions[bot])
-  * cea7441dbd - chore: add Kura 5.5.0 release notes (#5283) (github-actions[bot])
-  * d6d326c8d7 - fix(distrib): customize-installation.sh to always patch interface names on snapshot_0.xml and iptables [backport release-5.5.0] (#5278) (github-actions[bot])
-  * 3d2e6a3dcc - fix(rest.identity): fixed status codes and error messages for malformed requests [backport release-5.5.0] (#5279) (github-actions[bot])
-  * e4e5477af2 - fix(nm): Avoid querying wifi ap for info if it is not available anymore [backport release-5.5.0] (#5271) (github-actions[bot])
-  * 6533fc5d63 - fix: Fixed console not immediately applying SslManagerService target update [backport release-5.5.0] (#5274) (nicolatimeus)
-  * 0bbbc9499d - fix(distrib): missing uninstallation logging [backport release-5.5.0] (#5273) (github-actions[bot])
-  * 61be2a7403 - fix(distrib): add wpa_supplicant dbus permissions only on NN profiles [backport release-5.5.0] (#5270) (github-actions[bot])
-  * 7aea9512a5 - fix(web2): Removed servlet unregistration during update if options are not changed [backport release-5.5.0] (#5268) (github-actions[bot])
-  * 24feced08e - fix(core.cloud): [backport] Added null checks to unset reference methods  (#5262) (Salvatore Coppola)
-  * b1ea671a6f - fix(distrib): kurad installation on docker-alpine-x86_64-nn container [backport release-5.5.0] (#5257) (github-actions[bot])
-  * 16a06ae68f - fix: Allow kurad to shutdown and reboot the system [backport release-5.5.0] (#5254) (github-actions[bot])
-  * ad375f3720 - fix: correct management of wi-fi disabled state and visualization [backport release-5.5.0] (#5256) (github-actions[bot])
-  * 4d8a098496 - feat(linux.gpio): Added support to gpio symlinks [backport release-5.5.0] (#5247) (github-actions[bot])
-  * 0be0b6f8f3 - chore: add Kura 5.5.0 release notes (#5244) (github-actions[bot])
-  * b64ef78bfd - chore: Upticked versions for 5.5.0 release  (#5243) (nicolatimeus)
-  * e7cd70d5f9 - fix(emulator): Yet another set of small fixes (#5242) (Pierantonio Merlino)
-  * 457b953827 - fix(container.orchestration): Removed exposedPorts from the state of ContainerOrchestrationServiceImpl object. (#5240) (Salvatore Coppola)
-  * 0a452069de - fix(dev-env): Added net.configuration and io.netty bundles to launcher (#5241) (Pierantonio Merlino)
-  * 6629ddf759 - build: Updated Bouncy Castle to version 1.78.1 (#5234) (Salvatore Coppola)
-  * 676e475b0a - build: Updated log4j2 to 2.23.1 (#5238) (Salvatore Coppola)
-  * 98aa189b0a - feat(rest.security.provider): Rest Security Update (#5230) (Pierantonio Merlino)
-  * 4b3d0a1319 - build: Removed unused `dash-licenses-snapshots` maven repository (#5236) (Salvatore Coppola)
-  * 71def61f37 - fix: Improved parameter validation in IdentityService (#5229) (nicolatimeus)
-  * 1116017869 - fix(distrib): Fixed `kura.name` in Jetson Nano kura.properties (#5233) (Salvatore Coppola)
-  * 1ea36ff8d1 - docs(system): Fixed bad SystemService#getDeviceManagementServiceIgnore javadoc description (#5228) (Salvatore Coppola)
-  * 9bab1d8aab - feat(distrib): Add generic nn profiles (#5223) (Pierantonio Merlino)
-  * 137c7aa395 - feat: Added audit log for modifications in IdentityService (#5220) (nicolatimeus)
-  * 48bd62b725 - fix(nm): Added check for IPv4 address in DNSServerMonitor (#5221) (Pierantonio Merlino)
-  * d889f25509 - fix(net.configuration): Fix network properties default values (#5218) (Pierantonio Merlino)
-  * ac10c3d925 - refactor: removed calls to containerConfiguration based deprecated code (#5217) (sfiorani)
-  * ab254e3a47 - feat(rest.identity.provider): Added REST Identity API V2  (#5201) (Salvatore Coppola)
-  * 49f9b1aa81 - build: Commons-compress and related libs update (#5214) (Matteo Maiero)
-  * 2bc2cc3fec - build: bumped tycho version for jre 17 to 3.0.5 and maven to 3.9.6 (#5215) (Salvatore Coppola)
-  * da36fbb744 - fix: Fixed error on null password when AP name changed (#5200) (Matteo Maiero)
-  * 8280d6ebc6 - feat: Disable HTTP trace (#5204) (Matteo Maiero)
-  * 64804b6634 - fix(container.instance): refactored code to remove unreachable code (#5212) (sfiorani)
-  * 63130fb87c - refactor(container.provider): changed metatype option id in container instance (#5208) (sfiorani)
-  * 9cb2dcadf4 - feat: Signature Verification Digest Update of Container Instances (#5203) (sfiorani)
-  * 024e264f7d - feat(container.provider): added container instances enforcement allowlist (#5197) (sfiorani)
-  * 7b489bf026 - refactor(ContainerOrchestration): removed the invocation of deprecated code from ContainerOrchestrationServiceImpl (#5175) (sfiorani)
-  * a058d79535 - feat(container.orchestration.provider): implemented enforcement allowlist (#5162) (sfiorani)
-  * 6339a1e0cf - fix(web2): Added additional configuration also on configuration change (#5192) (Pierantonio Merlino)
-  * 7cbefb5d5e - refactor(network.threat.manager): Updated flooding protection metatype (#5179) (Pierantonio Merlino)
-  * ccbc1369d2 - feat: Limit the UI certificate add to a single PEM cert (#5183) (Matteo Maiero)
-  * 2986356fc3 - chore: Add core.identity to dev-env (#5186) (nicolatimeus)
-  * 3e47263588 - fix: GWT servlet review (#5190) (nicolatimeus)
-  * 29fbc21dce - feat: First implementationn of identity service APIs (#5173) (nicolatimeus)
-  * dcbcceb1e8 - fix(web2): Added better error message for password never set (#5163) (Salvatore Coppola)
-  * 48f793fe96 - fix(web2): Workaround for fix GWT strange behavior when deleting a certificate entry after DNs have been added as column in the table. (#5165) (Salvatore Coppola)
-  * 1115703130 - fix(distrib): added libudev.so.0 symlink (#5164) (Marcello Rinaldo Martina)
-  * f85eb7f7b0 - chore(container.provider): use correct range for listener implementer (#5156) (Mattia Dal Ben)
-  * 5d728c9151 - style(linux.usb): updated copyright header (#5147) (Marcello Rinaldo Martina)
-  * 9d119146d9 - fix: Fixed unnecessary column type changes in H2DbWireRecordStoreImpl (#5157) (nicolatimeus)
-  * 6564e84695 - feat(container.provider): add container image signature validation (#5129) (Mattia Dal Ben)
-  * f7ee5ad0d6 - ci: disable flaky tests (#5154) (Mattia Dal Ben)
-  * cbc08c8b3b - refactor(container.provider.test): refactor ContainerInstance unit tests (#5148) (Mattia Dal Ben)
-  * cd1d0ee0e9 - fix(core.keystore.test): Fixed package name (#5152) (Salvatore Coppola)
-  * e486af07f9 - fix: Corrected default container max-size for logging (#5150) (Matteo Maiero)
-  * ef0f176e9d - refactor(container.signature): use RegistryCredentials in verify methods (#5149) (Mattia Dal Ben)
-  * fad45842f5 - feat(web2): separation between wlan channel configuration and status (#5140) (sfiorani)
-  * 94341de5c4 - feat(examples): add DummyContainerSignatureValidationService (#5126) (Mattia Dal Ben)
-  * fe0a8bfbdd - feat: Added identity configuration extension example (#5139) (nicolatimeus)
-  * 4014bae53a - feat(container.signature): add image digest to ContainerSignatureValidationService API output (#5136) (Mattia Dal Ben)
-  * 5d3cfc1e15 - fix(linux.usb): memory leak on non-usb udev events (#5130) (Marcello Rinaldo Martina)
-  * 538fddc5c6 - feat: Added IdentityService APIs (#5132) (nicolatimeus)
-  * 574e54dd79 - fix: added modem infos to birth message when the NetworkStatusService is used (#5128) (Pierantonio Merlino)
-  * 1c36691d5d - feat(sparkplug): added SparkplugSubscriber (#5119) (Marcello Rinaldo Martina)
-  * 523744fdc0 - build(sparkplug): corrected MANIFEST for compatibility with Kura 5.2+ (#5133) (Marcello Rinaldo Martina)
-  * 1017d5e237 - feat(container.signature): add ContainerSignatureValidationService APIs (#5125) (Mattia Dal Ben)
-  * a47167f698 - feat: Switch to java 17 for runtime (#5118) (Matteo Maiero)
-  * 6223fa5225 - feat: Container Orchestration and Triton Container service improvements (#5121) (Pierantonio Merlino)
-  * b52d336be3 - test(packages.provider): remove unnecessary dependencies from IT (#5117) (Mattia Dal Ben)
-  * 1064870aad - build(wire.script.tools): updated GraalVM deps from 21.3.5 to 21.3.9 (#5115) (Marcello Rinaldo Martina)
-  * 7cac9e4f19 - refactor(sparkplug): applied State pattern to SparkplugMqttClient, fixed onConnectionLost status reset (#5114) (Marcello Rinaldo Martina)
-  * 4fd031885b - feat(sparkplug): added SSL support, fixed some issues (#5111) (Marcello Rinaldo Martina)
-  * d5c541b1c6 - feat(sparkplug): implementation of CloudPublisher as Sparkplug Device (#5107) (Marcello Rinaldo Martina)
-  * 588c0a237e - fix(Container.orchestrator): add default log limit to created docker containers (#5065) (G_Ivo)
-  * d53ec833b7 - fix: Network Advanced tab positioning (#5106) (Matteo Maiero)
-  * 3488d028a9 - feat(sparkplug): Edge Node implementation at Data Transport level (#5098) (Marcello Rinaldo Martina)
-  * 0445dee620 - docs: corrected Japanese translation to reword some technical terms with more commonly used ones (#5103) (Marcello Rinaldo Martina)
-  * 05a2daac49 - refactor(build): Removed raspberry pi profiles (#5095) (Salvatore Coppola)
-  * aba8988109 - feat(web2): Added warning message for Certificates field (#5089) (Salvatore Coppola)
-  * 106389319c - feat(web2): added 'Advanced' tab for MTUs and Promiscuous mode (#5087) (Fabio Di Zazzo)
-  * 83b85914dc - fix(nm): 802.1x TLS Private Key encryption (#5099) (Mattia Dal Ben)
-  * 41cbbd0ab6 - refactor(core.keystore): remove deprecated use of DERIA5String (#5086) (Mattia Dal Ben)
-  * e32251a760 - fix(nm): remove unusable 802.1x password parameters (#5097) (Mattia Dal Ben)
-  * 8bac6f59fa - fix(nm): 802.1x CA cert should be really "Optional" (#5096) (Mattia Dal Ben)
-  * 990fc4dc79 - refactor(test): better exception handling in NM tests (#5090) (Mattia Dal Ben)
-  * b48ebb1d79 - fix: Gwt error message consistency with wire graph (#5085) (Matteo Maiero)
-  * 9b371f4458 - fix: optional fields wpa enterprise (#5043) (G_Ivo)
-  * a73c7af6c1 - build: Update Bouncycastle to 1.77.0 (#5027) (Matteo Maiero)
-  * f4994ee59d - feat(web2): Added Distinguished Names to the certificate table (#5079) (Salvatore Coppola)
-  * 57f0cd9e54 - fix(nm): 802.1x EAP-TLS on platforms where NetworkManager uses `nss` (#5075) (Mattia Dal Ben)
-  * 52977487e9 - feat(sparkplug): added DataTransport layer (#5077) (Marcello Rinaldo Martina)
-  * 597bcf6561 - build: downgrade helper-maven-plugin for better compatibility (#5078) (Marcello Rinaldo Martina)
-  * c054d59f00 - fix: fixed data service code flow in case of configuration change (#5074) (Matteo Maiero)
-  * 4b06742f33 - feat(sparkplug): added Sparkplug B Protobuf Payload support and utility classes (#5072) (Marcello Rinaldo Martina)
-  * 9480be5b39 - feat(sparkplug): added Sparkplug cloud connection boilerplate (#5059) (Marcello Rinaldo Martina)
-  * 145f109e5d - refactor(css): Improve Admin UI headers  (#4874) (gnunzi)
-  * 5684ef29ae - fix(BaseKeystoreService): Add missing key generator provider (#4862) (gnunzi)
-  * a0f8002f13 - docs: refactor README file (#5063) (Mattia Dal Ben)
-  * 94ea937b14 - fix(data.service): correctly stopping reconnection thread (#5058) (sfiorani)
-  * 5baef7d295 - feat(nm): promiscuous mode configuration via snapshot (#4957) (fdizazzo)
-  * 4db9733ed9 - fix(rest.identity): adding specific error messages when user is not found (#5047) (sfiorani)
-  * ab9a34d61c - docs(README): changes proposal (#5044) (G_Ivo)
-  * f978be3148 - fix: 802.1x tab displaying and refresh (#5055) (Matteo Maiero)
-  * 7abf695c98 - docs: Update SECURITY.md (#5053) (Matteo Maiero)
-  * 6b701c3421 - fix: Aligned the 802.1x tab to the behaviour of other wireless tabs (#5051) (Matteo Maiero)
-  * 3e04ebe7d2 - chore(setups): Added tasks to oomph setup to enforce right life-cycle mapping. (#5036) (Salvatore Coppola)
-  * 5aada0cabd - chore: automated uptick to 5.5.0-SNAPSHOT (#5037) (github-actions[bot])
-  * 53e06723ef - docs: updated README with working links on shield badges (#5040) (Marcello Rinaldo Martina)
-  * aaf6d5c971 - fix: unhide keystore field and add error correction that prevents ca-cert being filled and keystore being null (#5030) (G_Ivo)
-  * 5d587153fd - fix: added catch to exception to prevent failure when keystores don't exist (#5029) (G_Ivo)
-  * 3488f31f60 - fix(web2): Fixed network radio mode value passing in the old networking. (#5026) (Salvatore Coppola)
-  * 14e1b7c5e2 - fix(rest.identity): fixed passswordAuthEnabled property (#5020) (sfiorani)
-  * a626f444e9 - fix(nm): load dhcp server configuration after change (#5018) (Mattia Dal Ben)
-  * aa87f66ab3 - refactor: fixed spelling in logs (#5016) (G_Ivo)
-  * e7b8bc06e2 - fix: enforced mandatory UserAdmin static reference on rest bundles that create permissions (#5014) (Marcello Rinaldo Martina)
-  * f0ed0e8a93 - fix(distrib): Added missing rest permissions for rest.security, rest.system and rest.cloudconnection in snapshot_0.xml files. (#5008) (Salvatore Coppola)
-  * f13eae90af - fix: Added guava new dependency to dev-env start script (#5007) (Matteo Maiero)
-  * 423a7a4938 - fix: wireless tab and cellular tab will show up when only ipv6 is enabled (#4999) (G_Ivo)
-  * d94ccbf11c - feat(rest.network.configuration.provider): Added factoryComponents APIs (#4994) (sfiorani)
-  * ee2c973f7b - feat(rest.network.configuration.provider): new rest api for network configuration management (#4915) (sfiorani)
-  * 5a5a9b3de2 - fix: Fixed web ui access for identity with limited permissions (#4988) (nicolatimeus)
-  * 9b6ebf0748 - chore: Added rest.network.configuration boilerplate (#4986) (nicolatimeus)
-  * 23e9d926a7 - fix: wire record query unbind error (#4983) (Matteo Maiero)
-  * 13f5f1959a - fix: metatype typo in container orchestrator (#4981) (G_Ivo)
-  * 037d68e43f - feat(rest.cloudconnection.provider): Cloud Connections REST Api (#4950) (Salvatore Coppola)
-  * 5509ed8f4b - fix: Disable REST basic and legacy certificate auth by default (#4972) (nicolatimeus)
-  * 63282947d8 - fix: Return login banner message before authentication (#4969) (nicolatimeus)
-  * 47169aa1d6 - fix(core.cloud): Set min value to command timeout metatype (#4965) (Pierantonio Merlino)
-  * 5b7b71cd83 - feat(rest.packages.provider): add endpoint for Package Descriptor retrieval (#4934) (Mattia Dal Ben)
-  * 2ef7d20505 - fix: changed bind-interfaces with bind-dynamic (#4959) (G_Ivo)
-  * 087b214283 - feat: Session REST API improvements (#4947) (nicolatimeus)
-  * 1fb4c42a5a - feat(web2): IPv6 Network on Status tab (#4944) (Pierantonio Merlino)
-  * d320e80601 - fix: Allow any authenticated identity to access security/v1/debug-enabled (#4949) (nicolatimeus)
-  * 9b83ba567d - ci(automation): avoid branch name collision on Version Uptick workflow (#4945) (Mattia Dal Ben)
+  * e3ad041b6b - feat(asset.provider): Added type for Scale and Offset in Channels [backport release-5.6.0] (#5426) (eclipse-kura-bot)
+  * 1824c77800 - feat(nm): add managed GPS mode [backport release-5.6.0] (#5417) (eclipse-kura-bot)
+  * e774a2e5c3 - chore: Updating versions to include current version packages in distrib (#5421) (Matteo Maiero)
+  * e2c372da05 - feat(api): add getSupportedGpsModes() to modem status API [backport release-5.6.0] (#5422) (eclipse-kura-bot)
+  * df160ae038 - feat: Improve container service description [backport release-5.6.0] (#5425) (eclipse-kura-bot)
+  * cf7fb669d1 - feat: Added asset name in error logs [backport release-5.6.0] (#5416) (eclipse-kura-bot)
+  * cd4a5a6e9d - style(position): added missing and fixed wrong copyrights in updated position API [backport release-5.6.0] (#5413) (eclipse-kura-bot)
+  * 94c76d2ed3 - feat(api): added gnss type data to PositionService (#5381) [backport release-5.6.0] (#5407) (sfiorani)
+  * 728ee0ce99 - feat(linux.net): Modified dhcp server selection order [backport release-5.6.0] (#5402) (Pierantonio Merlino)
+  * 6486935c91 - ci: use newly introduced bot personal access token for github workflows (#5397) (#5403) (Mattia Dal Ben)
+  * e5eae5fa61 - fix(distrib): Fix DHCP dependencies for Debian installer [backport release-5.6.0 (#5401) (Pierantonio Merlino)
+  * ccd2e08db6 - fix: Updated the Eclipse Marketplace certificate [backport release-5.6.0] (#5395) (github-actions[bot])
+  * 024cae7629 - ci: Keep only the artifacts of the last 2 builds [backport release-5.6.0] (#5393) (Mattia Dal Ben)
+  * 79f02b6efc - ci: fix Github actions permissions [backport release-5.6.0] (#5392) (github-actions[bot])
+  * 6ca13b211c - fix: Disable systemd-resolved stub mode on systemd versions less than 248 [backport release-5.6.0] (#5369) (github-actions[bot])
+  * b3dff8ffdb - fix: Connection Scheduler metatype improvement. [backport release-5.6.0] (#5365) (github-actions[bot])
+  * 392ee9413c - feat: Modified modem APN tooltip (backport) (#5360) (Pierantonio Merlino)
+  * d5a020ab82 - feat: Add net2 check to hide pdp if not needed (#5356) (Matteo Maiero)
+  * 766a3328e2 - feat(nm): Modem APN as an optional parameter [backport release-5.6.0] (#5353) (github-actions[bot])
+  * 8d11fda564 - chore: automated uptick to 5.6.0-SNAPSHOT (#5349) (github-actions[bot])

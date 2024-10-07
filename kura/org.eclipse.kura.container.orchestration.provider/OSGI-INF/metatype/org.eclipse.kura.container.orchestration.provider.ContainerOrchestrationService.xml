@@ -19,7 +19,7 @@
         
 
         <AD id="enabled" name="Enabled" type="Boolean" cardinality="0" required="true" default="false"
-            description="Enables the service to connect to the container engine host.">
+            description="Enables the service to connect to the container engine host. Please make sure that the Docker/Podman service is running in the host environment prior to enable this functionality.">
         </AD>
 
         <AD id="container.engine.host" name="Container Engine Host URL"

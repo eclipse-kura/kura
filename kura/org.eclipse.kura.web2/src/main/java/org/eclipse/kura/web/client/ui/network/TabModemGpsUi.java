@@ -163,12 +163,21 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
         this.radio2.setText(MSGS.falseLabel());
         this.radio1.setValue(true);
         this.radio2.setValue(false);
-        this.formInitialized = true;
 
         // GPS Mode
         this.labelGpsMode.setText(MSGS.netModemGpsMode());
+        // WIP: Populate the list box with the available GPS modes
         this.gpsMode.addItem("UNMANAGED");
         this.gpsMode.addItem("MANAGED_GPS");
+
+        this.gpsMode.addMouseOverHandler(event -> {
+            TabModemGpsUi.this.helpText.clear();
+            TabModemGpsUi.this.helpText.add(new Span(MSGS.netModemToolTipGpsMode()));
+        });
+        this.gpsMode.addMouseOutHandler(event -> resetHelp());
+        this.gpsMode.addChangeHandler(event -> setDirty(true));
+
+        this.formInitialized = true;
     }
 
     private void resetHelp() {

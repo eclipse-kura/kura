@@ -1,19 +1,20 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.internal.wire.asset.test;
 
-import java.util.OptionalDouble;
+import java.util.Optional;
 
+import org.eclipse.kura.channel.ScaleOffsetType;
 import org.eclipse.kura.type.DataType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +25,8 @@ public class ScaleOffsetTest extends WireAssetTestBase {
 
     @Test
     public void shouldSupportMissingScaleOffset() {
-        givenAssetChannel("foo", DataType.DOUBLE, OptionalDouble.empty(), OptionalDouble.empty());
+        givenAssetChannel("foo", DataType.DOUBLE, ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.empty(),
+                Optional.empty());
 
         whenDriverProducesValue("foo", 1.0d);
 
@@ -33,7 +35,7 @@ public class ScaleOffsetTest extends WireAssetTestBase {
 
     @Test
     public void shouldApplyScaleToDouble() {
-        givenAssetChannel("foo", DataType.DOUBLE, OptionalDouble.of(3.0d), OptionalDouble.empty());
+        givenAssetChannel("foo", DataType.DOUBLE, ScaleOffsetType.DOUBLE, Optional.of(3.0d), Optional.empty());
 
         whenDriverProducesValue("foo", 1.0d);
 
@@ -42,7 +44,7 @@ public class ScaleOffsetTest extends WireAssetTestBase {
 
     @Test
     public void shouldApplyScaleToFloat() {
-        givenAssetChannel("foo", DataType.FLOAT, OptionalDouble.of(3.0d), OptionalDouble.empty());
+        givenAssetChannel("foo", DataType.FLOAT, ScaleOffsetType.DOUBLE, Optional.of(3.0d), Optional.empty());
 
         whenDriverProducesValue("foo", 1.0f);
 
@@ -50,8 +52,8 @@ public class ScaleOffsetTest extends WireAssetTestBase {
     }
 
     @Test
-    public void shouldApplyScaleToIngeger() {
-        givenAssetChannel("foo", DataType.INTEGER, OptionalDouble.of(3.0d), OptionalDouble.empty());
+    public void shouldApplyScaleToInteger() {
+        givenAssetChannel("foo", DataType.INTEGER, ScaleOffsetType.DOUBLE, Optional.of(3.0d), Optional.empty());
 
         whenDriverProducesValue("foo", 1);
 
@@ -59,8 +61,27 @@ public class ScaleOffsetTest extends WireAssetTestBase {
     }
 
     @Test
-    public void shouldApplyScaleToLong() {
-        givenAssetChannel("foo", DataType.LONG, OptionalDouble.of(3.0d), OptionalDouble.empty());
+    public void shouldApplyScaleToIntegerWithDoubleScale() {
+        givenAssetChannel("foo", DataType.INTEGER, ScaleOffsetType.DOUBLE, Optional.of(3.0f), Optional.empty());
+
+        whenDriverProducesValue("foo", 1);
+
+        thenAssetOutputContains(0, "foo", 3);
+    }
+
+    @Test
+    public void shouldApplyScaleToIntegerWithIntegerScale() {
+        givenAssetChannel("foo", DataType.INTEGER, ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.of(3),
+                Optional.empty());
+
+        whenDriverProducesValue("foo", 1);
+
+        thenAssetOutputContains(0, "foo", 3);
+    }
+
+    @Test
+    public void shouldApplyScaleToLongWithDoubleScale() {
+        givenAssetChannel("foo", DataType.LONG, ScaleOffsetType.DOUBLE, Optional.of(3.0d), Optional.empty());
 
         whenDriverProducesValue("foo", 1l);
 
@@ -69,7 +90,7 @@ public class ScaleOffsetTest extends WireAssetTestBase {
 
     @Test
     public void shouldApplyOffsetToDouble() {
-        givenAssetChannel("foo", DataType.DOUBLE, OptionalDouble.empty(), OptionalDouble.of(10.0d));
+        givenAssetChannel("foo", DataType.DOUBLE, ScaleOffsetType.DOUBLE, Optional.empty(), Optional.of(10.0d));
 
         whenDriverProducesValue("foo", 1.0d);
 
@@ -78,7 +99,7 @@ public class ScaleOffsetTest extends WireAssetTestBase {
 
     @Test
     public void shouldApplyOffsetToFloat() {
-        givenAssetChannel("foo", DataType.FLOAT, OptionalDouble.empty(), OptionalDouble.of(-2.0d));
+        givenAssetChannel("foo", DataType.FLOAT, ScaleOffsetType.DOUBLE, Optional.empty(), Optional.of(-2.0d));
 
         whenDriverProducesValue("foo", 1.0f);
 
@@ -87,7 +108,7 @@ public class ScaleOffsetTest extends WireAssetTestBase {
 
     @Test
     public void shouldApplyOffsetToIngeger() {
-        givenAssetChannel("foo", DataType.INTEGER, OptionalDouble.empty(), OptionalDouble.of(10.0d));
+        givenAssetChannel("foo", DataType.INTEGER, ScaleOffsetType.DOUBLE, Optional.empty(), Optional.of(10.0d));
 
         whenDriverProducesValue("foo", 1);
 
@@ -96,7 +117,7 @@ public class ScaleOffsetTest extends WireAssetTestBase {
 
     @Test
     public void shouldApplyOffsetToLong() {
-        givenAssetChannel("foo", DataType.LONG, OptionalDouble.empty(), OptionalDouble.of(-2.0d));
+        givenAssetChannel("foo", DataType.LONG, ScaleOffsetType.DOUBLE, Optional.empty(), Optional.of(-2.0d));
 
         whenDriverProducesValue("foo", 1l);
 
@@ -105,7 +126,7 @@ public class ScaleOffsetTest extends WireAssetTestBase {
 
     @Test
     public void shouldApplyBothScaleAndOffset() {
-        givenAssetChannel("foo", DataType.LONG, OptionalDouble.of(6.0f), OptionalDouble.of(-2.0d));
+        givenAssetChannel("foo", DataType.LONG, ScaleOffsetType.DOUBLE, Optional.of(6.0f), Optional.of(-2.0d));
 
         whenDriverProducesValue("foo", 2l);
 
@@ -114,7 +135,7 @@ public class ScaleOffsetTest extends WireAssetTestBase {
 
     @Test
     public void shouldTolerateScaleAndOffsetOnBoolean() {
-        givenAssetChannel("foo", DataType.BOOLEAN, OptionalDouble.of(6.0f), OptionalDouble.of(-2.0d));
+        givenAssetChannel("foo", DataType.BOOLEAN, ScaleOffsetType.DOUBLE, Optional.of(6.0f), Optional.of(-2.0d));
 
         whenDriverProducesValue("foo", true);
 
@@ -123,7 +144,7 @@ public class ScaleOffsetTest extends WireAssetTestBase {
 
     @Test
     public void shouldTolerateScaleAndOffsetOnString() {
-        givenAssetChannel("foo", DataType.STRING, OptionalDouble.of(6.0f), OptionalDouble.of(-2.0d));
+        givenAssetChannel("foo", DataType.STRING, ScaleOffsetType.DOUBLE, Optional.of(6.0f), Optional.of(-2.0d));
 
         whenDriverProducesValue("foo", "bar");
 
@@ -132,7 +153,7 @@ public class ScaleOffsetTest extends WireAssetTestBase {
 
     @Test
     public void shouldTolerateScaleAndOffsetOnByteArray() {
-        givenAssetChannel("foo", DataType.BYTE_ARRAY, OptionalDouble.of(6.0f), OptionalDouble.of(-2.0d));
+        givenAssetChannel("foo", DataType.BYTE_ARRAY, ScaleOffsetType.DOUBLE, Optional.of(6.0f), Optional.of(-2.0d));
 
         whenDriverProducesValue("foo", new byte[] { 1, 2, 3, 4 });
 
@@ -155,9 +176,9 @@ public class ScaleOffsetTest extends WireAssetTestBase {
         this.triggerMode = triggerMode;
     }
 
-    private void givenAssetChannel(String name, DataType dataType, OptionalDouble scale,
-            OptionalDouble offset) {
-        super.givenAssetChannel(name, this.triggerMode == TriggerMode.LISTEN, dataType, scale, offset);
+    private void givenAssetChannel(String name, DataType dataType, ScaleOffsetType scaleOffsetType,
+            Optional<? extends Number> scale, Optional<? extends Number> offset) {
+        super.givenAssetChannel(name, this.triggerMode == TriggerMode.LISTEN, dataType, scaleOffsetType, scale, offset);
     }
 
     private void whenDriverProducesValue(final String channelName, final Object value) {

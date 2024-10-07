@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -40,6 +40,7 @@ import org.eclipse.kura.asset.provider.AssetConstants;
 import org.eclipse.kura.channel.Channel;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.ChannelType;
+import org.eclipse.kura.channel.ScaleOffsetType;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Option;
@@ -328,22 +329,31 @@ public final class BaseAssetConfiguration {
             return DataType.getDataType(valueTypeProp);
         }
 
-        private static double getValueScale(final Map<String, Object> properties) {
+        private static ScaleOffsetType getScaleOffsetType(final Map<String, Object> properties) {
+            final String scaleOffsetypeProp = (String) properties.get(AssetConstants.SCALE_OFFSET_TYPE.value());
+
+            if (scaleOffsetypeProp == null) {
+                return ScaleOffsetType.DEFINED_BY_VALUE_TYPE;
+            }
+            return ScaleOffsetType.getScaleOffsetType(scaleOffsetypeProp);
+        }
+
+        private static Number getValueScale(final Map<String, Object> properties) {
             final String valueScale = (String) properties.get(VALUE_SCALE.value());
 
             if (valueScale == null) {
                 return 1.0d;
             }
-            return Double.valueOf(valueScale);
+            return parseScaleOffsetTypedValue(getScaleOffsetType(properties), valueScale);
         }
 
-        private static double getValueOffset(final Map<String, Object> properties) {
-            final String valueScale = (String) properties.get(VALUE_OFFSET.value());
+        private static Number getValueOffset(final Map<String, Object> properties) {
+            final String valueOffset = (String) properties.get(VALUE_OFFSET.value());
 
-            if (valueScale == null) {
+            if (valueOffset == null) {
                 return 0.0d;
             }
-            return Double.valueOf(valueScale);
+            return parseScaleOffsetTypedValue(getScaleOffsetType(properties), valueOffset);
         }
 
         private static String getUnit(final Map<String, Object> properties) {
@@ -376,24 +386,32 @@ public final class BaseAssetConfiguration {
 
             final boolean isEnabled = isEnabled(channelConfig);
 
-            final double valueScale = getValueScale(channelConfig);
+            final Number valueScale = getValueScale(channelConfig);
+            final Number valueOffset = getValueOffset(channelConfig);
+            final ScaleOffsetType scaleOffsetType = getScaleOffsetType(channelConfig);
 
-            final double valueOffset = getValueOffset(channelConfig);
-
-            final Channel channel = new Channel(channelName, channelType, dataType, channelConfig);
+            final Channel channel = new Channel(channelName, channelType, dataType, scaleOffsetType, valueScale,
+                    valueOffset, channelConfig);
             channel.setEnabled(isEnabled);
-
-            if (dataType.equals(DataType.DOUBLE) || dataType.equals(DataType.INTEGER) || dataType.equals(DataType.FLOAT)
-                    || dataType.equals(DataType.LONG)) {
-                channel.setScale(valueScale);
-                channel.setOffset(valueOffset);
-            }
 
             final String valueUnit = getUnit(channelConfig);
             channel.setUnit(valueUnit);
 
             logger.debug("Retrieving single channel information from the properties...Done");
             return channel;
+        }
+
+        private static Number parseScaleOffsetTypedValue(ScaleOffsetType type, String value) {
+            Objects.requireNonNull(type, "type cannot be null");
+            Objects.requireNonNull(value, "value cannot be null");
+
+            switch (type) {
+            case DEFINED_BY_VALUE_TYPE:
+            case DOUBLE:
+                return Double.parseDouble(value);
+            default:
+                throw new IllegalArgumentException(value + " cannot be converted into a Number of type " + type);
+            }
         }
     }
 
@@ -403,4 +421,5 @@ public final class BaseAssetConfiguration {
         defaultProperties.putAll(properties);
         return defaultProperties;
     }
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.DataType;
@@ -35,6 +36,14 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class Channel {
 
+    private static final String MESSAGE_CHANNEL_CONFIGURATION_CANNOT_BE_NULL = "Channel configuration cannot be null";
+
+    private static final String MESSAGE_CHANNEL_VALUE_TYPE_CANNOT_BE_NULL = "Channel value type cannot be null";
+
+    private static final String MESSAGE_CHANNEL_TYPE_CANNOT_BE_NULL = "Channel type cannot be null";
+
+    private static final String MESSAGE_CHANNEL_NAME_CANNOT_BE_NULL = "Channel name cannot be null";
+
     /** The communication channel configuration. */
     private final transient Map<String, Object> configuration;
 
@@ -49,11 +58,22 @@ public class Channel {
      */
     private DataType valueType;
 
-    private double valueScale;
+    /**
+     * The data type of the scale/offset as expected from the operation
+     */
+    private ScaleOffsetType scaleOffsetType = ScaleOffsetType.DEFINED_BY_VALUE_TYPE;
 
-    private double valueOffset;
+    /*
+     * The value used to scale the value
+     */
+    private Number valueScale = 1.0d;
 
-    private String unit;
+    /**
+     * The value used as offset of the value
+     */
+    private Number valueOffset = 0.0d;
+
+    private String unit = "";
 
     /**
      * Determines if this channel is enabled or not
@@ -73,21 +93,68 @@ public class Channel {
      *            the configuration
      * @throws NullPointerException
      *             if any of the arguments is null
+     * @deprecated Use {@link #Channel(String, ChannelType, DataType, ScaleOffsetType, Number, Number, Map)}
      */
+
+    @Deprecated
     public Channel(final String name, final ChannelType type, final DataType valueType,
             final Map<String, Object> config) {
-        requireNonNull(name, "Channel name cannot be null");
-        requireNonNull(type, "Channel type cannot be null");
-        requireNonNull(valueType, "Channel value type cannot be null");
-        requireNonNull(config, "Channel configuration cannot be null");
+
+        requireNonNull(name, MESSAGE_CHANNEL_NAME_CANNOT_BE_NULL);
+        requireNonNull(type, MESSAGE_CHANNEL_TYPE_CANNOT_BE_NULL);
+        requireNonNull(valueType, MESSAGE_CHANNEL_VALUE_TYPE_CANNOT_BE_NULL);
+        requireNonNull(config, MESSAGE_CHANNEL_CONFIGURATION_CANNOT_BE_NULL);
 
         this.configuration = Collections.unmodifiableMap(config);
         this.name = name;
         this.type = type;
         this.valueType = valueType;
-        this.valueScale = 1.0d;
-        this.valueOffset = 0d;
-        this.unit = "";
+    }
+
+    /**
+     * Instantiates a new channel.
+     *
+     * @param name
+     *            the name for this channel
+     * @param type
+     *            the type
+     * @param valueType
+     *            the value type
+     * @param valueScale
+     *            the value used to scale the value, must have the same {@link DataType} as valueOffset
+     * @param valueOffset
+     *            the value used as offset of the value, must have the same {@link DataType} as valueScale
+     * @param config
+     *            the configuration
+     * @throws NullPointerException
+     *             if any of the arguments is null
+     * @throws IllegalArgumentException
+     *             if any of the valueScale and valueOffset have different types
+     *
+     * @since 2.8
+     */
+    public Channel(final String name, final ChannelType type, final DataType valueType,
+            final ScaleOffsetType scaleOffsetType, final Number valueScale, final Number valueOffset,
+            final Map<String, Object> config) {
+
+        requireNonNull(name, MESSAGE_CHANNEL_NAME_CANNOT_BE_NULL);
+        requireNonNull(type, MESSAGE_CHANNEL_TYPE_CANNOT_BE_NULL);
+        requireNonNull(valueType, MESSAGE_CHANNEL_VALUE_TYPE_CANNOT_BE_NULL);
+        requireNonNull(config, MESSAGE_CHANNEL_CONFIGURATION_CANNOT_BE_NULL);
+
+        requireNonNull(scaleOffsetType, "Scale/Offset type cannot be null");
+        requireNonNull(valueScale, "Channel value scale cannot be null");
+        requireNonNull(valueOffset, "Channel value offset cannot be null");
+
+        this.configuration = Collections.unmodifiableMap(config);
+        this.name = name;
+        this.type = type;
+        this.valueType = valueType;
+
+        this.scaleOffsetType = scaleOffsetType;
+        this.valueScale = valueScale;
+        this.valueOffset = valueOffset;
+
     }
 
     /**
@@ -127,6 +194,17 @@ public class Channel {
     }
 
     /**
+     * Gets the Scale/Offset type as expected for operations.
+     *
+     * @return the value type
+     *
+     * @since 2.8
+     */
+    public ScaleOffsetType getScaleOffsetType() {
+        return this.scaleOffsetType;
+    }
+
+    /**
      * Returns a boolean indicating if this channel is enabled or not
      *
      * @since 1.4
@@ -143,8 +221,23 @@ public class Channel {
      * @return a double that represents the scale factor to be applied to the read value
      *
      * @since 2.3
+     *
+     * @deprecated Use {@link #getValueScaleAsNumber()}
      */
+    @Deprecated
     public double getValueScale() {
+        return this.valueScale.doubleValue();
+    }
+
+    /**
+     * Returns a {@link Number} that represents the scale factor to be applied to the read
+     * value
+     *
+     * @return a {@link Number} that represents the scale factor to be applied to the read value
+     *
+     * @since 2.8
+     */
+    public Number getValueScaleAsNumber() {
         return this.valueScale;
     }
 
@@ -154,8 +247,23 @@ public class Channel {
      * @return a double that represents the offset to be applied to the read value
      *
      * @since 2.3
+     *
+     * @deprecated Use {@link #getValueOffsetAsNumber()}
      */
+    @Deprecated
     public double getValueOffset() {
+        return this.valueOffset.doubleValue();
+    }
+
+    /**
+     * Returns a {@link TypedValue} that represents the offset factor to be applied to the read
+     * value
+     *
+     * @return a {@link TypedValue} that represents the offset factor to be applied to the read value
+     *
+     * @since 2.8
+     */
+    public Number getValueOffsetAsNumber() {
         return this.valueOffset;
     }
 
@@ -175,7 +283,7 @@ public class Channel {
      *             if the argument is null
      */
     public void setName(final String name) {
-        requireNonNull(name, "Channel name cannot be null");
+        requireNonNull(name, MESSAGE_CHANNEL_NAME_CANNOT_BE_NULL);
         this.name = name;
     }
 
@@ -188,7 +296,7 @@ public class Channel {
      *             if the argument is null
      */
     public void setType(final ChannelType type) {
-        requireNonNull(type, "Channel type cannot be null");
+        requireNonNull(type, MESSAGE_CHANNEL_TYPE_CANNOT_BE_NULL);
         this.type = type;
     }
 
@@ -201,8 +309,23 @@ public class Channel {
      *             if the argument is null
      */
     public void setValueType(final DataType valueType) {
-        requireNonNull(valueType, "Channel value type cannot be null");
+        requireNonNull(valueType, MESSAGE_CHANNEL_VALUE_TYPE_CANNOT_BE_NULL);
         this.valueType = valueType;
+    }
+
+    /**
+     * Set the type of the scale/offset.
+     *
+     * @param scaleOffsetType
+     *            the scale/offset type
+     * @throws NullPointerException
+     *             if the argument is null
+     *
+     * @since 2.8
+     */
+    public void setScaleOffsetType(ScaleOffsetType scaleOffsetType) {
+        requireNonNull(this.valueType, "Scale/Offset value type cannot be null");
+        this.scaleOffsetType = scaleOffsetType;
     }
 
     /**
@@ -228,6 +351,17 @@ public class Channel {
     }
 
     /**
+     * Specifies the scale to be applied to the channel value
+     *
+     * @param scale
+     *            a {@link Number} value that specifies the scale to be applied to the channel value
+     * @since 2.8
+     */
+    public void setScale(Number scale) {
+        this.valueScale = scale;
+    }
+
+    /**
      * Specifies the offset to be applied to the channel value
      *
      * @param offset
@@ -235,6 +369,17 @@ public class Channel {
      * @since 2.3
      */
     public void setOffset(double offset) {
+        this.valueOffset = offset;
+    }
+
+    /**
+     * Specifies the offset to be applied to the channel value
+     *
+     * @param offset
+     *            a {@link Number} value that specifies the offset to be applied to the channel value
+     * @since 2.8
+     */
+    public void setOffset(Number offset) {
         this.valueOffset = offset;
     }
 
@@ -294,19 +439,8 @@ public class Channel {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (this.isEnabled ? 1231 : 1237);
-        result = prime * result + (this.name == null ? 0 : this.name.hashCode());
-        result = prime * result + (this.type == null ? 0 : this.type.hashCode());
-        result = prime * result + (this.unit == null ? 0 : this.unit.hashCode());
-        long temp;
-        temp = Double.doubleToLongBits(this.valueOffset);
-        result = prime * result + (int) (temp ^ temp >>> 32);
-        temp = Double.doubleToLongBits(this.valueScale);
-        result = prime * result + (int) (temp ^ temp >>> 32);
-        result = prime * result + (this.valueType == null ? 0 : this.valueType.hashCode());
-        return result;
+        return Objects.hash(this.isEnabled, this.name, this.scaleOffsetType, this.type, this.unit, this.valueOffset,
+                this.valueScale, this.valueType);
     }
 
     @Override
@@ -318,36 +452,10 @@ public class Channel {
             return false;
         }
         Channel other = (Channel) obj;
-        if (this.isEnabled != other.isEnabled) {
-            return false;
-        }
-        if (this.name == null) {
-            if (other.name != null) {
-                return false;
-            }
-        } else if (!this.name.equals(other.name)) {
-            return false;
-        }
-        if (this.type != other.type) {
-            return false;
-        }
-        if (this.unit == null) {
-            if (other.unit != null) {
-                return false;
-            }
-        } else if (!this.unit.equals(other.unit)) {
-            return false;
-        }
-        if (Double.doubleToLongBits(this.valueOffset) != Double.doubleToLongBits(other.valueOffset)) {
-            return false;
-        }
-        if (Double.doubleToLongBits(this.valueScale) != Double.doubleToLongBits(other.valueScale)) {
-            return false;
-        }
-        if (this.valueType != other.valueType) {
-            return false;
-        }
-        return true;
+        return this.isEnabled == other.isEnabled && Objects.equals(this.name, other.name)
+                && this.scaleOffsetType == other.scaleOffsetType && this.type == other.type
+                && Objects.equals(this.unit, other.unit) && Objects.equals(this.valueOffset, other.valueOffset)
+                && Objects.equals(this.valueScale, other.valueScale) && this.valueType == other.valueType;
     }
 
 }

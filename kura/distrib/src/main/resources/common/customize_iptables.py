@@ -45,7 +45,7 @@ def main():
     if wlan_number == 0:
         for line in iptables_content.split("\n"):
             if 'WIFI_INTERFACE_0' not in line:
-                iptables_content_updated += line.replace('ETH_INTERFACE_0', eth_names[0])
+                iptables_content_updated += (line.replace('ETH_INTERFACE_0', eth_names[0]) + "\n")
     else:
         iptables_content_updated = iptables_content
         iptables_content_updated = iptables_content_updated.replace('ETH_INTERFACE_0', eth_names[0])

@@ -44,7 +44,7 @@ customize_snapshot() {
     if [ ${BOARD} = "generic-device" ]; then 
 	    if python3 -V > /dev/null 2>&1
 	    then
-	        python3 "/opt/eclipse/kura/install/customize_snapshot.py"
+	        python3 "/opt/eclipse/kura/install/customize_snapshot.py" ${IS_NETWORKING_PROFILE}
 	    else
 	    	# fallback to RaspberryPi configuration to have something working...
 	    	mv "/opt/eclipse/kura/install/snapshot_0.xml-raspberry" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
@@ -99,18 +99,16 @@ if [ ! -d "/opt/eclipse/kura/user/snapshots/" ]; then
 fi
 
 mv "/opt/eclipse/kura/install/jdk.dio.properties-${BOARD}" "/opt/eclipse/kura/framework/jdk.dio.properties"
+mv "/opt/eclipse/kura/install/snapshot_0.xml-${BOARD}" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
 
-if [ "${IS_NETWORKING_PROFILE}" = "false" ]
+customize_snapshot "${BOARD}"
+customize_kura_properties "${BOARD}"
+
+if [ "${IS_NETWORKING_PROFILE}" = "true" ]
 then
-    mv "/opt/eclipse/kura/install/snapshot_0.xml-${BOARD}-nn" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
-else
-    mv "/opt/eclipse/kura/install/snapshot_0.xml-${BOARD}" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
     mv "/opt/eclipse/kura/install/iptables-${BOARD}" "/opt/eclipse/kura/.data/iptables"
-    customize_snapshot "${BOARD}"
     customize_iptables "${BOARD}"
 fi
-
-customize_kura_properties "${BOARD}"
 
 if [ ${BOARD} = "generic-device" ]; then    
     # dynamic RAM assignment

@@ -224,10 +224,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             this.driverServiceTracker.close();
             this.driverServiceTracker = null;
         }
-        final DriverTrackerCustomizer driverTrackerCustomizer = new DriverTrackerCustomizer(
-                this.context.getBundleContext(), this, driverId);
         this.driverServiceTracker = new ServiceTracker<>(this.context.getBundleContext(), Driver.class.getName(),
-                driverTrackerCustomizer);
+                new DriverTrackerCustomizer(this.context.getBundleContext(), this, driverId));
         this.driverServiceTracker.open();
 
         logger.debug("Attaching driver instance...Done");
@@ -710,10 +708,10 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         public void onChannelEvent(ChannelEvent event) {
             final ChannelRecord originaRecord = event.getChannelRecord();
 
-            if (shouldApplyScaleAndOffset(originaRecord, channel)) {
+            if (shouldApplyScaleAndOffset(originaRecord, this.channel)) {
                 final ChannelRecord cloned = cloneRecord(originaRecord);
 
-                applyScaleAndOffset(cloned, channel);
+                applyScaleAndOffset(cloned, this.channel);
 
                 this.listener.onChannelEvent(new ChannelEvent(cloned));
             } else {

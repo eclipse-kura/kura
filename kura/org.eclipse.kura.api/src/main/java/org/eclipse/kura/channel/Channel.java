@@ -36,6 +36,14 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class Channel {
 
+    private static final String MESSAGE_CHANNEL_CONFIGURATION_CANNOT_BE_NULL = "Channel configuration cannot be null";
+
+    private static final String MESSAGE_CHANNEL_VALUE_TYPE_CANNOT_BE_NULL = "Channel value type cannot be null";
+
+    private static final String MESSAGE_CHANNEL_TYPE_CANNOT_BE_NULL = "Channel type cannot be null";
+
+    private static final String MESSAGE_CHANNEL_NAME_CANNOT_BE_NULL = "Channel name cannot be null";
+
     /** The communication channel configuration. */
     private final transient Map<String, Object> configuration;
 
@@ -85,16 +93,17 @@ public class Channel {
      *            the configuration
      * @throws NullPointerException
      *             if any of the arguments is null
+     * @deprecated Use {@link #Channel(String, ChannelType, DataType, ScaleOffsetType, Number, Number, Map)}
      */
 
     @Deprecated
     public Channel(final String name, final ChannelType type, final DataType valueType,
             final Map<String, Object> config) {
 
-        requireNonNull(name, "Channel name cannot be null");
-        requireNonNull(type, "Channel type cannot be null");
-        requireNonNull(valueType, "Channel value type cannot be null");
-        requireNonNull(config, "Channel configuration cannot be null");
+        requireNonNull(name, MESSAGE_CHANNEL_NAME_CANNOT_BE_NULL);
+        requireNonNull(type, MESSAGE_CHANNEL_TYPE_CANNOT_BE_NULL);
+        requireNonNull(valueType, MESSAGE_CHANNEL_VALUE_TYPE_CANNOT_BE_NULL);
+        requireNonNull(config, MESSAGE_CHANNEL_CONFIGURATION_CANNOT_BE_NULL);
 
         this.configuration = Collections.unmodifiableMap(config);
         this.name = name;
@@ -121,17 +130,17 @@ public class Channel {
      *             if any of the arguments is null
      * @throws IllegalArgumentException
      *             if any of the valueScale and valueOffset have different types
-     * 
+     *
      * @since 2.8
      */
     public Channel(final String name, final ChannelType type, final DataType valueType,
             final ScaleOffsetType scaleOffsetType, final Number valueScale, final Number valueOffset,
             final Map<String, Object> config) {
 
-        requireNonNull(name, "Channel name cannot be null");
-        requireNonNull(type, "Channel type cannot be null");
-        requireNonNull(valueType, "Channel value type cannot be null");
-        requireNonNull(config, "Channel configuration cannot be null");
+        requireNonNull(name, MESSAGE_CHANNEL_NAME_CANNOT_BE_NULL);
+        requireNonNull(type, MESSAGE_CHANNEL_TYPE_CANNOT_BE_NULL);
+        requireNonNull(valueType, MESSAGE_CHANNEL_VALUE_TYPE_CANNOT_BE_NULL);
+        requireNonNull(config, MESSAGE_CHANNEL_CONFIGURATION_CANNOT_BE_NULL);
 
         requireNonNull(scaleOffsetType, "Scale/Offset type cannot be null");
         requireNonNull(valueScale, "Channel value scale cannot be null");
@@ -188,7 +197,7 @@ public class Channel {
      * Gets the Scale/Offset type as expected for operations.
      *
      * @return the value type
-     * 
+     *
      * @since 2.8
      */
     public ScaleOffsetType getScaleOffsetType() {
@@ -210,9 +219,9 @@ public class Channel {
      * Returns a double that represents the scale factor to be applied to the read value
      *
      * @return a double that represents the scale factor to be applied to the read value
-     * 
+     *
      * @since 2.3
-     * 
+     *
      * @deprecated Use {@link #getValueScaleAsNumber()}
      */
     @Deprecated
@@ -238,7 +247,7 @@ public class Channel {
      * @return a double that represents the offset to be applied to the read value
      *
      * @since 2.3
-     * 
+     *
      * @deprecated Use {@link #getValueOffsetAsNumber()}
      */
     @Deprecated
@@ -274,7 +283,7 @@ public class Channel {
      *             if the argument is null
      */
     public void setName(final String name) {
-        requireNonNull(name, "Channel name cannot be null");
+        requireNonNull(name, MESSAGE_CHANNEL_NAME_CANNOT_BE_NULL);
         this.name = name;
     }
 
@@ -287,7 +296,7 @@ public class Channel {
      *             if the argument is null
      */
     public void setType(final ChannelType type) {
-        requireNonNull(type, "Channel type cannot be null");
+        requireNonNull(type, MESSAGE_CHANNEL_TYPE_CANNOT_BE_NULL);
         this.type = type;
     }
 
@@ -300,22 +309,22 @@ public class Channel {
      *             if the argument is null
      */
     public void setValueType(final DataType valueType) {
-        requireNonNull(valueType, "Channel value type cannot be null");
+        requireNonNull(valueType, MESSAGE_CHANNEL_VALUE_TYPE_CANNOT_BE_NULL);
         this.valueType = valueType;
     }
 
     /**
      * Set the type of the scale/offset.
-     * 
+     *
      * @param scaleOffsetType
      *            the scale/offset type
      * @throws NullPointerException
      *             if the argument is null
-     * 
+     *
      * @since 2.8
      */
     public void setScaleOffsetType(ScaleOffsetType scaleOffsetType) {
-        requireNonNull(valueType, "Scale/Offset value type cannot be null");
+        requireNonNull(this.valueType, "Scale/Offset value type cannot be null");
         this.scaleOffsetType = scaleOffsetType;
     }
 
@@ -439,10 +448,7 @@ public class Channel {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if ((obj == null) || (getClass() != obj.getClass())) {
             return false;
         }
         Channel other = (Channel) obj;

@@ -38,21 +38,21 @@ def main():
         exit(1)
     
     logging.info("%s : starting editing", IPTABLES_FILENAME)
-    iptables = open(IPTABLES_FILENAME, 'r+', encoding='utf-8')
-    iptables_content = ""
-    if wlan_number == 0:
-        for line in iptables:
-            if 'WIFI_INTERFACE_0' not in line:
-                iptables_content += line.replace('ETH_INTERFACE_0', eth_names[0])
-    else:
+    with open(IPTABLES_FILENAME, 'r', encoding='utf-8') as iptables:
         iptables_content = iptables.read()
-        iptables_content = iptables_content.replace('ETH_INTERFACE_0', eth_names[0])
-        iptables_content = iptables_content.replace('WIFI_INTERFACE_0', wlan_names[0])
     
-    iptables.seek(0)
-    iptables.truncate()
-    iptables.write(iptables_content)
-    iptables.close()
+    iptables_content_updated = ""
+    if wlan_number == 0:
+        for line in iptables_content.split("\n"):
+            if 'WIFI_INTERFACE_0' not in line:
+                iptables_content_updated += line.replace('ETH_INTERFACE_0', eth_names[0])
+    else:
+        iptables_content_updated = iptables_content
+        iptables_content_updated = iptables_content_updated.replace('ETH_INTERFACE_0', eth_names[0])
+        iptables_content_updated = iptables_content_updated.replace('WIFI_INTERFACE_0', wlan_names[0])
+    
+    with open(IPTABLES_FILENAME, 'w', encoding='utf-8') as iptables:
+        iptables.write(iptables_content_updated)
         
     logging.info("%s : successfully edited", IPTABLES_FILENAME)
             

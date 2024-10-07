@@ -42,16 +42,14 @@ def main():
         exit(1)
     
     logging.info("%s : starting editing", KURA_PROPERTIES_FILENAME)
-    kura_properties = open(KURA_PROPERTIES_FILENAME, 'r+', encoding='utf-8')
-
-    kura_properties_content = kura_properties.read()
-    kura_properties_content = kura_properties_content.replace('device_name', board_name[0])
+    with open(KURA_PROPERTIES_FILENAME, 'r', encoding='utf-8') as kura_properties:
+        kura_properties_content = kura_properties.read()
+        
+    kura_properties_content = kura_properties_content.replace('device_name', board_name)
     kura_properties_content = kura_properties_content.replace('eth0', eth_names[0])
     
-    kura_properties.seek(0)
-    kura_properties.truncate()
-    kura_properties.write(kura_properties_content)
-    kura_properties.close()
+    with open(KURA_PROPERTIES_FILENAME, 'w', encoding='utf-8') as kura_properties:
+        kura_properties.write(kura_properties_content)
         
     logging.info("%s : successfully edited", KURA_PROPERTIES_FILENAME)
             

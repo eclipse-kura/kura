@@ -56,13 +56,15 @@ def main():
     
     
     logging.info("%s : starting editing", SNAPSHOT_FILENAME)
-    snapshot = open(SNAPSHOT_FILENAME, 'r+', encoding='utf-8')
-    network_template = open(network_configuration_template, 'r', encoding='utf-8')
-    firewall_template = open(firewall_configuration_template, 'r', encoding='utf-8')
-
-    snapshot_content = snapshot.read()
-    network_template_content = network_template.read()
-    firewall_template_content = firewall_template.read()
+    with open(SNAPSHOT_FILENAME, 'r', encoding='utf-8') as snapshot:
+        snapshot_content = snapshot.read()
+        
+    with open(network_configuration_template, 'r', encoding='utf-8') as network_template:
+        network_template_content = network_template.read()
+    
+    with open(firewall_configuration_template, 'r', encoding='utf-8') as firewall_template:
+        firewall_template_content = firewall_template.read()
+        
     snapshot_content = snapshot_content.replace('NETWORK_CONFIGURATION', network_template_content)
     snapshot_content = snapshot_content.replace('FIREWALL_CONFIGURATION', firewall_template_content)
     
@@ -80,10 +82,8 @@ def main():
         
     snapshot_content = snapshot_content.replace('INTERFACES_LIST', interfaces_list)
     
-    snapshot.seek(0)
-    snapshot.truncate()
-    snapshot.write(snapshot_content)
-    snapshot.close()
+    with open(SNAPSHOT_FILENAME, 'w', encoding='utf-8') as snapshot:
+        snapshot.write(snapshot_content)
         
     logging.info("%s : successfully edited", SNAPSHOT_FILENAME)
             

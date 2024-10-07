@@ -69,6 +69,9 @@ customize_iptables() {
 }
 
 customize_kura_properties() {
+    KURA_PLATFORM=$( uname -m )
+    sed -i "s/kura_platform/${KURA_PLATFORM}/g" "/opt/eclipse/kura/framework/kura.properties"
+
     local BOARD=$1
 
     if python3 -V > /dev/null 2>&1
@@ -79,8 +82,7 @@ customize_kura_properties() {
     fi
 }
 
-KURA_PLATFORM=$( uname -m )
-sed -i "s/kura_platform/${KURA_PLATFORM}/g" "/opt/eclipse/kura/framework/kura.properties"
+IS_NETWORKING_PROFILE=$1
 
 setup_libudev
 
@@ -97,11 +99,17 @@ if [ ! -d "/opt/eclipse/kura/user/snapshots/" ]; then
 fi
 
 mv "/opt/eclipse/kura/install/jdk.dio.properties-${BOARD}" "/opt/eclipse/kura/framework/jdk.dio.properties"
-mv "/opt/eclipse/kura/install/snapshot_0.xml-${BOARD}" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
-mv "/opt/eclipse/kura/install/iptables-${BOARD}" "/opt/eclipse/kura/.data/iptables"
 
-customize_snapshot "${BOARD}"
-customize_iptables "${BOARD}"
+if [ "${IS_NETWORKING_PROFILE}" = "false" ]
+then
+    mv "/opt/eclipse/kura/install/snapshot_0.xml-${BOARD}-nn" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
+else
+    mv "/opt/eclipse/kura/install/snapshot_0.xml-${BOARD}" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
+    mv "/opt/eclipse/kura/install/iptables-${BOARD}" "/opt/eclipse/kura/.data/iptables"
+    customize_snapshot "${BOARD}"
+    customize_iptables "${BOARD}"
+fi
+
 customize_kura_properties "${BOARD}"
 
 if [ ${BOARD} = "generic-device" ]; then    

@@ -40,6 +40,12 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
 
     private static final Messages MSGS = GWT.create(Messages.class);
 
+    private static final String NET_MODEM_MODE_UNMANAGED = "kuraModemGpsModeUnmanaged";
+    private static final String NET_MODEM_MODE_MANAGED_GPS = "kuraModemGpsModeManagedGps";
+
+    private static final String MODEM_GPS_UNMANAGED = "UNMANAGED";
+    private static final String MODEM_GPS_MANAGED_GPS = "MANAGED_GPS";
+
     private final GwtSession session;
     private final NetworkTabsUi tabs;
     private boolean dirty;
@@ -115,10 +121,10 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
         if (this.formInitialized) {
             updatedModemNetIf.setGpsEnabled(this.radio1.getValue());
 
-            if (this.gpsMode.getSelectedItemText().equals("UNMANAGED")) {
-                updatedModemNetIf.setGpsMode("kuraModemGpsModeUnmanaged");
+            if (MODEM_GPS_UNMANAGED.equals(this.gpsMode.getSelectedValue())) {
+                updatedModemNetIf.setGpsMode(NET_MODEM_MODE_UNMANAGED);
             } else { // MANAGED_GPS
-                updatedModemNetIf.setGpsMode("kuraModemGpsModeManagedGps");
+                updatedModemNetIf.setGpsMode(NET_MODEM_MODE_MANAGED_GPS);
             }
         } else {
             // initForm hasn't been called yet
@@ -174,8 +180,8 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
         // GPS Mode
         this.labelGpsMode.setText(MSGS.netModemGpsMode());
         // WIP: Populate the list box with the available GPS modes
-        this.gpsMode.addItem("UNMANAGED");
-        this.gpsMode.addItem("MANAGED_GPS");
+        this.gpsMode.addItem(MODEM_GPS_UNMANAGED);
+        this.gpsMode.addItem(MODEM_GPS_MANAGED_GPS);
 
         this.gpsMode.addMouseOverHandler(event -> {
             TabModemGpsUi.this.helpText.clear();
@@ -197,7 +203,7 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
             this.radio1.setValue(this.selectedModemIfConfig.isGpsEnabled());
             this.radio2.setValue(!this.selectedModemIfConfig.isGpsEnabled());
 
-            if (this.selectedModemIfConfig.getGpsMode().equals("kuraModemGpsModeUnmanaged")) {
+            if (NET_MODEM_MODE_UNMANAGED.equals(this.selectedModemIfConfig.getGpsMode())) {
                 this.gpsMode.setSelectedIndex(0);
             } else {
                 this.gpsMode.setSelectedIndex(1);

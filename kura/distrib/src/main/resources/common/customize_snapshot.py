@@ -68,16 +68,12 @@ def main():
     
     interfaces_list = "lo"
 
-    for i, eth_name in enumerate(eth_names):
-        if i > 1:
-            break
+    for i, eth_name in enumerate(eth_names[:2]):
         snapshot_content = snapshot_content.replace('ETH_INTERFACE_' + str(i), eth_name)
         interfaces_list += "," + eth_name
         logging.info("%s : replaced ETH_INTERFACE_%s with %s", SNAPSHOT_FILENAME, str(i), eth_name)
 
-    for i, wlan_name in enumerate(wlan_names):
-        if i > 0:
-            break
+    for i, wlan_name in enumerate(wlan_names[:1]):
         snapshot_content = snapshot_content.replace('WIFI_INTERFACE_' + str(i), wlan_name)
         interfaces_list += "," + wlan_name
         logging.info("%s : replaced WIFI_INTERFACE_%s with %s", SNAPSHOT_FILENAME, str(i), wlan_name)

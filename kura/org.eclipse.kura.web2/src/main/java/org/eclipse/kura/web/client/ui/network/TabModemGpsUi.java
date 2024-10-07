@@ -194,13 +194,8 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
 
     private void update() {
         if (this.selectedModemIfConfig != null) {
-            if (this.selectedModemIfConfig.isGpsEnabled()) {
-                this.radio1.setValue(true);
-                this.radio2.setValue(false);
-            } else {
-                this.radio1.setValue(false);
-                this.radio2.setValue(true);
-            }
+            this.radio1.setValue(this.selectedModemIfConfig.isGpsEnabled());
+            this.radio2.setValue(!this.selectedModemIfConfig.isGpsEnabled());
 
             if (this.selectedModemIfConfig.getGpsMode().equals("kuraModemGpsModeUnmanaged")) {
                 this.gpsMode.setSelectedIndex(0);
@@ -213,13 +208,8 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
 
     private void refreshForm() {
         if (this.selectedModemIfConfig != null) {
-            if (this.selectedModemIfConfig.isGpsSupported()) {
-                this.radio1.setEnabled(true);
-                this.radio2.setEnabled(true);
-            } else {
-                this.radio1.setEnabled(false);
-                this.radio2.setEnabled(false);
-            }
+            this.radio1.setEnabled(this.selectedModemIfConfig.isGpsSupported());
+            this.radio2.setEnabled(this.selectedModemIfConfig.isGpsSupported());
         }
         this.gpsMode.setEnabled(this.radio1.getValue());
     }

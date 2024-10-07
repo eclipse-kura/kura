@@ -26,12 +26,13 @@ def main():
         ]
     )
     
-    board_name = sys.argv[1:] # remove script name from args
+    args = sys.argv[1:] # remove script name from args
     
-    if len(board_name) < 1:
+    if len(args) < 1:
         logging.info("ERROR: invalid arguments length")
         exit(1)
-        
+    
+    board_name = args[0]
     KURA_PROPERTIES_FILENAME = "/opt/eclipse/kura/framework/kura.properties"
     
     (eth_names, wlan_names) = get_eth_wlan_interfaces_names()

@@ -243,6 +243,14 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig {
         set("gpsEnabled", gpsEnabled);
     }
 
+    public void setGpsMode(String gpsMode) {
+        set("gpsMode", gpsMode);
+    }
+
+    public String getGpsMode() {
+        return get("gpsMode");
+    }
+
     public boolean isGpsSupported() {
         if (get("gpsSupported") != null) {
             return (Boolean) get("gpsSupported");

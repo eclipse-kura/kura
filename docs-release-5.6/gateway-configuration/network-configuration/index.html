@@ -737,6 +737,21 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Cellular Modem properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gps-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      GPS Mode
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -4739,6 +4754,21 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Cellular Modem properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gps-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      GPS Mode
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -5456,6 +5486,12 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>false</td>
 </tr>
 <tr>
+<td><code>net.interface.&lt;interface&gt;.config.gpsMode</code></td>
+<td>String</td>
+<td>Select the GPS mode to activate for the modem if available</td>
+<td><code>kuraModemGpsModeUnmanaged</code></td>
+</tr>
+<tr>
 <td><code>net.interface.&lt;interface&gt;.config.persist</code></td>
 <td>Boolean</td>
 <td>The persist option of the PPP daemon</td>
@@ -5487,6 +5523,13 @@ Since the network configuration shown on the screen may not be synchronized with
 </tr>
 </tbody>
 </table>
+<h4 id="gps-mode">GPS Mode</h4>
+<p>The GPS mode can be set to one of the following values:</p>
+<ul>
+<li><code>kuraModemGpsModeUnmanaged</code>: the GPS device of the modem will be setup but not directly managed, therefore freeing the serial port for other services to use. This can be used in order to perform the setup of the GPS and then have another service (like <code>gpsd</code>) parse the NMEA strings in order to extract the position informations. This is the default value.</li>
+<li><code>kuraModemGpsModeManagedGps</code>: the GPS device of the modem will be setup and directly managed (typically by ModemManager) therefore the serial port won't be available for other services to use.</li>
+</ul>
+<p>For older versions compatibility, if the <code>net.interface.&lt;interface&gt;.config.gpsMode</code> property is not set, the GPS mode will be automatically set to the <code>kuraModemGpsModeUnmanaged</code> equivalent.</p>
 <h3 id="vlan-properties">VLAN properties</h3>
 <table>
 <thead>

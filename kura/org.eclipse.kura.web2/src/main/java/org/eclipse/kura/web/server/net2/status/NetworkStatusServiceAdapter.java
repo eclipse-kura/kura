@@ -291,6 +291,7 @@ public class NetworkStatusServiceAdapter {
             gwtModemConfig.setManufacturer(ellipsis(modemInterfaceInfo.getManufacturer(), 20));
             gwtModemConfig.setModemId(modemInterfaceInfo.getModel());
             gwtModemConfig.setGpsSupported(modemInterfaceInfo.isGpsSupported());
+            gwtModemConfig.setSupportedGpsModes(modemInterfaceInfo.getSupporteGpsModes());
             gwtModemConfig.setHwFirmware(modemInterfaceInfo.getFirmwareVersion());
             gwtModemConfig.setConnectionType(modemInterfaceInfo.getConnectionType().toString());
             gwtModemConfig.setNetworkTechnology(

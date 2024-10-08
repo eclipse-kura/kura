@@ -13,7 +13,11 @@
  *******************************************************************************/
 package org.eclipse.kura.web.shared.model;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+
+import org.eclipse.kura.net.status.modem.ModemGpsMode;
 
 public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig {
 
@@ -272,6 +276,22 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig {
 
     public void setGpsSupported(boolean gpsSupported) {
         set("gpsSupported", gpsSupported);
+    }
+
+    public void setSupportedGpsModes(Set<ModemGpsMode> supporteGpsModes) {
+        set("gpsSupportedModesUnmanaged", supporteGpsModes.contains(ModemGpsMode.UNMANAGED));
+        set("gpsSupportedModesManagedGps", supporteGpsModes.contains(ModemGpsMode.MANAGED_GPS));
+    }
+
+    public Set<ModemGpsMode> getSupportedGpsModes() {
+        Set<ModemGpsMode> supportedGpsModes = Collections.emptySet();
+        if (get("gpsSupportedModesUnmanaged") != null && (Boolean) get("gpsSupportedModesUnmanaged")) {
+            supportedGpsModes.add(ModemGpsMode.UNMANAGED);
+        }
+        if (get("gpsSupportedModesManagedGps") != null && (Boolean) get("gpsSupportedModesManagedGps")) {
+            supportedGpsModes.add(ModemGpsMode.MANAGED_GPS);
+        }
+        return supportedGpsModes;
     }
 
     public boolean isDiversityEnabled() {

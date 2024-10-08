@@ -120,12 +120,7 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
         GwtModemInterfaceConfig updatedModemNetIf = (GwtModemInterfaceConfig) updatedNetIf;
         if (this.formInitialized) {
             updatedModemNetIf.setGpsEnabled(this.radio1.getValue());
-
-            if (DROPDOWN_MODEM_GPS_UNMANAGED.equals(this.gpsMode.getSelectedValue())) {
-                updatedModemNetIf.setGpsMode(NET_MODEM_MODE_UNMANAGED);
-            } else { // MANAGED_GPS
-                updatedModemNetIf.setGpsMode(NET_MODEM_MODE_MANAGED_GPS);
-            }
+            updatedModemNetIf.setGpsMode(this.gpsMode.getSelectedValue());
         } else {
             // initForm hasn't been called yet
             updatedModemNetIf.setGpsEnabled(this.selectedModemIfConfig.isGpsEnabled());
@@ -187,8 +182,8 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
         this.labelGpsMode.setText(MSGS.netModemGpsMode());
         // WIP: Populate the list box with the available GPS modes
         this.gpsMode.clear();
-        this.gpsMode.addItem(DROPDOWN_MODEM_GPS_UNMANAGED);
-        this.gpsMode.addItem(DROPDOWN_MODEM_GPS_MANAGED_GPS);
+        this.gpsMode.addItem(DROPDOWN_MODEM_GPS_UNMANAGED, NET_MODEM_MODE_UNMANAGED);
+        this.gpsMode.addItem(DROPDOWN_MODEM_GPS_MANAGED_GPS, NET_MODEM_MODE_MANAGED_GPS);
 
         this.gpsMode.addMouseOverHandler(event -> {
             TabModemGpsUi.this.helpText.clear();
@@ -211,7 +206,7 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
             this.radio2.setValue(!this.selectedModemIfConfig.isGpsEnabled());
 
             for (int i = 0; i < this.gpsMode.getItemCount(); i++) {
-                if (this.gpsMode.getItemText(i).equals(this.selectedModemIfConfig.getGpsMode())) {
+                if (this.gpsMode.getValue(i).equals(this.selectedModemIfConfig.getGpsMode())) {
                     this.gpsMode.setSelectedIndex(i);
                     break;
                 }

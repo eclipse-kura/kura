@@ -231,6 +231,7 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
     private void reset() {
         this.radio1.setValue(true);
         this.radio2.setValue(false);
+        this.gpsMode.setSelectedIndex(0); // UNMANAGED
         update();
     }
 }

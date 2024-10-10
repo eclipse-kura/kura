@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.network;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
@@ -40,11 +43,12 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
 
     private static final Messages MSGS = GWT.create(Messages.class);
 
-    private static final String NET_MODEM_MODE_UNMANAGED = "kuraModemGpsModeUnmanaged";
-    private static final String NET_MODEM_MODE_MANAGED_GPS = "kuraModemGpsModeManagedGps";
-
-    private static final String DROPDOWN_MODEM_GPS_UNMANAGED = "UNMANAGED";
-    private static final String DROPDOWN_MODEM_GPS_MANAGED_GPS = "MANAGED_GPS";
+    // Note: index of STATUS_GPS_MODES and CONFIG_GPS_MODES must match!
+    // Strings used for the dropdown (item text) and that match the ModemGpsMode enum in the Kura API
+    private static final List<String> STATUS_GPS_MODES = Arrays.asList("UNMANAGED", "MANAGED_GPS");
+    // Strings used for the configuration (i.e. that will be written in the sanpshot) and set as dropdown values
+    private static final List<String> CONFIG_GPS_MODES = Arrays.asList("kuraModemGpsModeUnmanaged",
+            "kuraModemGpsModeManagedGps");
 
     private final GwtSession session;
     private final NetworkTabsUi tabs;
@@ -181,10 +185,12 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
         // GPS Mode
         this.labelGpsMode.setText(MSGS.netModemGpsMode());
         this.gpsMode.clear();
-        this.gpsMode.addItem(DROPDOWN_MODEM_GPS_UNMANAGED, NET_MODEM_MODE_UNMANAGED);
-        this.gpsMode.getElement().getElementsByTagName("option").getItem(0).setAttribute("disabled", "disabled");
-        this.gpsMode.addItem(DROPDOWN_MODEM_GPS_MANAGED_GPS, NET_MODEM_MODE_MANAGED_GPS);
-        this.gpsMode.getElement().getElementsByTagName("option").getItem(1).setAttribute("disabled", "disabled");
+
+        for (String mode : STATUS_GPS_MODES) {
+            this.gpsMode.addItem(mode, CONFIG_GPS_MODES.get(STATUS_GPS_MODES.indexOf(mode)));
+            this.gpsMode.getElement().getElementsByTagName("option").getItem(STATUS_GPS_MODES.indexOf(mode))
+                    .setAttribute("disabled", "disabled");
+        }
 
         this.gpsMode.addMouseOverHandler(event -> {
             TabModemGpsUi.this.helpText.clear();

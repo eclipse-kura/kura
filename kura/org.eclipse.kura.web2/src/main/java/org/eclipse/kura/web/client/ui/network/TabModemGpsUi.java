@@ -43,9 +43,9 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
 
     private static final Messages MSGS = GWT.create(Messages.class);
 
-    // Note: index of STATUS_GPS_MODES and CONFIG_GPS_MODES must match!
+    // Note: index of AVAIL_GPS_MODES and CONFIG_GPS_MODES must match!
     // Strings used for the dropdown (item text) and that match the ModemGpsMode enum in the Kura API
-    private static final List<String> STATUS_GPS_MODES = Arrays.asList("UNMANAGED", "MANAGED_GPS");
+    private static final List<String> AVAIL_GPS_MODES = Arrays.asList("UNMANAGED", "MANAGED_GPS");
     // Strings used for the configuration (i.e. that will be written in the sanpshot) and set as dropdown values
     private static final List<String> CONFIG_GPS_MODES = Arrays.asList("kuraModemGpsModeUnmanaged",
             "kuraModemGpsModeManagedGps");
@@ -186,9 +186,9 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
         this.labelGpsMode.setText(MSGS.netModemGpsMode());
         this.gpsMode.clear();
 
-        for (String mode : STATUS_GPS_MODES) {
-            this.gpsMode.addItem(mode, CONFIG_GPS_MODES.get(STATUS_GPS_MODES.indexOf(mode)));
-            this.gpsMode.getElement().getElementsByTagName("option").getItem(STATUS_GPS_MODES.indexOf(mode))
+        for (String mode : AVAIL_GPS_MODES) {
+            this.gpsMode.addItem(mode, CONFIG_GPS_MODES.get(AVAIL_GPS_MODES.indexOf(mode)));
+            this.gpsMode.getElement().getElementsByTagName("option").getItem(AVAIL_GPS_MODES.indexOf(mode))
                     .setAttribute("disabled", "disabled");
         }
 

@@ -182,7 +182,9 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
         this.labelGpsMode.setText(MSGS.netModemGpsMode());
         this.gpsMode.clear();
         this.gpsMode.addItem(DROPDOWN_MODEM_GPS_UNMANAGED, NET_MODEM_MODE_UNMANAGED);
+        this.gpsMode.getElement().getElementsByTagName("option").getItem(0).setAttribute("disabled", "disabled");
         this.gpsMode.addItem(DROPDOWN_MODEM_GPS_MANAGED_GPS, NET_MODEM_MODE_MANAGED_GPS);
+        this.gpsMode.getElement().getElementsByTagName("option").getItem(1).setAttribute("disabled", "disabled");
 
         this.gpsMode.addMouseOverHandler(event -> {
             TabModemGpsUi.this.helpText.clear();
@@ -218,15 +220,12 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
         if (this.selectedModemIfConfig != null) {
             this.radio1.setEnabled(this.selectedModemIfConfig.isGpsSupported());
             this.radio2.setEnabled(this.selectedModemIfConfig.isGpsSupported());
-        }
 
-        if (this.selectedModemIfConfig != null
-                && !this.selectedModemIfConfig.getSupportedGpsModes().contains(DROPDOWN_MODEM_GPS_UNMANAGED)) {
-            this.gpsMode.getElement().getElementsByTagName("option").getItem(0).setAttribute("disabled", "disabled");
-        }
-        if (this.selectedModemIfConfig != null
-                && !this.selectedModemIfConfig.getSupportedGpsModes().contains(DROPDOWN_MODEM_GPS_MANAGED_GPS)) {
-            this.gpsMode.getElement().getElementsByTagName("option").getItem(1).setAttribute("disabled", "disabled");
+            for (int i = 0; i < this.gpsMode.getItemCount(); i++) {
+                if (this.selectedModemIfConfig.getSupportedGpsModes().contains(this.gpsMode.getItemText(i))) {
+                    this.gpsMode.getElement().getElementsByTagName("option").getItem(i).removeAttribute("disabled");
+                }
+            }
         }
 
         this.gpsMode.setEnabled(this.radio1.getValue());

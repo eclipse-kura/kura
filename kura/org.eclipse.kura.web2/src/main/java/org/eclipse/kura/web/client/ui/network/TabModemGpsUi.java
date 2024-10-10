@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.network;
 
-import org.eclipse.kura.net.status.modem.ModemGpsMode;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
@@ -185,15 +184,6 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
         this.gpsMode.addItem(DROPDOWN_MODEM_GPS_UNMANAGED, NET_MODEM_MODE_UNMANAGED);
         this.gpsMode.addItem(DROPDOWN_MODEM_GPS_MANAGED_GPS, NET_MODEM_MODE_MANAGED_GPS);
 
-        if (this.selectedModemIfConfig != null
-                && !this.selectedModemIfConfig.getSupportedGpsModes().contains(ModemGpsMode.UNMANAGED)) {
-            this.gpsMode.getElement().getElementsByTagName("option").getItem(0).setAttribute("disabled", "disabled");
-        }
-        if (this.selectedModemIfConfig != null
-                && !this.selectedModemIfConfig.getSupportedGpsModes().contains(ModemGpsMode.MANAGED_GPS)) {
-            this.gpsMode.getElement().getElementsByTagName("option").getItem(1).setAttribute("disabled", "disabled");
-        }
-
         this.gpsMode.addMouseOverHandler(event -> {
             TabModemGpsUi.this.helpText.clear();
             TabModemGpsUi.this.helpText.add(new Span(MSGS.netModemToolTipGpsMode()));
@@ -229,6 +219,16 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
             this.radio1.setEnabled(this.selectedModemIfConfig.isGpsSupported());
             this.radio2.setEnabled(this.selectedModemIfConfig.isGpsSupported());
         }
+
+        if (this.selectedModemIfConfig != null
+                && !this.selectedModemIfConfig.getSupportedGpsModes().contains(DROPDOWN_MODEM_GPS_UNMANAGED)) {
+            this.gpsMode.getElement().getElementsByTagName("option").getItem(0).setAttribute("disabled", "disabled");
+        }
+        if (this.selectedModemIfConfig != null
+                && !this.selectedModemIfConfig.getSupportedGpsModes().contains(DROPDOWN_MODEM_GPS_MANAGED_GPS)) {
+            this.gpsMode.getElement().getElementsByTagName("option").getItem(1).setAttribute("disabled", "disabled");
+        }
+
         this.gpsMode.setEnabled(this.radio1.getValue());
     }
 

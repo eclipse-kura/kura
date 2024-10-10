@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,10 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.position;
 
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Set;
+
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -22,6 +26,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
+import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
@@ -84,7 +89,8 @@ public class PositionRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public PositionDTO getPosition() {
         if (positionServiceImpl.isLocked()) {
-            return new PositionDTO(positionServiceImpl.getPosition());
+            return new PositionDTO(positionServiceImpl.getPosition(),
+                    getGnssTypeFromSet(positionServiceImpl.getGnssType()));
         }
 
         throw DefaultExceptionHandler.toWebApplicationException(
@@ -126,6 +132,25 @@ public class PositionRestService {
             return new IsLockedDTO(positionServiceImpl.isLocked());
         } catch (Exception e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    /*
+     * Utils
+     */
+
+    private String getGnssTypeFromSet(Set<GNSSType> gnssTypeSet) {
+
+        if (Objects.isNull(gnssTypeSet)) {
+            return null;
+        }
+
+        if (gnssTypeSet.isEmpty()) {
+            return GNSSType.UNKNOWN.getValue();
+        } else if (gnssTypeSet.size() == 1) {
+            return new ArrayList<>(gnssTypeSet).get(0).getValue();
+        } else {
+            return "MixedGNSSTypes";
         }
     }
 }

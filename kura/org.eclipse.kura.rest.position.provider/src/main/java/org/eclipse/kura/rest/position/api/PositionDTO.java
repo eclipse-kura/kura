@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,8 +21,9 @@ public class PositionDTO {
     private Double altitude;
     private Double speed;
     private Double track;
+    private String gnssType;
 
-    public PositionDTO(Position position) {
+    public PositionDTO(Position position, String gnssType) {
         if (position.getLongitude() != null) {
             this.longitude = Math.toDegrees(position.getLongitude().getValue());
         }
@@ -41,6 +42,10 @@ public class PositionDTO {
 
         if (position.getTrack() != null) {
             this.track = Math.toDegrees(position.getTrack().getValue());
+        }
+
+        if (gnssType != null) {
+            this.gnssType = gnssType;
         }
     }
 
@@ -77,5 +82,12 @@ public class PositionDTO {
      */
     public Double getTrack() {
         return track;
+    }
+
+    /*
+     * Returns the GNSS Type used to retrieve position information
+     */
+    public String getGnssType() {
+        return gnssType;
     }
 }

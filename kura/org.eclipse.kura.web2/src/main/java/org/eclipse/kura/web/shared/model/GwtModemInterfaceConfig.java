@@ -14,6 +14,7 @@
 package org.eclipse.kura.web.shared.model;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -272,7 +273,7 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig {
     }
 
     public Set<ModemGpsMode> getSupportedGpsModes() {
-        Set<ModemGpsMode> supportedGpsModes = Collections.emptySet();
+        Set<ModemGpsMode> supportedGpsModes = new HashSet<>();
         if (get("gpsSupportedModesUnmanaged") != null && (Boolean) get("gpsSupportedModesUnmanaged")) {
             supportedGpsModes.add(ModemGpsMode.UNMANAGED);
         }

@@ -181,7 +181,6 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
 
         // GPS Mode
         this.labelGpsMode.setText(MSGS.netModemGpsMode());
-        // WIP: Populate the list box with the available GPS modes
         this.gpsMode.clear();
         this.gpsMode.addItem(DROPDOWN_MODEM_GPS_UNMANAGED, NET_MODEM_MODE_UNMANAGED);
         this.gpsMode.addItem(DROPDOWN_MODEM_GPS_MANAGED_GPS, NET_MODEM_MODE_MANAGED_GPS);

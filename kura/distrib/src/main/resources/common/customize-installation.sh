@@ -134,11 +134,11 @@ IS_NETWORKING_PROFILE=$1
 setup_libudev
 
 BOARD="generic-device"
-#if uname -a | grep -q 'raspberry' > /dev/null 2>&1
-#then
-#    BOARD="raspberry"
-#    echo "Customizing installation for Raspberry PI"
-#fi
+if uname -a | grep -q 'raspberry' > /dev/null 2>&1
+then
+    BOARD="raspberry"
+    echo "Customizing installation for Raspberry PI"
+fi
 
 mv "/opt/eclipse/kura/install/jdk.dio.properties-${BOARD}" "/opt/eclipse/kura/framework/jdk.dio.properties"
 

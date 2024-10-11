@@ -40,6 +40,7 @@ import org.eclipse.kura.channel.Channel;
 import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.ChannelType;
+import org.eclipse.kura.channel.ScaleOffsetType;
 import org.eclipse.kura.channel.listener.ChannelListener;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -60,6 +61,8 @@ import org.slf4j.LoggerFactory;
  * This AssetTest is responsible to test {@link Asset}
  */
 public final class AssetTest {
+
+    private static final String UNREGISTER_CHANNEL_NAME = "unregister";
 
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(AssetTest.class);
@@ -110,12 +113,14 @@ public final class AssetTest {
      */
     private static void resetChannels() {
         final Map<String, Object> channels = CollectionUtil.newHashMap();
+
         channels.put("kura.service.pid", "AssetTest");
+
         channels.put(AssetConstants.ASSET_DESC_PROP.value(), "sample.asset.desc");
         channels.put(AssetConstants.ASSET_DRIVER_PROP.value(), "org.eclipse.kura.asset.stub.driver");
         channels.put("1.CH#+name", "1.CH");
         channels.put("1.CH#+type", "READ");
-        channels.put("1.CH#+value.type", "INTEGER");
+        channels.put("1.CH#+value.type", DataType.INTEGER.name());
         channels.put("1.CH#+scale", "1.0");
         channels.put("1.CH#+offset", "0.0");
         channels.put("1.CH#DRIVER.modbus.register", "sample.channel1.modbus.register");
@@ -124,29 +129,29 @@ public final class AssetTest {
         channels.put("2.CH#+name", "2.CH");
         channels.put("2.CH#+enabled", "true");
         channels.put("2.CH#+type", "WRITE");
-        channels.put("2.CH#+value.type", "BOOLEAN");
+        channels.put("2.CH#+value.type", DataType.BOOLEAN.name());
         channels.put("2.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
         channels.put("2.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
 
         channels.put("3.CH#+name", "3.CH");
         channels.put("3.CH#+type", "READ");
         channels.put("3.CH#+enabled", "false");
-        channels.put("3.CH#+value.type", "INTEGER");
+        channels.put("3.CH#+value.type", DataType.INTEGER.name());
         channels.put("3.CH#DRIVER.modbus.register", "sample.channel1.modbus.register");
         channels.put("3.CH#DRIVER.modbus.FC", "sample.channel1.modbus.FC");
 
         channels.put("4.CH#+name", "4.CH");
         channels.put("4.CH#+enabled", "false");
         channels.put("4.CH#+type", "WRITE");
-        channels.put("4.CH#+value.type", "BOOLEAN");
+        channels.put("4.CH#+value.type", DataType.BOOLEAN.name());
         channels.put("4.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
         channels.put("4.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
 
         channels.put("5.CH#+name", "5.CH");
         channels.put("5.CH#+enabled", "true");
         channels.put("5.CH#+type", "READ");
-        channels.put("5.CH#+value.type", "INTEGER");
-        channels.put("5.CH#+scaleoffset.type", "DOUBLE");
+        channels.put("5.CH#+value.type", DataType.INTEGER.name());
+        channels.put("5.CH#+scaleoffset.type", ScaleOffsetType.DOUBLE.name());
         channels.put("5.CH#+scale", "3.3");
         channels.put("5.CH#+offset", "3.2");
         channels.put("5.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
@@ -155,8 +160,8 @@ public final class AssetTest {
         channels.put("6.CH#+name", "6.CH");
         channels.put("6.CH#+enabled", "true");
         channels.put("6.CH#+type", "READ");
-        channels.put("6.CH#+value.type", "INTEGER");
-        channels.put("6.CH#+scaleoffset.type", "DEFINED_BY_VALUE_TYPE");
+        channels.put("6.CH#+value.type", DataType.INTEGER.name());
+        channels.put("6.CH#+scaleoffset.type", ScaleOffsetType.DEFINED_BY_VALUE_TYPE.name());
         channels.put("6.CH#+scale", "3");
         channels.put("6.CH#+offset", "4");
         channels.put("6.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
@@ -249,11 +254,8 @@ public final class AssetTest {
         final ArrayList<Boolean> attachSequence = new ArrayList<>();
 
         final ChannelListener listener = event -> {
-            if ("unregister".equals(event.getChannelRecord().getChannelName())) {
-                attachSequence.add(false);
-            } else {
-                attachSequence.add(true);
-            }
+            boolean toBeAttached = !UNREGISTER_CHANNEL_NAME.equals(event.getChannelRecord().getChannelName());
+            attachSequence.add(toBeAttached);
         };
 
         asset.registerChannelListener("1.CH", listener);
@@ -281,11 +283,8 @@ public final class AssetTest {
         final ArrayList<Boolean> attachSequence = new ArrayList<>();
 
         final ChannelListener listener = event -> {
-            if ("unregister".equals(event.getChannelRecord().getChannelName())) {
-                attachSequence.add(false);
-            } else {
-                attachSequence.add(true);
-            }
+            boolean toBeAttached = !UNREGISTER_CHANNEL_NAME.equals(event.getChannelRecord().getChannelName());
+            attachSequence.add(toBeAttached);
         };
 
         ((BaseAsset) asset).unsetDriver();
@@ -314,11 +313,8 @@ public final class AssetTest {
         final ArrayList<Boolean> attachSequence = new ArrayList<>();
 
         final ChannelListener listener = event -> {
-            if ("unregister".equals(event.getChannelRecord().getChannelName())) {
-                attachSequence.add(false);
-            } else {
-                attachSequence.add(true);
-            }
+            boolean toBeAttached = !UNREGISTER_CHANNEL_NAME.equals(event.getChannelRecord().getChannelName());
+            attachSequence.add(toBeAttached);
         };
 
         asset.registerChannelListener("1.CH", listener);
@@ -352,7 +348,7 @@ public final class AssetTest {
             if (cnt == 0) {
                 assertEquals(1, event.getChannelRecord().getValue().getValue());
             } else if (cnt == 1) {
-                assertEquals("unregister", event.getChannelRecord().getChannelName());
+                assertEquals(UNREGISTER_CHANNEL_NAME, event.getChannelRecord().getChannelName());
                 assertEquals(DataType.BOOLEAN, event.getChannelRecord().getValueType());
             } else {
                 fail("Unexpected invocation.");
@@ -551,11 +547,8 @@ public final class AssetTest {
         final ArrayList<Boolean> attachSequence = new ArrayList<>();
 
         final ChannelListener listener = event -> {
-            if ("unregister".equals(event.getChannelRecord().getChannelName())) {
-                attachSequence.add(false);
-            } else {
-                attachSequence.add(true);
-            }
+            boolean toBeAttached = !UNREGISTER_CHANNEL_NAME.equals(event.getChannelRecord().getChannelName());
+            attachSequence.add(toBeAttached);
         };
 
         asset.registerChannelListener("3.CH", listener);
@@ -587,11 +580,8 @@ public final class AssetTest {
         sync(asset);
 
         final ChannelListener listener = event -> {
-            if ("unregister".equals(event.getChannelRecord().getChannelName())) {
-                attachSequence.add(false);
-            } else {
-                attachSequence.add(true);
-            }
+            boolean toBeAttached = !UNREGISTER_CHANNEL_NAME.equals(event.getChannelRecord().getChannelName());
+            attachSequence.add(toBeAttached);
         };
 
         asset.registerChannelListener("3.CH", listener);

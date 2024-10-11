@@ -12,6 +12,10 @@
  *******************************************************************************/
 package org.eclipse.kura.rest.position.api;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.eclipse.kura.position.GNSSType;
 import org.osgi.util.position.Position;
 
 public class PositionDTO {
@@ -21,9 +25,9 @@ public class PositionDTO {
     private Double altitude;
     private Double speed;
     private Double track;
-    private String gnssType;
+    private Set<String> gnssType;
 
-    public PositionDTO(Position position, String gnssType) {
+    public PositionDTO(Position position, Set<GNSSType> gnssTypeSet) {
         if (position.getLongitude() != null) {
             this.longitude = Math.toDegrees(position.getLongitude().getValue());
         }
@@ -44,8 +48,11 @@ public class PositionDTO {
             this.track = Math.toDegrees(position.getTrack().getValue());
         }
 
-        if (gnssType != null) {
-            this.gnssType = gnssType;
+        if (gnssTypeSet != null) {
+            this.gnssType = new HashSet<>();
+            for (GNSSType type : gnssTypeSet) {
+                this.gnssType.add(type.getValue());
+            }
         }
     }
 
@@ -87,7 +94,7 @@ public class PositionDTO {
     /*
      * Returns the GNSS Type used to retrieve position information
      */
-    public String getGnssType() {
+    public Set<String> getGnssType() {
         return gnssType;
     }
 }

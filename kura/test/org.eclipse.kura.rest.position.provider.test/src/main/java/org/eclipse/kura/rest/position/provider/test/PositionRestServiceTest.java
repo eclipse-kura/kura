@@ -66,7 +66,7 @@ public class PositionRestServiceTest {
 
         whenGetPosition();
 
-        thenPositionIs(0.1, 0.2, 4.5, 50.6, 9.8, "Gps");
+        thenPositionIs(0.1, 0.2, 4.5, 50.6, 9.8, new HashSet<>(Arrays.asList("Gps")));
         thenNoExceptionIsThrown();
     }
 
@@ -78,7 +78,7 @@ public class PositionRestServiceTest {
 
         whenGetPosition();
 
-        thenPositionIs(0.1, 0.2, 4.5, 50.6, 9.8, "MixedGNSSTypes");
+        thenPositionIs(0.1, 0.2, 4.5, 50.6, 9.8, new HashSet<>(Arrays.asList("Gps", "Glonass")));
         thenNoExceptionIsThrown();
     }
 
@@ -191,7 +191,7 @@ public class PositionRestServiceTest {
     }
 
     private void thenPositionIs(Double longitude, Double latitude, Double altitude, Double speed, Double track,
-            String gnssType) {
+            Set<String> gnssTypeSet) {
 
         if (longitude != null) {
             assertEquals(longitude, positionDTO.getLongitude(), 0.0);
@@ -223,8 +223,8 @@ public class PositionRestServiceTest {
             assertNull(positionDTO.getTrack());
         }
 
-        if (gnssType != null) {
-            assertEquals(gnssType, positionDTO.getGnssType());
+        if (gnssTypeSet != null) {
+            assertEquals(gnssTypeSet, positionDTO.getGnssType());
         } else {
             assertNull(positionDTO.getGnssType());
         }

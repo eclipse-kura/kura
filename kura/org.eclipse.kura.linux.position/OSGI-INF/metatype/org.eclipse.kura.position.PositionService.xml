@@ -97,6 +97,25 @@
        		required="false"
        		default="0"
        		description="Static altitude value in meters"/>
+       		
+       	<AD id="gnss.type" 
+            name="GNSS Type" 
+            type="String"
+            cardinality="0"
+            required="true"
+            default="Unknown"
+            description="Static system used to retrieve the static position information.">
+            
+            <Option label="Unknown" value="Unknown" />
+            <Option label="Other" value="Other" />
+            <Option label="Beidou" value="Beidou" />
+            <Option label="Galileo" value="Galileo" />
+            <Option label="Glonass" value="Glonass" />
+            <Option label="Gps" value="Gps" />
+            <Option label="IRNSS" value="IRNSS" />
+            <Option label="QZSS" value="QZSS" />
+            <Option label="MixedGNSSTypes" value="MixedGNSSTypes" />
+        </AD>
         
         <AD id="port"
             name="port"

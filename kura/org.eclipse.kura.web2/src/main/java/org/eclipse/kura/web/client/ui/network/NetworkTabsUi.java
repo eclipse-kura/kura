@@ -186,7 +186,7 @@ public class NetworkTabsUi extends Composite {
 
     private void initModemGpsTab() {
         this.modemGpsTabAnchorItem = new AnchorListItem(MSGS.netModemGps());
-        this.modemGpsTab = new TabModemGpsUi(this.session, this);
+        this.modemGpsTab = new TabModemGpsUi(this.session, this, isNet2);
 
         this.modemGpsTabAnchorItem.addClickHandler(event -> {
             setSelected(NetworkTabsUi.this.modemGpsTabAnchorItem);

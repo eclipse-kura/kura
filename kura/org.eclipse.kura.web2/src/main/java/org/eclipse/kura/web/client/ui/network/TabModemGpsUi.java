@@ -52,6 +52,7 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
 
     private final GwtSession session;
     private final NetworkTabsUi tabs;
+    private final boolean isNet2;
     private boolean dirty;
     GwtModemInterfaceConfig selectedModemIfConfig;
     boolean formInitialized;
@@ -84,7 +85,8 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
     @UiField
     HelpButton gpsModeHelp;
 
-    public TabModemGpsUi(GwtSession currentSession, NetworkTabsUi tabs) {
+    public TabModemGpsUi(GwtSession currentSession, NetworkTabsUi tabs, boolean isNet2) {
+        this.isNet2 = isNet2;
         initWidget(uiBinder.createAndBindUi(this));
         this.session = currentSession;
         this.tabs = tabs;
@@ -183,21 +185,27 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
         this.radio2.setValue(false);
 
         // GPS Mode
-        this.labelGpsMode.setText(MSGS.netModemGpsMode());
-        this.gpsMode.clear();
+        if (this.isNet2) {
+            this.labelGpsMode.setText(MSGS.netModemGpsMode());
+            this.gpsMode.clear();
 
-        for (String mode : AVAIL_GPS_MODES) {
-            this.gpsMode.addItem(mode, CONFIG_GPS_MODES.get(AVAIL_GPS_MODES.indexOf(mode)));
-            this.gpsMode.getElement().getElementsByTagName("option").getItem(AVAIL_GPS_MODES.indexOf(mode))
-                    .setAttribute("disabled", "disabled");
+            for (String mode : AVAIL_GPS_MODES) {
+                this.gpsMode.addItem(mode, CONFIG_GPS_MODES.get(AVAIL_GPS_MODES.indexOf(mode)));
+                this.gpsMode.getElement().getElementsByTagName("option").getItem(AVAIL_GPS_MODES.indexOf(mode))
+                        .setAttribute("disabled", "disabled");
+            }
+
+            this.gpsMode.addMouseOverHandler(event -> {
+                TabModemGpsUi.this.helpText.clear();
+                TabModemGpsUi.this.helpText.add(new Span(MSGS.netModemToolTipGpsMode()));
+            });
+            this.gpsMode.addMouseOutHandler(event -> resetHelp());
+            this.gpsMode.addChangeHandler(event -> setDirty(true));
+
+        } else {
+            this.labelGpsMode.setVisible(false);
+            this.gpsMode.setVisible(false);
         }
-
-        this.gpsMode.addMouseOverHandler(event -> {
-            TabModemGpsUi.this.helpText.clear();
-            TabModemGpsUi.this.helpText.add(new Span(MSGS.netModemToolTipGpsMode()));
-        });
-        this.gpsMode.addMouseOutHandler(event -> resetHelp());
-        this.gpsMode.addChangeHandler(event -> setDirty(true));
 
         this.formInitialized = true;
     }

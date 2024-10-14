@@ -14,6 +14,7 @@ package org.eclipse.kura.linux.position;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -204,7 +205,8 @@ public class PositionServiceImpl
             if (!this.options.isStatic()) {
                 return this.currentProvider.getDateTime();
             } else {
-                return LocalDateTime.now(ZoneOffset.UTC);
+                return LocalDateTime.parse(
+                        LocalDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
             }
 
         } else {

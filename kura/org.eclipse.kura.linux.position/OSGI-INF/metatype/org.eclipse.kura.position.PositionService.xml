@@ -102,7 +102,7 @@
             name="GNSS Type" 
             type="String"
             cardinality="0"
-            required="true"
+            required="false"
             default="Unknown"
             description="Static system used to retrieve the static position information.">
             
@@ -114,7 +114,6 @@
             <Option label="Gps" value="Gps" />
             <Option label="IRNSS" value="IRNSS" />
             <Option label="QZSS" value="QZSS" />
-            <Option label="MixedGNSSTypes" value="MixedGNSSTypes" />
         </AD>
         
         <AD id="port"

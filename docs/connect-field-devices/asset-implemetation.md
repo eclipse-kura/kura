@@ -66,7 +66,7 @@ The values of the **scale** and **offset** parameters are parsed from channel co
 
 The **mode** can be selected in the following way:
 
-- If the **scaleoffset.type** is set to `DOUBLE` or `LONG` the corrisponding **mode** will be used.
+- If the **scaleoffset.type** is set to `DOUBLE` or `LONG` the corrisponding **mode** will be used. The largest representable `LONG` is 2^53
 - If the **scaleoffset.type** value is `DEFINED_BY_VALUE_TYPE` the operation **mode** is determinated by **value.type**.
 
 Example of `DOUBLE` **mode**:

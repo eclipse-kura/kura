@@ -60,11 +60,6 @@ The **Cellular** tab contains the following configuration parameters:
 
 - **LCP Echo Failure**: sets the _lcp-echo-failure_ option of the PPP daemon. If set to a positive number, the modem presumes the peer to be dead if a specified number of LCP echo-requests are sent without receiving a valid LCP echo-reply. To disable this option, set it to zero.
 
-- **Enable GPS**: enables GPS with the following conditions:
-    - One modem port will be dedicated to NMEA data stream.
-    - This port may not be used to send AT commands to the modem.
-    - _PositionService_ should be enabled. Serial settings of _PositionService_ should not be changed; it will be redirected to the modem GPS port automatically.
-
 ### GPS
 
 ![](./images/IMG-14-10-2024-11-27-34.png)
@@ -72,12 +67,14 @@ The **Cellular** tab contains the following configuration parameters:
 The **GPS** tab allows the user to enable or disable the GPS module provided by the cellular modem. The available properties are:
 
 - **Enable GPS**: enables GPS module for the selected modem.
-- **GPS Mode** (generic profiles only): specifies the GPS mode.
+- **GPS Mode** ([generic profiles](../../getting-started/install-kura/#installer-types) only): specifies the GPS mode.
     - `UNMANAGED`: the GPS device of the modem will be setup but not directly managed, therefore freeing the serial port for other services to use. This can be used in order to perform the setup of the GPS and then have another service (like `gpsd`) parse the NMEA strings in order to extract the position informations.
     - `MANAGED_GPS`: the GPS device of the modem will be setup and directly managed (typically by ModemManager) therefore the serial port won't be available for other services to use.
 
 !!! note "GPS modes availability"
     GPS modes available for the modem are dependent on the modem model, modem firmware version and _ModemManager_ version installed on the system. Some modes may not be selectable if the modem does not support them.
+
+    For ["device-specific profiles"](../../getting-started/install-kura/#installer-types) the GPS mode is not available and implicitly set to `UNMANAGED`.
 
 Therefore, to use the GPS module provided by the cellular modem with Kura's _PositionService_, the following considerations should be taken into account:
 

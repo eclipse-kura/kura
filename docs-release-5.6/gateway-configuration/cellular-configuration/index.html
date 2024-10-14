@@ -727,6 +727,21 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Cellular Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gps" class="md-nav__link">
+    <span class="md-ellipsis">
+      GPS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -4408,6 +4423,21 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Cellular Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gps" class="md-nav__link">
+    <span class="md-ellipsis">
+      GPS
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -4504,15 +4534,30 @@ In the case of generic profiles, if it is left empty, the value is automatically
 <li>
 <p><strong>LCP Echo Failure</strong>: sets the <em>lcp-echo-failure</em> option of the PPP daemon. If set to a positive number, the modem presumes the peer to be dead if a specified number of LCP echo-requests are sent without receiving a valid LCP echo-reply. To disable this option, set it to zero.</p>
 </li>
-<li>
-<p><strong>Enable GPS</strong>: enables GPS with the following conditions:</p>
+</ul>
+<h3 id="gps">GPS</h3>
+<p><img alt="" src="../images/IMG-14-10-2024-11-27-34.png" /></p>
+<p>The <strong>GPS</strong> tab allows the user to enable or disable the GPS module provided by the cellular modem. The available properties are:</p>
 <ul>
-<li>One modem port will be dedicated to NMEA data stream.</li>
-<li>This port may not be used to send AT commands to the modem.</li>
-<li><em>PositionService</em> should be enabled. Serial settings of <em>PositionService</em> should not be changed; it will be redirected to the modem GPS port automatically.</li>
+<li><strong>Enable GPS</strong>: enables GPS module for the selected modem.</li>
+<li><strong>GPS Mode</strong> (<a href="../../getting-started/install-kura/#installer-types">generic profiles</a> only): specifies the GPS mode.<ul>
+<li><code>UNMANAGED</code>: the GPS device of the modem will be setup but not directly managed, therefore freeing the serial port for other services to use. This can be used in order to perform the setup of the GPS and then have another service (like <code>gpsd</code>) parse the NMEA strings in order to extract the position informations.</li>
+<li><code>MANAGED_GPS</code>: the GPS device of the modem will be setup and directly managed (typically by ModemManager) therefore the serial port won't be available for other services to use.</li>
 </ul>
 </li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">GPS modes availability</p>
+<p>GPS modes available for the modem are dependent on the modem model, modem firmware version and <em>ModemManager</em> version installed on the system. Some modes may not be selectable if the modem does not support them.</p>
+<p>For <a href="../../getting-started/install-kura/#installer-types">"device-specific profiles"</a> the GPS mode is not available and implicitly set to <code>UNMANAGED</code>.</p>
+</div>
+<p>Therefore, to use the GPS module provided by the cellular modem with Kura's <em>PositionService</em>, the following considerations should be taken into account:</p>
+<ul>
+<li>The <em>PositionService</em> should be enabled. Serial settings of the <em>PositionService</em> should not be changed; it will be redirected to the modem GPS port automatically.</li>
+<li>To use the <code>gpsd</code> and <code>serial</code> <em>PositionService</em> providers with the GPS module provided by the cellular modem, the GPS mode should be set to <code>UNMANAGED</code>.</li>
+<li>To use the <code>modemmanager</code> <em>PositionService</em> provider with the GPS module provided by the cellular modem, the GPS mode should be set to <code>MANAGED_GPS</code>.</li>
+</ul>
+<p>Refer to the <a href="../../core-services/position-service/">Position Service</a> section for more information.</p>
 <h1 id="cellular-linux-configuration">Cellular Linux Configuration</h1>
 <p>This section describes the changes applied by Kura at the Linux networking configuration. Please read the following note before proceeding with manual changes of the Linux networking configuration.</p>
 <div class="admonition warning">

@@ -4618,17 +4618,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><strong>enabled</strong>: each channel can be separately enabled using this flag.</li>
 <li><strong>name</strong>: unique user-friendly name for a channel</li>
 <li><strong>type</strong>: represents the type of operation supported. Possible values are: <em>READ</em>, <em>WRITE</em>, <em>READ/WRITE</em></li>
-<li>
-<p><strong>value.type</strong>: represents the data type that will be used when creating the Wire Envelope for the connected components.</p>
-</li>
-<li>
-<p><strong>scale</strong>: an optional scaling factor to be applied only to the numeric values retrieved from the field. It is parsed as a double. See below for more details.</p>
-</li>
+<li><strong>value.type</strong>: represents the data type that will be used when creating the Wire Envelope for the connected components and the output value for <em>READ</em> channel.</li>
+<li><strong>scale</strong>: an optional scaling factor to be applied only to the numeric values retrieved from the field. It is parsed as a double. See below for more details.</li>
 <li><strong>offset</strong>: an optional offset value that will be added only to the numeric values retrieved from the field. It is parsed as a double. See below for more details.</li>
 <li><strong>scaleoffset.type</strong>: Allows to customise the way scale and offset is applied. See below for more details.</li>
 <li><strong>unit</strong>: an optional string value that will be added to the asset channel read to represent the unit of measure associated to that specific channel.</li>
 <li><strong>listen</strong>: if supported by the associated driver, allows to receive notifications by the driver on events. This flag currently has effect only inside Kura Wires.</li>
 </ul>
+<p>For the <em>READ</em> and <em>READ/WRITE</em> channels, the Asset typically asks the driver to provide a value based on the <strong>value.type</strong>.
+If the <strong>scaleoffset.type</strong> is <em>LONG</em> or <em>DOUBLE</em>, the type requested will be one of these and the final value (after the scale and offset operation) will be transformed into the data type expected by <strong>value.type</strong>.</p>
 <h3 id="arithmetic-with-scale-and-offset">Arithmetic with scale and offset</h3>
 <p>The Asset supports applying a scale and offset to the values obtained by the attached Driver during read operations and to the values received in listen mode.</p>
 <div class="admonition warning">
@@ -4646,7 +4644,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>The values of the <strong>scale</strong> and <strong>offset</strong> parameters are parsed from channel configuration as doubles.</p>
 <p>The <strong>mode</strong> can be selected in the following way:</p>
 <ul>
-<li>If the <strong>scaleoffset.type</strong> is set to <code>DOUBLE</code> the corrisponding <strong>mode</strong> will be used.</li>
+<li>If the <strong>scaleoffset.type</strong> is set to <code>DOUBLE</code> or <code>LONG</code> the corrisponding <strong>mode</strong> will be used. The largest representable <code>LONG</code> is 2^53</li>
 <li>If the <strong>scaleoffset.type</strong> value is <code>DEFINED_BY_VALUE_TYPE</code> the operation <strong>mode</strong> is determinated by <strong>value.type</strong>.</li>
 </ul>
 <p>Example of <code>DOUBLE</code> <strong>mode</strong>:

@@ -65,6 +65,25 @@ The **Cellular** tab contains the following configuration parameters:
     - This port may not be used to send AT commands to the modem.
     - _PositionService_ should be enabled. Serial settings of _PositionService_ should not be changed; it will be redirected to the modem GPS port automatically.
 
+### GPS
+
+![](./images/IMG-14-10-2024-11-27-34.png)
+
+The **GPS** tab allows the user to enable or disable the GPS module provided by the cellular modem. The available properties are:
+
+- **Enable GPS**: enables GPS module for the selected modem.
+- **GPS Mode** (generic profiles only): specifies the GPS mode.
+    - `UNMANAGED`: the GPS device of the modem will be setup but not directly managed, therefore freeing the serial port for other services to use. This can be used in order to perform the setup of the GPS and then have another service (like `gpsd`) parse the NMEA strings in order to extract the position informations.
+    - `MANAGED_GPS`: the GPS device of the modem will be setup and directly managed (typically by ModemManager) therefore the serial port won't be available for other services to use.
+
+Therefore, to use the GPS module provided by the cellular modem with Kura's _PositionService_, the following considerations should be taken into account:
+
+- The _PositionService_ should be enabled. Serial settings of the _PositionService_ should not be changed; it will be redirected to the modem GPS port automatically.
+- To use the `gpsd` and `serial` _PositionService_ providers with the GPS module provided by the cellular modem, the GPS mode should be set to `UNMANAGED`.
+- To use the `modemmanager` _PositionService_ provider with the GPS module provided by the cellular modem, the GPS mode should be set to `MANAGED_GPS`.
+
+Refer to the [Position Service](../core-services/position-service.md) section for more information.
+
 # Cellular Linux Configuration
 
 This section describes the changes applied by Kura at the Linux networking configuration. Please read the following note before proceeding with manual changes of the Linux networking configuration.

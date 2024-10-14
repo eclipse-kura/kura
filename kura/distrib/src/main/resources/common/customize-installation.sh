@@ -39,54 +39,18 @@ setup_libudev() {
 }
 
 customize_snapshot() {
-    local BOARD=$1
-    
     if [ ! -d "/opt/eclipse/kura/user/snapshots/" ]; then
         mkdir /opt/eclipse/kura/user/snapshots/
     fi
 
-    if [ ${BOARD} = "generic-device" ]; then 
-        mv "/opt/eclipse/kura/install/snapshot_0.xml-${BOARD}" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
-	    if python3 -V > /dev/null 2>&1
-	    then
-	        python3 "/opt/eclipse/kura/install/customize_snapshot.py" ${IS_NETWORKING_PROFILE}
-	    else
-	    	# fallback to RaspberryPi configuration to have something working...
-	    	if [ ${IS_NETWORKING_PROFILE} == "true" ]
-            then
-                mv "/opt/eclipse/kura/install/snapshot_0.xml-raspberry" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
-            else
-                mv "/opt/eclipse/kura/install/snapshot_0.xml-raspberry-nn" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
-            fi
-	        echo "python3 not found. The snapshot_0.xml file may have wrong interface names. Please correct them manually if they mismatch."
-	    fi
-	else
-	    if [ ${IS_NETWORKING_PROFILE} == "true" ]
-        then
-            mv "/opt/eclipse/kura/install/snapshot_0.xml-${BOARD}" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
-        else
-            mv "/opt/eclipse/kura/install/snapshot_0.xml-${BOARD}-nn" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
-        fi
-	fi
+    mv "/opt/eclipse/kura/install/snapshot_0.xml" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
+    python3 "/opt/eclipse/kura/install/customize_snapshot.py" ${IS_NETWORKING_PROFILE}
 }
 
 customize_iptables() {
-    local BOARD=$1
-
-    if [ "${IS_NETWORKING_PROFILE}" = "true" ]
-    then
-        mv "/opt/eclipse/kura/install/iptables-${BOARD}" "/opt/eclipse/kura/.data/iptables"
-    
-        if [ ${BOARD} = "generic-device" ]; then 
-    	    if python3 -V > /dev/null 2>&1
-    	    then
-    	        python3 "/opt/eclipse/kura/install/customize_iptables.py"
-    	    else
-    	    	# fallback to RaspberryPi configuration to have something working...
-    	    	mv "/opt/eclipse/kura/install/iptables-raspberry" "/opt/eclipse/kura/.data/iptables"
-    	        echo "python3 not found. The iptables file may have wrong interface names. Please correct them manually if they mismatch."
-    	    fi
-    	fi
+    if [ "${IS_NETWORKING_PROFILE}" = "true" ]; then
+        mv "/opt/eclipse/kura/install/iptables" "/opt/eclipse/kura/.data/iptables"
+        python3 "/opt/eclipse/kura/install/customize_iptables.py"
     fi
 }
 
@@ -96,12 +60,7 @@ customize_kura_properties() {
     KURA_PLATFORM=$( uname -m )
     sed -i "s/kura_platform/${KURA_PLATFORM}/g" "/opt/eclipse/kura/framework/kura.properties"
 
-    if python3 -V > /dev/null 2>&1
-    then
-        python3 "/opt/eclipse/kura/install/customize_kura_properties.py" "${BOARD}"
-    else
-        echo "python3 not found. Could not edit the primary network interface and device name in /opt/eclipse/kura/framework/kura.properties. Defaulted to eth0 and generic name."
-    fi
+    python3 "/opt/eclipse/kura/install/customize_kura_properties.py" "${BOARD}"
 }
 
 customize_ram() {
@@ -142,8 +101,8 @@ fi
 
 mv "/opt/eclipse/kura/install/jdk.dio.properties-${BOARD}" "/opt/eclipse/kura/framework/jdk.dio.properties"
 
-customize_snapshot "${BOARD}"
+customize_snapshot
 customize_kura_properties "${BOARD}"
-customize_iptables "${BOARD}"
+customize_iptables
 customize_ram "${BOARD}"
 

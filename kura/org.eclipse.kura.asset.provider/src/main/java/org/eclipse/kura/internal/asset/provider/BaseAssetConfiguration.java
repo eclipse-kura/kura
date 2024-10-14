@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -54,7 +55,6 @@ import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.internal.asset.provider.helper.ChannelRecordHelper;
 import org.eclipse.kura.type.DataType;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class BaseAssetConfiguration {
@@ -411,7 +411,8 @@ public final class BaseAssetConfiguration {
             case DOUBLE:
                 return Double.parseDouble(value);
             case LONG:
-                return Long.parseLong(value);
+                // TODO replace with Long.parseLong(value) once scale and offset are turned in String in the metatype
+                return (Double.valueOf(value).longValue());
             default:
                 throw new IllegalArgumentException(value + " cannot be converted into a Number of type " + type);
             }

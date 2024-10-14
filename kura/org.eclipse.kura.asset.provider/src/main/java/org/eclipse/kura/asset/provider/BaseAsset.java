@@ -61,6 +61,7 @@ import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.PreparedRead;
 import org.eclipse.kura.internal.asset.provider.BaseAssetConfiguration;
 import org.eclipse.kura.internal.asset.provider.DriverTrackerCustomizer;
+import org.eclipse.kura.internal.asset.provider.helper.ChannelRecordHelper;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -386,7 +387,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 continue;
             }
 
-            final ChannelRecord channelRecord = channel.createReadRecord();
+            final ChannelRecord channelRecord = ChannelRecordHelper.createModifiedChannelRecord(channel);
+            channel.createReadRecord();
             validRecords.add(channelRecord);
             channelRecords.add(channelRecord);
         }
@@ -435,8 +437,9 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
                 newValue = calculateScaleAndOffsetByTypedValue((TypedValue<? extends Number>) channelRecord.getValue(),
                         channelScale, channelOffset);
             } else {
-                newValue = calculateScaleAndOffset((TypedValue<? extends Number>) channelRecord.getValue(),
-                        channel.getScaleOffsetType(), channelScale, channelOffset);
+                newValue = calculateScaleAndOffset(channel.getValueType(),
+                        (TypedValue<? extends Number>) channelRecord.getValue(), channel.getScaleOffsetType(),
+                        channelScale, channelOffset);
             }
 
             channelRecord.setValue(newValue);
@@ -479,18 +482,23 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     }
 
-    private TypedValue<? extends Number> calculateScaleAndOffset(TypedValue<? extends Number> typedValue,
-            ScaleOffsetType scaleOffsetType, Number scale, Number offset) {
+    private TypedValue<? extends Number> calculateScaleAndOffset(DataType outputValueType,
+            TypedValue<? extends Number> typedValue, ScaleOffsetType scaleOffsetType, Number scale, Number offset) {
 
         Number result = null;
 
-        if (ScaleOffsetType.DOUBLE.equals(scaleOffsetType)) {
+        switch (scaleOffsetType) {
+        case DOUBLE:
             result = scale.doubleValue() * typedValue.getValue().doubleValue() + offset.doubleValue();
-        } else {
+            break;
+        case LONG:
+            result = scale.longValue() * typedValue.getValue().longValue() + offset.longValue();
+            break;
+        default:
             throw new IllegalArgumentException("Invalid scale/offset type");
         }
 
-        return toTypedValue(typedValue.getType(), result);
+        return toTypedValue(outputValueType, result);
 
     }
 

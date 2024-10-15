@@ -201,32 +201,31 @@ public class PositionServiceImpl
     public LocalDateTime getDateTime() {
 
         if (this.options.isEnabled()) {
-
-            if (!this.options.isStatic()) {
+            if (!this.options.isStatic() && this.currentProvider != null) {
                 return this.currentProvider.getDateTime();
-            } else {
+            } else if (this.options.isStatic()) {
                 return LocalDateTime.parse(
                         LocalDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
             }
-
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     @Override
     public Set<GNSSType> getGnssType() {
         if (this.options.isEnabled()) {
 
-            if (!this.options.isStatic()) {
+            if (!this.options.isStatic() && this.currentProvider != null) {
                 return this.currentProvider.getGnssType();
-            } else {
+            } else if (this.options.isStatic()) {
                 return new HashSet<>(Arrays.asList(this.staticGnssType));
             }
 
-        } else {
-            return Collections.emptySet();
         }
+
+        return Collections.emptySet();
+
     }
 
     @Override

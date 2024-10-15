@@ -30,7 +30,7 @@
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.exclusions>${project.basedir}/generated-sources/**/*</sonar.coverage.exclusions>
         <sonar.exclusions>${project.basedir}/generated-sources/**/*</sonar.exclusions>
-        <protoc.version>3.21.12</protoc.version>
+        <protoc.version>3.25.5</protoc.version>
     </properties>
 
     <artifactId>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</artifactId>

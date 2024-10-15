@@ -4308,7 +4308,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>The PositionService provides the geographic position of the gateway if a GPS component is available and enabled.</p>
 <p>When this service is enabled and provides a valid geographic position, this position is published in the gateway birth certificate with its location.</p>
 <p>The GPS connection parameters must be defined in order to allow the service to receive the GPS frames. The PositionService supports direct access to gps device or the connection to that through gpsd.</p>
-<p>For a device that is not connected to a GPS, it is possible to define a <em>static</em> position by entering <em>latitude,</em> <em>longitude,</em> and <em>altitude.</em> In this case, the position is returned by the PositionService as if it were an actual GPS position. This may be useful when a gateway is installed in a known place and does not move.</p>
+<p>For a device that is not connected to a GPS, it is possible to define a <em>static</em> position by entering <em>latitude,</em> <em>longitude,</em>, <em>altitude</em> and <em>GNSS Type</em>. In this case, the position, date and time information is returned by the PositionService as if it were an actual GPS position. This may be useful when a gateway is installed in a known place and does not move.</p>
 <p>To use this service, select the <strong>PositionService</strong> option located in the <strong>Services</strong> area as shown in the screen capture below.</p>
 <p><img alt="Position Service" src="../images/position-service.png" /></p>
 <p>This service provides the following configuration parameters:</p>
@@ -4340,6 +4340,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
 <li>
 <p><strong>altitude</strong> - provides the static altitude value in meters.</p>
+</li>
+<li>
+<p><strong>GNSSType</strong> - provides the gnss type used to retrieve static information.</p>
 </li>
 <li>
 <p><strong>port</strong> - supplies the USB or serial port of the GPS device.</p>

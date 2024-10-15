@@ -14,6 +14,7 @@
 import sys
 import logging
 import os
+import argparse
 from network_tools import get_eth_wlan_interfaces_names
 
 def main():
@@ -28,13 +29,12 @@ def main():
     
     SNAPSHOT_FILENAME = "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
     
-    args = sys.argv[1:]
-    if len(args) < 1:
-        logging.info("ERROR: invalid arguments length")
-        exit(1)
-    is_networking_profile = args[0]
+    parser = argparse.ArgumentParser(description="Customize snapshot_0.xml file", usage='%(prog)s is_networking_profile')
+    parser.add_argument('--networking_profile', action='store_true', help='Specifies if this is a profile with or without networking')
+    parser.set_defaults(networking_profile=False)
+    args = parser.parse_args()
     
-    if is_networking_profile == 'false':
+    if not args.networking_profile:
         with open(SNAPSHOT_FILENAME, 'r', encoding='utf-8') as snapshot:
             snapshot_content = snapshot.read()
         

@@ -44,7 +44,11 @@ customize_snapshot() {
     fi
 
     mv "/opt/eclipse/kura/install/snapshot_0.xml" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
-    python3 "/opt/eclipse/kura/install/customize_snapshot.py" ${IS_NETWORKING_PROFILE}
+    if [ ${IS_NETWORKING_PROFILE} = "true" ]; then
+        python3 "/opt/eclipse/kura/install/customize_snapshot.py" "--networking_profile"
+    else
+        python3 "/opt/eclipse/kura/install/customize_snapshot.py"
+    fi 
 }
 
 customize_iptables() {

@@ -14,6 +14,7 @@
 import sys
 import logging
 import os
+import argparse
 from network_tools import get_eth_wlan_interfaces_names
 
 def main():
@@ -26,13 +27,10 @@ def main():
         ]
     )
     
-    args = sys.argv[1:] # remove script name from args
-    
-    if len(args) < 1:
-        logging.info("ERROR: invalid arguments length")
-        exit(1)
-    
-    board_name = args[0]
+    parser = argparse.ArgumentParser(description="Customize kura properties file", usage='%(prog)s device_name')
+    parser.add_argument('device_name', help='The name of the device')
+    args = parser.parse_args()
+       
     KURA_PROPERTIES_FILENAME = "/opt/eclipse/kura/framework/kura.properties"
     
     (eth_names, wlan_names) = get_eth_wlan_interfaces_names()
@@ -45,7 +43,7 @@ def main():
     with open(KURA_PROPERTIES_FILENAME, 'r', encoding='utf-8') as kura_properties:
         kura_properties_content = kura_properties.read()
         
-    kura_properties_content = kura_properties_content.replace('device_name', board_name)
+    kura_properties_content = kura_properties_content.replace('device_name', args.device_name)
     kura_properties_content = kura_properties_content.replace('eth0', eth_names[0])
     
     with open(KURA_PROPERTIES_FILENAME, 'w', encoding='utf-8') as kura_properties:

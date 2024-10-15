@@ -25,6 +25,11 @@
 		
 	//the track of this position in degrees as a compass heading.
 	"track": 1000.0
+
+	//the gnss system used to retrieve position information
+	"gnssType": [
+        "Gps"
+    ]
 }
 ```
 

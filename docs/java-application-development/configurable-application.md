@@ -330,65 +330,6 @@ each of the property values and tags match what is shown below:
 
 If **Kura 3.0 or newer versions** are used and the "org.eclipse.kura.core.configuration.legacyServiceTracking" system property is set to false or not set, proceed as follows.
 
-After the Component class has been created, it will
-open in the Workspace. On the Services tab, click the **Add** button
-under **Provided Services**. Enter “configurable” and select the
-interface “org.eclipse.kura.configuration.ConfigurableComponent”. This is required for
-components that are configurable through the Kura ConfigurationService,
-so that they expose a Service.
-
-![](./images/configurable-application/image15_1.png)
-
-In the Overview tab, the Name and Class fields should already point to
-your Java class. Make the following settings:
-
-* Set the Activate field to **activate** and set the Deactivate field
-    to **deactivate**. This tells the component where these OSGi
-    activation methods are located.
-
-* Set the Configuration Policy to **require**.
-
-* Set the Modified field to **updated**. This tells the component
-    which method to call when the configuration is updated.
-
-* Uncheck the box **This component is enabled when started**, then
-    check both boxes **This component is enabled when started** and
-    **This component is immediately activated**.
-
-Click the **Add Property** button. Enter a property with the name
-“service.pid” and value
-“org.eclipse.kura.example.configurable.ConfigurableExample” as shown in
-the screen capture below.
-
-![](./images/configurable-application/image16.png)
-
-Verify that the completed Overview tab looks like the screen shot shown
-below and save the Component class definition file:
-
-![](./images/configurable-application/image17.png)
-
-Check the Source tab of the component.xml file and carefully verify that
-each of the property values and tags match what is shown below:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
-    activate="activate"
-    configuration-policy="require"
-    deactivate="deactivate"
-    enabled="true"
-    immediate="true"
-    modified="updated"
-    name="org.eclipse.kura.example.configurable.ConfigurableExample">
-
-    <implementation class="org.eclipse.kura.example.configurable.ConfigurableExample"/>
-    <service>
-       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
-    </service>
-    <property name="service.pid" type="String" value="org.eclipse.kura.example.configurable.ConfigurableExample"/>
-</scr:component>
-```
-
 ### Create the Default Configuration
 
 With the component definition file created, you also need to specify the

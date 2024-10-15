@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,10 @@
  *******************************************************************************/
 package org.eclipse.kura.rest.position.api;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.eclipse.kura.position.GNSSType;
 import org.osgi.util.position.Position;
 
 public class PositionDTO {
@@ -21,8 +25,9 @@ public class PositionDTO {
     private Double altitude;
     private Double speed;
     private Double track;
+    private Set<String> gnssType;
 
-    public PositionDTO(Position position) {
+    public PositionDTO(Position position, Set<GNSSType> gnssTypeSet) {
         if (position.getLongitude() != null) {
             this.longitude = Math.toDegrees(position.getLongitude().getValue());
         }
@@ -41,6 +46,13 @@ public class PositionDTO {
 
         if (position.getTrack() != null) {
             this.track = Math.toDegrees(position.getTrack().getValue());
+        }
+
+        if (gnssTypeSet != null) {
+            this.gnssType = new HashSet<>();
+            for (GNSSType type : gnssTypeSet) {
+                this.gnssType.add(type.getValue());
+            }
         }
     }
 
@@ -77,5 +89,12 @@ public class PositionDTO {
      */
     public Double getTrack() {
         return track;
+    }
+
+    /*
+     * Returns the GNSS Type used to retrieve position information
+     */
+    public Set<String> getGnssType() {
+        return gnssType;
     }
 }

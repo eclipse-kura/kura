@@ -59,6 +59,14 @@
                                 </g:FlowPanel>
                             </b:FormGroup>
 
+                            <b:FormGroup>
+                                <b:FormLabel for="gpsMode" ui:field="labelGpsMode"></b:FormLabel>
+                                <util:HelpButton ui:field="gpsModeHelp" />
+                                <g:FlowPanel>
+                                    <b:ListBox b:id="gpsMode" ui:field="gpsMode" />
+                                </g:FlowPanel>
+                            </b:FormGroup>
+
                         </b:FieldSet>
                     </b:Form>
 

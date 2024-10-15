@@ -601,6 +601,7 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_DIVERSITY_ENABLED = "net.interface.%s.config.diversityEnabled";
     private static final String NET_INTERFACE_CONFIG_RESET_TIMEOUT = "net.interface.%s.config.resetTimeout";
     private static final String NET_INTERFACE_CONFIG_GPS_ENABLED = "net.interface.%s.config.gpsEnabled";
+    private static final String NET_INTERFACE_CONFIG_GPS_MODE = "net.interface.%s.config.gpsMode";
     private static final String NET_INTERFACE_CONFIG_PERSIST = "net.interface.%s.config.persist";
     private static final String NET_INTERFACE_CONFIG_APN = "net.interface.%s.config.apn";
     private static final String NET_INTERFACE_CONFIG_DIAL_STRING = "net.interface.%s.config.dialString";
@@ -716,6 +717,15 @@ public class NetworkConfigurationServiceProperties {
 
     public void setModemGpsEnabled(String ifname, boolean isGpsEnabled) {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_GPS_ENABLED, ifname), isGpsEnabled);
+    }
+
+    public String getModemGpsMode(String ifname) {
+        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_GPS_MODE, ifname),
+                "kuraModemGpsModeUnmanaged");
+    }
+
+    public void setModemGpsMode(String ifname, String gpsMode) {
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_GPS_MODE, ifname), gpsMode);
     }
 
     public boolean getModemPersistEnabled(String ifname) {

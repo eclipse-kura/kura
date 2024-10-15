@@ -6,7 +6,7 @@ When this service is enabled and provides a valid geographic position, this posi
 
 The GPS connection parameters must be defined in order to allow the service to receive the GPS frames. The PositionService supports direct access to gps device or the connection to that through gpsd.
 
-For a device that is not connected to a GPS, it is possible to define a _static_ position by entering _latitude,_ _longitude,_ and _altitude._ In this case, the position is returned by the PositionService as if it were an actual GPS position. This may be useful when a gateway is installed in a known place and does not move.
+For a device that is not connected to a GPS, it is possible to define a _static_ position by entering _latitude,_ _longitude,_, _altitude_ and _GNSS Type_. In this case, the position, date and time information is returned by the PositionService as if it were an actual GPS position. This may be useful when a gateway is installed in a known place and does not move.
 
 To use this service, select the **PositionService** option located in the **Services** area as shown in the screen capture below.
 
@@ -31,6 +31,8 @@ This service provides the following configuration parameters:
 - **longitude** - provides the static longitude value in degrees.
 
 - **altitude** - provides the static altitude value in meters.
+
+- **GNSSType** - provides the gnss type used to retrieve static information.
 
 - **port** - supplies the USB or serial port of the GPS device.
 

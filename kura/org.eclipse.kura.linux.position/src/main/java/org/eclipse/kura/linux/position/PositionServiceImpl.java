@@ -13,8 +13,12 @@
 package org.eclipse.kura.linux.position;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,6 +57,7 @@ public class PositionServiceImpl
     private boolean hasLock;
     private Position staticPosition;
     private NmeaPosition staticNmeaPosition;
+    private GNSSType staticGnssType;
 
     // ----------------------------------------------------------------
     //
@@ -85,7 +90,7 @@ public class PositionServiceImpl
     protected void activate(final Map<String, Object> properties) {
         logger.debug("Activating...");
 
-        setStaticPosition(0, 0, 0);
+        setStaticPosition(0, 0, 0, GNSSType.UNKNOWN.getValue());
         updated(properties);
 
         logger.info("Activating... Done.");
@@ -127,7 +132,7 @@ public class PositionServiceImpl
 
         if (this.options.isStatic()) {
             setStaticPosition(this.options.getStaticLatitude(), this.options.getStaticLongitude(),
-                    this.options.getStaticAltitude());
+                    this.options.getStaticAltitude(), this.options.getStaticGnssType());
             setLock(true);
         } else {
             try {
@@ -194,16 +199,33 @@ public class PositionServiceImpl
 
     @Override
     public LocalDateTime getDateTime() {
-        if (this.currentProvider != null) {
-            return this.currentProvider.getDateTime();
-        } else {
-            return null;
+
+        if (this.options.isEnabled()) {
+            if (!this.options.isStatic() && this.currentProvider != null) {
+                return this.currentProvider.getDateTime();
+            } else if (this.options.isStatic()) {
+                return LocalDateTime.parse(
+                        LocalDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
+            }
         }
+
+        return null;
     }
 
     @Override
     public Set<GNSSType> getGnssType() {
-        return this.currentProvider.getGnssType();
+        if (this.options.isEnabled()) {
+
+            if (!this.options.isStatic() && this.currentProvider != null) {
+                return this.currentProvider.getGnssType();
+            } else if (this.options.isStatic()) {
+                return new HashSet<>(Arrays.asList(this.staticGnssType));
+            }
+
+        }
+
+        return Collections.emptySet();
+
     }
 
     @Override
@@ -248,7 +270,7 @@ public class PositionServiceImpl
             this.currentProvider = null;
         }
 
-        setStaticPosition(0, 0, 0);
+        setStaticPosition(0, 0, 0, GNSSType.UNKNOWN.getValue());
         setLock(false);
     }
 
@@ -263,7 +285,7 @@ public class PositionServiceImpl
         this.hasLock = hasLock;
     }
 
-    private void setStaticPosition(double latitudeDeg, double longitudeDeg, double altitudeNmea) {
+    private void setStaticPosition(double latitudeDeg, double longitudeDeg, double altitudeNmea, String gnssType) {
 
         final double latitudeRad = Math.toRadians(latitudeDeg);
         final double longitudeRad = Math.toRadians(longitudeDeg);
@@ -278,6 +300,7 @@ public class PositionServiceImpl
         this.staticPosition = new Position(latitude, longitude, altitude, speed, track);
         this.staticNmeaPosition = new NmeaPosition(latitudeDeg, longitudeDeg, altitudeNmea, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 (char) 0, (char) 0, (char) 0);
+        this.staticGnssType = GNSSType.fromValue(gnssType);
     }
 
     @Override

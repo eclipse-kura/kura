@@ -1,0 +1,85 @@
+   <esf:configuration pid="org.eclipse.kura.net.admin.NetworkConfigurationService">
+        <esf:properties>
+            <esf:property name="net.interfaces" array="false" encrypted="false" type="String">
+                <esf:value>INTERFACES_LIST</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.type" array="false" encrypted="false" type="String">
+                <esf:value>LOOPBACK</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.config.ip4.status" array="false" encrypted="false" type="String">
+                <esf:value>netIPv4StatusUnmanaged</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.lo.config.ip6.status" array="false" encrypted="false" type="String">
+                <esf:value>netIPv6StatusUnmanaged</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.type" array="false" encrypted="false" type="String">
+                <esf:value>ETHERNET</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.status" array="false" encrypted="false" type="String">
+                <esf:value>netIPv4StatusEnabledLAN</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.address" array="false" encrypted="false" type="String">
+                <esf:value>172.16.0.1</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.prefix" array="false" encrypted="false" type="Short">
+                <esf:value>24</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.dnsServers" array="false" encrypted="false" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.mtu" array="false" encrypted="false" type="Integer">
+                <esf:value>0</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.ip4.gateway" array="false" encrypted="false" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.nat.enabled" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.dhcpClient4.enabled" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.dhcpServer4.enabled" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.dhcpServer4.passDns" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.dhcpServer4.prefix" array="false" encrypted="false" type="Short">
+                <esf:value>24</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.dhcpServer4.maxLeaseTime" array="false" encrypted="false" type="Integer">
+                <esf:value>7200</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.dhcpServer4.rangeStart" array="false" encrypted="false" type="String">
+                <esf:value>172.16.0.100</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.dhcpServer4.defaultLeaseTime" array="false" encrypted="false" type="Integer">
+                <esf:value>7200</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.dhcpServer4.rangeEnd" array="false" encrypted="false" type="String">
+                <esf:value>172.16.0.110</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_0.config.ip6.status" array="false" encrypted="false" type="String">
+                <esf:value>netIPv6StatusDisabled</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_1.type" array="false" encrypted="false" type="String">
+                <esf:value>ETHERNET</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_1.config.ip4.status" array="false" encrypted="false" type="String">
+                <esf:value>netIPv4StatusEnabledWAN</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_1.config.ip4.dnsServers" array="false" encrypted="false" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_1.config.dhcpClient4.enabled" array="false" encrypted="false" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_1.config.dhcpServer4.enabled" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="net.interface.ETH_INTERFACE_1.config.ip6.status" array="false" encrypted="false" type="String">
+                <esf:value>netIPv6StatusDisabled</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>

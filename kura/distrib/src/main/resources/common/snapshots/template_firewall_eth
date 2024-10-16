@@ -1,0 +1,13 @@
+    <esf:configuration pid="org.eclipse.kura.net.admin.FirewallConfigurationService">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="firewall.open.ports" type="String">
+                    <esf:value>22,tcp,,ETH_INTERFACE_0,,,,#;443,tcp,,ETH_INTERFACE_0,,,,#;4443,tcp,,ETH_INTERFACE_0,,,,#;1450,tcp,,ETH_INTERFACE_0,,,,#;5002,tcp,127.0.0.1/32,,,,,#;53,udp,,ETH_INTERFACE_0,,,,#;67,udp,,ETH_INTERFACE_0,,,,#;8000,tcp,,ETH_INTERFACE_0,,,,#;</esf:value>
+                </esf:property>
+            <esf:property array="false" encrypted="false" name="firewall.port.forwarding" type="String">
+                    <esf:value></esf:value>
+                </esf:property>
+            <esf:property array="false" encrypted="false" name="firewall.nat" type="String">
+                    <esf:value></esf:value>
+                </esf:property>
+        </esf:properties>
+    </esf:configuration>

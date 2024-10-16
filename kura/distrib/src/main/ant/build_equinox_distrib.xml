@@ -578,7 +578,13 @@ fi]]>
                 prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/patch_sysctl.sh"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/find_net_interfaces.py"
+            <zipfileset file="src/main/resources/common/network_tools.py"
+                prefix="${build.output.name}/${install.folder}" />
+            <zipfileset file="src/main/resources/common/customize_iptables.py"
+                prefix="${build.output.name}/${install.folder}" />
+            <zipfileset file="src/main/resources/common/customize_kura_properties.py"
+                prefix="${build.output.name}/${install.folder}" />
+            <zipfileset file="src/main/resources/common/customize_snapshot.py"
                 prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/comment_interfaces_file.py"
                 prefix="${build.output.name}/${install.folder}" />

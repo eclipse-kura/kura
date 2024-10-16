@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (c) 2023 Eurotech and/or its affiliates and others
+# Copyright (c) 2024 Eurotech and/or its affiliates and others
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -56,44 +56,4 @@ def get_eth_wlan_interfaces_names():
     logging.info("Found ethernet interfaces: %s", ethernet_interface_names)
     logging.info("Found wireless interfaces: %s", wireless_interface_names)
     return (ethernet_interface_names, wireless_interface_names)
-
-def main():
-    logging.basicConfig(
-        format='[find_net_interfaces.py] %(asctime)s %(levelname)s %(message)s',
-        level=logging.INFO,
-        datefmt='%Y-%m-%d %H:%M:%S',
-        handlers=[
-            logging.StreamHandler()
-        ]
-    )
     
-    file_paths_to_edit = sys.argv[1:] # remove script name from args
-    
-    if len(file_paths_to_edit) < 1:
-        logging.info("ERROR: invalid arguments length")
-        exit(1)
-    
-    (eth_names, wlan_names) = get_eth_wlan_interfaces_names()
-    
-    for path in file_paths_to_edit:
-        with open(path, 'r+', encoding='utf-8') as file_to_edit:
-            logging.info("%s : starting editing", path)
-    
-            content = file_to_edit.read()
-    
-            for i, eth_name in enumerate(eth_names):
-                content = content.replace('eth' + str(i), eth_name)
-                logging.info("%s : replaced eth%s with %s", path, str(i), eth_name)
-    
-            for i, wlan_name in enumerate(wlan_names):
-                content = content.replace('wlan' + str(i), wlan_name)
-                logging.info("%s : replaced wlan%s with %s", path, str(i), wlan_name)
-            
-            file_to_edit.seek(0)
-            file_to_edit.truncate()
-            file_to_edit.write(content)
-            
-            logging.info("%s : successfully edited", path)
-            
-if __name__ == "__main__":
-    main()

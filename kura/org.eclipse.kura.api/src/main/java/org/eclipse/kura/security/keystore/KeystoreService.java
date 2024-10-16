@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -103,6 +103,24 @@ public interface KeystoreService {
      *             if the algorithm is null
      */
     public List<KeyManager> getKeyManagers(String algorithm) throws KuraException;
+
+    /**
+     * Returns one key manager for each type of key material using the Java Security API Provider with the given name.
+     *
+     * @param algorithm
+     * @param provider
+     *            the name of the Provider to be used
+     * @return a list of key manager
+     * @throws KuraException
+     *             if the provided algorithm/provider is not supported or does not exist or if the associated keystore
+     *             cannot be
+     *             accessed
+     * @throws IllegalArgumentException
+     *             if algorithm or provider is null
+     * 
+     * @since 2.8
+     */
+    public List<KeyManager> getKeyManagers(String algorithm, String provider) throws KuraException;
 
     /**
      * Creates and persists a new keypair in the managed keystore using the specified alias.

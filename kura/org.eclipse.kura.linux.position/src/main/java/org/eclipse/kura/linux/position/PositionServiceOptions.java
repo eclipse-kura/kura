@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,7 @@ public class PositionServiceOptions {
     private static final Property<Double> STATIC_LATITUDE = new Property<>("latitude", 0.0d);
     private static final Property<Double> STATIC_LONGITUDE = new Property<>("longitude", 0.0d);
     private static final Property<Double> STATIC_ALTITUDE = new Property<>("altitude", 0.0d);
+    private static final Property<String> STATIC_GNSS_TYPE = new Property<>("gnss.type", "Unknown");
     private static final Property<String> PORT = new Property<>("port", "");
     private static final Property<Integer> BAUD_RATE = new Property<>("baudRate", 115200);
     private static final Property<Integer> BITS_PER_WORD = new Property<>("bitsPerWord", 8);
@@ -62,6 +63,10 @@ public class PositionServiceOptions {
 
     public double getStaticAltitude() {
         return STATIC_ALTITUDE.get(this.properties);
+    }
+
+    public String getStaticGnssType() {
+        return STATIC_GNSS_TYPE.get(this.properties);
     }
 
     public int getBaudRate() {
@@ -130,10 +135,10 @@ public class PositionServiceOptions {
         return isEnabled() == other.isEnabled() && isStatic() == other.isStatic()
                 && getStaticLatitude() == other.getStaticLatitude()
                 && getStaticLongitude() == other.getStaticLongitude()
-                && getStaticAltitude() == other.getStaticAltitude() && getPort().equals(other.getPort())
-                && getBaudRate() == other.getBaudRate() && getBitsPerWord() == other.getBitsPerWord()
-                && getStopBits() == other.getStopBits() && getParity() == other.getParity()
-                && getPositionProvider().equals(other.getPositionProvider())
+                && getStaticAltitude() == other.getStaticAltitude() && getStaticGnssType() == other.getStaticGnssType()
+                && getPort().equals(other.getPort()) && getBaudRate() == other.getBaudRate()
+                && getBitsPerWord() == other.getBitsPerWord() && getStopBits() == other.getStopBits()
+                && getParity() == other.getParity() && getPositionProvider().equals(other.getPositionProvider())
                 && getGpsdHost().equals(other.getGpsdHost()) && getGpsdPort() == other.getGpsdPort()
                 && getGpsdMaxValidityInterval().equals(other.getGpsdMaxValidityInterval());
     }

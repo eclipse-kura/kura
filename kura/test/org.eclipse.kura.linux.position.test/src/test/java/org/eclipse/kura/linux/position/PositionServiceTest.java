@@ -227,6 +227,7 @@ public class PositionServiceTest {
         properties.put("latitude", 46.0d);
         properties.put("longitude", 15.0d);
         properties.put("altitude", 300.0d);
+        properties.put("gnss.type", "Gps");
         properties.put("proider", "serial");
 
         fixture.ps.activate(properties);
@@ -239,6 +240,9 @@ public class PositionServiceTest {
         assertEquals(46.0d, Math.toDegrees(position.getLatitude().getValue()), EPS);
         assertEquals(15.0d, Math.toDegrees(position.getLongitude().getValue()), EPS);
         assertEquals(300.0d, position.getAltitude().getValue(), EPS);
+
+        assertNotNull(fixture.ps.getDateTime());
+        assertEquals(new HashSet<>(Arrays.asList(GNSSType.GPS)), fixture.ps.getGnssType());
 
         final NmeaPosition nmeaPosition = fixture.ps.getNmeaPosition();
 
@@ -435,6 +439,7 @@ public class PositionServiceTest {
         properties.put("latitude", 20.0d);
         properties.put("longitude", 30.0d);
         properties.put("altitude", 40.0d);
+        properties.put("gnss.type", "Glonass");
 
         fixture.ps.updated(properties);
         assertNull(fixture.getGpsDevice());
@@ -445,6 +450,9 @@ public class PositionServiceTest {
         assertEquals(20.0d, Math.toDegrees(position.getLatitude().getValue()), EPS);
         assertEquals(30.0d, Math.toDegrees(position.getLongitude().getValue()), EPS);
         assertEquals(40.0d, position.getAltitude().getValue(), EPS);
+
+        assertNotNull(fixture.ps.getDateTime());
+        assertEquals(new HashSet<>(Arrays.asList(GNSSType.GLONASS)), fixture.ps.getGnssType());
 
         verify(fixture.eventAdmin, times(1)).postEvent(argThat(isPositionLockedEvent));
     }

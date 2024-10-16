@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,34 +13,27 @@
 package org.eclipse.kura.rest.position.provider.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.ws.rs.WebApplicationException;
-import java.time.ZonedDateTime;
-import java.time.LocalDateTime;
-import org.osgi.util.position.Position;
-import org.osgi.util.measurement.Measurement;
-import org.osgi.util.measurement.Unit;
-import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloudconnection.message.KuraMessage;
-import org.eclipse.kura.message.KuraPayload;
-import org.eclipse.kura.message.KuraResponsePayload;
-import org.eclipse.kura.position.PositionService;
+
 import org.eclipse.kura.internal.rest.position.PositionRestService;
-import org.eclipse.kura.rest.position.api.IsLockedDTO;
+import org.eclipse.kura.position.GNSSType;
+import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.rest.position.api.DateTimeDTO;
+import org.eclipse.kura.rest.position.api.IsLockedDTO;
 import org.eclipse.kura.rest.position.api.PositionDTO;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
+import org.osgi.util.measurement.Measurement;
+import org.osgi.util.measurement.Unit;
+import org.osgi.util.position.Position;
 
 public class PositionRestServiceTest {
 
@@ -57,11 +50,11 @@ public class PositionRestServiceTest {
     public void getPositionTest() {
         givenMockedPositionService();
         givenIsLocked(true);
-        givenPosition(0.1, 0.2, 4.5, null, null);
+        givenPosition(0.1, 0.2, 4.5, null, null, null);
 
         whenGetPosition();
 
-        thenPositionIs(0.1, 0.2, 4.5, null, null);
+        thenPositionIs(0.1, 0.2, 4.5, null, null, null);
         thenNoExceptionIsThrown();
     }
 
@@ -69,11 +62,23 @@ public class PositionRestServiceTest {
     public void getPositionTestWithFullParameters() {
         givenMockedPositionService();
         givenIsLocked(true);
-        givenPosition(0.1, 0.2, 4.5, 50.6, 9.8);
+        givenPosition(0.1, 0.2, 4.5, 50.6, 9.8, new HashSet<>(Arrays.asList(GNSSType.GPS)));
 
         whenGetPosition();
 
-        thenPositionIs(0.1, 0.2, 4.5, 50.6, 9.8);
+        thenPositionIs(0.1, 0.2, 4.5, 50.6, 9.8, new HashSet<>(Arrays.asList("Gps")));
+        thenNoExceptionIsThrown();
+    }
+
+    @Test
+    public void getPositionTestWithFullParametersAndMultipleGNSSTypes() {
+        givenMockedPositionService();
+        givenIsLocked(true);
+        givenPosition(0.1, 0.2, 4.5, 50.6, 9.8, new HashSet<>(Arrays.asList(GNSSType.GPS, GNSSType.GLONASS)));
+
+        whenGetPosition();
+
+        thenPositionIs(0.1, 0.2, 4.5, 50.6, 9.8, new HashSet<>(Arrays.asList("Gps", "Glonass")));
         thenNoExceptionIsThrown();
     }
 
@@ -112,7 +117,7 @@ public class PositionRestServiceTest {
     }
 
     @Test
-    public void getPositionNoLockTest(){
+    public void getPositionNoLockTest() {
         givenMockedPositionService();
         givenIsLocked(false);
 
@@ -122,7 +127,7 @@ public class PositionRestServiceTest {
     }
 
     @Test
-    public void getLocalDateTimeNoLockTest(){
+    public void getLocalDateTimeNoLockTest() {
         givenMockedPositionService();
         givenIsLocked(false);
 
@@ -131,22 +136,25 @@ public class PositionRestServiceTest {
         thenExceptionIsThrown();
     }
 
-
-    private void givenMockedPositionService(){
+    private void givenMockedPositionService() {
         positionRestService.setPositionServiceImpl(positionService);
     }
 
-    private void givenPosition(Double longitude, Double latitude, Double altitude, Double speed, Double track) {
+    private void givenPosition(Double longitude, Double latitude, Double altitude, Double speed, Double track,
+            Set<GNSSType> gnssTypeSet) {
 
         Measurement latitudeMesurment = latitude != null ? new Measurement(Math.toRadians(latitude), Unit.rad) : null;
-        Measurement longitudeMesurment = longitude != null ? new Measurement(Math.toRadians(longitude), Unit.rad) : null;
+        Measurement longitudeMesurment = longitude != null ? new Measurement(Math.toRadians(longitude), Unit.rad)
+                : null;
         Measurement altitudeMesurment = altitude != null ? new Measurement(altitude, Unit.m) : null;
         Measurement speedMesurment = speed != null ? new Measurement(speed, Unit.m_s) : null;
         Measurement trackMesurment = track != null ? new Measurement(Math.toRadians(track), Unit.rad) : null;
 
-        Position testPosition = new Position(latitudeMesurment, longitudeMesurment, altitudeMesurment, speedMesurment, trackMesurment);
+        Position testPosition = new Position(latitudeMesurment, longitudeMesurment, altitudeMesurment, speedMesurment,
+                trackMesurment);
 
         when(positionService.getPosition()).thenReturn(testPosition);
+        when(positionService.getGnssType()).thenReturn(gnssTypeSet);
     }
 
     private void givenLocalDateTime(String zonedDateTime) {
@@ -154,7 +162,7 @@ public class PositionRestServiceTest {
         when(positionService.getDateTime()).thenReturn(testLocalDateTime);
     }
 
-    private void givenIsLocked(boolean isLocked){
+    private void givenIsLocked(boolean isLocked) {
         when(positionService.isLocked()).thenReturn(isLocked);
     }
 
@@ -167,7 +175,7 @@ public class PositionRestServiceTest {
     }
 
     private void whenGetLocalDateTime() {
-        try{
+        try {
             localDateTimeDTO = positionRestService.getLocalDateTime();
         } catch (Exception e) {
             testException = e;
@@ -175,42 +183,50 @@ public class PositionRestServiceTest {
     }
 
     private void whenGetIsLocked() {
-        try{
+        try {
             isLockedDTO = positionRestService.getIsLocked();
         } catch (Exception e) {
             testException = e;
         }
     }
 
-    private void thenPositionIs(Double longitude, Double latitude, Double altitude, Double speed, Double track) {
-        if (longitude != null){
+    private void thenPositionIs(Double longitude, Double latitude, Double altitude, Double speed, Double track,
+            Set<String> gnssTypeSet) {
+
+        if (longitude != null) {
             assertEquals(longitude, positionDTO.getLongitude(), 0.0);
         } else {
             assertNull(positionDTO.getLongitude());
         }
 
-        if (latitude != null){
+        if (latitude != null) {
             assertEquals(latitude, positionDTO.getLatitude(), 0.0);
         } else {
             assertNull(positionDTO.getLatitude());
         }
 
-        if (altitude != null){
+        if (altitude != null) {
             assertEquals(altitude, positionDTO.getAltitude(), 0.0);
         } else {
             assertNull(positionDTO.getAltitude());
         }
 
-        if (speed != null){
+        if (speed != null) {
             assertEquals(speed, positionDTO.getSpeed(), 0.0);
         } else {
             assertNull(positionDTO.getSpeed());
         }
 
-        if (track != null){
+        if (track != null) {
             assertEquals(track, positionDTO.getTrack(), 0.0);
         } else {
             assertNull(positionDTO.getTrack());
+        }
+
+        if (gnssTypeSet != null) {
+            assertEquals(gnssTypeSet, positionDTO.getGnssType());
+        } else {
+            assertNull(positionDTO.getGnssType());
         }
     }
 

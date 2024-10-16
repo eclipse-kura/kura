@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,11 +16,13 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.util.Set;
 
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.linux.position.NMEAParser.Code;
 import org.eclipse.kura.linux.position.NMEAParser.ParseException;
+import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionException;
 import org.eclipse.kura.position.PositionListener;
@@ -79,6 +81,10 @@ public class GpsDevice {
 
     public synchronized String getTimeNmea() {
         return this.nmeaParser.getTimeNmea();
+    }
+
+    public synchronized Set<GNSSType> getGnssType() {
+        return this.nmeaParser.getGnssType();
     }
 
     public void disconnect() {

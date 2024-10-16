@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,10 +22,14 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.position.GNSSType;
 import org.junit.Test;
 import org.osgi.util.measurement.Measurement;
 import org.osgi.util.measurement.Unit;
@@ -77,6 +81,7 @@ public class UseGpsdPositionProviderTest {
         whenNMEAStreamArriveFrom(DEVICE_2_1_JSON_STREAM);
 
         thenPositionIsNotNull();
+        thenGnssTypeIs(new HashSet<>(Arrays.asList(GNSSType.GPS, GNSSType.GLONASS)));
     }
 
     @Test
@@ -163,6 +168,39 @@ public class UseGpsdPositionProviderTest {
         givenGpsdProviderIsStarted();
 
         thenPositionIsZero();
+    }
+
+    @Test
+    public void getGnssTypeFromDevice1Stream() {
+        givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
+        givenGpsdProviderIsStarted();
+
+        whenNMEAStreamArriveFrom(DEVICE1_JSON_STREAM);
+
+        thenGnssTypeIs(new HashSet<>(Arrays.asList(GNSSType.GPS)));
+    }
+
+    @Test
+    public void getGnssTypeFromDevice2Stream() {
+        givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
+        givenGpsdProviderIsStarted();
+
+        whenNMEAStreamArriveFrom(DEVICE_2_1_JSON_STREAM);
+
+        thenGnssTypeIs(new HashSet<>(Arrays.asList(GNSSType.GPS, GNSSType.GLONASS)));
+    }
+
+    @Test
+    public void getGnssTypeFromDevice2Stream2() {
+        givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
+        givenGpsdProviderIsStarted();
+
+        whenNMEAStreamArriveFrom(BOLTGATE_10_12_JSON_STREAM_2);
+
+        thenGnssTypeIs(new HashSet<>(Arrays.asList(GNSSType.GPS, GNSSType.GLONASS)));
     }
 
     private void givenGpsdPositionProvider() {
@@ -265,6 +303,10 @@ public class UseGpsdPositionProviderTest {
 
     private void thenPositionIsLocked() {
         assertTrue(this.gpsdPositionProvider.isLocked());
+    }
+
+    private void thenGnssTypeIs(Set<GNSSType> types) {
+        assertEquals(types, this.gpsdPositionProvider.getGnssType());
     }
 
     private void gpsdPositionProviderStart() {

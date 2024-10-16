@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -60,6 +60,7 @@ import org.eclipse.kura.net.status.modem.ESimStatus;
 import org.eclipse.kura.net.status.modem.ModemBand;
 import org.eclipse.kura.net.status.modem.ModemCapability;
 import org.eclipse.kura.net.status.modem.ModemConnectionStatus;
+import org.eclipse.kura.net.status.modem.ModemGpsMode;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
 import org.eclipse.kura.net.status.modem.ModemMode;
 import org.eclipse.kura.net.status.modem.ModemModePair;
@@ -642,6 +643,53 @@ public class NMDbusConnectorTest {
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
         thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED), false);
+    }
+
+    @Test
+    public void applyShouldWorkWithModemWithEnabledGPSAndUnmanagedMode() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("1-5", "ttyACM17", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+
+        givenNetworkConfigMapWith("net.interfaces", "1-5,");
+        givenNetworkConfigMapWith("net.interface.1-5.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.1-5.config.dhcpClient4.enabled", true);
+        givenNetworkConfigMapWith("net.interface.1-5.config.apn", "myAwesomeAPN");
+        givenNetworkConfigMapWith("net.interface.1-5.config.gpsEnabled", true);
+        givenNetworkConfigMapWith("net.interface.1-5.config.gpsMode", "kuraModemGpsModeUnmanaged");
+        givenNetworkConfigMapWith("net.interface.1-5.config.resetTimeout", 0);
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+        thenConnectionUpdateIsCalledFor("ttyACM17");
+        thenActivateConnectionIsCalledFor("ttyACM17");
+        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED), false);
+    }
+
+    @Test
+    public void applyShouldWorkWithModemWithEnabledGPSAndManagedMode() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("1-5", "ttyACM17", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+
+        givenNetworkConfigMapWith("net.interfaces", "1-5,");
+        givenNetworkConfigMapWith("net.interface.1-5.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.1-5.config.dhcpClient4.enabled", true);
+        givenNetworkConfigMapWith("net.interface.1-5.config.apn", "myAwesomeAPN");
+        givenNetworkConfigMapWith("net.interface.1-5.config.gpsEnabled", true);
+        givenNetworkConfigMapWith("net.interface.1-5.config.gpsMode", "kuraModemGpsModeManagedGps");
+        givenNetworkConfigMapWith("net.interface.1-5.config.resetTimeout", 0);
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+        thenConnectionUpdateIsCalledFor("ttyACM17");
+        thenActivateConnectionIsCalledFor("ttyACM17");
+        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
+                MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA), false);
     }
 
     @Test
@@ -1657,6 +1705,7 @@ public class NMDbusConnectorTest {
         assertTrue(modemStatus.getCurrentBands().contains(ModemBand.EUTRAN_10));
         assertTrue(modemStatus.getCurrentBands().contains(ModemBand.EUTRAN_39));
         assertTrue(modemStatus.isGpsSupported());
+        assertEquals(EnumSet.of(ModemGpsMode.UNMANAGED, ModemGpsMode.MANAGED_GPS), modemStatus.getSupporteGpsModes());
         assertFalse(modemStatus.isSimLocked());
         assertEquals(ModemConnectionStatus.REGISTERED, modemStatus.getConnectionStatus());
         assertEquals(1, modemStatus.getAccessTechnologies().size());

@@ -255,6 +255,14 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig {
         set("gpsEnabled", gpsEnabled);
     }
 
+    public void setGpsMode(String gpsMode) {
+        set("gpsMode", gpsMode);
+    }
+
+    public String getGpsMode() {
+        return get("gpsMode");
+    }
+
     public boolean isGpsSupported() {
         if (get("gpsSupported") != null) {
             return (Boolean) get("gpsSupported");
@@ -264,6 +272,14 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig {
 
     public void setGpsSupported(boolean gpsSupported) {
         set("gpsSupported", gpsSupported);
+    }
+
+    public void setSupportedGpsModes(List<String> list) {
+        set("gpsSupportedModes", list);
+    }
+
+    public List<String> getSupportedGpsModes() {
+        return get("gpsSupportedModes");
     }
 
     public boolean isDiversityEnabled() {

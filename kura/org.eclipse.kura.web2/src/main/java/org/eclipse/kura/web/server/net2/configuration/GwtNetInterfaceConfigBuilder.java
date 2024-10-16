@@ -327,6 +327,7 @@ public class GwtNetInterfaceConfigBuilder {
             gwtModemConfig.setLcpEchoInterval(this.properties.getModemLpcEchoInterval(this.ifName));
             gwtModemConfig.setLcpEchoFailure(this.properties.getModemLpcEchoFailure(this.ifName));
             gwtModemConfig.setGpsEnabled(this.properties.getModemGpsEnabled(this.ifName));
+            gwtModemConfig.setGpsMode(this.properties.getModemGpsMode(ifName));
             gwtModemConfig.setDiversityEnabled(this.properties.getModemDiversityEnabled(this.ifName));
             gwtModemConfig.setApn(this.properties.getModemApn(this.ifName));
             gwtModemConfig.setModemId(this.properties.getUsbProductName(this.ifName));

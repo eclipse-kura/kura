@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,8 +15,11 @@ package org.eclipse.kura.linux.position;
 import static java.lang.Math.toRadians;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.osgi.util.measurement.Measurement;
 import org.osgi.util.measurement.Unit;
@@ -47,6 +50,10 @@ public class NMEAParser {
     private char latitudeHemisphere = 0;
     private char longitudeHemisphere = 0;
 
+    private Set<GNSSType> gnssType = new HashSet<>();
+    private int gnssTypeUpdateCounter = 0;
+    private static final int GNSSTYPE_RESET_COUNTER = 50;
+
     /**
      * Fill the fields of GPS position depending of the type of the sentence
      *
@@ -70,6 +77,9 @@ public class NMEAParser {
          * $GS = Glonass
          * $GN = GNSS, that is GPS + Glonass + possibly others
          */
+
+        parseGnssType(tokens.get(0));
+
         if (!tokens.get(0).startsWith("$G")) {
             // Not a valid token. Return.
             throw new ParseException(Code.INVALID);
@@ -90,6 +100,65 @@ public class NMEAParser {
         }
 
         return this.validPosition;
+    }
+
+    private void parseGnssType(String token) {
+
+        if (this.gnssTypeUpdateCounter > GNSSTYPE_RESET_COUNTER) {
+            this.gnssType.clear();
+            this.gnssTypeUpdateCounter = 0;
+        }
+
+        String id = token.substring(1, 3);
+
+        GNSSType type = getGnssTypeFromSentenceId(id);
+
+        if (!type.equals(GNSSType.UNKNOWN)) {
+            this.gnssType.add(type);
+        }
+
+        this.gnssTypeUpdateCounter++;
+    }
+
+    /*
+     * Also 'GN' is a possible GNSSType, representing the Mixed GNSS System (GPS+GALILEO or GPS+GLONASS for example).
+     * 
+     * But, if the device is capable to emit GN sentences, it must emit also the single-id ones. So we are still able to
+     * extract the specific GNSS System. See {@link
+     * https://receiverhelp.trimble.com/alloy-gnss/en-us/NMEA-0183messages_GNS.html}
+     * 
+     * As example, if the device emits GN messages due to a GP/GA combination, it will emit three sentences: GN, GP, GA.
+     * 
+     * Info about the correlation GNSS System / NMEA Sentence at
+     * {@link https://en.wikipedia.org/wiki/NMEA_0183#NMEA_sentence_format}
+     * 
+     */
+    private GNSSType getGnssTypeFromSentenceId(String type) {
+
+        switch (type) {
+
+        case "GP":
+            return GNSSType.GPS;
+
+        case "BD":
+        case "GB":
+            return GNSSType.BEIDOU;
+
+        case "GA":
+            return GNSSType.GALILEO;
+
+        case "GL":
+            return GNSSType.GLONASS;
+
+        case "GI":
+            return GNSSType.IRNSS;
+
+        case "GQ":
+            return GNSSType.QZSS;
+
+        default:
+            return GNSSType.UNKNOWN;
+        }
     }
 
     private void parseVTGSentence(List<String> tokens) {
@@ -261,7 +330,6 @@ public class NMEAParser {
         final int starpos = nmeaMessageIn.indexOf('*');
         final String strChecksum = nmeaMessageIn.substring(starpos + 1, nmeaMessageIn.length() - 1);
         final int parsedChecksum = Integer.parseInt(strChecksum, 16); // Check sum is coded in hex string
-
         int actualChecksum = 0;
         for (int i = 1; i < starpos; i++) {
             actualChecksum ^= nmeaMessageIn.charAt(i);
@@ -370,6 +438,10 @@ public class NMEAParser {
 
     public char getLongitudeHemisphere() {
         return this.longitudeHemisphere;
+    }
+
+    public Set<GNSSType> getGnssType() {
+        return this.gnssType;
     }
 
     public enum Code {

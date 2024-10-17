@@ -64,7 +64,7 @@ function stopWatchdog {
     fi
 }
 
-# Pre-install script
+# Post-install script
 function postInstall {
     mkdir -p ${INSTALL_DIR} >> ${LOG} 2>&1
     unzip /tmp/kura_*.zip -d ${INSTALL_DIR} >> ${LOG} 2>&1

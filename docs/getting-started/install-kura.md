@@ -39,23 +39,29 @@ Eclipse Kura's Generic profile incorporates an adaptive Heap Memory allocation s
 
 ### Initial network configuration
 
-During the installation of a generic profile with network management support, the initial network configuration will be generated dynamically using the rules described below:
+During the installation of Eclipse Kura with network management support, the initial network configuration will be generated dynamically. The existing wired and wireless network interface names are detected and sorted in ascending lexicographic order at the installation.
 
-- The existing wired and wireless Ethernet network interface names are sorted in ascending lexicographic order.
-- The first wired Ethernet interface in the list will be configured as follows:
-    - **Status**: `Enabled for WAN`
-    - **Configure**: `Using DHCP`
+If only one ethernet interface is detected (e.g. eth0), it will be configured as follows:
 
-- The first wireless LAN interface will be configured as follows:
-    - **Status**: `Enabled for LAN`
-    - **Configure**: `Manually`
-    - **IP address**: `172.16.1.1`
-    - **Passphrase**: `testKEYS`
-    - **DHCP & NAT**: `enabled`
+| Interface | Configuration |
+|-----------|---------------|
+| Ethernet interface (e.g. eth0) | - **Status**: `Enabled for WAN`<br>- **Configure**: `Using DHCP`|
 
-- All other network interfaces will be disabled.
+If multiple ethernet interfaces are detected, instead, the first two interfaces will be configured as presented in the table below. The other ethernet interfaces will be disabled.
 
-For example, if the system contains the following interfaces: `wlp2s0`, `wlp3s0`, `enp3s0`, `eno1`, `ens2`; then `eno1` will be enabled for WAN in DHCP client mode, `wlp2s0` will be configured as an AP, and all other network interfaces will be disabled.
+| Interface | Configuration |
+|-----------|---------------|
+| First Ethernet interface (e.g. eth0) | - **Status**: `Enabled for LAN`<br>- **Configure**: `Manually`<br>- **IP address**: `172.16.0.1`<br>- **Router Mode**: DHCP and NAT|
+| Second Ethernet interface (e.g. eth1) | - **Status**: `Enabled for WAN`<br>- **Configure**: `Using DHCP`|
+
+Finally, if a wireless interface (e.g. wlan0) is detected, it will configured as shown below. The other wireless interfaces will be disabled.
+
+| Interface | Configuration |
+|-----------|---------------|
+| Wireless interface (e.g. wlan0) | - **Status**: `Enabled for LAN`<br>- **Configure**: `Manually`<br>- **IP address**: `172.16.1.1`<br>- **Passphrase**: `testKEYS`<br>- **Router Mode**: DHCP and NAT |
+
+For example, if the system contains the following interfaces: `wlp2s0`, `wlp3s0`, `enp3s0`, `eno1`, `ens2`; then `eno1` will be
+enabled for LAN with a DHCP server, `enp3s0` will be enabled for WAN in DHCP client mode, `wlp2s0` will be configured as an AP, and all other network interfaces will be disabled.
 
 !!! warning
     On systems that do not use systemd's predictable interface naming scheme (see [Freedesktop reference](https://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames/)) the primary network interface name might change whenever a re-enumeration is triggered (for example, after a reboot or after plugging in an external network adapter).
@@ -66,11 +72,13 @@ For example, if the system contains the following interfaces: `wlp2s0`, `wlp3s0`
 
 ### Initial firewall configuration
 
-The initial firewall configuration will be as shown in the screenshot below.
+Similarly to the initial network configuration, the initial firewall setup is adapted based on the network interface detected on the system. In case of multiple ethernet and wireless interfaces, the configuration will be as shown in the screenshot below.
 
 ![](./images/firewall-generic.png)
 
-Please note that installing a Kura generic profile with network configuration support will replace the current network and firewall configuration with the one shown above.
+If the wireless interface is not present, the firewall entries for the `wlan0` are dropped.
+
+Please note that installing Eclipse Kura with network configuration support will replace the current network and firewall configuration with the one shown above.
 
 ### Other Kura services
 

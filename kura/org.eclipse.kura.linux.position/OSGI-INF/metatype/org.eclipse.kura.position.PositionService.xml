@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -97,6 +97,24 @@
        		required="false"
        		default="0"
        		description="Static altitude value in meters"/>
+       		
+       	<AD id="gnss.type" 
+            name="GNSS Type" 
+            type="String"
+            cardinality="0"
+            required="false"
+            default="Unknown"
+            description="Static system used to retrieve the static position information.">
+            
+            <Option label="Unknown" value="Unknown" />
+            <Option label="Other" value="Other" />
+            <Option label="Beidou" value="Beidou" />
+            <Option label="Galileo" value="Galileo" />
+            <Option label="Glonass" value="Glonass" />
+            <Option label="Gps" value="Gps" />
+            <Option label="IRNSS" value="IRNSS" />
+            <Option label="QZSS" value="QZSS" />
+        </AD>
         
         <AD id="port"
             name="port"

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -560,6 +560,89 @@ public class FilesystemKeystoreServiceImplTest {
 
         List<KeyManager> keyManagers = keystoreService.getKeyManagers(KeyManagerFactory.getDefaultAlgorithm());
         assertNotNull(keyManagers);
+    }
+
+    @Test
+    public void testGetKeyManagersPKIXSunJSSE() throws GeneralSecurityException, IOException, KuraException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+
+        List<KeyManager> keyManagers = keystoreService.getKeyManagers("PKIX", "SunJSSE");
+        assertNotNull(keyManagers);
+    }
+
+    @Test(expected = KuraException.class)
+    public void testGetKeyManagersNonExistingProvider() throws GeneralSecurityException, IOException, KuraException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+
+        keystoreService.getKeyManagers("PKIX", "nonexisting");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetKeyManagersWithProvideNullAlgorithm()
+            throws GeneralSecurityException, IOException, KuraException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+
+        keystoreService.getKeyManagers(null, "SunJSSE");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetKeyManagersWithProvideNullProvider()
+            throws GeneralSecurityException, IOException, KuraException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+
+        keystoreService.getKeyManagers("PKIX", null);
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -37,13 +37,15 @@ Once defined the Channels in an Asset, a simple Java application that leverages 
 - **enabled**: each channel can be separately enabled using this flag.
 - **name**: unique user-friendly name for a channel
 - **type**: represents the type of operation supported. Possible values are: _READ_, _WRITE_, _READ/WRITE_
-- **value.type**: represents the data type that will be used when creating the Wire Envelope for the connected components.
-
+- **value.type**: represents the data type that will be used when creating the Wire Envelope for the connected components and the output value for _READ_ channel.
 - **scale**: an optional scaling factor to be applied only to the numeric values retrieved from the field. It is parsed as a double. See below for more details.
 - **offset**: an optional offset value that will be added only to the numeric values retrieved from the field. It is parsed as a double. See below for more details.
 - **scaleoffset.type**: Allows to customise the way scale and offset is applied. See below for more details.
 - **unit**: an optional string value that will be added to the asset channel read to represent the unit of measure associated to that specific channel.
 - **listen**: if supported by the associated driver, allows to receive notifications by the driver on events. This flag currently has effect only inside Kura Wires.
+
+For the _READ_ and _READ/WRITE_ channels, the Asset typically asks the driver to provide a value based on the **value.type**.
+If the **scaleoffset.type** is _LONG_ or _DOUBLE_, the type requested will be one of these and the final value (after the scale and offset operation) will be transformed into the data type expected by **value.type**.
 
 ### Arithmetic with scale and offset
 The Asset supports applying a scale and offset to the values obtained by the attached Driver during read operations and to the values received in listen mode.
@@ -64,7 +66,7 @@ The values of the **scale** and **offset** parameters are parsed from channel co
 
 The **mode** can be selected in the following way:
 
-- If the **scaleoffset.type** is set to `DOUBLE` the corrisponding **mode** will be used.
+- If the **scaleoffset.type** is set to `DOUBLE` or `LONG` the corrisponding **mode** will be used. The largest representable `LONG` is 2^53
 - If the **scaleoffset.type** value is `DEFINED_BY_VALUE_TYPE` the operation **mode** is determinated by **value.type**.
 
 Example of `DOUBLE` **mode**:

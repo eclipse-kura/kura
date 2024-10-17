@@ -440,7 +440,7 @@ public class NMEAParser {
         return this.longitudeHemisphere;
     }
 
-    public Set<GNSSType> getGnssType() {
+    public Set<GNSSType> getGnssTypes() {
         return this.gnssType;
     }
 

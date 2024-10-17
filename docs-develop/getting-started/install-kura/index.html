@@ -4520,7 +4520,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>The Eclipse Kura&trade;'s installer incorporates an adaptive Heap Memory allocation system during installation. The allocation follows a formula based on your gateway's available memory. If your gateway has less than 1024MB of RAM, Kura will set -Xms and -Xmx to 256MB. For gateways with more than 1024MB, one quarter of the total RAM will be assigned to -Xms and -Xmx.</p>
 <h3 id="initial-network-configuration">Initial network configuration</h3>
 <p>During the installation of Eclipse Kura with network management support, the initial network configuration will be generated dynamically. The existing wired and wireless network interface names are detected and sorted in ascending lexicographic order at the installation.</p>
-<p>If only one ethernet interface is detected (e.g. eth0), it will be configured as follows:</p>
+<p>If only one ethernet interface is detected (e.g. <code>eth0</code>), it will be configured as follows:</p>
 <table>
 <thead>
 <tr>
@@ -4530,7 +4530,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </thead>
 <tbody>
 <tr>
-<td>Ethernet interface (e.g. eth0)</td>
+<td>Ethernet interface (e.g. <code>eth0</code>)</td>
 <td>- <strong>Status</strong>: <code>Enabled for WAN</code><br>- <strong>Configure</strong>: <code>Using DHCP</code></td>
 </tr>
 </tbody>
@@ -4545,16 +4545,16 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </thead>
 <tbody>
 <tr>
-<td>First Ethernet interface (e.g. eth0)</td>
-<td>- <strong>Status</strong>: <code>Enabled for LAN</code><br>- <strong>Configure</strong>: <code>Manually</code><br>- <strong>IP address</strong>: <code>172.16.0.1</code><br>- <strong>Router Mode</strong>: DHCP and NAT</td>
+<td>First Ethernet interface (e.g. <code>eth0</code>)</td>
+<td>- <strong>Status</strong>: <code>Enabled for LAN</code><br>- <strong>Configure</strong>: <code>Manually</code><br>- <strong>IP address</strong>: <code>172.16.0.1</code><br>- <strong>Router Mode</strong>: <code>DHCP and NAT</code></td>
 </tr>
 <tr>
-<td>Second Ethernet interface (e.g. eth1)</td>
+<td>Second Ethernet interface (e.g. <code>eth1</code>)</td>
 <td>- <strong>Status</strong>: <code>Enabled for WAN</code><br>- <strong>Configure</strong>: <code>Using DHCP</code></td>
 </tr>
 </tbody>
 </table>
-<p>Finally, if a wireless interface (e.g. wlan0) is detected, it will configured as shown below. The other wireless interfaces will be disabled.</p>
+<p>Finally, if a wireless interface (e.g. <code>wlan0</code>) is detected, it will configured as shown below. The other wireless interfaces will be disabled.</p>
 <table>
 <thead>
 <tr>
@@ -4564,8 +4564,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </thead>
 <tbody>
 <tr>
-<td>Wireless interface (e.g. wlan0)</td>
-<td>- <strong>Status</strong>: <code>Enabled for LAN</code><br>- <strong>Configure</strong>: <code>Manually</code><br>- <strong>IP address</strong>: <code>172.16.1.1</code><br>- <strong>Passphrase</strong>: <code>testKEYS</code><br>- <strong>Router Mode</strong>: DHCP and NAT</td>
+<td>Wireless interface (e.g. <code>wlan0</code>)</td>
+<td>- <strong>Status</strong>: <code>Enabled for LAN</code><br>- <strong>Configure</strong>: <code>Manually</code><br>- <strong>IP address</strong>: <code>172.16.1.1</code><br>- <strong>Passphrase</strong>: <code>testKEYS</code><br>- <strong>Router Mode</strong>: <code>DHCP and NAT</code></td>
 </tr>
 </tbody>
 </table>

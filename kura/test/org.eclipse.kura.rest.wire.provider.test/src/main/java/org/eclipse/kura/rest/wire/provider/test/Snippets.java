@@ -104,6 +104,10 @@ public class Snippets {
             + "                {\n" //
             + "                    \"label\": \"DOUBLE\",\n" //
             + "                    \"value\": \"DOUBLE\"\n" //
+            + "                },\n" //
+            + "                {\n" //
+            + "                    \"label\": \"LONG\",\n" //
+            + "                    \"value\": \"LONG\"\n" //
             + "                }\n" //
             + "            ],\n" //
             + "            \"name\": \"scaleoffset.type\",\n" //

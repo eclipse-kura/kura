@@ -40,6 +40,7 @@ import org.eclipse.kura.channel.Channel;
 import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.ChannelType;
+import org.eclipse.kura.channel.ScaleOffsetType;
 import org.eclipse.kura.channel.listener.ChannelListener;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -61,6 +62,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class AssetTest {
 
+    private static final String UNREGISTER_CHANNEL_NAME = "unregister";
+
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(AssetTest.class);
 
@@ -74,23 +77,12 @@ public final class AssetTest {
     /** A latch to be initialized with the no of OSGi dependencies it needs */
     private static CountDownLatch dependencyLatch = new CountDownLatch(1);
 
-    /** The Device Configuration instance. */
-    public AssetConfiguration configuration;
-
-    /** The properties to be parsed as Device Configuration. */
-    public Map<String, Object> properties;
-
-    /** The Channel Configuration */
-    public Map<String, Object> sampleChannelConfig;
-
     /**
      * JUnit Callback to be triggered before creating the instance of this suite
      *
-     * @throws Exception
-     *             if the dependent services are null
      */
     @BeforeClass
-    public static void setUpClass() throws Exception {
+    public static void setUpClass() {
         // Wait for OSGi dependencies
         logger.info("Setting Up The Testcase....");
         try {
@@ -101,57 +93,79 @@ public final class AssetTest {
             fail("OSGi dependencies unfulfilled");
         }
 
-        // asset = new BaseAsset();
-
-        // initt();
     }
 
     @Before
     public void init() throws InterruptedException {
         // may need to wait for asset to be registered and injected
-        if (asset == null) {
+        while (asset == null) {
             synchronized (assetLock) {
                 assetLock.wait(3000);
             }
 
         }
 
-        initt();
+        resetChannels();
     }
 
     /**
      * Initializes asset data
      */
-    private static void initt() {
+    private static void resetChannels() {
         final Map<String, Object> channels = CollectionUtil.newHashMap();
+
         channels.put("kura.service.pid", "AssetTest");
+
         channels.put(AssetConstants.ASSET_DESC_PROP.value(), "sample.asset.desc");
         channels.put(AssetConstants.ASSET_DRIVER_PROP.value(), "org.eclipse.kura.asset.stub.driver");
         channels.put("1.CH#+name", "1.CH");
         channels.put("1.CH#+type", "READ");
-        channels.put("1.CH#+value.type", "INTEGER");
+        channels.put("1.CH#+value.type", DataType.INTEGER.name());
         channels.put("1.CH#+scale", "1.0");
         channels.put("1.CH#+offset", "0.0");
         channels.put("1.CH#DRIVER.modbus.register", "sample.channel1.modbus.register");
         channels.put("1.CH#DRIVER.modbus.FC", "sample.channel1.modbus.FC");
+
         channels.put("2.CH#+name", "2.CH");
         channels.put("2.CH#+enabled", "true");
         channels.put("2.CH#+type", "WRITE");
-        channels.put("2.CH#+value.type", "BOOLEAN");
+        channels.put("2.CH#+value.type", DataType.BOOLEAN.name());
         channels.put("2.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
         channels.put("2.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
+
         channels.put("3.CH#+name", "3.CH");
         channels.put("3.CH#+type", "READ");
         channels.put("3.CH#+enabled", "false");
-        channels.put("3.CH#+value.type", "INTEGER");
+        channels.put("3.CH#+value.type", DataType.INTEGER.name());
         channels.put("3.CH#DRIVER.modbus.register", "sample.channel1.modbus.register");
         channels.put("3.CH#DRIVER.modbus.FC", "sample.channel1.modbus.FC");
-        channels.put("4.CH#+name", "3.CH");
+
+        channels.put("4.CH#+name", "4.CH");
         channels.put("4.CH#+enabled", "false");
         channels.put("4.CH#+type", "WRITE");
-        channels.put("4.CH#+value.type", "BOOLEAN");
+        channels.put("4.CH#+value.type", DataType.BOOLEAN.name());
         channels.put("4.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
         channels.put("4.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
+
+        channels.put("5.CH#+name", "5.CH");
+        channels.put("5.CH#+enabled", "true");
+        channels.put("5.CH#+type", "READ");
+        channels.put("5.CH#+value.type", DataType.INTEGER.name());
+        channels.put("5.CH#+scaleoffset.type", ScaleOffsetType.DOUBLE.name());
+        channels.put("5.CH#+scale", "3.3");
+        channels.put("5.CH#+offset", "3.2");
+        channels.put("5.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
+        channels.put("5.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
+
+        channels.put("6.CH#+name", "6.CH");
+        channels.put("6.CH#+enabled", "true");
+        channels.put("6.CH#+type", "READ");
+        channels.put("6.CH#+value.type", DataType.INTEGER.name());
+        channels.put("6.CH#+scaleoffset.type", ScaleOffsetType.DEFINED_BY_VALUE_TYPE.name());
+        channels.put("6.CH#+scale", "3");
+        channels.put("6.CH#+offset", "4");
+        channels.put("6.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
+        channels.put("6.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
 
         ((BaseAsset) asset).updated(channels);
         sync(asset);
@@ -187,15 +201,15 @@ public final class AssetTest {
         final AssetConfiguration assetConfiguration = asset.getAssetConfiguration();
         assertNotNull(assetConfiguration);
         final Map<String, Channel> channels = assetConfiguration.getAssetChannels();
-        assertEquals(4, channels.size());
+        assertEquals(6, channels.size());
 
         final Channel channel1 = channels.get("1.CH");
         assertTrue(channel1.isEnabled());
         assertEquals("1.CH", channel1.getName());
         assertEquals(ChannelType.READ, channel1.getType());
         assertEquals(DataType.INTEGER, channel1.getValueType());
-        assertEquals(1.0d, channel1.getValueScale(), 0.0);
-        assertEquals(0.0d, channel1.getValueOffset(), 0.0);
+        assertEquals(1.0d, channel1.getValueScaleAsNumber().doubleValue(), 0.0);
+        assertEquals(0.0d, channel1.getValueOffsetAsNumber().doubleValue(), 0.0);
         assertEquals("sample.channel1.modbus.register", channel1.getConfiguration().get("DRIVER.modbus.register"));
         assertEquals("sample.channel1.modbus.FC", channel1.getConfiguration().get("DRIVER.modbus.FC"));
 
@@ -240,11 +254,8 @@ public final class AssetTest {
         final ArrayList<Boolean> attachSequence = new ArrayList<>();
 
         final ChannelListener listener = event -> {
-            if ("unregister".equals(event.getChannelRecord().getChannelName())) {
-                attachSequence.add(false);
-            } else {
-                attachSequence.add(true);
-            }
+            boolean toBeAttached = !UNREGISTER_CHANNEL_NAME.equals(event.getChannelRecord().getChannelName());
+            attachSequence.add(toBeAttached);
         };
 
         asset.registerChannelListener("1.CH", listener);
@@ -272,11 +283,8 @@ public final class AssetTest {
         final ArrayList<Boolean> attachSequence = new ArrayList<>();
 
         final ChannelListener listener = event -> {
-            if ("unregister".equals(event.getChannelRecord().getChannelName())) {
-                attachSequence.add(false);
-            } else {
-                attachSequence.add(true);
-            }
+            boolean toBeAttached = !UNREGISTER_CHANNEL_NAME.equals(event.getChannelRecord().getChannelName());
+            attachSequence.add(toBeAttached);
         };
 
         ((BaseAsset) asset).unsetDriver();
@@ -305,11 +313,8 @@ public final class AssetTest {
         final ArrayList<Boolean> attachSequence = new ArrayList<>();
 
         final ChannelListener listener = event -> {
-            if ("unregister".equals(event.getChannelRecord().getChannelName())) {
-                attachSequence.add(false);
-            } else {
-                attachSequence.add(true);
-            }
+            boolean toBeAttached = !UNREGISTER_CHANNEL_NAME.equals(event.getChannelRecord().getChannelName());
+            attachSequence.add(toBeAttached);
         };
 
         asset.registerChannelListener("1.CH", listener);
@@ -343,7 +348,7 @@ public final class AssetTest {
             if (cnt == 0) {
                 assertEquals(1, event.getChannelRecord().getValue().getValue());
             } else if (cnt == 1) {
-                assertEquals("unregister", event.getChannelRecord().getChannelName());
+                assertEquals(UNREGISTER_CHANNEL_NAME, event.getChannelRecord().getChannelName());
                 assertEquals(DataType.BOOLEAN, event.getChannelRecord().getValueType());
             } else {
                 fail("Unexpected invocation.");
@@ -434,8 +439,8 @@ public final class AssetTest {
         final List<ChannelRecord> records = asset.readAllChannels();
 
         assertNotNull(records);
-        assertEquals(1, records.size());
-        assertEquals(1, records.get(0).getValue().getValue());
+        assertEquals(3, records.size());
+        assertEquals(7, records.get(0).getValue().getValue());
     }
 
     /**
@@ -486,7 +491,7 @@ public final class AssetTest {
 
         List<AD> ads = ocd.getAD();
         assertNotNull(ads);
-        assertEquals(38, ads.size()); // description, driver, 32 from BaseChannelDescriptor and StubChannelDescriptor
+        assertEquals(56, ads.size()); // description, driver, 54 from BaseChannelDescriptor and StubChannelDescriptor
 
         assertEquals("asset.desc", ads.get(0).getId());
         assertEquals("driver.pid", ads.get(1).getId());
@@ -542,11 +547,8 @@ public final class AssetTest {
         final ArrayList<Boolean> attachSequence = new ArrayList<>();
 
         final ChannelListener listener = event -> {
-            if ("unregister".equals(event.getChannelRecord().getChannelName())) {
-                attachSequence.add(false);
-            } else {
-                attachSequence.add(true);
-            }
+            boolean toBeAttached = !UNREGISTER_CHANNEL_NAME.equals(event.getChannelRecord().getChannelName());
+            attachSequence.add(toBeAttached);
         };
 
         asset.registerChannelListener("3.CH", listener);
@@ -578,11 +580,8 @@ public final class AssetTest {
         sync(asset);
 
         final ChannelListener listener = event -> {
-            if ("unregister".equals(event.getChannelRecord().getChannelName())) {
-                attachSequence.add(false);
-            } else {
-                attachSequence.add(true);
-            }
+            boolean toBeAttached = !UNREGISTER_CHANNEL_NAME.equals(event.getChannelRecord().getChannelName());
+            attachSequence.add(toBeAttached);
         };
 
         asset.registerChannelListener("3.CH", listener);
@@ -602,7 +601,6 @@ public final class AssetTest {
 
         assertEquals(Arrays.asList(true, false), attachSequence);
 
-        initt();
     }
 
     /**
@@ -611,7 +609,7 @@ public final class AssetTest {
      */
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
-    public void testCompleteConfigWithDefaults() throws KuraException {
+    public void testCompleteConfigWithDefaults() {
 
         final Map<String, Object> channels = CollectionUtil.newHashMap();
         channels.put("kura.service.pid", "AssetTest");
@@ -636,7 +634,23 @@ public final class AssetTest {
         assertEquals("5",
                 asset.getAssetConfiguration().getAssetChannels().get("3.CH").getConfiguration().get("unit.id"));
 
-        initt();
+    }
+
+    @Test
+    public void testChannelRecordValueTypeWithDoubleScaleOffset() throws KuraException {
+
+        List<ChannelRecord> records = asset.read(new HashSet<>(Arrays.asList("5.CH")));
+
+        assertEquals(DataType.DOUBLE, records.get(0).getValueType());
+
+    }
+
+    @Test
+    public void testChannelRecordValueTypeWithDefiniedByValueScaleOffset() throws KuraException {
+
+        List<ChannelRecord> records = asset.read(new HashSet<>(Arrays.asList("6.CH")));
+
+        assertEquals(DataType.INTEGER, records.get(0).getValueType());
     }
 
     public void bindAsset(Asset asset) {

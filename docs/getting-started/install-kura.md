@@ -38,24 +38,24 @@ The Eclipse Kura&trade;'s installer incorporates an adaptive Heap Memory allocat
 
 During the installation of Eclipse Kura with network management support, the initial network configuration will be generated dynamically. The existing wired and wireless network interface names are detected and sorted in ascending lexicographic order at the installation.
 
-If only one ethernet interface is detected (i.e. eth0), it will be configured as follows:
+If only one ethernet interface is detected (e.g. eth0), it will be configured as follows:
 
 | Interface | Configuration |
 |-----------|---------------|
-| Ethernet interface (i.e. eth0) | - **Status**: `Enabled for WAN`<br>- **Configure**: `Using DHCP`|
+| Ethernet interface (e.g. eth0) | - **Status**: `Enabled for WAN`<br>- **Configure**: `Using DHCP`|
 
 If multiple ethernet interfaces are detected, instead, the first two interfaces will be configured as presented in the table below. The other ethernet interfaces will be disabled.
 
 | Interface | Configuration |
 |-----------|---------------|
-| First Ethernet interface (i.e. eth0) | - **Status**: `Enabled for LAN`<br>- **Configure**: `Manually`<br>- **IP address**: `172.16.0.1`<br>- **Router Mode**: DHCP and NAT|
-| Second Ethernet interface (i.e. eth1) | - **Status**: `Enabled for WAN`<br>- **Configure**: `Using DHCP`|
+| First Ethernet interface (e.g. eth0) | - **Status**: `Enabled for LAN`<br>- **Configure**: `Manually`<br>- **IP address**: `172.16.0.1`<br>- **Router Mode**: DHCP and NAT|
+| Second Ethernet interface (e.g. eth1) | - **Status**: `Enabled for WAN`<br>- **Configure**: `Using DHCP`|
 
-Finally, if a wireless interface (i.e. wlan0) is detected, it will configured as shown below. The other wireless interfaces will be disabled.
+Finally, if a wireless interface (e.g. wlan0) is detected, it will configured as shown below. The other wireless interfaces will be disabled.
 
 | Interface | Configuration |
 |-----------|---------------|
-| Wireless interface (i.e. wlan0) | - **Status**: `Enabled for LAN`<br>- **Configure**: `Manually`<br>- **IP address**: `172.16.1.1`<br>- **Passphrase**: `testKEYS`<br>- **Router Mode**: DHCP and NAT |
+| Wireless interface (e.g. wlan0) | - **Status**: `Enabled for LAN`<br>- **Configure**: `Manually`<br>- **IP address**: `172.16.1.1`<br>- **Passphrase**: `testKEYS`<br>- **Router Mode**: DHCP and NAT |
 
 For example, if the system contains the following interfaces: `wlp2s0`, `wlp3s0`, `enp3s0`, `eno1`, `ens2`; then `eno1` will be
 enabled for LAN with a DHCP server, `enp3s0` will be enabled for WAN in DHCP client mode, `wlp2s0` will be configured as an AP, and all other network interfaces will be disabled.

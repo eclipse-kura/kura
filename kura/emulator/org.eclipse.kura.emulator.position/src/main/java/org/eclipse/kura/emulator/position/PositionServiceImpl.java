@@ -246,7 +246,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
     }
 
     @Override
-    public Set<GNSSType> getGnssType() {
+    public Set<GNSSType> getGnssTypes() {
         return new HashSet<>(Arrays.asList(GNSSType.GPS));
     }
 }

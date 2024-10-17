@@ -171,7 +171,7 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     }
 
     @Override
-    public Set<GNSSType> getGnssType() {
+    public Set<GNSSType> getGnssTypes() {
         return this.gnssType.get();
     }
 

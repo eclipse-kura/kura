@@ -242,7 +242,7 @@ public class PositionServiceTest {
         assertEquals(300.0d, position.getAltitude().getValue(), EPS);
 
         assertNotNull(fixture.ps.getDateTime());
-        assertEquals(new HashSet<>(Arrays.asList(GNSSType.GPS)), fixture.ps.getGnssType());
+        assertEquals(new HashSet<>(Arrays.asList(GNSSType.GPS)), fixture.ps.getGnssTypes());
 
         final NmeaPosition nmeaPosition = fixture.ps.getNmeaPosition();
 
@@ -452,7 +452,7 @@ public class PositionServiceTest {
         assertEquals(40.0d, position.getAltitude().getValue(), EPS);
 
         assertNotNull(fixture.ps.getDateTime());
-        assertEquals(new HashSet<>(Arrays.asList(GNSSType.GLONASS)), fixture.ps.getGnssType());
+        assertEquals(new HashSet<>(Arrays.asList(GNSSType.GLONASS)), fixture.ps.getGnssTypes());
 
         verify(fixture.eventAdmin, times(1)).postEvent(argThat(isPositionLockedEvent));
     }
@@ -533,7 +533,7 @@ public class PositionServiceTest {
         final String date = fixture.ps.getNmeaDate();
         final String time = fixture.ps.getNmeaTime();
         final String lastSentence = fixture.ps.getLastSentence();
-        final Set<GNSSType> gnssType = fixture.ps.getGnssType();
+        final Set<GNSSType> gnssTypes = fixture.ps.getGnssTypes();
 
         // from GGA
         assertEquals(1, nmeaPosition.getFixQuality());
@@ -564,7 +564,7 @@ public class PositionServiceTest {
 
         assertEquals("$GNVTG,,,,,,,12.34,,,,*4a\n", lastSentence);
 
-        assertEquals(new HashSet<>(Arrays.asList(GNSSType.GPS, GNSSType.GLONASS)), gnssType);
+        assertEquals(new HashSet<>(Arrays.asList(GNSSType.GPS, GNSSType.GLONASS)), gnssTypes);
 
         fixture.ps.deactivate();
 

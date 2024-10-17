@@ -83,8 +83,8 @@ public class GpsDevice {
         return this.nmeaParser.getTimeNmea();
     }
 
-    public synchronized Set<GNSSType> getGnssType() {
-        return this.nmeaParser.getGnssType();
+    public synchronized Set<GNSSType> getGnssTypes() {
+        return this.nmeaParser.getGnssTypes();
     }
 
     public void disconnect() {

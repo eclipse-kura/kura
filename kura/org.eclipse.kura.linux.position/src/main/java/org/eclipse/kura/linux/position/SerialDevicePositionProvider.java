@@ -230,8 +230,8 @@ public class SerialDevicePositionProvider implements PositionProvider {
     }
 
     @Override
-    public Set<GNSSType> getGnssType() {
-        return this.gpsDevice.getGnssType();
+    public Set<GNSSType> getGnssTypes() {
+        return this.gpsDevice.getGnssTypes();
     }
 
     protected GpsDevice getGpsDevice() {

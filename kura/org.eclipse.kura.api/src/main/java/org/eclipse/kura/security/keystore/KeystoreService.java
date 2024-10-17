@@ -105,7 +105,7 @@ public interface KeystoreService {
     public List<KeyManager> getKeyManagers(String algorithm) throws KuraException;
 
     /**
-     * Returns one key manager for each type of key material using the Java Security API Provider with the given name.
+     * Returns one key manager for each type of key material using the Java Security API Provider matching the given name.
      *
      * @param algorithm
      * @param provider

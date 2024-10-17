@@ -69,7 +69,7 @@ enabled for LAN with a DHCP server, `enp3s0` will be enabled for WAN in DHCP cli
 
 ### Initial firewall configuration
 
-As done for the initial network configuration, the initial firewall setup is adjusted based on the network interface detected on the system. In the case of multiple ethernet and wireless interfaces, the configuration will be as shown in the screenshot below.
+Similarly to the initial network configuration, the initial firewall setup is adapted based on the network interface detected on the system. In case of multiple ethernet and wireless interfaces, the configuration will be as shown in the screenshot below.
 
 ![](./images/firewall-generic.png)
 

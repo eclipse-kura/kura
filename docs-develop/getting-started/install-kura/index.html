@@ -4519,31 +4519,58 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h3 id="java-heap-memory-assignment">Java Heap Memory Assignment</h3>
 <p>The Eclipse Kura&trade;'s installer incorporates an adaptive Heap Memory allocation system during installation. The allocation follows a formula based on your gateway's available memory. If your gateway has less than 1024MB of RAM, Kura will set -Xms and -Xmx to 256MB. For gateways with more than 1024MB, one quarter of the total RAM will be assigned to -Xms and -Xmx.</p>
 <h3 id="initial-network-configuration">Initial network configuration</h3>
-<p>During the installation of a profile with network management support, the initial network configuration will be generated dynamically using the rules described below:</p>
-<ul>
-<li>The existing wired and wireless Ethernet network interface names are sorted in ascending lexicographic order.</li>
-<li>
-<p>The first wired Ethernet interface in the list will be configured as follows:</p>
-<ul>
-<li><strong>Status</strong>: <code>Enabled for WAN</code></li>
-<li><strong>Configure</strong>: <code>Using DHCP</code></li>
-</ul>
-</li>
-<li>
-<p>The first wireless LAN interface will be configured as follows:</p>
-<ul>
-<li><strong>Status</strong>: <code>Enabled for LAN</code></li>
-<li><strong>Configure</strong>: <code>Manually</code></li>
-<li><strong>IP address</strong>: <code>172.16.1.1</code></li>
-<li><strong>Passphrase</strong>: <code>testKEYS</code></li>
-<li><strong>DHCP &amp; NAT</strong>: <code>enabled</code></li>
-</ul>
-</li>
-<li>
-<p>All other network interfaces will be disabled.</p>
-</li>
-</ul>
-<p>For example, if the system contains the following interfaces: <code>wlp2s0</code>, <code>wlp3s0</code>, <code>enp3s0</code>, <code>eno1</code>, <code>ens2</code>; then <code>eno1</code> will be enabled for WAN in DHCP client mode, <code>wlp2s0</code> will be configured as an AP, and all other network interfaces will be disabled.</p>
+<p>During the installation of Eclipse Kura with network management support, the initial network configuration will be generated dynamically. The existing wired and wireless network interface names are detected and sorted in ascending lexicographic order at the installation.</p>
+<p>If only one ethernet interface is detected (e.g. eth0), it will be configured as follows:</p>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Configuration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ethernet interface (e.g. eth0)</td>
+<td>- <strong>Status</strong>: <code>Enabled for WAN</code><br>- <strong>Configure</strong>: <code>Using DHCP</code></td>
+</tr>
+</tbody>
+</table>
+<p>If multiple ethernet interfaces are detected, instead, the first two interfaces will be configured as presented in the table below. The other ethernet interfaces will be disabled.</p>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Configuration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>First Ethernet interface (e.g. eth0)</td>
+<td>- <strong>Status</strong>: <code>Enabled for LAN</code><br>- <strong>Configure</strong>: <code>Manually</code><br>- <strong>IP address</strong>: <code>172.16.0.1</code><br>- <strong>Router Mode</strong>: DHCP and NAT</td>
+</tr>
+<tr>
+<td>Second Ethernet interface (e.g. eth1)</td>
+<td>- <strong>Status</strong>: <code>Enabled for WAN</code><br>- <strong>Configure</strong>: <code>Using DHCP</code></td>
+</tr>
+</tbody>
+</table>
+<p>Finally, if a wireless interface (e.g. wlan0) is detected, it will configured as shown below. The other wireless interfaces will be disabled.</p>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Configuration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wireless interface (e.g. wlan0)</td>
+<td>- <strong>Status</strong>: <code>Enabled for LAN</code><br>- <strong>Configure</strong>: <code>Manually</code><br>- <strong>IP address</strong>: <code>172.16.1.1</code><br>- <strong>Passphrase</strong>: <code>testKEYS</code><br>- <strong>Router Mode</strong>: DHCP and NAT</td>
+</tr>
+</tbody>
+</table>
+<p>For example, if the system contains the following interfaces: <code>wlp2s0</code>, <code>wlp3s0</code>, <code>enp3s0</code>, <code>eno1</code>, <code>ens2</code>; then <code>eno1</code> will be
+enabled for LAN with a DHCP server, <code>enp3s0</code> will be enabled for WAN in DHCP client mode, <code>wlp2s0</code> will be configured as an AP, and all other network interfaces will be disabled.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>On systems that do not use systemd's predictable interface naming scheme (see <a href="https://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames/">Freedesktop reference</a>) the primary network interface name might change whenever a re-enumeration is triggered (for example, after a reboot or after plugging in an external network adapter).</p>
@@ -4551,8 +4578,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>Systemd consistent network interface naming assigns the name prefix based on the physical location of the device, see <a href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/networking_guide/sec-understanding_the_predictable_network_interface_device_names">Understanding the Predictable Network Interface Device Names</a> for further reference.</p>
 </div>
 <h3 id="initial-firewall-configuration">Initial firewall configuration</h3>
-<p>The initial firewall configuration will be as shown in the screenshot below.</p>
+<p>Similarly to the initial network configuration, the initial firewall setup is adapted based on the network interface detected on the system. In case of multiple ethernet and wireless interfaces, the configuration will be as shown in the screenshot below.</p>
 <p><img alt="" src="../images/firewall-generic.png" /></p>
+<p>If the wireless interface is not present, the firewall entries for the <code>wlan0</code> are dropped.</p>
 <p>Please note that installing Eclipse Kura with network configuration support will replace the current network and firewall configuration with the one shown above.</p>
 <h3 id="other-kura-services">Other Kura services</h3>
 <p>Eclipse Kura&trade; do not contain gateway specific customizations, this implies that the values of some configuration parameters may be incorrect and/or missing and must be manually filled after installation. For example the user might want to:</p>

@@ -213,11 +213,11 @@ public class PositionServiceImpl
     }
 
     @Override
-    public Set<GNSSType> getGnssType() {
+    public Set<GNSSType> getGnssTypes() {
         if (this.options.isEnabled()) {
 
             if (!this.options.isStatic() && this.currentProvider != null) {
-                return this.currentProvider.getGnssType();
+                return this.currentProvider.getGnssTypes();
             } else if (this.options.isStatic()) {
                 return new HashSet<>(Arrays.asList(this.staticGnssType));
             }

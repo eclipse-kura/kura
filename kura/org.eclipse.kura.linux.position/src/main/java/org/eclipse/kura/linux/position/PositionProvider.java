@@ -46,6 +46,6 @@ public interface PositionProvider {
 
     public PositionProviderType getType();
 
-    public Set<GNSSType> getGnssType();
+    public Set<GNSSType> getGnssTypes();
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -254,6 +254,26 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
         } catch (GeneralSecurityException e) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, e,
                     "Failed to get the key managers for algorithm " + algorithm);
+        }
+    }
+
+    @Override
+    public List<KeyManager> getKeyManagers(String algorithm, String provider) throws KuraException {
+        if (isNull(algorithm)) {
+            throw new IllegalArgumentException("Algorithm cannot be null!");
+        }
+        if (isNull(provider)) {
+            throw new IllegalArgumentException("Provider cannot be null!");
+        }
+        KeystoreInstance ks = loadKeystore();
+        try {
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm, provider);
+            kmf.init(ks.getKeystore(), ks.getPassword());
+
+            return Arrays.asList(kmf.getKeyManagers());
+        } catch (GeneralSecurityException e) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, e,
+                    "Failed to get the key managers for algorithm " + algorithm + " and provider " + provider);
         }
     }
 

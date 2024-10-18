@@ -58,49 +58,29 @@
                                     <version>${org.apache.felix.deploymentadmin.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.knowhowlab</groupId>
-                                    <artifactId>org.knowhowlab.osgi.monitoradmin</artifactId>
+                                    <groupId>org.knowhowlab.osgi</groupId>
+                                    <artifactId>monitoradmin</artifactId>
                                     <version>${org.knowhowlab.osgi.monitoradmin.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.jetty</groupId>
-                                    <artifactId>jetty-http</artifactId>
-                                    <version>${org.eclipse.jetty.http.version}</version>
+                                    <groupId>org.eclipse.jetty.ee8</groupId>
+                                    <artifactId>jetty-ee8-security</artifactId>
+                                    <version>${org.eclipse.jetty.ee8.jetty-ee8-security.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.jetty</groupId>
-                                    <artifactId>jetty-continuation</artifactId>
-                                    <version>${org.eclipse.jetty.continuation.version}</version>
+                                    <groupId>org.eclipse.jetty.ee8</groupId>
+                                    <artifactId>jetty-ee8-servlet</artifactId>
+                                    <version>${org.eclipse.jetty.ee8.jetty-ee8-servlet.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.jetty</groupId>
-                                    <artifactId>jetty-io</artifactId>
-                                    <version>${org.eclipse.jetty.io.version}</version>
+                                    <groupId>org.eclipse.jetty.ee8</groupId>
+                                    <artifactId>jetty-ee8-nested</artifactId>
+                                    <version>${org.eclipse.jetty.ee8.jetty-ee8-nested.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.jetty</groupId>
-                                    <artifactId>jetty-security</artifactId>
-                                    <version>${org.eclipse.jetty.security.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.jetty</groupId>
-                                    <artifactId>jetty-server</artifactId>
-                                    <version>${org.eclipse.jetty.server.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.jetty</groupId>
-                                    <artifactId>jetty-servlet</artifactId>
-                                    <version>${org.eclipse.jetty.servlet.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.jetty</groupId>
-                                    <artifactId>jetty-util</artifactId>
-                                    <version>${org.eclipse.jetty.util.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.jetty</groupId>
-                                    <artifactId>jetty-util-ajax</artifactId>
-                                    <version>${org.eclipse.jetty.util.ajax.version}</version>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.http.service.api</artifactId>
+                                    <version>${org.eclipse.equinox.http.service.api.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.platform</groupId>
@@ -116,6 +96,11 @@
                                     <groupId>org.eclipse.platform</groupId>
                                     <artifactId>org.eclipse.equinox.wireadmin</artifactId>
                                     <version>${org.eclipse.equinox.wireadmin.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.http.whiteboard</artifactId>
+                                    <version>${org.osgi.service.http.whiteboard.version}</version>
                                 </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
@@ -183,8 +168,6 @@
 
                                         <include name="plugins/org.apache.felix*.jar" />
 
-                                        <include name="plugins/javax*.jar" />
-
                                     </patternset>
                                     <mapper type="flatten" />
                                 </unzip>
@@ -203,30 +186,25 @@
                                     tofile="${project.build.directory}/source/plugins/org.apache.felix.dependencymanager_${org.apache.felix.dependencymanager.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/org.apache.felix.deploymentadmin.jar"
                                     tofile="${project.build.directory}/source/plugins/org.apache.felix.deploymentadmin_${org.apache.felix.deploymentadmin.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/org.knowhowlab.osgi.monitoradmin.jar"
+                                <move file="${project.build.directory}/source/plugins/monitoradmin.jar"
                                     tofile="${project.build.directory}/source/plugins/org.knowhowlab.osgi.monitoradmin_${org.knowhowlab.osgi.monitoradmin.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-http.jar"
-                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.http_${org.eclipse.jetty.http.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-continuation.jar"
-                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.continuation_${org.eclipse.jetty.continuation.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-io.jar"
-                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.io_${org.eclipse.jetty.io.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-security.jar"
-                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.security_${org.eclipse.jetty.security.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-server.jar"
-                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.server_${org.eclipse.jetty.server.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-servlet.jar"
-                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.servlet_${org.eclipse.jetty.servlet.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-util.jar"
-                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.util_${org.eclipse.jetty.util.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-util-ajax.jar"
-                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.util.ajax_${org.eclipse.jetty.util.ajax.version}.jar" />
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.session_${org.eclipse.jetty.session.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-ee8-security.jar" 
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.ee8.jetty-ee8-security_${org.eclipse.jetty.ee8.jetty-ee8-security.version}.jar" />                                    
+                                <move file="${project.build.directory}/source/plugins/jetty-ee8-servlet.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.ee8.jetty-ee8-servlet_${org.eclipse.jetty.ee8.jetty-ee8-servlet.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-ee8-nested.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.ee8.jetty-ee8-nested_${org.eclipse.jetty.ee8.jetty-ee8-nested.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.io.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.io_${org.eclipse.equinox.io.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.util.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.util_${org.eclipse.equinox.util.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.http.service.api.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.http.service.api_${org.eclipse.equinox.http.service.api.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.wireadmin.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.wireadmin_${org.eclipse.equinox.wireadmin.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.osgi.service.http.whiteboard.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.osgi.service.http.whiteboard_${org.osgi.service.http.whiteboard.version}.jar" />
                             </target>
                         </configuration>
                     </execution>

@@ -34,17 +34,12 @@
         <dependency>
             <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.equinox.http.jetty</artifactId>
-            <version>3.7.400</version>
+            <version>3.9.200</version>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>9.4.53.v20231009</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>9.4.53.v20231009</version>
+            <groupId>org.eclipse.jetty.ee8</groupId>
+            <artifactId>jetty-ee8-servlet</artifactId>
+            <version>12.0.14</version>
         </dependency>
     </dependencies>
 
@@ -62,14 +57,11 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>${maven-bundle-plugin.version}</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
                         <Fragment-Host>org.eclipse.equinox.http.jetty</Fragment-Host>
-                        <Require-Capability>
-                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"
-                        </Require-Capability>
+                        <Require-Capability>osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"</Require-Capability>
                     </instructions>
                 </configuration>
             </plugin>

@@ -694,6 +694,16 @@ fi]]>
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.service.http.whiteboard_${org.osgi.service.http.whiteboard.version}.jar" />
+            <param name="start.level" value="1" />
+            <param name="start" value="s" />
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.eclipse.equinox.http.service.api_${org.eclipse.equinox.http.service.api.version}.jar" />
+            <param name="start.level" value="1" />
+            <param name="start" value="s" />
+        </antcall>
+        <antcall target="install-plugin">
             <param name="bundle.file" value="org.eclipse.osgi.services_${org.eclipse.osgi.services.version}.jar" />
             <param name="start.level" value="2" />
             <param name="start" value="s" />
@@ -759,42 +769,17 @@ fi]]>
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.jetty.continuation_${org.eclipse.jetty.continuation.version}.jar" />
+            <param name="bundle.file" value="org.eclipse.jetty.ee8.jetty-ee8-security_${org.eclipse.jetty.ee8.jetty-ee8-security.version}.jar" />
+            <param name="start.level" value="5" />
+            <param name="start" value="s" />
+        </antcall>    	
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.eclipse.jetty.ee8.jetty-ee8-servlet_${org.eclipse.jetty.ee8.jetty-ee8-servlet.version}.jar" />
             <param name="start.level" value="5" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.jetty.http_${org.eclipse.jetty.http.version}.jar" />
-            <param name="start.level" value="5" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.jetty.io_${org.eclipse.jetty.io.version}.jar" />
-            <param name="start.level" value="5" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.jetty.security_${org.eclipse.jetty.security.version}.jar" />
-            <param name="start.level" value="5" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.jetty.server_${org.eclipse.jetty.server.version}.jar" />
-            <param name="start.level" value="5" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.jetty.servlet_${org.eclipse.jetty.servlet.version}.jar" />
-            <param name="start.level" value="5" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.jetty.util_${org.eclipse.jetty.util.version}.jar" />
-            <param name="start.level" value="5" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.jetty.util.ajax_${org.eclipse.jetty.util.ajax.version}.jar" />
+            <param name="bundle.file" value="org.eclipse.jetty.ee8.jetty-ee8-nested_${org.eclipse.jetty.ee8.jetty-ee8-nested.version}.jar" />
             <param name="start.level" value="5" />
             <param name="start" value="s" />
         </antcall>

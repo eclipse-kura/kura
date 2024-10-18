@@ -22,7 +22,9 @@ public enum ScaleOffsetType {
 
     DEFINED_BY_VALUE_TYPE,
 
-    DOUBLE;
+    DOUBLE,
+
+    LONG;
 
     /**
      * Converts {@code stringScaleOffsetType}, if possible, to the related {@link ScaleOffsetType}.
@@ -41,6 +43,10 @@ public enum ScaleOffsetType {
 
         if (DOUBLE.name().equalsIgnoreCase(stringScaleOffsetType)) {
             return DOUBLE;
+        }
+
+        if (LONG.name().equalsIgnoreCase(stringScaleOffsetType)) {
+            return LONG;
         }
 
         throw new IllegalArgumentException("Cannot convert to DataType");

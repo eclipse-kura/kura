@@ -51,6 +51,7 @@ import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.core.configuration.util.ComponentUtil;
 import org.eclipse.kura.driver.ChannelDescriptor;
 import org.eclipse.kura.driver.Driver;
+import org.eclipse.kura.internal.asset.provider.helper.ChannelRecordHelper;
 import org.eclipse.kura.type.DataType;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -103,7 +104,7 @@ public final class BaseAssetConfiguration {
             final Channel channel = e.getValue();
             if (channel.isEnabled()
                     && (channel.getType() == ChannelType.READ || channel.getType() == ChannelType.READ_WRITE)) {
-                readRecords.add(channel.createReadRecord());
+                readRecords.add(ChannelRecordHelper.createModifiedChannelRecord(channel));
             }
         }
 
@@ -409,6 +410,9 @@ public final class BaseAssetConfiguration {
             case DEFINED_BY_VALUE_TYPE:
             case DOUBLE:
                 return Double.parseDouble(value);
+            case LONG:
+                // TODO replace with Long.parseLong(value) once scale and offset are turned in String in the metatype
+                return (Double.valueOf(value).longValue());
             default:
                 throw new IllegalArgumentException(value + " cannot be converted into a Number of type " + type);
             }

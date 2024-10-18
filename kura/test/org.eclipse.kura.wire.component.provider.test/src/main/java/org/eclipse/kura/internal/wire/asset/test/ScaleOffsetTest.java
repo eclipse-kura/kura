@@ -89,6 +89,33 @@ public class ScaleOffsetTest extends WireAssetTestBase {
     }
 
     @Test
+    public void shouldApplyScaleToLongWithLongScale() {
+        givenAssetChannel("foo", DataType.LONG, ScaleOffsetType.LONG, Optional.of(3), Optional.empty());
+
+        whenDriverProducesValue("foo", 40l);
+
+        thenAssetOutputContains(0, "foo", 120l);
+    }
+
+    @Test
+    public void shouldApplyOffsetToLongWithLongScale() {
+        givenAssetChannel("foo", DataType.LONG, ScaleOffsetType.LONG, Optional.empty(), Optional.of(55));
+
+        whenDriverProducesValue("foo", 40l);
+
+        thenAssetOutputContains(0, "foo", 95l);
+    }
+
+    @Test
+    public void shouldApplyBothScaleAndOffsetToLongWithLongScale() {
+        givenAssetChannel("foo", DataType.LONG, ScaleOffsetType.LONG, Optional.of(2), Optional.of(55));
+
+        whenDriverProducesValue("foo", 40l);
+
+        thenAssetOutputContains(0, "foo", 135l);
+    }
+
+    @Test
     public void shouldApplyOffsetToDouble() {
         givenAssetChannel("foo", DataType.DOUBLE, ScaleOffsetType.DOUBLE, Optional.empty(), Optional.of(10.0d));
 

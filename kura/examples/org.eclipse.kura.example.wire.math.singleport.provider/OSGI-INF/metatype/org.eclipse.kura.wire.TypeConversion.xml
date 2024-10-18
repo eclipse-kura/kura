@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    
+    Copyright (c) 2024 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+    
+    SPDX-License-Identifier: EPL-2.0
+    
+    Contributors:
+     Eurotech
+     
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.wire.TypeConversion" 
+         name="GainOffset" 
+         description="A wire component that applies a type conversion to a configurable set of numerical input properties.">
+         
+        <AD id="channels"
+            name="Channels and Conversion"
+            type="String" cardinality="0"
+            required="true"
+            default="channel1|Long"
+            description="Specifies the properties on which apply the type conversion. Separated by a new line|textarea">
+        </AD>
+        
+        <AD id="emit.received.properties"
+            name="emit.received.properties"
+            type="Boolean" cardinality="0"
+            required="true"
+            default="false"
+            description="Specifies whether received properties should be included in the emitted envelope or not.">
+        </AD>
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.wire.TypeConversion" factoryPid="org.eclipse.kura.wire.TypeConversion">
+        <Object ocdref="org.eclipse.kura.wire.TypeConversion"/>
+    </Designate>
+</MetaData>

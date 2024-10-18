@@ -154,7 +154,7 @@ public class PositionRestServiceTest {
                 trackMesurment);
 
         when(positionService.getPosition()).thenReturn(testPosition);
-        when(positionService.getGnssType()).thenReturn(gnssTypeSet);
+        when(positionService.getGnssTypes()).thenReturn(gnssTypeSet);
     }
 
     private void givenLocalDateTime(String zonedDateTime) {

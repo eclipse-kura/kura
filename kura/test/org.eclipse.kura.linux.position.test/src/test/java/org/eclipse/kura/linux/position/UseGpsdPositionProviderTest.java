@@ -306,7 +306,7 @@ public class UseGpsdPositionProviderTest {
     }
 
     private void thenGnssTypeIs(Set<GNSSType> types) {
-        assertEquals(types, this.gpsdPositionProvider.getGnssType());
+        assertEquals(types, this.gpsdPositionProvider.getGnssTypes());
     }
 
     private void gpsdPositionProviderStart() {

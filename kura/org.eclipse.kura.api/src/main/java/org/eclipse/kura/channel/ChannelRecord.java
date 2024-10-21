@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -68,6 +68,8 @@ import org.osgi.annotation.versioning.ProviderType;
 @NotThreadSafe
 public class ChannelRecord {
 
+    private static final String NULL_CHANNEL_NAME_ERROR_MESSAGE = "Channel Name cannot be null";
+
     /**
      * Provided channel configuration to perform read or write
      * operation.
@@ -115,7 +117,7 @@ public class ChannelRecord {
      * @return the channel record
      */
     public static ChannelRecord createReadRecord(final String channelName, final DataType valueType) {
-        requireNonNull(channelName, "Channel Name cannot be null");
+        requireNonNull(channelName, NULL_CHANNEL_NAME_ERROR_MESSAGE);
         requireNonNull(valueType, "Value Type cannot be null");
 
         ChannelRecord result = new ChannelRecord();
@@ -131,7 +133,7 @@ public class ChannelRecord {
      */
     public static ChannelRecord createReadRecord(final String channelName, final DataType valueType,
             final String unit) {
-        requireNonNull(channelName, "Channel Name cannot be null");
+        requireNonNull(channelName, NULL_CHANNEL_NAME_ERROR_MESSAGE);
         requireNonNull(valueType, "Value Type cannot be null");
 
         ChannelRecord result = new ChannelRecord();
@@ -154,7 +156,7 @@ public class ChannelRecord {
      * @return the channel record
      */
     public static ChannelRecord createWriteRecord(final String channelName, final TypedValue<?> value) {
-        requireNonNull(channelName, "Channel Name cannot be null");
+        requireNonNull(channelName, NULL_CHANNEL_NAME_ERROR_MESSAGE);
         requireNonNull(value, "Value cannot be null");
 
         ChannelRecord result = new ChannelRecord();
@@ -177,7 +179,7 @@ public class ChannelRecord {
      * @return the channel record
      */
     public static ChannelRecord createStatusRecord(final String channelName, final ChannelStatus status) {
-        requireNonNull(channelName, "Channel Name cannot be null");
+        requireNonNull(channelName, NULL_CHANNEL_NAME_ERROR_MESSAGE);
         requireNonNull(status, "Status cannot be null");
 
         ChannelRecord result = new ChannelRecord();

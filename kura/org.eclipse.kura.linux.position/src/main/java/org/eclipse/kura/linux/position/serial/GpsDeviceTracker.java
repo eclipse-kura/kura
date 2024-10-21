@@ -11,12 +11,13 @@
  *  Eurotech
  *******************************************************************************/
 
-package org.eclipse.kura.linux.position;
+package org.eclipse.kura.linux.position.serial;
 
 import java.io.File;
 import java.util.Optional;
 
 import org.eclipse.kura.comm.CommURI;
+import org.eclipse.kura.linux.position.GpsDeviceAvailabilityListener;
 import org.eclipse.kura.usb.UsbService;
 import org.eclipse.kura.usb.UsbTtyDevice;
 import org.osgi.service.event.Event;

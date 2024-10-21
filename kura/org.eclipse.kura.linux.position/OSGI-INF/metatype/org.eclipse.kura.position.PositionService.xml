@@ -46,6 +46,7 @@
             
             <Option label="serial" value="serial" />
             <Option label="gpsd" value="gpsd" />
+            <Option label="modemManager" value="modemManager" />
             
         </AD>
         <AD id="gpsd.host" 

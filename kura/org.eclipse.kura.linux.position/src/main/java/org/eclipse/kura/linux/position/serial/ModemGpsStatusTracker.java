@@ -11,12 +11,13 @@
  *  Eurotech
  *******************************************************************************/
 
-package org.eclipse.kura.linux.position;
+package org.eclipse.kura.linux.position.serial;
 
 import static org.eclipse.kura.net.modem.ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC;
 import static org.eclipse.kura.net.modem.ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC;
 
 import org.eclipse.kura.comm.CommURI;
+import org.eclipse.kura.linux.position.GpsDeviceAvailabilityListener;
 import org.eclipse.kura.net.modem.ModemGpsEnabledEvent;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;

@@ -103,6 +103,10 @@ public class ModemManagerDbusWrapper {
         logger.debug("Modem location setup {} for modem {}", currentLocationSources, modemDevicePath.get());
 
         if (!currentLocationSources.equals(desiredLocationSources)) {
+            if (!EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE).equals(desiredLocationSources)) {
+                modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(
+                        EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE)), false);
+            }
             modemLocation.Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(desiredLocationSources),
                     false);
         }

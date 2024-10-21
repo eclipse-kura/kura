@@ -227,7 +227,7 @@ public class PositionServiceTest {
         properties.put("latitude", 46.0d);
         properties.put("longitude", 15.0d);
         properties.put("altitude", 300.0d);
-        properties.put("gnss.types", "Gps");
+        properties.put("gnss.type", "Gps");
         properties.put("proider", "serial");
 
         fixture.ps.activate(properties);
@@ -439,7 +439,7 @@ public class PositionServiceTest {
         properties.put("latitude", 20.0d);
         properties.put("longitude", 30.0d);
         properties.put("altitude", 40.0d);
-        properties.put("gnss.types", "Glonass");
+        properties.put("gnss.type", "Glonass");
 
         fixture.ps.updated(properties);
         assertNull(fixture.getGpsDevice());

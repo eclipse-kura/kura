@@ -98,8 +98,8 @@
        		default="0"
        		description="Static altitude value in meters"/>
        		
-       	<AD id="gnss.types" 
-            name="GNSS Types" 
+       	<AD id="gnss.type" 
+            name="GNSS Type" 
             type="String"
             cardinality="0"
             required="false"

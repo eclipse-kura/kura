@@ -32,7 +32,7 @@ This service provides the following configuration parameters:
 
 - **altitude** - provides the static altitude value in meters.
 
-- **GNSS Types** - provides the gnss system used to retrieve static information.
+- **GNSS Type** - provides the gnss system used to retrieve static information.
 
 - **port** - supplies the USB or serial port of the GPS device.
 

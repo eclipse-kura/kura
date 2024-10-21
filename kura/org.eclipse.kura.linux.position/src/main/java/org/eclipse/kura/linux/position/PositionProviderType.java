@@ -19,7 +19,8 @@ import java.util.Map;
 public enum PositionProviderType {
 
     SERIAL("serial"),
-    GPSD("gpsd");
+    GPSD("gpsd"),
+    MODEM_MANAGER("modemManager");
 
     private String value;
 

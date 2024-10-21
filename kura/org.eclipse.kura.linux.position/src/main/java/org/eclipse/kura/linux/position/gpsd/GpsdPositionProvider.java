@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.linux.position;
+package org.eclipse.kura.linux.position.gpsd;
 
 import static java.lang.Math.toRadians;
 
@@ -29,7 +29,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.eclipse.kura.linux.position.GpsDevice.Listener;
+import org.eclipse.kura.linux.position.GpsDeviceAvailabilityListener;
+import org.eclipse.kura.linux.position.PositionProvider;
+import org.eclipse.kura.linux.position.PositionProviderType;
+import org.eclipse.kura.linux.position.PositionServiceOptions;
+import org.eclipse.kura.linux.position.serial.GpsDevice;
+import org.eclipse.kura.linux.position.serial.GpsDevice.Listener;
 import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.osgi.util.measurement.Measurement;

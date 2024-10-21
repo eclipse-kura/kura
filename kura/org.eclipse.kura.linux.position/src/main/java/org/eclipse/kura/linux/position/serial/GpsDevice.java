@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.linux.position;
+package org.eclipse.kura.linux.position.serial;
 
 import static java.util.Objects.requireNonNull;
 
@@ -20,8 +20,8 @@ import java.util.Set;
 
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
-import org.eclipse.kura.linux.position.NMEAParser.Code;
-import org.eclipse.kura.linux.position.NMEAParser.ParseException;
+import org.eclipse.kura.linux.position.serial.NMEAParser.Code;
+import org.eclipse.kura.linux.position.serial.NMEAParser.ParseException;
 import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionException;
@@ -276,7 +276,7 @@ public class GpsDevice {
         return sb.toString();
     }
 
-    interface Listener extends PositionListener {
+    public interface Listener extends PositionListener {
 
         public void onLockStatusChanged(final boolean hasLock);
     }

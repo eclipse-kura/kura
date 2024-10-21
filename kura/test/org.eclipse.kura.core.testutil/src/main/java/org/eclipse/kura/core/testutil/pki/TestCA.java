@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -66,7 +66,6 @@ public class TestCA {
 
     public static final String TEST_KEYSTORE_PASSWORD = "changeit";
 
-    private static final String SIGNATURE_ALGORITHM = "SHA256WithRSA";
     private static final Instant DEFAULT_START_INSTANT = Instant.now();
     private static final Instant DEFAULT_END_INSTANT = DEFAULT_START_INSTANT.plus(365, ChronoUnit.DAYS);
 
@@ -131,7 +130,7 @@ public class TestCA {
     private static X509Certificate buildCertificate(final CertificateCreationOptions options, final BigInteger serial,
             final KeyPair certPair, final X500Name issuerName, final KeyPair issuerPair) throws TestCAException {
         try {
-            final ContentSigner contentSigner = new JcaContentSignerBuilder(SIGNATURE_ALGORITHM)
+            final ContentSigner contentSigner = new JcaContentSignerBuilder(options.getSignatureAlgorithm())
                     .build(issuerPair.getPrivate());
 
             final JcaX509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(issuerName, serial,
@@ -211,7 +210,7 @@ public class TestCA {
                             SubjectPublicKeyInfo.getInstance(this.caKeyPair.getPublic().getEncoded())));
             crlBuilder.addExtension(Extension.cRLNumber, false, new CRLNumber(this.nextCrlNumber));
 
-            final ContentSigner contentSigner = new JcaContentSignerBuilder(SIGNATURE_ALGORITHM)
+            final ContentSigner contentSigner = new JcaContentSignerBuilder(options.getSignatureAlgorithm())
                     .build(this.caKeyPair.getPrivate());
 
             return new JcaX509CRLConverter().getCRL(crlBuilder.build(contentSigner));
@@ -291,10 +290,12 @@ public class TestCA {
 
         private final Optional<Date> startDate;
         private final Optional<Date> endDate;
+        private final String signatureAlgorithm;
 
         private CRLCreationOptions(final Builder builder) {
             this.startDate = builder.startDate;
             this.endDate = builder.endDate;
+            this.signatureAlgorithm = builder.signatureAlgorithm;
         }
 
         public Optional<Date> getStartDate() {
@@ -305,6 +306,10 @@ public class TestCA {
             return endDate;
         }
 
+        public String getSignatureAlgorithm() {
+            return signatureAlgorithm;
+        }
+
         public static Builder builder() {
             return new Builder();
         }
@@ -313,6 +318,7 @@ public class TestCA {
 
             private Optional<Date> startDate = Optional.empty();
             private Optional<Date> endDate = Optional.empty();
+            private String signatureAlgorithm = "SHA256WithRSA";
 
             public Builder withStartDate(final Date startDate) {
                 this.startDate = Optional.of(startDate);
@@ -321,6 +327,11 @@ public class TestCA {
 
             public Builder withEndDate(final Date endDate) {
                 this.endDate = Optional.of(endDate);
+                return this;
+            }
+
+            public Builder withSignatureAlgorithm(final String signatureAlgorithm) {
+                this.signatureAlgorithm = signatureAlgorithm;
                 return this;
             }
 
@@ -336,12 +347,14 @@ public class TestCA {
         private final Optional<Date> startDate;
         private final Optional<Date> endDate;
         private final Optional<URI> crlDownloadURL;
+        private final String signatureAlgorithm;
 
         private CertificateCreationOptions(final Builder builder) {
             this.dn = builder.dn;
             this.startDate = builder.startDate;
             this.endDate = builder.endDate;
             this.crlDownloadURL = builder.crlDownloadURL;
+            this.signatureAlgorithm = builder.signatureAlgorithm;
         }
 
         public static Builder builder(final X500Name dn) {
@@ -364,12 +377,17 @@ public class TestCA {
             return crlDownloadURL;
         }
 
+        public String getSignatureAlgorithm() {
+            return signatureAlgorithm;
+        }
+
         public static class Builder {
 
             private final X500Name dn;
             private Optional<Date> startDate = Optional.empty();
             private Optional<Date> endDate = Optional.empty();
             private Optional<URI> crlDownloadURL = Optional.empty();
+            private String signatureAlgorithm = "SHA256WithRSA";
 
             public Builder(final X500Name dn) {
                 this.dn = dn;
@@ -387,6 +405,11 @@ public class TestCA {
 
             public Builder withCRLDownloadURI(final URI uri) {
                 this.crlDownloadURL = Optional.of(uri);
+                return this;
+            }
+
+            public Builder withSignatureAlgorithm(final String signatureAlgorithm) {
+                this.signatureAlgorithm = signatureAlgorithm;
                 return this;
             }
 

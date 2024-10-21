@@ -26,7 +26,7 @@ public class PositionServiceOptions {
     private static final Property<Double> STATIC_LATITUDE = new Property<>("latitude", 0.0d);
     private static final Property<Double> STATIC_LONGITUDE = new Property<>("longitude", 0.0d);
     private static final Property<Double> STATIC_ALTITUDE = new Property<>("altitude", 0.0d);
-    private static final Property<String> STATIC_GNSS_TYPE = new Property<>("gnss.type", "Unknown");
+    private static final Property<String> STATIC_GNSS_TYPE = new Property<>("gnss.types", "Unknown");
     private static final Property<String> PORT = new Property<>("port", "");
     private static final Property<Integer> BAUD_RATE = new Property<>("baudRate", 115200);
     private static final Property<Integer> BITS_PER_WORD = new Property<>("bitsPerWord", 8);

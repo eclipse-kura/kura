@@ -98,13 +98,13 @@
        		default="0"
        		description="Static altitude value in meters"/>
        		
-       	<AD id="gnss.type" 
-            name="GNSS Type" 
+       	<AD id="gnss.types" 
+            name="GNSS Types" 
             type="String"
             cardinality="0"
             required="false"
             default="Unknown"
-            description="Static system used to retrieve the static position information.">
+            description="GNSS system used to retrieve the static position information.">
             
             <Option label="Unknown" value="Unknown" />
             <Option label="Other" value="Other" />

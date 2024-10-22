@@ -14,12 +14,12 @@
 
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" immediate="false" name="SerialDevicePositionProvider">
-   <implementation class="org.eclipse.kura.linux.position.SerialDevicePositionProvider"/>
+   <implementation class="org.eclipse.kura.linux.position.serial.SerialDevicePositionProvider"/>
    <service>
       <provide interface="org.eclipse.kura.linux.position.PositionProvider"/>
-      <provide interface="org.eclipse.kura.linux.position.SerialDevicePositionProvider" />
+      <provide interface="org.eclipse.kura.linux.position.serial.SerialDevicePositionProvider" />
    </service>
-   <property name="service.pid" value="org.eclipse.kura.linux.position.SerialDevicePositionProvider"/>
+   <property name="service.pid" value="org.eclipse.kura.linux.position.serial.SerialDevicePositionProvider"/>
    <reference bind="setModemGpsStatusTracker" cardinality="1..1" interface="org.eclipse.kura.linux.position.ModemGpsStatusTracker" name="ModemGpsStatusTracker" policy="static" unbind="unsetModemGpsStatusTracker"/>
    <reference bind="setGpsDeviceTracker" cardinality="1..1" interface="org.eclipse.kura.linux.position.GpsDeviceTracker" name="GpsDeviceTracker" policy="static" unbind="unsetGpsDeviceTracker"/>
    <reference bind="setConnectionFactory" cardinality="1..1" interface="org.osgi.service.io.ConnectionFactory" name="ConnectionFactory" policy="static" unbind="unsetConnectionFactory"/>   

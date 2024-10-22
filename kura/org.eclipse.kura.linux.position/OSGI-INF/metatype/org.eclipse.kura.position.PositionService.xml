@@ -104,7 +104,7 @@
             cardinality="0"
             required="false"
             default="Unknown"
-            description="Static system used to retrieve the static position information.">
+            description="GNSS system used to retrieve the static position information.">
             
             <Option label="Unknown" value="Unknown" />
             <Option label="Other" value="Other" />

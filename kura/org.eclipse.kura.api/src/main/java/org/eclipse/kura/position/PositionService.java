@@ -121,7 +121,7 @@ public interface PositionService {
      * 
      * @since 2.8
      */
-    public Set<GNSSType> getGnssType();
+    public Set<GNSSType> getGnssTypes();
 
     /**
      * Registers position listener

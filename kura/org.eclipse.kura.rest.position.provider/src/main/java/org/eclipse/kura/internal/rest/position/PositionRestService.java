@@ -84,7 +84,7 @@ public class PositionRestService {
     @Produces(MediaType.APPLICATION_JSON)
     public PositionDTO getPosition() {
         if (positionServiceImpl.isLocked()) {
-            return new PositionDTO(positionServiceImpl.getPosition(), positionServiceImpl.getGnssType());
+            return new PositionDTO(positionServiceImpl.getPosition(), positionServiceImpl.getGnssTypes());
         }
 
         throw DefaultExceptionHandler.toWebApplicationException(

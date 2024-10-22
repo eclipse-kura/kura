@@ -579,7 +579,7 @@ public class NMDbusConnectorTest {
 
         thenNoExceptionIsThrown();
         thenDisconnectIsCalledFor("ttyACM17");
-        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
+        thenLocationSetupWasCalledOnceWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
     }
 
     @Test
@@ -598,7 +598,8 @@ public class NMDbusConnectorTest {
 
         thenNoExceptionIsThrown();
         thenDisconnectIsCalledFor("ttyACM17");
-        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED), false);
+        thenLocationSetupWasCalledOnceWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
+        thenLocationSetupWasCalledOnceWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED), false);
     }
 
     @Test
@@ -620,7 +621,7 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
-        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
+        thenLocationSetupWasCalledOnceWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
     }
 
     @Test
@@ -642,7 +643,8 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
-        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED), false);
+        thenLocationSetupWasCalledOnceWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
+        thenLocationSetupWasCalledOnceWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED), false);
     }
 
     @Test
@@ -665,7 +667,8 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
-        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED), false);
+        thenLocationSetupWasCalledOnceWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
+        thenLocationSetupWasCalledOnceWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_UNMANAGED), false);
     }
 
     @Test
@@ -688,7 +691,8 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
-        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
+        thenLocationSetupWasCalledOnceWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
+        thenLocationSetupWasCalledOnceWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW,
                 MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA), false);
     }
 
@@ -710,7 +714,7 @@ public class NMDbusConnectorTest {
         thenNoExceptionIsThrown();
         thenConnectionUpdateIsCalledFor("ttyACM17");
         thenActivateConnectionIsCalledFor("ttyACM17");
-        thenLocationSetupWasCalledWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
+        thenLocationSetupWasCalledOnceWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
     }
 
     @Test
@@ -1661,7 +1665,7 @@ public class NMDbusConnectorTest {
         verify(this.mockedConnections.get(path), times(0)).Delete();
     }
 
-    private void thenLocationSetupWasCalledWith(EnumSet<MMModemLocationSource> expectedLocationSources,
+    private void thenLocationSetupWasCalledOnceWith(EnumSet<MMModemLocationSource> expectedLocationSources,
             boolean expectedFlag) {
         verify(this.mockModemLocation, times(1))
                 .Setup(MMModemLocationSource.toBitMaskFromMMModemLocationSource(expectedLocationSources), expectedFlag);

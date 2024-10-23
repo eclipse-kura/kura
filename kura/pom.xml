@@ -800,7 +800,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.codehaus.mojo</groupId>
                                         <artifactId>properties-maven-plugin</artifactId>
-                                        <versionRange>[1.0-alpha-1,)</versionRange>
+                                        <versionRange>[1.2.1,)</versionRange>
                                         <goals>
                                             <goal>read-project-properties</goal>
                                         </goals>

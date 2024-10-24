@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,7 @@ public class SimDTO {
     private final String imsi;
     private final String eid;
     private final String operatorName;
+    private final String operatorIdentifier;
     private final SimType simType;
     private final ESimStatus eSimStatus;
 
@@ -35,6 +36,7 @@ public class SimDTO {
         this.imsi = sim.getImsi();
         this.eid = sim.getEid();
         this.operatorName = sim.getOperatorName();
+        this.operatorIdentifier = sim.getOperatorIdentifier();
         this.simType = sim.getSimType();
         this.eSimStatus = sim.geteSimStatus();
     }

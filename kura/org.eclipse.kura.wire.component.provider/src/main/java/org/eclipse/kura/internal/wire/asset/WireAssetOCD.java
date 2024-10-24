@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -38,8 +38,18 @@ public class WireAssetOCD extends BaseAssetOCD {
             + "a single driver generated timestamp being respectively"
             + " the max (most recent) or min (oldest) among the timestamps of the channels.";
 
-    private static final String EMIT_ERRORS_DESCRIPTION = "Specifies wheter errors should be included or not "
-            + "in the emitted envelope";
+    private static final String EMIT_ERRORS_DESCRIPTION = "Specifies whether channel specific errors should be included or not "
+            + "in emitted envelopes. If enabled, the component will add an additional property per channel, named \"<channel_name>_error\"."
+            + " If the channel operation fails, the property value will be an error message reported by the Driver,"
+            + " if the operation succeeds the property value will be the empty string.";
+
+    private static final String EMIT_CONNECTION_ERRORS_DESCRIPTION = "Specifies whether the component should emit an envelope"
+            + " in case of a general connection exception reported by the Driver "
+            + "(for example due to the fact that the connection with a remote device cannot be established)."
+            + " The error message associated with the exception will be emitted in a property named \"assetError\"."
+            + " In case of connection exception, channel values are not available and no channel related properties will be emitted."
+            + " If the \"timestamp.mode\" property is set to a value other than \"NO_TIMESTAMPS\", the component will also emit a \"assetTimestamp\""
+            + " property reporting current system time. This property will be ignored if \"emit.errors\" is disabled.";
 
     private static final String EMIT_ON_CHANGE_DESCRIPTION = "If set to true, this component will include"
             + " a channel value in the output emitted in Kura Wires"
@@ -97,6 +107,17 @@ public class WireAssetOCD extends BaseAssetOCD {
         emitErrorsAd.setDefault(FALSE);
 
         addAD(emitErrorsAd);
+
+        final Tad emitConnectionErrorsAd = new Tad();
+        emitConnectionErrorsAd.setId(WireAssetOptions.EMIT_CONNECTION_ERRORS_PROP_NAME);
+        emitConnectionErrorsAd.setName(WireAssetOptions.EMIT_CONNECTION_ERRORS_PROP_NAME);
+        emitConnectionErrorsAd.setCardinality(0);
+        emitConnectionErrorsAd.setType(Tscalar.BOOLEAN);
+        emitConnectionErrorsAd.setDescription(EMIT_CONNECTION_ERRORS_DESCRIPTION);
+        emitConnectionErrorsAd.setRequired(true);
+        emitConnectionErrorsAd.setDefault(FALSE);
+
+        addAD(emitConnectionErrorsAd);
 
         final Tad emitOnChangeAd = new Tad();
         emitOnChangeAd.setId(WireAssetOptions.EMIT_ON_CHANGE_PROP_NAME);

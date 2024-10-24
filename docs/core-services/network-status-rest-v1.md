@@ -576,6 +576,7 @@ Object that contains specific properties to describe the status of a Modem inter
       "iccid": "1111111111111111111",
       "imsi": "111111111111111",
       "operatorName": "MyOperator",
+      "operatorIdentifier": "12345",
       "simType": "PHYSICAL"
     }
   ],
@@ -896,6 +897,8 @@ This class contains all relevant properties to describe a SIM (Subscriber Identi
   * **eid**: `string` 
   
   * **operatorName**: `string` 
+
+  * **operatorIdentifier**: `string` 
   
   * **simType**: `string (enumerated)` 
       * [SimType](#simtype)

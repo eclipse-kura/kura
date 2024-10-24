@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,8 +12,10 @@
  ******************************************************************************/
 package org.eclipse.kura.net.status.modem;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,7 +41,7 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
     private final String hardwareRevision;
     private final String primaryPort;
     private final Map<String, ModemPortType> ports;
-    private final Set<ModemCapability> supportedModemCapabilities;
+    private final List<Set<ModemCapability>> supportedModemCapabilities;
     private final Set<ModemCapability> currentModemCapabilities;
     private final ModemPowerState powerState;
     private final Set<ModemModePair> supportedModes;
@@ -117,7 +119,24 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         return this.ports;
     }
 
+    /**
+     * @deprecated use {@link ModemInterfaceStatus#getAllSupportedModemCapabilities()} instead.
+     *             This method returns only the first ModemCapability if any.
+     * @since 2.8
+     */
+    @Deprecated
     public Set<ModemCapability> getSupportedModemCapabilities() {
+        if (!this.supportedModemCapabilities.isEmpty()) {
+            return this.supportedModemCapabilities.get(0);
+        } else {
+            return new HashSet<ModemCapability>();
+        }
+    }
+
+    /**
+     * @since 2.8
+     */
+    public List<Set<ModemCapability>> getAllSupportedModemCapabilities() {
         return this.supportedModemCapabilities;
     }
 
@@ -210,7 +229,7 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
         private String hardwareRevision = NA;
         private String primaryPort = NA;
         private Map<String, ModemPortType> ports = Collections.emptyMap();
-        private Set<ModemCapability> supportedModemCapabilities = EnumSet.of(ModemCapability.NONE);
+        private List<Set<ModemCapability>> supportedModemCapabilities = new ArrayList<>();
         private Set<ModemCapability> currentModemCapabilities = EnumSet.of(ModemCapability.NONE);
         private ModemPowerState powerState = ModemPowerState.UNKNOWN;
         private Set<ModemModePair> supportedModes = Collections.emptySet();
@@ -265,8 +284,26 @@ public class ModemInterfaceStatus extends NetworkInterfaceStatus {
             return getThis();
         }
 
+        /**
+         * @deprecated To add all the supported capabilities, call this method multiple times with every set of
+         *             ModemCapability.
+         *             Instead use
+         *             {@link ModemInterfaceStatus#withAllSupportedModemCapabilities(List<Set<ModemCapability>>
+         *             supportedModemCapabilities)} to add the ModemCapabilities all at once.
+         * @since 2.8
+         */
+        @Deprecated
         public ModemInterfaceStatusBuilder withSupportedModemCapabilities(
                 Set<ModemCapability> supportedModemCapabilities) {
+            this.supportedModemCapabilities.add(supportedModemCapabilities);
+            return getThis();
+        }
+
+        /**
+         * @since 2.8
+         */
+        public ModemInterfaceStatusBuilder withAllSupportedModemCapabilities(
+                List<Set<ModemCapability>> supportedModemCapabilities) {
             this.supportedModemCapabilities = supportedModemCapabilities;
             return getThis();
         }

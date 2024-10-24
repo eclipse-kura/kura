@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -37,6 +37,7 @@ class MockDriver implements Driver {
     private final Map<String, List<TypedValue<?>>> values = new HashMap<>();
     final Map<String, ChannelListener> listeners = new HashMap<>();
     CompletableFuture<Void> preparedReadCalled = new CompletableFuture<>();
+    Optional<ConnectionException> connectionException = Optional.empty();
 
     @Override
     public void connect() throws ConnectionException {
@@ -60,6 +61,12 @@ class MockDriver implements Driver {
 
     @Override
     public void read(List<ChannelRecord> records) throws ConnectionException {
+        final Optional<ConnectionException> ex = this.connectionException;
+
+        if (ex.isPresent()) {
+            throw ex.get();
+        }
+
         for (final ChannelRecord record : records) {
             final Optional<TypedValue<?>> value = Optional.ofNullable(values.get(record.getChannelName()))
                     .flatMap(l -> {
@@ -108,6 +115,10 @@ class MockDriver implements Driver {
 
     @Override
     public void write(List<ChannelRecord> records) throws ConnectionException {
+    }
+
+    synchronized void throwConnectionException(final Optional<ConnectionException> connectionException) {
+        this.connectionException = connectionException;
     }
 
     synchronized void addReadResult(final String channelName, final TypedValue<?> value) {

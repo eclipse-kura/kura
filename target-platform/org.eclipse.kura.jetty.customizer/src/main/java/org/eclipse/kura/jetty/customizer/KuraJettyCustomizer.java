@@ -29,30 +29,38 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
+import java.util.zip.Deflater;
 
 import javax.net.ssl.KeyManager;
 import javax.servlet.SessionCookieConfig;
 
 import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.jetty.JettyCustomizer;
+import org.eclipse.jetty.ee8.servlet.ServletContextHandler;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.ConnectionFactory;
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.ForwardedRequestCustomizer;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.util.compression.CompressionPool;
+import org.eclipse.jetty.util.compression.DeflaterPool;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 public class KuraJettyCustomizer extends JettyCustomizer {
+
+    private DeflaterPool deflaterPool = new DeflaterPool(CompressionPool.DEFAULT_CAPACITY, Deflater.BEST_COMPRESSION,
+            true);
 
     @Override
     public Object customizeContext(Object context, Dictionary<String, ?> settings) {
@@ -63,11 +71,12 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         final ServletContextHandler servletContextHandler = (ServletContextHandler) context;
 
         servletContextHandler.getServer().setErrorHandler(new KuraErrorHandler());
+        servletContextHandler.getServer().setHandler(new BlockHttpMethodsHandler(EnumSet.of(HttpMethod.TRACE)));
 
         final GzipHandler gzipHandler = new GzipHandler();
-        gzipHandler.setCompressionLevel(9);
+        gzipHandler.setDeflaterPool(this.deflaterPool);
 
-        servletContextHandler.setGzipHandler(gzipHandler);
+        servletContextHandler.insertHandler(gzipHandler);
 
         servletContextHandler.setErrorHandler(new KuraErrorHandler());
 
@@ -86,7 +95,6 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         }
 
         final ServerConnector serverConnector = (ServerConnector) connector;
-
         final Set<Integer> ports = (Set<Integer>) settings.get("org.eclipse.kura.http.ports");
 
         if (ports == null) {
@@ -94,7 +102,6 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         }
 
         HttpConfiguration httpConfiguration = new HttpConfiguration();
-        httpConfiguration.addCustomizer(new BlockHttpMethods(EnumSet.of(HttpMethod.TRACE)));
 
         for (final int port : ports) {
             final ServerConnector newConnector = new ServerConnector(serverConnector.getServer(),
@@ -192,7 +199,6 @@ public class KuraJettyCustomizer extends JettyCustomizer {
 
         final HttpConfiguration httpsConfig = new HttpConfiguration();
         httpsConfig.addCustomizer(new SecureRequestCustomizer());
-        httpsConfig.addCustomizer(new BlockHttpMethods(EnumSet.of(HttpMethod.TRACE)));
 
         final ServerConnector connector = new ServerConnector(server,
                 new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(httpsConfig));
@@ -284,21 +290,24 @@ public class KuraJettyCustomizer extends JettyCustomizer {
 
     }
 
-    private static class BlockHttpMethods implements HttpConfiguration.Customizer {
+    private static class BlockHttpMethodsHandler extends Handler.Wrapper {
 
         private final Set<HttpMethod> blockedMethods;
 
-        public BlockHttpMethods(Set<HttpMethod> methods) {
+        public BlockHttpMethodsHandler(Set<HttpMethod> methods) {
             this.blockedMethods = methods;
         }
 
         @Override
-        public void customize(Connector connector, HttpConfiguration channelConfig, Request request) {
+        public boolean handle(Request request, Response response, Callback callback) throws Exception {
             HttpMethod httpMethod = HttpMethod.fromString(request.getMethod());
             if (this.blockedMethods.contains(httpMethod)) {
-                request.setHandled(true);
-                request.getResponse().setStatus(HttpStatus.METHOD_NOT_ALLOWED_405);
+                response.setStatus(HttpStatus.METHOD_NOT_ALLOWED_405);
+                callback.succeeded();
+                return true;
             }
+
+            return false;
         }
     }
 

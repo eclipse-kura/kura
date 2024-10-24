@@ -187,11 +187,6 @@
                                     <artifactId>com.gwt.user</artifactId>
                                     <version>${com.gwt.user.version}</version>
                                 </artifactItem>
-                                <!--<artifactItem>
-									<groupId>com.gwt</groupId>
-									<artifactId>com.gwt.user</artifactId>
-									<version>0.2.0</version>
-								</artifactItem>-->
                                 <artifactItem>
                                     <groupId>org.hamcrest</groupId>
                                     <artifactId>org.hamcrest.core</artifactId>
@@ -638,6 +633,11 @@
                                     <artifactId>sqlite-jdbc</artifactId>
                                     <version>${org.xerial.sqlite-jdbc.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>javax.servlet</groupId>
+                                    <artifactId>javax.servlet-api</artifactId>
+                                    <version>${javax.servlet.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -760,6 +760,7 @@
                                 <move file="target/source/plugins/HikariCP.jar" tofile="target/source/plugins/com.zaxxer.HikariCP_${hikaricp.version}.jar"/>
                                 <move file="target/source/plugins/quartz.jar" tofile="target/source/plugins/org.quartz-scheduler.quartz_${quartz.version}.jar"/>
                                 <move file="target/source/plugins/sqlite-jdbc.jar" tofile="target/source/plugins/org.xerial.sqlite-jdbc_${org.xerial.sqlite-jdbc.version}.jar"/>
+                                <move file="target/source/plugins/javax.servlet-api.jar" tofile="target/source/plugins/javax.servlet-api_${org.xerial.sqlite-jdbc.version}.jar"/>
                             </tasks>
                         </configuration>
                     </execution>

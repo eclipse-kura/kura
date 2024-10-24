@@ -40,9 +40,9 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <echo file="${project.basedir}/../distrib/build.properties" append="false">
-                                                                        kura.build.version=${kura.build.version}
-                                                                </echo>
+                                <echo 
+                                    file="${project.basedir}/../distrib/build.properties" 
+                                    append="false">kura.build.version=${kura.build.version}</echo>
                             </tasks>
                         </configuration>
                     </execution>

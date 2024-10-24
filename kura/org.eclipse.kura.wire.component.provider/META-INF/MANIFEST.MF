@@ -44,4 +44,4 @@ Import-Package: org.apache.logging.log4j;version="2.8.2",
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
-Export-Package: org.eclipse.kura.internal.wire.asset;version="1.0.0"
+Export-Package: org.eclipse.kura.internal.wire.asset;version="1.1.0";x-internal:=true

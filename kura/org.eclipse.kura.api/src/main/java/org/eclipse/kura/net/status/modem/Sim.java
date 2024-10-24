@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,7 @@ public class Sim {
     private final String imsi;
     private final String eid;
     private final String operatorName;
+    private final String operatorIdentifier;
     private final SimType simType;
     private final ESimStatus eSimStatus;
 
@@ -40,6 +41,7 @@ public class Sim {
         this.imsi = builder.imsi;
         this.eid = builder.eid;
         this.operatorName = builder.operatorName;
+        this.operatorIdentifier = builder.operatorIdentifier;
         this.simType = builder.simType;
         this.eSimStatus = builder.eSimStatus;
     }
@@ -68,6 +70,14 @@ public class Sim {
         return this.operatorName;
     }
 
+    /**
+     * 
+     * @since 2.8
+     */
+    public String getOperatorIdentifier() {
+        return this.operatorIdentifier;
+    }
+
     public SimType getSimType() {
         return this.simType;
     }
@@ -88,6 +98,7 @@ public class Sim {
         private String imsi = "NA";
         private String eid = "NA";
         private String operatorName = "NA";
+        private String operatorIdentifier = "NA";
         private SimType simType = SimType.UNKNOWN;
         private ESimStatus eSimStatus = ESimStatus.UNKNOWN;
 
@@ -124,6 +135,15 @@ public class Sim {
             return this;
         }
 
+        /**
+         * 
+         * @since 2.8
+         */
+        public SimBuilder withOperatorIdentifier(String operatorIdentifier) {
+            this.operatorIdentifier = operatorIdentifier;
+            return this;
+        }
+
         public SimBuilder withSimType(SimType simType) {
             this.simType = simType;
             return this;
@@ -143,7 +163,7 @@ public class Sim {
     @Override
     public int hashCode() {
         return Objects.hash(this.active, this.primary, this.eSimStatus, this.eid, this.iccid, this.imsi,
-                this.operatorName, this.simType);
+                this.operatorName, this.operatorIdentifier, this.simType);
     }
 
     @Override
@@ -158,7 +178,7 @@ public class Sim {
         return this.active == other.active && this.primary == other.primary && this.eSimStatus == other.eSimStatus
                 && Objects.equals(this.eid, other.eid) && Objects.equals(this.iccid, other.iccid)
                 && Objects.equals(this.imsi, other.imsi) && Objects.equals(this.operatorName, other.operatorName)
-                && this.simType == other.simType;
+                && Objects.equals(this.operatorIdentifier, other.operatorIdentifier) && this.simType == other.simType;
     }
 
 }

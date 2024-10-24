@@ -929,6 +929,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                         .withImsi("imsi") //
                         .withEid("sed") //
                         .withOperatorName("op") //
+                        .withOperatorIdentifier("id") //
                         .withSimType(SimType.PHYSICAL) //
                         .withESimStatus(ESimStatus.UNKNOWN).build(), //
                 Sim.builder() //
@@ -938,6 +939,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                         .withImsi("isi") //
                         .withEid("se") //
                         .withOperatorName("opp") //
+                        .withOperatorIdentifier("idd") //
                         .withSimType(SimType.ESIM) //
                         .withESimStatus(ESimStatus.WITH_PROFILES) //
                         .build())));
@@ -968,6 +970,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"imsi\":\"imsi\"," //
                 + "\"eid\":\"sed\"," //
                 + "\"operatorName\":\"op\"," //
+                + "\"operatorIdentifier\":\"id\"," //
                 + "\"simType\":\"PHYSICAL\"," //
                 + "\"eSimStatus\":\"UNKNOWN\"}," //
                 + "{\"active\":false," //
@@ -976,6 +979,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"imsi\":\"isi\"," //
                 + "\"eid\":\"se\"," //
                 + "\"operatorName\":\"opp\"," //
+                + "\"operatorIdentifier\":\"idd\"," //
                 + "\"simType\":\"ESIM\"," //
                 + "\"eSimStatus\":\"WITH_PROFILES\"}]," //
                 + "\"simLocked\":false," //

@@ -759,6 +759,7 @@ public class NMStatusConverter {
             logger.warn("Eid property not found.");
         }
         String operatorName = simProperties.Get(MM_SIM_BUS_NAME, "OperatorName");
+        String operatorIdentifier = simProperties.Get(MM_SIM_BUS_NAME, "OperatorIdentifier");
         SimType simType = SimType.PHYSICAL;
         ESimStatus eSimStatus = ESimStatus.UNKNOWN;
         try {
@@ -771,7 +772,8 @@ public class NMStatusConverter {
         }
 
         return Sim.builder().withActive(isActive).withPrimary(isPrimary).withIccid(iccid).withImsi(imsi).withEid(eid)
-                .withOperatorName(operatorName).withSimType(simType).withESimStatus(eSimStatus).build();
+                .withOperatorName(operatorName).withOperatorIdentifier(operatorIdentifier).withSimType(simType)
+                .withESimStatus(eSimStatus).build();
     }
 
     private static List<Bearer> getBearers(List<Properties> properties) {

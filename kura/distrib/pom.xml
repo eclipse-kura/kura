@@ -45,6 +45,8 @@
         <kura.network.provider>kura-networking</kura.network.provider>
         <!-- kura-networking or network-manager-->
 
+        <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
+
         <!-- used for RPM uninstallation -->
         <kura.install.link>/opt/eclipse/kura</kura.install.link>
     </properties>
@@ -95,7 +97,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0-alpha-1</version>
+                <version>${properties-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>initialize</phase>
@@ -1036,7 +1038,7 @@
                                             properties-maven-plugin
                                         </artifactId>
                                         <versionRange>
-                                            [1.0-alpha-1,)
+                                            [1.2.1,)
                                         </versionRange>
                                         <goals>
                                             <goal>

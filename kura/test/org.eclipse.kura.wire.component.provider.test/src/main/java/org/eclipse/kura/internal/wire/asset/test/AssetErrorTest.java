@@ -71,6 +71,18 @@ public class AssetErrorTest extends WireAssetTestBase {
     }
 
     @Test
+    public void shouldTolerateNullMessage() {
+        givenAssetConfig(map("emit.errors", true, "emit.connection.errors", true));
+        givenConnectionException(new ConnectionException((String) null));
+
+        whenAssetReceivesEnvelope();
+
+        thenTotalEmittedEnvelopeCountAfter1SecIs(1);
+        thenAssetOutputContains(0, "assetError", "ConnectionException");
+        thenAssetOutputContainsAssetTimestamp();
+    }
+
+    @Test
     public void shouldNotEmitTimestampIfDisabled() {
         givenAssetConfig(map("emit.errors", true, "emit.connection.errors", true, "timestamp.mode", "NO_TIMESTAMPS"));
         givenConnectionException(new ConnectionException("exception message"));

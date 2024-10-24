@@ -272,7 +272,7 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
         wireRecordProperties.put(WireAssetConstants.PROP_ASSET_NAME.value(),
                 TypedValues.newStringValue(getKuraServicePid()));
         wireRecordProperties.put(WireAssetConstants.PROP_ASSET_ERROR.value(),
-                TypedValues.newStringValue(message != null ? message : "Unknown error"));
+                TypedValues.newStringValue(message != null ? message : e.getClass().getSimpleName()));
 
         if (options.getTimestampMode() != TimestampMode.NO_TIMESTAMPS) {
             wireRecordProperties.put(WireAssetConstants.PROP_SINGLE_TIMESTAMP_NAME.value(),

@@ -56,6 +56,7 @@ import org.eclipse.kura.net.status.vlan.VlanInterfaceStatus.VlanInterfaceStatusB
 import org.eclipse.kura.net.status.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.status.wifi.WifiAccessPoint.WifiAccessPointBuilder;
 import org.eclipse.kura.net.status.wifi.WifiCapability;
+import org.eclipse.kura.net.status.wifi.WifiFlag;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus.WifiInterfaceStatusBuilder;
 import org.eclipse.kura.net.status.wifi.WifiMode;
@@ -73,6 +74,7 @@ import org.eclipse.kura.nm.enums.MMModemPowerState;
 import org.eclipse.kura.nm.enums.MMModemState;
 import org.eclipse.kura.nm.enums.MMSimEsimStatus;
 import org.eclipse.kura.nm.enums.MMSimType;
+import org.eclipse.kura.nm.enums.NM80211ApFlags;
 import org.eclipse.kura.nm.enums.NM80211ApSecurityFlags;
 import org.eclipse.kura.nm.enums.NM80211Mode;
 import org.eclipse.kura.nm.enums.NMDeviceState;
@@ -420,6 +422,9 @@ public class NMStatusConverter {
                 .fromUInt32(nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "RsnFlags"));
         builder.withRsnSecurity(wifiSecurityFlagConvert(rsnSecurityFlags));
 
+        List<NM80211ApFlags> flags = NM80211ApFlags.fromUInt32(nmAccessPoint.Get(NM_ACCESSPOINT_BUS_NAME, "Flags"));
+        builder.withFlags(wifiFlagConvert(flags));
+
         return builder.build();
     }
 
@@ -489,6 +494,27 @@ public class NMStatusConverter {
             return WifiSecurity.KEY_MGMT_EAP_SUITE_B_192;
         default:
             throw new IllegalArgumentException(String.format("Non convertible NM80211ApSecurityFlag \"%s\"", nmFlag));
+        }
+    }
+
+    private static Set<WifiFlag> wifiFlagConvert(List<NM80211ApFlags> nmFlags) {
+        List<WifiFlag> kuraFlags = new ArrayList<>();
+
+        for (NM80211ApFlags nmFlag : nmFlags) {
+            kuraFlags.add(wifiFlagConvert(nmFlag));
+        }
+
+        return new HashSet<>(kuraFlags);
+    }
+
+    private static WifiFlag wifiFlagConvert(NM80211ApFlags nmFlag) {
+        switch (nmFlag) {
+        case NM_802_11_AP_FLAGS_NONE:
+            return WifiFlag.NONE;
+        case NM_802_11_AP_FLAGS_PRIVACY:
+            return WifiFlag.PRIVACY;
+        default:
+            throw new IllegalArgumentException(String.format("Non convertible NM80211ApFlag \"%s\"", nmFlag));
         }
     }
 

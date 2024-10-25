@@ -664,7 +664,8 @@ public class NMStatusConverterTest {
         thenResultingModemHWRevisionIs("TopSecret");
         thenResultingModemPrimaryPortIs("NaN");
         thenResultingModemPortsAre(new HashMap<String, ModemPortType>());
-        thenResultingModemSupportedCapabilitiesAre(EnumSet.noneOf(ModemCapability.class));
+        thenResultingModemSupportedCapabilitiesAre(EnumSet.of(ModemCapability.POTS, ModemCapability.GSM_UMTS),
+                EnumSet.of(ModemCapability.LTE, ModemCapability.GSM_UMTS));
         thenResultingModemCurrentCapabilitiesAre(EnumSet.of(ModemCapability.POTS, ModemCapability.GSM_UMTS));
         thenResultingModemPowerStateIs(ModemPowerState.ON);
         thenResultingModemSupportedModesAre(new HashSet<>());
@@ -881,7 +882,8 @@ public class NMStatusConverterTest {
         givenModemPropertiesWith("HardwareRevision", "TopSecret");
         givenModemPropertiesWith("PrimaryPort", "NaN");
         givenModemPropertiesWith("Ports", Arrays.asList(new Object[] {}));
-        givenModemPropertiesWith("SupportedCapabilities", Arrays.asList(new UInt32[] {}));
+        givenModemPropertiesWith("SupportedCapabilities",
+                Arrays.asList(new UInt32[] { new UInt32(5), new UInt32(12) }));
         givenModemPropertiesWith("CurrentCapabilities", new UInt32(5));
         givenModemPropertiesWith("PowerState", MMModemPowerState.MM_MODEM_POWER_STATE_ON.toUInt32());
         givenModemPropertiesWith("SupportedModes", Arrays.asList(new Object[] {}));
@@ -1172,8 +1174,12 @@ public class NMStatusConverterTest {
         assertEquals(ports, this.resultingModemStatus.getPorts());
     }
 
-    private void thenResultingModemSupportedCapabilitiesAre(EnumSet<ModemCapability> modemCapability) {
-        assertEquals(modemCapability, this.resultingModemStatus.getSupportedModemCapabilities());
+    private void thenResultingModemSupportedCapabilitiesAre(Set<ModemCapability> firstModemCapability,
+            Set<ModemCapability> secondModemCapability) {
+        List<Set<ModemCapability>> supportedModemCapabilities = new ArrayList<Set<ModemCapability>>();
+        supportedModemCapabilities.add(firstModemCapability);
+        supportedModemCapabilities.add(secondModemCapability);
+        assertEquals(supportedModemCapabilities, this.resultingModemStatus.getAllSupportedModemCapabilities());
     }
 
     private void thenResultingModemCurrentCapabilitiesAre(EnumSet<ModemCapability> modemCapability) {

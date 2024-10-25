@@ -136,7 +136,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
     }
 
     @Test
-    public void shouldRportGeneralExceptionGettingAllInterfacesStatus() {
+    public void shouldReportGeneralExceptionGettingAllInterfacesStatus() {
         givenExceptionThrownByNetworkStatusServiceMethods(new IllegalStateException("exception message"));
 
         whenRequestIsPerformed(new MethodSpec("GET"), NETWORK_STATUS_PATH);
@@ -747,7 +747,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"hardwareRevision\":\"N/A\"," //
                 + "\"primaryPort\":\"N/A\"," //
                 + "\"ports\":{}," //
-                + "\"supportedModemCapabilities\":[\"NONE\"]," //
+                + "\"supportedModemCapabilities\":[]," //
                 + "\"currentModemCapabilities\":[\"NONE\"]," //
                 + "\"powerState\":\"UNKNOWN\"," //
                 + "\"supportedModes\":[]," //
@@ -791,7 +791,8 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 .withHardwareRevision("hwrev") //
                 .withPrimaryPort("port") //
                 .withPorts(Collections.singletonMap("foo", ModemPortType.AUDIO)) //
-                .withSupportedModemCapabilities(EnumSet.of(ModemCapability.EVDO, ModemCapability.GSM_UMTS)) //
+                .withAllSupportedModemCapabilities(
+                        Arrays.asList(EnumSet.of(ModemCapability.EVDO, ModemCapability.GSM_UMTS)))
                 .withCurrentModemCapabilities(EnumSet.of(ModemCapability.IRIDIUM, ModemCapability.LTE)) //
                 .withPowerState(ModemPowerState.OFF) //
                 .withSupportedModes(Collections.singleton(
@@ -873,7 +874,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"hardwareRevision\":\"N/A\"," //
                 + "\"primaryPort\":\"N/A\"," //
                 + "\"ports\":{}," //
-                + "\"supportedModemCapabilities\":[\"NONE\"]," //
+                + "\"supportedModemCapabilities\":[]," //
                 + "\"currentModemCapabilities\":[\"NONE\"]," //
                 + "\"powerState\":\"UNKNOWN\"," //
                 + "\"supportedModes\":[]," //
@@ -955,7 +956,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"hardwareRevision\":\"N/A\"," //
                 + "\"primaryPort\":\"N/A\"," //
                 + "\"ports\":{}," //
-                + "\"supportedModemCapabilities\":[\"NONE\"]," //
+                + "\"supportedModemCapabilities\":[]," //
                 + "\"currentModemCapabilities\":[\"NONE\"]," //
                 + "\"powerState\":\"UNKNOWN\"," //
                 + "\"supportedModes\":[]," //

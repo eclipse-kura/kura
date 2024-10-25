@@ -17,7 +17,6 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -610,7 +609,7 @@ public class NMStatusConverter {
             builder.withHardwareRevision(properties.Get(MM_MODEM_BUS_NAME, "HardwareRevision"));
             builder.withPrimaryPort(properties.Get(MM_MODEM_BUS_NAME, "PrimaryPort"));
             builder.withPorts(getPorts(properties));
-            builder.withSupportedModemCapabilities(getModemSupportedCapabilities(properties));
+            builder.withAllSupportedModemCapabilities(getModemSupportedCapabilities(properties));
             builder.withCurrentModemCapabilities(getModemCurrentCapabilities(properties));
             builder.withPowerState(
                     MMModemPowerState.toModemPowerState(properties.Get(MM_MODEM_BUS_NAME, "PowerState")));
@@ -648,10 +647,11 @@ public class NMStatusConverter {
         return ports;
     }
 
-    private static Set<ModemCapability> getModemSupportedCapabilities(Properties properties) {
-        EnumSet<ModemCapability> modemCapabilities = EnumSet.noneOf(ModemCapability.class);
+    private static List<Set<ModemCapability>> getModemSupportedCapabilities(Properties properties) {
+        List<Set<ModemCapability>> modemCapabilities = new ArrayList<>();
         List<UInt32> capabilities = properties.Get(MM_MODEM_BUS_NAME, "SupportedCapabilities");
-        capabilities.forEach(capability -> modemCapabilities.add(MMModemCapability.toModemCapability(capability)));
+        capabilities.forEach(
+                capability -> modemCapabilities.add(MMModemCapability.toModemCapabilitiesFromBitMask(capability)));
         return modemCapabilities;
     }
 

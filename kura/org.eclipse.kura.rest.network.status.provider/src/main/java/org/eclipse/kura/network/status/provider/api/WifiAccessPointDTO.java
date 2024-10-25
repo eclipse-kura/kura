@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,7 @@ package org.eclipse.kura.network.status.provider.api;
 import java.util.Set;
 
 import org.eclipse.kura.net.status.wifi.WifiAccessPoint;
+import org.eclipse.kura.net.status.wifi.WifiFlag;
 import org.eclipse.kura.net.status.wifi.WifiMode;
 import org.eclipse.kura.net.status.wifi.WifiSecurity;
 
@@ -30,6 +31,7 @@ public class WifiAccessPointDTO {
     private final int signalStrength;
     private final Set<WifiSecurity> wpaSecurity;
     private final Set<WifiSecurity> rsnSecurity;
+    private final Set<WifiFlag> flags;
 
     public WifiAccessPointDTO(final WifiAccessPoint accessPoint) {
         this.ssid = accessPoint.getSsid();
@@ -41,5 +43,6 @@ public class WifiAccessPointDTO {
         this.signalStrength = accessPoint.getSignalStrength();
         this.wpaSecurity = accessPoint.getWpaSecurity();
         this.rsnSecurity = accessPoint.getRsnSecurity();
+        this.flags = accessPoint.getFlags();
     }
 }

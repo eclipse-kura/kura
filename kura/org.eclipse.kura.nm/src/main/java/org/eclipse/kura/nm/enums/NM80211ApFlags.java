@@ -21,7 +21,10 @@ import org.freedesktop.dbus.types.UInt32;
 public enum NM80211ApFlags {
 
     NM_802_11_AP_FLAGS_NONE(0x00000000),
-    NM_802_11_AP_FLAGS_PRIVACY(0x00000001);
+    NM_802_11_AP_FLAGS_PRIVACY(0x00000001),
+    NM_802_11_AP_FLAGS_WPS(0x00000002),
+    NM_802_11_AP_FLAGS_WPS_PBC(0x00000004),
+    NM_802_11_AP_FLAGS_WPS_PIN(0x00000008);
 
     private final int value;
 

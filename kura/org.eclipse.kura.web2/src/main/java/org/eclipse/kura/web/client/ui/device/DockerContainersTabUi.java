@@ -296,6 +296,7 @@ public class DockerContainersTabUi extends Composite implements Tab {
                             @Override
                             public void onSuccess(Void result) {
                                 EntryClassUi.hideWaitModal();
+                                refresh();
                             }
                         });
 
@@ -307,7 +308,6 @@ public class DockerContainersTabUi extends Composite implements Tab {
                 FailureHandler.handle(caught);
             }
         });
-        refresh();
     }
 
     private void stopSelectedContainer() {
@@ -337,11 +337,11 @@ public class DockerContainersTabUi extends Composite implements Tab {
                             public void onSuccess(Void result) {
                                 EntryClassUi.hideWaitModal();
                                 DockerContainersTabUi.this.containersStop.setEnabled(false);
+                                refresh();
                             }
                         });
             }
         });
-        refresh();
     }
 
     private void loadContainersTable(CellTable<GwtGroupedNVPair> bundlesGrid2,

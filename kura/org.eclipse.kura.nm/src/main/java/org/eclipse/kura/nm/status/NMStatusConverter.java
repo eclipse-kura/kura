@@ -453,6 +453,9 @@ public class NMStatusConverter {
     private static Set<WifiSecurity> wifiSecurityFlagConvert(List<NM80211ApSecurityFlags> nmSecurityFlags) {
         List<WifiSecurity> kuraSecurityFlags = new ArrayList<>();
 
+        if (nmSecurityFlags.isEmpty()) {
+            kuraSecurityFlags.add(WifiSecurity.NONE);
+        }
         for (NM80211ApSecurityFlags nmFlag : nmSecurityFlags) {
             kuraSecurityFlags.add(wifiSecurityFlagConvert(nmFlag));
         }
@@ -500,6 +503,9 @@ public class NMStatusConverter {
     private static Set<WifiFlag> wifiFlagConvert(List<NM80211ApFlags> nmFlags) {
         List<WifiFlag> kuraFlags = new ArrayList<>();
 
+        if (nmFlags.isEmpty()) {
+            kuraFlags.add(WifiFlag.NONE);
+        }
         for (NM80211ApFlags nmFlag : nmFlags) {
             kuraFlags.add(wifiFlagConvert(nmFlag));
         }
@@ -513,6 +519,12 @@ public class NMStatusConverter {
             return WifiFlag.NONE;
         case NM_802_11_AP_FLAGS_PRIVACY:
             return WifiFlag.PRIVACY;
+        case NM_802_11_AP_FLAGS_WPS:
+            return WifiFlag.WPS;
+        case NM_802_11_AP_FLAGS_WPS_PBC:
+            return WifiFlag.WPS_PBC;
+        case NM_802_11_AP_FLAGS_WPS_PIN:
+            return WifiFlag.WPS_PIN;
         default:
             throw new IllegalArgumentException(String.format("Non convertible NM80211ApFlag \"%s\"", nmFlag));
         }

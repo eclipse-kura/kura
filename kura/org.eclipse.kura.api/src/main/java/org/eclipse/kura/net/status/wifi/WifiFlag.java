@@ -21,6 +21,12 @@ public enum WifiFlag {
     /** None */
     NONE,
     /** Supports authentication and encryption */
-    PRIVACY;
+    PRIVACY,
+    /** Supports WPS */
+    WPS,
+    /** Supports push-button based WPS */
+    WPS_PBC,
+    /** Supports PIN based WPS */
+    WPS_PIN;
 
 }

@@ -160,16 +160,20 @@ public class NetworkStatusServiceAdapter {
 
             for (WifiAccessPoint ap : wifiStatus.getAvailableWifiAccessPoints()) {
                 GwtWifiHotspotEntry entry = new GwtWifiHotspotEntry();
+                entry.setGroupCiphers(GwtWifiCiphers.netWifiCiphers_NONE.name());
+                entry.setPairwiseCiphers(GwtWifiCiphers.netWifiCiphers_NONE.name());
+                entry.setSecurity(GwtWifiSecurity.netWifiSecurityNONE.name());
+                try {
+                    parseAndSetWifiSecurity(entry, ap);
+                } catch (IllegalArgumentException e) {
+                    logger.warn("Cannot parse wifi security flags", e);
+                    continue;
+                }
                 entry.setChannel(ap.getChannel().getChannel());
                 entry.setFrequency(ap.getChannel().getFrequency());
                 entry.setMacAddress(NetworkUtil.macToString(ap.getHardwareAddress()));
                 entry.setSSID(ap.getSsid());
                 entry.setsignalStrength(ap.getSignalStrength());
-
-                entry.setGroupCiphers(GwtWifiCiphers.netWifiCiphers_NONE.name());
-                entry.setPairwiseCiphers(GwtWifiCiphers.netWifiCiphers_NONE.name());
-                entry.setSecurity(GwtWifiSecurity.netWifiSecurityNONE.name());
-                parseAndSetWifiSecurity(entry, ap);
 
                 result.add(entry);
             }
@@ -382,21 +386,48 @@ public class NetworkStatusServiceAdapter {
         Set<WifiSecurity> wpaSecurity = wifiAccessPoint.getWpaSecurity();
         Set<WifiFlag> flags = wifiAccessPoint.getFlags();
 
-        if (rsnSecurity.contains(WifiSecurity.KEY_MGMT_PSK) && wpaSecurity.contains(WifiSecurity.KEY_MGMT_PSK)) {
+        if (isSecurityNone(rsnSecurity, wpaSecurity, flags)) {
+            entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityNONE.value());
+        } else if (isSecurityWEP(rsnSecurity, wpaSecurity, flags)) {
+            entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWEP.value());
+        } else if (isSecurityWPA(rsnSecurity, wpaSecurity, flags) && isSecurityWPA2(rsnSecurity, wpaSecurity, flags)) {
             entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA_WPA2.value());
             setCiphers(entryToModify, rsnSecurity);
-        } else if (rsnSecurity.contains(WifiSecurity.KEY_MGMT_PSK)) {
-            entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA2.value());
-            setCiphers(entryToModify, rsnSecurity);
-        } else if (wpaSecurity.contains(WifiSecurity.KEY_MGMT_PSK)) {
+        } else if (isSecurityWPA(rsnSecurity, wpaSecurity, flags)) {
             entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA.value());
             setCiphers(entryToModify, wpaSecurity);
-        } else if (flags.contains(WifiFlag.PRIVACY)) {
-            entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWEP.value());
+        } else if (isSecurityWPA2(rsnSecurity, wpaSecurity, flags)) {
+            entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA2.value());
+            setCiphers(entryToModify, rsnSecurity);
+        } else if (isSecurityWPA2WPA3Enterprise(rsnSecurity, wpaSecurity, flags)) {
+            entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA2WPA3Enterprise.value());
+            setCiphers(entryToModify, rsnSecurity);
         } else {
-            entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityNONE.value());
+            throw new IllegalArgumentException(String.format("Security flags not recognized or supported"));
         }
-        // missing WPA3....
+    }
+
+    private boolean isSecurityNone(Set<WifiSecurity> rsnSecurity, Set<WifiSecurity> wpaSecurity, Set<WifiFlag> flags) {
+        return flags.contains(WifiFlag.NONE) && rsnSecurity.contains(WifiSecurity.NONE)
+                && wpaSecurity.contains(WifiSecurity.NONE);
+    }
+
+    private boolean isSecurityWEP(Set<WifiSecurity> rsnSecurity, Set<WifiSecurity> wpaSecurity, Set<WifiFlag> flags) {
+        return flags.contains(WifiFlag.PRIVACY) && rsnSecurity.contains(WifiSecurity.NONE)
+                && wpaSecurity.contains(WifiSecurity.NONE);
+    }
+
+    private boolean isSecurityWPA(Set<WifiSecurity> rsnSecurity, Set<WifiSecurity> wpaSecurity, Set<WifiFlag> flags) {
+        return flags.contains(WifiFlag.PRIVACY) && wpaSecurity.contains(WifiSecurity.KEY_MGMT_PSK);
+    }
+
+    private boolean isSecurityWPA2(Set<WifiSecurity> rsnSecurity, Set<WifiSecurity> wpaSecurity, Set<WifiFlag> flags) {
+        return flags.contains(WifiFlag.PRIVACY) && rsnSecurity.contains(WifiSecurity.KEY_MGMT_PSK);
+    }
+
+    private boolean isSecurityWPA2WPA3Enterprise(Set<WifiSecurity> rsnSecurity, Set<WifiSecurity> wpaSecurity,
+            Set<WifiFlag> flags) {
+        return flags.contains(WifiFlag.PRIVACY) && (rsnSecurity.contains(WifiSecurity.KEY_MGMT_802_1X));
     }
 
     private void setCiphers(GwtWifiHotspotEntry entryToModify, Set<WifiSecurity> wifiSecurity) {

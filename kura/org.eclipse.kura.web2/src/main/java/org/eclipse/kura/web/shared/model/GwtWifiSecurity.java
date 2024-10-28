@@ -18,16 +18,16 @@ public enum GwtWifiSecurity {
     netWifiSecurityWEP("WEP"),
     netWifiSecurityWPA("WPA"),
     netWifiSecurityWPA2("WPA2"),
-    netWifiSecurityWPA2WPA3Enterprise("WPA3"),
+    netWifiSecurityWPA2WPA3Enterprise("WPA2/WPA3-Enterprise"),
     netWifiSecurityWPA_WPA2("WPA/WPA2");
 
-    private String value;
+    String value;
 
     private GwtWifiSecurity(String value) {
         this.value = value;
     }
 
     public String value() {
-        return this.value;
+        return value;
     }
 }

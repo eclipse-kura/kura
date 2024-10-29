@@ -883,7 +883,7 @@ This object describes a Wifi Access Point. It can be used both for describing a 
       * array element type: `string (enumerated)`
           * [WifiSecurity](#wifisecurity)
 
-  * **Flags**: `array` 
+  * **flags**: `array` 
       The capabilities of the access point
 
       * array element type: `string (enumerated)`

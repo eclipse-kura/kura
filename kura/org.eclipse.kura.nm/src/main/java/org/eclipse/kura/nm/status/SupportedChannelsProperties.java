@@ -10,6 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
+
 package org.eclipse.kura.nm.status;
 
 import java.util.List;

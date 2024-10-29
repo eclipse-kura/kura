@@ -14,12 +14,12 @@
 
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" immediate="false" name="ModemGpsStatusTracker">
-   <implementation class="org.eclipse.kura.linux.position.ModemGpsStatusTracker"/>
+   <implementation class="org.eclipse.kura.linux.position.serial.ModemGpsStatusTracker"/>
    <service>
       <provide interface="org.osgi.service.event.EventHandler"/>
-      <provide interface="org.eclipse.kura.linux.position.ModemGpsStatusTracker"/>
+      <provide interface="org.eclipse.kura.linux.position.serial.ModemGpsStatusTracker"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.linux.position.ModemGpsStatusTracker"/>
+   <property name="service.pid" value="org.eclipse.kura.linux.position.serial.ModemGpsStatusTracker"/>
    <property name="event.topics" type="String">org/eclipse/kura/net/modem/gps/ENABLED
 org/eclipse/kura/net/modem/gps/DISABLED
    </property>

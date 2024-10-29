@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.linux.position.serial;
+package org.eclipse.kura.linux.position.provider;
 
 import static java.lang.Math.toRadians;
 

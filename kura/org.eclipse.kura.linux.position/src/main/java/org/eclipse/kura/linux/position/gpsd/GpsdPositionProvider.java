@@ -29,12 +29,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.eclipse.kura.linux.position.GpsDeviceAvailabilityListener;
-import org.eclipse.kura.linux.position.PositionProvider;
-import org.eclipse.kura.linux.position.PositionProviderType;
-import org.eclipse.kura.linux.position.PositionServiceOptions;
-import org.eclipse.kura.linux.position.serial.GpsDevice;
-import org.eclipse.kura.linux.position.serial.GpsDevice.Listener;
+import org.eclipse.kura.linux.position.options.PositionServiceOptions;
+import org.eclipse.kura.linux.position.provider.GpsDeviceAvailabilityListener;
+import org.eclipse.kura.linux.position.provider.LockStatusListener;
+import org.eclipse.kura.linux.position.provider.PositionProvider;
+import org.eclipse.kura.linux.position.provider.PositionProviderType;
 import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.osgi.util.measurement.Measurement;
@@ -64,7 +63,7 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     private GPSdEndpoint gpsEndpoint;
     private PositionServiceOptions configuration;
 
-    private Listener gpsDeviceListener;
+    private LockStatusListener gpsDeviceListener;
     private ScheduledExecutorService executor;
     private Future<?> checkFuture = CompletableFuture.completedFuture(null);
 
@@ -153,7 +152,7 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     }
 
     @Override
-    public void init(PositionServiceOptions configuration, Listener gpsDeviceListener,
+    public void init(PositionServiceOptions configuration, LockStatusListener gpsDeviceListener,
             GpsDeviceAvailabilityListener gpsDeviceAvailabilityListener) {
         stop();
 

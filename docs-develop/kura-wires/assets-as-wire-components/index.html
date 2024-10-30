@@ -2647,6 +2647,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#wire-asset-global-configuration-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Wire Asset global configuration parameters
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4381,6 +4390,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#wire-asset-global-configuration-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Wire Asset global configuration parameters
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4401,13 +4419,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h2 id="read-mode">Read mode</h2>
 <p>Every time a WireAsset receives an envelope on its input port, it will read the values of all of its channels with <code>READ</code> or <code>READ_WRITE</code> type. The result is emitted as a WireEnvelope with a single WireRecord. The WireRecord contains the following properties:</p>
 <ul>
-<li>a property with key <code>assetName</code>, value type <strong>STRING</strong> and the emitting asset asset name as value
-For each channel in asset configuration with <strong>READ</strong> or <strong>READ_WRITE</strong> type named <strong>name</strong>:</li>
+<li>a property with key <code>assetName</code>, value type <strong>STRING</strong> and the emitting asset asset name as value</li>
+<li>a property with key <code>assetError</code>, value type <strong>STRING</strong> if <strong>emit.errors</strong> and <strong>emit.connection.errors</strong> is enabled and a general connection failure is returned by the Driver. See the description of the <strong>emit.connection.errors</strong> parameter for more details.</li>
+<li>a property with key <code>assetTimestamp</code>, value type <strong>LONG</strong>, reporting a timestamp in milliseconds since Unix epoch (midnight, January 1, 1970 UTC). This property may be present or not depending on the value of the <strong>timestamp.mode</strong> configuration parameter or in case of general connection exception reported by the Driver, see the configuration parameter description for more details.</li>
+</ul>
+<p>For each channel in asset configuration with <strong>READ</strong> or <strong>READ_WRITE</strong> type named <strong>name</strong>:</p>
+<ul>
 <li>a property with key = <strong>name</strong>, value type = <strong>value.type</strong> in channel configuration and value = value obtained from read operation. This property will be present only if the read operation is successful.</li>
 <li>a property with key = <code>&lt;name&gt;_timestamp</code> value type = <code>LONG</code> reporting a timestamp in milliseconds since UNIX epoch. This property will be present only if the <strong>timestamp.mode</strong> Asset configuration property is set to <code>PER_CHANNEL</code></li>
 <li>a property with key = <code>&lt;name&gt;_error</code>, value type = <code>STRING</code> reporting an error message. This property will be present only if read operation fails and the <strong>emit.errors</strong> Asset configuration property is set to true.</li>
 </ul>
-<p>For example, if the Asset attached to the Modbus Driver shown in the picture below receives a WireEnvelope on its input port, it can emit an envelope with the following content, assuming that the read operation for each channel succeed:</p>
+<p>For example, if an Asset that has the channel configuration shown in the picture below receives a WireEnvelope on its input port, it can emit an envelope with the following content, assuming that the read operation for each channel succeed:</p>
 <p><img alt="WireAsset Read Example" src="../images/asset-read-example.png" /></p>
 <ul>
 <li><strong>WireEnvelope</strong><ul>
@@ -4491,6 +4513,53 @@ If a channel with name <code>&lt;key&gt;</code> is defined in asset configuratio
 <li>The <strong>Toggle-4</strong>: <code>true</code> property will have no effect, since the asset contains a channel named <code>Toggle-4</code>, with <strong>value.type</strong> = <code>BOOLEAN</code> but <strong>type</strong>  = <code>READ</code> != <code>WRITE</code> | <code>READ_WRITE</code></li>
 <li>The  <strong>foo</strong>: <code>bar</code> property will have no effect, since none of the defined channels has <code>foo</code> as <strong>name</strong>.</li>
 <li>The Asset will read and emit all of the channel values with <strong>type</strong> = <code>READ</code> or <code>READ_WRITE</code>, since a WireEnvelope has been received.</li>
+</ul>
+<h2 id="wire-asset-global-configuration-parameters">Wire Asset global configuration parameters</h2>
+<p>The WireAsset component provides the following global (non per-channel) configuration parameters that can be used to customize component behavior:</p>
+<ul>
+<li>
+<p><strong>emit.all.channels</strong>: Specifies whether the values of all READ or READ_WRITE channels should be emitted when a channel event is received in listen mode. If set to true, the values for all channels will be read and emitted, if set to false, only the value for the channel related to the event will be emitted.</p>
+</li>
+<li>
+<p><strong>timestamp.mode</strong>: Allows to configure how timestamps are emitted, the following modes are supported:</p>
+<ul>
+<li>
+<p><strong>NO_TIMESTAMPS</strong>: no timestamp-related properties will be emitted.</p>
+</li>
+<li>
+<p><strong>PER_CHANNEL</strong>: the component will emit a driver-generated timestamp property per channel, as the value of the <code>&lt;channel name&gt;_timestamp</code> property.</p>
+</li>
+<li>
+<p><strong>SINGLE_ASSET_GENERATED</strong>: the component will emit a single timestamp per request, generated by the Asset itself before emitting the envelope as the value of the <code>assetTimestamp</code> property.</p>
+</li>
+<li>
+<p><strong>SINGLE_DRIVER_GENERATED_MAX</strong> and <strong>SINGLE_DRIVER_GENERATED_MIN</strong>: the component will emit a single driver generated timestamp being respectively the max (most recent) or min (oldest) among the timestamps of the channels as the value of the <code>assetTimestamp</code> property.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>emit.errors</strong>: Specifies whether channel specific errors should be included or not in emitted envelopes. If enabled, the component will add an additional property per channel, named <code>&lt;channel_name&gt;_error</code>. If the channel operation fails, the property value will be an error message reported by the Driver, if the operation succeeds the property value will be the empty string.</p>
+</li>
+<li>
+<p><strong>emit.connection.errors</strong>: Specifies whether the component should emit an envelope in case of a general connection exception reported by the Driver (for example due to the fact that the connection with a remote device cannot be established). The error message associated with the exception will be emitted in a property named <code>assetError</code>. In case of connection exception, channel values are not available and no channel related properties will be emitted. If the <strong>timestamp.mode</strong> property is set to a value other than <strong>NO_TIMESTAMPS</strong>, the component will also emit a <code>assetTimestamp</code> property reporting current system time. This property will be ignored if <strong>emit.errors</strong> is disabled. Example of emitted envelope contents:</p>
+</li>
+<li>
+<p><strong>WireEnvelope</strong></p>
+<ul>
+<li><strong>WireRecord[0]</strong><ul>
+<li><strong>assetName</strong>: <code>myAsset</code> (type = <code>STRING</code>)</li>
+<li><strong>assetError</strong>: <code>Connection refused</code> (type = <code>STRING</code>)</li>
+<li><strong>assetTimestamp</strong>: <code>1597925200</code> (type = <code>LONG</code>)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>emit.on.change</strong>: If set to true, this component will include a channel value in the output emitted in Kura Wires only if it differs from the last emitted value for that channel. Channel errors will always be emitted if <strong>emit.errors</strong> is set to <code>true</code>. If as a result of a read operation no changes are detected in any referenced channel, the Asset will emit an envelope containing no channel values, unless <strong>emit.empty.envelopes</strong> is set to <code>false</code>.</p>
+</li>
+<li>
+<p><strong>emit.empty.envelopes</strong>: If set to false, this component will not emit empty envelopes.</p>
+</li>
 </ul>
 
 

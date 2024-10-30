@@ -5,7 +5,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -22,12 +21,8 @@ import org.junit.Test;
 import org.osgi.util.measurement.Measurement;
 import org.osgi.util.measurement.Unit;
 import org.osgi.util.position.Position;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class MMPositionProviderTest {
-
-    private static final Logger logger = LoggerFactory.getLogger(MMPositionProviderTest.class);
 
     MMPositionProvider provider;
     NMDbusConnector mockNmDbusConnector;
@@ -36,19 +31,19 @@ public class MMPositionProviderTest {
     @Test
     public void shouldRetrieveCorrectPosition() throws InterruptedException {
 
-        givenModemManagerFakeLocation();
+        givenModemManagerFakeLocation(39.5, 9.7, 4.5);
         givenPositionProviderWithMockDbusConnector();
         givenProviderInitAndStart();
 
         whenServiceAskForPosition();
 
-        thenPositionIsCorrect(0, 0, 0, 0, 0);
+        thenPositionIsCorrect(39.5, 9.7, 4.5, 0, 10.2);
     }
 
     /*
      * The return location is a gps point in Rome retrieved with {@link https://nmeagen.org/}
      */
-    private void givenModemManagerFakeLocation() {
+    private void givenModemManagerFakeLocation(double lat, double lon, double alt) {
 
         Scanner scanner = new Scanner(MMPositionProviderTest.class.getResourceAsStream("/fakeNmeaSentences.txt"),
                 "UTF-8");
@@ -59,6 +54,15 @@ public class MMPositionProviderTest {
         Map<UInt32, Variant<?>> variantMap = new HashMap<>();
         variantMap.put(new UInt32(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA.getValue()),
                 new Variant<>(locationString));
+
+        Map<String, Variant<?>> rawLocationMap = new HashMap<>();
+        rawLocationMap.put("latitude", new Variant<>(lat, Double.class));
+        rawLocationMap.put("longitude", new Variant<>(lon, Double.class));
+        rawLocationMap.put("altitude", new Variant<>(alt, Double.class));
+
+        variantMap.put(new UInt32(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW.getValue()),
+                new Variant<>(rawLocationMap, "a{sv}"));
+
         when(mockLocation.GetLocation()).thenReturn(variantMap);
 
         NMDbusConnector dbusConnector = mock(NMDbusConnector.class);
@@ -71,25 +75,28 @@ public class MMPositionProviderTest {
         this.provider = new MMPositionProvider(this.mockNmDbusConnector);
     }
 
-    private void givenProviderInitAndStart() throws InterruptedException {
-        this.provider.init(new PositionServiceOptions(Collections.emptyMap()), mock(LockStatusListener.class),
-                mock(GpsDeviceAvailabilityListener.class));
+    private void givenProviderInitAndStart() {
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("modem.manager.refresh.rate.seconds", 1);
+        PositionServiceOptions options = new PositionServiceOptions(properties);
+
+        this.provider.init(options, mock(LockStatusListener.class), mock(GpsDeviceAvailabilityListener.class));
         this.provider.start();
     }
 
     private void whenServiceAskForPosition() throws InterruptedException {
-        Thread.sleep(100000);
+        Thread.sleep(3000);
         this.retrievedPosition = this.provider.getPosition();
     }
 
     private void thenPositionIsCorrect(double lat, double lon, double alt, double speed, double track) {
-        logger.error("\n\n{}\n\n", this.retrievedPosition);
 
-        assertEquals(this.retrievedPosition.getLatitude(), new Measurement(lat, Unit.rad));
-        assertEquals(this.retrievedPosition.getLongitude(), new Measurement(lon, Unit.rad));
-        assertEquals(this.retrievedPosition.getAltitude(), new Measurement(alt, Unit.m));
-        assertEquals(this.retrievedPosition.getSpeed(), new Measurement(speed, Unit.m_s));
-        assertEquals(this.retrievedPosition.getTrack(), new Measurement(track, Unit.rad));
+        assertEquals(new Measurement(Math.toRadians(lat), Unit.rad), this.retrievedPosition.getLatitude());
+        assertEquals(new Measurement(Math.toRadians(lon), Unit.rad), this.retrievedPosition.getLongitude());
+        assertEquals(new Measurement(Math.toRadians(alt), Unit.m), this.retrievedPosition.getAltitude());
+        assertEquals(new Measurement(speed, Unit.m_s), this.retrievedPosition.getSpeed());
+        assertEquals(new Measurement(Math.toRadians(track), Unit.rad), this.retrievedPosition.getTrack());
     }
 
 }

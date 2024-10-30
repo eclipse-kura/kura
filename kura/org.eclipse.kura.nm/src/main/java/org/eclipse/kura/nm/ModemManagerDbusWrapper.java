@@ -13,7 +13,6 @@
 package org.eclipse.kura.nm;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -24,10 +23,8 @@ import java.util.Set;
 
 import org.eclipse.kura.nm.enums.MMModemLocationSource;
 import org.eclipse.kura.nm.enums.MMModemState;
-import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.eclipse.kura.nm.signal.handlers.NMModemResetHandler;
 import org.eclipse.kura.nm.status.SimProperties;
-import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
@@ -36,7 +33,6 @@ import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.modemmanager1.Modem;
 import org.freedesktop.modemmanager1.modem.Location;
-import org.freedesktop.networkmanager.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,44 +54,6 @@ public class ModemManagerDbusWrapper {
 
     public ModemManagerDbusWrapper(DBusConnection dbusConnection) {
         this.dbusConnection = dbusConnection;
-    }
-
-    public Map<String, Modem> getEnabledModems() {
-
-        Map<String, Modem> modemList = new HashMap<>();
-
-        try {
-
-            NetworkManager networkManager = dbusConnection.getRemoteObject(NETWORK_MANAGER_BUS_NAME,
-                    "/org/freedesktop/NetworkManager", NetworkManager.class);
-            for (DBusPath dbusPath : networkManager.GetAllDevices()) {
-                Device device = dbusConnection.getRemoteObject(NETWORK_MANAGER_BUS_NAME, dbusPath.getPath(),
-                        Device.class);
-                Properties props = dbusConnection.getRemoteObject(NETWORK_MANAGER_BUS_NAME, device.getObjectPath(),
-                        Properties.class);
-
-                if (NMDeviceType.fromUInt32(props.Get(MM_DEVICE_NAME, "DeviceType"))
-                        .equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
-
-                    String modemPath = (String) props.Get("org.freedesktop.NetworkManager.Device", "Udi");
-                    Modem modem = dbusConnection.getRemoteObject(MODEM_MANAGER_BUS_NAME, modemPath, Modem.class);
-                    Properties modemProperties = dbusConnection.getRemoteObject(MODEM_MANAGER_BUS_NAME,
-                            modem.getObjectPath(), Properties.class);
-
-                    if (MMModemState.toMMModemState(modemProperties.Get(MM_MODEM_NAME, MM_MODEM_PROPERTY_STATE))
-                            .equals(MMModemState.MM_MODEM_STATE_CONNECTED)) {
-
-                        modemList.put(modemPath, modem);
-                    }
-                }
-            }
-
-        } catch (DBusException ex) {
-            logger.warn("Impossible to retrieve modems list due to ", ex);
-            return Collections.emptyMap();
-        }
-
-        return modemList;
     }
 
     protected void setGPS(Optional<String> modemDevicePath, Optional<Boolean> enableGPS, Optional<String> gpsModeString)
@@ -168,6 +126,23 @@ public class ModemManagerDbusWrapper {
             logger.info("Modem {} not enabled. Enabling modem...", modemDevicePath);
             modem.Enable(true);
         }
+    }
+
+    public Modem getModem(String modemPath) throws DBusException {
+        return dbusConnection.getRemoteObject(MODEM_MANAGER_BUS_NAME, modemPath, Modem.class);
+    }
+
+    public Location getModemManagerLocation(String modemPath) throws DBusException {
+        return dbusConnection.getRemoteObject("org.freedesktop.ModemManager1", modemPath, Location.class);
+    }
+
+    public Properties getLocationProperties(Location location) throws DBusException {
+        return dbusConnection.getRemoteObject("org.freedesktop.ModemManager1", location.getObjectPath(),
+                Properties.class);
+    }
+
+    public MMModemState getMMModemState(Properties modemProperties) {
+        return MMModemState.toMMModemState(modemProperties.Get(MM_MODEM_NAME, MM_MODEM_PROPERTY_STATE));
     }
 
     public Optional<Properties> getModemProperties(String modemPath) throws DBusException {

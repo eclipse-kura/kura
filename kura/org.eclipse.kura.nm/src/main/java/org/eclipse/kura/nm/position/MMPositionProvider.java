@@ -16,7 +16,6 @@ package org.eclipse.kura.nm.position;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,16 +31,13 @@ import org.eclipse.kura.linux.position.provider.NMEAParser;
 import org.eclipse.kura.linux.position.provider.NMEAParser.ParseException;
 import org.eclipse.kura.linux.position.provider.PositionProvider;
 import org.eclipse.kura.linux.position.provider.PositionProviderType;
-import org.eclipse.kura.nm.ModemManagerDbusWrapper;
+import org.eclipse.kura.nm.NMDbusConnector;
 import org.eclipse.kura.nm.enums.MMModemLocationSource;
 import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
-import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
-import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
-import org.freedesktop.modemmanager1.Modem;
 import org.freedesktop.modemmanager1.modem.Location;
 import org.osgi.util.position.Position;
 import org.slf4j.Logger;
@@ -53,10 +49,7 @@ public class MMPositionProvider implements PositionProvider {
 
     private DateTimeFormatter nmeaDateTimePattern = DateTimeFormatter.ofPattern("ddMMyy hhmmss");
 
-    private final DBusConnection dbusConnection;
-    private final ModemManagerDbusWrapper mmWrapper;
-
-    Map<String, Modem> gpsEnabledModems;
+    private final NMDbusConnector nmDbusConnector;
 
     LockStatusListener gpsDeviceListener;
 
@@ -66,23 +59,18 @@ public class MMPositionProvider implements PositionProvider {
     NMEAParser nmeaParser = new NMEAParser();
 
     public MMPositionProvider() throws DBusException {
-        this.dbusConnection = DBusConnection.getConnection(DBusConnection.DEFAULT_SYSTEM_BUS_ADDRESS);
-        this.mmWrapper = new ModemManagerDbusWrapper(this.dbusConnection);
+        this.nmDbusConnector = NMDbusConnector.getInstance();
+    }
+
+    public MMPositionProvider(NMDbusConnector connector) {
+        this.nmDbusConnector = connector;
     }
 
     @Override
     public void start() {
 
-        this.positionRefreshTask = null;
-
-        this.gpsEnabledModems = getGpsEnabledMap();
-
-        if (!this.gpsEnabledModems.isEmpty()) {
-            this.positionRefreshTask = Executors.newSingleThreadScheduledExecutor();
-            this.positionRefreshTask.scheduleAtFixedRate(this::getModemManagerLocation, 0, refreshRate,
-                    TimeUnit.SECONDS);
-        }
-
+        this.positionRefreshTask = Executors.newSingleThreadScheduledExecutor();
+        this.positionRefreshTask.scheduleAtFixedRate(this::getModemManagerLocation, 0, refreshRate, TimeUnit.SECONDS);
     }
 
     @Override
@@ -153,52 +141,21 @@ public class MMPositionProvider implements PositionProvider {
         return this.nmeaParser.getGnssTypes();
     }
 
-    private Map<String, Modem> getGpsEnabledMap() {
-
-        Map<String, Modem> gpsEnabledMap = new HashMap<>();
-
-        for (Map.Entry<String, Modem> entryMap : this.mmWrapper.getEnabledModems().entrySet()) {
-            try {
-                String modemPath = entryMap.getKey();
-                Modem modem = entryMap.getValue();
-
-                Location location = dbusConnection.getRemoteObject("org.freedesktop.ModemManager1", modemPath,
-                        Location.class);
-
-                Properties locationProps = dbusConnection.getRemoteObject("org.freedesktop.ModemManager1",
-                        location.getObjectPath(), Properties.class);
-
-                Set<MMModemLocationSource> sources = MMModemLocationSource.toMMModemLocationSourceFromBitMask(
-                        locationProps.Get("org.freedesktop.ModemManager1.Modem.Location", "Enabled"));
-                if (sources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA)
-                        && sources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW)) {
-                    gpsEnabledMap.put(modemPath, modem);
-                }
-            } catch (DBusException e) {
-                logger.debug("Impossible to retrieve information regarding modem: {}", entryMap.getKey());
-            }
-        }
-
-        return gpsEnabledMap;
-    }
-
     private void getModemManagerLocation() {
 
-        for (Map.Entry<String, Modem> entry : this.gpsEnabledModems.entrySet()) {
-            try {
-                Location location = dbusConnection.getRemoteObject("org.freedesktop.ModemManager1", entry.getKey(),
-                        Location.class);
-                Map<UInt32, Variant<?>> locationData = location.GetLocation();
+        List<Location> availableLocations = this.nmDbusConnector.getAvailableMMLocations();
 
-                for (Map.Entry<UInt32, Variant<?>> locationEntry : locationData.entrySet()) {
-                    if (MMModemLocationSource.toMMModemLocationSource(locationEntry.getKey())
-                            .equals(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA)) {
+        for (Location location : availableLocations) {
+            Map<UInt32, Variant<?>> locationMap = location.GetLocation();
+            UInt32 nmeaLocationType = new UInt32(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA.getValue());
 
-                        parseNmeaLocation(locationEntry.getValue());
-                    }
-                }
-            } catch (DBusException ex) {
-                logger.warn("Impossible to retrieve location from modem {}", entry.getKey());
+            if (locationMap.containsKey(nmeaLocationType)) {
+                Variant<?> locationData = locationMap.get(nmeaLocationType);
+                parseNmeaLocation(locationData);
+            }
+
+            if (this.nmeaParser.isValidPosition()) {
+                return;
             }
         }
     }
@@ -220,7 +177,6 @@ public class MMPositionProvider implements PositionProvider {
                 logger.error("Error parsing sentence {}", sentence.substring(0, 6));
             }
         });
-
     }
 
 }

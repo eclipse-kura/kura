@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,10 +17,12 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.log.LogEntry;
 import org.eclipse.kura.log.LogProvider;
+import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtLogEntry;
@@ -38,6 +40,8 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
 
     private static final LogEntriesCache cache = new LogEntriesCache();
     private static final List<String> registeredLogProviders = new LinkedList<>();
+
+    private static SystemService systemService;
 
     @Override
     public List<String> initLogProviders(GwtXSRFToken xsrfToken) throws GwtKuraException {
@@ -90,6 +94,16 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
                     logger.info("LogProvider {} no more available.", pid);
                 }
             }
+
+            Optional<String> defaultLogManager = getDefaultLogManager();
+            if (defaultLogManager.isPresent() && !registeredLogProviders.isEmpty()
+                    && !registeredLogProviders.get(0).equals(defaultLogManager.get())) {
+                String logManager = defaultLogManager.get();
+                if (registeredLogProviders.contains(logManager)) {
+                    registeredLogProviders.remove(logManager);
+                    registeredLogProviders.add(0, logManager);
+                }
+            }
         } catch (GwtKuraException e) {
             logger.error("Error loading log providers.");
         }
@@ -103,6 +117,19 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
         } catch (Exception ex) {
             return time;
         }
+    }
+
+    private Optional<String> getDefaultLogManager() {
+        Optional<String> defaultLogManager = Optional.empty();
+        try {
+            SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
+            if (systemService != null) {
+                defaultLogManager = systemService.getDefaultLogManager();
+            }
+        } catch (GwtKuraException e) {
+            logger.error("Error retrieving default LogManager name", e);
+        }
+        return defaultLogManager;
     }
 
     private static final class LogEntriesCache {

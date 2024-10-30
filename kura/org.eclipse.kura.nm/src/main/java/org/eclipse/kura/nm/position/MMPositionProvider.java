@@ -15,20 +15,16 @@ package org.eclipse.kura.nm.position;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.eclipse.kura.linux.position.options.PositionServiceOptions;
 import org.eclipse.kura.linux.position.provider.GpsDeviceAvailabilityListener;
 import org.eclipse.kura.linux.position.provider.LockStatusListener;
-import org.eclipse.kura.linux.position.provider.NMEAParser;
-import org.eclipse.kura.linux.position.provider.NMEAParser.ParseException;
 import org.eclipse.kura.linux.position.provider.PositionProvider;
 import org.eclipse.kura.linux.position.provider.PositionProviderType;
 import org.eclipse.kura.nm.NMDbusConnector;
@@ -46,6 +42,10 @@ import org.slf4j.LoggerFactory;
 public class MMPositionProvider implements PositionProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(MMPositionProvider.class);
+    private static final UInt32 NMEA_LOCATION_SOURCE = new UInt32(
+            MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA.getValue());
+    private static final UInt32 RAW_LOCATION_SOURCE = new UInt32(
+            MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW.getValue());
 
     private DateTimeFormatter nmeaDateTimePattern = DateTimeFormatter.ofPattern("ddMMyy hhmmss");
 
@@ -56,7 +56,7 @@ public class MMPositionProvider implements PositionProvider {
     ScheduledExecutorService positionRefreshTask;
     private int refreshRate;
 
-    NMEAParser nmeaParser = new NMEAParser();
+    private final MMLocationParser mmLocationParser = new MMLocationParser();
 
     public MMPositionProvider() throws DBusException {
         this.nmDbusConnector = NMDbusConnector.getInstance();
@@ -87,39 +87,37 @@ public class MMPositionProvider implements PositionProvider {
 
     @Override
     public Position getPosition() {
-        return this.nmeaParser.getPosition();
+        return this.mmLocationParser.getPosition();
     }
 
     @Override
     public NmeaPosition getNmeaPosition() {
-        return this.nmeaParser.getNmeaPosition();
+        throw new UnsupportedOperationException("NmeaPosition not available on ModemManagaer provider");
     }
 
     @Override
     public String getNmeaTime() {
-        return this.nmeaParser.getTimeNmea();
+        throw new UnsupportedOperationException("NmeaTime not available on ModemManagaer provider");
     }
 
     @Override
     public String getNmeaDate() {
-        return this.nmeaParser.getDateNmea();
+        throw new UnsupportedOperationException("NmeaDate not available on ModemManagaer provider");
     }
 
     @Override
     public LocalDateTime getDateTime() {
-        String nmeaDateTime = this.getNmeaDate() + " " + this.getNmeaTime();
-        return LocalDateTime.parse(nmeaDateTime, nmeaDateTimePattern);
+        return this.mmLocationParser.getLocalDateTime();
     }
 
     @Override
     public boolean isLocked() {
-        return this.nmeaParser.isValidPosition();
+        return this.mmLocationParser.isFixed();
     }
 
     @Override
     public String getLastSentence() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("LastSentence not available on ModemManagaer provider");
     }
 
     @Override
@@ -138,7 +136,7 @@ public class MMPositionProvider implements PositionProvider {
 
     @Override
     public Set<GNSSType> getGnssTypes() {
-        return this.nmeaParser.getGnssTypes();
+        return this.mmLocationParser.getGnssTypes();
     }
 
     private void getModemManagerLocation() {
@@ -147,36 +145,14 @@ public class MMPositionProvider implements PositionProvider {
 
         for (Location location : availableLocations) {
             Map<UInt32, Variant<?>> locationMap = location.GetLocation();
-            UInt32 nmeaLocationType = new UInt32(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA.getValue());
+            if (locationMap.containsKey(NMEA_LOCATION_SOURCE) && locationMap.containsKey(RAW_LOCATION_SOURCE)) {
+                Variant<?> nmeaData = locationMap.get(NMEA_LOCATION_SOURCE);
+                this.mmLocationParser.parseNmeaLocation(nmeaData);
 
-            if (locationMap.containsKey(nmeaLocationType)) {
-                Variant<?> locationData = locationMap.get(nmeaLocationType);
-                parseNmeaLocation(locationData);
-            }
-
-            if (this.nmeaParser.isValidPosition()) {
-                return;
+                Variant<?> rawData = locationMap.get(RAW_LOCATION_SOURCE);
+                this.mmLocationParser.parseRawLocation(rawData);
             }
         }
-    }
-
-    private void parseNmeaLocation(Variant<?> locationVariant) {
-        String locationString = ((CharSequence) locationVariant.getValue()).toString();
-
-        List<String> nmeaSentences = Arrays.asList(locationString.split("\\r?\\n|\\r")).stream().filter(sentence -> {
-            return !sentence.isEmpty();
-        }).collect(Collectors.toList());
-
-        nmeaSentences.stream().forEach(sentence -> {
-            try {
-                this.nmeaParser.parseSentence(sentence);
-                if (this.gpsDeviceListener != null) {
-                    this.gpsDeviceListener.newNmeaSentence(sentence);
-                }
-            } catch (ParseException e) {
-                logger.error("Error parsing sentence {}", sentence.substring(0, 6));
-            }
-        });
     }
 
 }

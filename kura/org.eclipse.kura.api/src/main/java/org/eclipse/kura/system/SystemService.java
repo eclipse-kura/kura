@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -115,7 +115,7 @@ public interface SystemService {
      * @since 2.2
      */
     public static final String KEY_LEGACY_BT_BEACON_SCAN = "kura.legacy.bluetooth.beacon.scan";
-    
+
     /**
      * @since 2.3
      */
@@ -130,6 +130,11 @@ public interface SystemService {
      * @since 2.6
      */
     public static final String KEY_JDK_VENDOR_VERSION = "jdk.vendor.version";
+
+    /**
+     * @since 2.8
+     */
+    public static final String KEY_DEFAULT_LOG_MANAGER = "kura.default.log.manager";
 
     /**
      * @deprecated
@@ -579,7 +584,7 @@ public interface SystemService {
      * @return if the legacy beacon scan has to be used
      */
     public boolean isLegacyBluetoothBeaconScan();
-    
+
     /**
      * Returns true (default) if the PPP logging in separate log file in /var/log is enabled.
      *
@@ -605,5 +610,13 @@ public interface SystemService {
      * @return the String representing the Java System property jdk.vendor.version.
      */
     public String getJdkVendorVersion();
+
+    /**
+     * Returns the name of the default LogManager, if any.
+     *
+     * @since 2.8
+     * @return the optional default LogManager
+     */
+    public Optional<String> getDefaultLogManager();
 
 }

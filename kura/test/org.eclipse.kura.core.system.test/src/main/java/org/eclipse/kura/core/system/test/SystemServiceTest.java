@@ -12,14 +12,13 @@
  *******************************************************************************/
 package org.eclipse.kura.core.system.test;
 
-import org.eclipse.kura.core.testutil.TestUtil;
-import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandExecutorService;
-import org.eclipse.kura.executor.CommandStatus;
-import org.eclipse.kura.system.SystemService;
-import org.eclipse.kura.test.annotation.TestTarget;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -31,12 +30,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.test.annotation.TestTarget;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class SystemServiceTest {
 
@@ -366,6 +367,12 @@ public class SystemServiceTest {
         } else {
             assertEquals(UNKNOWN, serialNumber);
         }
+    }
+
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void shouldGetDefaultLogManagerProperty() {
+        assertFalse(systemService.getDefaultLogManager().isPresent());
     }
 
 }

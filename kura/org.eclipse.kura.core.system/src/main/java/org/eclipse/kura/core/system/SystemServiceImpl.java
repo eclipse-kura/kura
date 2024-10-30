@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -65,20 +65,13 @@ import org.slf4j.LoggerFactory;
 
 public class SystemServiceImpl extends SuperSystemService implements SystemService {
 
-    private static final String PROPERTY_PROVIDER_SUFFIX = ".provider";
-
-    private static final String DMIDECODE_COMMAND = "dmidecode -t system";
-
-    private static final String SPACES_REGEX = ":\\s+";
-
-    private static final String BIN_SH = "/bin/sh";
-
-    private static final String LINUX_2_6_34_12_WR4_3_0_0_STANDARD = "2.6.34.12-WR4.3.0.0_standard";
-
-    private static final String LINUX_2_6_34_9_WR4_2_0_0_STANDARD = "2.6.34.9-WR4.2.0.0_standard";
-
     private static final Logger logger = LoggerFactory.getLogger(SystemServiceImpl.class);
-
+    private static final String PROPERTY_PROVIDER_SUFFIX = ".provider";
+    private static final String DMIDECODE_COMMAND = "dmidecode -t system";
+    private static final String SPACES_REGEX = ":\\s+";
+    private static final String BIN_SH = "/bin/sh";
+    private static final String LINUX_2_6_34_12_WR4_3_0_0_STANDARD = "2.6.34.12-WR4.3.0.0_standard";
+    private static final String LINUX_2_6_34_9_WR4_2_0_0_STANDARD = "2.6.34.9-WR4.2.0.0_standard";
     private static final String CLOUDBEES_SECURITY_SETTINGS_PATH = "/private/eurotech/settings-security.xml";
     private static final String LOG4J_CONFIGURATION = "log4j.configuration";
     private static final String DPA_CONFIGURATION = "dpa.configuration";
@@ -1527,6 +1520,11 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         }
 
         return System.getProperty(KEY_JDK_VENDOR_VERSION);
+    }
+
+    @Override
+    public Optional<String> getDefaultLogManager() {
+        return getProperty(KEY_DEFAULT_LOG_MANAGER);
     }
 
 }

@@ -89,7 +89,6 @@ public class MMPositionProviderTest {
     }
 
     private void givenProviderInitAndStart() {
-
         Map<String, Object> properties = new HashMap<>();
         properties.put("modem.manager.refresh.rate.seconds", 1);
         PositionServiceOptions options = new PositionServiceOptions(properties);
@@ -104,7 +103,6 @@ public class MMPositionProviderTest {
     }
 
     private void thenPositionIsCorrect(double lat, double lon, double alt, double speed, double track) {
-
         assertEquals(new Measurement(Math.toRadians(lat), Unit.rad), this.retrievedPosition.getLatitude());
         assertEquals(new Measurement(Math.toRadians(lon), Unit.rad), this.retrievedPosition.getLongitude());
         assertEquals(new Measurement(Math.toRadians(alt), Unit.m), this.retrievedPosition.getAltitude());

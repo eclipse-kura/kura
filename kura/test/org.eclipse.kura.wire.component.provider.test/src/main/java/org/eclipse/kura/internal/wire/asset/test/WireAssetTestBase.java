@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.channel.ChannelType;
 import org.eclipse.kura.channel.ScaleOffsetType;
 import org.eclipse.kura.driver.Driver;
+import org.eclipse.kura.driver.Driver.ConnectionException;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -83,6 +84,8 @@ public class WireAssetTestBase {
 
     protected void givenAssetConfig(final Map<String, Object> assetConfig) {
         try {
+            assetConfig.put("driver.pid", "testDriver");
+
             if (driverRegistration.isPresent()) {
                 driverRegistration.get().unregister();
             }
@@ -120,7 +123,7 @@ public class WireAssetTestBase {
             try {
                 this.driver.preparedReadCalled.get(30, TimeUnit.SECONDS);
             } catch (Exception e) {
-                fail("driver not ready");
+                fail("driver not ready " + e);
             }
 
             final long listenChannelCount = assetConfig.keySet().stream().filter(k -> {
@@ -155,6 +158,14 @@ public class WireAssetTestBase {
         }
     }
 
+    protected void givenConnectionException(final ConnectionException e) {
+        this.driver.throwConnectionException(Optional.of(e));
+    }
+
+    protected void givenNoConnectionException() {
+        this.driver.throwConnectionException(Optional.empty());
+    }
+
     protected void whenAssetReceivesEnvelope() {
 
         this.testEmitter.emit();
@@ -177,7 +188,7 @@ public class WireAssetTestBase {
         }
     }
 
-    protected void awaitEnvelope(final int index) {
+    protected WireEnvelope awaitEnvelope(final int index) {
         synchronized (this.envelopes) {
             if (index >= this.envelopes.size()) {
                 try {
@@ -188,8 +199,11 @@ public class WireAssetTestBase {
 
                 if (index >= this.envelopes.size()) {
                     fail("expected to receive at least " + (index + 1) + " envelopes");
+                    throw new IllegalStateException("Unreachable");
                 }
             }
+
+            return this.envelopes.get(index);
         }
     }
 
@@ -244,4 +258,13 @@ public class WireAssetTestBase {
         assertEquals(expectedCount, this.envelopes.size());
     }
 
+    protected Map<String, Object> map(final Object... values) {
+        final Map<String, Object> result = new HashMap<>();
+
+        for (int i = 0; i < values.length; i += 2) {
+            result.put((String) values[i], values[i + 1]);
+        }
+
+        return result;
+    }
 }

@@ -19,6 +19,7 @@ import static org.eclipse.kura.channel.ChannelType.READ_WRITE;
 import static org.eclipse.kura.channel.ChannelType.WRITE;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,6 +28,7 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.AssetConfiguration;
 import org.eclipse.kura.asset.provider.BaseAsset;
 import org.eclipse.kura.channel.Channel;
@@ -36,6 +38,7 @@ import org.eclipse.kura.channel.listener.ChannelEvent;
 import org.eclipse.kura.channel.listener.ChannelListener;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
+import org.eclipse.kura.driver.Driver.ConnectionException;
 import org.eclipse.kura.driver.PreparedRead;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -249,8 +252,34 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
                 emitChannelRecords(readAllChannels());
             } catch (final Exception e) {
                 logger.error("Error while performing read from the Wire Asset: {}", getKuraServicePid(), e);
+                if (this.options.emitErrors() && this.options.emitConnectionErrors()) {
+                    emitAssetError(e);
+                }
             }
         }
+    }
+
+    private void emitAssetError(final Throwable e) {
+        if (e instanceof KuraException && e.getCause() instanceof ConnectionException) {
+            emitAssetError(e.getCause());
+            return;
+        }
+
+        final Map<String, TypedValue<?>> wireRecordProperties = new HashMap<>();
+
+        final String message = e.getMessage();
+
+        wireRecordProperties.put(WireAssetConstants.PROP_ASSET_NAME.value(),
+                TypedValues.newStringValue(getKuraServicePid()));
+        wireRecordProperties.put(WireAssetConstants.PROP_ASSET_ERROR.value(),
+                TypedValues.newStringValue(message != null ? message : e.getClass().getSimpleName()));
+
+        if (options.getTimestampMode() != TimestampMode.NO_TIMESTAMPS) {
+            wireRecordProperties.put(WireAssetConstants.PROP_SINGLE_TIMESTAMP_NAME.value(),
+                    TypedValues.newLongValue(System.currentTimeMillis()));
+        }
+
+        this.wireSupport.emit(Collections.singletonList(new WireRecord(wireRecordProperties)));
     }
 
     /**

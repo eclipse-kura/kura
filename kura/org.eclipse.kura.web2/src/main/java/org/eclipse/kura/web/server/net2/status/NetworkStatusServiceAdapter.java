@@ -166,7 +166,7 @@ public class NetworkStatusServiceAdapter {
                 try {
                     parseAndSetWifiSecurity(entry, ap);
                 } catch (IllegalArgumentException e) {
-                    logger.warn("Cannot parse wifi security flags", e);
+                    logger.warn("Access point security not recognized or supported.");
                     continue;
                 }
                 entry.setChannel(ap.getChannel().getChannel());

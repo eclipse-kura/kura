@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,12 +20,14 @@ class WireAssetOptions {
     public static final String EMIT_ALL_CHANNELS_PROP_NAME = "emit.all.channels";
     public static final String TIMESTAMP_MODE_PROP_NAME = "timestamp.mode";
     public static final String EMIT_ERRORS_PROP_NAME = "emit.errors";
+    public static final String EMIT_CONNECTION_ERRORS_PROP_NAME = "emit.connection.errors";
     public static final String EMIT_ON_CHANGE_PROP_NAME = "emit.on.change";
     public static final String EMIT_EMPTY_ENVELOPES_PROP_NAME = "emit.empty.envelopes";
 
     private boolean emitAllChannels;
     private TimestampMode timestampMode;
     private boolean emitErrors;
+    private boolean emitConnectionErrors;
     private boolean emitOnChange;
     private boolean emitEmptyEnvelopes;
 
@@ -35,11 +37,13 @@ class WireAssetOptions {
     public WireAssetOptions(Map<String, Object> properties) {
         final Object emitAllChannelsProp = properties.get(EMIT_ALL_CHANNELS_PROP_NAME);
         final Object emitErrorsProp = properties.get(EMIT_ERRORS_PROP_NAME);
+        final Object emitConnectionErrorsProp = properties.get(EMIT_CONNECTION_ERRORS_PROP_NAME);
         final Object emitOnChangeProp = properties.get(EMIT_ON_CHANGE_PROP_NAME);
         final Object emitEmptyEnvelopesProp = properties.get(EMIT_EMPTY_ENVELOPES_PROP_NAME);
 
         this.emitAllChannels = emitAllChannelsProp instanceof Boolean && (Boolean) emitAllChannelsProp;
         this.emitErrors = emitErrorsProp instanceof Boolean && (Boolean) emitErrorsProp;
+        this.emitConnectionErrors = emitConnectionErrorsProp instanceof Boolean && (Boolean) emitConnectionErrorsProp;
         this.emitOnChange = emitOnChangeProp instanceof Boolean && (Boolean) emitOnChangeProp;
         this.emitEmptyEnvelopes = !(emitEmptyEnvelopesProp instanceof Boolean) || (Boolean) emitEmptyEnvelopesProp;
 
@@ -56,6 +60,10 @@ class WireAssetOptions {
 
     public boolean emitErrors() {
         return this.emitErrors;
+    }
+
+    public boolean emitConnectionErrors() {
+        return this.emitConnectionErrors;
     }
 
     public boolean emitOnChange() {

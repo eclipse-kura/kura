@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -207,9 +207,9 @@ public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
     private Provider registerProviderJava9(final String config) throws KuraException {
 
         try {
-            final Provider prototype = Security.getProvider("SunPKCS11");
+            Provider newProvider = Security.getProvider("SunPKCS11");
 
-            final Method configure = prototype.getClass().getMethod("configure", String.class);
+            final Method configure = Provider.class.getMethod("configure", String.class);
 
             final File configFile = Files.createTempFile(null, null).toFile();
 
@@ -218,7 +218,9 @@ public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
                     out.write(config.getBytes());
                 }
 
-                return (Provider) configure.invoke(prototype, configFile.getAbsolutePath());
+                newProvider = (Provider) configure.invoke(newProvider, configFile.getAbsolutePath());
+                Security.addProvider(newProvider);
+                return newProvider;
             } finally {
                 Files.deleteIfExists(configFile.toPath());
             }

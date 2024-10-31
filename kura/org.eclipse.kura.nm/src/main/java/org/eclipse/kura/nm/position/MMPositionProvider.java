@@ -92,17 +92,17 @@ public class MMPositionProvider implements PositionProvider {
 
     @Override
     public NmeaPosition getNmeaPosition() {
-        throw new UnsupportedOperationException("NmeaPosition not available on ModemManagaer provider");
+        return this.mmLocationParser.getNmeaPosition();
     }
 
     @Override
     public String getNmeaTime() {
-        throw new UnsupportedOperationException("NmeaTime not available on ModemManagaer provider");
+        return this.mmLocationParser.getNmeaTime();
     }
 
     @Override
     public String getNmeaDate() {
-        throw new UnsupportedOperationException("NmeaDate not available on ModemManagaer provider");
+        return this.mmLocationParser.getNmeaDate();
     }
 
     @Override

@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +41,7 @@ public class MMPositionProviderTest {
     MMPositionProvider provider;
     NMDbusConnector mockNmDbusConnector;
     Position retrievedPosition;
+    LocalDateTime retrieveDateTime;
 
     @Test
     public void shouldRetrieveCorrectPosition() throws InterruptedException {
@@ -51,6 +53,7 @@ public class MMPositionProviderTest {
         whenServiceAskForPosition();
 
         thenPositionIsCorrect(39.5, 9.7, 4.5, 0, 10.2);
+        thenDateTimeIsCorrect("2024-10-29T10:33:55");
     }
 
     /*
@@ -72,6 +75,7 @@ public class MMPositionProviderTest {
         rawLocationMap.put("latitude", new Variant<>(lat, Double.class));
         rawLocationMap.put("longitude", new Variant<>(lon, Double.class));
         rawLocationMap.put("altitude", new Variant<>(alt, Double.class));
+        rawLocationMap.put("utc-time", new Variant<>("103355", String.class));
 
         variantMap.put(new UInt32(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW.getValue()),
                 new Variant<>(rawLocationMap, "a{sv}"));
@@ -100,14 +104,19 @@ public class MMPositionProviderTest {
     private void whenServiceAskForPosition() throws InterruptedException {
         Thread.sleep(3000);
         this.retrievedPosition = this.provider.getPosition();
+        this.retrieveDateTime = this.provider.getDateTime();
     }
 
     private void thenPositionIsCorrect(double lat, double lon, double alt, double speed, double track) {
         assertEquals(new Measurement(Math.toRadians(lat), Unit.rad), this.retrievedPosition.getLatitude());
         assertEquals(new Measurement(Math.toRadians(lon), Unit.rad), this.retrievedPosition.getLongitude());
-        assertEquals(new Measurement(Math.toRadians(alt), Unit.m), this.retrievedPosition.getAltitude());
+        assertEquals(new Measurement(alt, Unit.m), this.retrievedPosition.getAltitude());
         assertEquals(new Measurement(speed, Unit.m_s), this.retrievedPosition.getSpeed());
         assertEquals(new Measurement(Math.toRadians(track), Unit.rad), this.retrievedPosition.getTrack());
+    }
+
+    private void thenDateTimeIsCorrect(String expectedDateTime) {
+        assertEquals(expectedDateTime, this.retrieveDateTime.toString());
     }
 
 }

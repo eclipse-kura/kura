@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.position.GNSSType;
+import org.eclipse.kura.position.NmeaPosition;
 import org.freedesktop.dbus.types.Variant;
 import org.osgi.util.measurement.Measurement;
 import org.osgi.util.measurement.Unit;
@@ -46,6 +47,17 @@ public class MMLocationParser {
     private Double alt;
     private Double speed;
     private Double track;
+
+    private int fixQuality;
+    private int nrSatellites;
+    private double mDOP;
+    private double mPDOP;
+    private double mHDOP;
+    private double mVDOP;
+    private int m3Dfix;
+    private char latitudeHemisphere;
+    private char longitudeHemisphere;
+    private char validFix = 0;
 
     private LocalTime localTime;
     private LocalDate localDate;
@@ -70,6 +82,19 @@ public class MMLocationParser {
         return this.isFix;
     }
 
+    public NmeaPosition getNmeaPosition() {
+        return new NmeaPosition(this.lat, this.lon, this.alt, this.speed, this.track, this.fixQuality,
+                this.nrSatellites, this.mDOP, this.mPDOP, this.mHDOP, this.mVDOP, this.fixQuality);
+    }
+
+    public String getNmeaTime() {
+        return this.localTime.toString();
+    }
+
+    public String getNmeaDate() {
+        return this.localDate.toString();
+    }
+
     public void parseRawLocation(Variant<?> rawLocationVariant) {
         Map<String, Variant<?>> locationData = (Map<String, Variant<?>>) rawLocationVariant.getValue();
         for (Map.Entry<String, Variant<?>> rawEntry : locationData.entrySet()) {
@@ -88,9 +113,9 @@ public class MMLocationParser {
                 break;
 
             // time comes in format HHmmss.SS, so we cut the string after the dot to extract only the util information
-            case "utc":
-                this.localTime = LocalTime.parse((String) rawEntry.getValue().getValue(),
-                        DateTimeFormatter.ofPattern("HHmmss.SS"));
+            case "utc-time":
+                String time = ((String) rawEntry.getValue().getValue()).toString();
+                this.localTime = LocalTime.parse(time.split("\\.")[0], DateTimeFormatter.ofPattern("HHmmss"));
                 break;
 
             default:
@@ -127,6 +152,10 @@ public class MMLocationParser {
                     parseRmcSentence(tokens);
                     break;
 
+                case "GGA":
+                    parseGgaSentence(tokens);
+                    break;
+
                 default:
                     // Do Nothing
 
@@ -138,12 +167,36 @@ public class MMLocationParser {
         }
     }
 
+    private void parseGgaSentence(List<String> gsaTokens) {
+        if (!gsaTokens.get(7).isEmpty()) {
+            this.nrSatellites = Integer.parseInt(gsaTokens.get(7));
+        }
+        if (!gsaTokens.get(8).isEmpty()) {
+            this.mDOP = Double.parseDouble(gsaTokens.get(8));
+        }
+    }
+
     private void parseGsaSentence(List<String> gsaTokens) {
-        int fixType = Integer.parseInt(gsaTokens.get(2));
-        if (fixType == 2 || fixType == 3) {
-            this.isFix = true;
-        } else {
-            this.isFix = false;
+
+        if (!gsaTokens.get(2).isEmpty()) {
+
+            int fixType = Integer.parseInt(gsaTokens.get(2));
+            this.fixQuality = fixType;
+            if (fixType == 2 || fixType == 3) {
+                this.isFix = true;
+            } else {
+                this.isFix = false;
+            }
+        }
+
+        if (!gsaTokens.get(15).isEmpty()) {
+            this.mPDOP = Double.parseDouble(gsaTokens.get(15));
+        }
+        if (!gsaTokens.get(16).isEmpty()) {
+            this.mHDOP = Double.parseDouble(gsaTokens.get(16));
+        }
+        if (!gsaTokens.get(17).isEmpty()) {
+            this.mVDOP = Double.parseDouble(gsaTokens.get(17));
         }
     }
 
@@ -151,12 +204,32 @@ public class MMLocationParser {
      * Date is received in format dd-M-yy, so we convert it to yy-M-dd
      */
     private void parseRmcSentence(List<String> rmcTokens) {
-        this.localDate = LocalDate.parse(rmcTokens.get(9), DateTimeFormatter.ofPattern("ddMyy"));
-
-        this.speed = Double.parseDouble(rmcTokens.get(7)) * KNOTS_TO_M_S;
-        this.track = Math.toRadians(Double.parseDouble(rmcTokens.get(8)));
-        logger.info("\n\nRMC: {}, {}, {}", rmcTokens.get(8), Double.parseDouble(rmcTokens.get(8)),
-                Math.toRadians(Double.parseDouble(rmcTokens.get(8))));
+        if (!rmcTokens.get(9).isEmpty()) {
+            this.localDate = LocalDate.parse(rmcTokens.get(9), DateTimeFormatter.ofPattern("ddMyy"));
+        }
+        if (!rmcTokens.get(7).isEmpty()) {
+            this.speed = Double.parseDouble(rmcTokens.get(7)) * KNOTS_TO_M_S;
+        }
+        if (!rmcTokens.get(8).isEmpty()) {
+            this.track = Math.toRadians(Double.parseDouble(rmcTokens.get(8)));
+        }
+        if (!rmcTokens.get(4).isEmpty()) {
+            this.latitudeHemisphere = rmcTokens.get(4).charAt(0);
+        }
+        if (!rmcTokens.get(6).isEmpty()) {
+            this.longitudeHemisphere = rmcTokens.get(6).charAt(0);
+        }
+        if (!rmcTokens.get(2).isEmpty()) { // check validity
+            this.validFix = rmcTokens.get(2).charAt(0);
+            if (!"A".equals(rmcTokens.get(2))) {
+                this.isFix = false;
+            } else {
+                this.isFix = true;
+            }
+        } else {
+            this.validFix = 'V';
+            this.isFix = false;
+        }
     }
 
     private GNSSType getGnssTypeFromSentenceId(String type) {

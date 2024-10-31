@@ -403,12 +403,12 @@ public class NetworkStatusServiceAdapter {
             entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA2WPA3Enterprise.value());
             setCiphers(entryToModify, rsnSecurity);
         } else {
-            throw new IllegalArgumentException(String.format("Security flags not recognized or supported"));
+            throw new IllegalArgumentException("Security flags not recognized or supported");
         }
     }
 
     private boolean isSecurityNone(Set<WifiSecurity> rsnSecurity, Set<WifiSecurity> wpaSecurity, Set<WifiFlag> flags) {
-        return flags.contains(WifiFlag.NONE) && rsnSecurity.contains(WifiSecurity.NONE)
+        return !flags.contains(WifiFlag.PRIVACY) && rsnSecurity.contains(WifiSecurity.NONE)
                 && wpaSecurity.contains(WifiSecurity.NONE);
     }
 

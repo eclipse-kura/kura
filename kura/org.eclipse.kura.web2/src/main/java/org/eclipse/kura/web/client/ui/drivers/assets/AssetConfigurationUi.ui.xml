@@ -1,19 +1,21 @@
-<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <!--
 
-    Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+    Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
  
-	SPDX-License-Identifier: EPL-2.0
-	
-	Contributors:
-	 Eurotech
+    SPDX-License-Identifier: EPL-2.0
+    
+    Contributors:
+     Eurotech
      
 -->
-<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:b="urn:import:org.gwtbootstrap3.client.ui"
+<ui:UiBinder 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:ui:com.google.gwt.uibinder http://dl.google.com/gwt/dtd/uibinder.xsd"
+    xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:b="urn:import:org.gwtbootstrap3.client.ui"
     xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html" xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt" xmlns:cv="urn:import:com.google.gwt.user.cellview.client">
 
@@ -21,20 +23,20 @@
 
     <ui:style>
     .center-panel {
-    	height: 100%;
-    	padding-top: 20px;
-    	padding-left: 5px;
-    	border: none;
+        height: 100%;
+        padding-top: 20px;
+        padding-left: 5px;
+        border: none;
     }
     
     .channel-name-validation-label {
-    	color: red;
-    	font-size: 0.35cm;
-    	font-weight: normal;
+        color: red;
+        font-size: 0.35cm;
+        font-weight: normal;
     }
     
     .channel-name-form {
-    	margin-bottom: 0;
+        margin-bottom: 0;
     }
     </ui:style>
 
@@ -49,6 +51,9 @@
                                     <b:ButtonToolBar>
                                         <b:ButtonGroup size="SMALL">
                                             <b.html:Strong ui:field="channelTitle" text="{msgs.wiresChannelTitle}"/>
+                                        </b:ButtonGroup>
+                                        <b:ButtonGroup size="SMALL" addStyleNames="pull-right">
+                                            <b:Button icon="EYE" ui:field="btnManageHiddenColumn" text=""/>
                                         </b:ButtonGroup>
                                         <b:ButtonGroup size="SMALL" addStyleNames="pull-right">
                                             <b:Button icon="DOWNLOAD" ui:field="btnDownload" text="{msgs.wiresDownloadChannels}"/>
@@ -73,6 +78,27 @@
                     </g:ScrollPanel>
                 </b:Well>
             </b:Row>
+            <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="column-visibility-modal"
+                ui:field="columnVisibilityModal" title="{msgs.columnVisibilityModalTitle}">
+                <b:ModalHeader />
+                <b:ModalBody>
+                    <b:Form>
+                        <b:FormGroup addStyleNames="{style.channel-name-form}">
+                            <b:FormLabel ui:field="columnVisibilityLabel" />
+                            <g:FlowPanel>
+                                <b:Form ui:field="columnVisibilityForm" />
+                                <b:Anchor text="{msgs.columnVisibilityResetAnchor}" ui:field="resetColumnsAnchor" />
+                            </g:FlowPanel>
+                            <b:FormLabel addStyleNames="{style.channel-name-validation-label}" ui:field="columnVisibilityError" />
+                        </b:FormGroup>
+                    </b:Form>
+                </b:ModalBody>
+                <b:ModalFooter>
+                    <b:Button b:id="btn-set-column-visibility-cancel" type="PRIMARY" dataDismiss="MODAL"
+                        ui:field="btnCancelSetColumnVisibility" />
+                    <b:Button type="PRIMARY" b:id="btn-set-column-visibility" ui:field="btnSetColumnVisibility" />
+                </b:ModalFooter>
+            </b:Modal>
             <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="new-channel-modal"
                 ui:field="newChannelModal">
                 <b:ModalHeader />
@@ -96,7 +122,7 @@
             </b:Modal>
             <!-- File Upload Modal -->
             <b:Modal closable="false" fade="true" dataBackdrop="STATIC" dataKeyboard="true" title="Upload" b:id="upload-modal" 
-            	ui:field="uploadModal">
+                ui:field="uploadModal">
                 <b:ModalBody>
                         <b:Container fluid="true">
                             <b:Form ui:field="uploadForm">
@@ -113,11 +139,11 @@
                                         <b:Button ui:field="uploadCancel" text="{msgs.cancelButton}" />
                                         <b:Button ui:field="uploadUpload" text="{msgs.uploadButton}" />
                                     </b:ButtonGroup>
-                                    <g:Hidden ui:field="xsrfTokenField"></g:Hidden>
-                                    <g:Hidden ui:field="assetPidField"></g:Hidden>
-                                    <g:Hidden ui:field="driverPidField"></g:Hidden>
-                                    <g:Hidden ui:field="appendCheckField"></g:Hidden>
-                                    <g:Hidden ui:field="emptyStringCheckField"></g:Hidden>
+                                    <g:Hidden ui:field="xsrfTokenField" />
+                                    <g:Hidden ui:field="assetPidField" />
+                                    <g:Hidden ui:field="driverPidField" />
+                                    <g:Hidden ui:field="appendCheckField" />
+                                    <g:Hidden ui:field="emptyStringCheckField" />
                                 </b:FieldSet>
                             </b:Form>
                         </b:Container>

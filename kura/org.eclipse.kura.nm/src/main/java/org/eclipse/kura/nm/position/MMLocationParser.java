@@ -13,7 +13,9 @@
 
 package org.eclipse.kura.nm.position;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -35,8 +37,7 @@ public class MMLocationParser {
 
     private static final Logger logger = LoggerFactory.getLogger(MMLocationParser.class);
 
-    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yy-M-dd HH:mm:ss");
-    private static final double KNOTS_TO_M_S = 1 / 1.944;
+    private static final double KNOTS_TO_M_S = 1 / 1.94384449;
     private int gnssTypeUpdateCounter = 0;
     private static final int GNSSTYPE_RESET_COUNTER = 50;
 
@@ -46,18 +47,19 @@ public class MMLocationParser {
     private Double speed;
     private Double track;
 
-    private String localTime;
-    private String localDate;
+    private LocalTime localTime;
+    private LocalDate localDate;
     private Set<GNSSType> gnssTypes = new HashSet<>();
     private Boolean isFix = false;
 
     public LocalDateTime getLocalDateTime() {
-        return Objects.requireNonNull(LocalDateTime.parse(localDate + " " + localTime, DATE_TIME_FORMAT));
+        return Objects.requireNonNull(LocalDateTime.of(localDate, localTime));
     }
 
     public Position getPosition() {
-        return Objects.requireNonNull(new Position(new Measurement(lat, Unit.rad), new Measurement(lon, Unit.rad),
-                new Measurement(alt, Unit.m), new Measurement(speed, Unit.m_s), new Measurement(track, Unit.rad)));
+        return Objects.requireNonNull(new Position(new Measurement(this.lat, Unit.rad),
+                new Measurement(this.lon, Unit.rad), new Measurement(this.alt, Unit.m),
+                new Measurement(this.speed, Unit.m_s), new Measurement(this.track, Unit.rad)));
     }
 
     public Set<GNSSType> getGnssTypes() {
@@ -65,7 +67,7 @@ public class MMLocationParser {
     }
 
     public boolean isFixed() {
-        return Objects.requireNonNull(this.isFix);
+        return this.isFix;
     }
 
     public void parseRawLocation(Variant<?> rawLocationVariant) {
@@ -82,7 +84,13 @@ public class MMLocationParser {
                 break;
 
             case "altitude":
-                this.alt = Math.toRadians((Double) rawEntry.getValue().getValue());
+                this.alt = (Double) rawEntry.getValue().getValue();
+                break;
+
+            // time comes in format HHmmss.SS, so we cut the string after the dot to extract only the util information
+            case "utc":
+                this.localTime = LocalTime.parse((String) rawEntry.getValue().getValue(),
+                        DateTimeFormatter.ofPattern("HHmmss.SS"));
                 break;
 
             default:
@@ -96,9 +104,7 @@ public class MMLocationParser {
             String locationString = ((CharSequence) nmeaLocationVariant.getValue()).toString();
 
             List<String> nmeaSentences = Arrays.asList(locationString.split("\\r?\\n|\\r")).stream()
-                    .filter(sentence -> {
-                        return !sentence.isEmpty();
-                    }).collect(Collectors.toList());
+                    .filter(sentence -> !sentence.isEmpty()).collect(Collectors.toList());
 
             for (String sentence : nmeaSentences) {
 
@@ -117,10 +123,6 @@ public class MMLocationParser {
                     parseGsaSentence(tokens);
                     break;
 
-                case "GGA":
-                    parseGgaSentence(tokens);
-                    break;
-
                 case "RMC":
                     parseRmcSentence(tokens);
                     break;
@@ -136,8 +138,8 @@ public class MMLocationParser {
         }
     }
 
-    private void parseGsaSentence(List<String> gsaSentence) {
-        int fixType = Integer.parseInt(gsaSentence.get(2));
+    private void parseGsaSentence(List<String> gsaTokens) {
+        int fixType = Integer.parseInt(gsaTokens.get(2));
         if (fixType == 2 || fixType == 3) {
             this.isFix = true;
         } else {
@@ -145,19 +147,16 @@ public class MMLocationParser {
         }
     }
 
-    private void parseGgaSentence(List<String> ggaSentence) {
-        this.localTime = ggaSentence.get(1);
-    }
-
     /*
      * Date is received in format dd-M-yy, so we convert it to yy-M-dd
      */
-    private void parseRmcSentence(List<String> rmcSentence) {
-        String date = rmcSentence.get(9);
-        this.localDate = date.substring(4, 6) + date.substring(2, 4) + date.substring(0, 2);
+    private void parseRmcSentence(List<String> rmcTokens) {
+        this.localDate = LocalDate.parse(rmcTokens.get(9), DateTimeFormatter.ofPattern("ddMyy"));
 
-        this.speed = Double.parseDouble(rmcSentence.get(7)) * KNOTS_TO_M_S;
-        this.track = Math.toRadians(Double.parseDouble(rmcSentence.get(8)));
+        this.speed = Double.parseDouble(rmcTokens.get(7)) * KNOTS_TO_M_S;
+        this.track = Math.toRadians(Double.parseDouble(rmcTokens.get(8)));
+        logger.info("\n\nRMC: {}, {}, {}", rmcTokens.get(8), Double.parseDouble(rmcTokens.get(8)),
+                Math.toRadians(Double.parseDouble(rmcTokens.get(8))));
     }
 
     private GNSSType getGnssTypeFromSentenceId(String type) {

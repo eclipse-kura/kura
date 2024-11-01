@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -35,6 +35,7 @@ import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
 import org.eclipse.kura.net.status.modem.Sim;
 import org.eclipse.kura.net.status.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.status.wifi.WifiChannel;
+import org.eclipse.kura.net.status.wifi.WifiFlag;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
 import org.eclipse.kura.net.status.wifi.WifiMode;
 import org.eclipse.kura.net.status.wifi.WifiSecurity;
@@ -159,20 +160,20 @@ public class NetworkStatusServiceAdapter {
 
             for (WifiAccessPoint ap : wifiStatus.getAvailableWifiAccessPoints()) {
                 GwtWifiHotspotEntry entry = new GwtWifiHotspotEntry();
+                entry.setGroupCiphers(GwtWifiCiphers.netWifiCiphers_NONE.name());
+                entry.setPairwiseCiphers(GwtWifiCiphers.netWifiCiphers_NONE.name());
+                entry.setSecurity(GwtWifiSecurity.netWifiSecurityNONE.name());
+                try {
+                    parseAndSetWifiSecurity(entry, ap);
+                } catch (IllegalArgumentException e) {
+                    logger.warn("Access point security not recognized or supported.");
+                    continue;
+                }
                 entry.setChannel(ap.getChannel().getChannel());
                 entry.setFrequency(ap.getChannel().getFrequency());
                 entry.setMacAddress(NetworkUtil.macToString(ap.getHardwareAddress()));
                 entry.setSSID(ap.getSsid());
                 entry.setsignalStrength(ap.getSignalStrength());
-
-                // because of GwtWifiHotspotEntry interface does not discriminate RSN/WPA,
-                // order here is important:
-                // we assume that WPA security has priority over RSN one
-                entry.setGroupCiphers(GwtWifiCiphers.netWifiCiphers_NONE.name());
-                entry.setPairwiseCiphers(GwtWifiCiphers.netWifiCiphers_NONE.name());
-                entry.setSecurity(GwtWifiSecurity.netWifiSecurityNONE.name());
-                parseAndSetWifiSecurity(entry, ap.getRsnSecurity());
-                parseAndSetWifiSecurity(entry, ap.getWpaSecurity());
 
                 result.add(entry);
             }
@@ -380,11 +381,60 @@ public class NetworkStatusServiceAdapter {
         gwtConfig.setChannels(channelsBuilder.getChannelsIntegers());
     }
 
-    private void parseAndSetWifiSecurity(GwtWifiHotspotEntry entryToModify, Set<WifiSecurity> supportedSecurity) {
-        boolean isGroupCCMP = supportedSecurity.contains(WifiSecurity.GROUP_CCMP);
-        boolean isGroupTKIP = supportedSecurity.contains(WifiSecurity.GROUP_TKIP);
-        boolean isPairCCMP = supportedSecurity.contains(WifiSecurity.PAIR_CCMP);
-        boolean isPairTKIP = supportedSecurity.contains(WifiSecurity.PAIR_TKIP);
+    private void parseAndSetWifiSecurity(GwtWifiHotspotEntry entryToModify, WifiAccessPoint wifiAccessPoint) {
+        Set<WifiSecurity> rsnSecurity = wifiAccessPoint.getRsnSecurity();
+        Set<WifiSecurity> wpaSecurity = wifiAccessPoint.getWpaSecurity();
+        Set<WifiFlag> flags = wifiAccessPoint.getFlags();
+
+        if (isSecurityNone(rsnSecurity, wpaSecurity, flags)) {
+            entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityNONE.value());
+        } else if (isSecurityWEP(rsnSecurity, wpaSecurity, flags)) {
+            entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWEP.value());
+        } else if (isSecurityWPA(rsnSecurity, wpaSecurity, flags) && isSecurityWPA2(rsnSecurity, wpaSecurity, flags)) {
+            entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA_WPA2.value());
+            setCiphers(entryToModify, rsnSecurity);
+        } else if (isSecurityWPA(rsnSecurity, wpaSecurity, flags)) {
+            entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA.value());
+            setCiphers(entryToModify, wpaSecurity);
+        } else if (isSecurityWPA2(rsnSecurity, wpaSecurity, flags)) {
+            entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA2.value());
+            setCiphers(entryToModify, rsnSecurity);
+        } else if (isSecurityWPA2WPA3Enterprise(rsnSecurity, wpaSecurity, flags)) {
+            entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA2WPA3Enterprise.value());
+            setCiphers(entryToModify, rsnSecurity);
+        } else {
+            throw new IllegalArgumentException("Security flags not recognized or supported");
+        }
+    }
+
+    private boolean isSecurityNone(Set<WifiSecurity> rsnSecurity, Set<WifiSecurity> wpaSecurity, Set<WifiFlag> flags) {
+        return !flags.contains(WifiFlag.PRIVACY) && rsnSecurity.contains(WifiSecurity.NONE)
+                && wpaSecurity.contains(WifiSecurity.NONE);
+    }
+
+    private boolean isSecurityWEP(Set<WifiSecurity> rsnSecurity, Set<WifiSecurity> wpaSecurity, Set<WifiFlag> flags) {
+        return flags.contains(WifiFlag.PRIVACY) && rsnSecurity.contains(WifiSecurity.NONE)
+                && wpaSecurity.contains(WifiSecurity.NONE);
+    }
+
+    private boolean isSecurityWPA(Set<WifiSecurity> rsnSecurity, Set<WifiSecurity> wpaSecurity, Set<WifiFlag> flags) {
+        return flags.contains(WifiFlag.PRIVACY) && wpaSecurity.contains(WifiSecurity.KEY_MGMT_PSK);
+    }
+
+    private boolean isSecurityWPA2(Set<WifiSecurity> rsnSecurity, Set<WifiSecurity> wpaSecurity, Set<WifiFlag> flags) {
+        return flags.contains(WifiFlag.PRIVACY) && rsnSecurity.contains(WifiSecurity.KEY_MGMT_PSK);
+    }
+
+    private boolean isSecurityWPA2WPA3Enterprise(Set<WifiSecurity> rsnSecurity, Set<WifiSecurity> wpaSecurity,
+            Set<WifiFlag> flags) {
+        return flags.contains(WifiFlag.PRIVACY) && (rsnSecurity.contains(WifiSecurity.KEY_MGMT_802_1X));
+    }
+
+    private void setCiphers(GwtWifiHotspotEntry entryToModify, Set<WifiSecurity> wifiSecurity) {
+        boolean isGroupCCMP = wifiSecurity.contains(WifiSecurity.GROUP_CCMP);
+        boolean isGroupTKIP = wifiSecurity.contains(WifiSecurity.GROUP_TKIP);
+        boolean isPairCCMP = wifiSecurity.contains(WifiSecurity.PAIR_CCMP);
+        boolean isPairTKIP = wifiSecurity.contains(WifiSecurity.PAIR_TKIP);
 
         if (isGroupCCMP && isGroupTKIP) {
             entryToModify.setGroupCiphers(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name());
@@ -401,27 +451,6 @@ public class NetworkStatusServiceAdapter {
         } else if (isPairTKIP) {
             entryToModify.setPairwiseCiphers(GwtWifiCiphers.netWifiCiphers_TKIP.name());
         }
-
-        entryToModify.setSecurity(wifiSecurityCollectionToString(supportedSecurity));
-    }
-
-    private String wifiSecurityCollectionToString(Set<WifiSecurity> wifiSecurities) {
-        StringBuilder prettyPrint = new StringBuilder();
-
-        for (WifiSecurity wifiSecurity : wifiSecurities) {
-            String secString = wifiSecurity.name();
-            if (secString.contains("KEY_MGMT")) {
-                prettyPrint.append(secString.replace("KEY_MGMT_", ""));
-                prettyPrint.append(", ");
-            }
-        }
-
-        if (prettyPrint.length() > 2) {
-            prettyPrint.deleteCharAt(prettyPrint.length() - 1);
-            prettyPrint.deleteCharAt(prettyPrint.length() - 1);
-        }
-
-        return prettyPrint.toString();
     }
 
     private class ChannelsBuilder {

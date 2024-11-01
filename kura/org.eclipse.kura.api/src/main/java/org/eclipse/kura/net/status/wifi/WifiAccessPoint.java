@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -37,6 +37,7 @@ public class WifiAccessPoint {
     private final int signalStrength;
     private final Set<WifiSecurity> wpaSecurity;
     private final Set<WifiSecurity> rsnSecurity;
+    private final Set<WifiFlag> flags;
 
     private WifiAccessPoint(WifiAccessPointBuilder builder) {
         this.ssid = builder.ssid;
@@ -48,6 +49,7 @@ public class WifiAccessPoint {
         this.signalStrength = builder.signalStrength;
         this.wpaSecurity = builder.wpaSecurity;
         this.rsnSecurity = builder.rsnSecurity;
+        this.flags = builder.flags;
     }
 
     /**
@@ -131,6 +133,17 @@ public class WifiAccessPoint {
         return this.rsnSecurity;
     }
 
+    /**
+     * Return the capabilities of the access point.
+     * 
+     * @return a set of {@link WifiFlag} representing the capabilities
+     * 
+     * @since 2.8
+     */
+    public Set<WifiFlag> getFlags() {
+        return this.flags;
+    }
+
     public static WifiAccessPointBuilder builder() {
         return new WifiAccessPointBuilder();
     }
@@ -146,6 +159,7 @@ public class WifiAccessPoint {
         private int signalStrength;
         private Set<WifiSecurity> wpaSecurity = Collections.emptySet();
         private Set<WifiSecurity> rsnSecurity = Collections.emptySet();
+        private Set<WifiFlag> flags = Collections.emptySet();
 
         private WifiAccessPointBuilder() {
         }
@@ -195,6 +209,11 @@ public class WifiAccessPoint {
             return this;
         }
 
+        public WifiAccessPointBuilder withFlags(Set<WifiFlag> flags) {
+            this.flags = flags;
+            return this;
+        }
+
         public WifiAccessPoint build() {
             return new WifiAccessPoint(this);
         }
@@ -206,7 +225,7 @@ public class WifiAccessPoint {
         int result = 1;
         result = prime * result + Arrays.hashCode(this.hardwareAddress);
         result = prime * result + Objects.hash(this.channel, this.maxBitrate, this.mode, this.rsnSecurity,
-                this.signalQuality, this.signalStrength, this.ssid, this.wpaSecurity);
+                this.signalQuality, this.signalStrength, this.ssid, this.wpaSecurity, this.flags);
         return result;
     }
 
@@ -223,7 +242,7 @@ public class WifiAccessPoint {
                 && this.maxBitrate == other.maxBitrate && this.mode == other.mode
                 && Objects.equals(this.rsnSecurity, other.rsnSecurity) && this.signalQuality == other.signalQuality
                 && Objects.equals(this.ssid, other.ssid) && Objects.equals(this.signalStrength, other.signalStrength)
-                && Objects.equals(this.wpaSecurity, other.wpaSecurity);
+                && Objects.equals(this.wpaSecurity, other.wpaSecurity) && Objects.equals(this.flags, other.flags);
     }
 
 }

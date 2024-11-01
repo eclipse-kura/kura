@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -63,6 +63,7 @@ import org.eclipse.kura.net.status.modem.SimType;
 import org.eclipse.kura.net.status.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.status.wifi.WifiCapability;
 import org.eclipse.kura.net.status.wifi.WifiChannel;
+import org.eclipse.kura.net.status.wifi.WifiFlag;
 import org.eclipse.kura.net.status.wifi.WifiInterfaceStatus;
 import org.eclipse.kura.net.status.wifi.WifiMode;
 import org.eclipse.kura.net.status.wifi.WifiSecurity;
@@ -648,6 +649,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 .withSignalStrength(-94) //
                 .withWpaSecurity(EnumSet.of(WifiSecurity.GROUP_CCMP, WifiSecurity.KEY_MGMT_SAE)) //
                 .withRsnSecurity(EnumSet.of(WifiSecurity.KEY_MGMT_EAP_SUITE_B_192)) //
+                .withFlags(EnumSet.of(WifiFlag.PRIVACY)) //
                 .build())) //
         );
 
@@ -667,7 +669,8 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"signalQuality\":12," //
                 + "\"signalStrength\":-94," //
                 + "\"wpaSecurity\":[\"GROUP_CCMP\",\"KEY_MGMT_SAE\"]," //
-                + "\"rsnSecurity\":[\"KEY_MGMT_EAP_SUITE_B_192\"]}," //
+                + "\"rsnSecurity\":[\"KEY_MGMT_EAP_SUITE_B_192\"]," //
+                + "\"flags\":[\"PRIVACY\"]}," //
                 + "\"availableWifiAccessPoints\":[]," //
                 + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
@@ -697,6 +700,7 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                         .withSignalStrength(-94) //
                         .withWpaSecurity(EnumSet.of(WifiSecurity.GROUP_CCMP, WifiSecurity.KEY_MGMT_SAE)) //
                         .withRsnSecurity(EnumSet.of(WifiSecurity.KEY_MGMT_EAP_SUITE_B_192)) //
+                        .withFlags(EnumSet.of(WifiFlag.PRIVACY, WifiFlag.WPS)) //
                         .build())));
 
         whenRequestIsPerformed(new MethodSpec("GET"), NETWORK_STATUS_PATH);
@@ -715,7 +719,8 @@ public class NetworkStatusRestServiceImplTest extends AbstractRequestHandlerTest
                 + "\"signalQuality\":12," //
                 + "\"signalStrength\":-94," //
                 + "\"wpaSecurity\":[\"GROUP_CCMP\",\"KEY_MGMT_SAE\"]," //
-                + "\"rsnSecurity\":[\"KEY_MGMT_EAP_SUITE_B_192\"]}]," //
+                + "\"rsnSecurity\":[\"KEY_MGMT_EAP_SUITE_B_192\"]," //
+                + "\"flags\":[\"PRIVACY\",\"WPS\"]}]," //
                 + "\"id\":\"N/A\"," //
                 + "\"interfaceName\":\"N/A\"," //
                 + "\"hardwareAddress\":\"00:00:00:00:00:00\"," //

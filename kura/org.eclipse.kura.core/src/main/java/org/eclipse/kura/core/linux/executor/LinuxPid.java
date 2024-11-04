@@ -52,7 +52,7 @@ public class LinuxPid implements Pid {
             return false;
         }
         LinuxPid other = (LinuxPid) obj;
-        return this.pid != other.pid;
+        return this.pid == other.pid;
     }
 
 }

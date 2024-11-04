@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.linux.position;
+package org.eclipse.kura.linux.position.serial;
 
 import static java.util.Objects.requireNonNull;
 
@@ -20,12 +20,12 @@ import java.util.Set;
 
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
-import org.eclipse.kura.linux.position.NMEAParser.Code;
-import org.eclipse.kura.linux.position.NMEAParser.ParseException;
+import org.eclipse.kura.linux.position.provider.LockStatusListener;
+import org.eclipse.kura.linux.position.serial.NMEAParser.Code;
+import org.eclipse.kura.linux.position.serial.NMEAParser.ParseException;
 import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionException;
-import org.eclipse.kura.position.PositionListener;
 import org.osgi.service.io.ConnectionFactory;
 import org.osgi.util.position.Position;
 import org.slf4j.Logger;
@@ -48,11 +48,11 @@ public class GpsDevice {
     private final SerialCommunicate commThread;
     private String lastSentence;
 
-    private Listener listener;
+    private LockStatusListener listener;
 
     private final NMEAParser nmeaParser = new NMEAParser();
 
-    public GpsDevice(final ConnectionFactory connFactory, final CommURI commURI, final Listener listener)
+    public GpsDevice(final ConnectionFactory connFactory, final CommURI commURI, final LockStatusListener listener)
             throws PositionException {
         this.uri = commURI;
         this.listener = listener;
@@ -274,10 +274,5 @@ public class GpsDevice {
         sb.append("\n fixQuality=");
         sb.append(this.nmeaParser.getFixQuality());
         return sb.toString();
-    }
-
-    interface Listener extends PositionListener {
-
-        public void onLockStatusChanged(final boolean hasLock);
     }
 }

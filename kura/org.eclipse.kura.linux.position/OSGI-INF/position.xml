@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-   Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+   Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
 
    This program and the accompanying materials are made
    available under the terms of the Eclipse Public License 2.0
@@ -13,14 +13,14 @@
 	 Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.position.PositionService">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.2.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.position.PositionService">
    <implementation class="org.eclipse.kura.linux.position.PositionServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.position.PositionService"/>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
    
-   <reference bind="setPositionProviders" cardinality="1..n" interface="org.eclipse.kura.linux.position.PositionProvider" name="PositionProviders" policy="static" unbind="unsetPositionProviders"/>
+   <reference bind="setPositionProviders" cardinality="1..n" interface="org.eclipse.kura.linux.position.provider.PositionProvider" name="PositionProviders" policy-option="greedy" policy="static" unbind="unsetPositionProviders"/>
    
    <property name="service.pid" value="org.eclipse.kura.position.PositionService"/>
    <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>

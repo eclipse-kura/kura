@@ -13,12 +13,11 @@
      Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" immediate="false" name="GpsdPositionProvider">
-   <implementation class="org.eclipse.kura.linux.position.gpsd.GpsdPositionProvider"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" immediate="false" name="ModemManagerPositionProvider">
+   <implementation class="org.eclipse.kura.nm.position.MMPositionProvider"/>
    <service>
       <provide interface="org.eclipse.kura.linux.position.provider.PositionProvider"/>
-      <provide interface="org.eclipse.kura.linux.position.gpsd.GpsdPositionProvider" />
    </service>
    
-   <property name="service.pid" value="org.eclipse.kura.linux.position.gpsd.GpsdPositionProvider"/>
+   <property name="service.pid" value="org.eclipse.kura.nm.position.MMPositionProvider"/>
 </scr:component>

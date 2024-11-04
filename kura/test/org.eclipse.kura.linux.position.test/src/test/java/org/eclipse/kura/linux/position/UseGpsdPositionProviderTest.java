@@ -29,6 +29,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.linux.position.gpsd.GpsdPositionProvider;
+import org.eclipse.kura.linux.position.options.PositionServiceOptions;
+import org.eclipse.kura.linux.position.provider.PositionProviderType;
 import org.eclipse.kura.position.GNSSType;
 import org.junit.Test;
 import org.osgi.util.measurement.Measurement;

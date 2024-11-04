@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,12 +11,13 @@
  *  Eurotech
  *******************************************************************************/
 
-package org.eclipse.kura.linux.position;
+package org.eclipse.kura.linux.position.serial;
 
 import static org.eclipse.kura.net.modem.ModemGpsDisabledEvent.MODEM_EVENT_GPS_DISABLED_TOPIC;
 import static org.eclipse.kura.net.modem.ModemGpsEnabledEvent.MODEM_EVENT_GPS_ENABLED_TOPIC;
 
 import org.eclipse.kura.comm.CommURI;
+import org.eclipse.kura.linux.position.provider.GpsDeviceAvailabilityListener;
 import org.eclipse.kura.net.modem.ModemGpsEnabledEvent;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;

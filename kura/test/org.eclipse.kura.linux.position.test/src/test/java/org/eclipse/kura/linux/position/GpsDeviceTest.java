@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,8 +15,8 @@ package org.eclipse.kura.linux.position;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -34,12 +34,14 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
+import org.eclipse.kura.linux.position.provider.LockStatusListener;
+import org.eclipse.kura.linux.position.serial.GpsDevice;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionException;
 import org.junit.Test;
 import org.osgi.service.io.ConnectionFactory;
 
-public class GpsDeviceTest implements GpsDevice.Listener {
+public class GpsDeviceTest implements LockStatusListener {
 
     private static final double EPS = 0.000001;
     private static final int NUM = 7;

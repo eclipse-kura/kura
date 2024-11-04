@@ -26,3 +26,5 @@ Import-Package: de.taimos.gpsd4java.api;version="[1.0,2.0)",
  org.osgi.util.measurement;version="1.0.1",
  org.osgi.util.position;version="1.0.1",
  org.slf4j;version="1.6.4"
+Export-Package: org.eclipse.kura.linux.position.options;version="1.0.0";x-internal:=true,
+ org.eclipse.kura.linux.position.provider;version="1.0.0";x-internal:=true

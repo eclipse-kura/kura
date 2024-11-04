@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-   Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+   Copyright (c) 2018, 2024 Eurotech and/or its affiliates and others
 
    This program and the accompanying materials are made
    available under the terms of the Eclipse Public License 2.0
@@ -14,12 +14,12 @@
 
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" immediate="false" name="ModemGpsStatusTracker">
-   <implementation class="org.eclipse.kura.linux.position.ModemGpsStatusTracker"/>
+   <implementation class="org.eclipse.kura.linux.position.serial.ModemGpsStatusTracker"/>
    <service>
       <provide interface="org.osgi.service.event.EventHandler"/>
-      <provide interface="org.eclipse.kura.linux.position.ModemGpsStatusTracker"/>
+      <provide interface="org.eclipse.kura.linux.position.serial.ModemGpsStatusTracker"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.linux.position.ModemGpsStatusTracker"/>
+   <property name="service.pid" value="org.eclipse.kura.linux.position.serial.ModemGpsStatusTracker"/>
    <property name="event.topics" type="String">org/eclipse/kura/net/modem/gps/ENABLED
 org/eclipse/kura/net/modem/gps/DISABLED
    </property>

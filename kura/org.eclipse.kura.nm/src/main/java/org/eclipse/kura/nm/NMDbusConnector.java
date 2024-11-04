@@ -32,6 +32,8 @@ import org.eclipse.kura.linux.net.util.IwCapabilityTool;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.nm.configuration.NMSettingsConverter;
+import org.eclipse.kura.nm.enums.MMModemLocationSource;
+import org.eclipse.kura.nm.enums.MMModemState;
 import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.eclipse.kura.nm.signal.handlers.DeviceCreationLock;
@@ -50,6 +52,7 @@ import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.Variant;
+import org.freedesktop.modemmanager1.modem.Location;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
 import org.freedesktop.networkmanager.device.Vlan;
@@ -76,8 +79,8 @@ public class NMDbusConnector {
     private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_DEVICE_TYPES = Arrays.asList(
             NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceType.NM_DEVICE_TYPE_MODEM,
             NMDeviceType.NM_DEVICE_TYPE_VLAN);
-    private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_VIRTUAL_DEVICE_TYPES = Arrays.asList(
-            NMDeviceType.NM_DEVICE_TYPE_VLAN);
+    private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_VIRTUAL_DEVICE_TYPES = Arrays
+            .asList(NMDeviceType.NM_DEVICE_TYPE_VLAN);
     private static final List<KuraIpStatus> CONFIGURATION_SUPPORTED_STATUSES = Arrays.asList(KuraIpStatus.DISABLED,
             KuraIpStatus.ENABLEDLAN, KuraIpStatus.ENABLEDWAN, KuraIpStatus.UNMANAGED);
 
@@ -252,15 +255,15 @@ public class NMDbusConnector {
                         Vlan.class);
                 Properties vlanDeviceProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
                         vlanDevice.getObjectPath(), Properties.class);
-                
+
                 DBusPath parent = (DBusPath) vlanDeviceProperties.Get(NM_DEVICE_VLAN_BUS_NAME, "Parent");
                 Properties parentProperties = this.dbusConnection.getRemoteObject(NM_BUS_NAME, parent.getPath(),
                         Properties.class);
-                
+
                 DevicePropertiesWrapper vlanPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
                         Optional.of(vlanDeviceProperties), NMDeviceType.NM_DEVICE_TYPE_VLAN);
-                networkInterfaceStatus = NMStatusConverter.buildVlanStatus(interfaceId, vlanPropertiesWrapper, 
-                            ip4configProperties, ip6configProperties, parentProperties);
+                networkInterfaceStatus = NMStatusConverter.buildVlanStatus(interfaceId, vlanPropertiesWrapper,
+                        ip4configProperties, ip6configProperties, parentProperties);
                 break;
             case NM_DEVICE_TYPE_LOOPBACK:
                 DevicePropertiesWrapper loopbackPropertiesWrapper = new DevicePropertiesWrapper(deviceProperties,
@@ -339,7 +342,7 @@ public class NMDbusConnector {
                 new SupportedChannelsProperties(countryCode, supportedChannels));
         return networkInterfaceStatus;
     }
-    
+
     public synchronized void apply(Map<String, Object> networkConfiguration) throws DBusException {
         try {
             configurationEnforcementDisable();
@@ -423,14 +426,15 @@ public class NMDbusConnector {
             }
         }
     }
-        
-    private synchronized void manageConfiguredInterface(Optional<Device> device, String deviceId, NetworkProperties properties) throws DBusException {
+
+    private synchronized void manageConfiguredInterface(Optional<Device> device, String deviceId,
+            NetworkProperties properties) throws DBusException {
         NMDeviceType deviceType;
         if (device.isPresent()) {
             deviceType = this.networkManager.getDeviceType(device.get().getObjectPath());
         } else {
-            deviceType = NMDeviceType.fromPropertiesString(
-                    properties.get(String.class, "net.interface.%s.type", deviceId));
+            deviceType = NMDeviceType
+                    .fromPropertiesString(properties.get(String.class, "net.interface.%s.type", deviceId));
         }
 
         KuraIpStatus ip4Status = KuraIpStatus
@@ -478,15 +482,15 @@ public class NMDbusConnector {
 
     }
 
-    private void enableInterface(String deviceId, NetworkProperties properties, Optional<Device> device, NMDeviceType deviceType)
-            throws DBusException {
+    private void enableInterface(String deviceId, NetworkProperties properties, Optional<Device> device,
+            NMDeviceType deviceType) throws DBusException {
         if (device.isPresent()) {
             enableInterface(deviceId, properties, device.get(), deviceType);
         } else {
             createVirtualInterface(deviceId, properties, deviceType);
         }
     }
-    
+
     private void enableInterface(String deviceId, NetworkProperties properties, Device device, NMDeviceType deviceType)
             throws DBusException {
         if (Boolean.FALSE.equals(this.networkManager.isDeviceManaged(device))) {
@@ -536,16 +540,16 @@ public class NMDbusConnector {
         }
 
     }
-    
+
     private void createVirtualInterface(String deviceId, NetworkProperties properties, NMDeviceType deviceType)
-        throws DBusException {
+            throws DBusException {
         Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter.buildSettings(properties,
                 Optional.empty(), deviceId, deviceId, deviceType, this.networkManager.getVersion());
         DeviceCreationLock dcLock = new DeviceCreationLock(this, deviceId);
         Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
         DBusPath createdConnectionPath = settings.AddConnection(newConnectionSettings);
-        Connection createdConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME,
-                createdConnectionPath.getPath(), Connection.class);
+        Connection createdConnection = this.dbusConnection.getRemoteObject(NM_BUS_NAME, createdConnectionPath.getPath(),
+                Connection.class);
         try {
             Optional<Device> returnedDevice = dcLock.waitForDeviceCreation(1L);
             if (!returnedDevice.isPresent()) {
@@ -571,7 +575,7 @@ public class NMDbusConnector {
             return;
         }
         Device device = optDevice.get();
-        
+
         NMDeviceType deviceType = this.networkManager.getDeviceType(device.getObjectPath());
 
         if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
@@ -600,7 +604,7 @@ public class NMDbusConnector {
         }
         Device device = optDevice.get();
         Optional<Connection> appliedConnection = this.networkManager.getAppliedConnection(device);
-        
+
         NMDeviceState deviceState = this.networkManager.getDeviceState(device);
         if (Boolean.TRUE.equals(NMDeviceState.isConnected(deviceState))) {
             DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
@@ -608,7 +612,7 @@ public class NMDbusConnector {
             device.Disconnect();
             dsLock.waitForSignal();
         }
-        
+
         // Housekeeping
         if (appliedConnection.isPresent()) {
             appliedConnection.get().Delete();
@@ -641,5 +645,56 @@ public class NMDbusConnector {
         this.configurationEnforcementHandlerIsArmed = false;
         logger.debug("Network configuration enforcement set to {} (Expected: false)",
                 this.configurationEnforcementHandlerIsArmed);
+    }
+
+    public List<Location> getAvailableMMLocations() {
+        List<Location> availableLocations = new ArrayList<>();
+
+        this.getEnabledModemsPaths().forEach(modemPath -> {
+            try {
+                Properties locationProperties = this.modemManager
+                        .getLocationProperties(this.modemManager.getModemManagerLocation(modemPath));
+
+                Set<MMModemLocationSource> locationSources = MMModemLocationSource.toMMModemLocationSourceFromBitMask(
+                        locationProperties.Get("org.freedesktop.ModemManager1.Modem.Location", "Enabled"));
+
+                if (locationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA)
+                        && locationSources.contains(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW)) {
+                    availableLocations.add(this.modemManager.getModemManagerLocation(modemPath));
+                }
+            } catch (DBusException ex) {
+                logger.debug("Impossible to retrieve information regarding modem: {}", modemPath);
+            }
+        });
+
+        return availableLocations;
+
+    }
+
+    private List<String> getEnabledModemsPaths() {
+        List<String> enabledModemsPath = new ArrayList<>();
+
+        try {
+
+            for (Device device : this.networkManager.getAllDevices()) {
+                if (networkManager.getDeviceType(device.getObjectPath()).equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
+                    Optional<String> modemPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
+                    if (modemPath.isPresent()) {
+                        Optional<Properties> modemProps = this.modemManager.getModemProperties(modemPath.get());
+                        modemProps.ifPresent(props -> {
+                            MMModemState modemState = this.modemManager.getMMModemState(props);
+                            if (modemState.equals(MMModemState.MM_MODEM_STATE_CONNECTED)
+                                    || modemState.equals(MMModemState.MM_MODEM_STATE_REGISTERED)) {
+                                enabledModemsPath.add(modemPath.get());
+                            }
+                        });
+                    }
+                }
+            }
+        } catch (DBusException ex) {
+            logger.debug("Impossible to retrieve information regarding available modems");
+        }
+
+        return enabledModemsPath;
     }
 }

@@ -27,6 +27,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.linux.position.options.PositionServiceOptions;
+import org.eclipse.kura.linux.position.provider.GpsDeviceAvailabilityListener;
+import org.eclipse.kura.linux.position.provider.LockStatusListener;
+import org.eclipse.kura.linux.position.provider.PositionProvider;
 import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionListener;
@@ -41,7 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PositionServiceImpl
-        implements PositionService, ConfigurableComponent, GpsDeviceAvailabilityListener, GpsDevice.Listener {
+        implements PositionService, ConfigurableComponent, GpsDeviceAvailabilityListener, LockStatusListener {
 
     private static final Logger logger = LoggerFactory.getLogger(PositionServiceImpl.class);
 

@@ -10,14 +10,18 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.linux.position;
+package org.eclipse.kura.linux.position.serial;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 import org.eclipse.kura.comm.CommURI;
-import org.eclipse.kura.linux.position.GpsDevice.Listener;
+import org.eclipse.kura.linux.position.options.PositionServiceOptions;
+import org.eclipse.kura.linux.position.provider.GpsDeviceAvailabilityListener;
+import org.eclipse.kura.linux.position.provider.LockStatusListener;
+import org.eclipse.kura.linux.position.provider.PositionProvider;
+import org.eclipse.kura.linux.position.provider.PositionProviderType;
 import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.osgi.service.io.ConnectionFactory;
@@ -39,7 +43,7 @@ public class SerialDevicePositionProvider implements PositionProvider {
 
     private PositionServiceOptions configuration;
 
-    private Listener gpsDeviceListener;
+    private LockStatusListener lockStatusListener;
 
     private DateTimeFormatter nmeaDateTimePattern = DateTimeFormatter.ofPattern("ddMMyy hhmmss");
 
@@ -93,13 +97,13 @@ public class SerialDevicePositionProvider implements PositionProvider {
     }
 
     @Override
-    public void init(PositionServiceOptions configuration, Listener gpsDeviceListener,
+    public void init(PositionServiceOptions configuration, LockStatusListener gpsDeviceListener,
             GpsDeviceAvailabilityListener gpsDeviceAvailabilityListener) {
 
         this.gpsDeviceTracker.setListener(gpsDeviceAvailabilityListener);
         this.modemGpsStatusTracker.setListener(gpsDeviceAvailabilityListener);
 
-        this.gpsDeviceListener = gpsDeviceListener;
+        this.lockStatusListener = gpsDeviceListener;
         this.configuration = configuration;
     }
 
@@ -151,7 +155,7 @@ public class SerialDevicePositionProvider implements PositionProvider {
         }
 
         try {
-            return new GpsDevice(this.connectionFactory, uri, this.gpsDeviceListener);
+            return new GpsDevice(this.connectionFactory, uri, this.lockStatusListener);
         } catch (Exception e) {
             logger.warn("Failed to open GPS device: {}", uri, e);
             return null;
@@ -234,19 +238,19 @@ public class SerialDevicePositionProvider implements PositionProvider {
         return this.gpsDevice.getGnssTypes();
     }
 
-    protected GpsDevice getGpsDevice() {
+    public GpsDevice getGpsDevice() {
         return this.gpsDevice;
     }
 
-    protected ConnectionFactory getConnectionFactory() {
+    public ConnectionFactory getConnectionFactory() {
         return this.connectionFactory;
     }
 
-    protected GpsDeviceTracker getGpsDeviceTracker() {
+    public GpsDeviceTracker getGpsDeviceTracker() {
         return this.gpsDeviceTracker;
     }
 
-    protected ModemGpsStatusTracker getModemGpsStatusTracker() {
+    public ModemGpsStatusTracker getModemGpsStatusTracker() {
         return this.modemGpsStatusTracker;
     }
 

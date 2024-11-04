@@ -11,13 +11,14 @@
  *  Eurotech
  *******************************************************************************/
 
-package org.eclipse.kura.linux.position;
+package org.eclipse.kura.linux.position.options;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.OptionalInt;
 
 import org.eclipse.kura.comm.CommURI;
+import org.eclipse.kura.linux.position.provider.PositionProviderType;
 
 public class PositionServiceOptions {
 
@@ -38,6 +39,7 @@ public class PositionServiceOptions {
     private static final Property<Integer> GPSD_PORT = new Property<>("gpsd.port", 2947);
     private static final Property<Integer> GPSD_MAX_FIX_VALIDITY_INTERVAL = new Property<>(
             "gpsd.max.fix.validity.interval.seconds", 60);
+    private static final Property<Integer> MM_REFRESH_RATE = new Property<>("modem.manager.refresh.rate.seconds", 30);
 
     private final Map<String, Object> properties;
 
@@ -110,6 +112,10 @@ public class PositionServiceOptions {
         }
     }
 
+    public int getModemManagerRefreshRate() {
+        return MM_REFRESH_RATE.get(this.properties);
+    }
+
     public CommURI getGpsDeviceUri() {
         if (getPort().isEmpty()) {
             return null;
@@ -140,7 +146,8 @@ public class PositionServiceOptions {
                 && getBitsPerWord() == other.getBitsPerWord() && getStopBits() == other.getStopBits()
                 && getParity() == other.getParity() && getPositionProvider().equals(other.getPositionProvider())
                 && getGpsdHost().equals(other.getGpsdHost()) && getGpsdPort() == other.getGpsdPort()
-                && getGpsdMaxValidityInterval().equals(other.getGpsdMaxValidityInterval());
+                && getGpsdMaxValidityInterval().equals(other.getGpsdMaxValidityInterval())
+                && getModemManagerRefreshRate() == other.getModemManagerRefreshRate();
     }
 
     private static final class Property<T> {

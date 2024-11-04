@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,7 @@
  *  Eurotech
  *******************************************************************************/
 
-package org.eclipse.kura.linux.position;
+package org.eclipse.kura.linux.position.provider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +19,8 @@ import java.util.Map;
 public enum PositionProviderType {
 
     SERIAL("serial"),
-    GPSD("gpsd");
+    GPSD("gpsd"),
+    MODEM_MANAGER("modemManager");
 
     private String value;
 

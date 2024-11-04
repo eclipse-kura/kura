@@ -11,12 +11,12 @@
  *  Eurotech
  *******************************************************************************/
 
-package org.eclipse.kura.linux.position;
+package org.eclipse.kura.linux.position.provider;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 
-import org.eclipse.kura.linux.position.GpsDevice.Listener;
+import org.eclipse.kura.linux.position.options.PositionServiceOptions;
 import org.eclipse.kura.position.GNSSType;
 import org.eclipse.kura.position.NmeaPosition;
 import org.osgi.util.position.Position;
@@ -41,7 +41,7 @@ public interface PositionProvider {
 
     public String getLastSentence();
 
-    public void init(PositionServiceOptions configuration, Listener gpsDeviceListener,
+    public void init(PositionServiceOptions configuration, LockStatusListener gpsDeviceListener,
             GpsDeviceAvailabilityListener gpsDeviceAvailabilityListener);
 
     public PositionProviderType getType();

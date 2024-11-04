@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.kura.comm.CommURI;
+import org.eclipse.kura.linux.position.provider.GpsDeviceAvailabilityListener;
+import org.eclipse.kura.linux.position.serial.GpsDeviceTracker;
 import org.eclipse.kura.usb.UsbDeviceAddedEvent;
 import org.eclipse.kura.usb.UsbDeviceRemovedEvent;
 import org.eclipse.kura.usb.UsbService;

@@ -46,8 +46,20 @@
             
             <Option label="serial" value="serial" />
             <Option label="gpsd" value="gpsd" />
+            <Option label="modemManager" value="modemManager" />
             
         </AD>
+        
+        <AD id="modem.manager.refresh.rate.seconds"  
+            name="modem.manager.refresh.rate.seconds"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="30"
+            min="0"
+            description="Refresh time in seconds at which the position is updated when using the Modem Manager Position Provider">
+        </AD>
+        
         <AD id="gpsd.host" 
             name="gpsd.host" 
             type="String"

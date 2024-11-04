@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.eclipse.kura.linux.position.NMEAParser.ParseException;
+import org.eclipse.kura.linux.position.serial.NMEAParser;
+import org.eclipse.kura.linux.position.serial.NMEAParser.ParseException;
 import org.junit.Test;
 
 public class NMEAParserTest {

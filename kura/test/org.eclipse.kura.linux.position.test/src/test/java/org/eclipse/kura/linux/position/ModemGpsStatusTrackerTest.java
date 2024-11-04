@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -24,6 +24,8 @@ import java.util.HashMap;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommURI;
+import org.eclipse.kura.linux.position.provider.GpsDeviceAvailabilityListener;
+import org.eclipse.kura.linux.position.serial.ModemGpsStatusTracker;
 import org.eclipse.kura.net.modem.ModemGpsDisabledEvent;
 import org.eclipse.kura.net.modem.ModemGpsEnabledEvent;
 import org.junit.Test;

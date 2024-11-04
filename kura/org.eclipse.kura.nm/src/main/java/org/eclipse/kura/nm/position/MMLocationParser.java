@@ -163,7 +163,7 @@ public class MMLocationParser {
                 }
             }
 
-        } catch (NumberFormatException ex) {
+        } catch (Exception ex) {
             logger.error("Failed to parse NMEA sentence: ", ex);
         }
     }
@@ -286,7 +286,7 @@ public class MMLocationParser {
 
     @Override
     public String toString() {
-        return "GpsdInternalState [latitude=" + lat + ", longitude=" + lon + ", altitude=" + alt + ", speed=" + speed
+        return "ModemManagerProvider [latitude=" + lat + ", longitude=" + lon + ", altitude=" + alt + ", speed=" + speed
                 + ", timestamp=" + time + ", date=" + date + ", gnssType=" + gnssTypes + "]";
     }
 }

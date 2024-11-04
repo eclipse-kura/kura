@@ -650,7 +650,7 @@ public class NMDbusConnector {
     public List<Location> getAvailableMMLocations() {
         List<Location> availableLocations = new ArrayList<>();
 
-        this.getEnabledModemsPaths().stream().forEach(modemPath -> {
+        this.getEnabledModemsPaths().forEach(modemPath -> {
             try {
                 Properties locationProperties = this.modemManager
                         .getLocationProperties(this.modemManager.getModemManagerLocation(modemPath));

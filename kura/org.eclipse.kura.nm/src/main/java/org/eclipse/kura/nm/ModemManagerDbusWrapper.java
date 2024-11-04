@@ -40,9 +40,7 @@ public class ModemManagerDbusWrapper {
 
     private static final Logger logger = LoggerFactory.getLogger(ModemManagerDbusWrapper.class);
 
-    private static final String NETWORK_MANAGER_BUS_NAME = "org.freedesktop.NetworkManager";
-    private static final String MM_DEVICE_NAME = "org.freedesktop.NetworkManager.Device";
-    private static final String MODEM_MANAGER_BUS_NAME = "org.freedesktop.ModemManager1";
+    private static final String MM_BUS_NAME = "org.freedesktop.ModemManager1";
     private static final String MM_MODEM_NAME = "org.freedesktop.ModemManager1.Modem";
     private static final String MM_SIM_NAME = "org.freedesktop.ModemManager1.Sim";
     private static final String MM_LOCATION_BUS_NAME = "org.freedesktop.ModemManager1.Modem.Location";
@@ -69,9 +67,9 @@ public class ModemManagerDbusWrapper {
         KuraModemGPSMode desiredGPSMode = gpsModeString.isPresent() ? KuraModemGPSMode.fromString(gpsModeString.get())
                 : KuraModemGPSMode.KURA_MODEM_GPS_MODE_UNMANAGED;
 
-        Location modemLocation = this.dbusConnection.getRemoteObject(MODEM_MANAGER_BUS_NAME, modemDevicePath.get(),
+        Location modemLocation = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemDevicePath.get(),
                 Location.class);
-        Properties modemLocationProperties = this.dbusConnection.getRemoteObject(MODEM_MANAGER_BUS_NAME,
+        Properties modemLocationProperties = this.dbusConnection.getRemoteObject(MM_BUS_NAME,
                 modemLocation.getObjectPath(), Properties.class);
 
         Set<MMModemLocationSource> availableLocationSources = EnumSet
@@ -115,8 +113,8 @@ public class ModemManagerDbusWrapper {
     }
 
     protected void enableModem(String modemDevicePath) throws DBusException {
-        Modem modem = this.dbusConnection.getRemoteObject(MODEM_MANAGER_BUS_NAME, modemDevicePath, Modem.class);
-        Properties modemProperties = this.dbusConnection.getRemoteObject(MODEM_MANAGER_BUS_NAME, modemDevicePath,
+        Modem modem = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemDevicePath, Modem.class);
+        Properties modemProperties = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemDevicePath,
                 Properties.class);
 
         MMModemState currentModemState = MMModemState
@@ -129,16 +127,15 @@ public class ModemManagerDbusWrapper {
     }
 
     public Modem getModem(String modemPath) throws DBusException {
-        return dbusConnection.getRemoteObject(MODEM_MANAGER_BUS_NAME, modemPath, Modem.class);
+        return dbusConnection.getRemoteObject(MM_BUS_NAME, modemPath, Modem.class);
     }
 
     public Location getModemManagerLocation(String modemPath) throws DBusException {
-        return dbusConnection.getRemoteObject("org.freedesktop.ModemManager1", modemPath, Location.class);
+        return dbusConnection.getRemoteObject(MM_BUS_NAME, modemPath, Location.class);
     }
 
     public Properties getLocationProperties(Location location) throws DBusException {
-        return dbusConnection.getRemoteObject("org.freedesktop.ModemManager1", location.getObjectPath(),
-                Properties.class);
+        return dbusConnection.getRemoteObject(MM_BUS_NAME, location.getObjectPath(), Properties.class);
     }
 
     public MMModemState getMMModemState(Properties modemProperties) {
@@ -147,8 +144,7 @@ public class ModemManagerDbusWrapper {
 
     public Optional<Properties> getModemProperties(String modemPath) throws DBusException {
         Optional<Properties> modemProperties = Optional.empty();
-        Properties properties = this.dbusConnection.getRemoteObject(MODEM_MANAGER_BUS_NAME, modemPath,
-                Properties.class);
+        Properties properties = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemPath, Properties.class);
         if (Objects.nonNull(properties)) {
             modemProperties = Optional.of(properties);
         }
@@ -164,7 +160,7 @@ public class ModemManagerDbusWrapper {
                 // Multiple SIM slots aren't supported
                 DBusPath simPath = modemProperties.Get(MM_MODEM_NAME, "Sim");
                 if (!simPath.getPath().equals("/")) {
-                    Properties simProp = this.dbusConnection.getRemoteObject(MODEM_MANAGER_BUS_NAME, simPath.getPath(),
+                    Properties simProp = this.dbusConnection.getRemoteObject(MM_BUS_NAME, simPath.getPath(),
                             Properties.class);
                     simProperties.add(new SimProperties(simProp, true, true));
                 }
@@ -178,8 +174,7 @@ public class ModemManagerDbusWrapper {
                         continue;
                     }
 
-                    Properties simProp = this.dbusConnection.getRemoteObject(MODEM_MANAGER_BUS_NAME, dbusPath,
-                            Properties.class);
+                    Properties simProp = this.dbusConnection.getRemoteObject(MM_BUS_NAME, dbusPath, Properties.class);
                     boolean isActive = simProp.Get(MM_SIM_NAME, "Active");
                     boolean isPrimary = index == primarySimSlot.intValue() - 1;
 
@@ -190,7 +185,7 @@ public class ModemManagerDbusWrapper {
             // Fallback for ModemManager version prior to 1.16
             DBusPath simPath = modemProperties.Get(MM_MODEM_NAME, "Sim");
             if (!simPath.getPath().equals("/")) {
-                Properties simProp = this.dbusConnection.getRemoteObject(MODEM_MANAGER_BUS_NAME, simPath.getPath(),
+                Properties simProp = this.dbusConnection.getRemoteObject(MM_BUS_NAME, simPath.getPath(),
                         Properties.class);
                 simProperties.add(new SimProperties(simProp, true, true));
             }
@@ -215,14 +210,14 @@ public class ModemManagerDbusWrapper {
             throws DBusException {
         List<Properties> bearerProperties = new ArrayList<>();
         try {
-            Modem modem = this.dbusConnection.getRemoteObject(MODEM_MANAGER_BUS_NAME, modemPath, Modem.class);
+            Modem modem = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemPath, Modem.class);
             if (Objects.nonNull(modem)) {
                 List<DBusPath> bearerPaths = modem.ListBearers();
                 bearerProperties = getBearersPropertiesFromPaths(bearerPaths);
             }
         } catch (DBusExecutionException e) {
             try {
-                List<DBusPath> bearerPaths = modemProperties.Get(MODEM_MANAGER_BUS_NAME, "Bearers");
+                List<DBusPath> bearerPaths = modemProperties.Get(MM_BUS_NAME, "Bearers");
                 bearerProperties = getBearersPropertiesFromPaths(bearerPaths);
             } catch (DBusExecutionException e1) {
                 logger.warn("Cannot get bearers for modem {}", modemPath, e1);
@@ -235,8 +230,8 @@ public class ModemManagerDbusWrapper {
         List<Properties> bearerProperties = new ArrayList<>();
         for (DBusPath bearerPath : bearerPaths) {
             if (!bearerPath.getPath().equals("/")) {
-                bearerProperties.add(this.dbusConnection.getRemoteObject(MODEM_MANAGER_BUS_NAME, bearerPath.getPath(),
-                        Properties.class));
+                bearerProperties
+                        .add(this.dbusConnection.getRemoteObject(MM_BUS_NAME, bearerPath.getPath(), Properties.class));
             }
         }
         return bearerProperties;
@@ -250,8 +245,7 @@ public class ModemManagerDbusWrapper {
             return;
         }
 
-        Modem mmModemDevice = this.dbusConnection.getRemoteObject(MODEM_MANAGER_BUS_NAME, modemManagerDbusPath.get(),
-                Modem.class);
+        Modem mmModemDevice = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemManagerDbusPath.get(), Modem.class);
 
         NMModemResetHandler resetHandler = new NMModemResetHandler(networkManagerDbusPath, mmModemDevice,
                 delayMinutes * 60L * 1000L);

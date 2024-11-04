@@ -14,7 +14,6 @@
 package org.eclipse.kura.nm.position;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,12 +41,11 @@ import org.slf4j.LoggerFactory;
 public class MMPositionProvider implements PositionProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(MMPositionProvider.class);
+
     private static final UInt32 NMEA_LOCATION_SOURCE = new UInt32(
             MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA.getValue());
     private static final UInt32 RAW_LOCATION_SOURCE = new UInt32(
             MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_RAW.getValue());
-
-    private DateTimeFormatter nmeaDateTimePattern = DateTimeFormatter.ofPattern("ddMMyy hhmmss");
 
     private final NMDbusConnector nmDbusConnector;
 
@@ -69,8 +67,14 @@ public class MMPositionProvider implements PositionProvider {
     @Override
     public void start() {
 
+        if (this.refreshRate <= 0) {
+            logger.warn("Refresh rate not valid, only positive value are accepted");
+            return;
+        }
+
         this.positionRefreshTask = Executors.newSingleThreadScheduledExecutor();
-        this.positionRefreshTask.scheduleAtFixedRate(this::getModemManagerLocation, 0, refreshRate, TimeUnit.SECONDS);
+        this.positionRefreshTask.scheduleAtFixedRate(this::getModemManagerLocation, 0, this.refreshRate,
+                TimeUnit.SECONDS);
     }
 
     @Override
@@ -143,6 +147,8 @@ public class MMPositionProvider implements PositionProvider {
 
         List<Location> availableLocations = this.nmDbusConnector.getAvailableMMLocations();
 
+        boolean isLastPositionValid = this.mmLocationParser.isFixed();
+
         for (Location location : availableLocations) {
             Map<UInt32, Variant<?>> locationMap = location.GetLocation();
             if (locationMap.containsKey(NMEA_LOCATION_SOURCE) && locationMap.containsKey(RAW_LOCATION_SOURCE)) {
@@ -152,6 +158,13 @@ public class MMPositionProvider implements PositionProvider {
                 Variant<?> rawData = locationMap.get(RAW_LOCATION_SOURCE);
                 this.mmLocationParser.parseRawLocation(rawData);
             }
+        }
+
+        boolean isNewPositionValid = this.mmLocationParser.isFixed();
+
+        if (this.gpsDeviceListener != null && isNewPositionValid != isLastPositionValid) {
+            this.gpsDeviceListener.onLockStatusChanged(isNewPositionValid);
+            logger.info("Lock Status changed: {}", this.mmLocationParser);
         }
     }
 

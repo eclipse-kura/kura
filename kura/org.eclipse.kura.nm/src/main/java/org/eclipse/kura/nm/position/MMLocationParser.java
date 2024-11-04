@@ -57,15 +57,15 @@ public class MMLocationParser {
     private int m3Dfix;
     private char latitudeHemisphere;
     private char longitudeHemisphere;
-    private char validFix = 0;
+    private char validFix;
 
-    private LocalTime localTime;
-    private LocalDate localDate;
+    private LocalTime time;
+    private LocalDate date;
     private Set<GNSSType> gnssTypes = new HashSet<>();
     private Boolean isFix = false;
 
     public LocalDateTime getLocalDateTime() {
-        return Objects.requireNonNull(LocalDateTime.of(localDate, localTime));
+        return Objects.requireNonNull(LocalDateTime.of(date, time));
     }
 
     public Position getPosition() {
@@ -84,15 +84,16 @@ public class MMLocationParser {
 
     public NmeaPosition getNmeaPosition() {
         return new NmeaPosition(this.lat, this.lon, this.alt, this.speed, this.track, this.fixQuality,
-                this.nrSatellites, this.mDOP, this.mPDOP, this.mHDOP, this.mVDOP, this.fixQuality);
+                this.nrSatellites, this.mDOP, this.mPDOP, this.mHDOP, this.mVDOP, this.m3Dfix, this.validFix,
+                this.latitudeHemisphere, this.longitudeHemisphere);
     }
 
     public String getNmeaTime() {
-        return this.localTime.toString();
+        return this.time.toString();
     }
 
     public String getNmeaDate() {
-        return this.localDate.toString();
+        return this.date.toString();
     }
 
     public void parseRawLocation(Variant<?> rawLocationVariant) {
@@ -114,8 +115,8 @@ public class MMLocationParser {
 
             // time comes in format HHmmss.SS, so we cut the string after the dot to extract only the util information
             case "utc-time":
-                String time = ((String) rawEntry.getValue().getValue()).toString();
-                this.localTime = LocalTime.parse(time.split("\\.")[0], DateTimeFormatter.ofPattern("HHmmss"));
+                String utcTime = ((String) rawEntry.getValue().getValue());
+                this.time = LocalTime.parse(utcTime.split("\\.")[0], DateTimeFormatter.ofPattern("HHmmss"));
                 break;
 
             default:
@@ -162,7 +163,7 @@ public class MMLocationParser {
                 }
             }
 
-        } catch (Exception ex) {
+        } catch (NumberFormatException ex) {
             logger.error("Failed to parse NMEA sentence: ", ex);
         }
     }
@@ -205,7 +206,7 @@ public class MMLocationParser {
      */
     private void parseRmcSentence(List<String> rmcTokens) {
         if (!rmcTokens.get(9).isEmpty()) {
-            this.localDate = LocalDate.parse(rmcTokens.get(9), DateTimeFormatter.ofPattern("ddMyy"));
+            this.date = LocalDate.parse(rmcTokens.get(9), DateTimeFormatter.ofPattern("ddMyy"));
         }
         if (!rmcTokens.get(7).isEmpty()) {
             this.speed = Double.parseDouble(rmcTokens.get(7)) * KNOTS_TO_M_S;
@@ -281,5 +282,11 @@ public class MMLocationParser {
         default:
             return GNSSType.UNKNOWN;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "GpsdInternalState [latitude=" + lat + ", longitude=" + lon + ", altitude=" + alt + ", speed=" + speed
+                + ", timestamp=" + time + ", date=" + date + ", gnssType=" + gnssTypes + "]";
     }
 }

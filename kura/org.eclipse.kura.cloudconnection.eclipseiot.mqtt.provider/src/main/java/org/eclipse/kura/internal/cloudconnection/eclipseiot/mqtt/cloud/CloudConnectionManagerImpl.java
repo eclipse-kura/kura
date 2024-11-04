@@ -81,6 +81,8 @@ import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -617,6 +619,11 @@ public class CloudConnectionManagerImpl
     }
 
     private void publishBirthCertificate(boolean isNewConnection) throws KuraException {
+        if (isFrameworkStopping()) {
+            logger.info("framework is stopping.. not republishing birth certificate");
+            return;
+        }
+        
         readModemProfile();
         LifecycleMessage birthToPublish = new LifecycleMessage(this.options, this).asBirthCertificateMessage();
 
@@ -821,6 +828,21 @@ public class CloudConnectionManagerImpl
     @Override
     public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
         this.registeredCloudDeliveryListeners.remove(cloudDeliveryListener);
+    }
+    
+    private boolean isFrameworkStopping() {
+        try {
+            final Bundle ownBundle = FrameworkUtil.getBundle(CloudConnectionManagerImpl.class);
+
+            if (ownBundle == null) {
+                return false; // not running in an OSGi framework? e.g. unit test
+            }
+
+            return ownBundle.getBundleContext().getBundle(0).getState() == Bundle.STOPPING;
+        } catch (final Exception e) {
+            logger.warn("unexpected exception while checking if framework is shutting down", e);
+            return false;
+        }
     }
 
     private void readModemProfile() {

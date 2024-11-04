@@ -42,11 +42,11 @@ public class MMLocationParser {
     private int gnssTypeUpdateCounter = 0;
     private static final int GNSSTYPE_RESET_COUNTER = 50;
 
-    private Double lat;
-    private Double lon;
-    private Double alt;
-    private Double speed;
-    private Double track;
+    private Double lat = 0.0;
+    private Double lon = 0.0;
+    private Double alt = 0.0;
+    private Double speed = 0.0;
+    private Double track = 0.0;
 
     private int fixQuality;
     private int nrSatellites;
@@ -55,9 +55,9 @@ public class MMLocationParser {
     private double mHDOP;
     private double mVDOP;
     private int m3Dfix;
-    private char latitudeHemisphere;
-    private char longitudeHemisphere;
-    private char validFix;
+    private char latitudeHemisphere = 0;
+    private char longitudeHemisphere = 0;
+    private char validFix = 0;
 
     private LocalTime time;
     private LocalDate date;
@@ -165,6 +165,7 @@ public class MMLocationParser {
 
         } catch (Exception ex) {
             logger.error("Failed to parse NMEA sentence: ", ex);
+            this.isFix = false;
         }
     }
 

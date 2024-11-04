@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -82,6 +82,8 @@ import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -148,7 +150,7 @@ public class CloudConnectionManagerImpl
     private final Set<CloudDeliveryListener> registeredCloudDeliveryListeners;
 
     private ScheduledFuture<?> scheduledBirthPublisherFuture;
-    private ScheduledExecutorService scheduledBirthPublisher = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService scheduledBirthPublisher = Executors.newScheduledThreadPool(1);
 
     public CloudConnectionManagerImpl() {
         this.messageId = new AtomicInteger();
@@ -283,7 +285,7 @@ public class CloudConnectionManagerImpl
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         this.ownPid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
 
-        logger.info("activate {}...", ownPid);
+        logger.info("activate {}...", this.ownPid);
 
         //
         // save the bundle context and the properties
@@ -368,8 +370,8 @@ public class CloudConnectionManagerImpl
             return;
         }
 
-        if ((EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL.equals(topic)
-                || EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL.equals(topic)) && this.dataService.isConnected()) {
+        if ((EVENT_TOPIC_DEPLOYMENT_ADMIN_INSTALL.equals(topic) || EVENT_TOPIC_DEPLOYMENT_ADMIN_UNINSTALL.equals(topic))
+                && this.dataService.isConnected()) {
             logger.debug("CloudConnectionManagerImpl: received install/uninstall event, publishing BIRTH.");
             tryPublishBirthCertificate(false);
         }
@@ -655,6 +657,11 @@ public class CloudConnectionManagerImpl
     }
 
     private void publishBirthCertificate(boolean isNewConnection) throws KuraException {
+        if (isFrameworkStopping()) {
+            logger.info("framework is stopping.. not republishing birth certificate");
+            return;
+        }
+
         readModemProfile();
         LifecycleMessage birthToPublish = new LifecycleMessage(this.options, this).asBirthCertificateMessage();
 
@@ -819,7 +826,7 @@ public class CloudConnectionManagerImpl
     }
 
     String getOwnPid() {
-        return ownPid;
+        return this.ownPid;
     }
 
     @Override
@@ -859,6 +866,21 @@ public class CloudConnectionManagerImpl
     @Override
     public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
         this.registeredCloudDeliveryListeners.remove(cloudDeliveryListener);
+    }
+
+    private boolean isFrameworkStopping() {
+        try {
+            final Bundle ownBundle = FrameworkUtil.getBundle(CloudConnectionManagerImpl.class);
+
+            if (ownBundle == null) {
+                return false; // not running in an OSGi framework? e.g. unit test
+            }
+
+            return ownBundle.getBundleContext().getBundle(0).getState() == Bundle.STOPPING;
+        } catch (final Exception e) {
+            logger.warn("unexpected exception while checking if framework is shutting down", e);
+            return false;
+        }
     }
 
     private void readModemProfile() {

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -171,12 +171,12 @@ public class CloudServiceImpl
     private ServiceRegistration<?> notificationPublisherRegistration;
     private final CloudNotificationPublisher notificationPublisher;
 
-    private Set<TamperDetectionService> tamperDetectionServices = new HashSet<>();
+    private final Set<TamperDetectionService> tamperDetectionServices = new HashSet<>();
 
     private String ownPid;
 
     private ScheduledFuture<?> scheduledBirthPublisherFuture;
-    private ScheduledExecutorService scheduledBirthPublisher = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService scheduledBirthPublisher = Executors.newScheduledThreadPool(1);
     private LifecycleMessage lastBirthMessage;
     private LifecycleMessage lastAppMessage;
 
@@ -329,7 +329,7 @@ public class CloudServiceImpl
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         this.ownPid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
-        logger.info("activate {}...", ownPid);
+        logger.info("activate {}...", this.ownPid);
 
         //
         // save the bundle context and the properties
@@ -856,6 +856,11 @@ public class CloudServiceImpl
     }
 
     private void publishBirthCertificate(boolean isNewConnection) throws KuraException {
+        if (isFrameworkStopping()) {
+            logger.info("framework is stopping.. not republishing birth certificate");
+            return;
+        }
+
         readModemProfile();
         LifecycleMessage birthToPublish = new LifecycleMessage(this.options, this).asBirthCertificateMessage();
 
@@ -871,6 +876,10 @@ public class CloudServiceImpl
     }
 
     private void publishAppCertificate() {
+        if (isFrameworkStopping()) {
+            logger.info("framework is stopping.. not republishing app certificate");
+            return;
+        }
         publishWithDelay(new LifecycleMessage(this.options, this).asAppCertificateMessage());
     }
 
@@ -895,12 +904,12 @@ public class CloudServiceImpl
 
                 if (Objects.nonNull(this.lastBirthMessage)) {
                     logger.debug("CloudServiceImpl: publishing cached BIRTH message.");
-                    publishLifeCycleMessage(lastBirthMessage);
+                    publishLifeCycleMessage(this.lastBirthMessage);
                 }
 
                 if (Objects.nonNull(this.lastAppMessage)) {
                     logger.debug("CloudServiceImpl: publishing cached APP message.");
-                    publishLifeCycleMessage(lastAppMessage);
+                    publishLifeCycleMessage(this.lastAppMessage);
                 }
 
             } catch (KuraException e) {
@@ -986,11 +995,6 @@ public class CloudServiceImpl
     public void registerRequestHandler(String appId, RequestHandler requestHandler) {
         this.registeredRequestHandlers.put(appId, requestHandler);
 
-        if (isFrameworkStopping()) {
-            logger.info("framework is stopping.. not republishing app certificate");
-            return;
-        }
-
         if (isConnected()) {
             publishAppCertificate();
         }
@@ -999,11 +1003,6 @@ public class CloudServiceImpl
     @Override
     public void unregister(String appId) {
         this.registeredRequestHandlers.remove(appId);
-
-        if (isFrameworkStopping()) {
-            logger.info("framework is stopping.. not republishing app certificate");
-            return;
-        }
 
         if (isConnected()) {
             publishAppCertificate();
@@ -1193,7 +1192,7 @@ public class CloudServiceImpl
     }
 
     String getOwnPid() {
-        return ownPid;
+        return this.ownPid;
     }
 
     void withTamperDetectionServices(final Consumer<Set<TamperDetectionService>> consumer) {

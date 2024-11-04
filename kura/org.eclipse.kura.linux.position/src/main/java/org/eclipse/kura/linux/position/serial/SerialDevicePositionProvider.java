@@ -238,19 +238,19 @@ public class SerialDevicePositionProvider implements PositionProvider {
         return this.gpsDevice.getGnssTypes();
     }
 
-    protected GpsDevice getGpsDevice() {
+    public GpsDevice getGpsDevice() {
         return this.gpsDevice;
     }
 
-    protected ConnectionFactory getConnectionFactory() {
+    public ConnectionFactory getConnectionFactory() {
         return this.connectionFactory;
     }
 
-    protected GpsDeviceTracker getGpsDeviceTracker() {
+    public GpsDeviceTracker getGpsDeviceTracker() {
         return this.gpsDeviceTracker;
     }
 
-    protected ModemGpsStatusTracker getModemGpsStatusTracker() {
+    public ModemGpsStatusTracker getModemGpsStatusTracker() {
         return this.modemGpsStatusTracker;
     }
 

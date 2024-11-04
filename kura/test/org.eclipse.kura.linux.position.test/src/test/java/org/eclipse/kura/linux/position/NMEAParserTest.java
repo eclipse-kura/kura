@@ -17,7 +17,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.eclipse.kura.linux.position.NMEAParser.ParseException;
+import org.eclipse.kura.linux.position.serial.NMEAParser;
+import org.eclipse.kura.linux.position.serial.NMEAParser.ParseException;
 import org.junit.Test;
 
 public class NMEAParserTest {

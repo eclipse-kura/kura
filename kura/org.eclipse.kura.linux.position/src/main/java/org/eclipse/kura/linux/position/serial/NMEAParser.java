@@ -318,11 +318,11 @@ public class NMEAParser {
         return deg;
     }
 
-    double convertPositionlat(String pos, String direction) {
+    public double convertPositionlat(String pos, String direction) {
         return convertPosition(pos, direction, 2);
     }
 
-    double convertPositionlon(String pos, String direction) {
+    public double convertPositionlon(String pos, String direction) {
         return convertPosition(pos, direction, 3);
     }
 

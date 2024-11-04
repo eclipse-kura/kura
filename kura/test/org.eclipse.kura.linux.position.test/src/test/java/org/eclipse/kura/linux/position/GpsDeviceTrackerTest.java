@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.kura.comm.CommURI;
+import org.eclipse.kura.linux.position.provider.GpsDeviceAvailabilityListener;
+import org.eclipse.kura.linux.position.serial.GpsDeviceTracker;
 import org.eclipse.kura.usb.UsbDeviceAddedEvent;
 import org.eclipse.kura.usb.UsbDeviceRemovedEvent;
 import org.eclipse.kura.usb.UsbService;

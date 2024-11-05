@@ -4523,7 +4523,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 <p>In addition to this feature, the page also allows the <strong>real-time</strong> displaying of system logs, if the framework has the availability of one or more components that implement the LogProvider API. The UI also provides a useful button to open a new Kura instance in a new browser window. A reference implementation of the LogProvider API is provided in the <code>org.eclipse.kura.log.filesystem.provider</code> bundle. This bundle exposes in the framework a factory that can be used to read filesystem files. By default, Eclipse Kura creates two log providers at startup: one that reads from <code>/var/log/kura.log</code> and the other that reads from <code>/var/log/kura-audit.log</code>.</p>
 <p><img alt="Device System Logs" src="../images/device-system-logs.png" /></p>
-<p>The collected logs are stored in a cache server-side and are collected from the point in time where the log providers get attached to the UI (usually, from the login or after a refresh of the browser's window). When the section "System Logs" is accessed, the new log entries are polled from the server's cache and stored client-side.</p>
+<p>The device logs are stored in a server-side cache and are collected from the point in time where the log providers get attached to the UI (usually, from the login or after a refresh of the browser's window). When the section "System Logs" is accessed, the new log entries are polled from the server's cache and stored client-side.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The default log provider, that is the first log provider shown in the dropdown menu, is <code>filesystem-kura-log</code>. It is used to collect logs from the <code>/var/log/kura.log</code> file. The default value can be changed using the <code>kura.default.log.manager</code> property in the <code>kura.properties</code> file.</p>
+</div>
 
 
 

@@ -4387,13 +4387,26 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <ul>
 <li><strong>gpsd</strong> - gpsd service daemon if is available on the system. </li>
 <li><strong>serial</strong> - direct access to gps device through serial or usb port.</li>
+<li><strong>modemManager</strong> - location information retrieved through a Modem Manager controlled modem</li>
 </ul>
+</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The Modem Manager based provider exploits the Location service offered by an enabled modem controlled by the ModemManager daemon: to work properly, MM requires that the modem has a SIM card inserted. When selecting this mode make sure you meet this necessary condition. It is possible to check the status of the modem through the OS running the command <code>mmcli -m &lt;numberOfModem&gt;</code>, the status of the location service through: <code>mmcli -m &lt;numberOfModem&gt; --location-status</code>; while the location data can be retrieved by running <code>mmcli -m &lt;numberOfModem&gt; --location-get</code>.</p>
+</div>
+<ul>
+<li>
+<p><strong>modem.manager.refresh.rate.seconds</strong> - refresh time of the position when using the ModemManager base provider.</p>
 </li>
 <li>
 <p><strong>gpsd.host</strong> - host where gpsd service deamon is running. (required only if gpsd provider is selected.)</p>
 </li>
 <li>
 <p><strong>gpsd.port</strong> - port where gpsd service is listening. (required only if gpsd provider is selected.)</p>
+</li>
+<li>
+<p><strong>gpsd.max.fix.validity.interval.seconds</strong> - maximum time waited for a new position info before considering the fix lost.</p>
 </li>
 <li>
 <p><strong>latitude</strong> - provides the static latitude value in degrees.</p>

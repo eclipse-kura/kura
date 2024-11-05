@@ -302,7 +302,7 @@ public class CloudServiceImpl
     }
 
     public void unsetTamperDetectionService(final TamperDetectionService tamperDetectionService) {
-        if (this.tamperDetectionServices != null && this.tamperDetectionServices.contains(tamperDetectionService)) {
+        if (!this.tamperDetectionServices.isEmpty() && this.tamperDetectionServices.contains(tamperDetectionService)) {
             synchronized (this.tamperDetectionServices) {
                 this.tamperDetectionServices.remove(tamperDetectionService);
             }

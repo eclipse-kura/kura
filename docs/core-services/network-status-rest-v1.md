@@ -287,6 +287,9 @@ Object that contains specific properties to describe the status of a WiFi interf
     "ssid": "MyAccessPoint",
     "wpaSecurity": [
       "NONE"
+    ],
+    "flags": [
+      "PRIVACY"
     ]
   },
   "autoConnect": true,
@@ -309,6 +312,9 @@ Object that contains specific properties to describe the status of a WiFi interf
       "ssid": "MyAccessPoint",
       "wpaSecurity": [
         "NONE"
+      ],
+      "flags": [
+        "PRIVACY"
       ]
     },
     {
@@ -329,6 +335,9 @@ Object that contains specific properties to describe the status of a WiFi interf
       "ssid": "OtherSSID",
       "wpaSecurity": [
         "NONE"
+      ],
+      "flags": [
+        "PRIVACY"
       ]
     }
   ],
@@ -405,6 +414,9 @@ Object that contains specific properties to describe the status of a WiFi interf
     "ssid": "kura_gateway_raspberry_pi",
     "wpaSecurity": [
       "NONE"
+    ],
+    "flags": [
+      "PRIVACY"
     ]
   },
   "autoConnect": true,
@@ -427,6 +439,10 @@ Object that contains specific properties to describe the status of a WiFi interf
       "ssid": "kura_gateway_raspberry_pi",
       "wpaSecurity": [
         "NONE"
+      ],
+      "flags": [
+        "PRIVACY",
+        "WPS"
       ]
     }
   ],
@@ -866,6 +882,12 @@ This object describes a Wifi Access Point. It can be used both for describing a 
 
       * array element type: `string (enumerated)`
           * [WifiSecurity](#wifisecurity)
+
+  * **flags**: `array` 
+      The capabilities of the access point
+
+      * array element type: `string (enumerated)`
+          * [WifiFlags](#wififlags)
   
 
 ### ModemModePair
@@ -1040,6 +1062,16 @@ Flags describing the security capabilities of an access point.
       * `SECURITY_WPA`: Supports WPA encryption.
       * `SECURITY_WPA2`: Supports WPA2 encryption.
       * `SECURITY_WPA_WPA2`: Supports WPA and WPA2 encryption.
+
+### WifiFlags
+Flags describing the capabilities of an access point.
+
+  * Possible values
+      * `NONE`: None
+      * `PRIVACY`: supports authentication and encryption
+      * `WPS`: supports WPS (Wi-Fi Protected Setup)
+      * `WPS_PBC`: supports push-button based WPS
+      * `WPS_PIN`: supports PIN based WPS
 
 ### ModemPortType
 The type of a modem port.

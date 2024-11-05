@@ -21,10 +21,18 @@ This service provides the following configuration parameters:
 - **provider** - species which position provider use, can be gpsd or serial. 
     - **gpsd** - gpsd service daemon if is available on the system. 
     - **serial** - direct access to gps device through serial or usb port.
+    - **modemManager** - location information retrieved through a Modem Manager controlled modem
+
+!!! warning
+    The Modem Manager based provider exploits the Location service offered by an enabled modem controlled by the ModemManager daemon: to work properly, MM requires that the modem has a SIM card inserted. When selecting this mode make sure you meet this necessary condition. It is possible to check the status of the modem through the OS running the command `mmcli -m <numberOfModem>`, the status of the location service through: `mmcli -m <numberOfModem> --location-status`; while the location data can be retrieved by running `mmcli -m <numberOfModem> --location-get`.
+
+- **modem.manager.refresh.rate.seconds** - refresh time of the position when using the ModemManager base provider.
 
 - **gpsd.host** - host where gpsd service deamon is running. (required only if gpsd provider is selected.)
 
 - **gpsd.port** - port where gpsd service is listening. (required only if gpsd provider is selected.)
+
+- **gpsd.max.fix.validity.interval.seconds** - maximum time waited for a new position info before considering the fix lost.
 
 - **latitude** - provides the static latitude value in degrees.
 

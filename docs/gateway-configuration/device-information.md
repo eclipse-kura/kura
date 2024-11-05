@@ -60,4 +60,7 @@ In addition to this feature, the page also allows the **real-time** displaying o
 
 ![Device System Logs](./images/device-system-logs.png)
 
-The collected logs are stored in a cache server-side and are collected from the point in time where the log providers get attached to the UI (usually, from the login or after a refresh of the browser's window). When the section "System Logs" is accessed, the new log entries are polled from the server's cache and stored client-side.
+The device logs are stored in a server-side cache and are collected from the point in time where the log providers get attached to the UI (usually, from the login or after a refresh of the browser's window). When the section "System Logs" is accessed, the new log entries are polled from the server's cache and stored client-side.
+
+!!! note
+    The default log provider, that is the first log provider shown in the dropdown menu, is `filesystem-kura-log`. It is used to collect logs from the `/var/log/kura.log` file. The default value can be changed using the `kura.default.log.manager` property in the `kura.properties` file.

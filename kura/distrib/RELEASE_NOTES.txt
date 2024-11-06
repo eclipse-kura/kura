@@ -10,6 +10,7 @@ The release contains a number of bug fixes and general feature improvements.
 
 
 Features:
+  * e908f7c714 - modemManager based position provider [backport release-5.6.0] (#5512) (eclipse-kura-bot)
   * f43a382899 - Add default log manager property [backport release-5.6.0] (#5507) (eclipse-kura-bot)
   * 132eded3ae - [web-ui] Added a column filter to channels table in the asset configuration [backport release-5.6.0] (#5501) (eclipse-kura-bot)
   * 170689592f - Added support for emitting connection errors in WireAsset [backport release-5.6.0] (#5494) (eclipse-kura-bot)
@@ -44,6 +45,8 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * e2bba23190 - Linux.Pid equals override [backport release-5.6.0] (#5514) (eclipse-kura-bot)
+  * 47adbf1686 - Prevent publishing birth on shutdown [backport release-5.6.0]  (#5513) (Matteo Maiero)
   * 6b3d84edc3 - Java 11+ PKCS11 provider setup [backport release-5.6.0] (#5497) (eclipse-kura-bot)
   * 5a9bb1d43e - [nm] AP scan not reports correct Wifi Security [backport release-5.6.0] (#5505) (eclipse-kura-bot)
   * 4b0fdc8a7e - Improvement on Raw cloud connection [backport release-5.6.0] (#5503) (eclipse-kura-bot)
@@ -55,7 +58,6 @@ Bug Fixes:
   * ccd2e08db6 - Updated the Eclipse Marketplace certificate [backport release-5.6.0] (#5395) (github-actions[bot])
   * 6ca13b211c - Disable systemd-resolved stub mode on systemd versions less than 248 [backport release-5.6.0] (#5369) (github-actions[bot])
   * b3dff8ffdb - Connection Scheduler metatype improvement. [backport release-5.6.0] (#5365) (github-actions[bot])
-
 
 Target Platform Updates:
   * f768acc086 - updated jetty version to 9.4.55.v20240627 [backport release-5.6.0] (#5502) (eclipse-kura-bot)
@@ -122,6 +124,10 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 444a8691e5 - chore: add Kura 5.6.0 release notes (#5510) (eclipse-kura-bot)
+  * e2bba23190 - fix: Linux.Pid equals override [backport release-5.6.0] (#5514) (eclipse-kura-bot)
+  * 47adbf1686 - fix: Prevent publishing birth on shutdown [backport release-5.6.0]  (#5513) (Matteo Maiero)
+  * e908f7c714 - feat: modemManager based position provider [backport release-5.6.0] (#5512) (eclipse-kura-bot)
   * 9ac62728fa - chore: automated uptick to 5.6.0 (#5508) (eclipse-kura-bot)
   * f43a382899 - feat: Add default log manager property [backport release-5.6.0] (#5507) (eclipse-kura-bot)
   * 132eded3ae - feat(web-ui): Added a column filter to channels table in the asset configuration [backport release-5.6.0] (#5501) (eclipse-kura-bot)
@@ -166,5 +172,3 @@ Changelog:
   * 766a3328e2 - feat(nm): Modem APN as an optional parameter [backport release-5.6.0] (#5353) (github-actions[bot])
   * 8d11fda564 - chore: automated uptick to 5.6.0-SNAPSHOT (#5349) (github-actions[bot])
   * 963255b4c4 - chore: automated uptick to 5.5.1-SNAPSHOT (#5314) (github-actions[bot])
-
-

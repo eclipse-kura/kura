@@ -65,6 +65,7 @@ Target Platform Updates:
   * f45421ebef - Protobuf update to 3.25.5 [backport 5.6.0] (#5431) (#5450) (Matteo Maiero)
 
 Known Issues:
+  * When a new network interface is detected, it is not possible to configure it via REST. A user has to configure it once using the webUI, then the configuration via REST will work.
   * During a wifi scan, some access points with the WPA/WPA2 wifi security are recognized as WPA.
   * On devices with Ubuntu 20.04, the DHCP server provided by isc-dhcp-server may not assign an IP address to the clients. Use dnsmasq instead.
   * Different GNSS Type retrieved from different Position Providers (see #5409 for details)

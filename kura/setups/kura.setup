@@ -104,7 +104,7 @@
   <setupTask
       xsi:type="git:GitCloneTask"
       id="git.clone"
-      remoteURI="eclipse/kura">
+      remoteURI="eclipse-kura/kura">
     <annotation
         source="http://www.eclipse.org/oomph/setup/InducedChoices">
       <detail

@@ -21,11 +21,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.linux.position.options.PositionServiceOptions;
 import org.eclipse.kura.linux.position.provider.GpsDeviceAvailabilityListener;
@@ -73,16 +72,20 @@ public class PositionServiceImpl
         this.eventAdmin = eventAdmin;
     }
 
-    public void unsetEventAdmin(final EventAdmin eventAdmin) {
-        this.eventAdmin = null;
-    }
-
-    public void setPositionProviders(PositionProvider positionProvider) {
+    public synchronized void setPositionProviders(PositionProvider positionProvider) {
         this.positionProviders.add(positionProvider); // ADD NAME TO PROVIDERS
+
+        if (this.options != null && isSelectedProvider(positionProvider, this.options)) {
+            updateInternal();
+        }
     }
 
-    public void unsetPositionProviders(PositionProvider positionProvider) {
+    public synchronized void unsetPositionProviders(PositionProvider positionProvider) {
         this.positionProviders.remove(positionProvider);
+
+        if (this.options != null && isSelectedProvider(positionProvider, this.options)) {
+            updateInternal();
+        }
     }
 
     // ----------------------------------------------------------------
@@ -108,13 +111,15 @@ public class PositionServiceImpl
         logger.info("Deactivating... Done.");
     }
 
-    public void updated(final Map<String, Object> properties) {
+    public synchronized void updated(final Map<String, Object> properties) {
 
         logger.debug("Updating...");
 
         final PositionServiceOptions newOptions = new PositionServiceOptions(properties);
 
-        if (newOptions.equals(this.options)) {
+        final boolean isProviderBound = this.currentProvider != null && isSelectedProvider(currentProvider, newOptions);
+
+        if (newOptions.equals(this.options) && (newOptions.isStatic() || isProviderBound)) {
             logger.debug("same configuration, no need ot reconfigure GPS device");
             return;
         }
@@ -141,7 +146,7 @@ public class PositionServiceImpl
         } else {
             try {
                 startPositionProvider();
-            } catch (KuraException e) {
+            } catch (Exception e) {
                 logger.error("Unable to start the chosen Position Provider", e);
             }
         }
@@ -156,7 +161,8 @@ public class PositionServiceImpl
     @Override
     public Position getPosition() {
         if (this.options.isEnabled() && !this.options.isStatic()) {
-            return this.currentProvider.getPosition();
+            return Optional.ofNullable(this.currentProvider).map(PositionProvider::getPosition)
+                    .orElseGet(() -> staticPosition(0, 0, 0));
         } else {
             return this.staticPosition;
         }
@@ -166,7 +172,8 @@ public class PositionServiceImpl
     @Override
     public NmeaPosition getNmeaPosition() {
         if (this.options.isEnabled() && !this.options.isStatic()) {
-            return this.currentProvider.getNmeaPosition();
+            return Optional.ofNullable(this.currentProvider).map(PositionProvider::getNmeaPosition)
+                    .orElseGet(() -> staticNMEAPosition(0, 0, 0));
         } else {
             return this.staticNmeaPosition;
         }
@@ -180,7 +187,7 @@ public class PositionServiceImpl
         if (this.options.isStatic()) {
             return true;
         }
-        return this.currentProvider.isLocked();
+        return Optional.ofNullable(this.currentProvider).map(PositionProvider::isLocked).orElse(false);
     }
 
     @Override
@@ -255,17 +262,29 @@ public class PositionServiceImpl
         return this.options;
     }
 
-    private void startPositionProvider() throws KuraException {
+    private void startPositionProvider() {
         stopPositionProvider();
 
-        this.currentProvider = this.positionProviders.stream()
-                .filter(pp -> pp.getType() == this.options.getPositionProvider()).findAny()
-                .orElseThrow(() -> new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, " provider",
-                        this.options.getPositionProvider()));
+        final Optional<PositionProvider> provider = getSelectedProvider(this.options);
+
+        if (!provider.isPresent()) {
+            logger.info("PositionProvider {} is not bound", this.options.getPositionProvider());
+            return;
+        }
+
+        this.currentProvider = provider.get();
 
         this.currentProvider.init(options, this, this);
         this.currentProvider.start();
 
+    }
+
+    private Optional<PositionProvider> getSelectedProvider(final PositionServiceOptions options) {
+        return this.positionProviders.stream().filter(pp -> isSelectedProvider(pp, options)).findAny();
+    }
+
+    private boolean isSelectedProvider(final PositionProvider provider, final PositionServiceOptions options) {
+        return provider.getType() == options.getPositionProvider();
     }
 
     private void stopPositionProvider() {
@@ -291,6 +310,12 @@ public class PositionServiceImpl
 
     private void setStaticPosition(double latitudeDeg, double longitudeDeg, double altitudeNmea, String gnssType) {
 
+        this.staticPosition = staticPosition(latitudeDeg, longitudeDeg, altitudeNmea);
+        this.staticNmeaPosition = staticNMEAPosition(latitudeDeg, longitudeDeg, altitudeNmea);
+        this.staticGnssType = GNSSType.fromValue(gnssType);
+    }
+
+    private static Position staticPosition(double latitudeDeg, double longitudeDeg, double altitudeNmea) {
         final double latitudeRad = Math.toRadians(latitudeDeg);
         final double longitudeRad = Math.toRadians(longitudeDeg);
 
@@ -301,10 +326,12 @@ public class PositionServiceImpl
         // knots
         final Measurement track = new Measurement(java.lang.Math.toRadians(0), Unit.rad);
 
-        this.staticPosition = new Position(latitude, longitude, altitude, speed, track);
-        this.staticNmeaPosition = new NmeaPosition(latitudeDeg, longitudeDeg, altitudeNmea, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                (char) 0, (char) 0, (char) 0);
-        this.staticGnssType = GNSSType.fromValue(gnssType);
+        return new Position(latitude, longitude, altitude, speed, track);
+    }
+
+    private static NmeaPosition staticNMEAPosition(double latitudeDeg, double longitudeDeg, double altitudeNmea) {
+        return new NmeaPosition(latitudeDeg, longitudeDeg, altitudeNmea, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char) 0, (char) 0,
+                (char) 0);
     }
 
     @Override

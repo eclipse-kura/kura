@@ -129,14 +129,14 @@ This project leverages the following third party content.
 * maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.78.1, MIT AND CC0-1.0, approved, #14433
 * maven/mavencentral/org.bouncycastle/bctls-jdk18on/1.78.1, MIT, approved, #14676
 * maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.78.1, MIT, approved, #14435
-* maven/mavencentral/org.eclipse.jetty/jetty-continuation/9.4.53.v20231009, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.jetty/jetty-http/9.4.53.v20231009, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.jetty/jetty-io/9.4.53.v20231009, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.jetty/jetty-security/9.4.53.v20231009, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.jetty/jetty-server/9.4.53.v20231009, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.jetty/jetty-servlet/9.4.53.v20231009, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.jetty/jetty-util-ajax/9.4.53.v20231009, EPL-2.0 OR Apache-2.0, approved, rt.jetty
-* maven/mavencentral/org.eclipse.jetty/jetty-util/9.4.53.v20231009, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+* maven/mavencentral/org.eclipse.jetty/jetty-continuation/9.4.56.v20240826, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+* maven/mavencentral/org.eclipse.jetty/jetty-http/9.4.56.v20240826, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+* maven/mavencentral/org.eclipse.jetty/jetty-io/9.4.56.v20240826, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+* maven/mavencentral/org.eclipse.jetty/jetty-security/9.4.56.v20240826, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+* maven/mavencentral/org.eclipse.jetty/jetty-server/9.4.56.v20240826, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+* maven/mavencentral/org.eclipse.jetty/jetty-servlet/9.4.56.v20240826, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+* maven/mavencentral/org.eclipse.jetty/jetty-util/9.4.56.v20240826, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+* maven/mavencentral/org.eclipse.jetty/jetty-util-ajax/9.4.56.v20240826, EPL-2.0 OR Apache-2.0, approved, rt.jetty
 * maven/mavencentral/org.eclipse.milo/sdk-client/0.6.8, EPL-2.0, approved, iot.milo
 * maven/mavencentral/org.eclipse.milo/sdk-core/0.6.8, EPL-2.0, approved, iot.milo
 * maven/mavencentral/org.eclipse.milo/stack-client/0.6.8, EPL-2.0, approved, iot.milo

@@ -299,9 +299,8 @@ public class NetworkConfigurationRestService {
 
     private Optional<String> parseInterfaceName(String key) {
         Optional<String> interfaceName = Optional.empty();
-        String[] splittedKey = key.split("\\.");
-        if (splittedKey.length >= 3) {
-            interfaceName = Optional.of(splittedKey[2]);
+        if (key.startsWith("net.interface.") && key.contains(".config.")) {
+            interfaceName = Optional.of(key.substring(14, key.indexOf(".config.")));
         }
         return interfaceName;
     }

@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.web.Console;
@@ -97,8 +96,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class AssetConfigurationUi extends AbstractServicesUi implements HasConfiguration {
 
     private static final String COLUMN_VISIBILITY_SETTINGS_KEY = "org.eclipse.kura.settings.column.asset.";
-
-    private static final Logger logger = Logger.getLogger(AssetConfigurationUi.class.getSimpleName());
 
     private static final List<String> defaultHiddenColumns = //
             Arrays.asList(//
@@ -323,8 +320,6 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         this.btnManageHiddenColumn.setText(MSGS.columnVisibilityModalButton(//
                 String.valueOf(totalEnabledColumns(this.columnNameVisibilityMap)),
                 String.valueOf(this.columnNameVisibilityMap.size())));
-
-        logger.info("created AssetConfigurationUi for: " + this.model.getAssetPid());
     }
 
     private void fillColumnVisibilityCheckBox() {
@@ -394,7 +389,6 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
     private void populateColumnVisibilityMap() {
         this.model.getChannelDescriptor().getParameters().forEach(param -> {
-            AssetConfigurationUi.logger.info("Id: " + param.getId() + ", Name: " + param.getName());
             if (!param.getId().equals(AssetConstants.ENABLED.value())
                     && !param.getId().equals(AssetConstants.NAME.value())) {
                 boolean visible = !defaultHiddenColumns.contains(param.getId());
@@ -450,7 +444,6 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     }
 
     private void addColumn(final GwtConfigParameter param) {
-        logger.info("Adding column for: " + param.getId());
         AssetConfigurationUi.this.channelTable.addColumn(
                 getColumnFromParam(param, param.getId().equals(AssetConstants.NAME.value())), buildHeader(param));
     }
@@ -535,7 +528,6 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
                 final String paramId = channelModel.getChannelName() + '#' + param.getId();
                 Integer paramIndex = AssetConfigurationUi.this.model.getParameterIndex(param.getId());
                 channelModel.setValue(paramIndex, value);
-                AssetConfigurationUi.logger.info("Setting value for " + paramId + " to " + value);
                 if (!channelModel.isValid(paramIndex)) {
                     AssetConfigurationUi.this.invalidParameters.add(paramId);
                 } else {
@@ -583,15 +575,12 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
             }
         };
 
-        logger.info("param: " + param.getId() + "has reaonly: " + isReadOnly);
-
         if (!isReadOnly) {
             result.setFieldUpdater((index, channelModel, label) -> {
                 String paramId = param.getId();
                 AssetConfigurationUi.this.setDirty(true);
                 String newValue = labelsToValues.get(label);
                 Integer paramIndex = AssetConfigurationUi.this.model.getParameterIndex(paramId);
-                logger.info("changing param: " + paramId + " to: " + newValue + " with index" + paramIndex);
                 String oldValue = channelModel.getValue(paramIndex);
                 channelModel.setValue(paramIndex, newValue);
                 if ((param.getId().equals(AssetConstants.VALUE_TYPE.value())
@@ -603,10 +592,8 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
                         String paramIdentifier = channelModel.getChannelName() + '#' + paramEntry.getKey();
                         Integer parameterIndex = paramEntry.getValue();
                         if (!channelModel.isValid(parameterIndex)) {
-                            logger.info("Invalid parameter: " + paramIdentifier);
                             AssetConfigurationUi.this.invalidParameters.add(paramIdentifier);
                         } else {
-                            logger.info("Valid parameter: " + paramIdentifier);
                             AssetConfigurationUi.this.invalidParameters.remove(paramIdentifier);
                         }
                     }

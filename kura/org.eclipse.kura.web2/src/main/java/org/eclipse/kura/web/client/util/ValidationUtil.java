@@ -17,7 +17,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.ui.drivers.assets.AssetConfigurationUi;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
@@ -26,8 +25,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.TakesValue;
 
 public final class ValidationUtil {
-
-    private static final Logger logger = Logger.getLogger(AssetConfigurationUi.class.getSimpleName());
 
     private static final String CONFIG_MAX_VALUE = "configMaxValue";
     private static final String CONFIG_MIN_VALUE = "configMinValue";
@@ -48,8 +45,6 @@ public final class ValidationUtil {
 
     // Validates all the entered values
     public static void validateParameter(GwtConfigParameter param, String value, ValidationErrorConsumer consumer) {
-
-        logger.info("Validating parameter: " + param.toString());
 
         if (value == null || value.trim().isEmpty()) {
             if (!param.isRequired()) {

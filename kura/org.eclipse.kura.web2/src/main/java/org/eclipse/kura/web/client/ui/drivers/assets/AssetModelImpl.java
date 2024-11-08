@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.web.client.ui.drivers.assets.LegacyChannelModel.LegacyChannelModelBuilder;
@@ -32,8 +31,6 @@ import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 
 public class AssetModelImpl implements AssetModel {
-
-    private static final Logger logger = Logger.getLogger(AssetModelImpl.class.getSimpleName());
 
     public static final LabelComparator<LegacyChannelModel> CHANNEL_LABEL_COMPARATOR = new LabelComparator<>();
 
@@ -146,8 +143,6 @@ public class AssetModelImpl implements AssetModel {
 
         this.channelModels.clear();
         this.channelModels.addAll(sortedLegacyChannelModels);
-
-        logger.info("ChannelModels for " + getAssetPid() + ":" + " " + this.channelModels.toString());
     }
 
     @Override

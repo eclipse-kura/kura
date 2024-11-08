@@ -16,7 +16,6 @@ package org.eclipse.kura.web.client.ui.drivers.assets;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.util.ValidationUtil;
 import org.eclipse.kura.web.shared.AssetConstants;
@@ -27,8 +26,6 @@ import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterTy
 
 public class LegacyChannelModel implements AssetModel.ChannelModel {
 
-    private static final Logger logger = Logger.getLogger(LegacyChannelModel.class.getSimpleName());
-
     private final String channelName;
     private final GwtConfigParameter[] parameters;
 
@@ -38,13 +35,9 @@ public class LegacyChannelModel implements AssetModel.ChannelModel {
         this.channelName = channelName;
         this.parameters = parameters;
 
-        logger.info("Parameters for channelName " + channelName + ": " + this.parameters);
-
         // calculate the subtype for scale and offset parameters based on the scaleoffset.type and value type
         // properties.
         detectSubtype();
-
-        logger.info("Subtype: " + this.subtype);
 
         setScaleOffsetSubtype();
     }
@@ -55,8 +48,6 @@ public class LegacyChannelModel implements AssetModel.ChannelModel {
                     || param.getId().equals(getId(AssetConstants.VALUE_OFFSET))) {
 
                 param.setSubtype(this.subtype);
-
-                logger.info("Subtype for " + param.getId() + ": " + param.getSubtype());
             }
         }
     }
@@ -64,10 +55,7 @@ public class LegacyChannelModel implements AssetModel.ChannelModel {
     private void updateScaleOffsetSubtypeForParameters() {
         for (GwtConfigParameter param : this.parameters) {
             if (param.getSubtype() != null && param.getSubtype() != this.subtype) {
-
                 param.setSubtype(this.subtype);
-
-                logger.info("Subtype for " + param.getId() + ": " + param.getSubtype() + " updated");
             }
         }
     }
@@ -91,8 +79,6 @@ public class LegacyChannelModel implements AssetModel.ChannelModel {
         }
 
         if (scaleOffsetType != null && valueType != null) {
-            logger.info("ScaleOffsetType: " + scaleOffsetType + ", ValueType: " + valueType);
-
             subType = scaleOffsetType == ScaleOffsetType.DEFINED_BY_VALUE_TYPE
                     ? GwtConfigParameterType.valueOf(valueType.name())
                     : GwtConfigParameterType.valueOf(scaleOffsetType.name());

@@ -450,6 +450,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     }
 
     private void addColumn(final GwtConfigParameter param) {
+        logger.info("Adding column for: " + param.getId());
         AssetConfigurationUi.this.channelTable.addColumn(
                 getColumnFromParam(param, param.getId().equals(AssetConstants.NAME.value())), buildHeader(param));
     }
@@ -530,10 +531,12 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         final Column<ChannelModel, String> result = new ChannelColumn(cell, param);
 
         if (!isReadOnly) {
-            result.setFieldUpdater((index, object, value) -> {
-                final String paramId = object.getChannelName() + '#' + param.getId();
-                object.setValue(param.getId(), value);
-                if (!object.isValid(param.getId())) {
+            result.setFieldUpdater((index, channelModel, value) -> {
+                final String paramId = channelModel.getChannelName() + '#' + param.getId();
+                Integer paramIndex = AssetConfigurationUi.this.model.getParameterIndex(param.getId());
+                channelModel.setValue(paramIndex, value);
+                AssetConfigurationUi.logger.info("Setting value for " + paramId + " to " + value);
+                if (!channelModel.isValid(paramIndex)) {
                     AssetConfigurationUi.this.invalidParameters.add(paramId);
                 } else {
                     AssetConfigurationUi.this.invalidParameters.remove(paramId);
@@ -552,35 +555,65 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
     }
 
     private Column<ChannelModel, String> getSelectionInputColumn(final GwtConfigParameter param, boolean isReadOnly) {
-        final String id = param.getId();
         final Map<String, String> labelsToValues = param.getOptions();
         ArrayList<Entry<String, String>> sortedLabelsToValues = new ArrayList<>(labelsToValues.entrySet());
         Collections.sort(sortedLabelsToValues, DROPDOWN_LABEL_COMPARATOR);
+
         final ArrayList<String> labels = new ArrayList<>();
         final Map<String, String> valuesToLabels = new HashMap<>();
+
         for (Entry<String, String> entry : sortedLabelsToValues) {
             labels.add(entry.getKey());
             valuesToLabels.put(entry.getValue(), entry.getKey());
         }
+
         final SelectionCell cell = new SelectionCell(new ArrayList<>(labels));
         final Column<ChannelModel, String> result = new Column<ChannelModel, String>(cell) {
 
             @Override
-            public String getValue(final ChannelModel object) {
-                String result = object.getValue(id);
+            public String getValue(final ChannelModel channelModel) {
+                Integer paramIndex = AssetConfigurationUi.this.model.getParameterIndex(param.getId());
+                String result = channelModel.getValue(paramIndex);
                 if (result == null) {
                     final String defaultValue = param.getDefault();
                     result = defaultValue != null ? defaultValue : labelsToValues.get(labels.get(0));
-                    object.setValue(id, result);
+                    channelModel.setValue(paramIndex, result);
                 }
                 return valuesToLabels.get(result);
             }
         };
 
+        logger.info("param: " + param.getId() + "has reaonly: " + isReadOnly);
+
         if (!isReadOnly) {
-            result.setFieldUpdater((index, object, label) -> {
+            result.setFieldUpdater((index, channelModel, label) -> {
+                String paramId = param.getId();
                 AssetConfigurationUi.this.setDirty(true);
-                object.setValue(param.getId(), labelsToValues.get(label));
+                String newValue = labelsToValues.get(label);
+                Integer paramIndex = AssetConfigurationUi.this.model.getParameterIndex(paramId);
+                logger.info("changing param: " + paramId + " to: " + newValue + " with index" + paramIndex);
+                String oldValue = channelModel.getValue(paramIndex);
+                channelModel.setValue(paramIndex, newValue);
+                if ((param.getId().equals(AssetConstants.VALUE_TYPE.value())
+                        || param.getId().equals(AssetConstants.SCALE_OFFSET_TYPE.value())
+                                && !oldValue.equals(newValue))) {
+
+                    for (Map.Entry<String, Integer> paramEntry : AssetConfigurationUi.this.model.getParameterIndexes()
+                            .entrySet()) {
+                        String paramIdentifier = channelModel.getChannelName() + '#' + paramEntry.getKey();
+                        Integer parameterIndex = paramEntry.getValue();
+                        if (!channelModel.isValid(parameterIndex)) {
+                            logger.info("Invalid parameter: " + paramIdentifier);
+                            AssetConfigurationUi.this.invalidParameters.add(paramIdentifier);
+                        } else {
+                            logger.info("Valid parameter: " + paramIdentifier);
+                            AssetConfigurationUi.this.invalidParameters.remove(paramIdentifier);
+                        }
+                    }
+
+                    this.channelTable.redrawRow(index);
+
+                }
             });
         }
 
@@ -878,7 +911,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         }
     }
 
-    private static class ChannelColumn extends Column<ChannelModel, String> {
+    private class ChannelColumn extends Column<ChannelModel, String> {
 
         private final GwtConfigParameter param;
 
@@ -888,8 +921,9 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         }
 
         @Override
-        public String getValue(final ChannelModel object) {
-            String result = object.getValue(this.param.getId());
+        public String getValue(final ChannelModel channelModel) {
+            Integer paramIndex = AssetConfigurationUi.this.model.getParameterIndex(this.param.getId());
+            String result = channelModel.getValue(paramIndex);
             if (result != null) {
                 return result;
             }
@@ -897,8 +931,9 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         }
 
         @Override
-        public String getCellStyleNames(Context context, ChannelModel object) {
-            if (!object.isValid(this.param.getId())) {
+        public String getCellStyleNames(Context context, ChannelModel channelModel) {
+            Integer paramIndex = AssetConfigurationUi.this.model.getParameterIndex(this.param.getId());
+            if (!channelModel.isValid(paramIndex)) {
                 return "config-cell-not-valid";
             } else {
                 return "";

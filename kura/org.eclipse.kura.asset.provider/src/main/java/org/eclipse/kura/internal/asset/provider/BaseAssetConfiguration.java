@@ -411,8 +411,7 @@ public final class BaseAssetConfiguration {
             case DOUBLE:
                 return Double.parseDouble(value);
             case LONG:
-                // TODO replace with Long.parseLong(value) once scale and offset are turned in String in the metatype
-                return (Double.valueOf(value).longValue());
+                return Long.parseLong(value);
             default:
                 throw new IllegalArgumentException(value + " cannot be converted into a Number of type " + type);
             }

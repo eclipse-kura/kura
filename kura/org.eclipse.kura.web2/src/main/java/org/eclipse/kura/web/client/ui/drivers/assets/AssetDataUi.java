@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -124,8 +124,8 @@ public class AssetDataUi extends Composite {
             @Override
             public void onBrowserEvent(Context context, Element elem, ChannelModel object, NativeEvent event) {
                 if (getChannelStatus(object) == ChannelStatus.FAILURE) {
-                    final GwtChannelRecord record = AssetDataUi.this.channelValues.get(object.getChannelName());
-                    showFailureDetails(record);
+                    final GwtChannelRecord channelRecord = AssetDataUi.this.channelValues.get(object.getChannelName());
+                    showFailureDetails(channelRecord);
                 }
             }
 
@@ -154,9 +154,10 @@ public class AssetDataUi extends Composite {
                 this.valuesCell) {
 
             @Override
-            public void onBrowserEvent(Context context, Element elem, ChannelModel object, NativeEvent event) {
-                if (!"READ".equals(object.getValue(AssetConstants.TYPE.value()))) {
-                    super.onBrowserEvent(context, elem, object, event);
+            public void onBrowserEvent(Context context, Element elem, ChannelModel channelModel, NativeEvent event) {
+                if (!"READ".equals(
+                        channelModel.getValue(AssetDataUi.this.model.getParameterIndex(AssetConstants.TYPE.value())))) {
+                    super.onBrowserEvent(context, elem, channelModel, event);
                 }
             }
 
@@ -178,15 +179,16 @@ public class AssetDataUi extends Composite {
             }
 
             @Override
-            public void render(Context context, ChannelModel object, SafeHtmlBuilder sb) {
-                if ("READ".equals(object.getValue(AssetConstants.TYPE.value()))) {
-                    sb.appendEscaped(getValue(object));
+            public void render(Context context, ChannelModel channelModel, SafeHtmlBuilder sb) {
+                if ("READ".equals(
+                        channelModel.getValue(AssetDataUi.this.model.getParameterIndex(AssetConstants.TYPE.value())))) {
+                    sb.appendEscaped(getValue(channelModel));
                     return;
                 }
-                if (!isDirty(object.getChannelName())) {
+                if (!isDirty(channelModel.getChannelName())) {
                     AssetDataUi.this.valuesCell.clearViewData(context.getKey());
                 }
-                super.render(context, object, sb);
+                super.render(context, channelModel, sb);
             }
         };
 
@@ -205,24 +207,25 @@ public class AssetDataUi extends Composite {
         this.assetDataTable.addColumn(valueColumn, new TextHeader(MSGS.devicePropValue()));
     }
 
-    private static void showFailureDetails(final GwtChannelRecord record) {
-        record.setUnescaped(true);
-        String reason = record.getExceptionMessage();
-        record.setUnescaped(false);
+    private static void showFailureDetails(final GwtChannelRecord channelRecord) {
+        channelRecord.setUnescaped(true);
+        String reason = channelRecord.getExceptionMessage();
+        channelRecord.setUnescaped(false);
 
         if (reason == null || reason.trim().isEmpty()) {
             reason = "unknown";
         }
 
         FailureHandler.showErrorMessage("Channel failure details", "Reason: " + reason,
-                record.getExceptionStackTrace());
+                channelRecord.getExceptionStackTrace());
     }
 
     private GwtChannelRecord createWriteRecord(AssetModel.ChannelModel channel) {
         final GwtChannelRecord result = new GwtChannelRecord();
         result.setUnescaped(true);
         result.setName(channel.getChannelName());
-        result.setValueType(channel.getValue(AssetConstants.VALUE_TYPE.value()));
+        result.setValueType(
+                channel.getValue(AssetDataUi.this.model.getParameterIndex(AssetConstants.VALUE_TYPE.value())));
         return result;
     }
 
@@ -234,11 +237,11 @@ public class AssetDataUi extends Composite {
         final ArrayList<GwtChannelRecord> writeRecords = new ArrayList<>();
 
         for (final String channelName : this.modifiedWriteChannels) {
-            final GwtChannelRecord record = this.channelValues.get(channelName);
-            if (record == null) {
+            final GwtChannelRecord channelRecord = this.channelValues.get(channelName);
+            if (channelRecord == null) {
                 continue;
             }
-            writeRecords.add(record);
+            writeRecords.add(channelRecord);
         }
 
         if (writeRecords.isEmpty()) {
@@ -299,9 +302,9 @@ public class AssetDataUi extends Composite {
             final List<GwtChannelRecord> records = result.getRecords();
 
             if (records != null) {
-                for (final GwtChannelRecord record : records) {
-                    record.setUnescaped(true);
-                    this.channelValues.put(record.getName(), record);
+                for (final GwtChannelRecord channelRecord : records) {
+                    channelRecord.setUnescaped(true);
+                    this.channelValues.put(channelRecord.getName(), channelRecord);
                 }
                 AssetDataUi.this.channelsDataProvider.getList().addAll(this.model.getChannels());
                 AssetDataUi.this.channelsDataProvider.refresh();
@@ -319,22 +322,22 @@ public class AssetDataUi extends Composite {
 
     private ChannelStatus getChannelStatus(final ChannelModel model) {
         final String channelName = model.getChannelName();
-        final GwtChannelRecord record = this.channelValues.get(model.getChannelName());
+        final GwtChannelRecord channelRecord = this.channelValues.get(model.getChannelName());
 
-        if ("false".equals(model.getValue(AssetConstants.ENABLED.value()))) {
+        if ("false".equals(model.getValue(AssetDataUi.this.model.getParameterIndex(AssetConstants.ENABLED.value())))) {
             return ChannelStatus.DISABLED;
         } else if (this.modifiedWriteChannels.contains(channelName)) {
             return ChannelStatus.DIRTY;
-        } else if (record == null) {
+        } else if (channelRecord == null) {
             return ChannelStatus.UNKNOWN;
-        } else if (record.getValue() == null) {
+        } else if (channelRecord.getValue() == null) {
             return ChannelStatus.FAILURE;
         } else {
             return ChannelStatus.SUCCESS;
         }
     }
 
-    private static final class StaticColumn extends Column<AssetModel.ChannelModel, String> {
+    private final class StaticColumn extends Column<AssetModel.ChannelModel, String> {
 
         private final String key;
 
@@ -344,12 +347,12 @@ public class AssetDataUi extends Composite {
         }
 
         @Override
-        public String getValue(final AssetModel.ChannelModel object) {
-            return object.getValue(this.key);
+        public String getValue(final AssetModel.ChannelModel channelModel) {
+            return channelModel.getValue(AssetDataUi.this.model.getParameterIndex(this.key));
         }
     }
 
-    private static final class StatusCell extends TextCell {
+    private final class StatusCell extends TextCell {
 
         @Override
         public Set<String> getConsumedEvents() {

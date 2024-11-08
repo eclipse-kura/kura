@@ -35,6 +35,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -300,7 +301,7 @@ public class NetworkConfigurationRestService {
     private Optional<String> parseInterfaceName(String key) {
         Optional<String> interfaceName = Optional.empty();
         if (key.startsWith("net.interface.") && key.contains(".config.")) {
-            interfaceName = Optional.of(key.substring(14, key.indexOf(".config.")));
+            interfaceName = Optional.of(StringUtils.substringBetween(key, "net.interface.", ".config."));
         }
         return interfaceName;
     }

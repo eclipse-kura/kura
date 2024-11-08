@@ -33,7 +33,6 @@ import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.nm.configuration.NMSettingsConverter;
 import org.eclipse.kura.nm.enums.MMModemLocationSource;
-import org.eclipse.kura.nm.enums.MMModemState;
 import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.eclipse.kura.nm.signal.handlers.DeviceCreationLock;
@@ -650,7 +649,7 @@ public class NMDbusConnector {
     public List<Location> getAvailableMMLocations() {
         List<Location> availableLocations = new ArrayList<>();
 
-        this.getEnabledModemsPaths().forEach(modemPath -> {
+        this.getModemsPaths().forEach(modemPath -> {
             try {
                 Properties locationProperties = this.modemManager
                         .getLocationProperties(this.modemManager.getModemManagerLocation(modemPath));
@@ -671,30 +670,22 @@ public class NMDbusConnector {
 
     }
 
-    private List<String> getEnabledModemsPaths() {
-        List<String> enabledModemsPath = new ArrayList<>();
+    private List<String> getModemsPaths() {
+        List<String> modemsPath = new ArrayList<>();
 
         try {
 
             for (Device device : this.networkManager.getAllDevices()) {
                 if (networkManager.getDeviceType(device.getObjectPath()).equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
                     Optional<String> modemPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
-                    if (modemPath.isPresent()) {
-                        Optional<Properties> modemProps = this.modemManager.getModemProperties(modemPath.get());
-                        modemProps.ifPresent(props -> {
-                            MMModemState modemState = this.modemManager.getMMModemState(props);
-                            if (modemState.equals(MMModemState.MM_MODEM_STATE_CONNECTED)
-                                    || modemState.equals(MMModemState.MM_MODEM_STATE_REGISTERED)) {
-                                enabledModemsPath.add(modemPath.get());
-                            }
-                        });
-                    }
+
+                    modemPath.ifPresent(modemsPath::add);
                 }
             }
         } catch (DBusException ex) {
             logger.debug("Impossible to retrieve information regarding available modems");
         }
 
-        return enabledModemsPath;
+        return modemsPath;
     }
 }

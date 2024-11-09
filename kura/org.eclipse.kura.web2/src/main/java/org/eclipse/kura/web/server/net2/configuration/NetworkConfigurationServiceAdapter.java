@@ -53,34 +53,37 @@ public class NetworkConfigurationServiceAdapter {
      * Return a {@link GwtNetInterfaceConfig} of the given network interface with
      * properties read from the NetworkConfigurationService
      * 
-     * @param ifName the network interface name
+     * @param ifName
+     *            the network interface name
      * @return a new {@link GwtNetInterfaceConfig}
      */
     public GwtNetInterfaceConfig getGwtNetInterfaceConfig(String ifName) {
-        return new GwtNetInterfaceConfigBuilder(this.netConfServProperties)
-                .forInterface(ifName).build();
+        return new GwtNetInterfaceConfigBuilder(this.netConfServProperties).forInterface(ifName).build();
     }
 
     /**
-     * Return a {@link GwtNetInterfaceConfig} for the given network interface
-     * name and type with default values
+     * Return a {@link GwtNetInterfaceConfig} of the given network interface name and type with
+     * properties read from the NetworkConfigurationService
      * 
-     * @param ifName the network interface name
-     * @param ifType the network interface type
+     * @param ifName
+     *            the network interface name
+     * @param ifType
+     *            the network interface type
      * @return a new {@link GwtNetInterfaceConfig}
      */
-    public GwtNetInterfaceConfig getDefaultGwtNetInterfaceConfig(String ifName, NetworkInterfaceType ifType) {
-        return new GwtNetInterfaceConfigBuilder()
-                .forInterface(ifName).forType(ifType).build();
+    public GwtNetInterfaceConfig getGwtNetInterfaceConfig(String ifName, NetworkInterfaceType ifType) {
+        return new GwtNetInterfaceConfigBuilder(this.netConfServProperties).forInterface(ifName).forType(ifType)
+                .build();
     }
 
     /**
      * Updates the {@link ConfigurationService} with the properties found in input
      * {@code gwtConfig}
      * 
-     * @param gwtConfig the configuration containing the properties to update
+     * @param gwtConfig
+     *            the configuration containing the properties to update
      * @throws KuraException
-     * @throws GwtKuraException 
+     * @throws GwtKuraException
      */
     public void updateConfiguration(GwtNetInterfaceConfig gwtConfig) throws KuraException, GwtKuraException {
         NetworkConfigurationServicePropertiesBuilder builder = new NetworkConfigurationServicePropertiesBuilder(

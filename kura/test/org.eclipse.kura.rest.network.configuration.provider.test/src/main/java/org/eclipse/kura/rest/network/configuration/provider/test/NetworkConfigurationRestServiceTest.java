@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -28,7 +28,10 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
+import org.eclipse.kura.core.configuration.metatype.ObjectFactory;
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
@@ -38,7 +41,6 @@ import org.eclipse.kura.rest.network.configuration.provider.test.responses.MockC
 import org.eclipse.kura.rest.network.configuration.provider.test.responses.RestNetworkConfigurationJson;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -51,7 +53,6 @@ import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.User;
 import org.osgi.service.useradmin.UserAdmin;
 
-@Ignore
 public class NetworkConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     private static final String METHOD_SPEC_GET = "GET";
@@ -156,6 +157,21 @@ public class NetworkConfigurationRestServiceTest extends AbstractRequestHandlerT
     }
 
     @Test
+    public void shouldUpdateNetInterfacesProperty() throws KuraException {
+        givenMockUpdateConfiguration();
+        givenMockNetworkConfigurationService();
+        givenIdentity("admin", Optional.of("password"), Collections.emptyList());
+        givenBasicCredentials(Optional.of("admin:password"));
+
+        whenRequestIsPerformed(new MethodSpec(METHOD_SPEC_PUT), "/configurableComponents/configurations/_update",
+                RestNetworkConfigurationJson.NETWORK_CONFIGURATION_UPDATE_REQUEST);
+
+        thenRequestSucceeds();
+        thenValueIsUpdated(NETWORK_CONF_SERVICE_PID, "net.interface.wlan0.config.ip4.status", "netIPv4StatusDisabled");
+        thenValueIsUpdated(NETWORK_CONF_SERVICE_PID, "net.interfaces", "eth0,wlan0");
+    }
+
+    @Test
     public void shouldReturnEmptyArray() throws KuraException {
         givenMockUpdateConfiguration();
         givenIdentity("admin", Optional.of("password"), Collections.emptyList());
@@ -257,6 +273,14 @@ public class NetworkConfigurationRestServiceTest extends AbstractRequestHandlerT
         };
         Mockito.doAnswer(configurationUpdateAnswer).when(configurationService)
                 .updateConfiguration(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
+    }
+
+    private void givenMockNetworkConfigurationService() throws KuraException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("net.interfaces", "eth0");
+        ComponentConfiguration componentConfig = new ComponentConfigurationImpl(NETWORK_CONF_SERVICE_PID,
+                new ObjectFactory().createTocd(), properties);
+        when(configurationService.getComponentConfiguration(NETWORK_CONF_SERVICE_PID)).thenReturn(componentConfig);
     }
 
     /*

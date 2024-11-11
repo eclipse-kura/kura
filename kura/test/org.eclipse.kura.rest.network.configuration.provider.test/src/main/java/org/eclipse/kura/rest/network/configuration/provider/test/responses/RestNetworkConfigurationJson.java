@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,7 @@ public class RestNetworkConfigurationJson {
     public static final String EMPTY_CONFIGS_REQUEST = "{\"configs\":[]}";
     public static final String INVALID_PID_DELETE_REQUEST = "{\"pids\":[\"invalidPid\"]}";
     public static final String EMPTY_PIDS_REQUEST = "{\"pids\":[]}";
+    public static final String NETWORK_CONFIGURATION_UPDATE_REQUEST = "{\"configs\":[{\"pid\":\"org.eclipse.kura.net.admin.NetworkConfigurationService\",properties: {\"net.interface.wlan0.config.ip4.status\":{\"type\":\"STRING\",\"value\":\"netIPv4StatusDisabled\"}}}]}";
 
     /*
      * Responses

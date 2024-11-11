@@ -13,20 +13,20 @@ Name               | Entity          | Address |
 LED1               | COILS           | 2049    |
 LED2               | COILS           | 2050    |
 LED3               | COILS           | 2051    |
-LED4 RED           | COILS           | 2052    |
-LED4 GREEN         | COILS           | 2053    |
-LED4 BLUE          | COILS           | 2054    |
-Counter 3          | INPUT REGISTERS | 515     |
-Quad Counter       | INPUT REGISTERS | 520     |
-Toggle 4           | DISCRETE INPUTS | 2052    |
-Toggle 5           | DISCRETE INPUTS | 2053    |
-Toggle 6           | DISCRETE INPUTS | 2054    |
-Reset Counter 3    | COILS           | 3075    |
-Reset Quad Counter | COILS           | 3084    |
+LED4_RED           | COILS           | 2052    |
+LED4_GREEN         | COILS           | 2053    |
+LED4_BLUE          | COILS           | 2054    |
+Counter_3          | INPUT REGISTERS | 515     |
+Quad_Counter       | INPUT REGISTERS | 520     |
+Toggle_4           | DISCRETE INPUTS | 2052    |
+Toggle_5           | DISCRETE INPUTS | 2053    |
+Toggle_6           | DISCRETE INPUTS | 2054    |
+Reset_Counter_3    | COILS           | 3075    |
+Reset_Quad_Counter | COILS           | 3084    |
 
 The corresponding Channels definition in the Asset is as follows:
 
-![](images/Devkit.png)
+![](images/modbus_asset.png)
 
 As shown in the previous image, the Channel definition in an Asset results easily mappable to what available in a generic PLC documentation. 
 

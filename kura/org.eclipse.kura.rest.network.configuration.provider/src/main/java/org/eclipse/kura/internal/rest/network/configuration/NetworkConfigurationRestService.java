@@ -299,8 +299,6 @@ public class NetworkConfigurationRestService {
     }
 
     private Optional<String> parseInterfaceName(String key) {
-        Optional<String> interfaceName = Optional.empty();
-        interfaceName = Optional.ofNullable(StringUtils.substringBetween(key, "net.interface.", ".config."));
-        return interfaceName;
+        return Optional.ofNullable(StringUtils.substringBetween(key, "net.interface.", ".config."));
     }
 }

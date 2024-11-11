@@ -300,9 +300,7 @@ public class NetworkConfigurationRestService {
 
     private Optional<String> parseInterfaceName(String key) {
         Optional<String> interfaceName = Optional.empty();
-        if (key.startsWith("net.interface.") && key.contains(".config.")) {
-            interfaceName = Optional.of(StringUtils.substringBetween(key, "net.interface.", ".config."));
-        }
+        interfaceName = Optional.ofNullable(StringUtils.substringBetween(key, "net.interface.", ".config."));
         return interfaceName;
     }
 }

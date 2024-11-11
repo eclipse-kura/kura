@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,8 +17,10 @@ import static java.util.Objects.isNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -58,8 +61,8 @@ public class NetworkConfigurationRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(NetworkConfigurationRestService.class);
     private static final String KURA_PERMISSION_REST_CONFIGURATION_ROLE = "kura.permission.rest.network.configuration";
-    private static final List<String> NETWORK_CONFIGURATION_PIDS = Arrays.asList(
-            "org.eclipse.kura.net.admin.NetworkConfigurationService",
+    private static final String NETWORK_CONFIGURATION_SERVICE_PID = "org.eclipse.kura.net.admin.NetworkConfigurationService";
+    private static final List<String> NETWORK_CONFIGURATION_PIDS = Arrays.asList(NETWORK_CONFIGURATION_SERVICE_PID,
             "org.eclipse.kura.net.admin.FirewallConfigurationService",
             "org.eclipse.kura.net.admin.ipv6.FirewallConfigurationServiceIPv6");
     private static final String SUBTASK_SNAPSHOT_TAG = "snapshot";
@@ -169,6 +172,7 @@ public class NetworkConfigurationRestService {
                 failureHandler.runFallibleSubtask("update:" + componentConfig.getPid(), () -> {
                     final Map<String, Object> configurationProperties = DTOUtil
                             .dtosToConfigurationProperties(componentConfig.getProperties());
+                    updateNetInterfaces(configurationProperties, componentConfig.getPid());
                     this.configurationService.updateConfiguration(componentConfig.getPid(), configurationProperties,
                             false);
                 });
@@ -272,5 +276,29 @@ public class NetworkConfigurationRestService {
             }
         }
         return result;
+    }
+
+    private void updateNetInterfaces(Map<String, Object> configurationProperties, String pid) throws KuraException {
+        if (pid.equals(NETWORK_CONFIGURATION_SERVICE_PID)) {
+            Set<String> interfaceNames = new HashSet<>();
+            configurationProperties.keySet().forEach(key -> {
+                Optional<String> interfaceName = parseInterfaceName(key);
+                interfaceName.ifPresent(interfaceNames::add);
+            });
+            Map<String, Object> properties = this.configurationService.getComponentConfiguration(pid)
+                    .getConfigurationProperties();
+            String netInterfaces = (String) properties.get("net.interfaces");
+            List<String> netInterfacesList = Arrays.asList(netInterfaces.split(","));
+            for (String name : interfaceNames) {
+                if (!netInterfacesList.contains(name)) {
+                    netInterfaces += "," + name;
+                }
+            }
+            configurationProperties.put("net.interfaces", netInterfaces);
+        }
+    }
+
+    private Optional<String> parseInterfaceName(String key) {
+        return Optional.ofNullable(StringUtils.substringBetween(key, "net.interface.", ".config."));
     }
 }

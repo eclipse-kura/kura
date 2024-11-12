@@ -63,7 +63,7 @@
         
         <AD id="container.image.download.retries" 
             name="Image Download Retries" 
-            description="Specifies the number tentatives to pull the container image that the framework performes. Set to 0 for unlimited retries. Default: 5"
+            description="Specifies the number of retries the framework performs when attempting to pull the container image. Set to 0 for unlimited retries. Default: 5"
             type="Integer" 
             cardinality="1" 
             min="0"

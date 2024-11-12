@@ -20,8 +20,8 @@
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
    
-   <reference bind="setPositionProviders" cardinality="1..n" interface="org.eclipse.kura.linux.position.provider.PositionProvider" name="PositionProviders" policy-option="greedy" policy="static" unbind="unsetPositionProviders"/>
+   <reference bind="setPositionProviders" cardinality="1..n" interface="org.eclipse.kura.linux.position.provider.PositionProvider" name="PositionProviders" policy="dynamic" unbind="unsetPositionProviders"/>
    
    <property name="service.pid" value="org.eclipse.kura.position.PositionService"/>
-   <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>
+   <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static"/>
 </scr:component>

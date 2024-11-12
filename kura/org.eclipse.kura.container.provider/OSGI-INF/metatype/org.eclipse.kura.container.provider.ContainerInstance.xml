@@ -21,28 +21,16 @@
         
         <AD id="container.image" 
             name="Image name" 
-            description="The image the container will be created with. The value will need to be expressed in the form registryURL/imagename in case of a custom registry. 
-            Please fill the following registry credentials in case of pulling from a custom or authenticated Docker hub registry."
+            description="Specifies the image reference that will be used to create this container instance. 
+            The value has to be expressed in the form registryURL/imagename. If no registryURL is provided, the official Docker Hub registry will be used as default. 
+            When pulling the testing/test-image image from a local registry listening on port 5000 (e.g. myregistry.local:5000), the registryURL/imagename field has
+            to be specified as follows: myregistry.local:5000/testing/test-image
+            Default: nginx (the image will be pulled from the Docker Hub registry)"
             type="String" cardinality="1" required="true" default="nginx" />
 
         <AD id="container.image.tag" name="Image tag"
-            description="Describes which image version that should be pulled from the container registry." type="String"
+            description="Describes which image version should be pulled from the container registry. Default: latest" type="String"
             cardinality="1" required="true" default="latest" />
-
-        <AD id="container.signature.trust.anchor" name="Trust anchor"
-            description="Trust anchor used to verify the container image signature.|TextArea" type="String"
-            cardinality="1" required="false" default="" />
-
-        <AD id="container.signature.verify.transparency.log" name="Verify in transparency log"
-            description="Sets the transparency log verification, to be used when a container image signature has been uploaded to the transparency log." type="Boolean"
-            cardinality="1" required="false" default="true" />
-        
-        <AD
-            id="container.signature.enforcement.digest"
-            name="Container Image Enforcement Digest"
-            description="Digest of the container image allowed to run on the device if the Container Enforcement Monitor is enabled. If not given, it will be computed by the Container Signature Verification service."
-            type="String" cardinality="1" required="false"
-            default="" />
         
         <AD id="registry.hostname" name="Authentication Registry URL"
             description="Url for docker registry. Required only for authenticated registries" 
@@ -60,10 +48,24 @@
             description="Password for container registry. Required only for authenticated registries" 
             type="Password"
             cardinality="0" required="false" default="" />
+
+        <AD id="container.signature.trust.anchor" name="Trust anchor"
+            description="Trust anchor used to verify the container image signature.|TextArea" type="String"
+            cardinality="1" required="false" default="" />
+
+        <AD id="container.signature.verify.transparency.log" name="Verify in transparency log"
+            description="Sets the transparency log verification, to be used when a container image signature has been uploaded to the transparency log." type="Boolean"
+            cardinality="1" required="false" default="true" />
+        
+        <AD id="container.signature.enforcement.digest"
+            name="Container Image Enforcement Digest"
+            description="Digest of the container image allowed to run on the device, if the Container Enforcement Monitor is enabled. If not provided, it will be computed by the Container Signature Verification service."
+            type="String" cardinality="1" required="false"
+            default="" />
         
         <AD id="container.image.download.retries" 
             name="Image Download Retries" 
-            description="The number of retries to pull the container image. Set to 0 for unlimited retries"
+            description="Specifies the number of retries the framework performs when attempting to pull the container image. Set to 0 for unlimited retries. Default: 5"
             type="Integer" 
             cardinality="1" 
             min="0"
@@ -72,7 +74,7 @@
             
         <AD id="container.image.download.interval" 
             name="Image Download Retry Interval" 
-            description="The interval (in milliseconds) between retries to pull the container image"
+            description="The interval (in milliseconds) between retries to pull the container image. Default: 30000"
             type="Integer" 
             cardinality="1" 
             min="0"
@@ -81,7 +83,7 @@
         
         <AD id="container.image.download.timeout" 
             name="Image Download Timeout"
-            description="Image download timeout. Value specified in seconds" 
+            description="Image download timeout. Value specified in seconds. Default: 500" 
             type="Integer"
             cardinality="0" 
             required="true" 
@@ -176,11 +178,11 @@
          </AD>
             
        <AD id="container.loggerParameters" name="Logger Parameters"
-            description="Used to pass logger parameters to a container's logging driver. Example: max-size=10m, max-file=2." type="String" cardinality="1"
+            description="Used to pass logger parameters to a container's logging driver. Example: max-size=10m, max-file=2. Default: max-size=10m" type="String" cardinality="1"
             required="false" default="max-size=10m" />
 
         <AD id="container.restart.onfailure" name="Restart Container On Failure" type="Boolean" cardinality="1" required="true" default="false"
-            description="Automatically restart the container when it has failed.">
+            description="Automatically restart the container when it has failed. Default: false">
         </AD>
             
     </OCD>

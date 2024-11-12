@@ -38,7 +38,8 @@ public class MMLocationParser {
 
     private static final Logger logger = LoggerFactory.getLogger(MMLocationParser.class);
 
-    private static final double KNOTS_TO_M_S = 1 / 1.94384449;
+    private static final double KNOTS_TO_MS = 1 / 1.94384449;
+    private static final double MS_TO_KMH = 3.6;
     private int gnssTypeUpdateCounter = 0;
     private static final int GNSSTYPE_RESET_COUNTER = 50;
 
@@ -83,9 +84,9 @@ public class MMLocationParser {
     }
 
     public NmeaPosition getNmeaPosition() {
-        return new NmeaPosition(this.lat, this.lon, this.alt, this.speed, this.track, this.fixQuality,
-                this.nrSatellites, this.mDOP, this.mPDOP, this.mHDOP, this.mVDOP, this.m3Dfix, this.validFix,
-                this.latitudeHemisphere, this.longitudeHemisphere);
+        return new NmeaPosition(Math.toDegrees(this.lat), Math.toDegrees(this.lon), this.alt, this.speed * MS_TO_KMH,
+                Math.toDegrees(this.track), this.fixQuality, this.nrSatellites, this.mDOP, this.mPDOP, this.mHDOP,
+                this.mVDOP, this.m3Dfix, this.validFix, this.latitudeHemisphere, this.longitudeHemisphere);
     }
 
     public String getNmeaTime() {
@@ -210,7 +211,7 @@ public class MMLocationParser {
             this.date = LocalDate.parse(rmcTokens.get(9), DateTimeFormatter.ofPattern("ddMyy"));
         }
         if (!rmcTokens.get(7).isEmpty()) {
-            this.speed = Double.parseDouble(rmcTokens.get(7)) * KNOTS_TO_M_S;
+            this.speed = Double.parseDouble(rmcTokens.get(7)) * KNOTS_TO_MS;
         }
         if (!rmcTokens.get(8).isEmpty()) {
             this.track = Math.toRadians(Double.parseDouble(rmcTokens.get(8)));

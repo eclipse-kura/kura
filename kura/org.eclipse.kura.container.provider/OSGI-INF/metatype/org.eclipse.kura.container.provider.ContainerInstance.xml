@@ -22,8 +22,10 @@
         <AD id="container.image" 
             name="Image name" 
             description="Specifies the image reference that will be used to create this container instance. 
-            The value has to be expressed in the form registryURL/imagename in case of a custom registry. In case the image will be pulled from the official Docker Hub registry, the registryURL can be ignored and 
-            only the imagename can be provided. Default: nginx (the image will be pulled from the Docker Hub registry)"
+            The value has to be expressed in the form registryURL/imagename. If no registryURL is provided, the official Docker Hub registry will be used as default. 
+            In the use case of pulling the testing/test-image image from a local registry listening on port 5000 (myregistry.local:5000), the registryURL has
+            to be specified as follows: myregistry.local:5000/testing/test-image
+            Default: nginx (the image will be pulled from the Docker Hub registry)"
             type="String" cardinality="1" required="true" default="nginx" />
 
         <AD id="container.image.tag" name="Image tag"

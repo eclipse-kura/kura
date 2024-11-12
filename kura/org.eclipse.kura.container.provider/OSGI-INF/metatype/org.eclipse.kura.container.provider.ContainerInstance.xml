@@ -27,7 +27,7 @@
             type="String" cardinality="1" required="true" default="nginx" />
 
         <AD id="container.image.tag" name="Image tag"
-            description="Describes which image version that should be pulled from the container registry. Default: latest" type="String"
+            description="Describes which image version should be pulled from the container registry. Default: latest" type="String"
             cardinality="1" required="true" default="latest" />
         
         <AD id="registry.hostname" name="Authentication Registry URL"

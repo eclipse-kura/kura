@@ -39,7 +39,7 @@ public class MMLocationParser {
     private static final Logger logger = LoggerFactory.getLogger(MMLocationParser.class);
 
     private static final double KNOTS_TO_MS = 1 / 1.94384449;
-    private static final double MS_TO_KMH = 3.6;
+
     private int gnssTypeUpdateCounter = 0;
     private static final int GNSSTYPE_RESET_COUNTER = 50;
 
@@ -88,15 +88,10 @@ public class MMLocationParser {
         return this.isFix;
     }
 
-    /*
-     * Conversion required since org.eclipse.kura.position.NmeaPosition requires speed in Kilometers per hour instead of
-     * meters per second
-     */
     public NmeaPosition getNmeaPosition() {
         return new NmeaPosition(this.latitudeDegrees, this.longitudeDegrees, this.altitudeMeters,
-                this.speedMetersPerSecond * MS_TO_KMH, this.trackDegrees, this.fixQuality, this.nrSatellites, this.mDOP,
-                this.mPDOP, this.mHDOP, this.mVDOP, this.m3Dfix, this.validFix, this.latitudeHemisphere,
-                this.longitudeHemisphere);
+                this.speedMetersPerSecond, this.trackDegrees, this.fixQuality, this.nrSatellites, this.mDOP, this.mPDOP,
+                this.mHDOP, this.mVDOP, this.m3Dfix, this.validFix, this.latitudeHemisphere, this.longitudeHemisphere);
     }
 
     public String getNmeaTime() {

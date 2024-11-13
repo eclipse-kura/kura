@@ -6,7 +6,7 @@ The Raw MQTT cloud connector is composed of the following components:
 
 ### Cloud stack components
 
-The cloud stack is composed by the default [DataService](./gateway-configuration/data-service-configuration.md)) and [MqttDataTransport](./gateway-configuration/data-transport-service-configuration.md) plus the following component:
+The cloud stack is composed by the default [DataService](../gateway-configuration/data-service-configuration.md) and [MqttDataTransport](../gateway-configuration/data-transport-service-configuration.md) plus the following component:
 
 #### org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint
 
@@ -30,7 +30,7 @@ The `RawMqttPublisher` provides the following configuration options:
 
 * **Priority**: The priority of the messages. 0 is highest priority. This parameter is related to the DataService component of the cloud stack.
 
-The `RawMqttPublisher` will consider only the body field of the [KuraPayload](https://download.eclipse.org/kura/docs/api/5.5.0/apidocs/org/eclipse/kura/message/KuraPayload.html)s submitted for publishing. All other KuraPayload fields like the metrics and position information will be discarded.
+The `RawMqttPublisher` will consider only the body field of the [KuraPayload](https://download.eclipse.org/kura/docs/api/5.5.0/apidocs/org/eclipse/kura/message/KuraPayload.html)s submitted for publishing. All other KuraPayload fields like metrics or position information will be discarded.
 
 The received KuraPayload body field will be used as the payload of the published messages without any modification.
 
@@ -61,8 +61,10 @@ As said previously, the `RawMqttPublisher` component will only consider the body
 In this way every time that the **CloudPublisher** will receive an envelope with a property whose name matches the configured one, it will use its value as the body of the produced KuraPayload.
 
 The input property must be of STRING or BYTE_ARRAY type:
-* if the type is BYTE_ARRAY the value will be used as KuraPayload body without modifications.
-* if the type is STRING the value will be ecoded in UTF-8.
+
+  * if the type is BYTE_ARRAY the value will be used as KuraPayload body without modifications.
+
+  * if the type is STRING the value will be ecoded in UTF-8.
 
 ### Receiveing messages
 
@@ -73,5 +75,7 @@ It is also possible to receive the messages originating form a `RawMqttSubscribe
 * Set the value of the **Set property from message body** configuration property to the name of a wire record property that will be used to store the KuraPayload body
 
 * Set the value of the **Body property type** to STRING or BYTE_ARRAY:
-  * If set to BYTE_ARRAY, the body will be emitted without modifications.
-  * If set to STRING, the body will be decoded from UTF-8 and emitted as a string.
+
+    * If set to BYTE_ARRAY, the body will be emitted without modifications.
+
+    * If set to STRING, the body will be decoded from UTF-8 and emitted as a string.

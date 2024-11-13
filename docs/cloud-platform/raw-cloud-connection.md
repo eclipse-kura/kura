@@ -46,7 +46,7 @@ The `RawMqttSubscriber` provides the following configuration options:
 
 The `RawMqttSubscriber` will popolate the body field of the KuraPayload provided to consumers using the payload of received MQTT messages without any modification.
 
-## Using the Raw MQTT Cloud Conection from Kura Wires
+## Using the Raw MQTT Cloud Connection from Eclipse Kura Wires
 
 Using the Raw MQTT Cloud Conection from Kura Wires is possible but requires a few extra configuration steps.
 

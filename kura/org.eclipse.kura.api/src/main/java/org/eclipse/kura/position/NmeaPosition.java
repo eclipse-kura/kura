@@ -24,8 +24,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * <li>Latitude in degrees
  * <li>Track in degrees
  * <li>Altitude in meters
- * <li>Speed in km/h
- * <li>Speed in mph
+ * <li>Speed in m/s (this field has different getters to retrieved value in m/s, km/h or mph)
  * </ul>
  * It adds to the OSGI Position class the following fields:<br>
  * <ul>
@@ -47,11 +46,14 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class NmeaPosition {
 
-    private double latitude;
-    private double longitude;
-    private double altitude;
-    private double speed;
-    private double track;
+    private static final double MS_TO_KMH = 3.6;
+    private static final double MS_TO_MPH = 2.24;
+
+    private double latitudeDegrees;
+    private double longitudeDegrees;
+    private double altitudeMeters;
+    private double speedMetersPerSecond;
+    private double trackDegrees;
     private int fixQuality;
     private int nrSatellites;
     private double mDOP;
@@ -63,28 +65,29 @@ public class NmeaPosition {
     private char latitudeHemisphere;
     private char longitudeHemisphere;
 
-    public NmeaPosition(double lat, double lon, double alt, double speed, double track) {
-        this(lat, lon, alt, speed, track, 0, 0, 0.0, 0.0, 0.0, 0.0, 0, '0', '0', '0');
+    public NmeaPosition(double latDegrees, double lonDegrees, double altDegrees, double speedMps, double trackDegrees) {
+        this(latDegrees, lonDegrees, altDegrees, speedMps, trackDegrees, 0, 0, 0.0, 0.0, 0.0, 0.0, 0, '0', '0', '0');
     }
 
     @SuppressWarnings("checkstyle:parameterNumber")
-    public NmeaPosition(double lat, double lon, double alt, double speed, double track, int fixQuality,
-            int nrSatellites, double dop, double pdop, double hdop, double vdop, int fix3D) {
-        this(lat, lon, alt, speed, track, fixQuality, nrSatellites, dop, pdop, hdop, vdop, fix3D, '0', '0', '0');
+    public NmeaPosition(double latDegrees, double lonDegrees, double altDegrees, double speedMps, double trackDegrees,
+            int fixQuality, int nrSatellites, double dop, double pdop, double hdop, double vdop, int fix3D) {
+        this(latDegrees, lonDegrees, altDegrees, speedMps, trackDegrees, fixQuality, nrSatellites, dop, pdop, hdop,
+                vdop, fix3D, '0', '0', '0');
     }
 
     /**
      * @since 2.0
      */
     @SuppressWarnings("checkstyle:parameterNumber")
-    public NmeaPosition(double lat, double lon, double alt, double speed, double track, int fixQuality,
-            int nrSatellites, double dop, double pdop, double hdop, double vdop, int fix3D, char validF, char hemiLat,
-            char hemiLon) {
-        this.latitude = lat;
-        this.longitude = lon;
-        this.altitude = alt;
-        this.speed = speed;
-        this.track = track;
+    public NmeaPosition(double latDegrees, double lonDegrees, double altDegrees, double speedMps, double trackDegrees,
+            int fixQuality, int nrSatellites, double dop, double pdop, double hdop, double vdop, int fix3D, char validF,
+            char hemiLat, char hemiLon) {
+        this.latitudeDegrees = latDegrees;
+        this.longitudeDegrees = lonDegrees;
+        this.altitudeMeters = altDegrees;
+        this.speedMetersPerSecond = speedMps;
+        this.trackDegrees = trackDegrees;
         this.fixQuality = fixQuality;
         this.nrSatellites = nrSatellites;
         this.mDOP = dop;
@@ -101,69 +104,69 @@ public class NmeaPosition {
      * Return the latitude in degrees
      */
     public double getLatitude() {
-        return this.latitude;
+        return this.latitudeDegrees;
     }
 
     public void setLatitude(double latitude) {
-        this.latitude = latitude;
+        this.latitudeDegrees = latitude;
     }
 
     /**
      * Return the longitude in degrees
      */
     public double getLongitude() {
-        return this.longitude;
+        return this.longitudeDegrees;
     }
 
     public void setLongitude(double longitude) {
-        this.longitude = longitude;
+        this.longitudeDegrees = longitude;
     }
 
     /**
      * Return the altitude in meters
      */
     public double getAltitude() {
-        return this.altitude;
+        return this.altitudeMeters;
     }
 
     public void setAltitude(double altitude) {
-        this.altitude = altitude;
+        this.altitudeMeters = altitude;
     }
 
     /**
      * Return the speed in km/h
      */
     public double getSpeedKmh() {
-        return this.speed * 3.6;
+        return this.speedMetersPerSecond * MS_TO_KMH;
     }
 
     /**
      * Return the speed in mph
      */
     public double getSpeedMph() {
-        return this.speed * 2.24;
+        return this.speedMetersPerSecond * MS_TO_MPH;
     }
 
     /**
      * Return the speed in m/s
      */
     public double getSpeed() {
-        return this.speed;
+        return this.speedMetersPerSecond;
     }
 
     public void setSpeed(double speed) {
-        this.speed = speed;
+        this.speedMetersPerSecond = speed;
     }
 
     /**
      * Return the track in degrees
      */
     public double getTrack() {
-        return this.track;
+        return this.trackDegrees;
     }
 
     public void setTrack(double track) {
-        this.track = track;
+        this.trackDegrees = track;
     }
 
     public int getFixQuality() {

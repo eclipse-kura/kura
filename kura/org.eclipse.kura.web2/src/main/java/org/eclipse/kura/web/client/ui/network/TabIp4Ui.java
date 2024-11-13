@@ -552,8 +552,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.gateway.addMouseOutHandler(event -> resetHelp());
         this.gateway.addValueChangeHandler(event -> {
             setDirty(true);
-            if (!TabIp4Ui.this.gateway.getText().trim().matches(FieldType.IPV4_ADDRESS.getRegex())
-                    || TabIp4Ui.this.gateway.getText().trim().length() <= 0) {
+            if (!TabIp4Ui.this.gateway.getText().trim().matches(FieldType.IPV4_ADDRESS.getRegex())) {
                 TabIp4Ui.this.groupGateway.setValidationState(ValidationState.ERROR);
                 TabIp4Ui.this.helpGateway.setText(MSGS.netIPv4InvalidAddress());
             } else {
@@ -573,8 +572,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.subnet.addMouseOutHandler(event -> resetHelp());
         this.subnet.addValueChangeHandler(event -> {
             setDirty(true);
-            if (!TabIp4Ui.this.subnet.getText().trim().matches(FieldType.IPV4_ADDRESS.getRegex())
-                    || TabIp4Ui.this.subnet.getText().trim().length() <= 0) {
+            if (!TabIp4Ui.this.subnet.getText().trim().matches(FieldType.IPV4_ADDRESS.getRegex())) {
                 TabIp4Ui.this.groupSubnet.setValidationState(ValidationState.ERROR);
                 TabIp4Ui.this.helpSubnet.setText(MSGS.netIPv4InvalidAddress());
             } else {
@@ -594,8 +592,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.ip.addMouseOutHandler(event -> resetHelp());
         this.ip.addValueChangeHandler(event -> {
             setDirty(true);
-            if (!TabIp4Ui.this.ip.getText().trim().matches(FieldType.IPV4_ADDRESS.getRegex())
-                    || TabIp4Ui.this.ip.getText().trim().length() <= 0) {
+            if (!TabIp4Ui.this.ip.getText().trim().matches(FieldType.IPV4_ADDRESS.getRegex())) {
                 TabIp4Ui.this.groupIp.setValidationState(ValidationState.ERROR);
                 TabIp4Ui.this.helpIp.setText(MSGS.netIPv4InvalidAddress());
             } else {

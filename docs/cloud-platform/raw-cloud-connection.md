@@ -68,7 +68,7 @@ The input property must be of STRING or BYTE_ARRAY type:
 
 ### Receiveing messages
 
-It is also possible to receive the messages originating form a `RawMqttSubscriber` using a Wires **CloudSubscriber** component with additional configuration. By default the **CloudSubscriber** component will not emit KuraPayload body on the wires but it is possible to change this behaviour in the following way:
+It is also possible to receive the messages originating form a `RawMqttSubscriber` using a Wires **CloudSubscriber** component with additional configuration. By default, the **CloudSubscriber** component will not emit KuraPayload body on the wires but it is possible to change this behaviour in the following way:
 
 * Create a **CloudSubscriber** wire component and attach it to a `RawMqttSubscriber` instance.
 

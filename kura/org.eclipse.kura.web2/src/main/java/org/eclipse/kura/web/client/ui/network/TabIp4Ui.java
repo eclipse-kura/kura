@@ -206,10 +206,6 @@ public class TabIp4Ui extends Composite implements NetworkTab {
             return;
         }
 
-        if (config.getSubnetMask() != null && "255.255.255.255".equals(config.getSubnetMask())) {
-            config.setSubnetMask("");
-        }
-
         this.selectedNetIfConfig = config;
         logger.fine(this.selectedNetIfConfig.getName());
         logger.fine(this.selectedNetIfConfig.getConfigMode());

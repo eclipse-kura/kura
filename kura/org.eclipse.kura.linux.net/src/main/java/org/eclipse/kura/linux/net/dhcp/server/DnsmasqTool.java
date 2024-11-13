@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -40,7 +40,7 @@ public class DnsmasqTool implements DhcpLinuxTool {
     private static final Logger logger = LoggerFactory.getLogger(DnsmasqTool.class);
 
     private String globalConfigFilename = "/etc/dnsmasq.d/dnsmasq-globals.conf";
-    private static final String GLOBAL_CONFIGURATION = "port=0\nbind-dynamic\ndhcp-leasefile=/var/lib/dhcp/dnsmasq.leases\n";
+    private static final String GLOBAL_CONFIGURATION = "port=0\nbind-dynamic\n";
 
     static final Command IS_ACTIVE_COMMAND = new Command(new String[] { "systemctl", "is-active", "--quiet",
             DhcpServerTool.DNSMASQ.getValue() });

@@ -206,10 +206,6 @@ public class TabIp4Ui extends Composite implements NetworkTab {
             return;
         }
 
-        if (config.getSubnetMask() != null && "255.255.255.255".equals(config.getSubnetMask())) {
-            config.setSubnetMask("");
-        }
-
         this.selectedNetIfConfig = config;
         logger.fine(this.selectedNetIfConfig.getName());
         logger.fine(this.selectedNetIfConfig.getConfigMode());
@@ -291,6 +287,10 @@ public class TabIp4Ui extends Composite implements NetworkTab {
                 this.groupGateway.setValidationState(ValidationState.ERROR);
                 this.helpGateway.setText(MSGS.netIPv4InvalidAddress());
                 flag = false;
+            }
+            if (this.subnet.getValue() == null || "".equals(this.subnet.getValue().trim())) {
+                this.groupSubnet.setValidationState(ValidationState.ERROR);
+                this.helpSubnet.setText(MSGS.netIPv4InvalidAddress());
             }
             if (this.ip.getValue() == null || "".equals(this.ip.getValue().trim())) {
                 this.groupIp.setValidationState(ValidationState.ERROR);
@@ -531,7 +531,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.gateway.addValueChangeHandler(event -> {
             setDirty(true);
             if (!TabIp4Ui.this.gateway.getText().trim().matches(FieldType.IPV4_ADDRESS.getRegex())
-                    && TabIp4Ui.this.gateway.getText().trim().length() > 0) {
+                    || TabIp4Ui.this.gateway.getText().trim().length() <= 0) {
                 TabIp4Ui.this.groupGateway.setValidationState(ValidationState.ERROR);
                 TabIp4Ui.this.helpGateway.setText(MSGS.netIPv4InvalidAddress());
             } else {
@@ -552,7 +552,7 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.subnet.addValueChangeHandler(event -> {
             setDirty(true);
             if (!TabIp4Ui.this.subnet.getText().trim().matches(FieldType.IPV4_ADDRESS.getRegex())
-                    && TabIp4Ui.this.subnet.getText().trim().length() > 0) {
+                    || TabIp4Ui.this.subnet.getText().trim().length() <= 0) {
                 TabIp4Ui.this.groupSubnet.setValidationState(ValidationState.ERROR);
                 TabIp4Ui.this.helpSubnet.setText(MSGS.netIPv4InvalidAddress());
             } else {

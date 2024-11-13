@@ -292,6 +292,10 @@ public class TabIp4Ui extends Composite implements NetworkTab {
                 this.helpGateway.setText(MSGS.netIPv4InvalidAddress());
                 flag = false;
             }
+            if (this.subnet.getValue() == null || "".equals(this.subnet.getValue().trim())) {
+                this.groupSubnet.setValidationState(ValidationState.ERROR);
+                this.helpSubnet.setText(MSGS.netIPv4InvalidAddress());
+            }
             if (this.ip.getValue() == null || "".equals(this.ip.getValue().trim())) {
                 this.groupIp.setValidationState(ValidationState.ERROR);
                 this.helpIp.setText(MSGS.netIPv4InvalidAddress());

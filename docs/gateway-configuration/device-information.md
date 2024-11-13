@@ -38,6 +38,9 @@ The **System Packages** tab shows the list of all the Linux packages installed o
 
 ![Device System Packages](./images/device-system-packages.png)
 
+!!! note
+    In Debian based systems, if a package is removed without the `purge` option, the package will be still listed on the **System Packages** tab.
+
 ## System Properties
 
 The **System Properties** tab shows a list of relevant properties including OS and JVM parameters.

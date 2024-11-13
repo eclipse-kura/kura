@@ -2,7 +2,7 @@
 
 The Raw MQTT cloud connector is a cloud stack that exposes a MQTT cloud connection without applying any restriction on topic structure or performing any particular message encoding.
 
-The Raw MQTT cloud connector is composed of the following components:
+The Raw MQTT cloud connector is composed by the following components:
 
 ### Cloud stack components
 

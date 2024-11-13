@@ -48,7 +48,7 @@ The `RawMqttSubscriber` will popolate the body field of the KuraPayload provided
 
 ## Using the Raw MQTT Cloud Connection from Eclipse Kura Wires
 
-Using the Raw MQTT Cloud Conection from Kura Wires is possible but requires a few extra configuration steps.
+Using the Raw MQTT Cloud Connection from Eclipse Kura Wires is possible but requires a few extra configuration steps.
 
 ### Publishig messages
 

@@ -45,6 +45,19 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * 830b3fe28b - ipv4 empty subnet gateway checks - improvement [backport release-5.6.0] (#5561) (eclipse-kura-bot)
+  * 9e652a80e3 - Corrected the checks for empty subnet and gateway [backport release-5.6.0] (#5559) (eclipse-kura-bot)
+  * 383a8883d4 - [web2] Fixed MTU field visualization [backport release-5.6.0] (#5553) (eclipse-kura-bot)
+  * 2c26b076ed - Clash in dnsmasq lease file configuration option [backport release-5.6.0] (#5552) (eclipse-kura-bot)
+  * 29786a4776 - fixed nmea position unit of measurement [backport release-5.6.0] (#5549) (eclipse-kura-bot)
+  * c99ea3a282 - Cleanup of birth and app publish logic [backport release-5.6.0]  (#5544) (Matteo Maiero)
+  * de03964f88 - Use dynamic policy for PositionProvider reference in PositionService [backport release-5.6.0] (#5545) (eclipse-kura-bot)
+  * 2b999d3ffa - [distrib] Update default LogManager property in kura.properties file (#5541) (Pierantonio Merlino)
+  * 616c196892 - [rest.network.configuration] Fix net interfaces property management again [backport release-5.6.0] (#5538) (eclipse-kura-bot)
+  * 132cd037c0 - [distrib] revert #5522 [backport release-5.6.0] (#5539) (eclipse-kura-bot)
+  * 5987ac2dcd - Ignore modem state when getting position from MM [backport release-5.6.0] (#5534) (eclipse-kura-bot)
+  * 7c924d0038 - [distrib] Updated installer script to write all interface names to snapshot file [backport release-5.6.0] (#5528) (eclipse-kura-bot)
+  * 5f5a4ddbc2 - Update kura.setup for oomph to new repo [backport release-5.6.0] (#5526) (eclipse-kura-bot)
   * e2bba23190 - Linux.Pid equals override [backport release-5.6.0] (#5514) (eclipse-kura-bot)
   * 47adbf1686 - Prevent publishing birth on shutdown [backport release-5.6.0]  (#5513) (Matteo Maiero)
   * 6b3d84edc3 - Java 11+ PKCS11 provider setup [backport release-5.6.0] (#5497) (eclipse-kura-bot)
@@ -60,6 +73,7 @@ Bug Fixes:
   * b3dff8ffdb - Connection Scheduler metatype improvement. [backport release-5.6.0] (#5365) (github-actions[bot])
 
 Target Platform Updates:
+  * ca1a41ed36 - updated Jetty 9.4.55 -> 9.4.56 [backport release-5.6.0] (#5527) (eclipse-kura-bot)
   * f768acc086 - updated jetty version to 9.4.55.v20240627 [backport release-5.6.0] (#5502) (eclipse-kura-bot)
   * a4940f21fe - Reduce number of job history to 5 [backport release-5.6.0] (#5465) (eclipse-kura-bot)
   * f45421ebef - Protobuf update to 3.25.5 [backport 5.6.0] (#5431) (#5450) (Matteo Maiero)
@@ -125,6 +139,23 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 830b3fe28b - fix: ipv4 empty subnet gateway checks - improvement [backport release-5.6.0] (#5561) (eclipse-kura-bot)
+  * 100735184f - chore: Added feature for raw MQTT cloud connection [backport release-5.6.0] (#5558) (nicolatimeus)
+  * 9e652a80e3 - fix: Corrected the checks for empty subnet and gateway [backport release-5.6.0] (#5559) (eclipse-kura-bot)
+  * 383a8883d4 - fix(web2): Fixed MTU field visualization [backport release-5.6.0] (#5553) (eclipse-kura-bot)
+  * 2c26b076ed - fix: Clash in dnsmasq lease file configuration option [backport release-5.6.0] (#5552) (eclipse-kura-bot)
+  * 29786a4776 - fix: fixed nmea position unit of measurement [backport release-5.6.0] (#5549) (eclipse-kura-bot)
+  * c99ea3a282 - fix: Cleanup of birth and app publish logic [backport release-5.6.0]  (#5544) (Matteo Maiero)
+  * de03964f88 - fix: Use dynamic policy for PositionProvider reference in PositionService [backport release-5.6.0] (#5545) (eclipse-kura-bot)
+  * fdced81a9a - docs: Improve container instance metatype descriptions [backport release-5.6.0] (#5542) (eclipse-kura-bot)
+  * 2b999d3ffa - fix(distrib): Update default LogManager property in kura.properties file (#5541) (Pierantonio Merlino)
+  * 616c196892 - fix(rest.network.configuration): Fix net interfaces property management again [backport release-5.6.0] (#5538) (eclipse-kura-bot)
+  * 132cd037c0 - fix(distrib): revert #5522 [backport release-5.6.0] (#5539) (eclipse-kura-bot)
+  * 5987ac2dcd - fix: Ignore modem state when getting position from MM [backport release-5.6.0] (#5534) (eclipse-kura-bot)
+  * 7c924d0038 - fix(distrib): Updated installer script to write all interface names to snapshot file [backport release-5.6.0] (#5528) (eclipse-kura-bot)
+  * ca1a41ed36 - build(deps): updated Jetty 9.4.55 -> 9.4.56 [backport release-5.6.0] (#5527) (eclipse-kura-bot)
+  * 5f5a4ddbc2 - fix: Update kura.setup for oomph to new repo [backport release-5.6.0] (#5526) (eclipse-kura-bot)
+  * bc2ae9b000 - chore: add Kura 5.6.0 release notes (#5520) (eclipse-kura-bot)
   * 444a8691e5 - chore: add Kura 5.6.0 release notes (#5510) (eclipse-kura-bot)
   * e2bba23190 - fix: Linux.Pid equals override [backport release-5.6.0] (#5514) (eclipse-kura-bot)
   * 47adbf1686 - fix: Prevent publishing birth on shutdown [backport release-5.6.0]  (#5513) (Matteo Maiero)

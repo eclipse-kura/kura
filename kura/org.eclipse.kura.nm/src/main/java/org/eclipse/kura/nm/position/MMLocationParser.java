@@ -38,15 +38,16 @@ public class MMLocationParser {
 
     private static final Logger logger = LoggerFactory.getLogger(MMLocationParser.class);
 
-    private static final double KNOTS_TO_M_S = 1 / 1.94384449;
+    private static final double KNOTS_TO_MS = 1 / 1.94384449;
+
     private int gnssTypeUpdateCounter = 0;
     private static final int GNSSTYPE_RESET_COUNTER = 50;
 
-    private Double lat = 0.0;
-    private Double lon = 0.0;
-    private Double alt = 0.0;
-    private Double speed = 0.0;
-    private Double track = 0.0;
+    private Double latitudeDegrees = 0.0;
+    private Double longitudeDegrees = 0.0;
+    private Double altitudeMeters = 0.0;
+    private Double speedMetersPerSecond = 0.0;
+    private Double trackDegrees = 0.0;
 
     private int fixQuality;
     private int nrSatellites;
@@ -68,10 +69,15 @@ public class MMLocationParser {
         return Objects.requireNonNull(LocalDateTime.of(date, time));
     }
 
+    /*
+     * Conversions are required since org.osgi.util.position.Position requires values in radians for latitude, longitude
+     * and track.
+     */
     public Position getPosition() {
-        return Objects.requireNonNull(new Position(new Measurement(this.lat, Unit.rad),
-                new Measurement(this.lon, Unit.rad), new Measurement(this.alt, Unit.m),
-                new Measurement(this.speed, Unit.m_s), new Measurement(this.track, Unit.rad)));
+        return Objects.requireNonNull(new Position(new Measurement(Math.toRadians(this.latitudeDegrees), Unit.rad),
+                new Measurement(Math.toRadians(this.longitudeDegrees), Unit.rad),
+                new Measurement(this.altitudeMeters, Unit.m), new Measurement(this.speedMetersPerSecond, Unit.m_s),
+                new Measurement(Math.toRadians(this.trackDegrees), Unit.rad)));
     }
 
     public Set<GNSSType> getGnssTypes() {
@@ -83,9 +89,9 @@ public class MMLocationParser {
     }
 
     public NmeaPosition getNmeaPosition() {
-        return new NmeaPosition(this.lat, this.lon, this.alt, this.speed, this.track, this.fixQuality,
-                this.nrSatellites, this.mDOP, this.mPDOP, this.mHDOP, this.mVDOP, this.m3Dfix, this.validFix,
-                this.latitudeHemisphere, this.longitudeHemisphere);
+        return new NmeaPosition(this.latitudeDegrees, this.longitudeDegrees, this.altitudeMeters,
+                this.speedMetersPerSecond, this.trackDegrees, this.fixQuality, this.nrSatellites, this.mDOP, this.mPDOP,
+                this.mHDOP, this.mVDOP, this.m3Dfix, this.validFix, this.latitudeHemisphere, this.longitudeHemisphere);
     }
 
     public String getNmeaTime() {
@@ -102,15 +108,15 @@ public class MMLocationParser {
 
             switch (rawEntry.getKey()) {
             case "latitude":
-                this.lat = Math.toRadians((Double) rawEntry.getValue().getValue());
+                this.latitudeDegrees = (Double) rawEntry.getValue().getValue();
                 break;
 
             case "longitude":
-                this.lon = Math.toRadians((Double) rawEntry.getValue().getValue());
+                this.longitudeDegrees = (Double) rawEntry.getValue().getValue();
                 break;
 
             case "altitude":
-                this.alt = (Double) rawEntry.getValue().getValue();
+                this.altitudeMeters = (Double) rawEntry.getValue().getValue();
                 break;
 
             // time comes in format HHmmss.SS, so we cut the string after the dot to extract only the util information
@@ -210,10 +216,10 @@ public class MMLocationParser {
             this.date = LocalDate.parse(rmcTokens.get(9), DateTimeFormatter.ofPattern("ddMyy"));
         }
         if (!rmcTokens.get(7).isEmpty()) {
-            this.speed = Double.parseDouble(rmcTokens.get(7)) * KNOTS_TO_M_S;
+            this.speedMetersPerSecond = Double.parseDouble(rmcTokens.get(7)) * KNOTS_TO_MS;
         }
         if (!rmcTokens.get(8).isEmpty()) {
-            this.track = Math.toRadians(Double.parseDouble(rmcTokens.get(8)));
+            this.trackDegrees = Double.parseDouble(rmcTokens.get(8));
         }
         if (!rmcTokens.get(4).isEmpty()) {
             this.latitudeHemisphere = rmcTokens.get(4).charAt(0);
@@ -287,7 +293,8 @@ public class MMLocationParser {
 
     @Override
     public String toString() {
-        return "ModemManagerProvider [latitude=" + lat + ", longitude=" + lon + ", altitude=" + alt + ", speed=" + speed
-                + ", timestamp=" + time + ", date=" + date + ", gnssType=" + gnssTypes + "]";
+        return "ModemManagerProvider [latitude=" + latitudeDegrees + ", longitude=" + longitudeDegrees + ", altitude="
+                + altitudeMeters + ", speed=" + speedMetersPerSecond + ", timestamp=" + time + ", date=" + date
+                + ", gnssType=" + gnssTypes + "]";
     }
 }

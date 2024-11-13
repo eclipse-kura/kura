@@ -18,23 +18,20 @@ import java.util.Optional;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.client.util.MessageUtils;
-import org.eclipse.kura.web.shared.model.GwtNetIfType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.gwtbootstrap3.client.ui.Form;
-import org.gwtbootstrap3.client.ui.FormControlStatic;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.HelpBlock;
 import org.gwtbootstrap3.client.ui.IntegerBox;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.PanelHeader;
-import org.gwtbootstrap3.client.ui.TextArea;
-import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -42,7 +39,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class TabAdvancedUi extends Composite implements NetworkTab {
-	
+
     private static final String PROMISC_DEFAULT = "netAdvPromiscDefault";
     private static final String PROMISC_ENABLED = "netAdvPromiscEnabled";
     private static final String PROMISC_DISABLED = "netAdvPromiscDisabled";
@@ -76,7 +73,6 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
     @UiField
     HelpButton helpButtonPromisc;
 
-    
     @UiField
     IntegerBox mtu;
     @UiField
@@ -99,7 +95,12 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
     private final NetworkTabsUi tabs;
     private Optional<GwtNetInterfaceConfig> selectedNetIfConfig = Optional.empty();
 
+    private static native void changeCachedDecimalFormat(NumberFormat f) /*-{
+    @com.google.gwt.i18n.client.NumberFormat::cachedDecimalFormat = f;
+  }-*/;
+
     public TabAdvancedUi(GwtSession currentSession, NetworkTabsUi netTabs) {
+        changeCachedDecimalFormat(NumberFormat.getFormat("###0"));
         initWidget(uiBinder.createAndBindUi(this));
 
         this.helpTitle.setText(MSGS.netHelpTitle());
@@ -151,10 +152,10 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
     }
 
     private void initTextBoxes() {
-    	initMtuField();
-    	initIp6MtuField();
+        initMtuField();
+        initIp6MtuField();
     }
-    
+
     private void initMtuField() {
         this.mtu.addMouseOverHandler(event -> {
             this.helpText.clear();
@@ -164,16 +165,8 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
         this.mtu.addValueChangeHandler(valChangeEvent -> {
             setDirty(true);
 
-            String inputText = this.mtu.getText();
-            boolean isValidValue = false;
-
-            if (inputText != null) {
-                if (inputText.trim().isEmpty()) {
-                    isValidValue = true;
-                } else {
-                    isValidValue = isValidIntegerInRange(inputText, 0, Integer.MAX_VALUE);
-                }
-            }
+            Integer inputValue = this.mtu.getValue();
+            boolean isValidValue = isValidIntegerInRange(inputValue, 0, Integer.MAX_VALUE);
 
             if (isValidValue) {
                 this.groupMtu.setValidationState(ValidationState.NONE);
@@ -196,16 +189,8 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
         this.ip6Mtu.addValueChangeHandler(valChangeEvent -> {
             setDirty(true);
 
-            String inputText = this.ip6Mtu.getText();
-            boolean isValidValue = false;
-
-            if (inputText != null) {
-                if (inputText.trim().isEmpty()) {
-                    isValidValue = true;
-                } else {
-                    isValidValue = isValidIntegerInRange(inputText, 0, Integer.MAX_VALUE);
-                }
-            }
+            Integer inputValue = this.ip6Mtu.getValue();
+            boolean isValidValue = isValidIntegerInRange(inputValue, 0, Integer.MAX_VALUE);
 
             if (isValidValue) {
                 this.groupIp6Mtu.setValidationState(ValidationState.NONE);
@@ -217,16 +202,12 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
         });
     }
 
-    private boolean isValidIntegerInRange(String integerText, int min, int max) {
-        try {
-            int value = Integer.parseInt(integerText.trim());
-            return value >= min && value <= max;
-        } catch (NumberFormatException e) {
+    private boolean isValidIntegerInRange(Integer integerValue, int min, int max) {
+        if (integerValue == null) {
             return false;
         }
+        return integerValue >= min && integerValue <= max;
     }
-
-
 
     private void setHelpText(String message) {
         this.helpText.clear();
@@ -258,7 +239,7 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
     private void refreshFieldsBasedOnInterface(GwtNetInterfaceConfig config) {
         switch (config.getHwTypeEnum()) {
         case ETHERNET:
-        	this.promisc.setEnabled(true);
+            this.promisc.setEnabled(true);
             break;
         case LOOPBACK:
             this.mtu.setEnabled(false);
@@ -301,15 +282,15 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
     }
 
     private void updateConfigWithSelectedValues(GwtNetInterfaceConfig updatedNetIf) {
-    	if (this.mtu.getValue() != null) {
+        if (this.mtu.getValue() != null) {
             updatedNetIf.setMtu(this.mtu.getValue());
         }
 
-    	if (this.ip6Mtu.getValue() != null) {
+        if (this.ip6Mtu.getValue() != null) {
             updatedNetIf.setIpv6Mtu(this.ip6Mtu.getValue());
         }
-        
-        if(!nullOrEmpty(this.promisc.getSelectedValue())) {
+
+        if (!nullOrEmpty(this.promisc.getSelectedValue())) {
             updatedNetIf.setPromisc(Integer.parseInt(this.promisc.getSelectedValue()));
         }
     }
@@ -343,8 +324,8 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
     }
 
     private void reset() {
-        this.mtu.setText("");
-        this.ip6Mtu.setText("");
+        this.mtu.setValue(0);
+        this.ip6Mtu.setValue(0);
         this.promisc.setSelectedIndex(0);
     }
 

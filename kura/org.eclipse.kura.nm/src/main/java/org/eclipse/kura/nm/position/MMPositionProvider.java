@@ -16,6 +16,7 @@ package org.eclipse.kura.nm.position;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -151,12 +152,19 @@ public class MMPositionProvider implements PositionProvider {
 
         for (Location location : availableLocations) {
             Map<UInt32, Variant<?>> locationMap = location.GetLocation();
-            if (locationMap.containsKey(NMEA_LOCATION_SOURCE) && locationMap.containsKey(RAW_LOCATION_SOURCE)) {
-                Variant<?> nmeaData = locationMap.get(NMEA_LOCATION_SOURCE);
-                this.mmLocationParser.parseNmeaLocation(nmeaData);
+            Optional<Variant<?>> nmeaData = locationMap.containsKey(NMEA_LOCATION_SOURCE)
+                    ? Optional.of(locationMap.get(NMEA_LOCATION_SOURCE))
+                    : Optional.empty();
 
-                Variant<?> rawData = locationMap.get(RAW_LOCATION_SOURCE);
-                this.mmLocationParser.parseRawLocation(rawData);
+            Optional<Variant<?>> rawData = locationMap.containsKey(RAW_LOCATION_SOURCE)
+                    ? Optional.of(locationMap.get(RAW_LOCATION_SOURCE))
+                    : Optional.empty();
+
+            if (!nmeaData.isPresent() && !rawData.isPresent()) {
+                this.mmLocationParser.setInvalidFix();
+            } else {
+                nmeaData.ifPresent(this.mmLocationParser::parseNmeaLocation);
+                rawData.ifPresent(this.mmLocationParser::parseRawLocation);
             }
         }
 

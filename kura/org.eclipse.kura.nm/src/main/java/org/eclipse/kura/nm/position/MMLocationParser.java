@@ -102,6 +102,21 @@ public class MMLocationParser {
         return this.date.toString();
     }
 
+    /*
+     * Used by MMPositionProvider to invalidate position in case ModemManager doesn't provide any data, neither the nmea
+     * nor the raw. Usually, the Nmea data is always provided, while the Raw is provided only if Nmea has fix.
+     */
+
+    public void setInvalidFix() {
+        this.isFix = false;
+
+        this.latitudeDegrees = 0.0;
+        this.longitudeDegrees = 0.0;
+        this.altitudeMeters = 0.0;
+        this.speedMetersPerSecond = 0.0;
+        this.trackDegrees = 0.0;
+    }
+
     public void parseRawLocation(Variant<?> rawLocationVariant) {
         Map<String, Variant<?>> locationData = (Map<String, Variant<?>>) rawLocationVariant.getValue();
         for (Map.Entry<String, Variant<?>> rawEntry : locationData.entrySet()) {

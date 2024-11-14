@@ -342,7 +342,7 @@ public final class BaseAssetConfiguration {
         private static Number getValueScale(final Map<String, Object> properties) {
             final String valueScale = (String) properties.get(VALUE_SCALE.value());
 
-            if (valueScale == null) {
+            if (valueScale == null || valueScale.isEmpty()) {
                 return 1.0d;
             }
             return parseScaleOffsetTypedValue(getScaleOffsetType(properties), valueScale);
@@ -351,7 +351,7 @@ public final class BaseAssetConfiguration {
         private static Number getValueOffset(final Map<String, Object> properties) {
             final String valueOffset = (String) properties.get(VALUE_OFFSET.value());
 
-            if (valueOffset == null) {
+            if (valueOffset == null || valueOffset.isEmpty()) {
                 return 0.0d;
             }
             return parseScaleOffsetTypedValue(getScaleOffsetType(properties), valueOffset);

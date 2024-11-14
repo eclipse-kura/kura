@@ -120,9 +120,9 @@ public class Snippets {
             + "        },\n" //
             + "        {\n" //
             + "            \"name\": \"scale\",\n" //
-            + "            \"description\": \"Scale to be applied to the numeric value of the channel\",\n" //
+            + "            \"description\": \"Scale to be applied to the numeric value of the channel.\",\n" //
             + "            \"id\": \"+scale\",\n" //
-            + "            \"type\": \"DOUBLE\",\n" //
+            + "            \"type\": \"STRING\",\n" //
             + "            \"cardinality\": 0,\n" //
             + "            \"isRequired\": false\n" //
             + "        },\n" //
@@ -130,7 +130,7 @@ public class Snippets {
             + "            \"name\": \"offset\",\n" //
             + "            \"description\": \"Offset to be applied to the numeric value of the channel\",\n" //
             + "            \"id\": \"+offset\",\n" //
-            + "            \"type\": \"DOUBLE\",\n" //
+            + "            \"type\": \"STRING\",\n" //
             + "            \"cardinality\": 0,\n" //
             + "            \"isRequired\": false\n" //
             + "        },\n" //

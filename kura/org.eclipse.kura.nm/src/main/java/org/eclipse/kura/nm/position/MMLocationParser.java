@@ -308,8 +308,8 @@ public class MMLocationParser {
 
     @Override
     public String toString() {
-        return "ModemManagerProvider [latitude=" + latitudeDegrees + ", longitude=" + longitudeDegrees + ", altitude="
-                + altitudeMeters + ", speed=" + speedMetersPerSecond + ", timestamp=" + time + ", date=" + date
-                + ", gnssType=" + gnssTypes + "]";
+        return "ModemManagerProvider [isFix=" + isFix + ", latitude=" + latitudeDegrees + ", longitude="
+                + longitudeDegrees + ", altitude=" + altitudeMeters + ", speed=" + speedMetersPerSecond + ", timestamp="
+                + time + ", date=" + date + ", gnssType=" + gnssTypes + "]";
     }
 }

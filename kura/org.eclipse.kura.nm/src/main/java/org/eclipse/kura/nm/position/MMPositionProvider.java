@@ -162,8 +162,9 @@ public class MMPositionProvider implements PositionProvider {
 
             if (!nmeaData.isPresent() && !rawData.isPresent()) {
                 this.mmLocationParser.setInvalidFix();
-            } else {
-                nmeaData.ifPresent(this.mmLocationParser::parseNmeaLocation);
+            } else if (nmeaData.isPresent()) {
+                this.mmLocationParser.parseNmeaLocation(nmeaData.get());
+
                 rawData.ifPresent(this.mmLocationParser::parseRawLocation);
             }
         }

@@ -261,18 +261,22 @@ public class MMLocationParser {
                 this.longitudeHemisphere = rmcTokens.get(6).charAt(0);
             }
             if (!rmcTokens.get(2).isEmpty()) { // check validity
-                this.validFix = rmcTokens.get(2).charAt(0);
-                if (!"A".equals(rmcTokens.get(2))) {
-                    this.isFix = false;
-                } else {
-                    this.isFix = true;
-                }
+                parseRmcFixValidity(rmcTokens.get(2));
             } else {
                 this.validFix = 'V';
                 this.isFix = false;
             }
         } else {
             setInvalidFix();
+        }
+    }
+
+    private void parseRmcFixValidity(String validityToken) {
+        this.validFix = validityToken.charAt(0);
+        if (!"A".equals(validityToken)) {
+            this.isFix = false;
+        } else {
+            this.isFix = true;
         }
     }
 

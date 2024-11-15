@@ -892,7 +892,6 @@ public class CloudServiceImpl
                 this.scheduledBirthPublisherFuture.cancel(false);
                 logger.debug("CloudServiceImpl: BIRTH message cache timer restarted.");
             }
-            logger.info("isAppUpdate? {}", isAppUpdate, new RuntimeException());
 
             logger.debug("CloudServiceImpl: BIRTH message cached for 30s.");
 

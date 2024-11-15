@@ -14,6 +14,7 @@
 package org.eclipse.kura.nm.position;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -42,18 +43,47 @@ public class MMPositionProviderTest {
     NMDbusConnector mockNmDbusConnector;
     Position retrievedPosition;
     LocalDateTime retrieveDateTime;
+    Boolean isFix;
+
+    Exception unexpectedException;
 
     @Test
     public void shouldRetrieveCorrectPosition() throws InterruptedException {
 
         givenModemManagerFakeLocation(39.5, 9.7, 4.5);
         givenPositionProviderWithMockDbusConnector();
-        givenProviderInitAndStart();
+        givenProviderInitAndStartWithRefreshRate(1);
 
-        whenServiceAskForPosition();
+        whenServiceAsksForPosition();
 
+        thenNoExceptionThrown();
+        thenPositionIsFixed(true);
         thenPositionIsCorrect(39.5, 9.7, 4.5, 0, 10.2);
         thenDateTimeIsCorrect("2024-10-29T10:33:55");
+    }
+
+    @Test
+    public void shouldNotReportPositionWithInvalidRefreshRate() throws InterruptedException {
+        givenModemManagerFakeLocation(39.5, 9.7, 4.5);
+        givenPositionProviderWithMockDbusConnector();
+        givenProviderInitAndStartWithRefreshRate(-1);
+
+        whenServiceAsksForFix();
+
+        thenNoExceptionThrown();
+        thenPositionIsFixed(false);
+    }
+
+    @Test
+    public void shouldNotReportPositionWithoutNmeaData() throws InterruptedException {
+        givenModemManagerWithNoFix();
+        givenPositionProviderWithMockDbusConnector();
+        givenProviderInitAndStartWithRefreshRate(1);
+
+        whenServiceAsksForFix();
+
+        thenNoExceptionThrown();
+        thenPositionIsFixed(false);
     }
 
     /*
@@ -88,23 +118,65 @@ public class MMPositionProviderTest {
         this.mockNmDbusConnector = dbusConnector;
     }
 
+    private void givenModemManagerWithNoFix() {
+
+        Scanner scanner = new Scanner(MMPositionProviderTest.class.getResourceAsStream("/noFixNmeaSentences.txt"),
+                "UTF-8");
+        CharSequence locationString = scanner.useDelimiter("\\A").next().replace(" ", "");
+        scanner.close();
+
+        Location mockLocation = mock(Location.class);
+        Map<UInt32, Variant<?>> variantMap = new HashMap<>();
+        variantMap.put(new UInt32(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_GPS_NMEA.getValue()),
+                new Variant<>(locationString));
+
+        when(mockLocation.GetLocation()).thenReturn(variantMap);
+
+        NMDbusConnector dbusConnector = mock(NMDbusConnector.class);
+        when(dbusConnector.getAvailableMMLocations()).thenReturn(Arrays.asList(mockLocation));
+
+        this.mockNmDbusConnector = dbusConnector;
+    }
+
     private void givenPositionProviderWithMockDbusConnector() {
         this.provider = new MMPositionProvider(this.mockNmDbusConnector);
     }
 
-    private void givenProviderInitAndStart() {
+    private void givenProviderInitAndStartWithRefreshRate(int refreshRate) {
         Map<String, Object> properties = new HashMap<>();
-        properties.put("modem.manager.refresh.rate.seconds", 1);
+        properties.put("modem.manager.refresh.rate.seconds", refreshRate);
         PositionServiceOptions options = new PositionServiceOptions(properties);
 
         this.provider.init(options, mock(LockStatusListener.class), mock(GpsDeviceAvailabilityListener.class));
         this.provider.start();
     }
 
-    private void whenServiceAskForPosition() throws InterruptedException {
+    private void whenServiceAsksForPosition() throws InterruptedException {
         Thread.sleep(3000);
-        this.retrievedPosition = this.provider.getPosition();
-        this.retrieveDateTime = this.provider.getDateTime();
+
+        try {
+            this.isFix = this.provider.isLocked();
+            this.retrievedPosition = this.provider.getPosition();
+            this.retrieveDateTime = this.provider.getDateTime();
+        } catch (Exception ex) {
+            this.unexpectedException = ex;
+        }
+
+    }
+
+    private void whenServiceAsksForFix() throws InterruptedException {
+        Thread.sleep(3000);
+
+        try {
+            this.isFix = this.provider.isLocked();
+        } catch (Exception ex) {
+            this.unexpectedException = ex;
+        }
+
+    }
+
+    private void thenNoExceptionThrown() {
+        assertNull(this.unexpectedException);
     }
 
     private void thenPositionIsCorrect(double lat, double lon, double alt, double speed, double track) {
@@ -117,6 +189,10 @@ public class MMPositionProviderTest {
 
     private void thenDateTimeIsCorrect(String expectedDateTime) {
         assertEquals(expectedDateTime, this.retrieveDateTime.toString());
+    }
+
+    private void thenPositionIsFixed(boolean fixValue) {
+        assertEquals(fixValue, this.isFix);
     }
 
 }

@@ -45,6 +45,7 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * dabb9acce3 - position not updated when fix is lost [backport release-5.6.0] (#5567) (eclipse-kura-bot)
   * 830b3fe28b - ipv4 empty subnet gateway checks - improvement [backport release-5.6.0] (#5561) (eclipse-kura-bot)
   * 9e652a80e3 - Corrected the checks for empty subnet and gateway [backport release-5.6.0] (#5559) (eclipse-kura-bot)
   * 383a8883d4 - [web2] Fixed MTU field visualization [backport release-5.6.0] (#5553) (eclipse-kura-bot)
@@ -139,6 +140,9 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * dabb9acce3 - fix: position not updated when fix is lost [backport release-5.6.0] (#5567) (eclipse-kura-bot)
+  * 0ed4c417bc - chore: Cleanup of app update log [backport release-5.6.0] (#5566) (eclipse-kura-bot)
+  * f29abe3155 - chore: add Kura 5.6.0 release notes (#5562) (eclipse-kura-bot)
   * 830b3fe28b - fix: ipv4 empty subnet gateway checks - improvement [backport release-5.6.0] (#5561) (eclipse-kura-bot)
   * 100735184f - chore: Added feature for raw MQTT cloud connection [backport release-5.6.0] (#5558) (nicolatimeus)
   * 9e652a80e3 - fix: Corrected the checks for empty subnet and gateway [backport release-5.6.0] (#5559) (eclipse-kura-bot)

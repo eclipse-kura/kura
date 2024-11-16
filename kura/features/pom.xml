@@ -66,6 +66,7 @@
         <module>org.eclipse.kura.wire.script.tools</module>
         <module>org.eclipse.kura.db.sqlite.provider</module>
         <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</module>
+        <module>org.eclipse.kura.cloudconnection.raw.mqtt.provider</module>
     </modules>
 
     <profiles>

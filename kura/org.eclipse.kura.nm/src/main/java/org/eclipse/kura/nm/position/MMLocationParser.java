@@ -16,6 +16,7 @@ package org.eclipse.kura.nm.position;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -66,7 +67,11 @@ public class MMLocationParser {
     private Boolean isFix = false;
 
     public LocalDateTime getLocalDateTime() {
-        return Objects.requireNonNull(LocalDateTime.of(date, time));
+        if (!Objects.isNull(this.time) && !Objects.isNull(this.date)) {
+            return LocalDateTime.of(date, time);
+        }
+
+        return null;
     }
 
     /*
@@ -100,6 +105,25 @@ public class MMLocationParser {
 
     public String getNmeaDate() {
         return this.date.toString();
+    }
+
+    /*
+     * Used by MMPositionProvider to invalidate position in case ModemManager doesn't provide any data, neither the nmea
+     * nor the raw. Usually, the Nmea data is always provided, while the Raw is provided only if Nmea has fix.
+     */
+
+    public void setInvalidFix() {
+        this.isFix = false;
+
+        this.latitudeDegrees = 0.0;
+        this.longitudeDegrees = 0.0;
+        this.altitudeMeters = 0.0;
+        this.speedMetersPerSecond = 0.0;
+        this.trackDegrees = 0.0;
+
+        LocalDateTime utcDateTime = LocalDateTime.now(ZoneOffset.UTC);
+        this.time = utcDateTime.toLocalTime();
+        this.date = utcDateTime.toLocalDate();
     }
 
     public void parseRawLocation(Variant<?> rawLocationVariant) {
@@ -176,35 +200,43 @@ public class MMLocationParser {
     }
 
     private void parseGgaSentence(List<String> gsaTokens) {
-        if (!gsaTokens.get(7).isEmpty()) {
-            this.nrSatellites = Integer.parseInt(gsaTokens.get(7));
-        }
-        if (!gsaTokens.get(8).isEmpty()) {
-            this.mDOP = Double.parseDouble(gsaTokens.get(8));
+        if (gsaTokens.size() > 9) {
+            if (!gsaTokens.get(7).isEmpty()) {
+                this.nrSatellites = Integer.parseInt(gsaTokens.get(7));
+            }
+            if (!gsaTokens.get(8).isEmpty()) {
+                this.mDOP = Double.parseDouble(gsaTokens.get(8));
+            }
+        } else {
+            setInvalidFix();
         }
     }
 
     private void parseGsaSentence(List<String> gsaTokens) {
 
-        if (!gsaTokens.get(2).isEmpty()) {
+        if (gsaTokens.size() > 5) {
+            if (!gsaTokens.get(2).isEmpty()) {
 
-            int fixType = Integer.parseInt(gsaTokens.get(2));
-            this.fixQuality = fixType;
-            if (fixType == 2 || fixType == 3) {
-                this.isFix = true;
-            } else {
-                this.isFix = false;
+                int fixType = Integer.parseInt(gsaTokens.get(2));
+                this.fixQuality = fixType;
+                if (fixType == 2 || fixType == 3) {
+                    this.isFix = true;
+                } else {
+                    this.isFix = false;
+                }
             }
-        }
 
-        if (!gsaTokens.get(15).isEmpty()) {
-            this.mPDOP = Double.parseDouble(gsaTokens.get(15));
-        }
-        if (!gsaTokens.get(16).isEmpty()) {
-            this.mHDOP = Double.parseDouble(gsaTokens.get(16));
-        }
-        if (!gsaTokens.get(17).isEmpty()) {
-            this.mVDOP = Double.parseDouble(gsaTokens.get(17));
+            if (!gsaTokens.get(15).isEmpty()) {
+                this.mPDOP = Double.parseDouble(gsaTokens.get(15));
+            }
+            if (!gsaTokens.get(16).isEmpty()) {
+                this.mHDOP = Double.parseDouble(gsaTokens.get(16));
+            }
+            if (!gsaTokens.get(17).isEmpty()) {
+                this.mVDOP = Double.parseDouble(gsaTokens.get(17));
+            }
+        } else {
+            setInvalidFix();
         }
     }
 
@@ -212,31 +244,39 @@ public class MMLocationParser {
      * Date is received in format dd-M-yy, so we convert it to yy-M-dd
      */
     private void parseRmcSentence(List<String> rmcTokens) {
-        if (!rmcTokens.get(9).isEmpty()) {
-            this.date = LocalDate.parse(rmcTokens.get(9), DateTimeFormatter.ofPattern("ddMyy"));
-        }
-        if (!rmcTokens.get(7).isEmpty()) {
-            this.speedMetersPerSecond = Double.parseDouble(rmcTokens.get(7)) * KNOTS_TO_MS;
-        }
-        if (!rmcTokens.get(8).isEmpty()) {
-            this.trackDegrees = Double.parseDouble(rmcTokens.get(8));
-        }
-        if (!rmcTokens.get(4).isEmpty()) {
-            this.latitudeHemisphere = rmcTokens.get(4).charAt(0);
-        }
-        if (!rmcTokens.get(6).isEmpty()) {
-            this.longitudeHemisphere = rmcTokens.get(6).charAt(0);
-        }
-        if (!rmcTokens.get(2).isEmpty()) { // check validity
-            this.validFix = rmcTokens.get(2).charAt(0);
-            if (!"A".equals(rmcTokens.get(2))) {
-                this.isFix = false;
+        if (rmcTokens.size() > 9) {
+            if (!rmcTokens.get(9).isEmpty()) {
+                this.date = LocalDate.parse(rmcTokens.get(9), DateTimeFormatter.ofPattern("ddMyy"));
+            }
+            if (!rmcTokens.get(7).isEmpty()) {
+                this.speedMetersPerSecond = Double.parseDouble(rmcTokens.get(7)) * KNOTS_TO_MS;
+            }
+            if (!rmcTokens.get(8).isEmpty()) {
+                this.trackDegrees = Double.parseDouble(rmcTokens.get(8));
+            }
+            if (!rmcTokens.get(4).isEmpty()) {
+                this.latitudeHemisphere = rmcTokens.get(4).charAt(0);
+            }
+            if (!rmcTokens.get(6).isEmpty()) {
+                this.longitudeHemisphere = rmcTokens.get(6).charAt(0);
+            }
+            if (!rmcTokens.get(2).isEmpty()) { // check validity
+                parseRmcFixValidity(rmcTokens.get(2));
             } else {
-                this.isFix = true;
+                this.validFix = 'V';
+                this.isFix = false;
             }
         } else {
-            this.validFix = 'V';
+            setInvalidFix();
+        }
+    }
+
+    private void parseRmcFixValidity(String validityToken) {
+        this.validFix = validityToken.charAt(0);
+        if (!"A".equals(validityToken)) {
             this.isFix = false;
+        } else {
+            this.isFix = true;
         }
     }
 
@@ -293,8 +333,8 @@ public class MMLocationParser {
 
     @Override
     public String toString() {
-        return "ModemManagerProvider [latitude=" + latitudeDegrees + ", longitude=" + longitudeDegrees + ", altitude="
-                + altitudeMeters + ", speed=" + speedMetersPerSecond + ", timestamp=" + time + ", date=" + date
-                + ", gnssType=" + gnssTypes + "]";
+        return "ModemManagerProvider [isFix=" + isFix + ", latitude=" + latitudeDegrees + ", longitude="
+                + longitudeDegrees + ", altitude=" + altitudeMeters + ", speed=" + speedMetersPerSecond + ", timestamp="
+                + time + ", date=" + date + ", gnssType=" + gnssTypes + "]";
     }
 }

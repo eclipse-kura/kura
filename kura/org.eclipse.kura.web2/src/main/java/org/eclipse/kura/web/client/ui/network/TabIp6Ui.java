@@ -374,8 +374,6 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             boolean isValid = address != null && address.trim().length() > 0
                     && address.trim().matches(IPV6_ADDRESS_REGEX);
 
-            logger.info("isValid: " + isValid + " address: " + address + " length: " + (address.trim().length() > 0)
-                    + " matches? " + address.trim().matches(IPV6_ADDRESS_REGEX));
             if (isValid) {
                 this.groupIp.setValidationState(ValidationState.NONE);
                 this.wrongInputIp.setText("");

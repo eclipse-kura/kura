@@ -66,10 +66,10 @@ public class LinuxNetworkUtil {
     private static final String ERR_EXECUTING_CMD_MSG = "error executing command --- {} --- exit value={}";
     private static final String FAKE_MAC_ADDRESS = "12:34:56:78:ab:cd";
     private static final String ETHTOOL_COMMAND = "ethtool";
-    private static final String[] DEFAULT_SYSTEMD_SYSTEM_FOLDERS = new String[] { "/etc/systemd/system.control/",
-            "/run/systemd/system.control/", "/run/systemd/transient/", "/run/systemd/generator.early/",
-            "/etc/systemd/system/", "run/systemd/system/", "/run/systemd/generator/", "/usr/local/lib/systemd/system/",
-            "/usr/lib/systemd/system/", "/run/systemd/generator.late/" };
+    private static final String[] DEFAULT_SYSTEMD_SYSTEM_FOLDERS = new String[] { "/lib/systemd/system/",
+            "/etc/systemd/system.control/", "/run/systemd/system.control/", "/run/systemd/transient/",
+            "/run/systemd/generator.early/", "/etc/systemd/system/", "run/systemd/system/", "/run/systemd/generator/",
+            "/usr/local/lib/systemd/system/", "/usr/lib/systemd/system/", "/run/systemd/generator.late/" };
     private static final ArrayList<String> SYSTEMD_SYSTEM_UNITS = new ArrayList<>();
 
     private final CommandExecutorService executorService;

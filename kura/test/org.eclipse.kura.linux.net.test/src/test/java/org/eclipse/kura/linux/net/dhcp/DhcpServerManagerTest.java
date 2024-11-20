@@ -27,9 +27,12 @@ import org.eclipse.kura.linux.net.dhcp.server.DnsmasqConfigConverter;
 import org.eclipse.kura.linux.net.dhcp.server.DnsmasqLeaseReader;
 import org.eclipse.kura.linux.net.dhcp.server.UdhcpdConfigConverter;
 import org.eclipse.kura.linux.net.dhcp.server.UdhcpdLeaseReader;
+import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 public class DhcpServerManagerTest {
@@ -50,6 +53,8 @@ public class DhcpServerManagerTest {
     private Optional<DhcpServerConfigConverter> returnedConfigConverter;
     private Optional<DhcpServerLeaseReader> returnedLeaseReader;
     private Exception occurredException;
+    private MockedStatic<LinuxNetworkUtil> mockedLinuxNetworkUtil;
+    private DhcpServerTool tool;
 
     /*
      * Scenarios
@@ -268,6 +273,63 @@ public class DhcpServerManagerTest {
         thenReturnedLeaseReaderIsEmpty();
     }
 
+    @Test
+    public void shouldGetDnsmasqToolIfBinaryAndUnitArePresent() throws NoSuchFieldException {
+        givenLinuxNetworkUtil("dnsmasq", Optional.of("dnsmasq.service"));
+        givenDhcpServerManager(DhcpServerTool.NONE);
+
+        whenGetTool();
+
+        thenToolIs(DhcpServerTool.DNSMASQ);
+    }
+
+    @Test
+    public void shouldNotGetDnsmasqToolIfOnlyBinaryIsPresent() throws NoSuchFieldException {
+        givenLinuxNetworkUtil("dnsmasq", Optional.empty());
+        givenDhcpServerManager(DhcpServerTool.NONE);
+
+        whenGetTool();
+
+        thenToolIs(DhcpServerTool.NONE);
+    }
+
+    @Test
+    public void shouldGetDhcpdTool() throws NoSuchFieldException {
+        givenLinuxNetworkUtil("dhcpd", Optional.empty());
+        givenDhcpServerManager(DhcpServerTool.NONE);
+
+        whenGetTool();
+
+        thenToolIs(DhcpServerTool.DHCPD);
+    }
+
+    @Test
+    public void shouldGetUdhcpdTool() throws NoSuchFieldException {
+        givenLinuxNetworkUtil("udhcpd", Optional.empty());
+        givenDhcpServerManager(DhcpServerTool.NONE);
+
+        whenGetTool();
+
+        thenToolIs(DhcpServerTool.UDHCPD);
+    }
+
+    @Test
+    public void shouldNotGetAnyTool() throws NoSuchFieldException {
+        givenLinuxNetworkUtil("", Optional.empty());
+        givenDhcpServerManager(DhcpServerTool.NONE);
+
+        whenGetTool();
+
+        thenToolIs(DhcpServerTool.NONE);
+    }
+
+    @After
+    public void deregisterStaticMocks() {
+        if (this.mockedLinuxNetworkUtil != null) {
+            mockedLinuxNetworkUtil.close();
+        }
+    }
+
     /*
      * Steps
      */
@@ -282,6 +344,15 @@ public class DhcpServerManagerTest {
         TestUtil.setFieldValue(new DhcpServerManager(null), "dhcpServerTool", dhcpServerTool);
 
         this.dhcpServerManager = new DhcpServerManager(executorMock);
+    }
+
+    private void givenLinuxNetworkUtil(String toolName, Optional<String> unitName) {
+        this.mockedLinuxNetworkUtil = Mockito.mockStatic(LinuxNetworkUtil.class);
+        mockedLinuxNetworkUtil.when(() -> LinuxNetworkUtil.toolExists(toolName)).thenReturn(true);
+        if (unitName.isPresent()) {
+            mockedLinuxNetworkUtil.when(() -> LinuxNetworkUtil.systemdSystemUnitExists(unitName.get()))
+                    .thenReturn(true);
+        }
     }
 
     /*
@@ -328,6 +399,14 @@ public class DhcpServerManagerTest {
         }
     }
 
+    private void whenGetTool() {
+        try {
+            this.tool = DhcpServerManager.getTool();
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
     /*
      * Then
      */
@@ -364,4 +443,11 @@ public class DhcpServerManagerTest {
         assertEquals(dhcpServerLeaseReader, this.returnedLeaseReader.get().getClass());
     }
 
+    private void thenToolIs(DhcpServerTool expectedTool) {
+        assertEquals(expectedTool, this.tool);
+    }
+
+    private void thenConverterIsNotPresent() {
+        assertFalse(this.returnedConfigConverter.isPresent());
+    }
 }

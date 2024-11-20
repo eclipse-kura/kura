@@ -198,6 +198,7 @@ public class TabDhcp4NatUi extends AbstractServicesUi implements NetworkTab {
 
     @Override
     public boolean isValid() {
+        checkSubnetMatch();
         return !(this.groupRouter.getValidationState().equals(ValidationState.ERROR)
                 || this.groupBegin.getValidationState().equals(ValidationState.ERROR)
                 || this.groupEnd.getValidationState().equals(ValidationState.ERROR)
@@ -532,17 +533,6 @@ public class TabDhcp4NatUi extends AbstractServicesUi implements NetworkTab {
         this.helpText.add(new Span(MSGS.netHelpDefaultHint()));
     }
 
-    private boolean isPositiveInteger(String value) {
-        try {
-            if (Integer.parseInt(value) > 0) {
-                return true;
-            }
-        } catch (NumberFormatException e) {
-            return false;
-        }
-        return false;
-    }
-
     private void checkDhcpRangeValidity() {
         if (!isDhcpRangeValid()) {
             TabDhcp4NatUi.this.groupBegin.setValidationState(ValidationState.ERROR);
@@ -585,7 +575,7 @@ public class TabDhcp4NatUi extends AbstractServicesUi implements NetworkTab {
         GwtConfigParameter param = new GwtConfigParameter();
         param.setRequired(true);
         param.setType(GwtConfigParameterType.STRING);
-        if (!validateTextBox(param, groupSubnet).isEmpty()) {
+        if (!validateTextBox(param, this.groupSubnet).isEmpty()) {
             TabDhcp4NatUi.this.groupSubnet.setValidationState(ValidationState.ERROR);
         }
         if (!TabDhcp4NatUi.this.subnet.getText().matches(REGEX_IPV4)) {
@@ -599,7 +589,7 @@ public class TabDhcp4NatUi extends AbstractServicesUi implements NetworkTab {
         GwtConfigParameter param = new GwtConfigParameter();
         param.setRequired(true);
         param.setType(GwtConfigParameterType.STRING);
-        if (!validateTextBox(param, groupEnd).isEmpty()) {
+        if (!validateTextBox(param, this.groupEnd).isEmpty()) {
             TabDhcp4NatUi.this.groupEnd.setValidationState(ValidationState.ERROR);
         }
         if (!TabDhcp4NatUi.this.end.getText().matches(REGEX_IPV4)) {
@@ -613,14 +603,38 @@ public class TabDhcp4NatUi extends AbstractServicesUi implements NetworkTab {
         GwtConfigParameter param = new GwtConfigParameter();
         param.setRequired(true);
         param.setType(GwtConfigParameterType.STRING);
-        if (!validateTextBox(param, groupBegin).isEmpty()) {
+        if (!validateTextBox(param, this.groupBegin).isEmpty()) {
             TabDhcp4NatUi.this.groupBegin.setValidationState(ValidationState.ERROR);
         }
         if (!TabDhcp4NatUi.this.begin.getText().matches(REGEX_IPV4)) {
             TabDhcp4NatUi.this.groupBegin.setValidationState(ValidationState.ERROR);
         } else {
-            checkDhcpRangeValidity();
+            if (checkSubnetMatch()) {
+
+                checkDhcpRangeValidity();
+            }
         }
+    }
+
+    private boolean checkSubnetMatch() {
+        boolean isValid = false;
+
+        long interfaceIP = addressToLong(this.tcpTab.ip.getText().trim());
+        long rangeStart = addressToLong(TabDhcp4NatUi.this.begin.getText().trim());
+        long subnetMask = addressToLong(this.tcpTab.subnet.getText().trim());
+
+        if ((interfaceIP & subnetMask) == (rangeStart & subnetMask)) {
+            isValid = true;
+        }
+
+        if (isValid) {
+            TabDhcp4NatUi.this.groupBegin.setValidationState(ValidationState.NONE);
+            TabDhcp4NatUi.this.groupEnd.setValidationState(ValidationState.NONE);
+        } else {
+            TabDhcp4NatUi.this.groupBegin.setValidationState(ValidationState.ERROR);
+            TabDhcp4NatUi.this.groupEnd.setValidationState(ValidationState.ERROR);
+        }
+        return isValid;
     }
 
     private void setMaxLeaseTimeValidation() {
@@ -628,7 +642,7 @@ public class TabDhcp4NatUi extends AbstractServicesUi implements NetworkTab {
         param.setRequired(true);
         param.setType(GwtConfigParameterType.INTEGER);
         param.setMin("1");
-        if (!validateTextBox(param, groupMaxLease).isEmpty()) {
+        if (!validateTextBox(param, this.groupMaxLease).isEmpty()) {
             TabDhcp4NatUi.this.groupMaxLease.setValidationState(ValidationState.ERROR);
         } else {
             TabDhcp4NatUi.this.groupMaxLease.setValidationState(ValidationState.NONE);
@@ -640,7 +654,7 @@ public class TabDhcp4NatUi extends AbstractServicesUi implements NetworkTab {
         param.setRequired(true);
         param.setType(GwtConfigParameterType.INTEGER);
         param.setMin("1");
-        if (!validateTextBox(param, groupDefaultLease).isEmpty()) {
+        if (!validateTextBox(param, this.groupDefaultLease).isEmpty()) {
             TabDhcp4NatUi.this.groupDefaultLease.setValidationState(ValidationState.ERROR);
         } else {
             TabDhcp4NatUi.this.groupDefaultLease.setValidationState(ValidationState.NONE);
@@ -663,7 +677,8 @@ public class TabDhcp4NatUi extends AbstractServicesUi implements NetworkTab {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
-                    TabDhcp4NatUi.this.gwtNetworkService.getDhcpLeases(token, selectedNetIfConfig.getInterfaceName(),
+                    TabDhcp4NatUi.this.gwtNetworkService.getDhcpLeases(token,
+                            TabDhcp4NatUi.this.selectedNetIfConfig.getInterfaceName(),
                             new AsyncCallback<List<String>>() {
 
                                 @Override

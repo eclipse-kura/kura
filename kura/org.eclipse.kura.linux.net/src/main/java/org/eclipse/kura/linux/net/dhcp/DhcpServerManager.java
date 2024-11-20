@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -58,7 +58,8 @@ public class DhcpServerManager {
 
     public static DhcpServerTool getTool() {
         if (dhcpServerTool == DhcpServerTool.NONE) {
-            if (LinuxNetworkUtil.toolExists(DhcpServerTool.DNSMASQ.getValue())) {
+            if (LinuxNetworkUtil.toolExists(DhcpServerTool.DNSMASQ.getValue())
+                    && LinuxNetworkUtil.systemdSystemUnitExists(DhcpServerTool.DNSMASQ.getValue() + ".service")) {
                 dhcpServerTool = DhcpServerTool.DNSMASQ;
             } else if (LinuxNetworkUtil.toolExists(DhcpServerTool.UDHCPD.getValue())) {
                 dhcpServerTool = DhcpServerTool.UDHCPD;

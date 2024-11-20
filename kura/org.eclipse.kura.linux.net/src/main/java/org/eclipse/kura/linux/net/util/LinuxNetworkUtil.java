@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -44,12 +44,9 @@ import org.slf4j.LoggerFactory;
 
 public class LinuxNetworkUtil {
 
-    public static final String ACCESS_POINT_INTERFACE_SUFFIX = "_ap";
-
-    private static final String ETHTOOL_COMMAND = "ethtool";
-
     private static final Logger logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
 
+    public static final String ACCESS_POINT_INTERFACE_SUFFIX = "_ap";
     private static Map<String, LinuxIfconfig> ifconfigs = new HashMap<>();
     private static final String[] IGNORE_IFACES = { "can", "sit", "mon.wlan" };
     private static final ArrayList<String> TOOLS = new ArrayList<>();
@@ -65,12 +62,15 @@ public class LinuxNetworkUtil {
     private static final String IFCONFIG = "ifconfig";
     private static final String IWCONFIG = "iwconfig";
     private static final String IP = "ip";
-
     private static final String LINE_MSG = "line: {}";
-
     private static final String ERR_EXECUTING_CMD_MSG = "error executing command --- {} --- exit value={}";
-
     private static final String FAKE_MAC_ADDRESS = "12:34:56:78:ab:cd";
+    private static final String ETHTOOL_COMMAND = "ethtool";
+    private static final String[] DEFAULT_SYSTEMD_SYSTEM_FOLDERS = new String[] { "/etc/systemd/system.control/",
+            "/run/systemd/system.control/", "/run/systemd/transient/", "/run/systemd/generator.early/",
+            "/etc/systemd/system/", "run/systemd/system/", "/run/systemd/generator/", "/usr/local/lib/systemd/system/",
+            "/usr/lib/systemd/system/", "/run/systemd/generator.late/" };
+    private static final ArrayList<String> SYSTEMD_SYSTEM_UNITS = new ArrayList<>();
 
     private final CommandExecutorService executorService;
     private final WifiOptions wifiOptions;
@@ -264,22 +264,40 @@ public class LinuxNetworkUtil {
     }
 
     public static boolean toolExists(String tool) {
-        boolean ret = false;
-        final String[] searchFolders = new String[] { "/sbin/", "/usr/sbin/", "/bin/", "/usr/bin/" };
+        return searchResourceInFolders(tool, TOOLS, new String[] { "/sbin/", "/usr/sbin/", "/bin/", "/usr/bin/" });
+    }
 
-        if (TOOLS.contains(tool)) {
-            ret = true;
+    /**
+     * Checks if the given Systemd system unit is installed.
+     * This method search the unit in the default folders presented in
+     * https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html#Unit%20File%20Load%20Path
+     * If the unit is installed in a no-standard folder, this method will not
+     * be able to find it.
+     * 
+     * It applies only to system units, not user ones.
+     * 
+     * @param unitName
+     *            the name of the Systemd system unit
+     * @return true if it is present
+     */
+    public static boolean systemdSystemUnitExists(String unitName) {
+        return searchResourceInFolders(unitName, SYSTEMD_SYSTEM_UNITS, DEFAULT_SYSTEMD_SYSTEM_FOLDERS);
+    }
+
+    private static boolean searchResourceInFolders(String resourceName, List<String> resourceList, String[] folders) {
+
+        if (resourceList.contains(resourceName)) {
+            return true;
         } else {
-            for (String folder : searchFolders) {
-                File fTool = new File(folder + tool);
-                if (fTool.exists()) {
-                    TOOLS.add(tool);
-                    ret = true;
-                    break;
+            for (String folder : folders) {
+                File fUnit = new File(folder + resourceName);
+                if (fUnit.exists()) {
+                    resourceList.add(resourceName);
+                    return true;
                 }
             }
         }
-        return ret;
+        return false;
     }
 
     /**

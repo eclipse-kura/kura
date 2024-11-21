@@ -17,6 +17,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,6 +28,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
@@ -66,12 +75,8 @@ public class LinuxNetworkUtil {
     private static final String ERR_EXECUTING_CMD_MSG = "error executing command --- {} --- exit value={}";
     private static final String FAKE_MAC_ADDRESS = "12:34:56:78:ab:cd";
     private static final String ETHTOOL_COMMAND = "ethtool";
-    private static final String[] DEFAULT_SYSTEMD_SYSTEM_FOLDERS = new String[] { "/lib/systemd/system/",
-            "/etc/systemd/system.control/", "/run/systemd/system.control/", "/run/systemd/transient/",
-            "/run/systemd/generator.early/", "/etc/systemd/system/", "run/systemd/system/", "/run/systemd/generator/",
-            "/usr/local/lib/systemd/system/", "/usr/lib/systemd/system/", "/run/systemd/generator.late/" };
-    private static final ArrayList<String> SYSTEMD_SYSTEM_UNITS = new ArrayList<>();
-
+    private static final String[] DEFAULT_PATH = new String[] { "/sbin/", "/usr/sbin/", "/bin/", "/usr/bin/" };
+    private static final ProcessBuilder PROCESS_BUILDER = new ProcessBuilder();
     private final CommandExecutorService executorService;
     private final WifiOptions wifiOptions;
 
@@ -264,40 +269,45 @@ public class LinuxNetworkUtil {
     }
 
     public static boolean toolExists(String tool) {
-        return searchResourceInFolders(tool, TOOLS, new String[] { "/sbin/", "/usr/sbin/", "/bin/", "/usr/bin/" });
-    }
-
-    /**
-     * Checks if the given Systemd system unit is installed.
-     * This method search the unit in the default folders presented in
-     * https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html#Unit%20File%20Load%20Path
-     * If the unit is installed in a no-standard folder, this method will not
-     * be able to find it.
-     * 
-     * It applies only to system units, not user ones.
-     * 
-     * @param unitName
-     *            the name of the Systemd system unit
-     * @return true if it is present
-     */
-    public static boolean systemdSystemUnitExists(String unitName) {
-        return searchResourceInFolders(unitName, SYSTEMD_SYSTEM_UNITS, DEFAULT_SYSTEMD_SYSTEM_FOLDERS);
-    }
-
-    private static boolean searchResourceInFolders(String resourceName, List<String> resourceList, String[] folders) {
-
-        if (resourceList.contains(resourceName)) {
+        if (TOOLS.contains(tool)) {
             return true;
         } else {
-            for (String folder : folders) {
-                File fUnit = new File(folder + resourceName);
+            for (String folder : DEFAULT_PATH) {
+                File fUnit = new File(folder + tool);
                 if (fUnit.exists()) {
-                    resourceList.add(resourceName);
+                    TOOLS.add(tool);
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    /**
+     * Checks if the given Systemd system unit is installed.
+     * The result is based on the exit code of "systemctl status <unitName>"
+     * as presented in https://www.man7.org/linux/man-pages/man1/systemctl.1.html#EXIT_STATUS
+     * 
+     * @param unitName
+     *            the name of the Systemd system unit
+     * @return true if the unit is installed
+     */
+    public static boolean systemdSystemUnitExists(String unitName) {
+        PROCESS_BUILDER.command("sh", "-c", "systemctl status " + unitName);
+        Process process;
+        try {
+            process = PROCESS_BUILDER.start();
+            StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), logger::debug);
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future<?> future = executor.submit(streamGobbler);
+
+            int exitCode = process.waitFor();
+            future.get(10, TimeUnit.SECONDS);
+            return exitCode < 4;
+        } catch (IOException | ExecutionException | TimeoutException | InterruptedException e) {
+            logger.error(String.format("Cannot check %s unit existence", unitName), e);
+            return false;
+        }
     }
 
     /**
@@ -1194,6 +1204,22 @@ public class LinuxNetworkUtil {
         command.setOutputStream(new ByteArrayOutputStream());
         command.setErrorStream(new ByteArrayOutputStream());
         return this.executorService.execute(command);
+    }
+
+    private static class StreamGobbler implements Runnable {
+
+        private InputStream inputStream;
+        private Consumer<String> consumer;
+
+        public StreamGobbler(InputStream inputStream, Consumer<String> consumer) {
+            this.inputStream = inputStream;
+            this.consumer = consumer;
+        }
+
+        @Override
+        public void run() {
+            new BufferedReader(new InputStreamReader(inputStream)).lines().forEach(consumer);
+        }
     }
 
 }

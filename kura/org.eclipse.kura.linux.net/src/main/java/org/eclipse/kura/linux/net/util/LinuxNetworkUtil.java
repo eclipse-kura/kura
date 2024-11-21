@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -287,7 +287,7 @@ public class LinuxNetworkUtil {
      * Checks if the given Systemd system unit is installed.
      * The result is based on the exit code of "systemctl status <unitName>"
      * as presented in https://www.man7.org/linux/man-pages/man1/systemctl.1.html#EXIT_STATUS
-     * 
+     *
      * @param unitName
      *            the name of the Systemd system unit
      * @return true if the unit is installed
@@ -1152,7 +1152,7 @@ public class LinuxNetworkUtil {
             return;
         }
 
-        CommandStatus status = this.executeCommand(formIwDevIfaceInterfaceAddAp(ifaceName, dedicatedApInterface));
+        CommandStatus status = executeCommand(formIwDevIfaceInterfaceAddAp(ifaceName, dedicatedApInterface));
 
         if (!status.getExitStatus().isSuccessful()) {
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
@@ -1165,7 +1165,7 @@ public class LinuxNetworkUtil {
             return;
         }
 
-        CommandStatus status = this.executeCommand(formIpLinkSetAddress(ifaceName, FAKE_MAC_ADDRESS));
+        CommandStatus status = executeCommand(formIpLinkSetAddress(ifaceName, FAKE_MAC_ADDRESS));
 
         if (!status.getExitStatus().isSuccessful()) {
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
@@ -1178,7 +1178,7 @@ public class LinuxNetworkUtil {
             return;
         }
 
-        CommandStatus status = this.executeCommand(formIpLinkSetStatus(ifaceName, "up"));
+        CommandStatus status = executeCommand(formIpLinkSetStatus(ifaceName, "up"));
 
         if (!status.getExitStatus().isSuccessful()) {
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Failed to set link up for interface " + ifaceName);
@@ -1190,7 +1190,7 @@ public class LinuxNetworkUtil {
             return;
         }
 
-        CommandStatus status = this.executeCommand(formIpLinkSetStatus(ifaceName, "down"));
+        CommandStatus status = executeCommand(formIpLinkSetStatus(ifaceName, "down"));
 
         if (!status.getExitStatus().isSuccessful()) {
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Failed to set link up for interface " + ifaceName);
@@ -1208,8 +1208,8 @@ public class LinuxNetworkUtil {
 
     private static class StreamGobbler implements Runnable {
 
-        private InputStream inputStream;
-        private Consumer<String> consumer;
+        private final InputStream inputStream;
+        private final Consumer<String> consumer;
 
         public StreamGobbler(InputStream inputStream, Consumer<String> consumer) {
             this.inputStream = inputStream;
@@ -1218,7 +1218,7 @@ public class LinuxNetworkUtil {
 
         @Override
         public void run() {
-            new BufferedReader(new InputStreamReader(inputStream)).lines().forEach(consumer);
+            new BufferedReader(new InputStreamReader(this.inputStream)).lines().forEach(this.consumer);
         }
     }
 

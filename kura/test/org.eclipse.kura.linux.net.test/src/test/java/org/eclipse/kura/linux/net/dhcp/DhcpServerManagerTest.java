@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -326,7 +326,7 @@ public class DhcpServerManagerTest {
     @After
     public void deregisterStaticMocks() {
         if (this.mockedLinuxNetworkUtil != null) {
-            mockedLinuxNetworkUtil.close();
+            this.mockedLinuxNetworkUtil.close();
         }
     }
 
@@ -343,14 +343,14 @@ public class DhcpServerManagerTest {
 
         TestUtil.setFieldValue(new DhcpServerManager(null), "dhcpServerTool", dhcpServerTool);
 
-        this.dhcpServerManager = new DhcpServerManager(executorMock);
+        this.dhcpServerManager = new DhcpServerManager(this.executorMock);
     }
 
     private void givenLinuxNetworkUtil(String toolName, Optional<String> unitName) {
         this.mockedLinuxNetworkUtil = Mockito.mockStatic(LinuxNetworkUtil.class);
-        mockedLinuxNetworkUtil.when(() -> LinuxNetworkUtil.toolExists(toolName)).thenReturn(true);
+        this.mockedLinuxNetworkUtil.when(() -> LinuxNetworkUtil.toolExists(toolName)).thenReturn(true);
         if (unitName.isPresent()) {
-            mockedLinuxNetworkUtil.when(() -> LinuxNetworkUtil.systemdSystemUnitExists(unitName.get()))
+            this.mockedLinuxNetworkUtil.when(() -> LinuxNetworkUtil.systemdSystemUnitExists(unitName.get()))
                     .thenReturn(true);
         }
     }

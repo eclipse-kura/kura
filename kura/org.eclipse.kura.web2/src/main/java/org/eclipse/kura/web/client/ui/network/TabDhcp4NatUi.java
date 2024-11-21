@@ -456,7 +456,7 @@ public class TabDhcp4NatUi extends AbstractServicesUi implements NetworkTab {
         this.end.addMouseOutHandler(event -> resetHelp());
         this.end.addValueChangeHandler(event -> {
             setDirty(true);
-            setDHCPEndAddressValidation();
+            setDHCPRangeValidation();
         });
     }
 
@@ -473,7 +473,7 @@ public class TabDhcp4NatUi extends AbstractServicesUi implements NetworkTab {
         this.begin.addMouseOutHandler(event -> resetHelp());
         this.begin.addValueChangeHandler(event -> {
             setDirty(true);
-            setDHCPBeginAddressValidation();
+            setDHCPRangeValidation();
         });
     }
 
@@ -565,8 +565,7 @@ public class TabDhcp4NatUi extends AbstractServicesUi implements NetworkTab {
 
     private void setValidations() {
         setDHCPSubnetMaskValidation();
-        setDHCPEndAddressValidation();
-        setDHCPBeginAddressValidation();
+        setDHCPRangeValidation();
         setMaxLeaseTimeValidation();
         setDefaultLeaseTimeValidation();
     }
@@ -585,45 +584,46 @@ public class TabDhcp4NatUi extends AbstractServicesUi implements NetworkTab {
         }
     }
 
-    private void setDHCPEndAddressValidation() {
-        GwtConfigParameter param = new GwtConfigParameter();
-        param.setRequired(true);
-        param.setType(GwtConfigParameterType.STRING);
-        if (!validateTextBox(param, this.groupEnd).isEmpty()) {
-            TabDhcp4NatUi.this.groupEnd.setValidationState(ValidationState.ERROR);
-        }
-        if (!TabDhcp4NatUi.this.end.getText().matches(REGEX_IPV4)) {
-            TabDhcp4NatUi.this.groupEnd.setValidationState(ValidationState.ERROR);
-        } else {
-            checkDhcpRangeValidity();
-        }
-    }
-
-    private void setDHCPBeginAddressValidation() {
+    private void setDHCPRangeValidation() {
         GwtConfigParameter param = new GwtConfigParameter();
         param.setRequired(true);
         param.setType(GwtConfigParameterType.STRING);
         if (!validateTextBox(param, this.groupBegin).isEmpty()) {
             TabDhcp4NatUi.this.groupBegin.setValidationState(ValidationState.ERROR);
         }
+        if (!validateTextBox(param, this.groupEnd).isEmpty()) {
+            TabDhcp4NatUi.this.groupEnd.setValidationState(ValidationState.ERROR);
+        }
+        if (!TabDhcp4NatUi.this.end.getText().matches(REGEX_IPV4)) {
+            TabDhcp4NatUi.this.groupEnd.setValidationState(ValidationState.ERROR);
+            return;
+        }
         if (!TabDhcp4NatUi.this.begin.getText().matches(REGEX_IPV4)) {
             TabDhcp4NatUi.this.groupBegin.setValidationState(ValidationState.ERROR);
-        } else {
-            if (checkSubnetMatch()) {
-
-                checkDhcpRangeValidity();
-            }
+            return;
         }
+
+        checkSubnetMatch();
+
+        if (TabDhcp4NatUi.this.groupBegin.getValidationState().equals(ValidationState.NONE)) {
+            checkDhcpRangeValidity();
+        }
+
     }
 
-    private boolean checkSubnetMatch() {
+    private void checkSubnetMatch() {
+        if (ROUTER_OFF_MESSAGE.equals(this.router.getSelectedValue())) {
+            return;
+        }
         boolean isValid = false;
 
         long interfaceIP = addressToLong(this.tcpTab.ip.getText().trim());
         long rangeStart = addressToLong(TabDhcp4NatUi.this.begin.getText().trim());
+        long rangeEnd = addressToLong(TabDhcp4NatUi.this.end.getText().trim());
         long subnetMask = addressToLong(this.tcpTab.subnet.getText().trim());
 
-        if ((interfaceIP & subnetMask) == (rangeStart & subnetMask)) {
+        if ((interfaceIP & subnetMask) == (rangeStart & subnetMask)
+                && (interfaceIP & subnetMask) == (rangeEnd & subnetMask)) {
             isValid = true;
         }
 
@@ -634,7 +634,6 @@ public class TabDhcp4NatUi extends AbstractServicesUi implements NetworkTab {
             TabDhcp4NatUi.this.groupBegin.setValidationState(ValidationState.ERROR);
             TabDhcp4NatUi.this.groupEnd.setValidationState(ValidationState.ERROR);
         }
-        return isValid;
     }
 
     private void setMaxLeaseTimeValidation() {

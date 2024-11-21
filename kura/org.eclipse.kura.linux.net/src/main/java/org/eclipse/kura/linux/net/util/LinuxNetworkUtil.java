@@ -273,8 +273,8 @@ public class LinuxNetworkUtil {
             return true;
         } else {
             for (String folder : DEFAULT_PATH) {
-                File fUnit = new File(folder + tool);
-                if (fUnit.exists()) {
+                File fTool = new File(folder + tool);
+                if (fTool.exists()) {
                     TOOLS.add(tool);
                     return true;
                 }

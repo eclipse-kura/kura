@@ -56,9 +56,7 @@ The Asset supports applying a scale and offset to the values obtained by the att
 The following **mode**s are implemented for computing scale and offset:
 
 - `DOUBLE`
-- `INTEGER`
 - `LONG`
-- `FLOAT`
 
 The values of the **scale** and **offset** configuration parameters and the value obtained from the Driver are all converted to the **mode** type using the Java casting and then the following operation is performed: `channel_value * scale + offset`. The operation result is casted again to **value.type** to produce the final channel value.
 

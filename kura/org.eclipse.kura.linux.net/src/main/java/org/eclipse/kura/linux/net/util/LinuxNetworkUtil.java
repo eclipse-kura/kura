@@ -314,7 +314,7 @@ public class LinuxNetworkUtil {
         Process process;
         try {
             process = PROCESS_BUILDER.start();
-            StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), logger::info);
+            StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), logger::debug);
             ExecutorService executor = Executors.newSingleThreadExecutor();
             Future<?> future = executor.submit(streamGobbler);
 

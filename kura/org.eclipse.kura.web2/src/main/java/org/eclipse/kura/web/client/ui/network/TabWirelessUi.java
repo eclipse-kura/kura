@@ -361,15 +361,11 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         setPasswordValidation();
 
         this.tcp4Tab.status.addChangeHandler(event -> {
-            evalActiveConfig();
-
-            update();
+                evalActiveConfig();
         });
 
         this.tcp6Tab.status.addChangeHandler(event -> {
-            evalActiveConfig();
-
-            update();
+                evalActiveConfig();
         });
 
         logger.info("Constructor done.");
@@ -384,8 +380,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                     || !tcpIp6Status.equals(TabWirelessUi.this.tcp6Status);
 
             if (isStatusChanged) {
-                if (tcpIp4Status.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name()))
-                        || tcpIp6Status.equals(MessageUtils.get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name()))) {
+                if (tcpIp4Status.equals(GwtNetIfStatus.netIPv4StatusEnabledWAN.name())
+                        || tcpIp6Status.equals(GwtNetIfStatus.netIPv6StatusEnabledWAN.name())) {
                     TabWirelessUi.this.activeConfig = TabWirelessUi.this.selectedNetIfConfig.getStationWifiConfig();
                 } else {
                     TabWirelessUi.this.activeConfig = TabWirelessUi.this.selectedNetIfConfig.getActiveWifiConfig();
@@ -394,6 +390,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 TabWirelessUi.this.tcp4Status = tcpIp4Status;
                 TabWirelessUi.this.tcp6Status = tcpIp6Status;
                 TabWirelessUi.this.netTabs.updateTabs();
+                
+                update();
             }
         }
     }
@@ -458,12 +456,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             this.selectedNetIfConfig = (GwtWifiNetInterfaceConfig) config;
 
             this.activeConfig = this.selectedNetIfConfig.getActiveWifiConfig();
-
-            if (!(this.tcp4Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.getValue())
-                    && this.tcp6Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.getValue()))) {
-
-                loadCountryCode();
-            }
         }
     }
 
@@ -628,7 +620,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
         // Tcp/IP disabled
         if (tcpip4Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.getValue())
-                && tcpip6Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.getValue())) {
+                && tcpip6Status.equals(GwtNetIfStatus.netIPv6StatusDisabled.getValue())) {
             setForm(false);
         } else {
             setForm(true);
@@ -740,6 +732,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             if (this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE)) {
                 this.password.setEnabled(false);
             }
+            
+            loadCountryCode();
         }
 
         this.netTabs.updateTabs();

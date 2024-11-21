@@ -620,7 +620,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
         // Tcp/IP disabled
         if (tcpip4Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.getValue())
-                && tcpip6Status.equals(GwtNetIfStatus.netIPv4StatusDisabled.getValue())) {
+                && tcpip6Status.equals(GwtNetIfStatus.netIPv6StatusDisabled.getValue())) {
             setForm(false);
         } else {
             setForm(true);

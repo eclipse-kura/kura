@@ -269,18 +269,30 @@ public class LinuxNetworkUtil {
     }
 
     public static boolean toolExists(String tool) {
-        if (TOOLS.contains(tool)) {
-            return true;
+        return getToolPath(tool).isPresent();
+    }
+
+    public static Optional<String> getToolPath(String tool) {
+        Optional<String> optionalToolPath = getCachedTool(tool);
+        if (optionalToolPath.isPresent()) {
+            return optionalToolPath;
         } else {
             for (String folder : DEFAULT_PATH) {
-                File fTool = new File(folder + tool);
-                if (fTool.exists()) {
-                    TOOLS.add(tool);
-                    return true;
+                String toolPath = folder + tool;
+                File toolFile = new File(toolPath);
+                if (toolFile.exists()) {
+                    TOOLS.add(toolPath);
+                    return Optional.of(toolPath);
                 }
             }
         }
-        return false;
+        return Optional.empty();
+    }
+
+    private static Optional<String> getCachedTool(String tool) {
+        return TOOLS.stream().filter(item -> {
+            return item.endsWith(tool);
+        }).findFirst();
     }
 
     /**
@@ -293,7 +305,12 @@ public class LinuxNetworkUtil {
      * @return true if the unit is installed
      */
     public static boolean systemdSystemUnitExists(String unitName) {
-        PROCESS_BUILDER.command("systemctl", "status", unitName);
+        Optional<String> optionalSystemctlPath = getToolPath("systemctl");
+        if (!optionalSystemctlPath.isPresent()) {
+            logger.debug("Systemctl command not found in default paths");
+            return false;
+        }
+        PROCESS_BUILDER.command(optionalSystemctlPath.get(), "status", unitName);
         Process process;
         try {
             process = PROCESS_BUILDER.start();

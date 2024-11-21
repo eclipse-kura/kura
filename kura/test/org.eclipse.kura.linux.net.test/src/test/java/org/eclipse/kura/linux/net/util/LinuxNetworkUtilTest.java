@@ -13,6 +13,7 @@
 package org.eclipse.kura.linux.net.util;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -27,6 +28,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
@@ -44,6 +46,7 @@ public class LinuxNetworkUtilTest {
     private String linkStatus;
     private boolean toolExists;
     private boolean systemdUnitExists;
+    private Optional<String> toolPath;
 
     @Test
     public void createApNetworkInterface() {
@@ -100,6 +103,8 @@ public class LinuxNetworkUtilTest {
     public void shouldCheckSystemdUnitExistence()
             throws NoSuchFieldException, IllegalAccessException, IOException, InterruptedException {
         givenLinuxNetworkUtil();
+        givenToolPaths("/tmp/");
+        givenTool("/tmp/systemctl");
         givenProcessBuilder(0);
 
         whenCheckSystemdUnit("dnsmask.service");
@@ -111,11 +116,35 @@ public class LinuxNetworkUtilTest {
     public void shouldNotCheckSystemdUnitExistence()
             throws NoSuchFieldException, IllegalAccessException, IOException, InterruptedException {
         givenLinuxNetworkUtil();
+        givenToolPaths("/tmp/");
+        givenTool("/tmp/systemctl");
         givenProcessBuilder(4);
 
         whenCheckSystemdUnit("dnsmask.service");
 
         thenSystemdUnitNotExist();
+    }
+
+    @Test
+    public void shouldNotCheckSystemdUnitExistenceIfSystemctlNotExist()
+            throws NoSuchFieldException, IllegalAccessException, IOException, InterruptedException {
+        givenLinuxNetworkUtil();
+
+        whenCheckSystemdUnit("dnsmask.service");
+
+        thenSystemdUnitNotExist();
+    }
+
+    @Test
+    public void shouldGetToolPath()
+            throws NoSuchFieldException, IllegalAccessException, IOException, InterruptedException {
+        givenLinuxNetworkUtil();
+        givenToolPaths("/tmp/");
+        givenTool("/tmp/myAwesomeCommand");
+
+        whenGetTool("myAwesomeCommand");
+
+        thenToolIsRetrieved("/tmp/myAwesomeCommand");
     }
 
     private void givenLinuxNetworkUtil() {
@@ -171,6 +200,10 @@ public class LinuxNetworkUtilTest {
         this.systemdUnitExists = LinuxNetworkUtil.systemdSystemUnitExists(unitName);
     }
 
+    private void whenGetTool(String tool) {
+        this.toolPath = LinuxNetworkUtil.getToolPath(tool);
+    }
+
     private void thenApNetworkInterfaceIsCreated() {
         try {
             this.linuxNetworkUtil.createApNetworkInterface(this.interfaceName, this.dedicatedInterfaceName);
@@ -222,6 +255,11 @@ public class LinuxNetworkUtilTest {
 
     private void thenSystemdUnitNotExist() {
         assertFalse(this.systemdUnitExists);
+    }
+
+    private void thenToolIsRetrieved(String expectedToolPath) {
+        assertTrue(this.toolPath.isPresent());
+        assertEquals(expectedToolPath, this.toolPath.get());
     }
 
     static void setFinalStaticField(Class clazz, String fieldName, Object value)

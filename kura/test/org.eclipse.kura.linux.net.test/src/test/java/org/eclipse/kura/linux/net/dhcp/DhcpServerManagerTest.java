@@ -446,8 +446,4 @@ public class DhcpServerManagerTest {
     private void thenToolIs(DhcpServerTool expectedTool) {
         assertEquals(expectedTool, this.tool);
     }
-
-    private void thenConverterIsNotPresent() {
-        assertFalse(this.returnedConfigConverter.isPresent());
-    }
 }

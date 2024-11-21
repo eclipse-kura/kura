@@ -293,19 +293,23 @@ public class LinuxNetworkUtil {
      * @return true if the unit is installed
      */
     public static boolean systemdSystemUnitExists(String unitName) {
-        PROCESS_BUILDER.command("sh", "-c", "systemctl status " + unitName);
+        PROCESS_BUILDER.command("systemctl", "status", unitName);
         Process process;
         try {
             process = PROCESS_BUILDER.start();
-            StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), logger::debug);
+            StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), logger::info);
             ExecutorService executor = Executors.newSingleThreadExecutor();
             Future<?> future = executor.submit(streamGobbler);
 
             int exitCode = process.waitFor();
             future.get(10, TimeUnit.SECONDS);
             return exitCode < 4;
-        } catch (IOException | ExecutionException | TimeoutException | InterruptedException e) {
+        } catch (IOException | ExecutionException | TimeoutException e) {
             logger.error(String.format("Cannot check %s unit existence", unitName), e);
+            return false;
+        } catch (InterruptedException e1) {
+            Thread.currentThread().interrupt();
+            logger.error(String.format("Cannot check %s unit existence", unitName), e1);
             return false;
         }
     }

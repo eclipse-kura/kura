@@ -28,12 +28,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import org.apache.commons.io.Charsets;
@@ -312,14 +306,9 @@ public class LinuxNetworkUtil {
         Process process;
         try {
             process = PROCESS_BUILDER.start();
-            StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), logger::debug);
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            Future<?> future = executor.submit(streamGobbler);
-
             int exitCode = process.waitFor();
-            future.get(10, TimeUnit.SECONDS);
             return exitCode < 4;
-        } catch (IOException | ExecutionException | TimeoutException e) {
+        } catch (IOException e) {
             logger.error("Cannot check {} unit existence", unitName, e);
             return false;
         } catch (InterruptedException e1) {

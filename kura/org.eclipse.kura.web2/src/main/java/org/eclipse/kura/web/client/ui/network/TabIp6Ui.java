@@ -15,6 +15,7 @@ package org.eclipse.kura.web.client.ui.network;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.util.HelpButton;
@@ -163,6 +164,7 @@ public class TabIp6Ui extends Composite implements NetworkTab {
 
     private static TabIp6UiUiBinder uiBinder = GWT.create(TabIp6UiUiBinder.class);
     private static final Messages MSGS = GWT.create(Messages.class);
+    private static final Logger logger = Logger.getLogger(TabIp6Ui.class.getSimpleName());
 
     private boolean dirty = false;
     private final NetworkTabsUi tabs;
@@ -372,12 +374,12 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             boolean isValid = address != null && address.trim().length() > 0
                     && address.trim().matches(IPV6_ADDRESS_REGEX);
 
-            if (!isValid) {
-                this.groupIp.setValidationState(ValidationState.ERROR);
-                this.wrongInputIp.setText(MSGS.netIPv6InvalidAddress());
-            } else {
+            if (isValid) {
                 this.groupIp.setValidationState(ValidationState.NONE);
                 this.wrongInputIp.setText("");
+            } else {
+                this.groupIp.setValidationState(ValidationState.ERROR);
+                this.wrongInputIp.setText(MSGS.netIPv6InvalidAddress());
             }
         });
     }
@@ -660,16 +662,20 @@ public class TabIp6Ui extends Composite implements NetworkTab {
     public boolean isValid() {
         boolean isWan = this.status.getSelectedValue().equals(STATUS_WAN);
         boolean isManual = this.configure.getSelectedValue().equals(CONFIGURE_MANUAL);
+        boolean isValid = true;
 
-        if (isWan && isManual) {
-            if (nullOrEmpty(this.ip.getValue()) || this.subnet.getValue() == null
-                    || nullOrEmpty(this.gateway.getValue())) {
+        if (isManual) {
+            if (nullOrEmpty(this.ip.getValue()) || this.subnet.getValue() == null) {
                 this.groupIp.setValidationState(ValidationState.ERROR);
                 this.groupSubnet.setValidationState(ValidationState.ERROR);
-                this.groupGateway.setValidationState(ValidationState.ERROR);
                 this.wrongInputIp.setText(MSGS.netIPv6InvalidAddress());
+                this.wrongInputSubnet.setText(MSGS.netIpv6InvalidSubnet());
+                isValid = false;
+            }
+            if (isWan && nullOrEmpty(this.gateway.getValue())) {
+                this.groupGateway.setValidationState(ValidationState.ERROR);
                 this.wrongInputGateway.setText(MSGS.netIPv6InvalidAddress());
-                return false;
+                isValid = false;
             }
         }
 
@@ -678,10 +684,10 @@ public class TabIp6Ui extends Composite implements NetworkTab {
                 || this.groupSubnet.getValidationState().equals(ValidationState.ERROR)
                 || this.groupGateway.getValidationState().equals(ValidationState.ERROR)
                 || this.groupDns.getValidationState().equals(ValidationState.ERROR)) {
-            return false;
+            isValid = false;
         }
 
-        return true;
+        return isValid;
     }
 
     @Override

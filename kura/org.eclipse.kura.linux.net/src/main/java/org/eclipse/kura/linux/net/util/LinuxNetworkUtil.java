@@ -17,8 +17,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +26,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.function.Consumer;
 
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
@@ -1212,22 +1209,6 @@ public class LinuxNetworkUtil {
         command.setOutputStream(new ByteArrayOutputStream());
         command.setErrorStream(new ByteArrayOutputStream());
         return this.executorService.execute(command);
-    }
-
-    private static class StreamGobbler implements Runnable {
-
-        private final InputStream inputStream;
-        private final Consumer<String> consumer;
-
-        public StreamGobbler(InputStream inputStream, Consumer<String> consumer) {
-            this.inputStream = inputStream;
-            this.consumer = consumer;
-        }
-
-        @Override
-        public void run() {
-            new BufferedReader(new InputStreamReader(this.inputStream)).lines().forEach(this.consumer);
-        }
     }
 
 }

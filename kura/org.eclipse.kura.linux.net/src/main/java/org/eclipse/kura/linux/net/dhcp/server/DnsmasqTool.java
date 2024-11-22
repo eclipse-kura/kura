@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.net.dhcp.server;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -42,10 +43,10 @@ public class DnsmasqTool implements DhcpLinuxTool {
     private String globalConfigFilename = "/etc/dnsmasq.d/dnsmasq-globals.conf";
     private static final String GLOBAL_CONFIGURATION = "port=0\nbind-dynamic\n";
 
-    static final Command IS_ACTIVE_COMMAND = new Command(
-            new String[] { "systemctl", "is-active", "--quiet", DhcpServerTool.DNSMASQ.getValue() });
-    static final Command RESTART_COMMAND = new Command(
-            new String[] { "systemctl", "restart", DhcpServerTool.DNSMASQ.getValue() });
+    static final String[] IS_ACTIVE_COMMANDLINE = new String[] { "systemctl", "is-active", "--quiet",
+            DhcpServerTool.DNSMASQ.getValue() };
+    static final String[] RESTART_COMMANDLINE = new String[] { "systemctl", "restart",
+            DhcpServerTool.DNSMASQ.getValue() };
 
     private CommandExecutorService executorService;
     private Map<String, byte[]> configsLastHash = Collections.synchronizedMap(new HashMap<>());
@@ -57,7 +58,7 @@ public class DnsmasqTool implements DhcpLinuxTool {
 
     @Override
     public boolean isRunning(String interfaceName) throws KuraProcessExecutionErrorException {
-        CommandStatus status = this.executorService.execute(IS_ACTIVE_COMMAND);
+        CommandStatus status = this.executorService.execute(new Command(IS_ACTIVE_COMMANDLINE));
 
         boolean isRunning;
         try {
@@ -85,12 +86,19 @@ public class DnsmasqTool implements DhcpLinuxTool {
                     "Failed to start DHCP server for interface: " + interfaceName);
         }
 
-        CommandStatus restartStatus = this.executorService.execute(RESTART_COMMAND);
+        Command restartCommand = new Command(RESTART_COMMANDLINE);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+        restartCommand.setErrorStream(err);
+        restartCommand.setOutputStream(out);
+        CommandStatus restartStatus = this.executorService.execute(restartCommand);
 
         if (!restartStatus.getExitStatus().isSuccessful()) {
-            logger.error("dnsmasq Systemd unit startup failed. Is dnsmasq package installed on the system?");
+            logger.error("dnsmasq Systemd unit startup failed. Check if the tool is properly installed on the system.");
+            logger.error("dnsmasq stderr {}", new String(err.toByteArray(), StandardCharsets.UTF_8));
+            logger.error("dnsmasq stdout {}", new String(out.toByteArray(), StandardCharsets.UTF_8));
             removeInterfaceConfig(interfaceName);
-            restartStatus = this.executorService.execute(RESTART_COMMAND);
+            restartStatus = this.executorService.execute(restartCommand);
         }
 
         return restartStatus;
@@ -101,7 +109,7 @@ public class DnsmasqTool implements DhcpLinuxTool {
         boolean isInterfaceDisabled = true;
 
         if (removeInterfaceConfig(interfaceName)) {
-            CommandStatus status = this.executorService.execute(RESTART_COMMAND);
+            CommandStatus status = this.executorService.execute(new Command(RESTART_COMMANDLINE));
             isInterfaceDisabled = status.getExitStatus().isSuccessful();
         }
 

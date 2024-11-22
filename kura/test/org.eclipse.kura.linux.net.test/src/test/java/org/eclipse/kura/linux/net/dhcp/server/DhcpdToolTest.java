@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraProcessExecutionErrorException;
+import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.ExitStatus;
@@ -160,7 +161,7 @@ public class DhcpdToolTest {
 
         thenDisableInterfaceReturned(false);
     }
-    
+
     /*
      * Steps
      */
@@ -183,9 +184,10 @@ public class DhcpdToolTest {
             public boolean isSuccessful() {
                 return isSuccessful;
             }
-            
+
         };
-        CommandStatus returnedStatus = new CommandStatus(DnsmasqTool.IS_ACTIVE_COMMAND, returnedExitStatus);
+        CommandStatus returnedStatus = new CommandStatus(new Command(DnsmasqTool.IS_ACTIVE_COMMANDLINE),
+                returnedExitStatus);
 
         when(this.mockExecutor.execute(any())).thenReturn(returnedStatus);
         when(this.mockExecutor.isRunning(any(String[].class))).thenReturn(isSuccessful);
@@ -197,7 +199,8 @@ public class DhcpdToolTest {
 
     private void givenDhcpServerManagerReturn(String interfaceName, String returnedConfigFilename) {
         mockServerManager = mockStatic(DhcpServerManager.class);
-        mockServerManager.when(() -> DhcpServerManager.getPidFilename(interfaceName)).thenReturn(returnedConfigFilename);
+        mockServerManager.when(() -> DhcpServerManager.getPidFilename(interfaceName))
+                .thenReturn(returnedConfigFilename);
     }
 
     private void givenConfigFile(String filename) throws IOException {
@@ -212,7 +215,7 @@ public class DhcpdToolTest {
             public int getPid() {
                 return 1234;
             }
-            
+
         });
 
         when(this.mockExecutor.getPids(any())).thenReturn(this.runningPids);

@@ -158,8 +158,8 @@ public class BaseChannelDescriptor implements ChannelDescriptor {
         final Tad valueScale = new Tad();
         valueScale.setName(VALUE_SCALE.value().substring(1));
         valueScale.setId(VALUE_SCALE.value());
-        valueScale.setDescription("Scale to be applied to the numeric value of the channel");
-        valueScale.setType(Tscalar.DOUBLE);
+        valueScale.setDescription("Scale to be applied to the numeric value of the channel.");
+        valueScale.setType(Tscalar.STRING);
         valueScale.setRequired(false);
 
         this.defaultElements.add(valueScale);
@@ -168,7 +168,7 @@ public class BaseChannelDescriptor implements ChannelDescriptor {
         valueOffset.setName(VALUE_OFFSET.value().substring(1));
         valueOffset.setId(VALUE_OFFSET.value());
         valueOffset.setDescription("Offset to be applied to the numeric value of the channel");
-        valueOffset.setType(Tscalar.DOUBLE);
+        valueOffset.setType(Tscalar.STRING);
         valueOffset.setRequired(false);
 
         this.defaultElements.add(valueOffset);

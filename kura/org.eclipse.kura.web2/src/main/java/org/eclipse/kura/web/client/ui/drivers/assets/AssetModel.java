@@ -13,6 +13,7 @@
 package org.eclipse.kura.web.client.ui.drivers.assets;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
@@ -40,16 +41,21 @@ public interface AssetModel {
 
     public boolean isValid();
 
+    public Integer getParameterIndex(String value);
+
+    public Map<String, Integer> getParameterIndexes();
+
     public interface ChannelModel {
 
         public GwtConfigParameter getParameter(int index);
 
-        public void setValue(String id, String value);
+        public void setValue(Integer index, String value);
 
-        public boolean isValid(String id);
+        public boolean isValid(Integer index);
 
-        public String getValue(String id);
+        public String getValue(Integer index);
 
         public String getChannelName();
     }
+
 }

@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
+import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.TakesValue;
@@ -61,8 +62,18 @@ public final class ValidationUtil {
             return;
         }
 
+        validateType(param.getType(), param, consumer, trimmedValue);
+        validateType(param.getSubtype(), param, consumer, trimmedValue);
+
+    }
+
+    private static void validateType(GwtConfigParameterType type, GwtConfigParameter param,
+            ValidationErrorConsumer consumer, String trimmedValue) {
+        if (type == null) {
+            return;
+        }
         try {
-            switch (param.getType()) {
+            switch (type) {
             case BOOLEAN:
                 validateBoolean(trimmedValue, param, consumer);
                 break;
@@ -99,7 +110,6 @@ public final class ValidationUtil {
         } catch (NumberFormatException e) {
             consumer.addError(MessageUtils.get(INVALID_VALUE, trimmedValue));
         }
-
     }
 
     public static boolean validateParameters(GwtConfigComponent component) {

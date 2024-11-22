@@ -290,9 +290,7 @@ public class LinuxNetworkUtil {
     }
 
     private static Optional<String> getCachedTool(String tool) {
-        return TOOLS.stream().filter(item -> {
-            return item.endsWith(tool);
-        }).findFirst();
+        return TOOLS.stream().filter(item -> item.endsWith(tool)).findFirst();
     }
 
     /**
@@ -322,11 +320,11 @@ public class LinuxNetworkUtil {
             future.get(10, TimeUnit.SECONDS);
             return exitCode < 4;
         } catch (IOException | ExecutionException | TimeoutException e) {
-            logger.error(String.format("Cannot check %s unit existence", unitName), e);
+            logger.error("Cannot check {} unit existence", unitName, e);
             return false;
         } catch (InterruptedException e1) {
             Thread.currentThread().interrupt();
-            logger.error(String.format("Cannot check %s unit existence", unitName), e1);
+            logger.error("Cannot check {} unit existence", unitName, e1);
             return false;
         }
     }

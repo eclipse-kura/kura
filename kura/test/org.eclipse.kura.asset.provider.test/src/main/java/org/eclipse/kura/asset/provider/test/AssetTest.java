@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -121,8 +122,8 @@ public final class AssetTest {
         channels.put("1.CH#+name", "1.CH");
         channels.put("1.CH#+type", "READ");
         channels.put("1.CH#+value.type", DataType.INTEGER.name());
-        channels.put("1.CH#+scale", "1.0");
-        channels.put("1.CH#+offset", "0.0");
+        channels.put("1.CH#+scale", "1");
+        channels.put("1.CH#+offset", "0");
         channels.put("1.CH#DRIVER.modbus.register", "sample.channel1.modbus.register");
         channels.put("1.CH#DRIVER.modbus.FC", "sample.channel1.modbus.FC");
 
@@ -208,8 +209,8 @@ public final class AssetTest {
         assertEquals("1.CH", channel1.getName());
         assertEquals(ChannelType.READ, channel1.getType());
         assertEquals(DataType.INTEGER, channel1.getValueType());
-        assertEquals(1.0d, channel1.getValueScaleAsNumber().doubleValue(), 0.0);
-        assertEquals(0.0d, channel1.getValueOffsetAsNumber().doubleValue(), 0.0);
+        assertEquals(Optional.of(1), channel1.getValueScaleAsNumber());
+        assertEquals(Optional.of(0), channel1.getValueOffsetAsNumber());
         assertEquals("sample.channel1.modbus.register", channel1.getConfiguration().get("DRIVER.modbus.register"));
         assertEquals("sample.channel1.modbus.FC", channel1.getConfiguration().get("DRIVER.modbus.FC"));
 
@@ -410,7 +411,7 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testRead() throws KuraException {
-        final List<ChannelRecord> records = asset.read(new HashSet(Arrays.asList("1.CH")));
+        final List<ChannelRecord> records = asset.read(new HashSet<>(Arrays.asList("1.CH")));
 
         assertNotNull(records);
         assertEquals(1, records.size());
@@ -423,7 +424,7 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testReadChannelNotReadable() throws KuraException {
-        List<ChannelRecord> result = asset.read(new HashSet(Arrays.asList("2.CH")));
+        List<ChannelRecord> result = asset.read(new HashSet<>(Arrays.asList("2.CH")));
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -514,7 +515,7 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testReadChannelDisabled() throws KuraException {
-        List<ChannelRecord> result = asset.read(new HashSet(Arrays.asList("3.CH")));
+        List<ChannelRecord> result = asset.read(new HashSet<>(Arrays.asList("3.CH")));
 
         assertNotNull(result);
         assertEquals(1, result.size());

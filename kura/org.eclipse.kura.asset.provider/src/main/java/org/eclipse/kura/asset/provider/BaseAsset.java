@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -424,8 +425,8 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     @SuppressWarnings("unchecked")
     private void applyScaleAndOffset(final ChannelRecord channelRecord, final Channel channel) {
-        final Number channelScale = channel.getValueScaleAsNumber();
-        final Number channelOffset = channel.getValueOffsetAsNumber();
+        final Optional<Number> channelScale = channel.getValueScaleAsNumber();
+        final Optional<Number> channelOffset = channel.getValueOffsetAsNumber();
 
         switch (channel.getValueType()) {
         case DOUBLE:
@@ -457,22 +458,26 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
 
     // legacy method
     private TypedValue<? extends Number> calculateScaleAndOffsetByTypedValue(TypedValue<? extends Number> typedValue,
-            Number scale, Number offset) {
+            Optional<Number> scale, Optional<Number> offset) {
 
         Number result;
 
         switch (typedValue.getType()) {
-        case DOUBLE:
-            result = (double) typedValue.getValue() * scale.doubleValue() + offset.doubleValue();
-            break;
         case FLOAT:
-            result = (float) typedValue.getValue() * scale.floatValue() + offset.floatValue();
+            result = (float) typedValue.getValue() * scale.map(Number::floatValue).orElse(1f)
+                    + offset.map(Number::floatValue).orElse(0f);
+            break;
+        case DOUBLE:
+            result = (double) typedValue.getValue() * scale.map(Number::doubleValue).orElse(1d)
+                    + offset.map(Number::doubleValue).orElse(0d);
             break;
         case INTEGER:
-            result = (int) typedValue.getValue() * scale.intValue() + offset.intValue();
+            result = (int) typedValue.getValue() * scale.map(Number::intValue).orElse(1)
+                    + offset.map(Number::intValue).orElse(0);
             break;
         case LONG:
-            result = (long) typedValue.getValue() * scale.longValue() + offset.longValue();
+            result = (long) typedValue.getValue() * scale.map(Number::longValue).orElse(1L)
+                    + offset.map(Number::longValue).orElse(0L);
             break;
         default:
             throw new IllegalArgumentException("Unknown value type" + typedValue.getType());
@@ -483,16 +488,27 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
     }
 
     private TypedValue<? extends Number> calculateScaleAndOffset(DataType outputValueType,
-            TypedValue<? extends Number> typedValue, ScaleOffsetType scaleOffsetType, Number scale, Number offset) {
+            TypedValue<? extends Number> typedValue, ScaleOffsetType scaleOffsetType, Optional<Number> scale,
+            Optional<Number> offset) {
 
         Number result = null;
 
         switch (scaleOffsetType) {
+        case FLOAT:
+            result = scale.map(Number::floatValue).orElse(1f) * typedValue.getValue().floatValue()
+                    + offset.map(Number::floatValue).orElse(0f);
+            break;
         case DOUBLE:
-            result = scale.doubleValue() * typedValue.getValue().doubleValue() + offset.doubleValue();
+            result = scale.map(Number::doubleValue).orElse(1d) * typedValue.getValue().doubleValue()
+                    + offset.map(Number::doubleValue).orElse(0d);
+            break;
+        case INTEGER:
+            result = scale.map(Number::intValue).orElse(1) * typedValue.getValue().intValue()
+                    + offset.map(Number::intValue).orElse(0);
             break;
         case LONG:
-            result = scale.longValue() * typedValue.getValue().longValue() + offset.longValue();
+            result = scale.map(Number::longValue).orElse(1L) * typedValue.getValue().longValue()
+                    + offset.map(Number::longValue).orElse(0L);
             break;
         default:
             throw new IllegalArgumentException("Invalid scale/offset type");

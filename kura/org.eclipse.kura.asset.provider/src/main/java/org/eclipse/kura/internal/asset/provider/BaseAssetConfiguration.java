@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -339,22 +340,22 @@ public final class BaseAssetConfiguration {
             return ScaleOffsetType.getScaleOffsetType(scaleOffsetypeProp);
         }
 
-        private static Number getValueScale(final Map<String, Object> properties) {
+        private static Optional<Number> getValueScale(final Map<String, Object> properties) {
             final String valueScale = (String) properties.get(VALUE_SCALE.value());
 
             if (valueScale == null || valueScale.isEmpty()) {
-                return 1.0d;
+                return Optional.empty();
             }
-            return parseScaleOffsetTypedValue(getScaleOffsetType(properties), valueScale);
+            return parseScaleOffsetTypedValue(getScaleOffsetType(properties), getDataType(properties), valueScale);
         }
 
-        private static Number getValueOffset(final Map<String, Object> properties) {
+        private static Optional<Number> getValueOffset(final Map<String, Object> properties) {
             final String valueOffset = (String) properties.get(VALUE_OFFSET.value());
 
             if (valueOffset == null || valueOffset.isEmpty()) {
-                return 0.0d;
+                return Optional.empty();
             }
-            return parseScaleOffsetTypedValue(getScaleOffsetType(properties), valueOffset);
+            return parseScaleOffsetTypedValue(getScaleOffsetType(properties), getDataType(properties), valueOffset);
         }
 
         private static String getUnit(final Map<String, Object> properties) {
@@ -387,8 +388,8 @@ public final class BaseAssetConfiguration {
 
             final boolean isEnabled = isEnabled(channelConfig);
 
-            final Number valueScale = getValueScale(channelConfig);
-            final Number valueOffset = getValueOffset(channelConfig);
+            final Optional<Number> valueScale = getValueScale(channelConfig);
+            final Optional<Number> valueOffset = getValueOffset(channelConfig);
             final ScaleOffsetType scaleOffsetType = getScaleOffsetType(channelConfig);
 
             final Channel channel = new Channel(channelName, channelType, dataType, scaleOffsetType, valueScale,
@@ -402,18 +403,42 @@ public final class BaseAssetConfiguration {
             return channel;
         }
 
-        private static Number parseScaleOffsetTypedValue(ScaleOffsetType type, String value) {
-            Objects.requireNonNull(type, "type cannot be null");
+        private static Optional<Number> parseScaleOffsetTypedValue(ScaleOffsetType scaleOffsetType, DataType valueType,
+                String value) {
+            Objects.requireNonNull(scaleOffsetType, "scaleOffsetType cannot be null");
+            Objects.requireNonNull(valueType, "valueType cannot be null");
             Objects.requireNonNull(value, "value cannot be null");
 
-            switch (type) {
-            case DEFINED_BY_VALUE_TYPE:
+            DataType actualDataType = scaleOffsetType == ScaleOffsetType.DEFINED_BY_VALUE_TYPE ? valueType
+                    : toDataType(scaleOffsetType);
+
+            switch (actualDataType) {
+            case FLOAT:
+                return Optional.of(Float.parseFloat(value));
             case DOUBLE:
-                return Double.parseDouble(value);
+                return Optional.of(Double.parseDouble(value));
+            case INTEGER:
+                return Optional.of(Integer.parseInt(value));
             case LONG:
-                return Long.parseLong(value);
+                return Optional.of(Long.parseLong(value));
             default:
-                throw new IllegalArgumentException(value + " cannot be converted into a Number of type " + type);
+                throw new IllegalArgumentException(
+                        value + " cannot be converted into a Number of type " + scaleOffsetType);
+            }
+        }
+
+        private static DataType toDataType(ScaleOffsetType scaleOffsetType) {
+            switch (scaleOffsetType) {
+            case FLOAT:
+                return DataType.FLOAT;
+            case DOUBLE:
+                return DataType.DOUBLE;
+            case INTEGER:
+                return DataType.INTEGER;
+            case LONG:
+                return DataType.LONG;
+            default:
+                throw new IllegalArgumentException("Unsupported scale offset type: " + scaleOffsetType);
             }
         }
     }

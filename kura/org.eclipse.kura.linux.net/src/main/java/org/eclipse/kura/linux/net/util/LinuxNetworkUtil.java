@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -44,12 +44,9 @@ import org.slf4j.LoggerFactory;
 
 public class LinuxNetworkUtil {
 
-    public static final String ACCESS_POINT_INTERFACE_SUFFIX = "_ap";
-
-    private static final String ETHTOOL_COMMAND = "ethtool";
-
     private static final Logger logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
 
+    public static final String ACCESS_POINT_INTERFACE_SUFFIX = "_ap";
     private static Map<String, LinuxIfconfig> ifconfigs = new HashMap<>();
     private static final String[] IGNORE_IFACES = { "can", "sit", "mon.wlan" };
     private static final ArrayList<String> TOOLS = new ArrayList<>();
@@ -65,13 +62,12 @@ public class LinuxNetworkUtil {
     private static final String IFCONFIG = "ifconfig";
     private static final String IWCONFIG = "iwconfig";
     private static final String IP = "ip";
-
     private static final String LINE_MSG = "line: {}";
-
     private static final String ERR_EXECUTING_CMD_MSG = "error executing command --- {} --- exit value={}";
-
     private static final String FAKE_MAC_ADDRESS = "12:34:56:78:ab:cd";
-
+    private static final String ETHTOOL_COMMAND = "ethtool";
+    private static final String[] DEFAULT_PATH = new String[] { "/sbin/", "/usr/sbin/", "/bin/", "/usr/bin/" };
+    private static final ProcessBuilder PROCESS_BUILDER = new ProcessBuilder();
     private final CommandExecutorService executorService;
     private final WifiOptions wifiOptions;
 
@@ -264,22 +260,59 @@ public class LinuxNetworkUtil {
     }
 
     public static boolean toolExists(String tool) {
-        boolean ret = false;
-        final String[] searchFolders = new String[] { "/sbin/", "/usr/sbin/", "/bin/", "/usr/bin/" };
+        return getToolPath(tool).isPresent();
+    }
 
-        if (TOOLS.contains(tool)) {
-            ret = true;
+    public static Optional<String> getToolPath(String tool) {
+        Optional<String> optionalToolPath = getCachedTool(tool);
+        if (optionalToolPath.isPresent()) {
+            return optionalToolPath;
         } else {
-            for (String folder : searchFolders) {
-                File fTool = new File(folder + tool);
-                if (fTool.exists()) {
-                    TOOLS.add(tool);
-                    ret = true;
-                    break;
+            for (String folder : DEFAULT_PATH) {
+                String toolPath = folder + tool;
+                File toolFile = new File(toolPath);
+                if (toolFile.exists()) {
+                    TOOLS.add(toolPath);
+                    return Optional.of(toolPath);
                 }
             }
         }
-        return ret;
+        return Optional.empty();
+    }
+
+    private static Optional<String> getCachedTool(String tool) {
+        return TOOLS.stream().filter(item -> item.endsWith(tool)).findFirst();
+    }
+
+    /**
+     * Checks if the given Systemd system unit is installed.
+     * The result is based on the exit code of "systemctl status <unitName>"
+     * as presented in https://www.man7.org/linux/man-pages/man1/systemctl.1.html#EXIT_STATUS
+     *
+     * @param unitName
+     *            the name of the Systemd system unit
+     * @return true if the unit is installed
+     */
+    public static boolean systemdSystemUnitExists(String unitName) {
+        Optional<String> optionalSystemctlPath = getToolPath("systemctl");
+        if (!optionalSystemctlPath.isPresent()) {
+            logger.debug("Systemctl command not found in default paths");
+            return false;
+        }
+        PROCESS_BUILDER.command(optionalSystemctlPath.get(), "status", unitName);
+        Process process;
+        try {
+            process = PROCESS_BUILDER.start();
+            int exitCode = process.waitFor();
+            return exitCode < 4;
+        } catch (IOException e) {
+            logger.error("Cannot check {} unit existence", unitName, e);
+            return false;
+        } catch (InterruptedException e1) {
+            Thread.currentThread().interrupt();
+            logger.error("Cannot check {} unit existence", unitName, e1);
+            return false;
+        }
     }
 
     /**
@@ -1124,7 +1157,7 @@ public class LinuxNetworkUtil {
             return;
         }
 
-        CommandStatus status = this.executeCommand(formIwDevIfaceInterfaceAddAp(ifaceName, dedicatedApInterface));
+        CommandStatus status = executeCommand(formIwDevIfaceInterfaceAddAp(ifaceName, dedicatedApInterface));
 
         if (!status.getExitStatus().isSuccessful()) {
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
@@ -1137,7 +1170,7 @@ public class LinuxNetworkUtil {
             return;
         }
 
-        CommandStatus status = this.executeCommand(formIpLinkSetAddress(ifaceName, FAKE_MAC_ADDRESS));
+        CommandStatus status = executeCommand(formIpLinkSetAddress(ifaceName, FAKE_MAC_ADDRESS));
 
         if (!status.getExitStatus().isSuccessful()) {
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
@@ -1150,7 +1183,7 @@ public class LinuxNetworkUtil {
             return;
         }
 
-        CommandStatus status = this.executeCommand(formIpLinkSetStatus(ifaceName, "up"));
+        CommandStatus status = executeCommand(formIpLinkSetStatus(ifaceName, "up"));
 
         if (!status.getExitStatus().isSuccessful()) {
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Failed to set link up for interface " + ifaceName);
@@ -1162,7 +1195,7 @@ public class LinuxNetworkUtil {
             return;
         }
 
-        CommandStatus status = this.executeCommand(formIpLinkSetStatus(ifaceName, "down"));
+        CommandStatus status = executeCommand(formIpLinkSetStatus(ifaceName, "down"));
 
         if (!status.getExitStatus().isSuccessful()) {
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Failed to set link up for interface " + ifaceName);

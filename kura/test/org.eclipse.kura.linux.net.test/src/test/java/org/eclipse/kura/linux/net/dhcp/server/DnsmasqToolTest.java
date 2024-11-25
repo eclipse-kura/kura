@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.kura.KuraProcessExecutionErrorException;
+import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.ExitStatus;
@@ -47,7 +48,7 @@ public class DnsmasqToolTest {
     private CommandStatus startInterfaceStatus;
     private boolean interfaceDisabled;
     private Exception occurredException;
-    
+
     /*
      * Scenarios
      */
@@ -151,9 +152,10 @@ public class DnsmasqToolTest {
             public boolean isSuccessful() {
                 return isSuccessful;
             }
-            
+
         };
-        CommandStatus returnedStatus = new CommandStatus(DnsmasqTool.IS_ACTIVE_COMMAND, returnedExitStatus);
+        CommandStatus returnedStatus = new CommandStatus(new Command(DnsmasqTool.IS_ACTIVE_COMMANDLINE),
+                returnedExitStatus);
 
         when(this.mockExecutor.execute(any())).thenReturn(returnedStatus);
     }
@@ -166,13 +168,15 @@ public class DnsmasqToolTest {
     private void givenConfigFile(String filename) throws IOException {
         try {
             this.tmpFolder.newFolder("etc", "dnsmasq.d");
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
         this.tmpConfigFile = this.tmpFolder.newFile(filename);
     }
 
     private void givenDnsmasqTool() throws Exception {
         this.tool = new DnsmasqTool(this.mockExecutor);
-        this.tool.setDnsmasqGlobalConfigFile(this.tmpConfigFile.getAbsoluteFile().getParent() + "/dnsmasq-globals.conf");
+        this.tool
+                .setDnsmasqGlobalConfigFile(this.tmpConfigFile.getAbsoluteFile().getParent() + "/dnsmasq-globals.conf");
     }
 
     private void givenStartInterface(String interfaceName) throws KuraProcessExecutionErrorException {
@@ -196,7 +200,7 @@ public class DnsmasqToolTest {
             this.interfaceDisabled = this.tool.disableInterface(interfaceName);
         } catch (Exception e) {
             this.occurredException = e;
-        }        
+        }
     }
 
     /*

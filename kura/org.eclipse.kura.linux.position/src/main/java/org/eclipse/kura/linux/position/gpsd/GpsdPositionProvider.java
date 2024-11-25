@@ -87,6 +87,8 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
         }
 
         if (executor != null) {
+
+            this.checkFuture.cancel(true);
             executor.shutdown();
 
             try {

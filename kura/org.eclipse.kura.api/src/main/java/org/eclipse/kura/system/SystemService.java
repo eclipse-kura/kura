@@ -137,6 +137,11 @@ public interface SystemService {
     public static final String KEY_DEFAULT_LOG_MANAGER = "kura.default.log.manager";
 
     /**
+     * @since 3.0
+     */
+    public static final String KEY_WPA3_WIFI_SECURITY_ENABLE = "kura.wpa3.wifi.security.enable";
+
+    /**
      * @deprecated
      */
     @Deprecated
@@ -618,5 +623,14 @@ public interface SystemService {
      * @return the optional default LogManager
      */
     public Optional<String> getDefaultLogManager();
+
+    /**
+     * Returns true if the WPA3 WiFi Security is enabled on this device.
+     * The default is false.
+     *
+     * @since 3.0
+     * @return true if the WPA3 WiFi Security is enabled
+     */
+    public boolean isWPA3WifiSecurityEnabled();
 
 }

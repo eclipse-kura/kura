@@ -31,6 +31,8 @@ import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.util.IwCapabilityTool;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.wifi.WifiChannel;
+import org.eclipse.kura.net.wifi.WifiMode;
+import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.eclipse.kura.nm.configuration.NMSettingsConverter;
 import org.eclipse.kura.nm.enums.MMModemLocationSource;
 import org.eclipse.kura.nm.enums.NMDeviceState;
@@ -44,6 +46,7 @@ import org.eclipse.kura.nm.status.DevicePropertiesWrapper;
 import org.eclipse.kura.nm.status.NMStatusConverter;
 import org.eclipse.kura.nm.status.SimProperties;
 import org.eclipse.kura.nm.status.SupportedChannelsProperties;
+import org.eclipse.kura.system.SystemService;
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
@@ -94,6 +97,7 @@ public class NMDbusConnector {
     private final NetworkManagerDbusWrapper networkManager;
     private final ModemManagerDbusWrapper modemManager;
     private final WpaSupplicantDbusWrapper wpaSupplicant;
+    private Optional<SystemService> optionalSystemService = Optional.empty();
 
     private Map<String, Object> cachedConfiguration = null;
 
@@ -123,6 +127,10 @@ public class NMDbusConnector {
 
     public DBusConnection getDbusConnection() {
         return this.dbusConnection;
+    }
+
+    public void setSystemService(SystemService systemService) {
+        this.optionalSystemService = Optional.of(systemService);
     }
 
     public boolean configurationEnforcementIsActive() {
@@ -459,6 +467,12 @@ public class NMDbusConnector {
             return;
         }
 
+        if (NMDeviceType.NM_DEVICE_TYPE_WIFI.equals(deviceType) && !isWPA3WifiSecuritySupported()
+                && shouldConfigureWPA3WifiSecurity(deviceId, properties)) {
+            logger.warn("WPA3 is not supported. Cannot configure device \"{}\"", deviceId);
+            return;
+        }
+
         logger.info("Settings iface \"{}\":{}", deviceId, deviceType);
 
         if (interfaceStatus == KuraInterfaceStatus.DISABLED) {
@@ -479,6 +493,34 @@ public class NMDbusConnector {
             this.modemManager.setGPS(mmDbusPath, enableGPS, gpsModeString);
         }
 
+    }
+
+    private boolean isWPA3WifiSecuritySupported() {
+        boolean isWPA3Supported = false;
+        if (this.optionalSystemService.isPresent()) {
+            isWPA3Supported = this.optionalSystemService.get().isWPA3WifiSecurityEnabled();
+        }
+        return isWPA3Supported;
+    }
+
+    private boolean shouldConfigureWPA3WifiSecurity(String deviceId, NetworkProperties properties) {
+        Optional<String> optionalWifiMode = properties.getOpt(String.class, "net.interface.%s.config.wifi.mode",
+                deviceId);
+        if (!optionalWifiMode.isPresent() || (!optionalWifiMode.get().equals(WifiMode.INFRA.toString())
+                && !optionalWifiMode.get().equals(WifiMode.MASTER.toString()))) {
+            return false;
+        }
+
+        String wifiMode = optionalWifiMode.get().toLowerCase();
+        Optional<String> optionalWifiSecurity = properties.getOpt(String.class,
+                "net.interface.%s.config.wifi.%s.securityType", deviceId, wifiMode);
+
+        if (optionalWifiSecurity.isPresent()) {
+            return optionalWifiSecurity.get().equals(WifiSecurity.SECURITY_WPA3.toString())
+                    || optionalWifiSecurity.get().equals(WifiSecurity.SECURITY_WPA2_WPA3.toString());
+        }
+
+        return false;
     }
 
     private void enableInterface(String deviceId, NetworkProperties properties, Optional<Device> device,

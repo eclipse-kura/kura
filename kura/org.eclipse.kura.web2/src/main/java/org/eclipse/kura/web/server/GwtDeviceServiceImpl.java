@@ -195,9 +195,9 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         // kura properties
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
         Properties kuraProps = systemService.getProperties();
-        SortedSet kuraKeys = new TreeSet(kuraProps.keySet());
+        SortedSet kuraKeys = new TreeSet(kuraProps.stringPropertyNames());
         for (Object key : kuraKeys) {
-            pairs.add(new GwtGroupedNVPair("propsKura", key.toString(), kuraProps.get(key).toString()));
+            pairs.add(new GwtGroupedNVPair("propsKura", key.toString(), kuraProps.getProperty(key.toString())));
         }
         return new ArrayList<>(pairs);
     }
@@ -233,17 +233,19 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public boolean checkIfContainerOrchestratorIsActive(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        ContainerOrchestrationService checkIfContainerOrchestratorIsActive = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
+        ContainerOrchestrationService checkIfContainerOrchestratorIsActive = ServiceLocator.getInstance()
+                .getService(ContainerOrchestrationService.class);
 
         return checkIfContainerOrchestratorIsActive != null;
     }
-    
+
     @Override
     public List<GwtGroupedNVPair> findImages(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
         try {
-            ContainerOrchestrationService checkIfContainerOrchestratorIsActive = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
+            ContainerOrchestrationService checkIfContainerOrchestratorIsActive = ServiceLocator.getInstance()
+                    .getService(ContainerOrchestrationService.class);
             List<ImageInstanceDescriptor> images = checkIfContainerOrchestratorIsActive.listImageInstanceDescriptors();
             if (images != null) {
                 for (ImageInstanceDescriptor image : images) {
@@ -253,7 +255,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
                     pair.setStatus("bndInstalled");
                     pair.setVersion(image.getImageTag());
                     pair.set("arch", image.getImageArch());
-                    
+
                     pairs.add(pair);
                 }
             }
@@ -264,12 +266,13 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
         return new ArrayList<>(pairs);
     }
-    
+
     @Override
     public void deleteImage(GwtXSRFToken xsrfToken, String imageId) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        ContainerOrchestrationService containerOrchestrationService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
+        ContainerOrchestrationService containerOrchestrationService = ServiceLocator.getInstance()
+                .getService(ContainerOrchestrationService.class);
 
         List<ImageInstanceDescriptor> images = containerOrchestrationService.listImageInstanceDescriptors();
 
@@ -299,8 +302,10 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
         try {
-            ContainerOrchestrationService checkIfContainerOrchestratorIsActive = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
-            List<ContainerInstanceDescriptor> containers = checkIfContainerOrchestratorIsActive.listContainerDescriptors();
+            ContainerOrchestrationService checkIfContainerOrchestratorIsActive = ServiceLocator.getInstance()
+                    .getService(ContainerOrchestrationService.class);
+            List<ContainerInstanceDescriptor> containers = checkIfContainerOrchestratorIsActive
+                    .listContainerDescriptors();
             if (containers != null) {
                 for (ContainerInstanceDescriptor container : containers) {
                     GwtGroupedNVPair pair = new GwtGroupedNVPair();
@@ -324,7 +329,8 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public void startContainer(GwtXSRFToken xsrfToken, String containerName) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        ContainerOrchestrationService containerOrchestrationService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
+        ContainerOrchestrationService containerOrchestrationService = ServiceLocator.getInstance()
+                .getService(ContainerOrchestrationService.class);
         List<ContainerInstanceDescriptor> containers = containerOrchestrationService.listContainerDescriptors();
 
         logger.info("Starting container with name: {}", containerName);
@@ -351,7 +357,8 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public void stopContainer(GwtXSRFToken xsrfToken, String containerName) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        ContainerOrchestrationService containerOrchestrationService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
+        ContainerOrchestrationService containerOrchestrationService = ServiceLocator.getInstance()
+                .getService(ContainerOrchestrationService.class);
 
         List<ContainerInstanceDescriptor> containers = containerOrchestrationService.listContainerDescriptors();
 

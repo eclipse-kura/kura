@@ -47,6 +47,7 @@ import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
@@ -74,6 +75,7 @@ import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.eclipse.kura.nm.signal.handlers.DeviceCreationLock;
 import org.eclipse.kura.nm.signal.handlers.NMConfigurationEnforcementHandler;
+import org.eclipse.kura.system.SystemService;
 import org.freedesktop.ModemManager1;
 import org.freedesktop.NetworkManager;
 import org.freedesktop.dbus.DBusPath;
@@ -1057,6 +1059,74 @@ public class NMDbusConnectorTest {
         thenScanIsTriggered("wlan0");
     }
 
+    @Test
+    public void shouldApplyWPA3WiFiConfigurationIfWPA3IsSupported() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenSystemService(true);
+        givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+
+        givenWifiInterfaceConfiguration("SECURITY_WPA3");
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+        thenConnectionUpdateIsCalledFor("wlan0");
+        thenActivateConnectionIsCalledFor("wlan0");
+    }
+
+    @Test
+    public void shouldNotApplyWPA3WiFiConfigurationIfWPA3IsNotSupported() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenSystemService(false);
+        givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+
+        givenWifiInterfaceConfiguration("SECURITY_WPA3");
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+        thenConnectionUpdateIsNotCalledFor("wlan0");
+        thenActivateConnectionIsNotCalledFor("wlan0");
+    }
+
+    @Test
+    public void shouldApplyWPA2WPA3WiFiConfigurationIfWPA3IsSupported() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenSystemService(true);
+        givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+
+        givenWifiInterfaceConfiguration("SECURITY_WPA2_WPA3");
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+        thenConnectionUpdateIsCalledFor("wlan0");
+        thenActivateConnectionIsCalledFor("wlan0");
+    }
+
+    @Test
+    public void shouldNotApplyWPA2WPA3WiFiConfigurationIfWPA3IsNotSupported() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenSystemService(false);
+        givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+
+        givenWifiInterfaceConfiguration("SECURITY_WPA2_WPA3");
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+        thenConnectionUpdateIsNotCalledFor("wlan0");
+        thenActivateConnectionIsNotCalledFor("wlan0");
+    }
+
     /*
      * Given
      */
@@ -1455,6 +1525,36 @@ public class NMDbusConnectorTest {
         clearInvocations(this.mockConnection);
     }
 
+    private void givenSystemService(boolean isWPASupported) {
+        SystemService mockSystemService = mock(SystemService.class);
+        when(mockSystemService.isWPA3WifiSecurityEnabled()).thenReturn(isWPASupported);
+
+        this.instanceNMDbusConnector.setSystemService(mockSystemService);
+    }
+
+    private void givenWifiInterfaceConfiguration(String wifiSecurity) {
+        givenNetworkConfigMapWith("net.interfaces", "wlan0");
+        givenNetworkConfigMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledLAN");
+        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.mode", "MASTER");
+        givenNetworkConfigMapWith("net.interface.wlan0.config.dhcpClient4.enabled", false);
+        givenNetworkConfigMapWith("net.interface.wlan0.config.ip4.address", "192.168.0.12");
+        givenNetworkConfigMapWith("net.interface.wlan0.config.ip4.prefix", (short) 25);
+        givenNetworkConfigMapWith("net.interface.wlan0.config.ip4.dnsServers", "1.1.1.1");
+        givenNetworkConfigMapWith("net.interface.wlan0.config.dhcpServer4.enabled", true);
+        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.master.mode", "MASTER");
+        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.master.ssid", "whatACoolSSID!");
+        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.master.securityType", wifiSecurity);
+        givenNetworkConfigMapWith("net.interface.wlan0.config.dhcpServer4.prefix", 25);
+        givenNetworkConfigMapWith("net.interface.wlan0.config.dhcpServer4.rangeStart", "192.168.0.20");
+        givenNetworkConfigMapWith("net.interface.wlan0.config.dhcpServer4.rangeEnd", "192.168.0.24");
+        givenNetworkConfigMapWith("net.interface.wlan0.config.dhcpServer4.passDns", true);
+        givenNetworkConfigMapWith("net.interface.wlan0.config.dhcpServer4.defaultLeaseTime", 900);
+        givenNetworkConfigMapWith("net.interface.wlan0.config.dhcpServer4.maxLeaseTime", 900);
+        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.master.channel", "1");
+        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.master.radioMode", "RADIO_MODE_80211b");
+        givenNetworkConfigMapWith("net.interface.wlan0.config.wifi.master.passphrase", new Password("EEEEEHHHHH"));
+    }
+
     /*
      * When
      */
@@ -1613,8 +1713,18 @@ public class NMDbusConnectorTest {
         verify(connect).Update(any());
     }
 
+    private void thenConnectionUpdateIsNotCalledFor(String netInterface) throws DBusException {
+        Connection connect = this.dbusConnection.getRemoteObject("org.freedesktop.NetworkManager",
+                "/mock/device/" + netInterface, Connection.class);
+        verify(connect, never()).Update(any());
+    }
+
     private void thenActivateConnectionIsCalledFor(String netInterface) throws DBusException {
         verify(this.mockedNetworkManager).ActivateConnection(any(), any(), any());
+    }
+
+    private void thenActivateConnectionIsNotCalledFor(String netInterface) throws DBusException {
+        verify(this.mockedNetworkManager, never()).ActivateConnection(any(), any(), any());
     }
 
     private void thenAddAndActivateConnectionIsCalledFor(String netInterface) throws DBusException {

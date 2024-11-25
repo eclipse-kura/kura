@@ -375,4 +375,10 @@ public class SystemServiceTest {
         assertFalse(systemService.getDefaultLogManager().isPresent());
     }
 
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void shouldGetDefaultWPA3WifiSecuritySupportProperty() {
+        assertFalse(systemService.isWPA3WifiSecurityEnabled());
+    }
+
 }

@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.kura.asset.provider.AssetConstants;
@@ -35,6 +36,7 @@ import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.ChannelStatus;
 import org.eclipse.kura.channel.ChannelType;
+import org.eclipse.kura.channel.ScaleOffsetType;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.Driver.ConnectionException;
@@ -91,8 +93,10 @@ public class WireAssetTest {
         wireAssetProperties.put(AssetConstants.ASSET_DRIVER_PROP.value(), "driverPid");
         wireAssetProperties.put(ConfigurationService.KURA_SERVICE_PID, "componentName");
 
-        Channel readChannel1 = new Channel("readChannel1", ChannelType.READ, DataType.BOOLEAN, new HashMap<>());
-        Channel writeChannel2 = new Channel("writeChannel2", ChannelType.WRITE, DataType.BOOLEAN, new HashMap<>());
+        Channel readChannel1 = new Channel("readChannel1", ChannelType.READ, DataType.BOOLEAN,
+                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.empty(), Optional.empty(), new HashMap<>());
+        Channel writeChannel2 = new Channel("writeChannel2", ChannelType.WRITE, DataType.BOOLEAN,
+                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.empty(), Optional.empty(), new HashMap<>());
 
         putChannel(readChannel1, wireAssetProperties);
         putChannel(writeChannel2, wireAssetProperties);
@@ -196,9 +200,12 @@ public class WireAssetTest {
         wireAssetProperties.put(AssetConstants.ASSET_DRIVER_PROP.value(), "driverPid");
         wireAssetProperties.put(ConfigurationService.KURA_SERVICE_PID, "componentName");
 
-        Channel readChannel1 = new Channel("0", ChannelType.READ, DataType.BOOLEAN, Collections.emptyMap());
-        Channel readChannel2 = new Channel("1", ChannelType.READ, DataType.BOOLEAN, Collections.emptyMap());
-        Channel readChannel3 = new Channel("2", ChannelType.READ, DataType.BOOLEAN, Collections.emptyMap());
+        Channel readChannel1 = new Channel("0", ChannelType.READ, DataType.BOOLEAN,
+                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.empty(), Optional.empty(), Collections.emptyMap());
+        Channel readChannel2 = new Channel("1", ChannelType.READ, DataType.BOOLEAN,
+                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.empty(), Optional.empty(), Collections.emptyMap());
+        Channel readChannel3 = new Channel("2", ChannelType.READ, DataType.BOOLEAN,
+                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.empty(), Optional.empty(), Collections.emptyMap());
 
         putChannel(readChannel1, wireAssetProperties);
         putChannel(readChannel2, wireAssetProperties);

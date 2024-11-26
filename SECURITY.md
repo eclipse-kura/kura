@@ -11,7 +11,9 @@ The fixes are applied to the latest minor release available for the given major 
 
 | Version | Last Release | Supported          | 
 | ------- | ------------ | ------------------ | 
-| 5.4.x   | 2023-11-30   | :white_check_mark: |
+| 5.6.x   | 2024-11-20   | :white_check_mark: |
+| 5.5.x   | 2024-07-08   | :x:                |
+| 5.4.x   | 2023-11-30   | :x:                |
 | 5.3.x   | 2023-07-07   | :x:                |
 | 5.2.x   | 2023-05-12   | :x:                |
 | 5.1.x   | 2022-06-30   | :x:                | 

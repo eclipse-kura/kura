@@ -161,8 +161,16 @@ public class EnumsParser {
                 return GwtWifiSecurity.netWifiSecurityWPA2.name();
             }
 
+            if (wifiSecurity.get().equals(WifiSecurity.SECURITY_WPA3.name())) {
+                return GwtWifiSecurity.netWifiSecurityWPA3.name();
+            }
+
             if (wifiSecurity.get().equals(WifiSecurity.SECURITY_WPA_WPA2.name())) {
                 return GwtWifiSecurity.netWifiSecurityWPA_WPA2.name();
+            }
+
+            if (wifiSecurity.get().equals(WifiSecurity.SECURITY_WPA2_WPA3.name())) {
+                return GwtWifiSecurity.netWifiSecurityWPA2_WPA3.name();
             }
 
             if (wifiSecurity.get().equals(WifiSecurity.SECURITY_WPA2_WPA3_ENTERPRISE.name())) {
@@ -191,8 +199,16 @@ public class EnumsParser {
                 return WifiSecurity.SECURITY_WPA2.name();
             }
 
+            if (gwtWifiSecurity.get().equals(GwtWifiSecurity.netWifiSecurityWPA3.name())) {
+                return WifiSecurity.SECURITY_WPA3.name();
+            }
+
             if (gwtWifiSecurity.get().equals(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name())) {
                 return WifiSecurity.SECURITY_WPA_WPA2.name();
+            }
+
+            if (gwtWifiSecurity.get().equals(GwtWifiSecurity.netWifiSecurityWPA2_WPA3.name())) {
+                return WifiSecurity.SECURITY_WPA2_WPA3.name();
             }
 
             if (gwtWifiSecurity.get().equals(GwtWifiSecurity.netWifiSecurityWPA2WPA3Enterprise.name())) {

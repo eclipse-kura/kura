@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -44,6 +45,7 @@ import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.ChannelStatus;
 import org.eclipse.kura.channel.ChannelType;
+import org.eclipse.kura.channel.ScaleOffsetType;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
@@ -56,6 +58,7 @@ import com.google.gson.JsonElement;
 
 public class AssetRestServiceTest {
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testListAssetPids() throws InvalidSyntaxException {
         // test retrieval of asset service pids
@@ -122,10 +125,12 @@ public class AssetRestServiceTest {
 
         Map<String, Channel> channels = new TreeMap<>();
         Map<String, Object> channelConfig = new HashMap<>();
-        Channel ch1 = new Channel("ch1", ChannelType.READ, DataType.INTEGER, channelConfig);
+        Channel ch1 = new Channel("ch1", ChannelType.READ, DataType.INTEGER, ScaleOffsetType.DEFINED_BY_VALUE_TYPE,
+                Optional.empty(), Optional.empty(), channelConfig);
         channels.put(ch1.getName(), ch1);
         channelConfig = new HashMap<>();
-        Channel ch2 = new Channel("ch2", ChannelType.WRITE, DataType.STRING, channelConfig);
+        Channel ch2 = new Channel("ch2", ChannelType.WRITE, DataType.STRING, ScaleOffsetType.DEFINED_BY_VALUE_TYPE,
+                Optional.empty(), Optional.empty(), channelConfig);
         channels.put(ch2.getName(), ch2);
 
         AssetConfiguration assetConfig = new AssetConfiguration("description", "driverPid", channels);
@@ -153,37 +158,37 @@ public class AssetRestServiceTest {
         when(asMock.getAsset(pid)).thenReturn(asset);
 
         List<ChannelRecord> records = new ArrayList<>();
-        ChannelRecord record = ChannelRecord.createReadRecord("ch1", DataType.INTEGER);
-        record.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
-        record.setValue(TypedValues.newIntegerValue(1));
-        records.add(record);
-        record = ChannelRecord.createReadRecord("ch2", DataType.STRING);
-        record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE));
-        records.add(record);
-        record = ChannelRecord.createReadRecord("ch3", DataType.STRING);
-        record.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
-        record.setValue(TypedValues.newStringValue("val"));
-        records.add(record);
-        record = ChannelRecord.createReadRecord("ch4", DataType.BOOLEAN);
-        record.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
-        record.setValue(TypedValues.newBooleanValue(true));
-        records.add(record);
-        record = ChannelRecord.createReadRecord("ch5", DataType.BYTE_ARRAY);
-        record.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
-        record.setValue(TypedValues.newByteArrayValue(new byte[] {1,2,3}));
-        records.add(record);
-        record = ChannelRecord.createReadRecord("ch6", DataType.DOUBLE);
-        record.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
-        record.setValue(TypedValues.newDoubleValue(1.234));
-        records.add(record);
-        record = ChannelRecord.createReadRecord("ch7", DataType.FLOAT);
-        record.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
-        record.setValue(TypedValues.newFloatValue(12.34f));
-        records.add(record);
-        record = ChannelRecord.createReadRecord("ch8", DataType.LONG);
-        record.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
-        record.setValue(TypedValues.newLongValue(1234));
-        records.add(record);
+        ChannelRecord channelRecord = ChannelRecord.createReadRecord("ch1", DataType.INTEGER);
+        channelRecord.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
+        channelRecord.setValue(TypedValues.newIntegerValue(1));
+        records.add(channelRecord);
+        channelRecord = ChannelRecord.createReadRecord("ch2", DataType.STRING);
+        channelRecord.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE));
+        records.add(channelRecord);
+        channelRecord = ChannelRecord.createReadRecord("ch3", DataType.STRING);
+        channelRecord.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
+        channelRecord.setValue(TypedValues.newStringValue("val"));
+        records.add(channelRecord);
+        channelRecord = ChannelRecord.createReadRecord("ch4", DataType.BOOLEAN);
+        channelRecord.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
+        channelRecord.setValue(TypedValues.newBooleanValue(true));
+        records.add(channelRecord);
+        channelRecord = ChannelRecord.createReadRecord("ch5", DataType.BYTE_ARRAY);
+        channelRecord.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
+        channelRecord.setValue(TypedValues.newByteArrayValue(new byte[] { 1, 2, 3 }));
+        records.add(channelRecord);
+        channelRecord = ChannelRecord.createReadRecord("ch6", DataType.DOUBLE);
+        channelRecord.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
+        channelRecord.setValue(TypedValues.newDoubleValue(1.234));
+        records.add(channelRecord);
+        channelRecord = ChannelRecord.createReadRecord("ch7", DataType.FLOAT);
+        channelRecord.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
+        channelRecord.setValue(TypedValues.newFloatValue(12.34f));
+        records.add(channelRecord);
+        channelRecord = ChannelRecord.createReadRecord("ch8", DataType.LONG);
+        channelRecord.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
+        channelRecord.setValue(TypedValues.newLongValue(1234));
+        records.add(channelRecord);
         when(asset.readAllChannels()).thenReturn(records);
 
         JsonElement json = svc.read(pid);
@@ -242,10 +247,10 @@ public class AssetRestServiceTest {
         channelNames.add("ch1");
 
         List<ChannelRecord> records = new ArrayList<>();
-        ChannelRecord record = ChannelRecord.createReadRecord("ch1", DataType.BOOLEAN);
-        record.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
-        record.setValue(TypedValues.newBooleanValue(true));
-        records.add(record);
+        ChannelRecord channelRecord = ChannelRecord.createReadRecord("ch1", DataType.BOOLEAN);
+        channelRecord.setChannelStatus(new ChannelStatus(ChannelFlag.SUCCESS));
+        channelRecord.setValue(TypedValues.newBooleanValue(true));
+        records.add(channelRecord);
         when(assetMock.read(channelNames)).thenReturn(records);
 
         ReadRequest request = new ReadRequest() {
@@ -329,6 +334,7 @@ public class AssetRestServiceTest {
         };
 
         doAnswer(invocation -> {
+            @SuppressWarnings("unchecked")
             List<ChannelRecord> records = invocation.getArgument(0, List.class);
             assertEquals(7, records.size());
 
@@ -348,7 +354,7 @@ public class AssetRestServiceTest {
         verify(asset, times(1)).write(any());
     }
 
-    private void assertChannelWrite(List<ChannelRecord> records, int idx, String channel, TypedValue value) {
+    private void assertChannelWrite(List<ChannelRecord> records, int idx, String channel, TypedValue<?> value) {
         ChannelRecord channelRecord = records.get(idx);
         assertEquals(channel, channelRecord.getChannelName());
         assertEquals(value, channelRecord.getValue());

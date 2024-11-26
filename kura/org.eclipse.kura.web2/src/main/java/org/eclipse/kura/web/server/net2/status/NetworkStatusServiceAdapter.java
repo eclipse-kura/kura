@@ -437,9 +437,7 @@ public class NetworkStatusServiceAdapter {
     }
 
     private boolean isSecurityWPA3(Set<WifiSecurity> rsnSecurity, Set<WifiSecurity> wpaSecurity, Set<WifiFlag> flags) {
-        return flags.contains(WifiFlag.PRIVACY)
-                && (rsnSecurity.contains(WifiSecurity.KEY_MGMT_SAE) || rsnSecurity.contains(WifiSecurity.KEY_MGMT_OWE)
-                        || rsnSecurity.contains(WifiSecurity.KEY_MGMT_OWE_TM));
+        return flags.contains(WifiFlag.PRIVACY) && (rsnSecurity.contains(WifiSecurity.KEY_MGMT_SAE));
     }
 
     private void setCiphers(GwtWifiHotspotEntry entryToModify, Set<WifiSecurity> wifiSecurity) {

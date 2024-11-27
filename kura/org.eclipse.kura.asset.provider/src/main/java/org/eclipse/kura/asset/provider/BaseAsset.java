@@ -420,7 +420,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         return !isNull(channelRecord) && //
                 !isNull(channelRecord.getValueType()) && //
                 !isNull(channelRecord.getValue()) && //
-                (!channel.getValueScaleAsNumber().equals(1.0d) || !channel.getValueOffsetAsNumber().equals(0.0d));
+                (channel.getValueScaleAsNumber().isPresent() || channel.getValueOffsetAsNumber().isPresent());
     }
 
     @SuppressWarnings("unchecked")

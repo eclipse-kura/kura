@@ -25,8 +25,15 @@ public enum ScaleOffsetType {
 
     DEFINED_BY_VALUE_TYPE,
 
+    /**
+     * @since 3.0
+     */
+    FLOAT,
     DOUBLE,
-
+    /**
+     * @since 3.0
+     */
+    INTEGER,
     LONG;
 
     /**

@@ -108,7 +108,7 @@ public class Snippets {
             + "                {\n" //
             + "                    \"label\": \"DOUBLE\",\n" //
             + "                    \"value\": \"DOUBLE\"\n" //
-            + "                }\n" //
+            + "                },\n" //
             + "                {\n" //
             + "                    \"label\": \"INTEGER\",\n" //
             + "                    \"value\": \"INTEGER\"\n" //

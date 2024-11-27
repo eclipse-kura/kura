@@ -51,8 +51,16 @@ public enum ScaleOffsetType {
             return DEFINED_BY_VALUE_TYPE;
         }
 
+        if (FLOAT.name().equalsIgnoreCase(stringScaleOffsetType)) {
+            return FLOAT;
+        }
+
         if (DOUBLE.name().equalsIgnoreCase(stringScaleOffsetType)) {
             return DOUBLE;
+        }
+
+        if (INTEGER.name().equalsIgnoreCase(stringScaleOffsetType)) {
+            return INTEGER;
         }
 
         if (LONG.name().equalsIgnoreCase(stringScaleOffsetType)) {

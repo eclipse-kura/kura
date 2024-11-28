@@ -272,10 +272,10 @@
 
 ### Bundle States
 ```
--   `ACTIVE`: Container is running
--   `INSTALLED`: Container is starting
--   `UNINSTALLED`: Container has failed, or is stopped
--   `UNKNOWN`: Container state can not be determined
+-   `ACTIVE`: Bundle is running
+-   `INSTALLED`: Bundle is starting
+-   `UNINSTALLED`: Bundle has failed, or is stopped
+-   `UNKNOWN`: Bundle state can not be determined
 ```
 
 ### Container States

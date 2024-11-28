@@ -501,6 +501,8 @@ public class NMSettingsConverter {
             return createWPAWPA2Settings(props, deviceId, propMode);
         case SECURITY_WPA3:
             return createWPA3Settings(props, deviceId, propMode);
+        case SECURITY_WPA2_WPA3:
+            return createWPA2WPA3Settings(props, deviceId, propMode);
         case SECURITY_WPA2_WPA3_ENTERPRISE:
             return createWPA2WPA3EnterpriseSettings();
         default:
@@ -537,11 +539,25 @@ public class NMSettingsConverter {
         Map<String, Variant<?>> settings = createWifiSettings(props, deviceId, propMode);
 
         settings.put(NM_SETTINGS_80211_KEY_MANAGEMENT, new Variant<>("sae"));
+        // Set PMF (Protected Management Frames) as required
+        settings.put("pmf", new Variant<>(new UInt32(3)));
 
         return settings;
     }
 
-    private static Map<String, Variant<?>> createWifiSettings(NetworkProperties props, String deviceId, String propMode) {
+    private static Map<String, Variant<?>> createWPA2WPA3Settings(NetworkProperties props, String deviceId,
+            String propMode) {
+        Map<String, Variant<?>> settings = createWifiSettings(props, deviceId, propMode);
+
+        settings.put(NM_SETTINGS_80211_KEY_MANAGEMENT, new Variant<>("sae"));
+        // Set PMF (Protected Management Frames) as optional
+        settings.put("pmf", new Variant<>(new UInt32(2)));
+
+        return settings;
+    }
+
+    private static Map<String, Variant<?>> createWifiSettings(NetworkProperties props, String deviceId,
+            String propMode) {
         Map<String, Variant<?>> settings = new HashMap<>();
 
         String psk = props
@@ -823,6 +839,7 @@ public class NMSettingsConverter {
         case SECURITY_WPA2:
             return Arrays.asList("rsn");
         case SECURITY_WPA_WPA2:
+        case SECURITY_WPA2_WPA3:
         case SECURITY_WPA3:
             return Arrays.asList();
         default:

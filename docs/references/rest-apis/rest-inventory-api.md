@@ -28,6 +28,16 @@
     ]
 }
 ```
+Supported **type** values are:
+- BUNDLE : represents a OSGi Bundle
+- DP : represents a OSGi Deployment Package
+- DEB : represents a Linux Debian package
+- RPM : represents a Linux RPM package
+- APK : represents a Linux Alpine APK package
+- DOCKER : represents a container instance
+- CONTAINER_IMAGE : represents a container image
+- UNKNOWN : fallback type for unrecognized resources
+
  --- 
 
 

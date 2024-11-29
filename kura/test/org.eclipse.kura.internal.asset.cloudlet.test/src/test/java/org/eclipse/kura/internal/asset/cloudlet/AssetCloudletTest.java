@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.Asset;
@@ -40,7 +39,6 @@ import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.type.DataType;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 
 public class AssetCloudletTest {
@@ -127,7 +125,7 @@ public class AssetCloudletTest {
         Map<String, Channel> channels = new HashMap<>();
         Map<String, Object> channelConfig = new HashMap<>();
         Channel channel = new Channel("ch1", ChannelType.READ_WRITE, DataType.INTEGER,
-                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.empty(), Optional.empty(), channelConfig);
+                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, 1.0d, 0.0d, channelConfig);
         channels.put("ch1", channel);
         AssetConfiguration assetConfiguration = new AssetConfiguration("description", "driverPid", channels);
         when(assetMock.getAssetConfiguration()).thenReturn(assetConfiguration);
@@ -215,7 +213,7 @@ public class AssetCloudletTest {
         Map<String, Channel> channels = new HashMap<>();
         Map<String, Object> channelConfig = new HashMap<>();
         Channel channel = new Channel("ch1", ChannelType.READ_WRITE, DataType.INTEGER,
-                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.empty(), Optional.empty(), channelConfig);
+                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, 1.0d, 0.0d, channelConfig);
         channels.put("ch1", channel);
         AssetConfiguration assetConfiguration = new AssetConfiguration("description", "driverPid", channels);
         when(assetMock.getAssetConfiguration()).thenReturn(assetConfiguration);
@@ -302,7 +300,7 @@ public class AssetCloudletTest {
         Map<String, Channel> channels = new HashMap<>();
         Map<String, Object> channelConfig = new HashMap<>();
         Channel channel = new Channel("ch1", ChannelType.READ_WRITE, DataType.INTEGER,
-                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.empty(), Optional.empty(), channelConfig);
+                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, 1.0d, 0.0d, channelConfig);
         channels.put("ch1", channel);
         AssetConfiguration assetConfiguration = new AssetConfiguration("description", "driverPid", channels);
         when(assetMock.getAssetConfiguration()).thenReturn(assetConfiguration);
@@ -347,7 +345,7 @@ public class AssetCloudletTest {
         Map<String, Channel> channels = new HashMap<>();
         Map<String, Object> channelConfig = new HashMap<>();
         Channel channel = new Channel("ch1", ChannelType.READ_WRITE, DataType.INTEGER,
-                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.empty(), Optional.empty(), channelConfig);
+                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, 1.0d, 0.0d, channelConfig);
         channels.put("ch1", channel);
         AssetConfiguration assetConfiguration = new AssetConfiguration("description", "driverPid", channels);
         when(assetMock.getAssetConfiguration()).thenReturn(assetConfiguration);
@@ -397,7 +395,7 @@ public class AssetCloudletTest {
         Map<String, Channel> channels = new HashMap<>();
         Map<String, Object> channelConfig = new HashMap<>();
         Channel channel = new Channel("ch1", ChannelType.READ_WRITE, DataType.INTEGER,
-                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.empty(), Optional.empty(), channelConfig);
+                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, 1.0d, 0.0d, channelConfig);
         channels.put("ch1", channel);
         AssetConfiguration assetConfiguration = new AssetConfiguration("description", "driverPid", channels);
         when(assetMock.getAssetConfiguration()).thenReturn(assetConfiguration);
@@ -437,7 +435,7 @@ public class AssetCloudletTest {
     }
 
     @Test(expected = KuraException.class)
-    public void testDoExecWriteNoRequestBody() throws NoSuchFieldException, InvalidSyntaxException, KuraException {
+    public void testDoExecWriteNoRequestBody() throws NoSuchFieldException, KuraException {
         // test doExec initiating write with no request body
 
         AssetCloudlet svc = new AssetCloudlet();
@@ -470,7 +468,7 @@ public class AssetCloudletTest {
     }
 
     @Test
-    public void testDoExecWrite() throws NoSuchFieldException, InvalidSyntaxException, KuraException {
+    public void testDoExecWrite() throws NoSuchFieldException, KuraException {
         // test doExec initiating write
 
         AssetCloudlet svc = new AssetCloudlet();

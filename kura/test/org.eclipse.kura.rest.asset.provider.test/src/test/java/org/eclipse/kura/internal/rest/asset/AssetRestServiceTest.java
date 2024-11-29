@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -126,11 +125,11 @@ public class AssetRestServiceTest {
         Map<String, Channel> channels = new TreeMap<>();
         Map<String, Object> channelConfig = new HashMap<>();
         Channel ch1 = new Channel("ch1", ChannelType.READ, DataType.INTEGER, ScaleOffsetType.DEFINED_BY_VALUE_TYPE,
-                Optional.empty(), Optional.empty(), channelConfig);
+                1.0d, 0.0d, channelConfig);
         channels.put(ch1.getName(), ch1);
         channelConfig = new HashMap<>();
         Channel ch2 = new Channel("ch2", ChannelType.WRITE, DataType.STRING, ScaleOffsetType.DEFINED_BY_VALUE_TYPE,
-                Optional.empty(), Optional.empty(), channelConfig);
+                1.0d, 0.0d, channelConfig);
         channels.put(ch2.getName(), ch2);
 
         AssetConfiguration assetConfig = new AssetConfiguration("description", "driverPid", channels);

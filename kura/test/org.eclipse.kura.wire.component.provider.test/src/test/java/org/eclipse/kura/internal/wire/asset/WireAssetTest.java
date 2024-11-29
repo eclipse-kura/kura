@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 import org.eclipse.kura.asset.provider.AssetConstants;
@@ -94,9 +93,9 @@ public class WireAssetTest {
         wireAssetProperties.put(ConfigurationService.KURA_SERVICE_PID, "componentName");
 
         Channel readChannel1 = new Channel("readChannel1", ChannelType.READ, DataType.BOOLEAN,
-                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.empty(), Optional.empty(), new HashMap<>());
+                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, 1.0d, 0.0d, new HashMap<>());
         Channel writeChannel2 = new Channel("writeChannel2", ChannelType.WRITE, DataType.BOOLEAN,
-                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.empty(), Optional.empty(), new HashMap<>());
+                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, 1.0d, 0.0d, new HashMap<>());
 
         putChannel(readChannel1, wireAssetProperties);
         putChannel(writeChannel2, wireAssetProperties);
@@ -201,11 +200,11 @@ public class WireAssetTest {
         wireAssetProperties.put(ConfigurationService.KURA_SERVICE_PID, "componentName");
 
         Channel readChannel1 = new Channel("0", ChannelType.READ, DataType.BOOLEAN,
-                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.empty(), Optional.empty(), Collections.emptyMap());
+                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, 1.0d, 0.0d, Collections.emptyMap());
         Channel readChannel2 = new Channel("1", ChannelType.READ, DataType.BOOLEAN,
-                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.empty(), Optional.empty(), Collections.emptyMap());
+                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, 1.0d, 0.0d, Collections.emptyMap());
         Channel readChannel3 = new Channel("2", ChannelType.READ, DataType.BOOLEAN,
-                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.empty(), Optional.empty(), Collections.emptyMap());
+                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, 1.0d, 0.0d, Collections.emptyMap());
 
         putChannel(readChannel1, wireAssetProperties);
         putChannel(readChannel2, wireAssetProperties);

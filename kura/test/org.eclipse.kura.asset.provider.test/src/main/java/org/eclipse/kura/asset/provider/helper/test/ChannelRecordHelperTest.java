@@ -16,7 +16,6 @@ package org.eclipse.kura.asset.provider.helper.test;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
-import java.util.Optional;
 
 import org.eclipse.kura.channel.Channel;
 import org.eclipse.kura.channel.ChannelRecord;
@@ -33,8 +32,8 @@ public class ChannelRecordHelperTest {
 
     @Test
     public void shouldCreateChannelRecorWithDoubleValueType() {
-        givenChannel(new Channel("test-channel1", ChannelType.READ, DataType.INTEGER, ScaleOffsetType.DOUBLE,
-                Optional.of(3.3d), Optional.of(33.1d), Collections.emptyMap()));
+        givenChannel(new Channel("test-channel1", ChannelType.READ, DataType.INTEGER, ScaleOffsetType.DOUBLE, 3.3d,
+                33.1d, Collections.emptyMap()));
 
         whenCreatedChannelRecord();
 
@@ -44,7 +43,7 @@ public class ChannelRecordHelperTest {
     @Test
     public void shouldCreateChannelRecorWithIntegerValueType() {
         givenChannel(new Channel("test-channel2", ChannelType.READ, DataType.INTEGER,
-                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, Optional.of(3.3d), Optional.of(3.1d), Collections.emptyMap()));
+                ScaleOffsetType.DEFINED_BY_VALUE_TYPE, 3.3d, 3.1d, Collections.emptyMap()));
 
         whenCreatedChannelRecord();
 
@@ -53,8 +52,8 @@ public class ChannelRecordHelperTest {
 
     @Test
     public void shouldCreateChannelRecorWithLongValueType() {
-        givenChannel(new Channel("test-channel3", ChannelType.READ, DataType.INTEGER, ScaleOffsetType.LONG,
-                Optional.of(3l), Optional.of(4l), Collections.emptyMap()));
+        givenChannel(new Channel("test-channel3", ChannelType.READ, DataType.INTEGER, ScaleOffsetType.LONG, 3l, 4l,
+                Collections.emptyMap()));
 
         whenCreatedChannelRecord();
 

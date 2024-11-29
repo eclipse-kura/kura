@@ -64,7 +64,7 @@ public enum ScaleOffsetType {
             return LONG;
         }
 
-        throw new IllegalArgumentException("Cannot convert to DataType");
+        throw new IllegalArgumentException("Cannot convert to ScaleOffsetType");
     }
 
 }

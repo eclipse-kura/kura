@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -340,20 +339,20 @@ public final class BaseAssetConfiguration {
             return ScaleOffsetType.getScaleOffsetType(scaleOffsetypeProp);
         }
 
-        private static Optional<Number> getValueScale(final Map<String, Object> properties) {
+        private static Number getValueScale(final Map<String, Object> properties) {
             final String valueScale = (String) properties.get(VALUE_SCALE.value());
 
             if (valueScale == null || valueScale.isEmpty()) {
-                return Optional.empty();
+                return 1.0d;
             }
             return parseScaleOffsetTypedValue(getScaleOffsetType(properties), getDataType(properties), valueScale);
         }
 
-        private static Optional<Number> getValueOffset(final Map<String, Object> properties) {
+        private static Number getValueOffset(final Map<String, Object> properties) {
             final String valueOffset = (String) properties.get(VALUE_OFFSET.value());
 
             if (valueOffset == null || valueOffset.isEmpty()) {
-                return Optional.empty();
+                return 0.0d;
             }
             return parseScaleOffsetTypedValue(getScaleOffsetType(properties), getDataType(properties), valueOffset);
         }
@@ -388,8 +387,8 @@ public final class BaseAssetConfiguration {
 
             final boolean isEnabled = isEnabled(channelConfig);
 
-            final Optional<Number> valueScale = getValueScale(channelConfig);
-            final Optional<Number> valueOffset = getValueOffset(channelConfig);
+            final Number valueScale = getValueScale(channelConfig);
+            final Number valueOffset = getValueOffset(channelConfig);
             final ScaleOffsetType scaleOffsetType = getScaleOffsetType(channelConfig);
 
             final Channel channel = new Channel(channelName, channelType, dataType, scaleOffsetType, valueScale,
@@ -403,7 +402,7 @@ public final class BaseAssetConfiguration {
             return channel;
         }
 
-        private static Optional<Number> parseScaleOffsetTypedValue(ScaleOffsetType scaleOffsetType, DataType valueType,
+        private static Number parseScaleOffsetTypedValue(ScaleOffsetType scaleOffsetType, DataType valueType,
                 String value) {
             Objects.requireNonNull(scaleOffsetType, "scaleOffsetType cannot be null");
             Objects.requireNonNull(valueType, "valueType cannot be null");
@@ -414,13 +413,13 @@ public final class BaseAssetConfiguration {
 
             switch (actualDataType) {
             case FLOAT:
-                return Optional.of(Float.parseFloat(value));
+                return Float.parseFloat(value);
             case DOUBLE:
-                return Optional.of(Double.parseDouble(value));
+                return Double.parseDouble(value);
             case INTEGER:
-                return Optional.of(Integer.parseInt(value));
+                return Integer.parseInt(value);
             case LONG:
-                return Optional.of(Long.parseLong(value));
+                return Long.parseLong(value);
             default:
                 throw new IllegalArgumentException(
                         value + " cannot be converted into a Number of type " + scaleOffsetType);

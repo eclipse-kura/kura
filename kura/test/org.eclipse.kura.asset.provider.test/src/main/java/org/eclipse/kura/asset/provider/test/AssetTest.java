@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -209,8 +208,8 @@ public final class AssetTest {
         assertEquals("1.CH", channel1.getName());
         assertEquals(ChannelType.READ, channel1.getType());
         assertEquals(DataType.INTEGER, channel1.getValueType());
-        assertEquals(Optional.of(1), channel1.getValueScaleAsNumber());
-        assertEquals(Optional.of(0), channel1.getValueOffsetAsNumber());
+        assertEquals(1, channel1.getValueScaleAsNumber());
+        assertEquals(0, channel1.getValueOffsetAsNumber());
         assertEquals("sample.channel1.modbus.register", channel1.getConfiguration().get("DRIVER.modbus.register"));
         assertEquals("sample.channel1.modbus.FC", channel1.getConfiguration().get("DRIVER.modbus.FC"));
 

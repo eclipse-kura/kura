@@ -18,7 +18,6 @@ import static java.util.Objects.requireNonNull;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.DataType;
@@ -67,12 +66,12 @@ public class Channel {
     /*
      * The value used to scale the value
      */
-    private Optional<Number> valueScale = Optional.empty();
+    private Number valueScale = 1.0d;
 
     /**
      * The value used as offset of the value
      */
-    private Optional<Number> valueOffset = Optional.empty();
+    private Number valueOffset = 0.0d;
 
     private String unit = "";
 
@@ -91,9 +90,9 @@ public class Channel {
      * @param valueType
      *            the value type
      * @param valueScale
-     *            an optional value used to scale the value, must have the same {@link DataType} as valueOffset
+     *            an value used to scale the value, must have the same {@link DataType} as valueOffset
      * @param valueOffset
-     *            an optional value used as offset of the value, must have the same {@link DataType} as valueScale
+     *            an value used as offset of the value, must have the same {@link DataType} as valueScale
      * @param config
      *            the configuration
      * @throws NullPointerException
@@ -101,11 +100,11 @@ public class Channel {
      * @throws IllegalArgumentException
      *             if any of the valueScale and valueOffset have different types
      *
-     * @since 3.0
+     * @since 2.8
      */
     public Channel(final String name, final ChannelType type, final DataType valueType,
-            final ScaleOffsetType scaleOffsetType, final Optional<Number> valueScale,
-            final Optional<Number> valueOffset, final Map<String, Object> config) {
+            final ScaleOffsetType scaleOffsetType, final Number valueScale, final Number valueOffset,
+            final Map<String, Object> config) {
 
         requireNonNull(name, MESSAGE_CHANNEL_NAME_CANNOT_BE_NULL);
         requireNonNull(type, MESSAGE_CHANNEL_TYPE_CANNOT_BE_NULL);
@@ -113,6 +112,8 @@ public class Channel {
         requireNonNull(config, MESSAGE_CHANNEL_CONFIGURATION_CANNOT_BE_NULL);
 
         requireNonNull(scaleOffsetType, "Scale/Offset type cannot be null");
+        requireNonNull(valueScale, "Channel value scale cannot be null");
+        requireNonNull(valueOffset, "Channel value offset cannot be null");
 
         this.configuration = Collections.unmodifiableMap(config);
         this.name = name;
@@ -189,9 +190,9 @@ public class Channel {
      *
      * @return a {@link Number} that represents the scale factor to be applied to the read value
      *
-     * @since 3.0
+     * @since 2.8
      */
-    public Optional<Number> getValueScaleAsNumber() {
+    public Number getValueScaleAsNumber() {
         return this.valueScale;
     }
 
@@ -201,9 +202,9 @@ public class Channel {
      *
      * @return a {@link TypedValue} that represents the offset factor to be applied to the read value
      *
-     * @since 3.0
+     * @since 2.8
      */
-    public Optional<Number> getValueOffsetAsNumber() {
+    public Number getValueOffsetAsNumber() {
         return this.valueOffset;
     }
 
@@ -283,10 +284,10 @@ public class Channel {
      * Specifies the scale to be applied to the channel value
      *
      * @param scale
-     *            an optional {@link Number} value that specifies the scale to be applied to the channel value
-     * @since 3.0
+     *            a {@link Number} value that specifies the scale to be applied to the channel value
+     * @since 2.8
      */
-    public void setScale(Optional<Number> scale) {
+    public void setScale(Number scale) {
         this.valueScale = scale;
     }
 
@@ -294,10 +295,10 @@ public class Channel {
      * Specifies the offset to be applied to the channel value
      *
      * @param offset
-     *            an optional {@link Number} value that specifies the offset to be applied to the channel value
-     * @since 3.0
+     *            a {@link Number} value that specifies the offset to be applied to the channel value
+     * @since 2.8
      */
-    public void setOffset(Optional<Number> offset) {
+    public void setOffset(Number offset) {
         this.valueOffset = offset;
     }
 

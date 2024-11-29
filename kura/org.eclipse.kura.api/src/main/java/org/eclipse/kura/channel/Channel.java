@@ -90,9 +90,9 @@ public class Channel {
      * @param valueType
      *            the value type
      * @param valueScale
-     *            an value used to scale the value, must have the same {@link DataType} as valueOffset
+     *            the value used to scale the value, must have the same {@link DataType} as valueOffset
      * @param valueOffset
-     *            an value used as offset of the value, must have the same {@link DataType} as valueScale
+     *            the value used as offset of the value, must have the same {@link DataType} as valueScale
      * @param config
      *            the configuration
      * @throws NullPointerException

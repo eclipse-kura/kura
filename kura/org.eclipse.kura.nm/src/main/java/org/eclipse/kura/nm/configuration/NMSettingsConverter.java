@@ -549,7 +549,7 @@ public class NMSettingsConverter {
             String propMode) {
         Map<String, Variant<?>> settings = createWifiSettings(props, deviceId, propMode);
 
-        settings.put(NM_SETTINGS_80211_KEY_MANAGEMENT, new Variant<>("sae"));
+        settings.put(NM_SETTINGS_80211_KEY_MANAGEMENT, new Variant<>("wpa-psk"));
         // Set PMF (Protected Management Frames) as optional
         settings.put("pmf", new Variant<>(new UInt32(2)));
 

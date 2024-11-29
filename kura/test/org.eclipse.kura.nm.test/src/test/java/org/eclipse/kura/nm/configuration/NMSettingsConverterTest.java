@@ -1114,6 +1114,65 @@ public class NMSettingsConverterTest {
     }
 
     @Test
+    public void build80211WirelessSecuritySettingsShouldWorkWhenGivenSecurityTypeWpaWpa2() {
+
+        givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
+        givenMapWith("net.interface.wlan0.config.wifi.infra.securityType", "SECURITY_WPA_WPA2");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.groupCiphers", "CCMP");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild80211WirelessSecuritySettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionOccurred();
+        thenResultingMapContains("key-mgmt", "wpa-psk");
+        thenResultingMapContains("proto", new Variant<>(Arrays.asList(), "as").getValue());
+        thenResultingMapNotContains("wep-key-type");
+        thenResultingMapNotContains("wep-key0");
+    }
+
+    @Test
+    public void build80211WirelessSecuritySettingsShouldWorkWhenGivenSecurityTypeWpa2Wpa3() {
+
+        givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
+        givenMapWith("net.interface.wlan0.config.wifi.infra.securityType", "SECURITY_WPA2_WPA3");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.groupCiphers", "CCMP");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild80211WirelessSecuritySettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionOccurred();
+        thenResultingMapContains("key-mgmt", "wpa-psk");
+        thenResultingMapContains("proto", new Variant<>(Arrays.asList(), "as").getValue());
+        thenResultingMapContains("pmf", new Variant<>(new UInt32(2)).getValue());
+        thenResultingMapNotContains("wep-key-type");
+        thenResultingMapNotContains("wep-key0");
+    }
+
+    @Test
+    public void build80211WirelessSecuritySettingsShouldWorkWhenGivenSecurityTypeWpa3() {
+
+        givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.passphrase", new Password("test"));
+        givenMapWith("net.interface.wlan0.config.wifi.infra.securityType", "SECURITY_WPA3");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.groupCiphers", "CCMP");
+        givenMapWith("net.interface.wlan0.config.wifi.infra.pairwiseCiphers", "CCMP");
+        givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
+
+        whenBuild80211WirelessSecuritySettingsIsRunWith(this.networkProperties, "wlan0");
+
+        thenNoExceptionOccurred();
+        thenResultingMapContains("key-mgmt", "sae");
+        thenResultingMapContains("proto", new Variant<>(Arrays.asList(), "as").getValue());
+        thenResultingMapContains("pmf", new Variant<>(new UInt32(3)).getValue());
+        thenResultingMapNotContains("wep-key-type");
+        thenResultingMapNotContains("wep-key0");
+    }
+
+    @Test
     public void build80211WirelessSecuritySettingsShouldThrowWhenGivenMalformedSecurity() {
 
         givenMapWith("net.interface.wlan0.config.wifi.mode", "INFRA");

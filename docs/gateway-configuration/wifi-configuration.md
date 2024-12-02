@@ -27,7 +27,10 @@ The **Wireless** tab contains the following configuration parameters:
     - WEP: Wired Equivalent Privacy
     - WPA: Wi-Fi Protected Access
     - WPA2: Wi-Fi Protected Access II
-    - WPA2/WPA3-Enterprise: Wi-Fi Protected Access II & III with 802.1x. Please see [here](./wifi-configuration-8021x.md) for further details. This fearture is available only in station mode
+    - WPA/WPA2: Wi-Fi Protected Access and Wi-Fi Protected Access II
+    - WPA2/WPA3-Enterprise: Wi-Fi Protected Access II & III with 802.1x. Please see [here](./wifi-configuration-8021x.md) for further details. This fearture is available only in station mode.
+    - WPA3: Wi-Fi Protected Access III. This is an experimental feature. See [here](#notes-about-wpa3-security) for further details.
+    - WPA2/WPA3: Wi-Fi Protected Access II and Wi-Fi Protected Access III. This is an experimental feature. See [here](#notes-about-wpa3-security) for further details.
 
 - **Wireless Password**: sets the password for the wireless network.
     - WEP: 64-bit or 128-bit encryption key
@@ -89,3 +92,18 @@ In addition to the options described above, the **Wireless** configuration displ
     - Security
 
     If you select one of these access points, respective wireless controls (i.e., _Network Name_, _Wireless Security_, and _Channel_) are filled with information obtained during the scan operation. The _Force Wireless Network Scan_ button triggers a manual scan for available access points.
+
+## Notes about WPA3 security
+
+The support to WPA3 security feature is experimental. Before using it, update your system with the latest changes and check that the WiFi module installed on you device has the latest firmware.
+To check if an interface supports the new WPA3 security, run the following command:
+
+```
+iw phy | grep -i sae
+```
+
+and verify is the following output is present
+
+```
+Device supports SAE with AUTHENTICATE command
+```

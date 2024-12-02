@@ -1146,7 +1146,7 @@ public class NMSettingsConverterTest {
 
         thenNoExceptionOccurred();
         thenResultingMapContains("key-mgmt", "wpa-psk");
-        thenResultingMapContains("proto", new Variant<>(Arrays.asList(), "as").getValue());
+        thenResultingMapContains("proto", new Variant<>(Arrays.asList("rsn"), "as").getValue());
         thenResultingMapContains("pmf", new Variant<>(new UInt32(2)).getValue());
         thenResultingMapNotContains("wep-key-type");
         thenResultingMapNotContains("wep-key0");
@@ -1166,7 +1166,7 @@ public class NMSettingsConverterTest {
 
         thenNoExceptionOccurred();
         thenResultingMapContains("key-mgmt", "sae");
-        thenResultingMapContains("proto", new Variant<>(Arrays.asList(), "as").getValue());
+        thenResultingMapContains("proto", new Variant<>(Arrays.asList("rsn"), "as").getValue());
         thenResultingMapContains("pmf", new Variant<>(new UInt32(3)).getValue());
         thenResultingMapNotContains("wep-key-type");
         thenResultingMapNotContains("wep-key0");

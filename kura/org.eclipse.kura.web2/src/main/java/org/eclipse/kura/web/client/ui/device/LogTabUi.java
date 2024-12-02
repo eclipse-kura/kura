@@ -95,10 +95,12 @@ public class LogTabUi extends Composite {
     private final String nonce = Integer.toString(Random.nextInt());
 
     private static final int DOWNLOAD_COMPLETE_WAIT_TIMEOUT = 5000;
+    private static final int DOWNLOAD_COMPLETION_RETRIES= 60; 
+    
     private Timer waitDownloadCompleted = new Timer() {
 
         // safety parameter, 9 = 45secs
-        private short retryLimit = 9;
+        private short retryLimit = DOWNLOAD_COMPLETION_RETRIES;
         private String cookieName;
 
         @Override
@@ -121,7 +123,7 @@ public class LogTabUi extends Composite {
         private void hideModalAndStop() {
             EntryClassUi.hideWaitModal();
             Cookies.removeCookie(cookieName, "/");
-            this.retryLimit = 9;
+            this.retryLimit = DOWNLOAD_COMPLETION_RETRIES;
             this.cancel();
         }
 

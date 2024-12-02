@@ -837,10 +837,10 @@ public class NMSettingsConverter {
         case SECURITY_WPA:
             return Arrays.asList("wpa");
         case SECURITY_WPA2:
-            return Arrays.asList("rsn");
-        case SECURITY_WPA_WPA2:
         case SECURITY_WPA2_WPA3:
         case SECURITY_WPA3:
+            return Arrays.asList("rsn");
+        case SECURITY_WPA_WPA2:
             return Arrays.asList();
         default:
             throw new IllegalArgumentException(String.format("Unsupported WiFi proto \"%s\"", securityType));

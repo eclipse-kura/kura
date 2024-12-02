@@ -363,8 +363,7 @@ public final class BaseAssetConfiguration {
 
         private static boolean isEnabled(final Map<String, Object> properties) {
             try {
-                Object enableProp = properties.get(ENABLED.value());
-                return enableProp == null || Boolean.parseBoolean(enableProp.toString());
+                return Boolean.parseBoolean(properties.get(ENABLED.value()).toString());
             } catch (Exception e) {
                 logger.debug("Failed to retrieve enabled channel property");
                 return true;

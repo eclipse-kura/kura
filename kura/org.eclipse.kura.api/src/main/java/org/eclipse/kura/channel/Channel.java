@@ -284,11 +284,37 @@ public class Channel {
      * Specifies the scale to be applied to the channel value
      *
      * @param scale
+     *            a double value that specifies the scale to be applied to the channel value
+     * @since 2.3
+     * @deprecated since version 3.0
+     */
+    @Deprecated
+    public void setScale(double scale) {
+        this.valueScale = scale;
+    }
+
+    /**
+     * Specifies the scale to be applied to the channel value
+     *
+     * @param scale
      *            a {@link Number} value that specifies the scale to be applied to the channel value
      * @since 2.8
      */
     public void setScale(Number scale) {
         this.valueScale = scale;
+    }
+
+    /**
+     * Specifies the offset to be applied to the channel value
+     *
+     * @param offset
+     *            a double value that specifies the offset to be applied to the channel value
+     * @since 2.3
+     * @deprecated since version 3.0
+     */
+    @Deprecated
+    public void setOffset(double offset) {
+        this.valueOffset = offset;
     }
 
     /**

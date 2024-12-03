@@ -345,7 +345,7 @@ public final class BaseAssetConfiguration {
             if (valueScale == null || valueScale.isEmpty()) {
                 return 1.0d;
             }
-            return parseScaleOffsetTypedValue(getScaleOffsetType(properties), valueScale);
+            return parseScaleOffsetTypedValue(getScaleOffsetType(properties), getDataType(properties), valueScale);
         }
 
         private static Number getValueOffset(final Map<String, Object> properties) {
@@ -354,7 +354,7 @@ public final class BaseAssetConfiguration {
             if (valueOffset == null || valueOffset.isEmpty()) {
                 return 0.0d;
             }
-            return parseScaleOffsetTypedValue(getScaleOffsetType(properties), valueOffset);
+            return parseScaleOffsetTypedValue(getScaleOffsetType(properties), getDataType(properties), valueOffset);
         }
 
         private static String getUnit(final Map<String, Object> properties) {
@@ -402,18 +402,42 @@ public final class BaseAssetConfiguration {
             return channel;
         }
 
-        private static Number parseScaleOffsetTypedValue(ScaleOffsetType type, String value) {
-            Objects.requireNonNull(type, "type cannot be null");
+        private static Number parseScaleOffsetTypedValue(ScaleOffsetType scaleOffsetType, DataType valueType,
+                String value) {
+            Objects.requireNonNull(scaleOffsetType, "scaleOffsetType cannot be null");
+            Objects.requireNonNull(valueType, "valueType cannot be null");
             Objects.requireNonNull(value, "value cannot be null");
 
-            switch (type) {
-            case DEFINED_BY_VALUE_TYPE:
+            DataType actualDataType = scaleOffsetType == ScaleOffsetType.DEFINED_BY_VALUE_TYPE ? valueType
+                    : toDataType(scaleOffsetType);
+
+            switch (actualDataType) {
+            case FLOAT:
+                return Float.parseFloat(value);
             case DOUBLE:
                 return Double.parseDouble(value);
+            case INTEGER:
+                return Integer.parseInt(value);
             case LONG:
                 return Long.parseLong(value);
             default:
-                throw new IllegalArgumentException(value + " cannot be converted into a Number of type " + type);
+                throw new IllegalArgumentException(
+                        value + " cannot be converted into a Number of type " + scaleOffsetType);
+            }
+        }
+
+        private static DataType toDataType(ScaleOffsetType scaleOffsetType) {
+            switch (scaleOffsetType) {
+            case FLOAT:
+                return DataType.FLOAT;
+            case DOUBLE:
+                return DataType.DOUBLE;
+            case INTEGER:
+                return DataType.INTEGER;
+            case LONG:
+                return DataType.LONG;
+            default:
+                throw new IllegalArgumentException("Unsupported scale offset type: " + scaleOffsetType);
             }
         }
     }

@@ -46,8 +46,12 @@ public class ChannelRecordHelper {
 
     private static DataType toDataType(ScaleOffsetType scaleOffsetType) {
         switch (scaleOffsetType) {
+        case FLOAT:
+            return DataType.FLOAT;
         case DOUBLE:
             return DataType.DOUBLE;
+        case INTEGER:
+            return DataType.INTEGER;
         case LONG:
             return DataType.LONG;
         default:

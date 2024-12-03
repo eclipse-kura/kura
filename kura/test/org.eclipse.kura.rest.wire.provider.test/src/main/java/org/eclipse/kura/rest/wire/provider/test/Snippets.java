@@ -102,8 +102,16 @@ public class Snippets {
             + "                    \"value\": \"DEFINED_BY_VALUE_TYPE\"\n" //
             + "                },\n" //
             + "                {\n" //
+            + "                    \"label\": \"FLOAT\",\n" //
+            + "                    \"value\": \"FLOAT\"\n" //
+            + "                },\n" //
+            + "                {\n" //
             + "                    \"label\": \"DOUBLE\",\n" //
             + "                    \"value\": \"DOUBLE\"\n" //
+            + "                },\n" //
+            + "                {\n" //
+            + "                    \"label\": \"INTEGER\",\n" //
+            + "                    \"value\": \"INTEGER\"\n" //
             + "                },\n" //
             + "                {\n" //
             + "                    \"label\": \"LONG\",\n" //

@@ -32,8 +32,8 @@ public class ChannelRecordHelperTest {
 
     @Test
     public void shouldCreateChannelRecorWithDoubleValueType() {
-        givenChannel(new Channel("test-channel", ChannelType.READ, DataType.INTEGER, ScaleOffsetType.DOUBLE, 3.3d, 3.1d,
-                Collections.emptyMap()));
+        givenChannel(new Channel("test-channel1", ChannelType.READ, DataType.INTEGER, ScaleOffsetType.DOUBLE, 3.3d,
+                33.1d, Collections.emptyMap()));
 
         whenCreatedChannelRecord();
 
@@ -42,7 +42,7 @@ public class ChannelRecordHelperTest {
 
     @Test
     public void shouldCreateChannelRecorWithIntegerValueType() {
-        givenChannel(new Channel("test-channel", ChannelType.READ, DataType.INTEGER,
+        givenChannel(new Channel("test-channel2", ChannelType.READ, DataType.INTEGER,
                 ScaleOffsetType.DEFINED_BY_VALUE_TYPE, 3.3d, 3.1d, Collections.emptyMap()));
 
         whenCreatedChannelRecord();
@@ -52,7 +52,7 @@ public class ChannelRecordHelperTest {
 
     @Test
     public void shouldCreateChannelRecorWithLongValueType() {
-        givenChannel(new Channel("test-channel", ChannelType.READ, DataType.INTEGER, ScaleOffsetType.LONG, 3l, 4l,
+        givenChannel(new Channel("test-channel3", ChannelType.READ, DataType.INTEGER, ScaleOffsetType.LONG, 3l, 4l,
                 Collections.emptyMap()));
 
         whenCreatedChannelRecord();

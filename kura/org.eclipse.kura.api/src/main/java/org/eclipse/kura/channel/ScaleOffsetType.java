@@ -22,8 +22,15 @@ public enum ScaleOffsetType {
 
     DEFINED_BY_VALUE_TYPE,
 
+    /**
+     * @since 3.0
+     */
+    FLOAT,
     DOUBLE,
-
+    /**
+     * @since 3.0
+     */
+    INTEGER,
     LONG;
 
     /**
@@ -41,15 +48,23 @@ public enum ScaleOffsetType {
             return DEFINED_BY_VALUE_TYPE;
         }
 
+        if (FLOAT.name().equalsIgnoreCase(stringScaleOffsetType)) {
+            return FLOAT;
+        }
+
         if (DOUBLE.name().equalsIgnoreCase(stringScaleOffsetType)) {
             return DOUBLE;
+        }
+
+        if (INTEGER.name().equalsIgnoreCase(stringScaleOffsetType)) {
+            return INTEGER;
         }
 
         if (LONG.name().equalsIgnoreCase(stringScaleOffsetType)) {
             return LONG;
         }
 
-        throw new IllegalArgumentException("Cannot convert to DataType");
+        throw new IllegalArgumentException("Cannot convert to ScaleOffsetType");
     }
 
 }

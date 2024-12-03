@@ -462,11 +462,11 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         Number result;
 
         switch (typedValue.getType()) {
-        case DOUBLE:
-            result = (double) typedValue.getValue() * scale.doubleValue() + offset.doubleValue();
-            break;
         case FLOAT:
             result = (float) typedValue.getValue() * scale.floatValue() + offset.floatValue();
+            break;
+        case DOUBLE:
+            result = (double) typedValue.getValue() * scale.doubleValue() + offset.doubleValue();
             break;
         case INTEGER:
             result = (int) typedValue.getValue() * scale.intValue() + offset.intValue();
@@ -488,8 +488,14 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         Number result = null;
 
         switch (scaleOffsetType) {
+        case FLOAT:
+            result = scale.floatValue() * typedValue.getValue().floatValue() + offset.floatValue();
+            break;
         case DOUBLE:
             result = scale.doubleValue() * typedValue.getValue().doubleValue() + offset.doubleValue();
+            break;
+        case INTEGER:
+            result = scale.intValue() * typedValue.getValue().intValue() + offset.intValue();
             break;
         case LONG:
             result = scale.longValue() * typedValue.getValue().longValue() + offset.longValue();

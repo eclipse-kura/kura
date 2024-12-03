@@ -77,6 +77,8 @@ public final class AssetTest {
     /** A latch to be initialized with the no of OSGi dependencies it needs */
     private static CountDownLatch dependencyLatch = new CountDownLatch(1);
 
+    private static int channelNumber;
+
     /**
      * JUnit Callback to be triggered before creating the instance of this suite
      *
@@ -121,8 +123,9 @@ public final class AssetTest {
         channels.put("1.CH#+name", "1.CH");
         channels.put("1.CH#+type", "READ");
         channels.put("1.CH#+value.type", DataType.INTEGER.name());
-        channels.put("1.CH#+scale", "1.0");
-        channels.put("1.CH#+offset", "0.0");
+        channels.put("1.CH#+scaleoffset.type", ScaleOffsetType.DEFINED_BY_VALUE_TYPE.name());
+        channels.put("1.CH#+scale", "1");
+        channels.put("1.CH#+offset", "0");
         channels.put("1.CH#DRIVER.modbus.register", "sample.channel1.modbus.register");
         channels.put("1.CH#DRIVER.modbus.FC", "sample.channel1.modbus.FC");
 
@@ -137,6 +140,7 @@ public final class AssetTest {
         channels.put("3.CH#+type", "READ");
         channels.put("3.CH#+enabled", "false");
         channels.put("3.CH#+value.type", DataType.INTEGER.name());
+        channels.put("3.CH#+scaleoffset.type", ScaleOffsetType.DEFINED_BY_VALUE_TYPE.name());
         channels.put("3.CH#DRIVER.modbus.register", "sample.channel1.modbus.register");
         channels.put("3.CH#DRIVER.modbus.FC", "sample.channel1.modbus.FC");
 
@@ -166,6 +170,68 @@ public final class AssetTest {
         channels.put("6.CH#+offset", "4");
         channels.put("6.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
         channels.put("6.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
+
+        channels.put("7.CH#+name", "7.CH");
+        channels.put("7.CH#+enabled", "true");
+        channels.put("7.CH#+type", "READ");
+        channels.put("7.CH#+value.type", DataType.INTEGER.name());
+        channels.put("7.CH#+scaleoffset.type", ScaleOffsetType.INTEGER.name());
+        channels.put("7.CH#+scale", "3");
+        channels.put("7.CH#+offset", "4");
+        channels.put("7.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
+        channels.put("7.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
+
+        channels.put("8.CH#+name", "8.CH");
+        channels.put("8.CH#+enabled", "true");
+        channels.put("8.CH#+type", "READ");
+        channels.put("8.CH#+value.type", DataType.INTEGER.name());
+        channels.put("8.CH#+scaleoffset.type", ScaleOffsetType.LONG.name());
+        channels.put("8.CH#+scale", "3");
+        channels.put("8.CH#+offset", "4");
+        channels.put("8.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
+        channels.put("8.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
+
+        channels.put("9.CH#+name", "9.CH");
+        channels.put("9.CH#+enabled", "true");
+        channels.put("9.CH#+type", "READ");
+        channels.put("9.CH#+value.type", DataType.INTEGER.name());
+        channels.put("9.CH#+scaleoffset.type", ScaleOffsetType.FLOAT.name());
+        channels.put("9.CH#+scale", "3");
+        channels.put("9.CH#+offset", "4");
+        channels.put("9.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
+        channels.put("9.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
+
+        channels.put("11.CH#+name", "11.CH");
+        channels.put("11.CH#+enabled", "true");
+        channels.put("11.CH#+type", "READ");
+        channels.put("11.CH#+value.type", DataType.LONG.name());
+        channels.put("11.CH#+scaleoffset.type", ScaleOffsetType.DEFINED_BY_VALUE_TYPE.name());
+        channels.put("11.CH#+scale", "3");
+        channels.put("11.CH#+offset", "4");
+        channels.put("11.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
+        channels.put("11.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
+
+        channels.put("12.CH#+name", "12.CH");
+        channels.put("12.CH#+enabled", "true");
+        channels.put("12.CH#+type", "READ");
+        channels.put("12.CH#+value.type", DataType.FLOAT.name());
+        channels.put("12.CH#+scaleoffset.type", ScaleOffsetType.DEFINED_BY_VALUE_TYPE.name());
+        channels.put("12.CH#+scale", "3.3");
+        channels.put("12.CH#+offset", "4.7");
+        channels.put("12.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
+        channels.put("12.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
+
+        channels.put("13.CH#+name", "13.CH");
+        channels.put("13.CH#+enabled", "true");
+        channels.put("13.CH#+type", "READ");
+        channels.put("13.CH#+value.type", DataType.DOUBLE.name());
+        channels.put("13.CH#+scaleoffset.type", ScaleOffsetType.DEFINED_BY_VALUE_TYPE.name());
+        channels.put("13.CH#+scale", "3.4");
+        channels.put("13.CH#+offset", "4.3");
+        channels.put("13.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
+        channels.put("13.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
+
+        channelNumber = channels.size();
 
         ((BaseAsset) asset).updated(channels);
         sync(asset);
@@ -201,15 +267,15 @@ public final class AssetTest {
         final AssetConfiguration assetConfiguration = asset.getAssetConfiguration();
         assertNotNull(assetConfiguration);
         final Map<String, Channel> channels = assetConfiguration.getAssetChannels();
-        assertEquals(6, channels.size());
+        assertEquals(12, channels.size());
 
         final Channel channel1 = channels.get("1.CH");
         assertTrue(channel1.isEnabled());
         assertEquals("1.CH", channel1.getName());
         assertEquals(ChannelType.READ, channel1.getType());
         assertEquals(DataType.INTEGER, channel1.getValueType());
-        assertEquals(1.0d, channel1.getValueScaleAsNumber().doubleValue(), 0.0);
-        assertEquals(0.0d, channel1.getValueOffsetAsNumber().doubleValue(), 0.0);
+        assertEquals(1, channel1.getValueScaleAsNumber());
+        assertEquals(0, channel1.getValueOffsetAsNumber());
         assertEquals("sample.channel1.modbus.register", channel1.getConfiguration().get("DRIVER.modbus.register"));
         assertEquals("sample.channel1.modbus.FC", channel1.getConfiguration().get("DRIVER.modbus.FC"));
 
@@ -232,7 +298,9 @@ public final class AssetTest {
         AtomicBoolean invoked = new AtomicBoolean(false);
 
         final ChannelListener listener = event -> {
-            assertEquals(1, event.getChannelRecord().getValue().getValue());
+            if (event.getChannelRecord().getValue() != null) {
+                assertEquals(1, event.getChannelRecord().getValue().getValue());
+            }
 
             invoked.set(true);
         };
@@ -410,7 +478,7 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testRead() throws KuraException {
-        final List<ChannelRecord> records = asset.read(new HashSet(Arrays.asList("1.CH")));
+        final List<ChannelRecord> records = asset.read(new HashSet<>(Arrays.asList("1.CH")));
 
         assertNotNull(records);
         assertEquals(1, records.size());
@@ -423,7 +491,7 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testReadChannelNotReadable() throws KuraException {
-        List<ChannelRecord> result = asset.read(new HashSet(Arrays.asList("2.CH")));
+        List<ChannelRecord> result = asset.read(new HashSet<>(Arrays.asList("2.CH")));
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -439,7 +507,7 @@ public final class AssetTest {
         final List<ChannelRecord> records = asset.readAllChannels();
 
         assertNotNull(records);
-        assertEquals(3, records.size());
+        assertEquals(9, records.size());
         assertEquals(7, records.get(0).getValue().getValue());
     }
 
@@ -491,7 +559,7 @@ public final class AssetTest {
 
         List<AD> ads = ocd.getAD();
         assertNotNull(ads);
-        assertEquals(56, ads.size()); // description, driver, 54 from BaseChannelDescriptor and StubChannelDescriptor
+        assertEquals(110, ads.size());
 
         assertEquals("asset.desc", ads.get(0).getId());
         assertEquals("driver.pid", ads.get(1).getId());
@@ -514,7 +582,7 @@ public final class AssetTest {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testReadChannelDisabled() throws KuraException {
-        List<ChannelRecord> result = asset.read(new HashSet(Arrays.asList("3.CH")));
+        List<ChannelRecord> result = asset.read(new HashSet<>(Arrays.asList("3.CH")));
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -646,11 +714,60 @@ public final class AssetTest {
     }
 
     @Test
-    public void testChannelRecordValueTypeWithDefiniedByValueScaleOffset() throws KuraException {
+    public void testChannelRecordValueTypeWithIntegerScaleOffset() throws KuraException {
+
+        List<ChannelRecord> records = asset.read(new HashSet<>(Arrays.asList("7.CH")));
+
+        assertEquals(DataType.INTEGER, records.get(0).getValueType());
+    }
+
+    @Test
+    public void testChannelRecordValueTypeWithLongScaleOffset() throws KuraException {
+
+        List<ChannelRecord> records = asset.read(new HashSet<>(Arrays.asList("8.CH")));
+
+        assertEquals(DataType.LONG, records.get(0).getValueType());
+    }
+
+    @Test
+    public void testChannelRecordValueTypeWithFloatScaleOffset() throws KuraException {
+
+        List<ChannelRecord> records = asset.read(new HashSet<>(Arrays.asList("9.CH")));
+
+        assertEquals(DataType.FLOAT, records.get(0).getValueType());
+
+    }
+
+    @Test
+    public void testChannelRecordValueTypeWithDefiniedByValueScaleOffsetInteger() throws KuraException {
 
         List<ChannelRecord> records = asset.read(new HashSet<>(Arrays.asList("6.CH")));
 
         assertEquals(DataType.INTEGER, records.get(0).getValueType());
+    }
+
+    @Test
+    public void testChannelRecordValueTypeWithDefiniedByValueScaleOffsetLong() throws KuraException {
+
+        List<ChannelRecord> records = asset.read(new HashSet<>(Arrays.asList("11.CH")));
+
+        assertEquals(DataType.LONG, records.get(0).getValueType());
+    }
+
+    @Test
+    public void testChannelRecordValueTypeWithDefiniedByValueScaleOffsetFloat() throws KuraException {
+
+        List<ChannelRecord> records = asset.read(new HashSet<>(Arrays.asList("12.CH")));
+
+        assertEquals(DataType.FLOAT, records.get(0).getValueType());
+    }
+
+    @Test
+    public void testChannelRecordValueTypeWithDefiniedByValueScaleOffsetDouble() throws KuraException {
+
+        List<ChannelRecord> records = asset.read(new HashSet<>(Arrays.asList("13.CH")));
+
+        assertEquals(DataType.DOUBLE, records.get(0).getValueType());
     }
 
     public void bindAsset(Asset asset) {

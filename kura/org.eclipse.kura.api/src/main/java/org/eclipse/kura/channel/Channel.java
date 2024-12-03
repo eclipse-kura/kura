@@ -89,37 +89,6 @@ public class Channel {
      *            the type
      * @param valueType
      *            the value type
-     * @param config
-     *            the configuration
-     * @throws NullPointerException
-     *             if any of the arguments is null
-     * @deprecated Use {@link #Channel(String, ChannelType, DataType, ScaleOffsetType, Number, Number, Map)}
-     */
-
-    @Deprecated
-    public Channel(final String name, final ChannelType type, final DataType valueType,
-            final Map<String, Object> config) {
-
-        requireNonNull(name, MESSAGE_CHANNEL_NAME_CANNOT_BE_NULL);
-        requireNonNull(type, MESSAGE_CHANNEL_TYPE_CANNOT_BE_NULL);
-        requireNonNull(valueType, MESSAGE_CHANNEL_VALUE_TYPE_CANNOT_BE_NULL);
-        requireNonNull(config, MESSAGE_CHANNEL_CONFIGURATION_CANNOT_BE_NULL);
-
-        this.configuration = Collections.unmodifiableMap(config);
-        this.name = name;
-        this.type = type;
-        this.valueType = valueType;
-    }
-
-    /**
-     * Instantiates a new channel.
-     *
-     * @param name
-     *            the name for this channel
-     * @param type
-     *            the type
-     * @param valueType
-     *            the value type
      * @param valueScale
      *            the value used to scale the value, must have the same {@link DataType} as valueOffset
      * @param valueOffset
@@ -216,20 +185,6 @@ public class Channel {
     }
 
     /**
-     * Returns a double that represents the scale factor to be applied to the read value
-     *
-     * @return a double that represents the scale factor to be applied to the read value
-     *
-     * @since 2.3
-     *
-     * @deprecated Use {@link #getValueScaleAsNumber()}
-     */
-    @Deprecated
-    public double getValueScale() {
-        return this.valueScale.doubleValue();
-    }
-
-    /**
      * Returns a {@link Number} that represents the scale factor to be applied to the read
      * value
      *
@@ -239,20 +194,6 @@ public class Channel {
      */
     public Number getValueScaleAsNumber() {
         return this.valueScale;
-    }
-
-    /**
-     * Returns a double that represents the offset to be applied to the read value
-     *
-     * @return a double that represents the offset to be applied to the read value
-     *
-     * @since 2.3
-     *
-     * @deprecated Use {@link #getValueOffsetAsNumber()}
-     */
-    @Deprecated
-    public double getValueOffset() {
-        return this.valueOffset.doubleValue();
     }
 
     /**
@@ -345,7 +286,9 @@ public class Channel {
      * @param scale
      *            a double value that specifies the scale to be applied to the channel value
      * @since 2.3
+     * @deprecated since version 3.0
      */
+    @Deprecated
     public void setScale(double scale) {
         this.valueScale = scale;
     }
@@ -367,7 +310,9 @@ public class Channel {
      * @param offset
      *            a double value that specifies the offset to be applied to the channel value
      * @since 2.3
+     * @deprecated since version 3.0
      */
+    @Deprecated
     public void setOffset(double offset) {
         this.valueOffset = offset;
     }

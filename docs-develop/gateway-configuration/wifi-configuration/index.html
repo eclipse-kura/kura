@@ -696,6 +696,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#notes-about-wpa3-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes about WPA3 security
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4386,6 +4395,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#notes-about-wpa3-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Notes about WPA3 security
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4439,7 +4457,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>WEP: Wired Equivalent Privacy</li>
 <li>WPA: Wi-Fi Protected Access</li>
 <li>WPA2: Wi-Fi Protected Access II</li>
-<li>WPA2/WPA3-Enterprise: Wi-Fi Protected Access II &amp; III with 802.1x. Please see <a href="../wifi-configuration-8021x/">here</a> for further details. This fearture is available only in station mode</li>
+<li>WPA/WPA2: Wi-Fi Protected Access and Wi-Fi Protected Access II</li>
+<li>WPA2/WPA3-Enterprise: Wi-Fi Protected Access II &amp; III with 802.1x. Please see <a href="../wifi-configuration-8021x/">here</a> for further details. This fearture is available only in station mode.</li>
+<li>WPA3: Wi-Fi Protected Access III. This is an experimental feature. See <a href="#notes-about-wpa3-security">here</a> for further details.</li>
+<li>WPA2/WPA3: Wi-Fi Protected Access II and Wi-Fi Protected Access III. This is an experimental feature. See <a href="#notes-about-wpa3-security">here</a> for further details.</li>
 </ul>
 </li>
 <li>
@@ -4536,6 +4557,14 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>If you select one of these access points, respective wireless controls (i.e., <em>Network Name</em>, <em>Wireless Security</em>, and <em>Channel</em>) are filled with information obtained during the scan operation. The <em>Force Wireless Network Scan</em> button triggers a manual scan for available access points.</p>
 </li>
 </ul>
+<h2 id="notes-about-wpa3-security">Notes about WPA3 security</h2>
+<p>The support to WPA3 security feature is experimental. Before using it, update your system with the latest changes and check that the WiFi module installed on you device has the latest firmware.
+To check if an interface supports the new WPA3 security, run the following command:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>iw phy | grep -i sae
+</code></pre></div>
+<p>and verify is the following output is present</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Device supports SAE with AUTHENTICATE command
+</code></pre></div>
 
 
 

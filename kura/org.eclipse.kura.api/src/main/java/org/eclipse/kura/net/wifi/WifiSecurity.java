@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -50,7 +50,17 @@ public enum WifiSecurity {
     /** Supports WPA and WPA2 encryption. */
     SECURITY_WPA_WPA2(0x4000),
     /** Supports WPA2 WPA3 enterprise. */
-    SECURITY_WPA2_WPA3_ENTERPRISE(0x8000);
+    SECURITY_WPA2_WPA3_ENTERPRISE(0x8000),
+    /**
+     * @since 3.0
+     *        Supports WPA3 encryption.
+     */
+    SECURITY_WPA3(0x10000),
+    /**
+     * @since 3.0
+     *        Supports WPA2 and WPA3 encryption.
+     */
+    SECURITY_WPA2_WPA3(0x20000);
 
     private int code;
 

@@ -96,14 +96,20 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private static final String WIFI_MODE_AP = GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name();
     private static final String WIFI_MODE_STATION_MESSAGE = MessageUtils.get(WIFI_MODE_STATION);
     private static final String WIFI_MODE_ACCESS_POINT_MESSAGE = MessageUtils.get(WIFI_MODE_AP);
+    private static final String WIFI_SECURITY_NONE_MESSAGE = MessageUtils
+            .get(GwtWifiSecurity.netWifiSecurityNONE.name());
     private static final String WIFI_SECURITY_WEP_MESSAGE = MessageUtils.get(GwtWifiSecurity.netWifiSecurityWEP.name());
     private static final String WIFI_SECURITY_WPA_MESSAGE = MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA.name());
     private static final String WIFI_SECURITY_WPA2_MESSAGE = MessageUtils
             .get(GwtWifiSecurity.netWifiSecurityWPA2.name());
+    private static final String WIFI_SECURITY_WPA3_MESSAGE = MessageUtils
+            .get(GwtWifiSecurity.netWifiSecurityWPA3.name());
     private static final String WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE = MessageUtils
             .get(GwtWifiSecurity.netWifiSecurityWPA2WPA3Enterprise.name());
     private static final String WIFI_SECURITY_WPA_WPA2_MESSAGE = MessageUtils
             .get(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name());
+    private static final String WIFI_SECURITY_WPA2_WPA3_MESSAGE = MessageUtils
+            .get(GwtWifiSecurity.netWifiSecurityWPA2_WPA3.name());
     private static final String WIFI_BGSCAN_NONE_MESSAGE = MessageUtils
             .get(GwtWifiBgscanModule.netWifiBgscanMode_NONE.name());
     private static final String WIFI_CIPHERS_CCMP_TKIP_MESSAGE = MessageUtils
@@ -121,8 +127,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private static final String WIFI_BAND_2GHZ_MESSAGE = MessageUtils.get("netWifiBand2Ghz");
     private static final String WIFI_BAND_BOTH_MESSAGE = MessageUtils.get("netWifiBandBoth");
 
-    private static final String WIFI_SECURITY_NONE_MESSAGE = MessageUtils
-            .get(GwtWifiSecurity.netWifiSecurityNONE.name());
     private static final String IPV4_STATUS_WAN_MESSAGE = MessageUtils
             .get(GwtNetIfStatus.netIPv4StatusEnabledWAN.name());
 
@@ -715,8 +719,11 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             if (this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_MESSAGE)
                     || this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA_MESSAGE)
+                    || this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA3_MESSAGE)
                     || this.security.getSelectedItemText()
-                            .equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name()))) {
+                            .equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA_WPA2.name()))
+                    || this.security.getSelectedItemText()
+                            .equals(MessageUtils.get(GwtWifiSecurity.netWifiSecurityWPA2_WPA3.name()))) {
                 if (WIFI_MODE_STATION_MESSAGE.equals(this.wireless.getSelectedItemText())) {
                     this.pairwise.setEnabled(true);
                     this.group.setEnabled(true);
@@ -1282,7 +1289,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
         if (this.security != null && (this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA_MESSAGE)
                 || this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_MESSAGE)
-                || this.security.getSelectedItemText().contentEquals(WIFI_SECURITY_WPA_WPA2_MESSAGE))) {
+                || this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA3_MESSAGE)
+                || this.security.getSelectedItemText().contentEquals(WIFI_SECURITY_WPA_WPA2_MESSAGE)
+                || this.security.getSelectedItemText().contentEquals(WIFI_SECURITY_WPA2_WPA3_MESSAGE))) {
 
             this.password.setValidatorsFrom(configUserOptions);
             configUserOptions.setPasswordMinimumLength(Math.min(configUserOptions.getPasswordMinimumLength(), 63));

@@ -393,11 +393,17 @@ public class NetworkStatusServiceAdapter {
         } else if (isSecurityWPA(rsnSecurity, wpaSecurity, flags) && isSecurityWPA2(rsnSecurity, wpaSecurity, flags)) {
             entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA_WPA2.value());
             setCiphers(entryToModify, rsnSecurity);
+        } else if (isSecurityWPA2(rsnSecurity, wpaSecurity, flags) && isSecurityWPA3(rsnSecurity, wpaSecurity, flags)) {
+            entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA2_WPA3.value());
+            setCiphers(entryToModify, rsnSecurity);
         } else if (isSecurityWPA(rsnSecurity, wpaSecurity, flags)) {
             entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA.value());
             setCiphers(entryToModify, wpaSecurity);
         } else if (isSecurityWPA2(rsnSecurity, wpaSecurity, flags)) {
             entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA2.value());
+            setCiphers(entryToModify, rsnSecurity);
+        } else if (isSecurityWPA3(rsnSecurity, wpaSecurity, flags)) {
+            entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA3.value());
             setCiphers(entryToModify, rsnSecurity);
         } else if (isSecurityWPA2WPA3Enterprise(rsnSecurity, wpaSecurity, flags)) {
             entryToModify.setSecurity(GwtWifiSecurity.netWifiSecurityWPA2WPA3Enterprise.value());
@@ -428,6 +434,10 @@ public class NetworkStatusServiceAdapter {
     private boolean isSecurityWPA2WPA3Enterprise(Set<WifiSecurity> rsnSecurity, Set<WifiSecurity> wpaSecurity,
             Set<WifiFlag> flags) {
         return flags.contains(WifiFlag.PRIVACY) && (rsnSecurity.contains(WifiSecurity.KEY_MGMT_802_1X));
+    }
+
+    private boolean isSecurityWPA3(Set<WifiSecurity> rsnSecurity, Set<WifiSecurity> wpaSecurity, Set<WifiFlag> flags) {
+        return flags.contains(WifiFlag.PRIVACY) && (rsnSecurity.contains(WifiSecurity.KEY_MGMT_SAE));
     }
 
     private void setCiphers(GwtWifiHotspotEntry entryToModify, Set<WifiSecurity> wifiSecurity) {

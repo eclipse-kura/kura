@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,8 +18,10 @@ public enum KuraWifiSecurityType {
     SECURITY_WEP,
     SECURITY_WPA,
     SECURITY_WPA2,
+    SECURITY_WPA3,
     SECURITY_WPA2_WPA3_ENTERPRISE,
-    SECURITY_WPA_WPA2;
+    SECURITY_WPA_WPA2,
+    SECURITY_WPA2_WPA3;
 
     public static KuraWifiSecurityType fromString(String securityType) {
         if (securityType == null || securityType.isEmpty()) {
@@ -27,20 +29,24 @@ public enum KuraWifiSecurityType {
         }
 
         switch (securityType) {
-        case "NONE":
-            return KuraWifiSecurityType.SECURITY_NONE;
-        case "SECURITY_WEP":
-            return KuraWifiSecurityType.SECURITY_WEP;
-        case "SECURITY_WPA":
-            return KuraWifiSecurityType.SECURITY_WPA;
-        case "SECURITY_WPA2":
-            return KuraWifiSecurityType.SECURITY_WPA2;
-        case "SECURITY_WPA2_WPA3_ENTERPRISE":
-            return KuraWifiSecurityType.SECURITY_WPA2_WPA3_ENTERPRISE;
-        case "SECURITY_WPA_WPA2":
-            return KuraWifiSecurityType.SECURITY_WPA_WPA2;
-        default:
-            throw new IllegalArgumentException("Invalid security type: " + securityType);
+            case "NONE":
+                return KuraWifiSecurityType.SECURITY_NONE;
+            case "SECURITY_WEP":
+                return KuraWifiSecurityType.SECURITY_WEP;
+            case "SECURITY_WPA":
+                return KuraWifiSecurityType.SECURITY_WPA;
+            case "SECURITY_WPA2":
+                return KuraWifiSecurityType.SECURITY_WPA2;
+            case "SECURITY_WPA3":
+                return KuraWifiSecurityType.SECURITY_WPA3;
+            case "SECURITY_WPA2_WPA3_ENTERPRISE":
+                return KuraWifiSecurityType.SECURITY_WPA2_WPA3_ENTERPRISE;
+            case "SECURITY_WPA_WPA2":
+                return KuraWifiSecurityType.SECURITY_WPA_WPA2;
+            case "SECURITY_WPA2_WPA3":
+                return KuraWifiSecurityType.SECURITY_WPA2_WPA3;
+            default:
+                throw new IllegalArgumentException("Invalid security type: " + securityType);
         }
     }
 }

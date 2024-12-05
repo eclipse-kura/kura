@@ -19,7 +19,9 @@ public enum GwtWifiSecurity {
     netWifiSecurityWPA("WPA"),
     netWifiSecurityWPA2("WPA2"),
     netWifiSecurityWPA2WPA3Enterprise("WPA2/WPA3-Enterprise"),
-    netWifiSecurityWPA_WPA2("WPA/WPA2");
+    netWifiSecurityWPA_WPA2("WPA/WPA2"),
+    netWifiSecurityWPA3("WPA3 - Experimental"),
+    netWifiSecurityWPA2_WPA3("WPA2/WPA3 - Experimental");
 
     String value;
 

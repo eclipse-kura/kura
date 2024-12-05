@@ -158,8 +158,7 @@ public class NMSettingsConverter {
                 create8021xTls(props, deviceId, settings);
                 break;
             default:
-                throw new IllegalArgumentException(
-                        String.format("Security type 802-1x EAP \"%s\" is not supported.", eap));
+                throw new IllegalArgumentException(String.format("Security type 802-1x EAP \"%s\" is not supported.", eap));
         }
 
         if (!phase2.isPresent()) {
@@ -174,7 +173,7 @@ public class NMSettingsConverter {
                 break;
             default:
                 throw new IllegalArgumentException(
-                        String.format("Security type 802-1x InnerAuth (Phase2) \"%s\" is not supported.", phase2));
+                    String.format("Security type 802-1x InnerAuth (Phase2) \"%s\" is not supported.", phase2));
         }
 
         return settings;
@@ -386,8 +385,7 @@ public class NMSettingsConverter {
     }
 
     private static void configureIp6Wan(NetworkProperties props, String deviceId, Map<String, Variant<?>> settings) {
-        Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip6.dnsServers",
-                deviceId);
+        Optional<List<String>> dnsServers = props.getOptStringList("net.interface.%s.config.ip6.dnsServers", deviceId);
 
         dnsServers.ifPresent(value -> {
             settings.put("dns", new Variant<>(convertIp6(value), "aay"));
@@ -429,14 +427,14 @@ public class NMSettingsConverter {
             Map<String, Variant<?>> settings) {
         settings.put(NM_SETTINGS_IPV6_METHOD, new Variant<>("auto"));
 
-        Optional<String> addressGenerationMode = props.getOpt(String.class,
-                "net.interface.%s.config.ip6.addr.gen.mode", deviceId);
+        Optional<String> addressGenerationMode = props.getOpt(String.class, "net.interface.%s.config.ip6.addr.gen.mode",
+                deviceId);
 
         addressGenerationMode.ifPresent(value -> {
             KuraIp6AddressGenerationMode ipv6AddressGenerationMode = KuraIp6AddressGenerationMode
                     .fromString(addressGenerationMode.get());
-            settings.put("addr-gen-mode", new Variant<>(KuraIp6AddressGenerationMode
-                    .toNMSettingIP6ConfigAddrGenMode(ipv6AddressGenerationMode).toInt32()));
+            settings.put("addr-gen-mode", new Variant<>(
+                    KuraIp6AddressGenerationMode.toNMSettingIP6ConfigAddrGenMode(ipv6AddressGenerationMode).toInt32()));
         });
 
         Optional<String> privacy = props.getOpt(String.class, "net.interface.%s.config.ip6.privacy", deviceId);
@@ -454,8 +452,7 @@ public class NMSettingsConverter {
             ip6ConfigMethod = KuraIp6ConfigurationMethod
                     .fromString(props.get(String.class, "net.interface.%s.config.ip6.address.method", deviceId));
         } catch (NoSuchElementException e) {
-            logger.warn("IPv6 address method property not found. Using default value: {}",
-                    ip6ConfigMethod);
+            logger.warn("IPv6 address method property not found. Using default value: {}", ip6ConfigMethod);
         }
         return ip6ConfigMethod;
     }
@@ -502,11 +499,14 @@ public class NMSettingsConverter {
             case SECURITY_WPA2:
             case SECURITY_WPA_WPA2:
                 return createWPAWPA2Settings(props, deviceId, propMode);
+            case SECURITY_WPA3:
+                return createWPA3Settings(props, deviceId, propMode);
+            case SECURITY_WPA2_WPA3:
+                return createWPA2WPA3Settings(props, deviceId, propMode);
             case SECURITY_WPA2_WPA3_ENTERPRISE:
                 return createWPA2WPA3EnterpriseSettings();
             default:
-                throw new IllegalArgumentException(
-                        String.format("Security type \"%s\" is not supported.", securityType));
+                throw new IllegalArgumentException(String.format("Security type \"%s\" is not supported.", securityType));
         }
     }
 
@@ -527,9 +527,38 @@ public class NMSettingsConverter {
 
     private static Map<String, Variant<?>> createWPAWPA2Settings(NetworkProperties props, String deviceId,
             String propMode) {
-        Map<String, Variant<?>> settings = new HashMap<>();
+        Map<String, Variant<?>> settings = createWifiSettings(props, deviceId, propMode);
 
         settings.put(NM_SETTINGS_80211_KEY_MANAGEMENT, new Variant<>("wpa-psk"));
+
+        return settings;
+    }
+
+    private static Map<String, Variant<?>> createWPA3Settings(NetworkProperties props, String deviceId,
+            String propMode) {
+        Map<String, Variant<?>> settings = createWifiSettings(props, deviceId, propMode);
+
+        settings.put(NM_SETTINGS_80211_KEY_MANAGEMENT, new Variant<>("sae"));
+        // Set PMF (Protected Management Frames) as required
+        settings.put("pmf", new Variant<>(new UInt32(3)));
+
+        return settings;
+    }
+
+    private static Map<String, Variant<?>> createWPA2WPA3Settings(NetworkProperties props, String deviceId,
+            String propMode) {
+        Map<String, Variant<?>> settings = createWifiSettings(props, deviceId, propMode);
+
+        settings.put(NM_SETTINGS_80211_KEY_MANAGEMENT, new Variant<>("wpa-psk"));
+        // Set PMF (Protected Management Frames) as optional
+        settings.put("pmf", new Variant<>(new UInt32(2)));
+
+        return settings;
+    }
+
+    private static Map<String, Variant<?>> createWifiSettings(NetworkProperties props, String deviceId,
+            String propMode) {
+        Map<String, Variant<?>> settings = new HashMap<>();
 
         String psk = props
                 .get(Password.class, "net.interface.%s.config.wifi.%s.passphrase", deviceId, propMode.toLowerCase())
@@ -808,6 +837,8 @@ public class NMSettingsConverter {
             case SECURITY_WPA:
                 return Arrays.asList("wpa");
             case SECURITY_WPA2:
+            case SECURITY_WPA2_WPA3:
+            case SECURITY_WPA3:
                 return Arrays.asList("rsn");
             case SECURITY_WPA_WPA2:
                 return Arrays.asList();
@@ -829,8 +860,7 @@ public class NMSettingsConverter {
             // ... WIP
             default:
                 throw new IllegalArgumentException(String
-                        .format("Unsupported connection type conversion from NMDeviceType \"%s\"",
-                                deviceType.toString()));
+                    .format("Unsupported connection type conversion from NMDeviceType \"%s\"", deviceType.toString()));
         }
     }
 

@@ -1,3 +1,15 @@
+def onlyDocsChanged() {
+    if (!env.CHANGE_TARGET) {
+        echo "CHANGE_TARGET not set. Skipping check"
+        return false
+    }
+
+    def changedFiles = currentBuild.changeSets.collect { it.items }.flatten().collect { it.affectedPaths }
+    echo "Changed files: ${changedFiles}" // Debug
+
+    return changedFiles.every { it.endsWith(".md") || it.endsWith(".txt") }
+}
+
 node {
     properties([
         disableConcurrentBuilds(abortPrevious: true),
@@ -13,6 +25,13 @@ node {
         dir("kura") {
             checkout scm
         }
+    }
+
+    // Skip build if only documentation files (i.e. *.md and *.txt) have changed
+    if (onlyDocsChanged()) {
+        echo "Skipping build for documentation changes"
+        currentBuild.result = 'SUCCESS'
+        return
     }
 
     stage('Build') {

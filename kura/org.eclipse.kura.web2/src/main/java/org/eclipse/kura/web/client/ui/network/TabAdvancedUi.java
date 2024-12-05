@@ -44,6 +44,10 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
     private static final String PROMISC_ENABLED = "netAdvPromiscEnabled";
     private static final String PROMISC_DISABLED = "netAdvPromiscDisabled";
 
+    private static final int IPV4_MIN_MTU = 576;
+    private static final int IPV6_MIN_MTU = 1280;
+    private static final int MAX_MTU_SUPPORTED = 1500;
+
     interface TabAdvancedUiUiBinder extends UiBinder<Widget, TabAdvancedUi> {
     }
 
@@ -166,7 +170,7 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
             setDirty(true);
 
             Integer inputValue = this.mtu.getValue();
-            boolean isValidValue = isValidIntegerInRange(inputValue, 0, Integer.MAX_VALUE);
+            boolean isValidValue = isValidIntegerInRange(inputValue, IPV4_MIN_MTU, MAX_MTU_SUPPORTED);
 
             if (isValidValue) {
                 this.groupMtu.setValidationState(ValidationState.NONE);
@@ -190,7 +194,7 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
             setDirty(true);
 
             Integer inputValue = this.ip6Mtu.getValue();
-            boolean isValidValue = isValidIntegerInRange(inputValue, 0, Integer.MAX_VALUE);
+            boolean isValidValue = isValidIntegerInRange(inputValue, IPV6_MIN_MTU, MAX_MTU_SUPPORTED);
 
             if (isValidValue) {
                 this.groupIp6Mtu.setValidationState(ValidationState.NONE);
@@ -202,11 +206,19 @@ public class TabAdvancedUi extends Composite implements NetworkTab {
         });
     }
 
+    /*
+     * Minimum values are 576 for IPv4 and 1280 for IPv6.
+     * Maximum value is 1500 for both of them.
+     * 0 accepted for MTU Auto-discovery.
+     */
     private boolean isValidIntegerInRange(Integer integerValue, int min, int max) {
         if (integerValue == null) {
             return false;
         }
-        return integerValue >= min && integerValue <= max;
+
+        boolean isZero = integerValue == 0;
+        boolean isInsideLimits = integerValue >= min && integerValue <= max;
+        return isZero || isInsideLimits;
     }
 
     private void setHelpText(String message) {

@@ -4,7 +4,7 @@ def onlyDocsChanged() {
         return false
     }
 
-    def changedFiles = currentBuild.changeSets.collect { it.items }.flatten().collect { it.affectedPaths }
+    def changedFiles = currentBuild.changeSets.collect { it.items }.flatten().collect { it.affectedPaths }.flatten()
     echo "Changed files: ${changedFiles}" // Debug
 
     return changedFiles.every { it.endsWith(".md") || it.endsWith(".txt") }

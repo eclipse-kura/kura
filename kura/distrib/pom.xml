@@ -1136,6 +1136,7 @@
     </dependencies>
 
     <profiles>
+
         <profile>
             <id>java8</id>
             <activation>
@@ -1145,6 +1146,7 @@
                 <skip.js.nashorn.engine.components>false</skip.js.nashorn.engine.components>
             </properties>
         </profile>
+
         <profile>
             <id>java17</id>
             <activation>
@@ -1154,6 +1156,8 @@
                 <skip.js.nashorn.engine.components>true</skip.js.nashorn.engine.components>
             </properties>
         </profile>
+
+        <!-- armhf -->
         <profile>
             <id>generic-arm32</id>
             <activation>
@@ -1250,6 +1254,7 @@
             </build>
         </profile>
 
+        <!-- armhf-nn -->
         <profile>
             <id>generic-arm32-nn</id>
             <activation>
@@ -1341,6 +1346,7 @@
             </build>
         </profile>
 
+        <!-- x86_64 -->
         <profile>
             <id>generic-x86_64</id>
             <activation>
@@ -1437,6 +1443,7 @@
             </build>
         </profile>
 
+        <!-- x86_64-nn -->
 		<profile>
             <id>generic-x86_64-nn</id>
             <activation>
@@ -1527,7 +1534,8 @@
                 </plugins>
             </build>
         </profile>
-        
+
+        <!-- aarch64 -->
         <profile>
             <id>generic-aarch64</id>
             <activation>
@@ -1624,6 +1632,7 @@
             </build>
         </profile>
 
+        <!-- aarch64-nn -->
 		<profile>
             <id>generic-aarch64-nn</id>
             <activation>
@@ -1715,6 +1724,8 @@
             </build>
         </profile>
         
+        <!-- dockers -->
+
         <profile>
             <id>docker-x86_64-nn</id>
             <activation>
@@ -1832,6 +1843,7 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
             <id>docker-ubi8-x86_64-nn</id>
             <activation>
@@ -1878,6 +1890,7 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
             <id>docker-alpine-x86_64-nn</id>
             <activation>
@@ -1925,6 +1938,7 @@
             </build>
         </profile>
 
+        <!-- dev-env -->
         <profile>
             <id>dev-env</id>
             <activation>
@@ -2273,6 +2287,9 @@
                 </plugins>
             </build>
         </profile>
+
+        <!-- dp -->
+
         <profile>
             <id>core-dp</id>
             <activation>
@@ -2400,6 +2417,7 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
             <id>can-dp</id>
             <activation>
@@ -2437,5 +2455,6 @@
                 </plugins>
             </build>
         </profile>
+
     </profiles>
 </project>

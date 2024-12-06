@@ -1348,7 +1348,7 @@
 
         <!-- x86_64 -->
         <profile>
-            <id>generic-x86_64</id>
+            <id>x86_64</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1381,7 +1381,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-x86_64-jars</id>
+                                <id>x86_64-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1392,8 +1392,8 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-x86_64" />
-                                        <property name="target.device" value="generic-x86_64" />
+                                        <property name="build.name" value="x86_64" />
+                                        <property name="target.device" value="x86_64" />
                                         <property name="native.tag" value="x86_64" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="x86_64" />
@@ -1411,18 +1411,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-x86_64-deb</id>
+                                <id>x86_64-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-x86_64_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-x86_64/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_x86_64_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/x86_64/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-x86_64.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_x86_64.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1445,7 +1445,7 @@
 
         <!-- x86_64-nn -->
 		<profile>
-            <id>generic-x86_64-nn</id>
+            <id>x86_64-nn</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1478,7 +1478,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-x86_64-nn-jars</id>
+                                <id>x86_64-nn-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1489,8 +1489,8 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-x86_64-nn" />
-                                        <property name="target.device" value="generic-x86_64-nn" />
+                                        <property name="build.name" value="x86_64-nn" />
+                                        <property name="target.device" value="x86_64-nn" />
                                         <property name="native.tag" value="x86_64" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="x86_64" />
@@ -1508,18 +1508,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-x86_64-nn-deb</id>
+                                <id>x86_64-nn-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-x86_64-nn_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-x86_64-nn/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_x86_64-nn_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/x86_64-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-x86_64-nn.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_x86_64-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>

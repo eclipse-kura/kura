@@ -9,7 +9,6 @@ Eclipse Kura™
 
 [![GitHub Tag](https://img.shields.io/github/v/tag/eclipse/kura?label=Latest%20Tag)](https://github.com/eclipse-kura/kura/tags)
 [![GitHub](https://img.shields.io/github/license/eclipse/kura?label=License)](https://github.com/eclipse-kura/kura/blob/develop/LICENSE)
-
 [![Jenkins](https://img.shields.io/jenkins/build?jobUrl=https:%2F%2Fci.eclipse.org%2Fkura%2Fjob%2Fmultibranch%2Fjob%2Fdevelop&label=Jenkins%20Build&logo=jenkins)](https://ci.eclipse.org/kura/job/multibranch/job/develop/)
 [![Jenkins](https://img.shields.io/jenkins/tests?compact_message&failed_label=%E2%9D%8C&jobUrl=https:%2F%2Fci.eclipse.org%2Fkura%2Fjob%2Fmultibranch%2Fjob%2Fdevelop%2F&label=Jenkins%20CI&passed_label=%E2%9C%85&skipped_label=%E2%9D%95&logo=jenkins)](https://ci.eclipse.org/kura/job/multibranch/) <br/>
   

@@ -1159,7 +1159,7 @@
 
         <!-- armhf -->
         <profile>
-            <id>generic-arm32</id>
+            <id>armhf</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1192,7 +1192,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-arm32-jars</id>
+                                <id>armhf-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1203,8 +1203,8 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-arm32" />
-                                        <property name="target.device" value="generic-arm32" />
+                                        <property name="build.name" value="armhf" />
+                                        <property name="target.device" value="armhf" />
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv7_hf" />
@@ -1222,18 +1222,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-arm32-deb</id>
+                                <id>armhf-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-arm32_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-arm32/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_armhf_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/armhf/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-arm32.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_armhf.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1256,7 +1256,7 @@
 
         <!-- armhf-nn -->
         <profile>
-            <id>generic-arm32-nn</id>
+            <id>armhf-nn</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1289,7 +1289,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-arm32-nn-jars</id>
+                                <id>armhf-nn-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1300,8 +1300,8 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-arm32-nn" />
-                                        <property name="target.device" value="generic-arm32-nn" />
+                                        <property name="build.name" value="armhf-nn" />
+                                        <property name="target.device" value="armhf-nn" />
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv7_hf" />
@@ -1319,18 +1319,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-arm32-nn-deb</id>
+                                <id>armhf-nn-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-arm32-nn_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-arm32-nn/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_armhf-nn_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/armhf-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-arm32-nn.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_armhf-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>

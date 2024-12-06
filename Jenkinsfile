@@ -38,7 +38,7 @@ node {
     stage('Build') {
         timeout(time: 2, unit: 'HOURS') {
             dir("kura") {
-                withMaven(jdk: 'adoptopenjdk-hotspot-jdk8-latest', maven: 'apache-maven-3.9.6') {
+                withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
                     sh "touch /tmp/isJenkins.txt"
                     sh "mvn -f target-platform/pom.xml clean install -Pno-mirror -Pcheck-exists-plugin"
                     sh "mvn -f kura/pom.xml -Dsurefire.rerunFailingTestsCount=3 clean install -Pcheck-exists-plugin"

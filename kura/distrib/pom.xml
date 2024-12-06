@@ -1537,7 +1537,7 @@
 
         <!-- aarch64 -->
         <profile>
-            <id>generic-aarch64</id>
+            <id>aarch64</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1570,7 +1570,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-aarch64-jars</id>
+                                <id>aarch64-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1581,11 +1581,11 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-aarch64" />
-                                        <property name="target.device" value="generic-aarch64" />
+                                        <property name="build.name" value="aarch64" />
+                                        <property name="target.device" value="aarch64" />
                                         <property name="native.tag" value="aarch64" />
                                         <property name="kura.os.version" value="raspbian" />
-                                        <property name="kura.arch" value="generic-arm64" />
+                                        <property name="kura.arch" value="aarch64" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -1600,18 +1600,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-aarch64-deb</id>
+                                <id>aarch64-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-aarch64_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-aarch64/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_aarch64_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/aarch64/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-aarch64.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_aarch64.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1634,7 +1634,7 @@
 
         <!-- aarch64-nn -->
 		<profile>
-            <id>generic-aarch64-nn</id>
+            <id>aarch64-nn</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1667,7 +1667,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-aarch64-nn-jars</id>
+                                <id>aarch64-nn-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1678,11 +1678,11 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-aarch64-nn" />
-                                        <property name="target.device" value="generic-aarch64-nn" />
+                                        <property name="build.name" value="aarch64-nn" />
+                                        <property name="target.device" value="aarch64-nn" />
                                         <property name="native.tag" value="aarch64" />
                                         <property name="kura.os.version" value="raspbian" />
-                                        <property name="kura.arch" value="generic-arm64" />
+                                        <property name="kura.arch" value="aarch64" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -1697,18 +1697,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-aarch64-nn-deb</id>
+                                <id>aarch64-nn-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-aarch64-nn_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-aarch64-nn/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_aarch64-nn_installer.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/aarch64-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-aarch64-nn.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_aarch64-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>

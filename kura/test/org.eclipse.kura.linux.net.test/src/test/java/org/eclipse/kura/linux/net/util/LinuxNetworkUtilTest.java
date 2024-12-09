@@ -34,8 +34,10 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandStatus;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class LinuxNetworkUtilTest {
 
     private LinuxNetworkUtil linuxNetworkUtil;

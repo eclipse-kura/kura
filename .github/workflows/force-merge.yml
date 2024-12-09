@@ -11,7 +11,7 @@ permissions:
   issues: read
 
 env:
-  quorum: 1
+  quorum: 3
 
 jobs:
   force_merge:

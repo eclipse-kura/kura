@@ -63,7 +63,7 @@ following steps:
 4. Download the Kura package with:
 
     ```
-    wget http://download.eclipse.org/kura/releases/<version>/kura-<kura-version>_generic-<arch>_installer.deb
+    wget http://download.eclipse.org/kura/releases/<version>/kura-<kura-version>_<arch>_installer.deb
     ```
 
     Note: replace `<version>` in the URL above with the version number of the latest release (e.g. 5.5.0) and `<arch>` with your device architecture 
@@ -71,7 +71,7 @@ following steps:
 5. Install Kura with: 
 
     ```
-    sudo apt-get install ./kura-<kura-version>_generic-<arch>_installer.deb
+    sudo apt-get install ./kura-<kura-version>_<arch>_installer.deb
     ```
 
 6. For a correct configuration of the Wlan interface, it is necessary to set the **Locale** and the **WLAN Country** through the `raspi-config` command:

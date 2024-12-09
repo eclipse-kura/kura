@@ -8,8 +8,8 @@ Eclipse Kura&trade; is provided using a Debian Linux package. Visit the [Kura do
 
 Several installers can be found on such page, and they fall into one of the following categories:
 
-1. standard installers, like `kura-6.0.0_generic-arm32_installer.deb`; and
-2. installers with suffix **nn**, like `kura-6.0.0_generic-arm32-nn_installer.deb`
+1. standard installers, like `kura-6.0.0_armhf_installer.deb`; and
+2. installers with suffix **nn**, like `kura-6.0.0_armhf-nn_installer.deb`
 
 Profiles of types (1) ship a Kura version with networking functionalities. In particular, they can be installed on targets with [NetworkManager](https://networkmanager.dev), a commonly available tool for managing Linux networking. Kura leverages this tool for networking functionalities. Refer to the [Kura installers](#kura-installers) section for further information.
 
@@ -26,12 +26,13 @@ Installers of type (2) with the suffix `nn` are **No Networking** profiles that 
 A user can deploy Kura on a target system using the installer tailored for the device architecture. The installer file looks like:
 
 ```
-kura-<kura-version>_generic-<arch>_installer.deb/rpm
+kura-<kura-version>_<arch>_installer.deb/rpm
 ```
 
-where `<arch>` is one of the **supported architectures**: *x86_64*, *arm32*, and *arm64*. Kura can work on systems that have available the dependencies listed in the [Kura dependencies](#kura-dependencies) section, and that have **at least one** physical ethernet interface.
+where `<arch>` is one of the **supported architectures**: *x86_64*, *armhf*, and *aarch64*. Kura can work on systems that have available the dependencies listed in the [Kura dependencies](#kura-dependencies) section, and that have **at least one** physical ethernet interface. Java 17 is required.
 
 ### Java Heap Memory Assignment
+
 The Eclipse Kura&trade;'s installer incorporates an adaptive Heap Memory allocation system during installation. The allocation follows a formula based on your gateway's available memory. If your gateway has less than 1024MB of RAM, Kura will set -Xms and -Xmx to 256MB. For gateways with more than 1024MB, one quarter of the total RAM will be assigned to -Xms and -Xmx.
 
 ### Initial network configuration
@@ -97,7 +98,7 @@ To have all the Kura features working, the following dependencies are required:
 - Logs: `logrotate`.
 - Gps: `gpsd`.
 - Python: `python3`.
-- Java: `openjdk-17-jre-headless` or `temurin-17-jdk` or `openjdk-8-jre-headless` or `temurin-8-jdk`.
+- Java: `openjdk-17-jre-headless` or `temurin-17-jdk`.
 - Others: `dos2unix`
 
 ### Reference devices
@@ -106,11 +107,11 @@ Eclipse Kura&trade; has been tested on the following devices and provides full c
 
 | Device | Architecture | OS |
 | - | - | - |
-| **Raspberry Pi 3/4** | *arm32* | Raspberry Pi OS "Bookworm" |
-| **Raspberry Pi 3/4** | *arm64* | Raspberry Pi OS "Bookworm" |
-| **Raspberry Pi 3/4** | *arm64* | Ubuntu 20.04 |
+| **Raspberry Pi 3/4** | *armhf* | Raspberry Pi OS "Bookworm" |
+| **Raspberry Pi 3/4** | *aarch64* | Raspberry Pi OS "Bookworm" |
+| **Raspberry Pi 3/4** | *aarch64* | Ubuntu 20.04 |
 | **ZimaBoard/Blade** | *x86_64* | TBD |
-| **NVIDIA Jetson AGX Orin&trade;** | *arm64* | TBD |
+| **NVIDIA Jetson AGX Orin&trade;** | *aarch64* | TBD |
 
 Check out the quick start guides for the detailed installation steps and set-up procedures:
 

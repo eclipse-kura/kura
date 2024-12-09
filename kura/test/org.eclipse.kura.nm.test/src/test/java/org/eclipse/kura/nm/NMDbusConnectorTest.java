@@ -103,7 +103,7 @@ import fi.w1.wpa_supplicant1.Interface;
 public class NMDbusConnectorTest {
 
     private static final String MM_MODEM_BUS_NAME = "org.freedesktop.ModemManager1.Modem";
-    private final DBusConnection dbusConnection = mock(DBusConnection.class, RETURNS_SMART_NULLS);
+    private final DBusConnection dbusConnection = mock(DBusConnection.class);
     private final Wpa_supplicant1 mockedWpaSupplicant = mock(Wpa_supplicant1.class);
     private final NetworkManager mockedNetworkManager = mock(NetworkManager.class);
     private final ModemManager1 mockedModemManager = mock(ModemManager1.class);

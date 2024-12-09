@@ -9,6 +9,7 @@ Depends: dos2unix, unzip,
  cron
 Architecture: all
 Maintainer: Eclipse Kura Developers <kura-dev@eclipse.org>
+Homepage: https://eclipse-kura.github.io/kura/
 Description: Kura is an inclusive software framework that puts a layer
   between the operating system and the customer application, with industry
   standard interfaces that shorten custom development time, simplified coding

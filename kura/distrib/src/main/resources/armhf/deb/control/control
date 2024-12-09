@@ -23,6 +23,7 @@ Depends: openjdk-17-jre-headless | temurin-17-jdk,
  logrotate, gpsd, python3
 Architecture: armhf
 Maintainer: Eclipse Kura Developers <kura-dev@eclipse.org>
+Homepage: https://eclipse-kura.github.io/kura/
 Description: Open-source IoT edge framework based on Java/OSGi
   Kura is an inclusive software framework that puts a layer
   between the operating system and the customer application, with industry

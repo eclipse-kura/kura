@@ -49,12 +49,11 @@ jobs:
 
             const votes = new Map();
             for(const comment of comments.data) {
-              const hasPermissions = comment.author_association === 'MEMBER' || comment.author_association === 'OWNER'
+              const hasVotingRights = comment.author_association === 'MEMBER' || comment.author_association === 'OWNER'
               const hasCastedVote = comment.body === '/force-merge'
 
-              if(hasPermissions && hasCastedVote) {
-                const username = comment.user.login
-                votes.set(username, comment.author_association);
+              if(hasVotingRights && hasCastedVote) {
+                votes.set(comment.user.login, comment.author_association);
               }
             }
 

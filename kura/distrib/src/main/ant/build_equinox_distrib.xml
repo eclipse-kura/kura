@@ -394,23 +394,11 @@ fi]]>
         <!-- Populate parameters -->
         <copy file="src/main/resources/${build.name}/kura_install.sh"
             tofile="${project.build.directory}/${build.output.name}/kura_install.sh" />
-        <copy file="src/main/resources/common/kura.init.yocto"
-            tofile="${project.build.directory}/${build.output.name}/kura.init.yocto"
-            failonerror="false" />
-        <copy file="src/main/resources/common/kura.init.raspbian"
-            tofile="${project.build.directory}/${build.output.name}/kura.init.raspbian"
-            failonerror="false" />
         <copy file="src/main/resources/common/kura.service"
             tofile="${project.build.directory}/${build.output.name}/kura.service"
             failonerror="false" />
         <replaceregexp
             file="${project.build.directory}/${build.output.name}/kura_install.sh"
-            match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
-        <replaceregexp
-            file="${project.build.directory}/${build.output.name}/kura.init.yocto"
-            match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
-        <replaceregexp
-            file="${project.build.directory}/${build.output.name}/kura.init.raspbian"
             match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
         <replaceregexp
             file="${project.build.directory}/${build.output.name}/kura.service"

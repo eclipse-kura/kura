@@ -2292,11 +2292,6 @@
 
         <profile>
             <id>core-dp</id>
-            <activation>
-                <property>
-                    <name>buildAll</name>
-                </property>
-            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -2420,11 +2415,6 @@
 
         <profile>
             <id>can-dp</id>
-            <activation>
-                <property>
-                    <name>buildAll</name>
-                </property>
-            </activation>
             <build>
                 <plugins>
                     <plugin>

@@ -26,7 +26,7 @@ Installers of type (2) with the suffix `nn` are **No Networking** profiles that 
 A user can deploy Kura on a target system using the installer tailored for the device architecture. The installer file looks like:
 
 ```
-kura_<kura-version>_<arch>.deb/rpm
+kura_<kura-version>_<arch>.deb
 ```
 
 where `<arch>` is one of the **supported architectures**: *amd64*, *arm64*, and *armhf*. Kura can work on systems that have available the dependencies listed in the [Kura dependencies](#kura-dependencies) section, and that have **at least one** physical ethernet interface.

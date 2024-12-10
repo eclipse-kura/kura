@@ -1,3 +1,16 @@
+def boolean onlyDocumentationFilesChangedIn(String workDirectory) {
+    if (!env.CHANGE_TARGET) {
+        echo "CHANGE_TARGET not set. Skipping check"
+        return false
+    }
+
+    def changedFiles = sh(script: "cd ${workDirectory} && git diff --name-only origin/${env.CHANGE_TARGET} origin/${env.BRANCH_NAME}", returnStdout: true).trim().split("\n")
+
+    echo "Changed files: ${changedFiles}" // Debug
+
+    return changedFiles && changedFiles.every { it.endsWith(".md") || it.endsWith(".txt") }
+}
+
 node {
     properties([
         disableConcurrentBuilds(abortPrevious: true),
@@ -13,6 +26,13 @@ node {
         dir("kura") {
             checkout scm
         }
+    }
+
+    // Skip build if only documentation files (i.e. *.md and *.txt) have changed
+    if (onlyDocumentationFilesChangedIn("kura")) {
+        echo "Skipping build for documentation changes"
+        currentBuild.result = 'SUCCESS'
+        return
     }
 
     stage('Build') {

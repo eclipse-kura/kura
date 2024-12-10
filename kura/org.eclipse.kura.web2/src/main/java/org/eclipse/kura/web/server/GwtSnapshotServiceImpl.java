@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -75,5 +75,28 @@ public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements 
         } catch (Exception e) {
             KuraExceptionHandler.handle(e);
         }
+    }
+
+    @Override
+    public List<String> getSnapshotConfigurationFromSid(GwtXSRFToken xsrfToken, long sid) throws GwtKuraException {
+
+        checkXSRFToken(xsrfToken);
+
+        List<String> configurationList = new ArrayList<>();
+
+        try {
+
+            ServiceLocator locator = ServiceLocator.getInstance();
+            ConfigurationService cs = locator.getService(ConfigurationService.class);
+            cs.getSnapshot(sid).forEach(configuration -> {
+                configurationList.add(configuration.getPid());
+            });
+
+        } catch (Exception e) {
+            KuraExceptionHandler.handle(e);
+        }
+
+        return configurationList;
+
     }
 }

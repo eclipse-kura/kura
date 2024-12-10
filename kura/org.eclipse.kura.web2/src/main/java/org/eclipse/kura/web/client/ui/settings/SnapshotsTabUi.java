@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -353,12 +353,25 @@ public class SnapshotsTabUi extends Composite implements Tab {
         final StringBuilder sbUrl = new StringBuilder();
 
         Long snapshot = this.selected.getSnapshotId();
+        this.gwtSnapshotService.getSnapshotConfigurationFromSid(token, snapshot.longValue(),
+                new AsyncCallback<List<String>>() {
 
-        downloadModal.show(format -> {
-            sbUrl.append("/device_snapshots?snapshotId=").append(snapshot).append("&format=").append(format);
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex);
+                    }
 
-            DownloadHelper.instance().startDownload(token, sbUrl.toString());
-        });
+                    @Override
+                    public void onSuccess(List<String> configs) {
+                        downloadModal.setSnapshotConfigurations(configs);
+                        downloadModal.show(format -> {
+                            sbUrl.append("/device_snapshots?snapshotId=").append(snapshot).append("&format=")
+                                    .append(format);
+
+                            DownloadHelper.instance().startDownload(token, sbUrl.toString());
+                        });
+                    }
+                });
 
     }
 

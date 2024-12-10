@@ -63,7 +63,7 @@ following steps:
 4. Download the Kura package with:
 
     ```
-    wget http://download.eclipse.org/kura/releases/<version>/kura-<kura-version>_<arch>_installer.deb
+    wget http://download.eclipse.org/kura/releases/<version>/kura-<kura-version>_<arch>.deb
     ```
 
     Note: replace `<version>` in the URL above with the version number of the latest release (e.g. 5.5.0) and `<arch>` with your device architecture 

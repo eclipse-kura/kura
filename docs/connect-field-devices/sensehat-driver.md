@@ -11,7 +11,7 @@ The driver-specific channel configuration contains a single parameter, **resourc
 
 **Note about running on OpenJDK**
 
-If some exceptions reporting `Locked by other application` are visible in the log and the driver fails to start, try switching to the Oracle JVM by installing the `oracle-java8-jdk` package.
+If some exceptions reporting `Locked by other application` are visible in the log and the driver fails to start, try switching to the Oracle JVM by installing the `oracle-java17-jdk` package.
 For more information on the problem, please see [this](https://github.com/eclipse/kura/issues/2098) GitHub issue.
 
 ## Installation

@@ -260,7 +260,7 @@ Identities with `rest.system` permissions can access these APIs.
         "kura.command.user": "kura",
         "kura.device.name": "raspberry",
         "kura.partNumber": "raspberry",
-        "kura.project": "generic-arm32",
+        "kura.project": "aarch64",
         "kura.company": "EUROTECH",
         "java.home": "/usr/lib/jvm/java-8-openjdk-armhf/jre",
         "version": "5.4.0-SNAPSHOT",
@@ -297,7 +297,7 @@ Identities with `rest.system` permissions can access these APIs.
         "java.vm.info": "mixed mode",
         "java.vm.version": "25.312-b07",
         "dpa.connection.timeout": "60000",
-        "build.number": "generic-arm32-buildNumber",
+        "build.number": "aarch64-buildNumber",
         "ccs.status.notification.url": "ccs:log"
     }
 }

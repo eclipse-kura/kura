@@ -4522,8 +4522,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h2 id="installer-types">Installer types</h2>
 <p>Several installers can be found on such page, and they fall into one of the following categories:</p>
 <ol>
-<li>standard installers, like <code>kura-6.0.0_generic-arm32_installer.deb</code>; and</li>
-<li>installers with suffix <strong>nn</strong>, like <code>kura-6.0.0_generic-arm32-nn_installer.deb</code></li>
+<li>standard <strong>kura</strong> installers, like <code>kura_6.0.0_arm64.deb</code></li>
+<li>installers named <strong>kura-nn</strong>, like <code>kura-nn_6.0.0_arm64.deb</code></li>
 </ol>
 <p>Profiles of types (1) ship a Kura version with networking functionalities. In particular, they can be installed on targets with <a href="https://networkmanager.dev">NetworkManager</a>, a commonly available tool for managing Linux networking. Kura leverages this tool for networking functionalities. Refer to the <a href="#kura-installers">Kura installers</a> section for further information.</p>
 <p>Installers of type (2) with the suffix <code>nn</code> are <strong>No Networking</strong> profiles that do not bundle the Kura Network Manager: all the network configurations need to be done outside of Kura. Functionalities <strong>missing</strong> in <strong>NN profiles</strong> compared to the full Kura profiles:</p>
@@ -4534,9 +4534,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 <h2 id="kura-installers">Kura installers</h2>
 <p>A user can deploy Kura on a target system using the installer tailored for the device architecture. The installer file looks like:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>kura-&lt;kura-version&gt;_generic-&lt;arch&gt;_installer.deb/rpm
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>kura_&lt;kura-version&gt;_&lt;arch&gt;.deb
 </code></pre></div>
-<p>where <code>&lt;arch&gt;</code> is one of the <strong>supported architectures</strong>: <em>x86_64</em>, <em>arm32</em>, and <em>arm64</em>. Kura can work on systems that have available the dependencies listed in the <a href="#kura-dependencies">Kura dependencies</a> section, and that have <strong>at least one</strong> physical ethernet interface.</p>
+<p>where <code>&lt;arch&gt;</code> is one of the <strong>supported architectures</strong>: <em>amd64</em>, <em>arm64</em>, and <em>armhf</em>. Kura can work on systems that have available the dependencies listed in the <a href="#kura-dependencies">Kura dependencies</a> section, and that have <strong>at least one</strong> physical ethernet interface.</p>
+<p>From Kura version 6.0.0 the Java 17 runtime is <strong>required</strong> to run the framework correctly.</p>
 <h3 id="java-heap-memory-assignment">Java Heap Memory Assignment</h3>
 <p>The Eclipse Kura&trade;'s installer incorporates an adaptive Heap Memory allocation system during installation. The allocation follows a formula based on your gateway's available memory. If your gateway has less than 1024MB of RAM, Kura will set -Xms and -Xmx to 256MB. For gateways with more than 1024MB, one quarter of the total RAM will be assigned to -Xms and -Xmx.</p>
 <h3 id="initial-network-configuration">Initial network configuration</h3>
@@ -4621,7 +4622,7 @@ enabled for LAN with a DHCP server, <code>enp3s0</code> will be enabled for WAN 
 <li>Logs: <code>logrotate</code>.</li>
 <li>Gps: <code>gpsd</code>.</li>
 <li>Python: <code>python3</code>.</li>
-<li>Java: <code>openjdk-17-jre-headless</code> or <code>temurin-17-jdk</code> or <code>openjdk-8-jre-headless</code> or <code>temurin-8-jdk</code>.</li>
+<li>Java: <code>openjdk-17-jre-headless</code> or <code>temurin-17-jdk</code>.</li>
 <li>Others: <code>dos2unix</code></li>
 </ul>
 <h3 id="reference-devices">Reference devices</h3>
@@ -4637,7 +4638,7 @@ enabled for LAN with a DHCP server, <code>enp3s0</code> will be enabled for WAN 
 <tbody>
 <tr>
 <td><strong>Raspberry Pi 3/4</strong></td>
-<td><em>arm32</em></td>
+<td><em>armhf</em></td>
 <td>Raspberry Pi OS "Bookworm"</td>
 </tr>
 <tr>
@@ -4652,7 +4653,7 @@ enabled for LAN with a DHCP server, <code>enp3s0</code> will be enabled for WAN 
 </tr>
 <tr>
 <td><strong>ZimaBoard/Blade</strong></td>
-<td><em>x86_64</em></td>
+<td><em>amd64</em></td>
 <td>TBD</td>
 </tr>
 <tr>

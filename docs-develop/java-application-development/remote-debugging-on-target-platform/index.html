@@ -4334,12 +4334,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>
 <p>Start Kura with Java Debug Wire Protocol (JDWP) typing <code>sudo /opt/eclipse/kura/bin/start_kura_debug.sh</code>. This will start Kura and open an OSGi console. It will also start listening for socket connections on port 8000.</p>
 </li>
-</ul>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Starting from Java 9, the JDWP socket connector accepts only local connections by default (see <a href="https://www.oracle.com/java/technologies/javase/9-notes.html#JDK-8041435">here</a> for further details). To enable remote debugging on Java 9, the following line in <code>/opt/eclipse/kura/bin/start_kura_debug.sh</code>: <br /><br />-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=n &#92;<br><br>has to be replaced with the following one: <br><br>-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=<b>*:</b>8000,suspend=n &#92;</p>
-</div>
-<ul>
 <li>
 <p>Open the tcp port 8000 in the firewall. This can be done through the firewall tab in Kura web interface or using iptables.</p>
 </li>

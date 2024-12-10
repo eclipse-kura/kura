@@ -8,8 +8,8 @@ Eclipse Kura&trade; is provided using a Debian Linux package. Visit the [Kura do
 
 Several installers can be found on such page, and they fall into one of the following categories:
 
-1. standard installers, like `kura-6.0.0_armhf_installer.deb`; and
-2. installers with suffix **nn**, like `kura-6.0.0_armhf-nn_installer.deb`
+1. standard **kura** installers, like `kura_6.0.0_arm64.deb`; and
+2. installers named **kura-nn**, like `kura-nn_6.0.0_arm64.deb`
 
 Profiles of types (1) ship a Kura version with networking functionalities. In particular, they can be installed on targets with [NetworkManager](https://networkmanager.dev), a commonly available tool for managing Linux networking. Kura leverages this tool for networking functionalities. Refer to the [Kura installers](#kura-installers) section for further information.
 
@@ -26,10 +26,12 @@ Installers of type (2) with the suffix `nn` are **No Networking** profiles that 
 A user can deploy Kura on a target system using the installer tailored for the device architecture. The installer file looks like:
 
 ```
-kura-<kura-version>_<arch>_installer.deb/rpm
+kura_<kura-version>_<arch>.deb/rpm
 ```
 
-where `<arch>` is one of the **supported architectures**: *x86_64*, *armhf*, and *aarch64*. Kura can work on systems that have available the dependencies listed in the [Kura dependencies](#kura-dependencies) section, and that have **at least one** physical ethernet interface. Java 17 is required.
+where `<arch>` is one of the **supported architectures**: *amd64*, *arm64*, and *armhf*. Kura can work on systems that have available the dependencies listed in the [Kura dependencies](#kura-dependencies) section, and that have **at least one** physical ethernet interface.
+
+From Kura version 6.0.0 the Java 17 runtime is **required** to run the framework correctly.
 
 ### Java Heap Memory Assignment
 
@@ -108,10 +110,10 @@ Eclipse Kura&trade; has been tested on the following devices and provides full c
 | Device | Architecture | OS |
 | - | - | - |
 | **Raspberry Pi 3/4** | *armhf* | Raspberry Pi OS "Bookworm" |
-| **Raspberry Pi 3/4** | *aarch64* | Raspberry Pi OS "Bookworm" |
-| **Raspberry Pi 3/4** | *aarch64* | Ubuntu 20.04 |
-| **ZimaBoard/Blade** | *x86_64* | TBD |
-| **NVIDIA Jetson AGX Orin&trade;** | *aarch64* | TBD |
+| **Raspberry Pi 3/4** | *arm64* | Raspberry Pi OS "Bookworm" |
+| **Raspberry Pi 3/4** | *arm64* | Ubuntu 20.04 |
+| **ZimaBoard/Blade** | *amd64* | TBD |
+| **NVIDIA Jetson AGX Orin&trade;** | *arm64* | TBD |
 
 Check out the quick start guides for the detailed installation steps and set-up procedures:
 

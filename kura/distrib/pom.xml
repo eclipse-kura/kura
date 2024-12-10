@@ -1206,7 +1206,7 @@
                                         <property name="build.name" value="armhf" />
                                         <property name="target.device" value="armhf" />
                                         <property name="native.tag" value="armv6hf" />
-                                        <property name="kura.os.version" value="linux" />
+                                        <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="armv7_hf" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1303,7 +1303,7 @@
                                         <property name="build.name" value="armhf-nn" />
                                         <property name="target.device" value="armhf-nn" />
                                         <property name="native.tag" value="armv6hf" />
-                                        <property name="kura.os.version" value="linux" />
+                                        <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="armv7_hf" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1395,7 +1395,7 @@
                                         <property name="build.name" value="x86_64" />
                                         <property name="target.device" value="x86_64" />
                                         <property name="native.tag" value="x86_64" />
-                                        <property name="kura.os.version" value="linux" />
+                                        <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="x86_64" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1492,7 +1492,7 @@
                                         <property name="build.name" value="x86_64-nn" />
                                         <property name="target.device" value="x86_64-nn" />
                                         <property name="native.tag" value="x86_64" />
-                                        <property name="kura.os.version" value="linux" />
+                                        <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="x86_64" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1584,7 +1584,7 @@
                                         <property name="build.name" value="aarch64" />
                                         <property name="target.device" value="aarch64" />
                                         <property name="native.tag" value="aarch64" />
-                                        <property name="kura.os.version" value="linux" />
+                                        <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="aarch64" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1681,7 +1681,7 @@
                                         <property name="build.name" value="aarch64-nn" />
                                         <property name="target.device" value="aarch64-nn" />
                                         <property name="native.tag" value="aarch64" />
-                                        <property name="kura.os.version" value="linux" />
+                                        <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="aarch64" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />

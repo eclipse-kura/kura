@@ -8,7 +8,7 @@ Eclipse Kura&trade; is provided using a Debian Linux package. Visit the [Kura do
 
 Several installers can be found on such page, and they fall into one of the following categories:
 
-1. standard **kura** installers, like `kura_6.0.0_arm64.deb`; and
+1. standard **kura** installers, like `kura_6.0.0_arm64.deb`
 2. installers named **kura-nn**, like `kura-nn_6.0.0_arm64.deb`
 
 Profiles of types (1) ship a Kura version with networking functionalities. In particular, they can be installed on targets with [NetworkManager](https://networkmanager.dev), a commonly available tool for managing Linux networking. Kura leverages this tool for networking functionalities. Refer to the [Kura installers](#kura-installers) section for further information.

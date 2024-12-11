@@ -340,11 +340,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.linux.usb.armv6hf</artifactId>
-                                    <version>${org.eclipse.kura.linux.usb.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.linux.usb.x86_64</artifactId>
                                     <version>${org.eclipse.kura.linux.usb.version}</version>
                                 </artifactItem>
@@ -777,7 +772,6 @@
                                 <move file="target/plugins/org.eclipse.kura.linux.systemd.provider.jar" tofile="target/plugins/org.eclipse.kura.linux.systemd.provider_${org.eclipse.kura.linux.systemd.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.position.jar" tofile="target/plugins/org.eclipse.kura.linux.position_${org.eclipse.kura.linux.position.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.usb.jar" tofile="target/plugins/org.eclipse.kura.linux.usb_${org.eclipse.kura.linux.usb.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.linux.usb.armv6hf.jar" tofile="target/plugins/org.eclipse.kura.linux.usb.armv6hf_${org.eclipse.kura.linux.usb.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.usb.x86_64.jar" tofile="target/plugins/org.eclipse.kura.linux.usb.x86_64_${org.eclipse.kura.linux.usb.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.usb.aarch64.jar" tofile="target/plugins/org.eclipse.kura.linux.usb.aarch64_${org.eclipse.kura.linux.usb.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.ble.provider.jar" tofile="target/plugins/org.eclipse.kura.ble.provider_${org.eclipse.kura.ble.provider.version}.jar" />

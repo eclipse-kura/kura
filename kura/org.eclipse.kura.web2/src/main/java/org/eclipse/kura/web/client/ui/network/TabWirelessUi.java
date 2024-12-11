@@ -158,7 +158,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private final NetworkTabsUi netTabs;
     private final ListDataProvider<GwtWifiHotspotEntry> ssidDataProvider = new ListDataProvider<>();
     private final SingleSelectionModel<GwtWifiHotspotEntry> ssidSelectionModel = new SingleSelectionModel<>();
-    // private boolean isWPA3WifiSecuritySupported;
 
     AnchorListItem wireless8021xTabAnchorItem;
 

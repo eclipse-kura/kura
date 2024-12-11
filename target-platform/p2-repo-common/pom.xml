@@ -134,11 +134,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>com.codeminders.hidapi.armv6hf</artifactId>
-                                    <version>${com.codeminders.hidapi.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>com.codeminders.hidapi.x86_64</artifactId>
                                     <version>${com.codeminders.hidapi.version}</version>
                                 </artifactItem>
@@ -659,7 +654,6 @@
                         <configuration>
                             <tasks>
                                 <move file="target/source/plugins/com.codeminders.hidapi.jar" tofile="target/source/plugins/com.codeminders.hidapi_${com.codeminders.hidapi.version}.jar"/>
-                                <move file="target/source/plugins/com.codeminders.hidapi.armv6hf.jar" tofile="target/source/plugins/com.codeminders.hidapi.armv6hf_${com.codeminders.hidapi.version}.jar"/>
                                 <move file="target/source/plugins/com.codeminders.hidapi.x86_64.jar" tofile="target/source/plugins/com.codeminders.hidapi.x86_64_${com.codeminders.hidapi.version}.jar"/>
                                 <move file="target/source/plugins/com.codeminders.hidapi.aarch64.jar" tofile="target/source/plugins/com.codeminders.hidapi.aarch64_${com.codeminders.hidapi.version}.jar"/>
                                 <move file="target/source/plugins/commons-net.jar" tofile="target/source/plugins/org.apache.commons.commons-net_${org.apache.commons.commons-net.version}.jar"/>

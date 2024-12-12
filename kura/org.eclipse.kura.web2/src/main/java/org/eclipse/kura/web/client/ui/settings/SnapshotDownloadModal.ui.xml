@@ -22,6 +22,15 @@
 
     <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages" />
 
+	<ui:style>
+		.channel-name-validation-label {
+	        padding-top: 5px;
+	        color: red;
+	        font-size: 0.35cm;
+	        font-weight: normal;
+	    }
+	</ui:style>
+
     <b:Modal closable="false" fade="true" dataBackdrop="STATIC" ui:field="modal" title="{msgs.deviceSnapshotDownloadModalTitle}">
             <b:ModalBody>
                 <g:FormPanel>
@@ -29,9 +38,11 @@
                         <b:FormGroup>
                             <b.html:Paragraph text="{msgs.deviceSnapshotDownloadModalHint}" />
                             <g:ScrollPanel ui:field="scrollPanel"></g:ScrollPanel>
+                            <b:FormLabel addStyleNames="{style.channel-name-validation-label}" ui:field="noPidSelectedError" />
                         </b:FormGroup>
                     </b:FieldSet>
                 </g:FormPanel>
+                <b:Anchor text="{msgs.downloadSnapshotResetSelection}" ui:field="resetColumnsAnchor" />
             </b:ModalBody>
             <b:ModalFooter>
                 <b:Button addStyleNames="fa" type="PRIMARY" dataDismiss="MODAL" text="{msgs.cancelButton}" />

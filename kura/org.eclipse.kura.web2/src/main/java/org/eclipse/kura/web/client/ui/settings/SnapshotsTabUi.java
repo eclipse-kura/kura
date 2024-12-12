@@ -363,16 +363,20 @@ public class SnapshotsTabUi extends Composite implements Tab {
 
                     @Override
                     public void onSuccess(List<String> configs) {
-                        downloadModal.setSnapshotConfigurations(configs);
-                        downloadModal.show(format -> {
-                            sbUrl.append("/device_snapshots?snapshotId=").append(snapshot).append("&format=")
-                                    .append(format);
+                        downloadModal.show(snapshotDownloadOptions -> {
 
-                            DownloadHelper.instance().startDownload(token, sbUrl.toString());
-                        });
+                            sbUrl.append("/device_snapshots?snapshotId=").append(snapshot).append("&format=")
+                                    .append(snapshotDownloadOptions.getFormat());
+
+                            if (snapshotDownloadOptions.getSelectedPids().isPresent()) {
+                                DownloadHelper.instance().startDownload(token, sbUrl.toString(),
+                                        snapshotDownloadOptions.getSelectedPids().get());
+                            } else {
+                                DownloadHelper.instance().startDownload(token, sbUrl.toString());
+                            }
+                        }, configs);
                     }
                 });
-
     }
 
     private void uploadAndApply() {

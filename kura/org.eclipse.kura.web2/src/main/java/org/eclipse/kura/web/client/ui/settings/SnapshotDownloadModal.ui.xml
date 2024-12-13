@@ -42,10 +42,11 @@
                         </b:FormGroup>
                     </b:FieldSet>
                 </g:FormPanel>
-                <b:Anchor text="{msgs.downloadSnapshotResetSelection}" ui:field="resetPidSelection" />
+                <b:Anchor ui:field="selectOrRemoveAllAnchor" />
             </b:ModalBody>
             <b:ModalFooter>
-                <b:Button addStyleNames="fa" type="PRIMARY" dataDismiss="MODAL" text="{msgs.cancelButton}" />
+            	<b.html:Paragraph text="Choose the format in which the file will be downloaded" />
+                <b:Button addStyleNames="fa" type="PRIMARY" ui:field= "cancelButton" text="{msgs.cancelButton}" />
                 <b:Button addStyleNames="fa" type="PRIMARY" ui:field="downloadJson" text="{msgs.downloadSnapshotJsonButton}" />
                 <b:Button addStyleNames="fa" type="PRIMARY" ui:field="downloadXml" text="{msgs.downloadSnapshotXmlButton}" />
             </b:ModalFooter>

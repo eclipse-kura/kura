@@ -25,6 +25,7 @@ node {
     stage('Preparation') {
         dir("kura") {
             checkout scm
+            sh "touch /tmp/isJenkins.txt"
         }
     }
 
@@ -35,19 +36,46 @@ node {
         return
     }
 
-    stage('Build') {
+    stage('Build target-platform') {
+        timeout(time: 1, unit: 'HOURS') {
+            dir("kura") {
+                withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
+                    sh "mvn -f target-platform/pom.xml clean install -Pno-mirror -Pcheck-exists-plugin"
+                }
+            }
+        }
+    }
+
+    stage('Build core') {
         timeout(time: 2, unit: 'HOURS') {
             dir("kura") {
-                withMaven(jdk: 'adoptopenjdk-hotspot-jdk8-latest', maven: 'apache-maven-3.9.6') {
-                    sh "touch /tmp/isJenkins.txt"
-                    sh "mvn -f target-platform/pom.xml clean install -Pno-mirror -Pcheck-exists-plugin"
-                    sh "mvn -f kura/pom.xml clean install -Pcheck-exists-plugin"
+                withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
+                    sh "mvn -f kura/pom.xml -Dsurefire.rerunFailingTestsCount=3 clean install -Pcheck-exists-plugin"
+                }
+            }
+        }
+    }
+
+    stage('Build distrib') {
+        timeout(time: 1, unit: 'HOURS') {
+            dir("kura") {
+                withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
                     sh "mvn -f kura/distrib/pom.xml clean install -DbuildAll"
+                }
+            }
+        }
+    }
+
+    stage('Build examples') {
+        timeout(time: 1, unit: 'HOURS') {
+            dir("kura") {
+                withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
                     sh "mvn -f kura/examples/pom.xml clean install -Pcheck-exists-plugin"
                 }
             }
         }
     }
+
 
     stage('Generate test reports') {
         dir("kura") {

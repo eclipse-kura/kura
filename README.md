@@ -51,7 +51,7 @@ Additionally, we provide two channels for reporting any issue you find with the 
 Install
 -------
 
-Eclipse Kura™ is compatible with Java 8 and Java 17.
+Eclipse Kura™ is compatible with Java 17.
 
 ### Target Gateways Installers
 Eclipse Kura™ provides pre-built installers for common development boards. Check the following [link](https://www.eclipse.org/kura/downloads.php) to download the desired installers.
@@ -66,7 +66,7 @@ Build
 ### Prerequisites
 
 In order to be able to build Eclipse Kura™ on your development machine, you need to have the following programs installed in your system:
-* JDK 1.8
+* JDK 17
 * Maven 3.5.x
 
 <details>
@@ -76,7 +76,7 @@ In order to be able to build Eclipse Kura™ on your development machine, you ne
 
 </summary>
 
-To install Java 8, download the JDK tar archive from the [Adoptium Project Repository](https://adoptium.net/releases.html?variant=openjdk8&jvmVariant=hotspot).
+To install Java 17, download the JDK tar archive from the [Adoptium Project Repository](https://adoptium.net/en-GB/temurin/releases/?variant=openjdk8&jvmVariant=hotspot&version=17).
 
 Once downloaded, copy the tar archive in `/Library/Java/JavaVirtualMachines/` and cd into it. Unpack the archive with the following command:
 
@@ -89,10 +89,7 @@ The tar archive can be deleted afterwards.
 Depending on which terminal you are using, edit the profiles (.zshrc, .profile, .bash_profile) to contain:
 
 ```bash
-# Adoptium JDK 8
-export JAVA_8_HOME=/Library/Java/JavaVirtualMachines/<archive-name>/Contents/Home
-alias java8='export JAVA_HOME=$JAVA_8_HOME'
-java8 
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/<archive-name>/Contents/Home
 ```
 
 Reload the terminal and run `java -version` to make sure it is installed correctly.
@@ -119,7 +116,7 @@ export PATH="/usr/local/opt/maven@3.5/bin:$PATH"
 
 For Java
 ```bash
-sudo apt install openjdk-8-jdk
+sudo apt install openjdk-17-jdk
 ```
 For Maven   
 

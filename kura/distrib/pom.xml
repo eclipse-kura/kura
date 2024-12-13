@@ -1136,6 +1136,7 @@
     </dependencies>
 
     <profiles>
+
         <profile>
             <id>java8</id>
             <activation>
@@ -1145,6 +1146,7 @@
                 <skip.js.nashorn.engine.components>false</skip.js.nashorn.engine.components>
             </properties>
         </profile>
+
         <profile>
             <id>java17</id>
             <activation>
@@ -1154,8 +1156,10 @@
                 <skip.js.nashorn.engine.components>true</skip.js.nashorn.engine.components>
             </properties>
         </profile>
+
+        <!-- armhf -->
         <profile>
-            <id>generic-arm32</id>
+            <id>armhf</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1188,7 +1192,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-arm32-jars</id>
+                                <id>armhf-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1199,10 +1203,10 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-arm32" />
-                                        <property name="target.device" value="generic-arm32" />
+                                        <property name="build.name" value="armhf" />
+                                        <property name="target.device" value="armhf" />
                                         <property name="native.tag" value="armv6hf" />
-                                        <property name="kura.os.version" value="raspbian" />
+                                        <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="armv7_hf" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1218,18 +1222,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-arm32-deb</id>
+                                <id>armhf-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-arm32_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-arm32/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_armhf.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/armhf/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-arm32.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_armhf.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1250,8 +1254,9 @@
             </build>
         </profile>
 
+        <!-- armhf-nn -->
         <profile>
-            <id>generic-arm32-nn</id>
+            <id>armhf-nn</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1284,7 +1289,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-arm32-nn-jars</id>
+                                <id>armhf-nn-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1295,10 +1300,10 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-arm32-nn" />
-                                        <property name="target.device" value="generic-arm32-nn" />
+                                        <property name="build.name" value="armhf-nn" />
+                                        <property name="target.device" value="armhf-nn" />
                                         <property name="native.tag" value="armv6hf" />
-                                        <property name="kura.os.version" value="raspbian" />
+                                        <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="armv7_hf" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1314,18 +1319,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-arm32-nn-deb</id>
+                                <id>armhf-nn-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-arm32-nn_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-arm32-nn/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura-nn_${project.version}_armhf.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/armhf-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-arm32-nn.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_armhf-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1341,8 +1346,9 @@
             </build>
         </profile>
 
+        <!-- x86_64 -->
         <profile>
-            <id>generic-x86_64</id>
+            <id>x86_64</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1375,7 +1381,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-x86_64-jars</id>
+                                <id>x86_64-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1386,10 +1392,10 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-x86_64" />
-                                        <property name="target.device" value="generic-x86_64" />
+                                        <property name="build.name" value="x86_64" />
+                                        <property name="target.device" value="x86_64" />
                                         <property name="native.tag" value="x86_64" />
-                                        <property name="kura.os.version" value="raspbian" />
+                                        <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="x86_64" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1405,18 +1411,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-x86_64-deb</id>
+                                <id>x86_64-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-x86_64_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-x86_64/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_amd64.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/x86_64/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-x86_64.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_x86_64.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1437,8 +1443,9 @@
             </build>
         </profile>
 
+        <!-- x86_64-nn -->
 		<profile>
-            <id>generic-x86_64-nn</id>
+            <id>x86_64-nn</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1471,7 +1478,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-x86_64-nn-jars</id>
+                                <id>x86_64-nn-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1482,10 +1489,10 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-x86_64-nn" />
-                                        <property name="target.device" value="generic-x86_64-nn" />
+                                        <property name="build.name" value="x86_64-nn" />
+                                        <property name="target.device" value="x86_64-nn" />
                                         <property name="native.tag" value="x86_64" />
-                                        <property name="kura.os.version" value="raspbian" />
+                                        <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="x86_64" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1501,18 +1508,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-x86_64-nn-deb</id>
+                                <id>x86_64-nn-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-x86_64-nn_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-x86_64-nn/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura-nn_${project.version}_amd64.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/x86_64-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-x86_64-nn.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_x86_64-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1527,9 +1534,10 @@
                 </plugins>
             </build>
         </profile>
-        
+
+        <!-- aarch64 -->
         <profile>
-            <id>generic-aarch64</id>
+            <id>aarch64</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1562,7 +1570,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-aarch64-jars</id>
+                                <id>aarch64-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1573,11 +1581,11 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-aarch64" />
-                                        <property name="target.device" value="generic-aarch64" />
+                                        <property name="build.name" value="aarch64" />
+                                        <property name="target.device" value="aarch64" />
                                         <property name="native.tag" value="aarch64" />
-                                        <property name="kura.os.version" value="raspbian" />
-                                        <property name="kura.arch" value="generic-arm64" />
+                                        <property name="kura.os.version" value="debian" />
+                                        <property name="kura.arch" value="aarch64" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -1592,18 +1600,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-aarch64-deb</id>
+                                <id>aarch64-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-aarch64_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-aarch64/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura_${project.version}_arm64.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/aarch64/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-aarch64.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_aarch64.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1624,8 +1632,9 @@
             </build>
         </profile>
 
+        <!-- aarch64-nn -->
 		<profile>
-            <id>generic-aarch64-nn</id>
+            <id>aarch64-nn</id>
             <activation>
                 <property>
                     <name>buildAll</name>
@@ -1658,7 +1667,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>generic-aarch64-nn-jars</id>
+                                <id>aarch64-nn-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1669,11 +1678,11 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="generic-aarch64-nn" />
-                                        <property name="target.device" value="generic-aarch64-nn" />
+                                        <property name="build.name" value="aarch64-nn" />
+                                        <property name="target.device" value="aarch64-nn" />
                                         <property name="native.tag" value="aarch64" />
-                                        <property name="kura.os.version" value="raspbian" />
-                                        <property name="kura.arch" value="generic-arm64" />
+                                        <property name="kura.os.version" value="debian" />
+                                        <property name="kura.arch" value="aarch64" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
                                         <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
@@ -1688,18 +1697,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>generic-aarch64-nn-deb</id>
+                                <id>aarch64-nn-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_generic-aarch64-nn_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/resources/generic-aarch64-nn/deb/control</controlDir>
+                                    <deb>${basedir}/target/kura-nn_${project.version}_arm64.deb</deb>
+                                    <controlDir>${basedir}/src/main/resources/aarch64-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_generic-aarch64-nn.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_aarch64-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1715,6 +1724,8 @@
             </build>
         </profile>
         
+        <!-- dockers -->
+
         <profile>
             <id>docker-x86_64-nn</id>
             <activation>
@@ -1832,6 +1843,7 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
             <id>docker-ubi8-x86_64-nn</id>
             <activation>
@@ -1878,6 +1890,7 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
             <id>docker-alpine-x86_64-nn</id>
             <activation>
@@ -1925,6 +1938,7 @@
             </build>
         </profile>
 
+        <!-- dev-env -->
         <profile>
             <id>dev-env</id>
             <activation>
@@ -2273,13 +2287,11 @@
                 </plugins>
             </build>
         </profile>
+
+        <!-- dp -->
+
         <profile>
             <id>core-dp</id>
-            <activation>
-                <property>
-                    <name>buildAll</name>
-                </property>
-            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -2400,13 +2412,9 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
             <id>can-dp</id>
-            <activation>
-                <property>
-                    <name>buildAll</name>
-                </property>
-            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -2437,5 +2445,6 @@
                 </plugins>
             </build>
         </profile>
+
     </profiles>
 </project>

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.system.SystemService;
@@ -166,6 +167,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private GwtWifiNetInterfaceConfig selectedNetIfConfig;
     private String tcp4Status;
     private String tcp6Status;
+    private AtomicBoolean isWPA3Supported = new AtomicBoolean(false);
 
     GwtWifiConfig activeConfig;
     GwtWifiChannelModel previousSelection;
@@ -922,7 +924,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         });
 
         // Wireless Security
-        initWifiSecurityListBox(false);
+        initWifiSecurityListBox();
 
         // Password
         this.labelPassword.setText(MSGS.netWifiWirelessPassword());
@@ -1499,9 +1501,16 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                                 @Override
                                 public void onSuccess(List<GwtWifiHotspotEntry> result) {
                                     TabWirelessUi.this.ssidDataProvider.getList().clear();
-
                                     for (GwtWifiHotspotEntry pair : result) {
-                                        TabWirelessUi.this.ssidDataProvider.getList().add(pair);
+                                        if (pair.getSecurity().equals(GwtWifiSecurity.netWifiSecurityWPA3.value())
+                                                || pair.getSecurity()
+                                                        .equals(GwtWifiSecurity.netWifiSecurityWPA2_WPA3.value())) {
+                                            if (TabWirelessUi.this.isWPA3Supported.get()) {
+                                                TabWirelessUi.this.ssidDataProvider.getList().add(pair);
+                                            }
+                                        } else {
+                                            TabWirelessUi.this.ssidDataProvider.getList().add(pair);
+                                        }
                                     }
                                     TabWirelessUi.this.ssidDataProvider.flush();
                                     if (!TabWirelessUi.this.ssidDataProvider.getList().isEmpty()) {
@@ -1885,7 +1894,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                                         .findFirst();
                                 if (wpa3SupportPair.isPresent()
                                         && Boolean.parseBoolean(wpa3SupportPair.get().getValue())) {
-                                    initWifiSecurityListBox(true);
+                                    TabWirelessUi.this.isWPA3Supported.set(true);
+                                    initWifiSecurityListBox();
                                 }
                             }
                         });
@@ -1893,12 +1903,13 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         });
     }
 
-    private void initWifiSecurityListBox(boolean isWPA3WifiSecuritySupported) {
+    private void initWifiSecurityListBox() {
         this.labelSecurity.setText(MSGS.netWifiWirelessSecurity());
         this.security.addMouseOverHandler(event -> {
             if (TabWirelessUi.this.security.isEnabled()) {
                 TabWirelessUi.this.helpText.clear();
-                TabWirelessUi.this.helpText.add(new Span(composeNetWifiToolTipSecurity(isWPA3WifiSecuritySupported)));
+                TabWirelessUi.this.helpText
+                        .add(new Span(composeNetWifiToolTipSecurity(TabWirelessUi.this.isWPA3Supported.get())));
             }
         });
         this.security.addMouseOutHandler(event -> resetHelp());
@@ -1906,7 +1917,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         for (GwtWifiSecurity mode : GwtWifiSecurity.values()) {
             if (mode.equals(GwtWifiSecurity.netWifiSecurityWPA3)
                     || mode.equals(GwtWifiSecurity.netWifiSecurityWPA2_WPA3)) {
-                if (isWPA3WifiSecuritySupported) {
+                if (TabWirelessUi.this.isWPA3Supported.get()) {
                     this.security.addItem(MessageUtils.get(mode.name()));
                 }
             } else {

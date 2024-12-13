@@ -60,11 +60,13 @@ public final class DownloadHelper {
     public void startDownload(GwtXSRFToken token, String resource, List<String> selectedPids) {
         final StringBuilder sbUrl = new StringBuilder();
 
+        final StringBuilder sbPids = new StringBuilder();
+        selectedPids.forEach(pid -> sbPids.append(pid + ","));
+        selectedPids.remove(selectedPids.size() - 1);
+
         sbUrl.append(Console.ADMIN_ROOT).append("/").append(GWT.getModuleName()).append(resource)
                 .append(resource.indexOf('?') != -1 ? '&' : '?').append("xsrfToken=")
-                .append(URL.encodeQueryString(token.getToken()));
-
-        logger.info("\n\nPIDS: " + selectedPids + "\n\n");
+                .append(URL.encodeQueryString(token.getToken())).append("&selectedPids=").append(sbPids.toString());
 
         startDownload(sbUrl.toString());
     }

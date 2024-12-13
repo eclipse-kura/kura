@@ -350,7 +350,6 @@ public class SnapshotsTabUi extends Composite implements Tab {
     }
 
     private void downloadSnapshot(GwtXSRFToken token) {
-        final StringBuilder sbUrl = new StringBuilder();
 
         Long snapshot = this.selected.getSnapshotId();
         this.gwtSnapshotService.getSnapshotConfigurationFromSid(token, snapshot.longValue(),
@@ -365,12 +364,16 @@ public class SnapshotsTabUi extends Composite implements Tab {
                     public void onSuccess(List<String> configs) {
                         downloadModal.show(snapshotDownloadOptions -> {
 
+                            final StringBuilder sbUrl = new StringBuilder();
+
                             sbUrl.append("/device_snapshots?snapshotId=").append(snapshot).append("&format=")
                                     .append(snapshotDownloadOptions.getFormat());
 
                             if (snapshotDownloadOptions.getSelectedPids().isPresent()) {
+
                                 DownloadHelper.instance().startDownload(token, sbUrl.toString(),
                                         snapshotDownloadOptions.getSelectedPids().get());
+
                             } else {
                                 DownloadHelper.instance().startDownload(token, sbUrl.toString());
                             }

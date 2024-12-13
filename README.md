@@ -2,7 +2,7 @@ Eclipse Kura™
 =============
 
 <p align="center">
-<img src="https://www.eclipse.org/kura/content/images/kura_logo_400.png" alt="Kura™ logo" width="500"/>
+<img src="https://eclipse.dev/kura/images/kura.png" alt="Kura™ logo" width="500"/>
 </p>
 
 <div align="center">

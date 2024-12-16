@@ -37,15 +37,15 @@
                     <b:FieldSet>
                         <b:FormGroup>
                             <b.html:Paragraph ui:field="downloadModalDescription" />
+                            <b.html:Paragraph ui:field="formatModalHint" text="{msgs.formatDownloadHint}" />
                             <g:ScrollPanel ui:field="pidSelectionScrollPanel"></g:ScrollPanel>
-                            <b:FormLabel addStyleNames="{style.channel-name-validation-label}" ui:field="noPidSelectedError" />
+                            <b:FormLabel addStyleNames="{style.channel-name-validation-label}" ui:field="noPidSelectedError" text="{msgs.downloadSnapshotError}" />
                         </b:FormGroup>
                     </b:FieldSet>
                 </g:FormPanel>
                 <b:Anchor ui:field="selectOrRemoveAllAnchor" />
             </b:ModalBody>
             <b:ModalFooter>
-            	<b.html:Paragraph text="Choose the format in which the file will be downloaded" />
                 <b:Button addStyleNames="fa" type="PRIMARY" ui:field= "cancelButton" text="{msgs.cancelButton}" />
                 <b:Button addStyleNames="fa" type="PRIMARY" ui:field="downloadJson" text="{msgs.downloadSnapshotJsonButton}" />
                 <b:Button addStyleNames="fa" type="PRIMARY" ui:field="downloadXml" text="{msgs.downloadSnapshotXmlButton}" />

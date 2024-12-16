@@ -43,14 +43,13 @@ public class SnapshotDownloadModal extends Composite {
     private static SnapshotDownloadModalUiBinder uiBinder = GWT.create(SnapshotDownloadModalUiBinder.class);
     private static final Messages MSGS = GWT.create(Messages.class);
 
-    private static final String SELECT_ALL_PIDS_SELECTION = "Select All Pids";
-    private static final String REMOVE_ALL_PIDS_SELECTION = "Remove All Pids";
-
     interface SnapshotDownloadModalUiBinder extends UiBinder<Widget, SnapshotDownloadModal> {
     }
 
     @UiField
     Paragraph downloadModalDescription;
+    @UiField
+    Paragraph formatModalHint;
     @UiField
     ScrollPanel pidSelectionScrollPanel;
     @UiField
@@ -80,7 +79,6 @@ public class SnapshotDownloadModal extends Composite {
         this.pidSelectionScrollPanel.setVisible(false);
         this.selectOrRemoveAllAnchor.setVisible(false);
         this.noPidSelectedError.setVisible(false);
-        this.noPidSelectedError.setText("Please select at least one pid from the list");
 
         this.cancelButton.addClickHandler(this::onCancelClick);
 
@@ -89,6 +87,7 @@ public class SnapshotDownloadModal extends Composite {
     public void show(Consumer<SnapshotDownloadOptions> consumer) {
         this.snapshotDownloadConsumer = consumer;
         this.modal.setTitle(MSGS.deviceWiregraphDownloadModalTitle());
+        this.downloadModalDescription.setText(MSGS.deviceWiregraphDownloadModalHint());
         initWiregraphDownloadButtons();
         this.modal.show();
     }
@@ -127,7 +126,7 @@ public class SnapshotDownloadModal extends Composite {
             this.anchorClickHandler.removeHandler();
         }
         this.areAllPidsSelected = true;
-        this.selectOrRemoveAllAnchor.setText(REMOVE_ALL_PIDS_SELECTION);
+        this.selectOrRemoveAllAnchor.setText(MSGS.removeAllAnchorText());
         this.anchorClickHandler = this.selectOrRemoveAllAnchor.addClickHandler(this::selectOrRemoveAllSelection);
         this.selectOrRemoveAllAnchor.setVisible(true);
     }
@@ -204,8 +203,8 @@ public class SnapshotDownloadModal extends Composite {
         List<String> selectedPids = new ArrayList<>();
         this.pidPanel.iterator().forEachRemaining(pid -> {
             CheckBox checkBox = (CheckBox) pid;
-            if (checkBox.getValue().booleanValue() && !checkBox.getText().equals(SELECT_ALL_PIDS_SELECTION)
-                    && !checkBox.getText().equals(REMOVE_ALL_PIDS_SELECTION)) {
+            if (checkBox.getValue().booleanValue() && !checkBox.getText().equals(MSGS.selectAllAnchorText())
+                    && !checkBox.getText().equals(MSGS.removeAllAnchorText())) {
                 selectedPids.add(checkBox.getText());
             }
         });
@@ -247,9 +246,9 @@ public class SnapshotDownloadModal extends Composite {
 
     private void updateSelectOrRemoveAllText() {
         if (this.areAllPidsSelected) {
-            this.selectOrRemoveAllAnchor.setText(REMOVE_ALL_PIDS_SELECTION);
+            this.selectOrRemoveAllAnchor.setText(MSGS.removeAllAnchorText());
         } else {
-            this.selectOrRemoveAllAnchor.setText(SELECT_ALL_PIDS_SELECTION);
+            this.selectOrRemoveAllAnchor.setText(MSGS.selectAllAnchorText());
         }
     }
 

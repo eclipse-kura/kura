@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.util;
 
+import java.util.List;
+import java.util.logging.Logger;
+
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
@@ -20,6 +23,8 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.http.client.URL;
 
 public final class DownloadHelper {
+
+    private static final Logger logger = Logger.getLogger(DownloadHelper.class.getSimpleName());
 
     private static DownloadHelper instance;
     private Element downloadIframe;
@@ -48,6 +53,20 @@ public final class DownloadHelper {
         sbUrl.append(Console.ADMIN_ROOT).append("/").append(GWT.getModuleName()).append(resource)
                 .append(resource.indexOf('?') != -1 ? '&' : '?').append("xsrfToken=")
                 .append(URL.encodeQueryString(token.getToken()));
+
+        startDownload(sbUrl.toString());
+    }
+
+    public void startDownload(GwtXSRFToken token, String resource, List<String> selectedPids) {
+        final StringBuilder sbUrl = new StringBuilder();
+
+        final StringBuilder sbPids = new StringBuilder();
+        selectedPids.forEach(pid -> sbPids.append(pid + ","));
+        selectedPids.remove(selectedPids.size() - 1);
+
+        sbUrl.append(Console.ADMIN_ROOT).append("/").append(GWT.getModuleName()).append(resource)
+                .append(resource.indexOf('?') != -1 ? '&' : '?').append("xsrfToken=")
+                .append(URL.encodeQueryString(token.getToken())).append("&selectedPids=").append(sbPids.toString());
 
         startDownload(sbUrl.toString());
     }

@@ -2,7 +2,7 @@
 
 <!--
     
-    Copyright (c) 2021 Eurotech and/or its affiliates and others
+    Copyright (c) 2024 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -22,23 +22,33 @@
 
     <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages" />
 
-    <b:Modal closable="false" fade="true" dataBackdrop="STATIC" ui:field="modal" title="{msgs.deviceSnapshotDownloadModalTitle}">
+	<ui:style>
+		.channel-name-validation-label {
+	        padding-top: 10px;
+	        color: red;
+	        font-size: 0.35cm;
+	        font-weight: normal;
+	    }
+	</ui:style>
+
+    <b:Modal closable="false" fade="true" dataBackdrop="STATIC" ui:field="modal">
             <b:ModalBody>
                 <g:FormPanel>
                     <b:FieldSet>
                         <b:FormGroup>
-                            <b.html:Paragraph text="{msgs.deviceSnapshotDownloadModalLabel}" />
-                            <b:ListBox b:id="formatList" ui:field="formatList">
-					          <g:item>XML</g:item>
-					          <g:item>JSON</g:item>
-					        </b:ListBox>
+                            <b.html:Paragraph ui:field="downloadModalDescription" />
+                            <b.html:Paragraph ui:field="formatModalHint" text="{msgs.formatDownloadHint}" />
+                            <g:ScrollPanel ui:field="pidSelectionScrollPanel"></g:ScrollPanel>
+                            <b:FormLabel addStyleNames="{style.channel-name-validation-label}" ui:field="noPidSelectedError" text="{msgs.downloadSnapshotError}" />
                         </b:FormGroup>
                     </b:FieldSet>
                 </g:FormPanel>
+                <b:Anchor ui:field="selectOrRemoveAllAnchor" />
             </b:ModalBody>
             <b:ModalFooter>
-                <b:Button addStyleNames="fa" type="PRIMARY" dataDismiss="MODAL" text="{msgs.cancelButton}" />
-                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="download" text="{msgs.download}" />
+                <b:Button addStyleNames="fa" type="PRIMARY" ui:field= "cancelButton" text="{msgs.cancelButton}" />
+                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="downloadJson" text="{msgs.downloadSnapshotJsonButton}" />
+                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="downloadXml" text="{msgs.downloadSnapshotXmlButton}" />
             </b:ModalFooter>
         </b:Modal>
 

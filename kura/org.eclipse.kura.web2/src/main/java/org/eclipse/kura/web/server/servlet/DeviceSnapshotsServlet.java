@@ -13,7 +13,9 @@
 package org.eclipse.kura.web.server.servlet;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -42,7 +44,7 @@ public class DeviceSnapshotsServlet extends AuditServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-            KuraRemoteServiceServlet.requirePermissions(request, Mode.ALL, new String[] { KuraPermission.ADMIN });
+        KuraRemoteServiceServlet.requirePermissions(request, Mode.ALL, new String[] { KuraPermission.ADMIN });
 
         // BEGIN XSRF - Servlet dependent code
 
@@ -63,7 +65,20 @@ public class DeviceSnapshotsServlet extends AuditServlet {
             if (snapshotId != null) {
 
                 long sid = Long.parseLong(snapshotId);
-                List<ComponentConfiguration> configs = cs.getSnapshot(sid);
+
+                List<ComponentConfiguration> configs;
+
+                String optionalSelectedPids = request.getParameter("selectedPids");
+                if (optionalSelectedPids != null) {
+
+                    List<String> selectedPids = Arrays.asList(optionalSelectedPids.split(","));
+                    configs = cs.getSnapshot(sid).stream().filter(config -> {
+                        return selectedPids.contains(config.getPid());
+                    }).collect(Collectors.toList());
+
+                } else {
+                    configs = cs.getSnapshot(sid);
+                }
 
                 GwtServerUtil.writeSnapshot(request, response, configs, "snapshot_" + sid);
 

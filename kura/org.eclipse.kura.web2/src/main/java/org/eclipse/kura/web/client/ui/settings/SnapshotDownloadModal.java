@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,50 +12,250 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.settings;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.wires.SnapshotDownloadOptions;
+import org.gwtbootstrap3.client.ui.Anchor;
 import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.ListBox;
+import org.gwtbootstrap3.client.ui.CheckBox;
+import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.Modal;
+import org.gwtbootstrap3.client.ui.html.Paragraph;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class SnapshotDownloadModal extends Composite {
 
     private static SnapshotDownloadModalUiBinder uiBinder = GWT.create(SnapshotDownloadModalUiBinder.class);
+    private static final Messages MSGS = GWT.create(Messages.class);
 
     interface SnapshotDownloadModalUiBinder extends UiBinder<Widget, SnapshotDownloadModal> {
     }
 
     @UiField
+    Paragraph downloadModalDescription;
+    @UiField
+    Paragraph formatModalHint;
+    @UiField
+    ScrollPanel pidSelectionScrollPanel;
+    @UiField
+    Anchor selectOrRemoveAllAnchor;
+    @UiField
     Modal modal;
     @UiField
-    ListBox formatList;
+    Button downloadXml;
     @UiField
-    Button download;
+    Button downloadJson;
+    @UiField
+    Button cancelButton;
+    @UiField
+    FormLabel noPidSelectedError;
 
-    private Listener listener = format -> {
-    };
+    boolean areAllPidsSelected = true;
+    VerticalPanel pidPanel = new VerticalPanel();
+
+    HandlerRegistration anchorClickHandler;
+
+    Consumer<SnapshotDownloadOptions> snapshotDownloadConsumer;
 
     public SnapshotDownloadModal() {
+
         initWidget(uiBinder.createAndBindUi(this));
 
-        this.download.addClickHandler(e -> {
-            this.modal.hide();
-            this.listener.onDonwload(this.formatList.getSelectedValue());
-        });
+        this.pidSelectionScrollPanel.setVisible(false);
+        this.selectOrRemoveAllAnchor.setVisible(false);
+        this.noPidSelectedError.setVisible(false);
+
+        this.cancelButton.addClickHandler(this::onCancelClick);
+
     }
 
-    public void show(final Listener listener) {
-        this.listener = listener;
+    public void show(Consumer<SnapshotDownloadOptions> consumer) {
+        this.snapshotDownloadConsumer = consumer;
+        this.modal.setTitle(MSGS.deviceWiregraphDownloadModalTitle());
+        this.downloadModalDescription.setText(MSGS.deviceWiregraphDownloadModalHint());
+        initWiregraphDownloadButtons();
         this.modal.show();
     }
 
-    public interface Listener {
+    public void show(Consumer<SnapshotDownloadOptions> consumer, List<String> availablePids) {
+        this.snapshotDownloadConsumer = consumer;
+        this.noPidSelectedError.setVisible(false);
+        this.modal.setTitle(MSGS.deviceSnapshotDownloadModalTitle());
+        this.downloadModalDescription.setText(MSGS.deviceSnapshotDownloadModalHint());
+        initSnapshotPidList(availablePids);
+        initSnapshotSelectAllAnchor();
+        initSnapshotScrollPanel();
+        initSnapshotDownloadButtons();
+        this.modal.show();
+    }
 
-        public void onDonwload(String format);
+    /*
+     * Snapshot Download Inits
+     */
+
+    private void initSnapshotPidList(List<String> snapshotConfigs) {
+
+        this.pidPanel.clear();
+
+        List<String> orderedPids = snapshotConfigs.stream().sorted().collect(Collectors.toList());
+        orderedPids.forEach(pid -> {
+            CheckBox box = new CheckBox(pid);
+            box.setValue(true);
+            box.addClickHandler(this::onCheckboxClick);
+            this.pidPanel.add(box);
+        });
+    }
+
+    private void initSnapshotSelectAllAnchor() {
+        if (this.anchorClickHandler != null) {
+            this.anchorClickHandler.removeHandler();
+        }
+        this.areAllPidsSelected = true;
+        this.selectOrRemoveAllAnchor.setText(MSGS.removeAllAnchorText());
+        this.anchorClickHandler = this.selectOrRemoveAllAnchor.addClickHandler(this::selectOrRemoveAllSelection);
+        this.selectOrRemoveAllAnchor.setVisible(true);
+    }
+
+    private void initSnapshotScrollPanel() {
+        this.pidSelectionScrollPanel.setAlwaysShowScrollBars(false);
+        this.pidSelectionScrollPanel.setHeight("350px");
+        this.pidSelectionScrollPanel.clear();
+        this.pidSelectionScrollPanel.add(pidPanel);
+        this.pidSelectionScrollPanel.setVisible(true);
+    }
+
+    private void initSnapshotDownloadButtons() {
+        this.downloadJson.addClickHandler(e -> {
+            if (isOnePidSelected()) {
+                this.modal.hide();
+                resetScrollPanel();
+                this.snapshotDownloadConsumer.accept(new SnapshotDownloadOptions("JSON", getSelectedPids()));
+            } else {
+                this.noPidSelectedError.setVisible(true);
+            }
+
+        });
+
+        this.downloadXml.addClickHandler(e -> {
+            if (isOnePidSelected()) {
+                this.modal.hide();
+                resetScrollPanel();
+                this.snapshotDownloadConsumer.accept(new SnapshotDownloadOptions("XML", getSelectedPids()));
+            } else {
+                this.noPidSelectedError.setVisible(true);
+            }
+        });
+    }
+
+    /*
+     * Wiregraph Snapshot Download Inits
+     */
+
+    private void initWiregraphDownloadButtons() {
+
+        this.downloadJson.addClickHandler(e -> {
+            this.modal.hide();
+            this.snapshotDownloadConsumer.accept(new SnapshotDownloadOptions("JSON"));
+        });
+
+        this.downloadXml.addClickHandler(e -> {
+            this.modal.hide();
+            this.snapshotDownloadConsumer.accept(new SnapshotDownloadOptions("XML"));
+        });
+    }
+
+    /*
+     * Utils
+     */
+
+    private void onCheckboxClick(ClickEvent handler) {
+        if (noPidSelectedError.isVisible()) {
+            noPidSelectedError.setVisible(false);
+        }
+
+        checkAllPidsSelected();
+        updateSelectOrRemoveAllText();
+
+    }
+
+    private void onCancelClick(ClickEvent handler) {
+        this.modal.hide();
+        resetScrollPanel();
+        this.noPidSelectedError.setVisible(false);
+    }
+
+    private Optional<List<String>> getSelectedPids() {
+        List<String> selectedPids = new ArrayList<>();
+        this.pidPanel.iterator().forEachRemaining(pid -> {
+            CheckBox checkBox = (CheckBox) pid;
+            if (checkBox.getValue().booleanValue() && !checkBox.getText().equals(MSGS.selectAllAnchorText())
+                    && !checkBox.getText().equals(MSGS.removeAllAnchorText())) {
+                selectedPids.add(checkBox.getText());
+            }
+        });
+
+        return selectedPids.isEmpty() ? Optional.empty() : Optional.of(selectedPids);
+    }
+
+    private void selectOrRemoveAllSelection(ClickEvent handler) {
+        pidPanel.iterator().forEachRemaining(widget -> ((CheckBox) widget).setValue(!this.areAllPidsSelected));
+        this.areAllPidsSelected = !this.areAllPidsSelected;
+        updateSelectOrRemoveAllText();
+    }
+
+    private boolean isOnePidSelected() {
+        boolean result = false;
+        Iterator<Widget> pidPanelIterator = this.pidPanel.iterator();
+        while (pidPanelIterator.hasNext()) {
+            CheckBox box = (CheckBox) pidPanelIterator.next();
+            if (box.getValue().booleanValue()) {
+                result = true;
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    private void checkAllPidsSelected() {
+        boolean areAllSelected = true;
+        Iterator<Widget> pidPanelIterator = this.pidPanel.iterator();
+        while (pidPanelIterator.hasNext()) {
+            if (!((CheckBox) pidPanelIterator.next()).getValue().booleanValue()) {
+                areAllSelected = false;
+                break;
+            }
+        }
+        this.areAllPidsSelected = areAllSelected;
+    }
+
+    private void updateSelectOrRemoveAllText() {
+        if (this.areAllPidsSelected) {
+            this.selectOrRemoveAllAnchor.setText(MSGS.removeAllAnchorText());
+        } else {
+            this.selectOrRemoveAllAnchor.setText(MSGS.selectAllAnchorText());
+        }
+    }
+
+    private void resetScrollPanel() {
+        this.pidSelectionScrollPanel.setVerticalScrollPosition(0);
+        this.pidSelectionScrollPanel.setHorizontalScrollPosition(0);
+        this.noPidSelectedError.setVisible(false);
     }
 
 }

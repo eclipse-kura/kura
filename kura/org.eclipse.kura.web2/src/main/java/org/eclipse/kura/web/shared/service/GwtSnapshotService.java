@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -29,6 +29,8 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface GwtSnapshotService extends RemoteService {
 
     public List<GwtSnapshot> findDeviceSnapshots(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    public List<String> getSnapshotConfigurationFromSid(GwtXSRFToken xsrfToken, long sid) throws GwtKuraException;
 
     @Audit(componentName = "UI Snapshots", description = "Rollback device snapshot")
     public void rollbackDeviceSnapshot(GwtXSRFToken xsrfToken, GwtSnapshot snapshot) throws GwtKuraException;

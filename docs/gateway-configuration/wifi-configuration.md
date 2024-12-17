@@ -95,8 +95,7 @@ In addition to the options described above, the **Wireless** configuration displ
 
 ## Notes about WPA3 security
 
-The support to WPA3 security feature is experimental. Before using it, update your system with the latest changes and check that the WiFi module installed on you device has the latest firmware.
-To check if an interface supports the new WPA3 security, run the following command:
+The support to WPA3 security feature is experimental and disabled by default. Before using it, update your system with the latest changes and check that the WiFi module installed on you device has the latest firmware. To check if an interface supports the new WPA3 security, run the following command:
 
 ```
 iw phy | grep -i sae
@@ -107,3 +106,11 @@ and verify is the following output is present
 ```
 Device supports SAE with AUTHENTICATE command
 ```
+
+To enable the WPA3 WiFi Security in Eclipse Kura, edit the `/opt/eclipse/kura/user/kura_custom.properties` and add the following line:
+
+```
+kura.wpa3.wifi.security.enable=true
+```
+
+In this way the WPA3 and WPA2/WPA3 entries will be available in the Wireless Tab on the web UI and the wifi interface will be configurable with the new security using the REST APIs.

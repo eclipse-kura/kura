@@ -4558,13 +4558,16 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
 </ul>
 <h2 id="notes-about-wpa3-security">Notes about WPA3 security</h2>
-<p>The support to WPA3 security feature is experimental. Before using it, update your system with the latest changes and check that the WiFi module installed on you device has the latest firmware.
-To check if an interface supports the new WPA3 security, run the following command:</p>
+<p>The support to WPA3 security feature is experimental and disabled by default. Before using it, update your system with the latest changes and check that the WiFi module installed on you device has the latest firmware. To check if an interface supports the new WPA3 security, run the following command:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>iw phy | grep -i sae
 </code></pre></div>
 <p>and verify is the following output is present</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Device supports SAE with AUTHENTICATE command
 </code></pre></div>
+<p>To enable the WPA3 WiFi Security in Eclipse Kura, edit the <code>/opt/eclipse/kura/user/kura_custom.properties</code> and add the following line:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>kura.wpa3.wifi.security.enable=true
+</code></pre></div>
+<p>In this way the WPA3 and WPA2/WPA3 entries will be available in the Wireless Tab on the web UI and the wifi interface will be configurable with the new security using the REST APIs.</p>
 
 
 

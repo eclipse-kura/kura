@@ -28,6 +28,12 @@ jobs:
       with:
         fetch-depth: '0'
 
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin' # See 'Supported distributions' for available options
+        java-version: '11' # Required by the git-changelog-command-line tool
+
     - name: Get version
       id: get-version
       run: "echo \"resolved-version=\

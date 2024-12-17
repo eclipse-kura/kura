@@ -4479,7 +4479,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><strong>XML</strong>: The original XML snapshot format.</li>
 <li><strong>JSON</strong>: The JSON format used by the <a href="../../references/rest-apis/rest-configuration-service-v2/">Configuration v2 REST APIs and CONF-V2 request handler</a>. For example the downloaded snapshot can be used as is as a body for the <a href="../../references/rest-apis/rest-configuration-service-v2/">PUT/configurableComponents/configurations/_update</a> request. The <code>takeSnapshot</code> parameter specified by the CONF-V2 request is missing from the downloaded JSON file, if that parameter is not specified, a new snapshot will be created by default.</li>
 </ul>
-<p>Pressing the <strong>Download</strong> button will trigger a dialog that allows choosing the desired format.</p>
+<p>Starting with Kura 6.0, it is possible to download <em>a partial</em> version of the snapshot. This allows the user to download a subset of the entire Kura configuration.</p>
+<p>In the snapshot download popup, a list of checkboxes is shown, representing the list of all the service configurations that can be downloaded. By default, all configurations (represented by the component PIDs) are selected. The user can remove from the downloaded snapshot the configuration they're not interested in by deselecting the related PIDs checkboxes. The snapshot can be then downloaded in XML or JSON format thorough the dedicated button.</p>
+<p>Pressing the <strong>Download</strong> button will trigger a dialog that allows choosing the desired configurations and format.</p>
 <p><img alt="" src="../images/snapshotsDownload.png" /></p>
 <h3 id="upload-and-apply">Upload and Apply</h3>
 <p>The <strong>Upload and Apply</strong> option  provides the ability to import an XML file from your computer and upload it onto the device. This function updates every service in Kura with the parameters defined in the XML file.</p>

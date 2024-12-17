@@ -41,8 +41,6 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
     private static final LogEntriesCache cache = new LogEntriesCache();
     private static final List<String> registeredLogProviders = new LinkedList<>();
 
-    private static SystemService systemService;
-
     @Override
     public List<String> initLogProviders(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);

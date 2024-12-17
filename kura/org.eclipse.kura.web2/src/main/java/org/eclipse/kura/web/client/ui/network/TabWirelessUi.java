@@ -16,8 +16,11 @@ package org.eclipse.kura.web.client.ui.network;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
+import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.NewPasswordInput;
@@ -27,6 +30,7 @@ import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.shared.GwtSafeHtmlUtils;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
+import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
@@ -41,6 +45,8 @@ import org.eclipse.kura.web.shared.model.GwtWifiRadioMode;
 import org.eclipse.kura.web.shared.model.GwtWifiSecurity;
 import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtDeviceService;
+import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtNetworkService;
 import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
@@ -140,6 +146,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
+    private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 
     private static final String REGEX_PASS_WPA = "^[ -~]{8,63}$";
     private static final String REGEX_PASS_WEP = "^(?:[\\x00-\\x7F]{5}|[\\x00-\\x7F]{13}|[a-fA-F0-9]{10}|[a-fA-F0-9]{26})$";
@@ -160,6 +167,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private GwtWifiNetInterfaceConfig selectedNetIfConfig;
     private String tcp4Status;
     private String tcp6Status;
+    private AtomicBoolean isWPA3Supported = new AtomicBoolean(false);
 
     GwtWifiConfig activeConfig;
     GwtWifiChannelModel previousSelection;
@@ -371,6 +379,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.tcp6Tab.status.addChangeHandler(event -> {
             evalActiveConfig();
         });
+
+        configureWifiSecurityListBox();
 
         logger.info("Constructor done.");
     }
@@ -914,23 +924,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         });
 
         // Wireless Security
-        this.labelSecurity.setText(MSGS.netWifiWirelessSecurity());
-        this.security.addMouseOverHandler(event -> {
-            if (TabWirelessUi.this.security.isEnabled()) {
-                TabWirelessUi.this.helpText.clear();
-                TabWirelessUi.this.helpText.add(new Span(MSGS.netWifiToolTipSecurity()));
-            }
-        });
-        this.security.addMouseOutHandler(event -> resetHelp());
-        for (GwtWifiSecurity mode : GwtWifiSecurity.values()) {
-            this.security.addItem(MessageUtils.get(mode.name()));
-        }
-        this.security.addChangeHandler(event -> {
-            setDirty(true);
-            setPasswordValidation();
-            refreshForm();
-            checkPassword();
-        });
+        initWifiSecurityListBox();
 
         // Password
         this.labelPassword.setText(MSGS.netWifiWirelessPassword());
@@ -1201,6 +1195,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         for (int i = 0; i < this.security.getItemCount(); i++) {
             if (this.security.getItemText(i).equals(WIFI_SECURITY_WPA2_WPA3_ENTERPRISE_MESSAGE)) {
                 this.security.removeItem(i);
+                return;
             }
         }
     }
@@ -1506,9 +1501,16 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                                 @Override
                                 public void onSuccess(List<GwtWifiHotspotEntry> result) {
                                     TabWirelessUi.this.ssidDataProvider.getList().clear();
-
                                     for (GwtWifiHotspotEntry pair : result) {
-                                        TabWirelessUi.this.ssidDataProvider.getList().add(pair);
+                                        if (pair.getSecurity().equals(GwtWifiSecurity.netWifiSecurityWPA3.value())
+                                                || pair.getSecurity()
+                                                        .equals(GwtWifiSecurity.netWifiSecurityWPA2_WPA3.value())) {
+                                            if (TabWirelessUi.this.isWPA3Supported.get()) {
+                                                TabWirelessUi.this.ssidDataProvider.getList().add(pair);
+                                            }
+                                        } else {
+                                            TabWirelessUi.this.ssidDataProvider.getList().add(pair);
+                                        }
                                     }
                                     TabWirelessUi.this.ssidDataProvider.flush();
                                     if (!TabWirelessUi.this.ssidDataProvider.getList().isEmpty()) {
@@ -1864,6 +1866,78 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.radio.addItem(WIFI_BAND_2GHZ_MESSAGE, WIFI_RADIO_BG);
         this.radio.addItem(WIFI_BAND_5GHZ_MESSAGE, WIFI_RADIO_A);
         this.radio.addItem(WIFI_BAND_BOTH_MESSAGE, WIFI_RADIO_BGN);
+    }
+
+    private void configureWifiSecurityListBox() {
+
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                TabWirelessUi.this.gwtDeviceService.findSystemProperties(token,
+                        new AsyncCallback<List<GwtGroupedNVPair>>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                logger.info("Unable to read WPA3 WiFi Security support property.");
+                            }
+
+                            @Override
+                            public void onSuccess(List<GwtGroupedNVPair> result) {
+                                Optional<GwtGroupedNVPair> wpa3SupportPair = result.stream().filter(
+                                        pair -> pair.getName().equals(SystemService.KEY_WPA3_WIFI_SECURITY_ENABLE))
+                                        .findFirst();
+                                if (wpa3SupportPair.isPresent()
+                                        && Boolean.parseBoolean(wpa3SupportPair.get().getValue())) {
+                                    TabWirelessUi.this.isWPA3Supported.set(true);
+                                    initWifiSecurityListBox();
+                                }
+                            }
+                        });
+            }
+        });
+    }
+
+    private void initWifiSecurityListBox() {
+        this.labelSecurity.setText(MSGS.netWifiWirelessSecurity());
+        this.security.addMouseOverHandler(event -> {
+            if (TabWirelessUi.this.security.isEnabled()) {
+                TabWirelessUi.this.helpText.clear();
+                TabWirelessUi.this.helpText
+                        .add(new Span(composeNetWifiToolTipSecurity(TabWirelessUi.this.isWPA3Supported.get())));
+            }
+        });
+        this.security.addMouseOutHandler(event -> resetHelp());
+        this.security.clear();
+        for (GwtWifiSecurity mode : GwtWifiSecurity.values()) {
+            if (mode.equals(GwtWifiSecurity.netWifiSecurityWPA3)
+                    || mode.equals(GwtWifiSecurity.netWifiSecurityWPA2_WPA3)) {
+                if (TabWirelessUi.this.isWPA3Supported.get()) {
+                    this.security.addItem(MessageUtils.get(mode.name()));
+                }
+            } else {
+                this.security.addItem(MessageUtils.get(mode.name()));
+            }
+        }
+        this.security.addChangeHandler(event -> {
+            setDirty(true);
+            setPasswordValidation();
+            refreshForm();
+            checkPassword();
+        });
+    }
+
+    private String composeNetWifiToolTipSecurity(boolean isWPA3WifiSecuritySupported) {
+        String toolTipMessage = MSGS.netWifiToolTipSecurity();
+        if (isWPA3WifiSecuritySupported) {
+            toolTipMessage += "<br><br>" + MSGS.netWifiToolTipSecurityWPA3();
+        }
+        return toolTipMessage;
     }
 
 }

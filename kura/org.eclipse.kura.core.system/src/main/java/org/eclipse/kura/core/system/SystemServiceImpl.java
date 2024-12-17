@@ -1527,4 +1527,14 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         return getProperty(KEY_DEFAULT_LOG_MANAGER);
     }
 
+    @Override
+    public boolean isWPA3WifiSecurityEnabled() {
+        final Optional<String> isWPA3enabled = getProperty(KEY_WPA3_WIFI_SECURITY_ENABLE);
+        if (isWPA3enabled.isPresent()) {
+            return Boolean.parseBoolean(isWPA3enabled.get());
+        }
+
+        return false;
+    }
+
 }

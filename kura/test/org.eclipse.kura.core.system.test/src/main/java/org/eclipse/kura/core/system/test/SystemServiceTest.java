@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -373,6 +373,12 @@ public class SystemServiceTest {
     @Test
     public void shouldGetDefaultLogManagerProperty() {
         assertFalse(systemService.getDefaultLogManager().isPresent());
+    }
+
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void shouldGetDefaultWPA3WifiSecuritySupportProperty() {
+        assertFalse(systemService.isWPA3WifiSecurityEnabled());
     }
 
 }

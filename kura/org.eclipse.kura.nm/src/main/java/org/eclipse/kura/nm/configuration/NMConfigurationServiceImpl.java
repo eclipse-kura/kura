@@ -52,6 +52,7 @@ import org.eclipse.kura.nm.configuration.monitor.DnsServerMonitor;
 import org.eclipse.kura.nm.configuration.writer.DhcpServerConfigWriter;
 import org.eclipse.kura.nm.configuration.writer.FirewallNatConfigWriter;
 import org.eclipse.kura.security.keystore.KeystoreService;
+import org.eclipse.kura.system.SystemService;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.osgi.service.component.ComponentContext;
@@ -79,6 +80,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
     private EventAdmin eventAdmin;
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
+    private SystemService systemService;
 
     private Map<String, KeystoreService> keystoreServices = new HashMap<>();
 
@@ -149,6 +151,10 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         this.dnsServer = dnsServer;
     }
 
+    public void setSystemService(SystemService systemService) {
+        this.systemService = systemService;
+    }
+
     public NMConfigurationServiceImpl() {
         try {
             this.nmDbusConnector = NMDbusConnector.getInstance();
@@ -176,6 +182,7 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         if (Objects.nonNull(this.nmDbusConnector)) {
             try {
                 this.nmDbusConnector.checkPermissions();
+                this.nmDbusConnector.setSystemService(this.systemService);
             } catch (DBusExecutionException e) {
                 logger.error("Cannot check NetworkManager permissions due to: ", e);
             }

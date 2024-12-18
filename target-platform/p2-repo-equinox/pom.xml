@@ -56,16 +56,38 @@
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.deploymentadmin</artifactId>
                                     <version>${org.apache.felix.deploymentadmin.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.felix</groupId>
-                                    <artifactId>org.apache.felix.http.jetty</artifactId>
-                                    <version>${org.apache.felix.http.jetty.version}</version>
-                                </artifactItem>
+                                </artifactItem>>
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.http.servlet-api</artifactId>
                                     <version>${org.apache.felix.http.servlet-api.version}</version>
+                                </artifactItem>
+
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.http.jetty12</artifactId>
+                                    <classifier>light</classifier>
+                                    <version>${org.apache.felix.http.jetty12.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.http.bridge</artifactId>
+                                    <version>${org.apache.felix.http.bridge.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.http.proxy</artifactId>
+                                    <version>${org.apache.felix.http.proxy.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.http.wrappers</artifactId>
+                                    <version>${org.apache.felix.http.wrappers.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.http.sslfilter</artifactId>
+                                    <version>${org.apache.felix.http.sslfilter.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.knowhowlab.osgi</groupId>
@@ -269,7 +291,7 @@
                                         <exclude name="plugins/org.eclipse.equinox.security*.jar" />
                                         <exclude name="plugins/org.eclipse.equinox.console.ssh*.jar" />
                                         <exclude name="plugins/org.eclipse.equinox.simpleconfig*.jar" />
-                                        <exclude name="plugins/org.eclipse.equinox.http.servletbridge*.jar" />
+                                        <exclude name="plugins/org.eclipse.equinox.http.*.jar" />>
 
                                         <include name="plugins/org.eclipse.equinox.launcher_*.jar" />
                                         <include name="plugins/org.eclipse.equinox.launcher.source_*.jar" />
@@ -366,10 +388,18 @@
                                 <move file="${project.build.directory}/source/plugins/jackson-databind.jar"
                                     tofile="${project.build.directory}/source/plugins/jackson-databind_${com.fasterxml.jackson.version}.jar" />
 
-                                <move file="${project.build.directory}/source/plugins/org.apache.felix.http.jetty.jar"
-                                    tofile="${project.build.directory}/source/plugins/org.apache.felix.http.jetty_${org.apache.felix.http.jetty.version}.jar" />
                                  <move file="${project.build.directory}/source/plugins/org.apache.felix.http.servlet-api.jar"
                                     tofile="${project.build.directory}/source/plugins/org.apache.felix.http.servlet-api_${org.apache.felix.http.servlet-api.version}.jar" />
+                                 <move file="${project.build.directory}/source/plugins/org.apache.felix.http.jetty12-light.jar" 
+                                    tofile="${project.build.directory}/source/plugins/org.apache.felix.http.jetty12-light_${org.apache.felix.http.jetty12.version}.jar" />
+                                 <move file="${project.build.directory}/source/plugins/org.apache.felix.http.bridge.jar" 
+                                    tofile="${project.build.directory}/source/plugins/org.apache.felix.http.bridge_${org.apache.felix.http.bridge.version}.jar" />
+                                 <move file="${project.build.directory}/source/plugins/org.apache.felix.http.proxy.jar" 
+                                    tofile="${project.build.directory}/source/plugins/org.apache.felix.http.proxy_${org.apache.felix.http.proxy.version}.jar" />
+                                 <move file="${project.build.directory}/source/plugins/org.apache.felix.http.wrappers.jar" 
+                                    tofile="${project.build.directory}/source/plugins/org.apache.felix.http.wrappers_${org.apache.felix.http.wrappers.version}.jar" />
+                                 <move file="${project.build.directory}/source/plugins/org.apache.felix.http.sslfilter.jar" 
+                                    tofile="${project.build.directory}/source/plugins/org.apache.felix.http.sslfilter_${org.apache.felix.http.sslfilter.version}.jar" />
                              </target>
                         </configuration>
                     </execution>

@@ -59,7 +59,6 @@
         <module>com.gwt.user</module>
         <module>moquette-broker</module>
         <module>log4j2-api-config</module>
-        <module>org.eclipse.kura.jetty.customizer</module>
         <module>p2-repo-common</module>
         <module>p2-repo-equinox</module>
         <module>p2-repo-test-deps</module>

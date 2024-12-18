@@ -725,14 +725,34 @@ fi]]>
             <param name="upgrader" value="true"/>
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="org.apache.felix.http.jetty_${org.apache.felix.http.jetty.version}.jar" />
-            <param name="start.level" value="2" />
-            <param name="start" value="s" />
+            <param name="bundle.file" value="org.apache.felix.http.servlet-api_${org.apache.felix.http.servlet-api.version}.jar" />
+            <param name="start.level" value="5" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="org.apache.felix.http.servlet-api_${org.apache.felix.http.servlet-api.version}.jar" />
-            <param name="start.level" value="2" />
-            <param name="start" value="s" />
+            <param name="bundle.file" value="org.apache.felix.http.jetty12-light_${org.apache.felix.http.jetty12.version}.jar"/>
+            <param name="start.level" value="5"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.apache.felix.http.bridge_${org.apache.felix.http.bridge.version}.jar"/>
+            <param name="start.level" value="5"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.apache.felix.http.proxy_${org.apache.felix.http.proxy.version}.jar"/>
+            <param name="start.level" value="5"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.apache.felix.http.wrappers_${org.apache.felix.http.wrappers.version}.jar"/>
+            <param name="start.level" value="5"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.apache.felix.http.sslfilter_${org.apache.felix.http.sslfilter.version}.jar"/>
+            <param name="start.level" value="5"/>
+            <param name="start" value=""/>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="jersey-media-json-jackson_${org.glassfish.jersey.version}.jar" />
@@ -791,11 +811,6 @@ fi]]>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.eclipse.equinox.registry_${org.eclipse.equinox.registry.version}.jar" />
-            <param name="start.level" value="1" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.equinox.http.registry_${org.eclipse.equinox.http.registry.version}.jar" />
             <param name="start.level" value="1" />
             <param name="start" value="s" />
         </antcall>
@@ -943,21 +958,6 @@ fi]]>
             <param name="bundle.file" value="org.eclipse.jetty.jetty-io_${org.eclipse.jetty.version}.jar" />
             <param name="start.level" value="5" />
             <param name="start" value="" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.equinox.http.jetty_${org.eclipse.equinox.http.jetty.version}.jar" />
-            <param name="start.level" value="5" />
-            <param name="start" value="" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.kura.jetty.customizer_${org.eclipse.kura.jetty.customizer.version}.jar" />
-            <param name="start.level" value="6" />
-            <param name="start" value="" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.equinox.http.servlet_${org.eclipse.equinox.http.servlet.version}.jar" />
-            <param name="start.level" value="5" />
-            <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.eclipse.jetty.ee8.jetty-ee8-security_${org.eclipse.jetty.version}.jar" />

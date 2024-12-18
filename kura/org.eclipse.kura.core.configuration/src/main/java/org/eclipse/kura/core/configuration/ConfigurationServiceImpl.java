@@ -1278,12 +1278,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                                                 if (props != null) {
                                                     Object value = props.get(adId);
                                                     if (value != null) {
-                                                        String propType;
+                                                        String propType = null;
                                                         if (!value.getClass().isArray()) {
                                                             propType = value.getClass().getSimpleName();
                                                         } else {
-                                                            propType = value.getClass().getComponentType()
-                                                                    .getSimpleName();
+                                                            Object[] tempArray = (Object[]) value;
+                                                            if (tempArray.length > 0 && tempArray[0] != null) {
+                                                                propType = tempArray[0].getClass().getSimpleName();
+                                                            }
                                                         }
 
                                                         try {
@@ -1901,10 +1903,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             if (this == obj) {
                 return true;
             }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
+            if ((obj == null) || (getClass() != obj.getClass())) {
                 return false;
             }
             TrackedComponentFactory other = (TrackedComponentFactory) obj;

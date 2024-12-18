@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -45,10 +45,10 @@ public class PropertyDTO implements Validable {
     public void validate() {
         FailureHandler.requireParameter(this.type, "type");
 
-        if (value instanceof List<?>) {
-            validateArrayProperty(type, (List<?>) value);
+        if (this.value instanceof List<?>) {
+            validateArrayProperty(this.type, (List<?>) this.value);
         } else {
-            validateSingletonProperty(type, value);
+            validateSingletonProperty(this.type, this.value);
         }
     }
 
@@ -96,22 +96,34 @@ public class PropertyDTO implements Validable {
 
     public static Optional<PropertyDTO> fromConfigurationProperty(final Object property) {
 
-        return Optional.ofNullable(property).flatMap(p -> scalarFromClass(p.getClass()))
-                .map(type -> new PropertyDTO(configurationPropertyToDTOProperty(property), type));
+        return Optional.ofNullable(property).flatMap(p -> {
+            Class<?> clazz;
+            if (!p.getClass().isArray()) {
+                clazz = p.getClass();
+            } else {
+                clazz = p.getClass();
+                Object[] tempArray = (Object[]) p;
+                if (tempArray.length > 0 && tempArray[0] != null) {
+                    clazz = tempArray[0].getClass();
+                }
+            }
+            return scalarFormSingletonClass(clazz);
+
+        }).map(type -> new PropertyDTO(configurationPropertyToDTOProperty(property), type));
     }
 
     public Optional<Object> toConfigurationProperty() {
-        if (value == null) {
+        if (this.value == null) {
             return Optional.empty();
         }
 
-        final Optional<Object> asSingleton = singletonToProperty(value, type);
+        final Optional<Object> asSingleton = singletonToProperty(this.value, this.type);
 
         if (asSingleton.isPresent()) {
             return asSingleton;
         }
 
-        return arrayToProperty(value, type);
+        return arrayToProperty(this.value, this.type);
     }
 
     @SuppressWarnings("unchecked")
@@ -263,13 +275,13 @@ public class PropertyDTO implements Validable {
         return Optional.of(result);
     }
 
-    public static Optional<Scalar> scalarFromClass(final Class<?> clazz) {
-        if (clazz.isArray()) {
-            return scalarFormSingletonClass(clazz.getComponentType());
-        } else {
-            return scalarFormSingletonClass(clazz);
-        }
-    }
+    // public static Optional<Scalar> scalarFromClass(final Class<?> clazz) {
+    // if (clazz.isArray()) {
+    // return scalarFormSingletonClass(clazz.getComponentType());
+    // } else {
+    // return scalarFormSingletonClass(clazz);
+    // }
+    // }
 
     private static Object configurationPropertyToDTOProperty(final Object property) {
         if (property instanceof Password) {

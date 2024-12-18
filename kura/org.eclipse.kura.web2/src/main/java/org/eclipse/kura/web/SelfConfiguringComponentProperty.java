@@ -180,7 +180,7 @@ public class SelfConfiguringComponentProperty<T> {
         if (cardinality == 0) {
             return Optional.of((T) extractScalar(scalar, defaultValue));
         } else {
-            final List<?> result = COMMA.splitAsStream(defaultValue).map(String::trim).filter(String::isEmpty)
+            final List<?> result = COMMA.splitAsStream(defaultValue).map(String::trim).filter(s -> !s.isEmpty())
                     .map(s -> extractScalar(scalar, s)).collect(Collectors.toList());
 
             return Optional.of((T) result.toArray());

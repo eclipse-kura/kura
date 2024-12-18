@@ -100,7 +100,8 @@ public class LinuxNetworkUtilTest {
     }
 
     @Test
-    @Ignore
+    @Ignore // Given the current implementation, we cannot inject the exit code
+            // of the command execution and therefore this test will fail.
     public void shouldCheckSystemdUnitExistence() throws IOException {
         givenLinuxNetworkUtil();
         givenTool("/tmp/systemctl");

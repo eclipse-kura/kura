@@ -33,7 +33,7 @@ INSTALL_DIR=/opt/eclipse
 ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
 
 # set up kura init
-sed "s|INSTALL_DIR|${INSTALL_DIR}|" ${INSTALL_DIR}/kura/install/kura.service > /lib/systemd/system/kura.service
+sed "s|INSTALL_DIR|${INSTALL_DIR}|" ${INSTALL_DIR}/kura/install/kura.service.nn > /lib/systemd/system/kura.service
 systemctl daemon-reload
 systemctl enable kura
 chmod +x ${INSTALL_DIR}/kura/bin/*.sh

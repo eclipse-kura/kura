@@ -19,6 +19,7 @@
 	        type="Integer" 
 	        cardinality="3" 
 	        required="false" 
+	        default="443,4443"
 	        min="1" 
 	        max="65535" 
 	        description="If set to a non empty list, REST API access will be allowed only on the specified ports. If set to an empty list, access will be allowed on all ports. Please make sure that the allowed ports are open in HttpService and Firewall configuration.">

@@ -103,7 +103,7 @@ channel configured with:
 
 If `channel_value` is 5 (DOUBLE) the result is: `(double) (channel_value * (double) 3.25d + (double) 1.5d) = 17.75`.
 
-As the examples show, the final result can be different depending on the used **mode** and **value.type**.
+As the examples show, the final result can change depending on the **mode** and **value.type** used.
 
 ### Driver specific parameters
 

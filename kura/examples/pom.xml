@@ -93,7 +93,6 @@
         <module>org.eclipse.kura.example.wire.math.trig</module>
         <module>org.eclipse.kura.example.driver.sensehat</module>
         <module>org.eclipse.kura.wire.devel.component.provider</module>
-        <module>org.eclipse.kura.example.web.extension</module>
         <module>org.eclipse.kura.example.gpio.led</module>
         <module>org.eclipse.kura.example.tamper.detection</module>
         <module>org.eclipse.kura.example.rest.authentication.provider</module>
@@ -156,9 +155,9 @@
             </activation>
             <repositories>
                 <repository>
-                    <id>p2-repo-equinox_3.16.0</id>
+                    <id>p2-repo-equinox</id>
                     <layout>p2</layout>
-                    <url>file:///${kura.basedir}/target-definition/equinox_3.16.0/repository/</url>
+                    <url>file:///${kura.basedir}/target-definition/equinox/repository/</url>
                 </repository>
             </repositories>
         </profile>
@@ -172,9 +171,9 @@
             </activation>
             <repositories>
                 <repository>
-                    <id>p2-repo-equinox_3.16.0</id>
+                    <id>p2-repo-equinox</id>
                     <layout>p2</layout>
-                    <url>file:///${kura.basedir}/target-definition/equinox_3.16.0/repository/</url>
+                    <url>file:///${kura.basedir}/target-definition/equinox/repository/</url>
                 </repository>
             </repositories>
         </profile>

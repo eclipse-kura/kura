@@ -270,7 +270,6 @@
                                         <exclude name="plugins/org.eclipse.equinox.console.ssh*.jar" />
                                         <exclude name="plugins/org.eclipse.equinox.simpleconfig*.jar" />
                                         <exclude name="plugins/org.eclipse.equinox.http.servletbridge*.jar" />
-                                        <exclude name="plugins/org.eclipse.equinox.http.service.api*.jar" />
 
                                         <include name="plugins/org.eclipse.equinox.launcher_*.jar" />
                                         <include name="plugins/org.eclipse.equinox.launcher.source_*.jar" />

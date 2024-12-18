@@ -127,7 +127,7 @@
 
 
         <condition property="kura.osgi.repo"
-            value="../../target-platform/p2-repo-equinox_3.16.0/target/source">
+            value="../../target-platform/p2-repo-equinox/target/source">
             <or>
                 <not>
                     <isset property="kura.osgi" />
@@ -144,7 +144,7 @@
 
         <copy file="src/main/resources/${build.name}/snapshot_0.xml"
             tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" failonerror="false" />
-        <copy file="src/main/osgi/equinox_3.16.0/configuration/config.ini"
+        <copy file="src/main/osgi/equinox/configuration/config.ini"
             tofile="${project.build.directory}/${build.output.name}/config.ini" />
 
         <!-- Copy jdk.dio files -->
@@ -617,53 +617,161 @@ fi]]>
             <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.service.cm_${org.osgi.service.cm.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.service.component_${org.osgi.service.component.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.service.coordinator_${org.osgi.service.coordinator.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.service.device_${org.osgi.service.device.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.service.event_${org.osgi.service.event.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.service.log.stream_${org.osgi.service.log.stream.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.service.metatype_${org.osgi.service.metatype.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.service.prefs_${org.osgi.service.prefs.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.service.provisioning_${org.osgi.service.provisioning.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.service.upnp_${org.osgi.service.upnp.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.service.useradmin_${org.osgi.service.useradmin.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.service.wireadmin_${org.osgi.service.wireadmin.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.util.function_${org.osgi.util.function.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.util.measurement_${org.osgi.util.measurement.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.util.position_${org.osgi.util.position.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.util.promise_${org.osgi.util.promise.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.util.pushstream_${org.osgi.util.pushstream.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.osgi.util.xml_${org.osgi.util.xml.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+            <param name="upgrader" value="true"/>
+        </antcall>
+        <antcall target="install-plugin">
             <param name="bundle.file" value="org.apache.felix.http.jetty_${org.apache.felix.http.jetty.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="2" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.apache.felix.http.servlet-api_${org.apache.felix.http.servlet-api.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="2" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="jersey-media-json-jackson_${org.glassfish.jersey.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="2" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="jersey-media-multipart_${org.glassfish.jersey.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="2" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="jackson-jakarta-rs-json-provider_${com.fasterxml.jackson.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="2" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="jackson-jakarta-rs-base_${com.fasterxml.jackson.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="2" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="jackson-annotations_${com.fasterxml.jackson.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="2" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="jackson-module-jakarta-xmlbind-annotations_${com.fasterxml.jackson.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="2" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="jackson-core_${com.fasterxml.jackson.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="2" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="jackson-databind_${com.fasterxml.jackson.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="2" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
@@ -673,7 +781,7 @@ fi]]>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.eclipse.kura.sun.misc_${org.eclipse.kura.sun.misc.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="2" />
             <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
@@ -697,11 +805,6 @@ fi]]>
             <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.equinox.ds_${org.eclipse.equinox.ds.version}.jar" />
-            <param name="start.level" value="1" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
             <param name="bundle.file" value="org.eclipse.equinox.event_${org.eclipse.equinox.event.version}.jar" />
             <param name="start.level" value="1" />
             <param name="start" value="s" />
@@ -723,46 +826,51 @@ fi]]>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.osgi.service.http.whiteboard_${org.osgi.service.http.whiteboard.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="2" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.osgi.service.servlet_${org.osgi.service.servlet.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="2" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="jakarta.ws.rs-api_${jakarta.ws.rs-api.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="5" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.osgi.service.jakartars_${org.osgi.service.jakartars.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="5" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.eclipse.osgitech.rest_${org.eclipse.osgi-technology.rest.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="5" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.eclipse.osgitech.rest.config_${org.eclipse.osgi-technology.rest.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="5" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.eclipse.osgitech.rest.sse_${org.eclipse.osgi-technology.rest.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="5" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.eclipse.osgitech.rest.jetty_${org.eclipse.osgi-technology.rest.version}.jar" />
-            <param name="start.level" value="1" />
+            <param name="start.level" value="5" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.eclipse.osgitech.rest.servlet.whiteboard_${org.eclipse.osgi-technology.rest.version}.jar" />
+            <param name="start.level" value="5" />
+            <param name="start" value="s" />
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.apache.felix.scr_${org.apache.felix.scr.version}.jar" />
             <param name="start.level" value="1" />
             <param name="start" value="s" />
         </antcall>
@@ -770,11 +878,6 @@ fi]]>
             <param name="bundle.file" value="org.eclipse.osgi.util_${org.eclipse.osgi.util.version}.jar" />
             <param name="start.level" value="2" />
             <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="org.apache.felix.scr_${org.apache.felix.scr.version}.jar" />
-            <param name="start.level" value="5" />
-            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.apache.felix.gogo.command_${org.apache.felix.gogo.command.version}.jar" />
@@ -862,12 +965,12 @@ fi]]>
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.jetty.ee8.jetty-ee8-servlet_${org.eclipse.jetty.ee8.jetty-ee8-servlet.version}.jar" />
+            <param name="bundle.file" value="org.eclipse.jetty.ee8.jetty-ee8-servlet_${org.eclipse.jetty.version}.jar" />
             <param name="start.level" value="5" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.jetty.ee8.jetty-ee8-nested_${org.eclipse.jetty.ee8.jetty-ee8-nested.version}.jar" />
+            <param name="bundle.file" value="org.eclipse.jetty.ee8.jetty-ee8-nested_${org.eclipse.jetty.version}.jar" />
             <param name="start.level" value="5" />
             <param name="start" value="s" />
         </antcall>

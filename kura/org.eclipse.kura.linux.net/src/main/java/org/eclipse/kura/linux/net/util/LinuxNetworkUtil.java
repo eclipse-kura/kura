@@ -260,15 +260,23 @@ public class LinuxNetworkUtil {
     }
 
     public static boolean toolExists(String tool) {
-        return getToolPath(tool).isPresent();
+        return toolExists(tool, DEFAULT_PATH);
+    }
+
+    public static boolean toolExists(String tool, String[] searchPaths) {
+        return getToolPath(tool, searchPaths).isPresent();
     }
 
     public static Optional<String> getToolPath(String tool) {
+        return getToolPath(tool, DEFAULT_PATH);
+    }
+
+    public static Optional<String> getToolPath(String tool, String[] searchPaths) {
         Optional<String> optionalToolPath = getCachedTool(tool);
         if (optionalToolPath.isPresent()) {
             return optionalToolPath;
         } else {
-            for (String folder : DEFAULT_PATH) {
+            for (String folder : searchPaths) {
                 String toolPath = folder + tool;
                 File toolFile = new File(toolPath);
                 if (toolFile.exists()) {
@@ -294,7 +302,21 @@ public class LinuxNetworkUtil {
      * @return true if the unit is installed
      */
     public static boolean systemdSystemUnitExists(String unitName) {
-        Optional<String> optionalSystemctlPath = getToolPath("systemctl");
+        return systemdSystemUnitExists(unitName, DEFAULT_PATH);
+    }
+    /**
+     * Checks if the given Systemd system unit is installed.
+     * The result is based on the exit code of "systemctl status <unitName>"
+     * as presented in https://www.man7.org/linux/man-pages/man1/systemctl.1.html#EXIT_STATUS
+     *
+     * @param unitName
+     *            the name of the Systemd system unit
+     * @param searchPaths
+     *            the paths to search for the systemctl command
+     * @return true if the unit is installed
+     */
+    public static boolean systemdSystemUnitExists(String unitName, String[] searchPaths) {
+        Optional<String> optionalSystemctlPath = getToolPath("systemctl", searchPaths);
         if (!optionalSystemctlPath.isPresent()) {
             logger.debug("Systemctl command not found in default paths");
             return false;

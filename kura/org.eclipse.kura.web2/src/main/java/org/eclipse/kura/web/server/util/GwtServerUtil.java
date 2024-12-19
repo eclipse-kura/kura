@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -738,20 +737,20 @@ public final class GwtServerUtil {
         gson.toJson(dto, writer);
     }
 
-    public static void writeSnapshot(final HttpServletRequest request, final HttpServletResponse response,
-            final List<ComponentConfiguration> configs, final String filename) throws ServletException {
+    public static void writeSnapshot(final HttpServletResponse response, final List<ComponentConfiguration> configs,
+            final String filename, final String format) throws ServletException {
 
-        String format = request.getParameter("format");
+        String downloadFormat = format;
 
-        if (format == null || format.isEmpty()) {
-            format = XML_FORMAT;
+        if (downloadFormat == null || downloadFormat.isEmpty()) {
+            downloadFormat = XML_FORMAT;
         }
 
         try (PrintWriter writer = response.getWriter()) {
 
-            if (XML_FORMAT.equalsIgnoreCase(format)) {
+            if (XML_FORMAT.equalsIgnoreCase(downloadFormat)) {
                 GwtServerUtil.writeXmlSnapshot(response, writer, filename + ".xml", configs);
-            } else if (JSON_FORMAT.equalsIgnoreCase(format)) {
+            } else if (JSON_FORMAT.equalsIgnoreCase(downloadFormat)) {
                 GwtServerUtil.writeJsonSnapshot(response, writer, filename + ".json", configs);
             }
 

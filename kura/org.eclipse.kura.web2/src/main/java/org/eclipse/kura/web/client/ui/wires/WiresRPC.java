@@ -219,7 +219,7 @@ public final class WiresRPC {
         });
     }
 
-    public static void downloadWiresSnapshot(final SnapshotDownloadOptions snapshotDownloadOptions) {
+    public static void downloadWiresSnapshot(String format) {
         EntryClassUi.showWaitModal();
         gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
@@ -232,8 +232,7 @@ public final class WiresRPC {
             @Override
             public void onSuccess(GwtXSRFToken token) {
                 EntryClassUi.hideWaitModal();
-                DownloadHelper.instance().startDownload(token,
-                        "/wiresSnapshot?format=" + snapshotDownloadOptions.getFormat());
+                DownloadHelper.instance().startDownload(token, "/wiresSnapshot?format=" + format);
             }
         });
     }

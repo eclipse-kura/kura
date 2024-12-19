@@ -148,7 +148,8 @@ public class WiresSnapshotServlet extends AuditServlet {
                 return null;
             });
 
-            GwtServerUtil.writeSnapshot(request, response, result, "graph_snapshot_" + System.currentTimeMillis());
+            GwtServerUtil.writeSnapshot(response, result, "graph_snapshot_" + System.currentTimeMillis(),
+                    request.getParameter("format"));
 
         } catch (Exception e) {
             logger.warn("Failed to download snapshot", e);

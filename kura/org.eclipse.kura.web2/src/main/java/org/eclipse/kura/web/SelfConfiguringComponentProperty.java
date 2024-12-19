@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -52,15 +52,15 @@ public class SelfConfiguringComponentProperty<T> {
     }
 
     public Tad getAd() {
-        return ad;
+        return this.ad;
     }
 
     public void fillValue(final Map<String, Object> properties) {
-        if (value.isPresent() && !properties.containsKey(ad.getId())) {
-            if (ad.getType() == Scalar.PASSWORD) {
-                properties.put(this.ad.getId(), new Password(value.get().toString().toCharArray()));
+        if (this.value.isPresent() && !properties.containsKey(this.ad.getId())) {
+            if (this.ad.getType() == Scalar.PASSWORD) {
+                properties.put(this.ad.getId(), new Password(this.value.get().toString().toCharArray()));
             } else {
-                properties.put(this.ad.getId(), value.get());
+                properties.put(this.ad.getId(), this.value.get());
             }
         }
     }
@@ -74,16 +74,16 @@ public class SelfConfiguringComponentProperty<T> {
         } else if (this.ad.getType() == Scalar.PASSWORD && providedValue instanceof Password) {
             final Password providedPassword = (Password) providedValue;
 
-            this.value = Optional.of((T) new String((providedPassword.getPassword())));
+            this.value = Optional.of((T) new String(providedPassword.getPassword()));
         }
     }
 
     public T get() {
-        return value.orElseThrow(() -> new IllegalStateException("property value has not been set"));
+        return this.value.orElseThrow(() -> new IllegalStateException("property value has not been set"));
     }
 
     public Optional<T> getOptional() {
-        return value;
+        return this.value;
     }
 
     private static void check(final Scalar scalar, final int cardinality, final Class<?> clazz) {
@@ -130,19 +130,19 @@ public class SelfConfiguringComponentProperty<T> {
 
     private Object extractScalar(final Scalar scalar, final String value) {
         if (scalar == Scalar.BOOLEAN) {
-            return (Boolean) Boolean.parseBoolean(value);
+            return Boolean.parseBoolean(value);
         } else if (scalar == Scalar.BYTE) {
-            return (Boolean) Boolean.parseBoolean(value);
+            return Byte.parseByte(value);
         } else if (scalar == Scalar.CHAR) {
-            return (Character) value.charAt(0);
+            return value.charAt(0);
         } else if (scalar == Scalar.DOUBLE) {
-            return (Double) Double.parseDouble(value);
+            return Double.parseDouble(value);
         } else if (scalar == Scalar.FLOAT) {
-            return (Float) Float.parseFloat(value);
+            return Float.parseFloat(value);
         } else if (scalar == Scalar.INTEGER) {
-            return (Integer) Integer.parseInt(value);
+            return Integer.parseInt(value);
         } else if (scalar == Scalar.LONG) {
-            return (Long) Long.parseLong(value);
+            return Long.parseLong(value);
         } else if (scalar == Scalar.PASSWORD) {
             try {
                 return new String(unwrapCryptoService().encryptAes(value.toCharArray()));
@@ -150,20 +150,44 @@ public class SelfConfiguringComponentProperty<T> {
                 throw new IllegalStateException("failed to encrypt password", e);
             }
         } else if (scalar == Scalar.SHORT) {
-            return (Short) Short.parseShort(value);
+            return Short.parseShort(value);
         } else if (scalar == Scalar.STRING) {
-            return (String) value;
+            return value;
+        } else {
+            throw new IllegalArgumentException(scalar == null ? null : scalar.toString());
+        }
+    }
+
+    private Object createScalarArray(final Scalar scalar) {
+        if (scalar == Scalar.BOOLEAN) {
+            return new Boolean[0];
+        } else if (scalar == Scalar.BYTE) {
+            return new Byte[0];
+        } else if (scalar == Scalar.CHAR) {
+            return new Character[0];
+        } else if (scalar == Scalar.DOUBLE) {
+            return new Double[0];
+        } else if (scalar == Scalar.FLOAT) {
+            return new Float[0];
+        } else if (scalar == Scalar.INTEGER) {
+            return new Integer[0];
+        } else if (scalar == Scalar.LONG) {
+            return new Long[0];
+        } else if (scalar == Scalar.SHORT) {
+            return new Short[0];
+        } else if (scalar == Scalar.STRING || scalar == Scalar.PASSWORD) {
+            return new String[0];
         } else {
             throw new IllegalArgumentException(scalar == null ? null : scalar.toString());
         }
     }
 
     private CryptoService unwrapCryptoService() {
-        if (!cryptoService.isPresent()) {
+        if (!this.cryptoService.isPresent()) {
             throw new IllegalArgumentException("CryptoService is required for defining a password property");
         }
 
-        return cryptoService.get();
+        return this.cryptoService.get();
     }
 
     private Optional<T> extractDefault(final AD ad) {
@@ -183,7 +207,7 @@ public class SelfConfiguringComponentProperty<T> {
             final List<?> result = COMMA.splitAsStream(defaultValue).map(String::trim).filter(s -> !s.isEmpty())
                     .map(s -> extractScalar(scalar, s)).collect(Collectors.toList());
 
-            return Optional.of((T) result.toArray());
+            return Optional.of((T) result.toArray((T[]) createScalarArray(scalar)));
         }
 
     }

@@ -101,7 +101,7 @@ public class ConsoleOptions {
             new AdBuilder("allowed.ports", "Allowed ports", Tscalar.INTEGER) //
                     .setRequired(false) //
                     .setCardinality(3) //
-                    .setDefault("443,4443,80") //
+                    .setDefault("443,4443") //
                     .setDescription(
                             "If set to a non empty list, Web Console access will be allowed only on the specified ports. If set to an empty list, access will be allowed on all ports. Please make sure that the allowed ports are open in HttpService and Firewall configuration.") //
                     .build(), //

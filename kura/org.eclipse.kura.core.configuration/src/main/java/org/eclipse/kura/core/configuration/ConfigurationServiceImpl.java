@@ -1247,8 +1247,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                                     cc = selfConfigComp.getConfiguration();
                                     if (cc.getPid() == null || !cc.getPid().equals(pid)) {
                                         logger.error(
-                                                "Invalid pid for returned Configuration of SelfConfiguringComponent with pid: "
-                                                        + pid + ". Ignoring it.");
+                                                "Invalid pid for returned Configuration of SelfConfiguringComponent with pid: {}. Ignoring it.",
+                                                pid);
                                         return null;
                                     }
 
@@ -1278,15 +1278,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                                                 if (props != null) {
                                                     Object value = props.get(adId);
                                                     if (value != null) {
-                                                        String propType = null;
-                                                        if (!value.getClass().isArray()) {
-                                                            propType = value.getClass().getSimpleName();
-                                                        } else {
-                                                            Object[] tempArray = (Object[]) value;
-                                                            if (tempArray.length > 0 && tempArray[0] != null) {
-                                                                propType = tempArray[0].getClass().getSimpleName();
-                                                            }
-                                                        }
+                                                        String propType = getTypeFromValue(value);
 
                                                         try {
                                                             logger.debug(
@@ -1297,14 +1289,13 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                                                             if (propertyScalar != adScalar) {
                                                                 logger.error(
                                                                         "Type: {} for property named: {} does not match the AD type: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
-                                                                        new Object[] { propType, adId, adType, pid });
+                                                                        propType, adId, adType, pid);
                                                                 return null;
                                                             }
                                                         } catch (IllegalArgumentException e) {
                                                             logger.error(
-                                                                    "Invalid class: {} for property named: {} for returned Configuration of SelfConfiguringComponent with pid: "
-                                                                            + pid,
-                                                                    propType, adId);
+                                                                    "Invalid class: {} for property named: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
+                                                                    propType, adId, pid);
                                                             return null;
                                                         }
                                                     }
@@ -1329,6 +1320,21 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
 
         return cc;
+    }
+
+    private String getTypeFromValue(Object value) {
+        String propType = null;
+        if (!value.getClass().isArray()) {
+            propType = value.getClass().getSimpleName();
+        } else {
+            Object[] tempArray = (Object[]) value;
+            if (tempArray.length > 0 && tempArray[0] != null) {
+                propType = tempArray[0].getClass().getSimpleName();
+            } else {
+                propType = value.getClass().getComponentType().getSimpleName();
+            }
+        }
+        return propType;
     }
 
     private TreeSet<Long> getSnapshotsInternal() {
@@ -1903,7 +1909,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             if (this == obj) {
                 return true;
             }
-            if ((obj == null) || (getClass() != obj.getClass())) {
+            if (obj == null || getClass() != obj.getClass()) {
                 return false;
             }
             TrackedComponentFactory other = (TrackedComponentFactory) obj;

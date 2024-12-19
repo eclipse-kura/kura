@@ -72,7 +72,7 @@ The **mode** can be selected in the following way:
 Example of `DOUBLE` **mode**:
 channel configured with:
 
-- **value.type**: INTEGER
+- **value.type**: `INTEGER`
 - **scaleoffset.type**: `DOUBLE`
 - **scale**: 3.25
 - **offset**: 1.5
@@ -84,29 +84,26 @@ If `channel_value` is 5 (INTEGER) the result is: `(int) ((double) channel_value 
 Example of `INTEGER` **mode**:
 channel configured with:
 
-- **value.type**: INTEGER
+- **value.type**: `INTEGER`
 - **scaleoffset.type**: `DEFINED_BY_VALUE_TYPE`
-- **scale**: 3.25
-- **offset**: 1.5
+- **scale**: 3
+- **offset**: 1
 
 Since **scaleoffset.type** is `DEFINED_BY_VALUE_TYPE`, the **mode** determined by the **value.type** parameter (`INTEGER`) will be used.
 
-If `channel_value` is 5 (INTEGER) the result is: `(int) (channel_value * (int) 3.25d + (int) 1.5d) = 16`.
+If `channel_value` is 5 (INTEGER) the result is: `(int) (channel_value * (int) 3 + (int) 1) = 16`.
 
 Example of `DOUBLE` **mode**:
 channel configured with:
 
-- **value.type**: DOUBLE
+- **value.type**: `DOUBLE`
 - **scaleoffset.type**: `DEFINED_BY_VALUE_TYPE`
 - **scale**: 3.25
 - **offset**: 1.5
 
 If `channel_value` is 5 (DOUBLE) the result is: `(double) (channel_value * (double) 3.25d + (double) 1.5d) = 17.75`.
 
-!!! warning
-    If the **mode** is `LONG` or `INTEGER` the decimal part of the **scale** and **offset** value will be discarded.
-
-As the examples show the final result can be different depending on the used **mode** and **value.type**.
+As the examples show, the final result can change depending on the **mode** and **value.type** used.
 
 ### Driver specific parameters
 

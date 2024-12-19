@@ -134,11 +134,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>com.codeminders.hidapi.armv6hf</artifactId>
-                                    <version>${com.codeminders.hidapi.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>com.codeminders.hidapi.x86_64</artifactId>
                                     <version>${com.codeminders.hidapi.version}</version>
                                 </artifactItem>
@@ -210,11 +205,6 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>jdk.dio</artifactId>
-                                    <version>${jdk.dio.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>jdk.dio.armv6hf</artifactId>
                                     <version>${jdk.dio.version}</version>
                                 </artifactItem>
                                 <artifactItem>
@@ -295,11 +285,6 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.soda.dk.comm</artifactId>
-                                    <version>${org.eclipse.soda.dk.comm.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.soda.dk.comm.armv6hf</artifactId>
                                     <version>${org.eclipse.soda.dk.comm.version}</version>
                                 </artifactItem>
                                 <artifactItem>
@@ -659,7 +644,6 @@
                         <configuration>
                             <tasks>
                                 <move file="target/source/plugins/com.codeminders.hidapi.jar" tofile="target/source/plugins/com.codeminders.hidapi_${com.codeminders.hidapi.version}.jar"/>
-                                <move file="target/source/plugins/com.codeminders.hidapi.armv6hf.jar" tofile="target/source/plugins/com.codeminders.hidapi.armv6hf_${com.codeminders.hidapi.version}.jar"/>
                                 <move file="target/source/plugins/com.codeminders.hidapi.x86_64.jar" tofile="target/source/plugins/com.codeminders.hidapi.x86_64_${com.codeminders.hidapi.version}.jar"/>
                                 <move file="target/source/plugins/com.codeminders.hidapi.aarch64.jar" tofile="target/source/plugins/com.codeminders.hidapi.aarch64_${com.codeminders.hidapi.version}.jar"/>
                                 <move file="target/source/plugins/commons-net.jar" tofile="target/source/plugins/org.apache.commons.commons-net_${org.apache.commons.commons-net.version}.jar"/>
@@ -675,7 +659,6 @@
                                 <move file="target/source/plugins/org.usb4java.jar" tofile="target/source/plugins/org.usb4java_${org.usb4java.version}.jar"/>
                                 <move file="target/source/plugins/h2.jar" tofile="target/source/plugins/com.h2database.h2_${com.h2database.h2.version}.jar"/>
                                 <move file="target/source/plugins/jdk.dio.jar" tofile="target/source/plugins/jdk.dio_${jdk.dio.version}.jar"/>
-                                <move file="target/source/plugins/jdk.dio.armv6hf.jar" tofile="target/source/plugins/jdk.dio.armv6hf_${jdk.dio.version}.jar"/>
                                 <move file="target/source/plugins/jdk.dio.x86_64.jar" tofile="target/source/plugins/jdk.dio.x86_64_${jdk.dio.version}.jar"/>
                                 <move file="target/source/plugins/jdk.dio.aarch64.jar" tofile="target/source/plugins/jdk.dio.aarch64_${jdk.dio.version}.jar"/>
                                 <move file="target/source/plugins/slf4j-api.jar" tofile="target/source/plugins/slf4j.api_${slf4j.api.version}.jar"/>
@@ -691,7 +674,6 @@
                                 <move file="target/source/plugins/commons-lang3.jar" tofile="target/source/plugins/org.apache.commons.lang3_${org.apache.commons.lang3.version}.jar"/>
                                 <move file="target/source/plugins/commons-csv.jar" tofile="target/source/plugins/org.apache.commons.csv_${org.apache.commons.csv.version}.jar"/>
                                 <move file="target/source/plugins/org.eclipse.soda.dk.comm.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm_${org.eclipse.soda.dk.comm.version}.jar"/>
-                                <move file="target/source/plugins/org.eclipse.soda.dk.comm.armv6hf.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm.armv6hf_${org.eclipse.soda.dk.comm.version}.jar"/>
                                 <move file="target/source/plugins/org.eclipse.soda.dk.comm.x86_64.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm.x86_64_${org.eclipse.soda.dk.comm.version}.jar"/>
                                 <move file="target/source/plugins/org.eclipse.soda.dk.comm.aarch64.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm.aarch64_${org.eclipse.soda.dk.comm.version}.jar"/>
                                 <move file="target/source/plugins/camel-amqp.jar" tofile="target/source/plugins/org.apache.camel.camel-amqp_${org.apache.camel.camel-amqp.version}.jar"/>

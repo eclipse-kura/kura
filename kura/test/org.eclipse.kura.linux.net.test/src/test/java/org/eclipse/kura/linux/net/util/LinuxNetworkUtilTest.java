@@ -17,10 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -37,7 +34,6 @@ import org.eclipse.kura.executor.CommandStatus;
 import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore
 public class LinuxNetworkUtilTest {
 
     private LinuxNetworkUtil linuxNetworkUtil;
@@ -91,60 +87,51 @@ public class LinuxNetworkUtilTest {
     }
 
     @Test
-    public void shouldCheckToolExistence() throws NoSuchFieldException, IllegalAccessException, IOException {
+    public void shouldCheckToolExistence() throws IOException {
         givenLinuxNetworkUtil();
-        givenToolPaths("/tmp/");
         givenTool("/tmp/dhcpd");
 
-        whenCheckTool("dhcpd");
+        whenCheckTool("dhcpd", "/tmp/");
 
         thenToolExists();
     }
 
     @Test
-    public void shouldCheckSystemdUnitExistence()
-            throws NoSuchFieldException, IllegalAccessException, IOException, InterruptedException {
+    @Ignore("Given the current implementation, we cannot inject the exit code of the command execution and therefore this test will fail.")
+    public void shouldCheckSystemdUnitExistence() throws IOException {
         givenLinuxNetworkUtil();
-        givenToolPaths("/tmp/");
         givenTool("/tmp/systemctl");
-        givenProcessBuilder(0);
 
-        whenCheckSystemdUnit("dnsmask.service");
+        whenCheckSystemdUnit("dnsmask.service", "/tmp/");
 
         thenSystemdUnitExists();
     }
 
     @Test
-    public void shouldNotCheckSystemdUnitExistence()
-            throws NoSuchFieldException, IllegalAccessException, IOException, InterruptedException {
+    public void shouldNotCheckSystemdUnitExistence() throws IOException {
         givenLinuxNetworkUtil();
-        givenToolPaths("/tmp/");
         givenTool("/tmp/systemctl");
-        givenProcessBuilder(4);
 
-        whenCheckSystemdUnit("dnsmask.service");
-
-        thenSystemdUnitNotExist();
-    }
-
-    @Test
-    public void shouldNotCheckSystemdUnitExistenceIfSystemctlNotExist()
-            throws NoSuchFieldException, IllegalAccessException, IOException, InterruptedException {
-        givenLinuxNetworkUtil();
-
-        whenCheckSystemdUnit("dnsmask.service");
+        whenCheckSystemdUnit("dnsmask.service", "/tmp/");
 
         thenSystemdUnitNotExist();
     }
 
     @Test
-    public void shouldGetToolPath()
-            throws NoSuchFieldException, IllegalAccessException, IOException, InterruptedException {
+    public void shouldNotCheckSystemdUnitExistenceIfSystemctlNotExist() {
         givenLinuxNetworkUtil();
-        givenToolPaths("/tmp/");
+
+        whenCheckSystemdUnit("dnsmask.service", "/tmp/");
+
+        thenSystemdUnitNotExist();
+    }
+
+    @Test
+    public void shouldGetToolPath() throws IOException {
+        givenLinuxNetworkUtil();
         givenTool("/tmp/myAwesomeCommand");
 
-        whenGetTool("myAwesomeCommand");
+        whenGetTool("myAwesomeCommand", "/tmp/");
 
         thenToolIsRetrieved("/tmp/myAwesomeCommand");
     }
@@ -153,10 +140,6 @@ public class LinuxNetworkUtilTest {
         CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         this.commandExecutorServiceStub = new CommandExecutorServiceStub(status);
         this.linuxNetworkUtil = new LinuxNetworkUtil(this.commandExecutorServiceStub);
-    }
-
-    private void givenToolPaths(String path) throws NoSuchFieldException, IllegalAccessException {
-        setFinalStaticField(LinuxNetworkUtil.class, "DEFAULT_PATH", new String[] { path });
     }
 
     private void givenTool(String tool) throws IOException {
@@ -180,30 +163,20 @@ public class LinuxNetworkUtilTest {
         this.linkStatus = linkStatus;
     }
 
-    private void givenProcessBuilder(int returnCode)
-            throws NoSuchFieldException, IOException, InterruptedException, IllegalAccessException {
-        Process mockedProcess = mock(Process.class);
-        when(mockedProcess.waitFor()).thenReturn(returnCode);
-        when(mockedProcess.getInputStream()).thenReturn(new ByteArrayInputStream(new byte[] {}));
-        ProcessBuilder mockedProcessBuilder = mock(ProcessBuilder.class);
-        when(mockedProcessBuilder.start()).thenReturn(mockedProcess);
-        setFinalStaticField(LinuxNetworkUtil.class, "PROCESS_BUILDER", mockedProcessBuilder);
-    }
-
     private void whenDedicatedInterfaceName(String dedicatedInterfaceName) {
         this.dedicatedInterfaceName = dedicatedInterfaceName;
     }
 
-    private void whenCheckTool(String toolName) {
-        this.toolExists = LinuxNetworkUtil.toolExists(toolName);
+    private void whenCheckTool(String toolName, String searchPath) {
+        this.toolExists = LinuxNetworkUtil.toolExists(toolName, new String[] { searchPath });
     }
 
-    private void whenCheckSystemdUnit(String unitName) {
-        this.systemdUnitExists = LinuxNetworkUtil.systemdSystemUnitExists(unitName);
+    private void whenCheckSystemdUnit(String unitName, String searchPath) {
+        this.systemdUnitExists = LinuxNetworkUtil.systemdSystemUnitExists(unitName, new String[] { searchPath });
     }
 
-    private void whenGetTool(String tool) {
-        this.toolPath = LinuxNetworkUtil.getToolPath(tool);
+    private void whenGetTool(String tool, String searchPath) {
+        this.toolPath = LinuxNetworkUtil.getToolPath(tool, new String[] { searchPath });
     }
 
     private void thenApNetworkInterfaceIsCreated() {
@@ -262,16 +235,6 @@ public class LinuxNetworkUtilTest {
     private void thenToolIsRetrieved(String expectedToolPath) {
         assertTrue(this.toolPath.isPresent());
         assertEquals(expectedToolPath, this.toolPath.get());
-    }
-
-    static void setFinalStaticField(Class clazz, String fieldName, Object value)
-            throws NoSuchFieldException, IllegalAccessException {
-        Field field = clazz.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        Field modifiers = field.getClass().getDeclaredField("modifiers");
-        modifiers.setAccessible(true);
-        modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-        field.set(null, value);
     }
 
 }

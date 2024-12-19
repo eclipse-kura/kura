@@ -29,7 +29,7 @@ A user can deploy Kura on a target system using the installer tailored for the d
 kura_<kura-version>_<arch>.deb
 ```
 
-where `<arch>` is one of the **supported architectures**: *amd64*, *arm64*, and *armhf*. Kura can work on systems that have available the dependencies listed in the [Kura dependencies](#kura-dependencies) section, and that have **at least one** physical ethernet interface.
+where `<arch>` is one of the **supported architectures**: *amd64* and *arm64*. Kura can work on systems that have available the dependencies listed in the [Kura dependencies](#kura-dependencies) section, and that have **at least one** physical ethernet interface.
 
 From Kura version 6.0.0 the Java 17 runtime is **required** to run the framework correctly.
 
@@ -109,7 +109,6 @@ Eclipse Kura&trade; has been tested on the following devices and provides full c
 
 | Device | Architecture | OS |
 | - | - | - |
-| **Raspberry Pi 3/4** | *armhf* | Raspberry Pi OS "Bookworm" |
 | **Raspberry Pi 3/4** | *arm64* | Raspberry Pi OS "Bookworm" |
 | **Raspberry Pi 3/4** | *arm64* | Ubuntu 20.04 |
 | **ZimaBoard/Blade** | *amd64* | TBD |

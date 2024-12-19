@@ -142,7 +142,7 @@ mvn -f kura/distrib/pom.xml clean install -DbuildAll
 ```
 
 !!! Note
-    You can skip tests by adding `-Dmaven.test.skip=true` in the commands above and you can compile a specific target by specifying the profile (e.g. `-Praspberry-pi-armhf`).
+    You can skip tests by adding `-Dmaven.test.skip=true` in the commands above and you can compile a specific target by specifying the profile (e.g. `-Parm64`).
 
 #### Build scripts
 

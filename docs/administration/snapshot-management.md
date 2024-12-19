@@ -24,9 +24,13 @@ Starting with Kura 6.0, it is possible to download _a partial_ version of the sn
 
 In the snapshot download popup, a list of checkboxes is shown, representing the list of all the service configurations that can be downloaded. By default, all configurations (represented by the component PIDs) are selected. The user can remove from the downloaded snapshot the configuration they're not interested in by deselecting the related PIDs checkboxes. The snapshot can be then downloaded in XML or JSON format thorough the dedicated button.
 
+Through the search box above the list, it is possible to easily find the desired services configuration, filtering them by their PIDs.
+
 Pressing the **Download** button will trigger a dialog that allows choosing the desired configurations and format.
 
 ![](images/snapshotsDownload.png)
+
+![](images/snapshotsDownloadFiltered.png)
 
 ### Upload and Apply
 

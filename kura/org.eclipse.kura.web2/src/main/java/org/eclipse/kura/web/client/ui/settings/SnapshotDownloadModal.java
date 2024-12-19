@@ -26,10 +26,12 @@ import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.CheckBox;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.Modal;
+import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.html.Paragraph;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -50,6 +52,8 @@ public class SnapshotDownloadModal extends Composite {
     Paragraph downloadModalDescription;
     @UiField
     Paragraph formatModalHint;
+    @UiField
+    TextBox pidSearch;
     @UiField
     ScrollPanel pidSelectionScrollPanel;
     @UiField
@@ -76,6 +80,7 @@ public class SnapshotDownloadModal extends Composite {
 
         initWidget(uiBinder.createAndBindUi(this));
 
+        this.pidSearch.setVisible(false);
         this.pidSelectionScrollPanel.setVisible(false);
         this.selectOrRemoveAllAnchor.setVisible(false);
         this.noPidSelectedError.setVisible(false);
@@ -97,6 +102,7 @@ public class SnapshotDownloadModal extends Composite {
         this.noPidSelectedError.setVisible(false);
         this.modal.setTitle(MSGS.deviceSnapshotDownloadModalTitle());
         this.downloadModalDescription.setText(MSGS.deviceSnapshotDownloadModalHint());
+        initPidSearch();
         initSnapshotPidList(availablePids);
         initSnapshotSelectAllAnchor();
         initSnapshotScrollPanel();
@@ -107,6 +113,12 @@ public class SnapshotDownloadModal extends Composite {
     /*
      * Snapshot Download Inits
      */
+
+    private void initPidSearch() {
+        this.pidSearch.clear();
+        this.pidSearch.setVisible(true);
+        this.pidSearch.addKeyUpHandler(this::onSearchBoxEvent);
+    }
 
     private void initSnapshotPidList(List<String> snapshotConfigs) {
 
@@ -182,6 +194,20 @@ public class SnapshotDownloadModal extends Composite {
     /*
      * Utils
      */
+
+    private void onSearchBoxEvent(KeyUpEvent event) {
+        TextBox searchBox = (TextBox) event.getSource();
+        String searchedPid = searchBox.getValue();
+
+        if (searchedPid == null || searchedPid.isEmpty() || searchedPid.equals("")) {
+            this.pidPanel.iterator().forEachRemaining(widget -> widget.setVisible(true));
+        } else {
+            this.pidPanel.iterator().forEachRemaining(widget -> {
+                CheckBox box = (CheckBox) widget;
+                box.setVisible(box.getText().toLowerCase().contains(searchedPid.toLowerCase()));
+            });
+        }
+    }
 
     private void onCheckboxClick(ClickEvent handler) {
         if (noPidSelectedError.isVisible()) {

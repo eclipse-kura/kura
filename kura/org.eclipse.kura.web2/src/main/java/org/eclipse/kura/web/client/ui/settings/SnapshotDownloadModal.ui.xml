@@ -29,6 +29,12 @@
 	        font-size: 0.35cm;
 	        font-weight: normal;
 	    }
+	    .small-spacing {
+		  	padding-bottom: 10px;
+		}
+		.big-spacing {
+		  	padding-bottom: 20px;
+		}
 	</ui:style>
 
     <b:Modal closable="false" fade="true" dataBackdrop="STATIC" ui:field="modal">
@@ -38,6 +44,10 @@
                         <b:FormGroup>
                             <b.html:Paragraph ui:field="downloadModalDescription" />
                             <b.html:Paragraph ui:field="formatModalHint" text="{msgs.formatDownloadHint}" />
+                            <g:Label addStyleNames="{style.small-spacing}"/>
+                            <b:TextBox placeholder="{msgs.snapshotDownloadSearchBoxPlaceholder}"
+								ui:field="pidSearch" addStyleNames="services-search" />
+							<g:Label addStyleNames="{style.big-spacing}"/>
                             <g:ScrollPanel ui:field="pidSelectionScrollPanel"></g:ScrollPanel>
                             <b:FormLabel addStyleNames="{style.channel-name-validation-label}" ui:field="noPidSelectedError" text="{msgs.downloadSnapshotError}" />
                         </b:FormGroup>

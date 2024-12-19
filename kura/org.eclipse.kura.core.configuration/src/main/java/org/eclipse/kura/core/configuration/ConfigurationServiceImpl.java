@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -1278,24 +1278,22 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                                                 if (props != null) {
                                                     Object value = props.get(adId);
                                                     if (value != null) {
-                                                        String propType = getTypeFromValue(value);
 
                                                         try {
-                                                            logger.debug(
-                                                                    "pid: {}, property name: {}, type: {}, value: {}",
-                                                                    pid, adId, propType, value);
-                                                            Scalar propertyScalar = Scalar.fromValue(propType);
+                                                            logger.debug("pid: {}, property name: {}, value: {}", pid,
+                                                                    adId, value);
+                                                            Scalar propertyScalar = getScalarFromObject(value);
                                                             Scalar adScalar = Scalar.fromValue(adType);
                                                             if (propertyScalar != adScalar) {
                                                                 logger.error(
                                                                         "Type: {} for property named: {} does not match the AD type: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
-                                                                        propType, adId, adType, pid);
+                                                                        propertyScalar.name(), adId, adType, pid);
                                                                 return null;
                                                             }
                                                         } catch (IllegalArgumentException e) {
                                                             logger.error(
-                                                                    "Invalid class: {} for property named: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
-                                                                    propType, adId, pid);
+                                                                    "Invalid class for property named: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
+                                                                    adId, pid);
                                                             return null;
                                                         }
                                                     }
@@ -1322,19 +1320,17 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         return cc;
     }
 
-    private String getTypeFromValue(Object value) {
-        String propType = null;
-        if (!value.getClass().isArray()) {
-            propType = value.getClass().getSimpleName();
-        } else {
-            Object[] tempArray = (Object[]) value;
+    private Scalar getScalarFromObject(Object p) {
+        Class<?> clazz = p.getClass();
+        if (clazz.isArray()) {
+            Object[] tempArray = (Object[]) p;
             if (tempArray.length > 0 && tempArray[0] != null) {
-                propType = tempArray[0].getClass().getSimpleName();
+                clazz = tempArray[0].getClass();
             } else {
-                propType = value.getClass().getComponentType().getSimpleName();
+                clazz = clazz.getComponentType();
             }
         }
-        return propType;
+        return Scalar.fromValue(clazz.getSimpleName());
     }
 
     private TreeSet<Long> getSnapshotsInternal() {

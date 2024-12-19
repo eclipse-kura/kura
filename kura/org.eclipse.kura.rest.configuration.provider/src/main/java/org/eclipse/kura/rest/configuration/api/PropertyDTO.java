@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -96,20 +96,21 @@ public class PropertyDTO implements Validable {
 
     public static Optional<PropertyDTO> fromConfigurationProperty(final Object property) {
 
-        return Optional.ofNullable(property).flatMap(p -> {
-            Class<?> clazz;
-            if (!p.getClass().isArray()) {
-                clazz = p.getClass();
-            } else {
-                clazz = p.getClass();
-                Object[] tempArray = (Object[]) p;
-                if (tempArray.length > 0 && tempArray[0] != null) {
-                    clazz = tempArray[0].getClass();
-                }
-            }
-            return scalarFormSingletonClass(clazz);
+        return Optional.ofNullable(property).flatMap(PropertyDTO::getScalarFromObject)
+                .map(type -> new PropertyDTO(configurationPropertyToDTOProperty(property), type));
+    }
 
-        }).map(type -> new PropertyDTO(configurationPropertyToDTOProperty(property), type));
+    private static Optional<Scalar> getScalarFromObject(Object p) {
+        Class<?> clazz = p.getClass();
+        if (clazz.isArray()) {
+            Object[] tempArray = (Object[]) p;
+            if (tempArray.length > 0 && tempArray[0] != null) {
+                clazz = tempArray[0].getClass();
+            } else {
+                clazz = clazz.getComponentType();
+            }
+        }
+        return scalarFromSingletonClass(clazz);
     }
 
     public Optional<Object> toConfigurationProperty() {
@@ -245,7 +246,7 @@ public class PropertyDTO implements Validable {
         }
     }
 
-    public static Optional<Scalar> scalarFormSingletonClass(final Class<?> clazz) {
+    public static Optional<Scalar> scalarFromSingletonClass(final Class<?> clazz) {
         final Scalar result;
 
         if (clazz == Boolean.class) {
@@ -274,14 +275,6 @@ public class PropertyDTO implements Validable {
 
         return Optional.of(result);
     }
-
-    // public static Optional<Scalar> scalarFromClass(final Class<?> clazz) {
-    // if (clazz.isArray()) {
-    // return scalarFormSingletonClass(clazz.getComponentType());
-    // } else {
-    // return scalarFormSingletonClass(clazz);
-    // }
-    // }
 
     private static Object configurationPropertyToDTOProperty(final Object property) {
         if (property instanceof Password) {

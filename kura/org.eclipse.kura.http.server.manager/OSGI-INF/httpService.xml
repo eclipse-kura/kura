@@ -34,4 +34,6 @@
            interface="org.eclipse.kura.security.keystore.KeystoreService"/>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
    <property name="event.topics" type="String">org/eclipse/kura/security/keystore/KeystoreChangedEvent/KEYSTORE_CHANGED</property>
+   <reference bind="setDispatcherServlet" cardinality="1..1" interface="jakarta.servlet.http.HttpServlet" name="HttpServlet" policy="static" target="(http.felix.dispatcher=*)"/>
+   <reference bind="setEventListener" cardinality="1..1" interface="java.util.EventListener" name="EventListener" policy="static" target="(http.felix.dispatcher=*)"/>
 </scr:component>

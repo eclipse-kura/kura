@@ -730,14 +730,9 @@ fi]]>
             <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="org.apache.felix.http.jetty12-light_${org.apache.felix.http.jetty12.version}.jar"/>
-            <param name="start.level" value="5"/>
-            <param name="start" value=""/>
-        </antcall>
-        <antcall target="install-plugin">
             <param name="bundle.file" value="org.apache.felix.http.bridge_${org.apache.felix.http.bridge.version}.jar"/>
             <param name="start.level" value="5"/>
-            <param name="start" value=""/>
+            <param name="start" value="s"/>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.apache.felix.http.proxy_${org.apache.felix.http.proxy.version}.jar"/>
@@ -960,17 +955,7 @@ fi]]>
             <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.jetty.ee8.jetty-ee8-security_${org.eclipse.jetty.version}.jar" />
-            <param name="start.level" value="5" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.jetty.ee8.jetty-ee8-servlet_${org.eclipse.jetty.version}.jar" />
-            <param name="start.level" value="5" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.jetty.ee8.jetty-ee8-nested_${org.eclipse.jetty.version}.jar" />
+            <param name="bundle.file" value="org.eclipse.jetty.ee10.jetty-ee10-servlet_${org.eclipse.jetty.version}.jar" />
             <param name="start.level" value="5" />
             <param name="start" value="s" />
         </antcall>

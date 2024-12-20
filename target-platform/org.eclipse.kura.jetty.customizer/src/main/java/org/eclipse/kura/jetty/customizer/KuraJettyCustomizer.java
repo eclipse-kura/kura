@@ -32,6 +32,7 @@ import java.util.function.Function;
 import java.util.zip.Deflater;
 
 import javax.net.ssl.KeyManager;
+import javax.servlet.SessionCookieConfig;
 
 import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.equinox.http.jetty.JettyCustomizer;

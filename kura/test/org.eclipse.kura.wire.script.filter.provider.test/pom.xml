@@ -220,16 +220,6 @@
                             </requirement>
                             <requirement>
                                 <type>eclipse-plugin</type>
-                                <id>org.eclipse.kura.jetty.customizer</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>org.eclipse.equinox.http.jetty</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.rest.provider</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
@@ -674,16 +664,6 @@
                             <id>org.apache.activemq.artemis-mqtt-protocol</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.kura.jetty.customizer</id>
-                            <level>2</level>
-                            <autoStart>false</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.equinox.http.jetty</id>
-                            <level>3</level>
-                            <autoStart>false</autoStart>
                         </bundle>
                         <bundle>
                             <id>org.eclipse.kura.http.server.manager</id>

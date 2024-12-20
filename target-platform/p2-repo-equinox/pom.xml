@@ -62,13 +62,6 @@
                                     <artifactId>org.apache.felix.http.servlet-api</artifactId>
                                     <version>${org.apache.felix.http.servlet-api.version}</version>
                                 </artifactItem>
-
-                                <artifactItem>
-                                    <groupId>org.apache.felix</groupId>
-                                    <artifactId>org.apache.felix.http.jetty12</artifactId>
-                                    <classifier>light</classifier>
-                                    <version>${org.apache.felix.http.jetty12.version}</version>
-                                </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.http.bridge</artifactId>
@@ -125,18 +118,8 @@
                                     <version>${org.eclipse.jetty.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.jetty.ee8</groupId>
-                                    <artifactId>jetty-ee8-security</artifactId>
-                                    <version>${org.eclipse.jetty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.jetty.ee8</groupId>
-                                    <artifactId>jetty-ee8-servlet</artifactId>
-                                    <version>${org.eclipse.jetty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.jetty.ee8</groupId>
-                                    <artifactId>jetty-ee8-nested</artifactId>
+                                    <groupId>org.eclipse.jetty.ee10</groupId>
+                                    <artifactId>jetty-ee10-servlet</artifactId>
                                     <version>${org.eclipse.jetty.version}</version>
                                 </artifactItem>
                                 <artifactItem>
@@ -338,12 +321,8 @@
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.jetty-util_${org.eclipse.jetty.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/jetty-io.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.jetty-io_${org.eclipse.jetty.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-ee8-security.jar" 
-                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.ee8.jetty-ee8-security_${org.eclipse.jetty.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-ee8-servlet.jar"
-                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.ee8.jetty-ee8-servlet_${org.eclipse.jetty.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-ee8-nested.jar"
-                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.ee8.jetty-ee8-nested_${org.eclipse.jetty.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-ee10-servlet.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.ee10.jetty-ee10-servlet_${org.eclipse.jetty.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.io.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.io_${org.eclipse.equinox.io.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.util.jar"
@@ -390,8 +369,6 @@
 
                                  <move file="${project.build.directory}/source/plugins/org.apache.felix.http.servlet-api.jar"
                                     tofile="${project.build.directory}/source/plugins/org.apache.felix.http.servlet-api_${org.apache.felix.http.servlet-api.version}.jar" />
-                                 <move file="${project.build.directory}/source/plugins/org.apache.felix.http.jetty12-light.jar" 
-                                    tofile="${project.build.directory}/source/plugins/org.apache.felix.http.jetty12-light_${org.apache.felix.http.jetty12.version}.jar" />
                                  <move file="${project.build.directory}/source/plugins/org.apache.felix.http.bridge.jar" 
                                     tofile="${project.build.directory}/source/plugins/org.apache.felix.http.bridge_${org.apache.felix.http.bridge.version}.jar" />
                                  <move file="${project.build.directory}/source/plugins/org.apache.felix.http.proxy.jar" 

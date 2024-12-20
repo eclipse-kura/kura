@@ -546,11 +546,7 @@
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
-                            <bundle>
-                                <id>org.eclipse.kura.jetty.customizer</id>
-                                <level>2</level>
-                                <autoStart>false</autoStart>
-                            </bundle>
+
                             <bundle>
                                 <id>org.eclipse.equinox.http.jetty</id>
                                 <level>3</level>
@@ -771,11 +767,6 @@
                                 <requirement>
                                     <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.deployment.agent</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.jetty.customizer</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
                                 <requirement>

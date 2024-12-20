@@ -14,6 +14,7 @@ package org.eclipse.kura.web.session;
 
 import java.io.IOException;
 
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.servlet.context.ServletContextHelper;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +26,7 @@ public class HttpServletContextHelper extends ServletContextHelper {
     private SecurityHandler securityHandler;
 
     public HttpServletContextHelper(SecurityHandler securityHandler) {
-        super();
+        super(FrameworkUtil.getBundle(HttpServletContextHelper.class));
         this.securityHandler = securityHandler;
     }
 

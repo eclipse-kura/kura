@@ -15,7 +15,6 @@ package org.eclipse.kura.http.server.manager;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
 import java.security.KeyStore;
 import java.security.cert.PKIXRevocationChecker;
 import java.util.EnumSet;
@@ -26,7 +25,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.zip.Deflater;
 
-import org.eclipse.jetty.ee10.servlet.ErrorHandler;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.ee10.servlet.SessionHandler;
@@ -44,7 +42,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.ErrorHandler.ErrorRequest;
-import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.session.DefaultSessionIdManager;
 import org.eclipse.jetty.session.HouseKeeper;
 import org.eclipse.jetty.util.compression.CompressionPool;
@@ -60,7 +57,6 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.SessionCookieConfig;
 import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
 
 public class JettyServerHolder {
 
@@ -78,7 +74,8 @@ public class JettyServerHolder {
 
         // TODO make it configurable from options
         this.server = new Server(new QueuedThreadPool(200, 8));
-        this.server.setErrorHandler(new KuraErrorHandler());
+        // TODO restore after debugging
+        // this.server.setErrorHandler(new KuraErrorHandler());
 
         for (int port : this.options.getHttpPorts()) {
             ServerConnector httpConnector = createHttpConnector(port);
@@ -143,20 +140,22 @@ public class JettyServerHolder {
         // handler.setMaxInactiveInterval(-1); // TODO evaluate configurability
         servletContextHandler.setSessionHandler(handler);
 
-        final GzipHandler gzipHandler = new GzipHandler();
-        gzipHandler.setDeflaterPool(this.deflaterPool);
+        // TODO restore after debugging
+        // final GzipHandler gzipHandler = new GzipHandler();
+        // gzipHandler.setDeflaterPool(this.deflaterPool);
+        //
+        // servletContextHandler.insertHandler(gzipHandler);
 
-        servletContextHandler.insertHandler(gzipHandler);
-
-        servletContextHandler.setErrorHandler(new ErrorHandler() {
-
-            @Override
-            protected void writeErrorPage(HttpServletRequest request, Writer writer, int code, String message,
-                    boolean showStacks) throws IOException {
-                // do nothing
-            }
-
-        });
+        // TODO restore after debugging
+        // servletContextHandler.setErrorHandler(new ErrorHandler() {
+        //
+        // @Override
+        // protected void writeErrorPage(HttpServletRequest request, Writer writer, int code, String message,
+        // boolean showStacks) throws IOException {
+        // // do nothing
+        // }
+        //
+        // });
 
         final SessionCookieConfig cookieConfig = servletContextHandler.getSessionHandler().getSessionCookieConfig();
 
@@ -264,7 +263,8 @@ public class JettyServerHolder {
         sslContextFactory.setNeedClientAuth(enableClientAuth);
 
         final HttpConfiguration httpsConfig = new HttpConfiguration();
-        httpsConfig.addCustomizer(new SecureRequestCustomizer());
+
+        httpsConfig.addCustomizer(new SecureRequestCustomizer(false)); // TODO to check
         httpsConfig.addCustomizer(new BlockHttpMethods(EnumSet.of(HttpMethod.TRACE)));
 
         final ServerConnector connector = new ServerConnector(server,

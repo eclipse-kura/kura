@@ -89,22 +89,22 @@ import org.osgi.service.servlet.whiteboard.HttpWhiteboardConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.servlet.Servlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 public class Console implements SelfConfiguringComponent {
 
-    private static final String SESSION_CONTEX_NAME = "sessionContex";
+    private static final String SESSION_CONTEXT_NAME = "sessionContext";
 
-    private static final String RESOURCE_CONTEX_NAME = "resourceContex";
+    private static final String RESOURCE_CONTEXT_NAME = "resourceContext";
 
     private static final String SESSION = "/session";
 
     private static final String EVENT_PATH = "/event";
 
     public static final String ADMIN_ROOT = "/admin";
-
     private static final String LOGIN_MODULE_PATH = ADMIN_ROOT + "/login";
     private static final String DENALI_MODULE_PATH = ADMIN_ROOT + "/denali";
 
@@ -136,7 +136,7 @@ public class Console implements SelfConfiguringComponent {
 
     private final Set<ServiceRegistration<ServletContextHelper>> contexts = new CopyOnWriteArraySet<>();
     private final Set<ServiceRegistration<ResourcesService>> resources = new CopyOnWriteArraySet<>();
-    private final Set<ServiceRegistration<HttpServlet>> servlets = new CopyOnWriteArraySet<>();
+    private final Set<ServiceRegistration<Servlet>> servlets = new CopyOnWriteArraySet<>();
 
     private BundleContext bundleContext;
 
@@ -460,88 +460,89 @@ public class Console implements SelfConfiguringComponent {
         ServletContextHelper resourceContextHelper = new HttpServletContextHelper(new BaseSecurityHandler());
         ServletContextHelper sessionContextHelper = new HttpServletContextHelper(createSessionHandlerChain());
 
-        registerContextHelper(RESOURCE_CONTEX_NAME, "/", resourceContextHelper);
-        registerContextHelper(SESSION_CONTEX_NAME, "/", sessionContextHelper);
+        registerContextHelper(RESOURCE_CONTEXT_NAME, "/", resourceContextHelper, 5);
+        registerContextHelper(SESSION_CONTEXT_NAME, "/", sessionContextHelper, 10);
 
-        registerResources(ADMIN_ROOT, "www", new AdminResources(), RESOURCE_CONTEX_NAME);
-        registerResources(AUTH_PATH, "www/auth.html", new AuthorizationResources(), SESSION_CONTEX_NAME);
-        registerResources(CONSOLE_PATH, "www/denali.html", new ConsoleResources(), SESSION_CONTEX_NAME);
+        registerResources(ADMIN_ROOT + "/*", "www", new AdminResources(), RESOURCE_CONTEXT_NAME);
+        registerResources(AUTH_PATH, "www/auth.html", new AuthorizationResources(), SESSION_CONTEXT_NAME);
+        registerResources(CONSOLE_PATH, "www/denali.html", new ConsoleResources(), SESSION_CONTEXT_NAME);
 
         registerServlet("gwtLoginInfoService", LOGIN_MODULE_PATH + "/loginInfo", new GwtLoginInfoServiceImpl(),
-                RESOURCE_CONTEX_NAME);
-        registerServlet("redirectServlet", "/", new RedirectServlet("/"::equals, this.appRoot), RESOURCE_CONTEX_NAME);
+                RESOURCE_CONTEXT_NAME);
+        registerServlet("redirectServlet", "/", new RedirectServlet("/"::equals, this.appRoot), RESOURCE_CONTEXT_NAME);
 
         registerServlet("notFoundAuthResourceServlet", AUTH_RESOURCE_PATH, new SendStatusServlet(404),
-                RESOURCE_CONTEX_NAME);
+                RESOURCE_CONTEXT_NAME);
         registerServlet("notFoundConsoleResourceServlet", CONSOLE_RESOURCE_PATH, new SendStatusServlet(404),
-                RESOURCE_CONTEX_NAME);
+                RESOURCE_CONTEXT_NAME);
 
         registerServlet("gwtPasswordAuthenticationService", PASSWORD_AUTH_PATH,
-                new GwtPasswordAuthenticationServiceImpl(this.userManager, CONSOLE_PATH), SESSION_CONTEX_NAME);
+                new GwtPasswordAuthenticationServiceImpl(this.userManager, CONSOLE_PATH), SESSION_CONTEXT_NAME);
         registerServlet("sslAuthenticationServlet", CERT_AUTH_PATH,
-                new SslAuthenticationServlet(CONSOLE_PATH, this.userManager), SESSION_CONTEX_NAME);
+                new SslAuthenticationServlet(CONSOLE_PATH, this.userManager), SESSION_CONTEXT_NAME);
 
         registerServlet("gwtKeystoreServiceImpl", DENALI_MODULE_PATH + "/keystore", new GwtKeystoreServiceImpl(),
-                SESSION_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
         registerServlet("gwtSslManagerServiceImpl", DENALI_MODULE_PATH + "/ssl", new GwtSslManagerServiceImpl(),
-                SESSION_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
 
         registerServlet("denaliSessionService", DENALI_MODULE_PATH + SESSION,
-                new GwtSessionServiceImpl(this.userManager), SESSION_CONTEX_NAME);
+                new GwtSessionServiceImpl(this.userManager), SESSION_CONTEXT_NAME);
 
         registerServlet("loginSessionService", LOGIN_MODULE_PATH + SESSION, new GwtSessionServiceImpl(this.userManager),
-                SESSION_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
         registerServlet("xsrfLoginServlet", LOGIN_MODULE_PATH + "/xsrf", new GwtSecurityTokenServiceImpl(),
-                SESSION_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
         registerServlet("xsrfDenaliServlet", DENALI_MODULE_PATH + "/xsrf", new GwtSecurityTokenServiceImpl(),
-                SESSION_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
         registerServlet("statusService", DENALI_MODULE_PATH + "/status", new GwtStatusServiceImpl(),
-                SESSION_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
         registerServlet("deviceService", DENALI_MODULE_PATH + "/device", new GwtDeviceServiceImpl(),
-                SESSION_CONTEX_NAME);
-        registerServlet("logService", DENALI_MODULE_PATH + "/logservice", new GwtLogServiceImpl(), SESSION_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
+        registerServlet("logService", DENALI_MODULE_PATH + "/logservice", new GwtLogServiceImpl(),
+                SESSION_CONTEXT_NAME);
         registerServlet("networkService", DENALI_MODULE_PATH + "/network", new GwtNetworkServiceImpl(),
-                SESSION_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
         registerServlet("componentService", DENALI_MODULE_PATH + "/component", new GwtComponentServiceImpl(),
-                SESSION_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
         registerServlet("packageService", DENALI_MODULE_PATH + "/package",
-                new GwtPackageServiceImpl(this.sslManagerService::get), SESSION_CONTEX_NAME);
+                new GwtPackageServiceImpl(this.sslManagerService::get), SESSION_CONTEXT_NAME);
         registerServlet("snapshotServiceImpl", DENALI_MODULE_PATH + "/snapshot", new GwtSnapshotServiceImpl(),
-                SESSION_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
         registerServlet("certificateService", DENALI_MODULE_PATH + "/certificate", new GwtCertificatesServiceImpl(),
-                SESSION_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
         registerServlet("securityService", DENALI_MODULE_PATH + "/security", new GwtSecurityServiceImpl(),
-                SESSION_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
         registerServlet("usersService", DENALI_MODULE_PATH + "/users", new GwtUserServiceImpl(this.userManager),
-                SESSION_CONTEX_NAME);
-        registerServlet("fileServlet", DENALI_MODULE_PATH + "/file", new FileServlet(), SESSION_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
+        registerServlet("fileServlet", DENALI_MODULE_PATH + "/file", new FileServlet(), SESSION_CONTEXT_NAME);
         registerServlet("deviceSnapshotsServlet", DENALI_MODULE_PATH + "/device_snapshots",
-                new DeviceSnapshotsServlet(), SESSION_CONTEX_NAME);
+                new DeviceSnapshotsServlet(), SESSION_CONTEXT_NAME);
         registerServlet("channelServlet", DENALI_MODULE_PATH + "/assetsUpDownload", new ChannelServlet(),
-                SESSION_CONTEX_NAME);
-        registerServlet("logServlet", DENALI_MODULE_PATH + "/log", new LogServlet(), SESSION_CONTEX_NAME);
-        registerServlet("skinServlet", DENALI_MODULE_PATH + "/skin", new SkinServlet(), RESOURCE_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
+        registerServlet("logServlet", DENALI_MODULE_PATH + "/log", new LogServlet(), SESSION_CONTEXT_NAME);
+        registerServlet("skinServlet", DENALI_MODULE_PATH + "/skin", new SkinServlet(), RESOURCE_CONTEXT_NAME);
         registerServlet("cloudServices", DENALI_MODULE_PATH + "/cloudservices", new GwtCloudConnectionServiceImpl(),
-                SESSION_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
         registerServlet("wireGraphService", DENALI_MODULE_PATH + "/wires", new GwtWireGraphServiceImpl(),
-                SESSION_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
         registerServlet("wiresSnapshotServlet", DENALI_MODULE_PATH + "/wiresSnapshot", new WiresSnapshotServlet(),
-                SESSION_CONTEX_NAME);
+                SESSION_CONTEXT_NAME);
         registerServlet("driverAndAssetService", DENALI_MODULE_PATH + "/assetservices",
-                new GwtDriverAndAssetServiceImpl(), SESSION_CONTEX_NAME);
-        registerServlet("wiresBlinkService", ADMIN_ROOT + "/sse", this.wiresBlinkService, SESSION_CONTEX_NAME);
-        registerServlet("eventService", DENALI_MODULE_PATH + EVENT_PATH, this.eventService, SESSION_CONTEX_NAME);
+                new GwtDriverAndAssetServiceImpl(), SESSION_CONTEXT_NAME);
+        registerServlet("wiresBlinkService", ADMIN_ROOT + "/sse", this.wiresBlinkService, SESSION_CONTEXT_NAME);
+        registerServlet("eventService", DENALI_MODULE_PATH + EVENT_PATH, this.eventService, SESSION_CONTEXT_NAME);
 
         this.eventService.start();
     }
 
-    private void registerContextHelper(String contextName, String contextPath, ServletContextHelper contextHelper) {
-        Map<String, String> props = new HashMap<>();
-
-        props.put(Constants.SERVICE_ID, contextName);
+    private void registerContextHelper(String contextName, String contextPath, ServletContextHelper contextHelper,
+            int ranking) {
+        Map<String, Object> props = new HashMap<>();
 
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, contextName);
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
+        props.put(Constants.SERVICE_RANKING, ranking);
 
         ServiceRegistration<ServletContextHelper> contextService = this.bundleContext
                 .registerService(ServletContextHelper.class, contextHelper, new Hashtable<>(props));
@@ -551,13 +552,12 @@ public class Console implements SelfConfiguringComponent {
 
     private void registerResources(String pattern, String prefix, ResourcesService resourcesService,
             String contextHelperName) {
-        Map<String, String> props = new HashMap<>();
-
-        props.put(Constants.SERVICE_ID, resourcesService.getClass().getSimpleName());
+        Map<String, Object> props = new HashMap<>();
 
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, pattern);
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, prefix);
-        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, contextHelperName);
+        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+                "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + contextHelperName + ")");
 
         ServiceRegistration<ResourcesService> resourcesS = this.bundleContext.registerService(ResourcesService.class,
                 resourcesService, new Hashtable<>(props));
@@ -570,14 +570,12 @@ public class Console implements SelfConfiguringComponent {
 
         Map<String, String> props = new HashMap<>();
 
-        props.put(Constants.SERVICE_SCOPE, Constants.SCOPE_PROTOTYPE);
-        props.put(Constants.SERVICE_ID, servletName);
-
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, servletName);
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, servletPattern);
-        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, contextHelperName);
+        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+                "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + contextHelperName + ")");
 
-        ServiceRegistration<HttpServlet> servletService = this.bundleContext.registerService(HttpServlet.class, servlet,
+        ServiceRegistration<Servlet> servletService = this.bundleContext.registerService(Servlet.class, servlet,
                 new Hashtable<>(props));
 
         this.servlets.add(servletService);

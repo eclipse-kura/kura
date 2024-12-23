@@ -16,6 +16,7 @@ package org.eclipse.kura.core.data.transport.mqtt;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -104,7 +105,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
     private SystemService systemService;
     private SslManagerService sslManagerService;
-    private CloudConnectionStatusService cloudConnectionStatusService;
+    private Optional<CloudConnectionStatusService> cloudConnectionStatusService = Optional.empty();
 
     private CloudConnectionStatusEnum notificationStatus = CloudConnectionStatusEnum.OFF;
 
@@ -170,11 +171,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     }
 
     public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
-        this.cloudConnectionStatusService = cloudConnectionStatusService;
+        this.cloudConnectionStatusService = Optional.of(cloudConnectionStatusService);
     }
 
     public void unsetCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
-        this.cloudConnectionStatusService = null;
+        this.cloudConnectionStatusService = Optional.empty();
     }
 
     // ----------------------------------------------------------------
@@ -337,9 +338,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         logger.info("#  Connecting...");
 
         // Register the component in the CloudConnectionStatus service
-        this.cloudConnectionStatusService.register(this);
+        this.cloudConnectionStatusService.ifPresent(service -> service.register(this));
         // Update status notification service
-        this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.FAST_BLINKING);
+        this.cloudConnectionStatusService
+                .ifPresent(service -> service.updateStatus(this, CloudConnectionStatusEnum.FAST_BLINKING));
 
         //
         // connect
@@ -350,20 +352,22 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             logger.info("# ------------------------------------------------------------");
 
             // Update status notification service
-            this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.ON);
+            this.cloudConnectionStatusService
+                    .ifPresent(service -> service.updateStatus(this, CloudConnectionStatusEnum.ON));
 
         } catch (MqttException e) {
             logger.warn("xxxxx  Connect failed. Forcing disconnect. xxxxx");
             closeMqttClient();
 
             // Update status notification service
-            this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
+            this.cloudConnectionStatusService
+                    .ifPresent(service -> service.updateStatus(this, CloudConnectionStatusEnum.OFF));
 
             throw new KuraConnectException(e, "Cannot connect");
         } finally {
             // Always unregister from CloudConnectionStatus service so to switch to the
             // previous state
-            this.cloudConnectionStatusService.unregister(this);
+            this.cloudConnectionStatusService.ifPresent(service -> service.unregister(this));
         }
 
         // notify the listeners
@@ -1061,12 +1065,12 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     private static String getMqttVersionLabel(int mqttVersion) {
 
         switch (mqttVersion) {
-            case MqttConnectOptions.MQTT_VERSION_3_1:
-                return "3.1";
-            case MqttConnectOptions.MQTT_VERSION_3_1_1:
-                return "3.1.1";
-            default:
-                return String.valueOf(mqttVersion);
+        case MqttConnectOptions.MQTT_VERSION_3_1:
+            return "3.1";
+        case MqttConnectOptions.MQTT_VERSION_3_1_1:
+            return "3.1.1";
+        default:
+            return String.valueOf(mqttVersion);
         }
     }
 }

@@ -100,7 +100,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     private ScheduledExecutorService congestionExecutor;
     private ScheduledFuture<?> congestionFuture;
 
-    private CloudConnectionStatusService cloudConnectionStatusService;
+    private Optional<CloudConnectionStatusService> cloudConnectionStatusService = Optional.empty();
     private CloudConnectionStatusEnum notificationStatus = CloudConnectionStatusEnum.OFF;
 
     private TokenBucket throttle;
@@ -149,7 +149,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         this.dataServiceListeners = new DataServiceListenerS(componentContext);
 
         // Register the component in the CloudConnectionStatus Service
-        this.cloudConnectionStatusService.register(this);
+        this.cloudConnectionStatusService.ifPresent(service -> service.register(this));
 
         this.dataTransportService.addDataTransportListener(this);
 
@@ -339,11 +339,11 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     }
 
     public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
-        this.cloudConnectionStatusService = cloudConnectionStatusService;
+        this.cloudConnectionStatusService = Optional.of(cloudConnectionStatusService);
     }
 
     public void unsetCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
-        this.cloudConnectionStatusService = null;
+        this.cloudConnectionStatusService = Optional.empty();
     }
 
     public void setWatchdogService(WatchdogService watchdogService) {
@@ -368,7 +368,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     public void onConnectionEstablished(boolean newSession) {
 
         logger.info("Notified connected");
-        this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.ON);
+        this.cloudConnectionStatusService
+                .ifPresent(service -> service.updateStatus(this, CloudConnectionStatusEnum.ON));
 
         // On a new session all messages the were in-flight in the previous session
         // would be lost and never confirmed by the DataPublisherService.
@@ -442,7 +443,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     @Override
     public void onDisconnected() {
         logger.info("Notified disconnected");
-        this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
+        this.cloudConnectionStatusService
+                .ifPresent(service -> service.updateStatus(this, CloudConnectionStatusEnum.OFF));
 
         // Notify the listeners
         this.dataServiceListeners.onDisconnected();
@@ -753,7 +755,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
             // Change notification status to slow blinking when connection is expected to
             // happen in the future
-            this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.SLOW_BLINKING);
+            this.cloudConnectionStatusService
+                    .ifPresent(service -> service.updateStatus(this, CloudConnectionStatusEnum.SLOW_BLINKING));
             // add a delay on the reconnect
             int maxDelay = reconnectInterval / 5;
             maxDelay = maxDelay > 0 ? maxDelay : 1;
@@ -766,7 +769,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         } else {
             // Change notification status to off. Connection is not expected to happen in
             // the future
-            this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.OFF);
+            this.cloudConnectionStatusService
+                    .ifPresent(service -> service.updateStatus(this, CloudConnectionStatusEnum.OFF));
             unregisterAsCriticalComponent();
         }
     }

@@ -29,8 +29,8 @@
               policy="static" 
               interface="org.eclipse.kura.data.DataTransportService"/>
    <reference name="CloudConnectionStatusService"
-              policy="static"
-              cardinality="1..1"
+              policy="dynamic"
+              cardinality="0..1"
               bind="setCloudConnectionStatusService"
               unbind="unsetCloudConnectionStatusService"
               interface="org.eclipse.kura.status.CloudConnectionStatusService"/>

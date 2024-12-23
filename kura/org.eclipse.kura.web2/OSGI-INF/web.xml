@@ -26,7 +26,6 @@
    <property name="kura.service.pid" type="String" value="org.eclipse.kura.web.Console"/>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
    <service>
-      <provide interface="org.eclipse.kura.web.api.Console"/>
       <provide interface="org.eclipse.kura.configuration.SelfConfiguringComponent"/>
    </service>
    <reference bind="setIdentityService" cardinality="1..1" interface="org.eclipse.kura.identity.IdentityService" name="IdentityService" policy="static"/>

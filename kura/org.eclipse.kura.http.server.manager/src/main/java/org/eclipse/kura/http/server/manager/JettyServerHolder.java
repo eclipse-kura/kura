@@ -15,14 +15,19 @@ package org.eclipse.kura.http.server.manager;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.cert.PKIXRevocationChecker;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.EventListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.Deflater;
 
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
@@ -66,7 +71,8 @@ public class JettyServerHolder {
             true);
 
     private final HttpServiceOptions options;
-    private Server server;
+    private final Server server;
+    private final File workDir;
 
     public JettyServerHolder(final HttpServiceOptions options, final Optional<KeystoreService> keystoreService,
             final HttpServlet httpServlet, final EventListener eventListener) {
@@ -76,6 +82,11 @@ public class JettyServerHolder {
         this.server = new Server(new QueuedThreadPool(200, 8));
         // TODO restore after debugging
         // this.server.setErrorHandler(new KuraErrorHandler());
+
+        final BundleContext context = FrameworkUtil.getBundle(JettyServerHolder.class).getBundleContext();
+        this.workDir = new File(context.getDataFile(""), "jettyWorkDir_" + System.nanoTime()); // TODO evaluate
+                                                                                               // configurability
+        this.workDir.mkdir();
 
         for (int port : this.options.getHttpPorts()) {
             ServerConnector httpConnector = createHttpConnector(port);
@@ -102,7 +113,9 @@ public class JettyServerHolder {
         }
 
         ServletHolder holder = new ServletHolder(httpServlet);
+        holder.setAsyncSupported(true);
         holder.setInitOrder(0);
+
         ServletContextHandler httpContext = createServletContextHandler();
         httpContext.addServlet(holder, "/*");
         httpContext.addEventListener(eventListener);
@@ -128,14 +141,10 @@ public class JettyServerHolder {
     private ServletContextHandler createServletContextHandler() {
 
         ServletContextHandler servletContextHandler = new ServletContextHandler();
-        servletContextHandler.setClassLoader(this.getClass().getClassLoader());
+        servletContextHandler.setClassLoader(JettyServerHolder.class.getClassLoader());
         servletContextHandler.setContextPath("/"); // TODO evaluate configurability
 
-        BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-        File jettyWorkDir = new File(context.getDataFile(""), "jettyWorkDir_"); // TODO evaluate configurability
-        jettyWorkDir.mkdir();
-
-        servletContextHandler.setAttribute("jakarta.servlet.context.tempdir", jettyWorkDir);
+        servletContextHandler.setAttribute("jakarta.servlet.context.tempdir", this.workDir);
         SessionHandler handler = new SessionHandler();
         // handler.setMaxInactiveInterval(-1); // TODO evaluate configurability
         servletContextHandler.setSessionHandler(handler);
@@ -222,15 +231,15 @@ public class JettyServerHolder {
 
     private static class BlockHttpMethods implements HttpConfiguration.Customizer {
 
-        private final Set<HttpMethod> blockedMethods;
+        private final Set<String> blockedMethods;
 
         public BlockHttpMethods(Set<HttpMethod> methods) {
-            this.blockedMethods = methods;
+            this.blockedMethods = methods.stream().map(m -> m.toString().toLowerCase()).collect(Collectors.toSet());
         }
 
         @Override
         public Request customize(Request request, Mutable responseHeaders) {
-            if (this.blockedMethods.contains(HttpMethod.TRACE)) {
+            if (this.blockedMethods.contains(request.getMethod().toLowerCase())) {
                 return new ErrorRequest(request, HttpStatus.METHOD_NOT_ALLOWED_405, "Method now allowed.", null);
             }
 
@@ -302,6 +311,12 @@ public class JettyServerHolder {
             this.server.stop();
         } catch (Exception e) {
             logger.warn("Unable to stop the Jetty server", e);
+        }
+
+        try (final Stream<Path> stream = Files.walk(this.workDir.toPath())) {
+            stream.map(Path::toFile).sorted(Comparator.reverseOrder()).forEach(File::delete);
+        } catch (Exception e) {
+            logger.warn("Unable to cleanp jetty workdir", e);
         }
     }
 

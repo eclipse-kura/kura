@@ -20,10 +20,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.util.DownloadHelper;
-import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Anchor;
@@ -359,24 +356,13 @@ public class SnapshotDownloadModal extends Composite {
     }
 
     private void downloadEntireSnapshot(Long snapshotId, String format) {
-
-        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(Throwable ex) {
-                FailureHandler.handle(ex);
-            }
-
-            @Override
-            public void onSuccess(GwtXSRFToken token) {
-                final StringBuilder sbUrl = new StringBuilder();
-
-                sbUrl.append("/device_snapshots?snapshotId=").append(snapshotId).append("&format=").append(format);
-
-                DownloadHelper.instance().startDownload(token, sbUrl.toString());
-
-            }
-        });
+        RequestQueue.submit(context -> this.gwtXSRFService.generateSecurityToken(context.callback(token -> {
+            xsrfTokenField.setValue(token.getToken());
+            pidsListField.setValue("");
+            snapshotDownloadFormatField.setValue(format);
+            snapshotIdField.setValue(snapshotId.toString());
+            snapshotDownloadForm.submit();
+        })));
     }
 
     private void downloadPartialSnapshot(Long snapshotId, String format) {

@@ -15,24 +15,29 @@ package org.eclipse.kura.web.server.servlet;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.RequiredPermissions.Mode;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DeviceSnapshotsServlet extends AuditServlet {
+
+    private static final String SNAPSHOT_DOWNLOAD_TAG = "snapshot_";
 
     private static final long serialVersionUID = -2533869595709953567L;
 
@@ -66,7 +71,7 @@ public class DeviceSnapshotsServlet extends AuditServlet {
 
                 long sid = Long.parseLong(snapshotId);
 
-                GwtServerUtil.writeSnapshot(response, cs.getSnapshot(sid), "snapshot_" + sid,
+                GwtServerUtil.writeSnapshot(response, cs.getSnapshot(sid), SNAPSHOT_DOWNLOAD_TAG + sid,
                         request.getParameter("format"));
 
             }
@@ -92,24 +97,16 @@ public class DeviceSnapshotsServlet extends AuditServlet {
 
         try {
 
-            ServiceLocator locator = ServiceLocator.getInstance();
-            ConfigurationService cs = locator.getService(ConfigurationService.class);
+            String downloadFormat = Objects.requireNonNull(request.getParameter("downloadFormat"));
+            Long snapshotId = Objects.requireNonNull(Long.parseLong(request.getParameter("snapshotId")));
+            String pidList = Objects.requireNonNull(request.getParameter("pidsList"));
 
-            String format = request.getParameter("downloadFormat");
-            Long snapshotId = Long.parseLong(request.getParameter("snapshotId"));
+            if (!pidList.isEmpty() && pidList.equals("EntireSnapshot")) {
+                parseEntireSnapshot(response, snapshotId, downloadFormat);
+            }
 
-            if (request.getParameter("pidsList").isEmpty() || request.getParameter("pidsList") == null) {
-
-                GwtServerUtil.writeSnapshot(response, cs.getSnapshot(snapshotId), "snapshot_" + snapshotId,
-                        request.getParameter("format"));
-            } else {
-                List<String> selectedPids = Arrays.asList(request.getParameter("pidsList").split(","));
-
-                List<ComponentConfiguration> configs = cs.getSnapshot(snapshotId).stream().filter(config -> {
-                    return selectedPids.contains(config.getPid());
-                }).collect(Collectors.toList());
-
-                GwtServerUtil.writeSnapshot(response, configs, "snapshot_" + snapshotId, format);
+            if (!pidList.isEmpty() && pidList.startsWith("SelectedPids: ")) {
+                parsePartialSnapshot(response, snapshotId, downloadFormat, pidList);
             }
 
         } catch (Exception e) {
@@ -117,6 +114,30 @@ public class DeviceSnapshotsServlet extends AuditServlet {
             throw new ServletException(e);
         }
 
+    }
+
+    private void parseEntireSnapshot(HttpServletResponse response, Long snapshotId, String downloadFormat)
+            throws GwtKuraException, ServletException, KuraException {
+
+        ServiceLocator locator = ServiceLocator.getInstance();
+        ConfigurationService cs = locator.getService(ConfigurationService.class);
+
+        GwtServerUtil.writeSnapshot(response, cs.getSnapshot(snapshotId), SNAPSHOT_DOWNLOAD_TAG + snapshotId,
+                downloadFormat);
+    }
+
+    private void parsePartialSnapshot(HttpServletResponse response, Long snapshotId, String downloadFormat,
+            String pidList) throws GwtKuraException, ServletException, KuraException {
+
+        ServiceLocator locator = ServiceLocator.getInstance();
+        ConfigurationService cs = locator.getService(ConfigurationService.class);
+
+        List<String> selectedPids = Arrays.asList(pidList.replace("SelectedPids: ", "").split(","));
+
+        List<ComponentConfiguration> configs = cs.getSnapshot(snapshotId).stream()
+                .filter(config -> selectedPids.contains(config.getPid())).collect(Collectors.toList());
+
+        GwtServerUtil.writeSnapshot(response, configs, SNAPSHOT_DOWNLOAD_TAG + snapshotId, downloadFormat);
     }
 
 }

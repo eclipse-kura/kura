@@ -313,15 +313,17 @@ public class SnapshotDownloadModal extends Composite {
         boolean areAllVisible = true;
         boolean areAllSelected = true;
 
-        Iterator<Widget> pidPanelIterator = this.pidPanel.iterator();
-        while (pidPanelIterator.hasNext()) {
-            Widget widget = pidPanelIterator.next();
+        for (Widget widget : pidPanel) {
             if (!widget.isVisible()) {
                 areAllVisible = false;
+                break;
             }
+        }
 
+        for (Widget widget : pidPanel) {
             if (widget.isVisible() && !((CheckBox) widget).getValue().booleanValue()) {
                 areAllSelected = false;
+                break;
             }
         }
 

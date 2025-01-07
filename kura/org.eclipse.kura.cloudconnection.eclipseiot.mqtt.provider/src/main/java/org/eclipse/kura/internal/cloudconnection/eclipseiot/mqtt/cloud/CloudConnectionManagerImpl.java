@@ -120,7 +120,7 @@ public class CloudConnectionManagerImpl
     private SystemService systemService;
     private SystemAdminService systemAdminService;
     private NetworkService networkService;
-    private PositionService positionService;
+    private Optional<PositionService> positionService = Optional.empty();
     private EventAdmin eventAdmin;
     private CertificatesService certificatesService;
     private Unmarshaller jsonUnmarshaller;
@@ -220,16 +220,16 @@ public class CloudConnectionManagerImpl
     }
 
     public void setPositionService(PositionService positionService) {
-        this.positionService = positionService;
+        this.positionService = Optional.of(positionService);
     }
 
     public void unsetPositionService(PositionService positionService) {
-        if (this.positionService.equals(positionService)) {
-            this.positionService = null;
+        if (this.positionService.isPresent() && this.positionService.get().equals(positionService)) {
+            this.positionService = Optional.empty();
         }
     }
 
-    public PositionService getPositionService() {
+    public Optional<PositionService> getPositionService() {
         return this.positionService;
     }
 
@@ -623,7 +623,7 @@ public class CloudConnectionManagerImpl
             logger.info("framework is stopping.. not republishing birth certificate");
             return;
         }
-        
+
         readModemProfile();
         LifecycleMessage birthToPublish = new LifecycleMessage(this.options, this).asBirthCertificateMessage();
 
@@ -829,7 +829,7 @@ public class CloudConnectionManagerImpl
     public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
         this.registeredCloudDeliveryListeners.remove(cloudDeliveryListener);
     }
-    
+
     private boolean isFrameworkStopping() {
         try {
             final Bundle ownBundle = FrameworkUtil.getBundle(CloudConnectionManagerImpl.class);

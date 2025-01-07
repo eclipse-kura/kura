@@ -51,7 +51,7 @@
               cardinality="0..1" 
               bind="setPositionService" 
               interface="org.eclipse.kura.position.PositionService" 
-              policy="static" 
+              policy="dynamic" 
               unbind="unsetPositionService"/>
    <reference name="EventAdmin"              
               cardinality="1..1" 

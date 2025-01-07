@@ -2,7 +2,7 @@
 
 <!--
     
-    Copyright (c) 2024 Eurotech and/or its affiliates and others
+    Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -24,10 +24,34 @@
 
 	<ui:style>
 		.channel-name-validation-label {
-	        padding-top: 10px;
-	        color: red;
-	        font-size: 0.35cm;
-	        font-weight: normal;
+	            padding-top: 10px;
+	            color: red;
+	            font-size: 0.35cm;
+	            font-weight: normal;
+	    }
+	    .small-spacing {
+	  	    padding-bottom: 10px;
+		}
+	    .big-spacing {
+		    padding-bottom: 20px;
+	    }
+	    	
+	    .text-button {
+		    background: none;
+		    border: none;
+		    color: blue;
+		    text-decoration: underline;
+		    cursor: pointer;
+		    float: left;
+		}
+		
+		.right-label {
+		    margin-left: auto;
+		    float: right;
+		    font-weight: bold;
+		}
+		.horizontal-panel {
+	    	width: 100%;
 	    }
 	</ui:style>
 
@@ -38,12 +62,19 @@
                         <b:FormGroup>
                             <b.html:Paragraph ui:field="downloadModalDescription" />
                             <b.html:Paragraph ui:field="formatModalHint" text="{msgs.formatDownloadHint}" />
+                            <g:Label ui:field="searchBoxSeparatorSmall" addStyleNames="{style.small-spacing}"/>
+                            <b:TextBox placeholder="{msgs.snapshotDownloadSearchBoxPlaceholder}"
+								ui:field="pidSearch" addStyleNames="services-search" />
+						    <g:Label ui:field="searchBoxSeparatorBig" addStyleNames="{style.big-spacing}"/>
                             <g:ScrollPanel ui:field="pidSelectionScrollPanel"></g:ScrollPanel>
                             <b:FormLabel addStyleNames="{style.channel-name-validation-label}" ui:field="noPidSelectedError" text="{msgs.downloadSnapshotError}" />
                         </b:FormGroup>
                     </b:FieldSet>
                 </g:FormPanel>
-                <b:Anchor ui:field="selectOrRemoveAllAnchor" />
+                 <g:HorizontalPanel addStyleNames="{style.horizontal-panel}" >
+			        <b:Anchor ui:field="selectOrRemoveAllAnchor" />
+			        <g:Label ui:field="selectedPidCounter" addStyleNames="{style.right-label}" />
+			    </g:HorizontalPanel>
             </b:ModalBody>
             <b:ModalFooter>
                 <b:Button addStyleNames="fa" type="PRIMARY" ui:field= "cancelButton" text="{msgs.cancelButton}" />

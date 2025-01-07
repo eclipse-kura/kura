@@ -26,7 +26,9 @@ Pressing the **Download** button will trigger a dialog that allows choosing the 
 
 ![](images/snapshotsDownload.png)
 
-In the snapshot download popup, a list of checkboxes is shown, representing the list of all the service configurations that can be downloaded. By default, all configurations (represented by the component PIDs) are selected. The user can remove from the downloaded snapshot the configuration they're not interested in by deselecting the related PIDs checkboxes. The snapshot can be then downloaded in XML or JSON format thorough the dedicated button.
+In the snapshot download popup, a list of checkboxes is shown, representing the list of all the service configurations that can be downloaded. By default, all configurations (represented by the component PIDs) are selected. The user can remove from the selection the configurations he's not interested in, by deselecting the related PIDs checkboxes. Only the selected component configurations will be then downloaded.
+
+The snapshots can be downloaded in XML or JSON format.
 
 A search box is available for the user to simplify the process of PID selection for the configurations available in the selected snapshot. As an example, in the screenshot below, it can be seen the filtering in progress as the user writes its filtering keyword
 

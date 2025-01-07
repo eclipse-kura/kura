@@ -218,8 +218,8 @@ public class SnapshotDownloadModal extends Composite {
         if (searchedPid == null || searchedPid.isEmpty() || searchedPid.equals("")) {
             this.pidPanel.iterator().forEachRemaining(widget -> widget.setVisible(true));
         } else {
-            this.pidPanel.iterator().forEachRemaining(widget -> widget
-                    .setVisible(isMatchingSearch(widget, searchedPid)));
+            this.pidPanel.iterator()
+                    .forEachRemaining(widget -> widget.setVisible(isMatchingSearch(widget, searchedPid)));
         }
 
         if (this.noPidSelectedError.isVisible()) {
@@ -227,10 +227,6 @@ public class SnapshotDownloadModal extends Composite {
         }
 
         updateSelectOrRemoveAllText(checkPidsCheckboxStates());
-    }
-    
-    private boolean isMatchingSearch(Widget widget, String searchedPid) {
-        return ((CheckBox) widget).getText().toLowerCase().contains(searchedPid.toLowerCase());
     }
 
     private void onCheckboxClick(ClickEvent handler) {
@@ -374,5 +370,9 @@ public class SnapshotDownloadModal extends Composite {
                 .append(this.pidPanel.getWidgetCount());
 
         this.selectedPidCounter.setText(counterTextBuilder.toString());
+    }
+
+    private boolean isMatchingSearch(Widget widget, String searchedPid) {
+        return ((CheckBox) widget).getText().toLowerCase().contains(searchedPid.toLowerCase());
     }
 }

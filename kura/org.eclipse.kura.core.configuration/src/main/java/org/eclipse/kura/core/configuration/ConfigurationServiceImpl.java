@@ -1248,9 +1248,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                     if (!isValidSelfConfiguringComponent(pid, cc)) {
                         return null;
                     }
-
                 }
-
             }
         } catch (KuraException e) {
             logger.error(GETTING_CONFIGURATION_ERROR, pid, e);
@@ -1270,41 +1268,30 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             return false;
         }
 
-        boolean result = false;
-
         OCD ocd = cc.getDefinition();
-        if (ocd != null) {
-            List<AD> ads = ocd.getAD();
+        if (isNull(ocd) || isNull(ocd.getAD())) {
+            return false;
+        }
+        
+        List<AD> ads = ocd.getAD();
 
-            if (ads != null) {
-                for (AD ad : ads) {
-                    String adId = ad.getId();
-                    String adType = ad.getType().value();
+        for (AD ad : ads) {
+            String adId = ad.getId();
+            String adType = ad.getType().value();
 
-                    if (adId == null) {
-                        logger.error(
-                                "null required id for AD for returned Configuration of SelfConfiguringComponent with pid: {}",
-                                pid);
-                        return false;
-                    }
-                    if (adType == null) {
-                        logger.error(
-                                "null required type for AD id: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
-                                adId, pid);
-                        return false;
-                    }
+            if (isNull(adId) || isNull(adType)) {
+                logger.error(
+                        "null required type for AD id: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
+                        adId, pid);
+                return false;
+            }
 
-                    Map<String, Object> props = cc.getConfigurationProperties();
-                    if (props != null) {
-                        Object value = props.get(adId);
-                        if (value != null && isMatchingADType(pid, adId, adType, value)) {
-                            result = true;
-                        }
-                    }
-                }
+            Map<String, Object> props = cc.getConfigurationProperties();
+            if (!isNull(props) && !isNull(props.get(adId)) && isMatchingADType(pid, adId, adType, props.get(adId))) {
+                return true;
             }
         }
-        return result;
+        return false;
     }
 
     private boolean isMatchingADType(String pid, String adId, String adType, Object value) {

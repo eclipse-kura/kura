@@ -257,6 +257,17 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         thenTestPropertyTypeIs(Json.value("INTEGER"));
         thenTestPropertyValueIs(Json.value(123));
     }
+    
+    @Test
+    public void testGetShortProperty() throws KuraException {
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.SHORT, (short) 123);
+
+        whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
+
+        thenRequestSucceeds();
+        thenTestPropertyTypeIs(Json.value("SHORT"));
+        thenTestPropertyValueIs(Json.value(123));
+    }
 
     @Test
     public void testGetLongProperty() throws KuraException {

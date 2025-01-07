@@ -1287,11 +1287,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             }
 
             Map<String, Object> props = cc.getConfigurationProperties();
-            if (!isNull(props) && !isNull(props.get(adId)) && isMatchingADType(pid, adId, adType, props.get(adId))) {
-                return true;
+            if (!isNull(props) && !isNull(props.get(adId)) && !isMatchingADType(pid, adId, adType, props.get(adId))) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     private boolean isMatchingADType(String pid, String adId, String adType, Object value) {

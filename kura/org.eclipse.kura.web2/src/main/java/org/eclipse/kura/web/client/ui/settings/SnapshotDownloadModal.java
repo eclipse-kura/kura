@@ -368,7 +368,7 @@ public class SnapshotDownloadModal extends Composite {
             }
         }
 
-        StringBuilder counterTextBuilder = new StringBuilder("Pids Selected ").append(selectedPids).append("/")
+        StringBuilder counterTextBuilder = new StringBuilder("PIDs Selected ").append(selectedPids).append("/")
                 .append(this.pidPanel.getWidgetCount());
 
         this.selectedPidCounter.setText(counterTextBuilder.toString());

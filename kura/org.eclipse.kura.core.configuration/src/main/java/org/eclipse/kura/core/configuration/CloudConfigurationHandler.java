@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -44,9 +44,13 @@ import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated Please switch to CONF-V2 and corresponding REST APIs
+ *             (https://eclipse-kura.github.io/kura/docs-release-5.6/references/rest-apis/rest-configuration-service-v2/)
+ */
+@Deprecated
 public class CloudConfigurationHandler implements RequestHandler {
 
     private static final String EXPECTED_ONE_RESOURCE_BUT_FOUND_NONE_MESSAGE = "Expected one resource but found none";
@@ -529,7 +533,7 @@ class UpdateConfigurationsCallable implements Callable<Void> {
         Thread.currentThread().setName(getClass().getSimpleName());
         //
         // update the configuration
-        try (final Scope scope = AuditContext.openScope(auditContext)) {
+        try (final Scope scope = AuditContext.openScope(this.auditContext)) {
             List<ComponentConfiguration> configImpls = this.xmlConfigurations != null
                     ? this.xmlConfigurations.getConfigurations()
                     : null;
@@ -579,7 +583,7 @@ class RollbackCallable implements Callable<Void> {
     public Void call() throws Exception {
         Thread.currentThread().setName(getClass().getSimpleName());
         // rollback to the specified snapshot if any
-        try (final Scope scope = AuditContext.openScope(auditContext)) {
+        try (final Scope scope = AuditContext.openScope(this.auditContext)) {
             if (this.snapshotId == null) {
                 this.configurationService.rollback();
             } else {

@@ -397,13 +397,19 @@ fi]]>
         <copy file="src/main/resources/common/kura.service"
             tofile="${project.build.directory}/${build.output.name}/kura.service"
             failonerror="false" />
+        <copy file="src/main/resources/common/kura.service.nn"
+            tofile="${project.build.directory}/${build.output.name}/kura.service.nn"
+            failonerror="false" />
         <replaceregexp
             file="${project.build.directory}/${build.output.name}/kura_install.sh"
             match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
         <replaceregexp
             file="${project.build.directory}/${build.output.name}/kura.service"
             match="INSTALL_DIR" replace="${kura.install.dir}" />
-
+        <replaceregexp
+            file="${project.build.directory}/${build.output.name}/kura.service.nn"
+            match="INSTALL_DIR" replace="${kura.install.dir}" />
+    	
         <zip destfile="${project.build.directory}/${build.output.name}.zip">
 
             <zipfileset
@@ -448,6 +454,9 @@ fi]]>
 
             <zipfileset
                 file="${project.build.directory}/${build.output.name}/kura.service"
+                prefix="${build.output.name}/${install.folder}" />
+            <zipfileset
+                file="${project.build.directory}/${build.output.name}/kura.service.nn"
                 prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/${build.name}/firewall.service"
                 prefix="${build.output.name}/${install.folder}" filemode="700" />

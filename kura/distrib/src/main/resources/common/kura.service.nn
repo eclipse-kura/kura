@@ -1,7 +1,7 @@
 [Unit]
 Description=Kura
-Wants=NetworkManager.service ModemManager.service dbus.service
-After=NetworkManager.service ModemManager.service dbus.service
+Wants=dbus.service
+After=dbus.service
 
 [Service]
 User=kurad

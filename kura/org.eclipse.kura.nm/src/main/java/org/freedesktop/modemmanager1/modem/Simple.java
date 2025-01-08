@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.freedesktop.modemmanager1.modem;
 
 import java.util.Map;
-
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.interfaces.DBusInterface;
@@ -25,10 +24,10 @@ import org.freedesktop.dbus.types.Variant;
 @DBusInterfaceName("org.freedesktop.ModemManager1.Modem.Simple")
 public interface Simple extends DBusInterface {
 
-    public DBusPath Connect(Map<String, Variant<?>> properties);
+    DBusPath Connect(Map<String, Variant<?>> properties);
 
-    public void Disconnect(DBusPath bearer);
+    void Disconnect(DBusPath bearer);
 
-    public Map<String, Variant<?>> GetStatus();
+    Map<String, Variant<?>> GetStatus();
 
 }

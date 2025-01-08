@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -28,18 +28,22 @@ import org.freedesktop.dbus.types.Variant;
 @DBusInterfaceName("org.freedesktop.ModemManager1.Bearer")
 @DBusProperty(name = "Interface", type = String.class, access = Access.READ)
 @DBusProperty(name = "Connected", type = Boolean.class, access = Access.READ)
+@DBusProperty(name = "ConnectionError", type = PropertyConnectionErrorStruct.class, access = Access.READ)
 @DBusProperty(name = "Suspended", type = Boolean.class, access = Access.READ)
+@DBusProperty(name = "Multiplexed", type = Boolean.class, access = Access.READ)
 @DBusProperty(name = "Ip4Config", type = Bearer.PropertyIp4ConfigType.class, access = Access.READ)
 @DBusProperty(name = "Ip6Config", type = Bearer.PropertyIp6ConfigType.class, access = Access.READ)
 @DBusProperty(name = "Stats", type = Bearer.PropertyStatsType.class, access = Access.READ)
+@DBusProperty(name = "ReloadStatsSupported", type = Boolean.class, access = Access.READ)
 @DBusProperty(name = "IpTimeout", type = UInt32.class, access = Access.READ)
 @DBusProperty(name = "BearerType", type = UInt32.class, access = Access.READ)
+@DBusProperty(name = "ProfileId", type = Integer.class, access = Access.READ)
 @DBusProperty(name = "Properties", type = Bearer.PropertyPropertiesType.class, access = Access.READ)
 public interface Bearer extends DBusInterface {
 
-    public void Connect();
+    void Connect();
 
-    public void Disconnect();
+    void Disconnect();
 
     public static interface PropertyIp4ConfigType extends TypeRef<Map<String, Variant>> {
 
@@ -56,4 +60,5 @@ public interface Bearer extends DBusInterface {
     public static interface PropertyPropertiesType extends TypeRef<Map<String, Variant>> {
 
     }
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,24 +19,24 @@ import org.freedesktop.dbus.types.UInt32;
 /**
  * Auto-generated class.
  */
-public class SetCurrentModesStruct extends Struct {
+public class SetCurrentModesModesStruct extends Struct {
 
     @Position(0)
     private final UInt32 member0;
     @Position(1)
     private final UInt32 member1;
 
-    public SetCurrentModesStruct(UInt32 member0, UInt32 member1) {
+    public SetCurrentModesModesStruct(UInt32 member0, UInt32 member1) {
         this.member0 = member0;
         this.member1 = member1;
     }
 
     public UInt32 getMember0() {
-        return this.member0;
+        return member0;
     }
 
     public UInt32 getMember1() {
-        return this.member1;
+        return member1;
     }
 
 }

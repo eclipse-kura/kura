@@ -10,33 +10,31 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.freedesktop.modemmanager1.modem;
+package org.freedesktop.modemmanager1;
 
-import java.util.Map;
 import org.freedesktop.dbus.Struct;
 import org.freedesktop.dbus.annotations.Position;
-import org.freedesktop.dbus.types.UInt32;
-import org.freedesktop.dbus.types.Variant;
 
 /**
  * Auto-generated class.
  */
-public class PropertyUpdateSettingsStruct extends Struct {
-    @Position(0)
-    private final UInt32 member0;
-    @Position(1)
-    private final Map<String, Variant<?>> member1;
+public class PropertyConnectionErrorStruct extends Struct {
 
-    public PropertyUpdateSettingsStruct(UInt32 member0, Map<String, Variant<?>> member1) {
+    @Position(0)
+    private final String member0;
+    @Position(1)
+    private final String member1;
+
+    public PropertyConnectionErrorStruct(String member0, String member1) {
         this.member0 = member0;
         this.member1 = member1;
     }
 
-    public UInt32 getMember0() {
+    public String getMember0() {
         return member0;
     }
 
-    public Map<String, Variant<?>> getMember1() {
+    public String getMember1() {
         return member1;
     }
 

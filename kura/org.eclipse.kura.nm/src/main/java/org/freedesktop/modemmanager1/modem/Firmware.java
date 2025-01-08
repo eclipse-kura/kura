@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,10 +12,13 @@
  *******************************************************************************/
 package org.freedesktop.modemmanager1.modem;
 
+import java.util.List;
+import java.util.Map;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
 import org.freedesktop.dbus.interfaces.DBusInterface;
+import org.freedesktop.dbus.types.Variant;
 
 /**
  * Auto-generated class.
@@ -24,8 +27,8 @@ import org.freedesktop.dbus.interfaces.DBusInterface;
 @DBusProperty(name = "UpdateSettings", type = PropertyUpdateSettingsStruct.class, access = Access.READ)
 public interface Firmware extends DBusInterface {
 
-    public ListTuple List();
+    ListTuple List();
 
-    public void Select(String uniqueid);
+    void Select(String uniqueid);
 
 }

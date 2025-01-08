@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -33,50 +33,50 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "EmergencyOnly", type = Boolean.class, access = Access.READ)
 public interface Voice extends DBusInterface {
 
-    public List<DBusPath> ListCalls();
+    List<DBusPath> ListCalls();
 
-    public void DeleteCall(DBusPath path);
+    void DeleteCall(DBusPath path);
 
-    public DBusPath CreateCall(Map<String, Variant<?>> properties);
+    DBusPath CreateCall(Map<String, Variant<?>> properties);
 
-    public void HoldAndAccept();
+    void HoldAndAccept();
 
-    public void HangupAndAccept();
+    void HangupAndAccept();
 
-    public void HangupAll();
+    void HangupAll();
 
-    public void Transfer();
+    void Transfer();
 
-    public void CallWaitingSetup(boolean enable);
+    void CallWaitingSetup(boolean enable);
 
-    public boolean CallWaitingQuery();
+    boolean CallWaitingQuery();
 
     public static class CallAdded extends DBusSignal {
 
-        private final DBusPath dbusPath;
+        private final DBusPath path;
 
-        public CallAdded(String _path, DBusPath _dbusPath) throws DBusException {
-            super(_path, _dbusPath);
-            this.dbusPath = _dbusPath;
+        public CallAdded(String _Spath, DBusPath _path) throws DBusException {
+            super(_Spath, _path);
+            this.path = _path;
         }
 
         public DBusPath getDbusPath() {
-            return this.dbusPath;
+            return path;
         }
 
     }
 
     public static class CallDeleted extends DBusSignal {
 
-        private final DBusPath dbusPath;
+        private final DBusPath path;
 
-        public CallDeleted(String _path, DBusPath _dbusPath) throws DBusException {
-            super(_path, _dbusPath);
-            this.dbusPath = _dbusPath;
+        public CallDeleted(String _Spath, DBusPath _path) throws DBusException {
+            super(_Spath, _path);
+            this.path = _path;
         }
 
         public DBusPath getDbusPath() {
-            return this.dbusPath;
+            return path;
         }
 
     }
@@ -84,4 +84,5 @@ public interface Voice extends DBusInterface {
     public static interface PropertyCallsType extends TypeRef<List<DBusPath>> {
 
     }
+
 }

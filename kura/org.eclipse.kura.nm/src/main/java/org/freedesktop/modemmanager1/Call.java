@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -37,19 +37,19 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "AudioFormat", type = Call.PropertyAudioFormatType.class, access = Access.READ)
 public interface Call extends DBusInterface {
 
-    public void Start();
+    void Start();
 
-    public void Accept();
+    void Accept();
 
-    public void Deflect(String number);
+    void Deflect(String number);
 
-    public void JoinMultiparty();
+    void JoinMultiparty();
 
-    public void LeaveMultiparty();
+    void LeaveMultiparty();
 
-    public void Hangup();
+    void Hangup();
 
-    public void SendDtmf(String dtmf);
+    void SendDtmf(String dtmf);
 
     public static class DtmfReceived extends DBusSignal {
 
@@ -61,7 +61,7 @@ public interface Call extends DBusInterface {
         }
 
         public String getDtmf() {
-            return this.dtmf;
+            return dtmf;
         }
 
     }
@@ -72,23 +72,23 @@ public interface Call extends DBusInterface {
         private final int newparam;
         private final UInt32 reason;
 
-        public StateChanged(String _path, int _old, int _new, UInt32 _reason) throws DBusException {
-            super(_path, _old, _new, _reason);
+        public StateChanged(String _path, int _old, int _newparam, UInt32 _reason) throws DBusException {
+            super(_path, _old, _newparam, _reason);
             this.old = _old;
-            this.newparam = _new;
+            this.newparam = _newparam;
             this.reason = _reason;
         }
 
         public int getOld() {
-            return this.old;
+            return old;
         }
 
         public int getNewparam() {
-            return this.newparam;
+            return newparam;
         }
 
         public UInt32 getReason() {
-            return this.reason;
+            return reason;
         }
 
     }
@@ -96,4 +96,5 @@ public interface Call extends DBusInterface {
     public static interface PropertyAudioFormatType extends TypeRef<Map<String, Variant>> {
 
     }
+
 }

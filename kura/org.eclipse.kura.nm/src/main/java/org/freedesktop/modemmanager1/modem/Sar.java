@@ -10,26 +10,24 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.freedesktop;
+package org.freedesktop.modemmanager1.modem;
 
-import java.util.Map;
+import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
 import org.freedesktop.dbus.interfaces.DBusInterface;
-import org.freedesktop.dbus.types.Variant;
+import org.freedesktop.dbus.types.UInt32;
 
 /**
  * Auto-generated class.
  */
-@DBusProperty(name = "Version", type = String.class, access = Access.READ)
-public interface ModemManager1 extends DBusInterface {
+@DBusInterfaceName("org.freedesktop.ModemManager1.Modem.Sar")
+@DBusProperty(name = "State", type = Boolean.class, access = Access.READ)
+@DBusProperty(name = "PowerLevel", type = UInt32.class, access = Access.READ)
+public interface Sar extends DBusInterface {
 
-    void ScanDevices();
+    void Enable(boolean enable);
 
-    void SetLogging(String level);
-
-    void ReportKernelEvent(Map<String, Variant<?>> properties);
-
-    void InhibitDevice(String uid, boolean inhibit);
+    void SetPowerLevel(UInt32 level);
 
 }

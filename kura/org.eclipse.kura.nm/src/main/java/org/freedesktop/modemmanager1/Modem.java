@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -31,11 +31,14 @@ import org.freedesktop.dbus.types.Variant;
  */
 @DBusInterfaceName("org.freedesktop.ModemManager1.Modem")
 @DBusProperty(name = "Sim", type = DBusPath.class, access = Access.READ)
+@DBusProperty(name = "SimSlots", type = Modem.PropertySimSlotsType.class, access = Access.READ)
+@DBusProperty(name = "PrimarySimSlot", type = UInt32.class, access = Access.READ)
 @DBusProperty(name = "Bearers", type = Modem.PropertyBearersType.class, access = Access.READ)
 @DBusProperty(name = "SupportedCapabilities", type = Modem.PropertySupportedCapabilitiesType.class, access = Access.READ)
 @DBusProperty(name = "CurrentCapabilities", type = UInt32.class, access = Access.READ)
 @DBusProperty(name = "MaxBearers", type = UInt32.class, access = Access.READ)
 @DBusProperty(name = "MaxActiveBearers", type = UInt32.class, access = Access.READ)
+@DBusProperty(name = "MaxActiveMultiplexedBearers", type = UInt32.class, access = Access.READ)
 @DBusProperty(name = "Manufacturer", type = String.class, access = Access.READ)
 @DBusProperty(name = "Model", type = String.class, access = Access.READ)
 @DBusProperty(name = "Revision", type = String.class, access = Access.READ)
@@ -64,27 +67,31 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "SupportedIpFamilies", type = UInt32.class, access = Access.READ)
 public interface Modem extends DBusInterface {
 
-    public void Enable(boolean enable);
+    void Enable(boolean enable);
 
-    public List<DBusPath> ListBearers();
+    List<DBusPath> ListBearers();
 
-    public DBusPath CreateBearer(Map<String, Variant<?>> properties);
+    DBusPath CreateBearer(Map<String, Variant<?>> properties);
 
-    public void DeleteBearer(DBusPath bearer);
+    void DeleteBearer(DBusPath bearer);
 
-    public void Reset();
+    void Reset();
 
-    public void FactoryReset(String code);
+    void FactoryReset(String code);
 
-    public void SetPowerState(UInt32 state);
+    void SetPowerState(UInt32 state);
 
-    public void SetCurrentCapabilities(UInt32 capabilities);
+    void SetCurrentCapabilities(UInt32 capabilities);
 
-    public void SetCurrentModes(SetCurrentModesStruct modes);
+    void SetCurrentModes(SetCurrentModesModesStruct modes);
 
-    public void SetCurrentBands(List<UInt32> bands);
+    void SetCurrentBands(List<UInt32> bands);
 
-    public String Command(String cmd, UInt32 timeout);
+    void SetPrimarySimSlot(UInt32 simSlot);
+
+    List<Map<String, Variant<?>>> GetCellInfo();
+
+    String Command(String cmd, UInt32 timeout);
 
     public static class StateChanged extends DBusSignal {
 
@@ -92,24 +99,28 @@ public interface Modem extends DBusInterface {
         private final int newparam;
         private final UInt32 reason;
 
-        public StateChanged(String _path, int _old, int _new, UInt32 _reason) throws DBusException {
-            super(_path, _old, _new, _reason);
+        public StateChanged(String _path, int _old, int _newparam, UInt32 _reason) throws DBusException {
+            super(_path, _old, _newparam, _reason);
             this.old = _old;
-            this.newparam = _new;
+            this.newparam = _newparam;
             this.reason = _reason;
         }
 
         public int getOld() {
-            return this.old;
+            return old;
         }
 
         public int getNewparam() {
-            return this.newparam;
+            return newparam;
         }
 
         public UInt32 getReason() {
-            return this.reason;
+            return reason;
         }
+
+    }
+
+    public static interface PropertySimSlotsType extends TypeRef<List<DBusPath>> {
 
     }
 
@@ -148,4 +159,5 @@ public interface Modem extends DBusInterface {
     public static interface PropertyCurrentBandsType extends TypeRef<List<UInt32>> {
 
     }
+
 }

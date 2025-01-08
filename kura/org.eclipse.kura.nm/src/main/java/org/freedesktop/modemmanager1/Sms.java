@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.freedesktop.modemmanager1;
 
 import java.util.List;
-
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -43,11 +42,12 @@ import org.freedesktop.dbus.types.UInt32;
 @DBusProperty(name = "Storage", type = UInt32.class, access = Access.READ)
 public interface Sms extends DBusInterface {
 
-    public void Send();
+    void Send();
 
-    public void Store(UInt32 storage);
+    void Store(UInt32 storage);
 
     public static interface PropertyDataType extends TypeRef<List<Byte>> {
 
     }
+
 }

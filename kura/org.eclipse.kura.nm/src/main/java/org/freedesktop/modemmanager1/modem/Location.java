@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,6 @@ package org.freedesktop.modemmanager1.modem;
 
 import java.util.List;
 import java.util.Map;
-
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -37,15 +36,15 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "GpsRefreshRate", type = UInt32.class, access = Access.READ)
 public interface Location extends DBusInterface {
 
-    public void Setup(UInt32 sources, boolean signalLocation);
+    void Setup(UInt32 sources, boolean signalLocation);
 
-    public Map<UInt32, Variant<?>> GetLocation();
+    Map<UInt32, Variant<?>> GetLocation();
 
-    public void SetSuplServer(String supl);
+    void SetSuplServer(String supl);
 
-    public void InjectAssistanceData(List<Byte> data);
+    void InjectAssistanceData(List<Byte> data);
 
-    public void SetGpsRefreshRate(UInt32 rate);
+    void SetGpsRefreshRate(UInt32 rate);
 
     public static interface PropertyLocationType extends TypeRef<Map<UInt32, Variant>> {
 
@@ -54,4 +53,5 @@ public interface Location extends DBusInterface {
     public static interface PropertyAssistanceDataServersType extends TypeRef<List<String>> {
 
     }
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -35,44 +35,44 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "DefaultStorage", type = UInt32.class, access = Access.READ)
 public interface Messaging extends DBusInterface {
 
-    public List<DBusPath> List();
+    List<DBusPath> List();
 
-    public void Delete(DBusPath path);
+    void Delete(DBusPath path);
 
-    public DBusPath Create(Map<String, Variant<?>> properties);
+    DBusPath Create(Map<String, Variant<?>> properties);
 
     public static class Added extends DBusSignal {
 
-        private final DBusPath dbusPath;
+        private final DBusPath path;
         private final boolean received;
 
-        public Added(String _path, DBusPath _dbusPath, boolean _received) throws DBusException {
-            super(_path, _dbusPath, _received);
-            this.dbusPath = _dbusPath;
+        public Added(String _Spath, DBusPath _path, boolean _received) throws DBusException {
+            super(_Spath, _path, _received);
+            this.path = _path;
             this.received = _received;
         }
 
         public DBusPath getDbusPath() {
-            return this.dbusPath;
+            return path;
         }
 
         public boolean getReceived() {
-            return this.received;
+            return received;
         }
 
     }
 
     public static class Deleted extends DBusSignal {
 
-        private final DBusPath dbusPath;
+        private final DBusPath path;
 
-        public Deleted(String _path, DBusPath _dbusPath) throws DBusException {
-            super(_path, _dbusPath);
-            this.dbusPath = _dbusPath;
+        public Deleted(String _Spath, DBusPath _path) throws DBusException {
+            super(_Spath, _path);
+            this.path = _path;
         }
 
         public DBusPath getDbusPath() {
-            return this.dbusPath;
+            return path;
         }
 
     }
@@ -84,4 +84,5 @@ public interface Messaging extends DBusInterface {
     public static interface PropertySupportedStoragesType extends TypeRef<List<UInt32>> {
 
     }
+
 }

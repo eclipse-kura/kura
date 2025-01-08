@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,10 +27,10 @@ import org.freedesktop.dbus.types.UInt32;
 @DBusProperty(name = "NetworkRequest", type = String.class, access = Access.READ)
 public interface Ussd extends DBusInterface {
 
-    public String Initiate(String command);
+    String Initiate(String command);
 
-    public String Respond(String response);
+    String Respond(String response);
 
-    public void Cancel();
+    void Cancel();
 
 }

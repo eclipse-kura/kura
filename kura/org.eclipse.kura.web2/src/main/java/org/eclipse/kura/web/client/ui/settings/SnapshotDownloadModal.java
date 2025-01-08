@@ -49,6 +49,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class SnapshotDownloadModal extends Composite {
 
+    private static final String XML_DOWNLOAD_FORMAT = "XML";
+    private static final String JSON_DOWNLOAD_FORMAT = "JSON";
     private static SnapshotDownloadModalUiBinder uiBinder = GWT.create(SnapshotDownloadModalUiBinder.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private static final Messages MSGS = GWT.create(Messages.class);
@@ -137,12 +139,12 @@ public class SnapshotDownloadModal extends Composite {
 
         this.downloadJson.addClickHandler(e -> {
             this.downloadModal.hide();
-            this.wiregraphDownloadConsumer.accept("JSON");
+            this.wiregraphDownloadConsumer.accept(JSON_DOWNLOAD_FORMAT);
         });
 
         this.downloadXml.addClickHandler(e -> {
             this.downloadModal.hide();
-            this.wiregraphDownloadConsumer.accept("XML");
+            this.wiregraphDownloadConsumer.accept(XML_DOWNLOAD_FORMAT);
         });
     }
 
@@ -215,10 +217,10 @@ public class SnapshotDownloadModal extends Composite {
                 .addSubmitCompleteHandler(event -> this.downloadCallback.onSuccess(event));
 
         this.jsonDownloadHandler = this.downloadJson
-                .addClickHandler(e -> onSnapshotDownloadButtonClick(snapshotId, "JSON"));
+                .addClickHandler(e -> onSnapshotDownloadButtonClick(snapshotId, JSON_DOWNLOAD_FORMAT));
 
         this.xmlDownloadHandler = this.downloadXml
-                .addClickHandler(e -> onSnapshotDownloadButtonClick(snapshotId, "XML"));
+                .addClickHandler(e -> onSnapshotDownloadButtonClick(snapshotId, XML_DOWNLOAD_FORMAT));
     }
 
     private void initHiddenFields() {
@@ -346,7 +348,7 @@ public class SnapshotDownloadModal extends Composite {
      */
 
     private String getSelectedPids() {
-        StringBuilder selectedPidsBuilder = new StringBuilder("SelectedPids: ");
+        StringBuilder selectedPidsBuilder = new StringBuilder();
         this.pidPanel.iterator().forEachRemaining(pid -> {
             CheckBox checkBox = (CheckBox) pid;
             if (checkBox.getValue().booleanValue()) {
@@ -360,7 +362,7 @@ public class SnapshotDownloadModal extends Composite {
     private void downloadEntireSnapshot(Long snapshotId, String format) {
         RequestQueue.submit(context -> this.gwtXSRFService.generateSecurityToken(context.callback(token -> {
             xsrfTokenField.setValue(token.getToken());
-            pidsListField.setValue("EntireSnapshot");
+            pidsListField.setValue("");
             snapshotDownloadFormatField.setValue(format);
             snapshotIdField.setValue(snapshotId.toString());
             snapshotDownloadForm.submit();

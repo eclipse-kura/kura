@@ -101,11 +101,9 @@ public class DeviceSnapshotsServlet extends AuditServlet {
             Long snapshotId = Objects.requireNonNull(Long.parseLong(request.getParameter("snapshotId")));
             String pidList = Objects.requireNonNull(request.getParameter("pidsList"));
 
-            if (!pidList.isEmpty() && pidList.equals("EntireSnapshot")) {
+            if (pidList.isEmpty()) {
                 parseEntireSnapshot(response, snapshotId, downloadFormat);
-            }
-
-            if (!pidList.isEmpty() && pidList.startsWith("SelectedPids: ")) {
+            } else {
                 parsePartialSnapshot(response, snapshotId, downloadFormat, pidList);
             }
 

@@ -175,8 +175,8 @@ public class LifeCyclePayloadBuilder {
         if (positionService.isPresent()) {
             Position position = positionService.get().getPosition();
             if (position != null) {
-                latitude = (position.getLatitude().getValue() / Math.PI) * 180;
-                longitude = (position.getLongitude().getValue() / Math.PI) * 180;
+                latitude = Math.toDegrees(position.getLatitude().getValue());
+                longitude = Math.toDegrees(position.getLongitude().getValue());
                 altitude = position.getAltitude().getValue();
             } else {
                 logger.warn("Unresolved PositionService reference.");

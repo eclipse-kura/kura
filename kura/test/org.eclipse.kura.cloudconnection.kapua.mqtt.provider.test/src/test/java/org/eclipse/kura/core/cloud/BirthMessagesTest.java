@@ -361,8 +361,7 @@ public class BirthMessagesTest {
     }
 
     private void thenBirthIsPublishedAfter(long delayMillis, String expectedTopic) throws KuraException {
-        verify(this.dataService, after(delayMillis).never()).publish(eq(expectedTopic), any(), eq(0), eq(false),
-                eq(0));
+        verify(this.dataService, after(delayMillis).never()).publish(eq(expectedTopic), any(), eq(0), eq(false), eq(0));
         verify(this.dataService, after(delayMillis + SLACK_DELAY).times(1)).publish(eq(expectedTopic), any(), eq(1),
                 eq(false), eq(0));
     }

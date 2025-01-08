@@ -394,8 +394,8 @@ public class CloudServiceTest {
 
     }
 
-    private JsonObject publishBirthAndGetMetrics() throws InterruptedException, ExecutionException, TimeoutException,
-            KuraException, InvalidSyntaxException {
+    private JsonObject publishBirthAndGetMetrics()
+            throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
         final CompletableFuture<Void> disconnected = underTestInspector.disconnected();
 
         cloudServiceImpl.disconnect();

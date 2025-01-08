@@ -54,7 +54,6 @@ import org.eclipse.kura.system.SystemService;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.logging.MockServerLogger;
@@ -66,7 +65,6 @@ import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
-@Ignore
 public class DeploymentAgentTest {
 
     private static final String VERSION_1_0_0 = "1.0.0";

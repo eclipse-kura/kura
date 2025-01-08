@@ -355,7 +355,7 @@ public class SnapshotDownloadModal extends Composite {
                 selectedPidsBuilder.append(checkBox.getText() + ",");
             }
         });
-
+        selectedPidsBuilder.replace(selectedPidsBuilder.length() - 1, selectedPidsBuilder.length(), "");
         return selectedPidsBuilder.toString();
     }
 

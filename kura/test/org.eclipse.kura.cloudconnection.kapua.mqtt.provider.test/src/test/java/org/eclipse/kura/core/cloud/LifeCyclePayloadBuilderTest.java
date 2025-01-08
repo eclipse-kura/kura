@@ -136,15 +136,15 @@ public class LifeCyclePayloadBuilderTest {
     }
 
     private void thenDeviceProfileHasPosition() {
-        assertEquals(new Double(1.0), kuraDeviceProfile.getLatitude());
-        assertEquals(new Double(2.0), kuraDeviceProfile.getLongitude());
-        assertEquals(new Double(3.0), kuraDeviceProfile.getAltitude());
+        assertEquals(Double.valueOf(1.0), kuraDeviceProfile.getLatitude());
+        assertEquals(Double.valueOf(2.0), kuraDeviceProfile.getLongitude());
+        assertEquals(Double.valueOf(3.0), kuraDeviceProfile.getAltitude());
     }
 
     private void thenDeviceProfileHasNotPosition() {
-        assertEquals(new Double(0.0), kuraDeviceProfile.getLatitude());
-        assertEquals(new Double(0.0), kuraDeviceProfile.getLongitude());
-        assertEquals(new Double(0.0), kuraDeviceProfile.getAltitude());
+        assertEquals(Double.valueOf(0.0), kuraDeviceProfile.getLatitude());
+        assertEquals(Double.valueOf(0.0), kuraDeviceProfile.getLongitude());
+        assertEquals(Double.valueOf(0.0), kuraDeviceProfile.getAltitude());
     }
 
     @Before

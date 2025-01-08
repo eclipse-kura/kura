@@ -346,7 +346,7 @@ public class CloudConnectionManagerImpl
         this.systemService = null;
         this.systemAdminService = null;
         this.networkService = null;
-        this.positionService = null;
+        this.positionService = Optional.empty();
         this.eventAdmin = null;
 
         this.cloudServiceRegistration.unregister();

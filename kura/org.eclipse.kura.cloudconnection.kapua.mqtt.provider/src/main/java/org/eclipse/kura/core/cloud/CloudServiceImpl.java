@@ -138,7 +138,7 @@ public class CloudServiceImpl
     private SystemService systemService;
     private SystemAdminService systemAdminService;
     private NetworkService networkService;
-    private PositionService positionService;
+    private Optional<PositionService> positionService = Optional.empty();
     private EventAdmin eventAdmin;
     private CertificatesService certificatesService;
     private Unmarshaller jsonUnmarshaller;
@@ -252,16 +252,16 @@ public class CloudServiceImpl
     }
 
     public void setPositionService(PositionService positionService) {
-        this.positionService = positionService;
+        this.positionService = Optional.of(positionService);
     }
 
     public void unsetPositionService(PositionService positionService) {
-        if (this.positionService != null && this.positionService.equals(positionService)) {
-            this.positionService = null;
+        if (this.positionService.isPresent() && this.positionService.get().equals(positionService)) {
+            this.positionService = Optional.empty();
         }
     }
 
-    public PositionService getPositionService() {
+    public Optional<PositionService> getPositionService() {
         return this.positionService;
     }
 

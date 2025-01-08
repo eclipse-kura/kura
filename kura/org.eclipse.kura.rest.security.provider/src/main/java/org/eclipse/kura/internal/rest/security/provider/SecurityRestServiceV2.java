@@ -25,8 +25,6 @@ import java.nio.charset.StandardCharsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +34,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
-@JakartarsResource
-@JakartarsName("securityRestServiceV2")
 @Path("security/v2")
 public class SecurityRestServiceV2 extends AbstractRestSecurityService {
 

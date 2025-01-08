@@ -44,5 +44,7 @@
     <property name="service.pid"
               type="String"
               value="org.eclipse.kura.rest.system.SystemRestService"/>
+              
+    <property name="osgi.jakartars.resource" type="String" value="true"/>
 
 </scr:component>

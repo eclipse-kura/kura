@@ -30,8 +30,6 @@ import org.eclipse.kura.type.TypedValue;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 
@@ -52,8 +50,6 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@JakartarsResource
-@JakartarsName("assetRestService")
 @Path("/assets")
 public class AssetRestService {
 

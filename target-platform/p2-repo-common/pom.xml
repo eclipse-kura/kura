@@ -598,6 +598,27 @@
                                     <artifactId>minimal-json</artifactId>
                                     <version>${com.eclipsesource.minimal-json.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.servicemix.specs</groupId>
+                                    <artifactId>org.apache.servicemix.specs.jaxb-api-2.3</artifactId>
+                                    <version>${org.apache.servicemix.specs.jaxb-api-2.3.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.servicemix.specs</groupId>
+                                    <artifactId>org.apache.servicemix.specs.stax-api-1.0</artifactId>
+                                    <version>${org.apache.servicemix.specs.stax-api-1.0.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.servicemix.specs</groupId>
+                                    <artifactId>org.apache.servicemix.specs.activation-api-1.1</artifactId>
+                                    <version>${org.apache.servicemix.specs.activation-api-1.1.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.sun.xml.bind</groupId>
+                                    <artifactId>jaxb-osgi</artifactId>
+                                    <version>${jaxb-osgi.javax.version}</version>
+                                    <destFileName>jaxb-osgi.javax.jar</destFileName>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -713,6 +734,10 @@
                                 <move file="target/source/plugins/quartz.jar" tofile="target/source/plugins/org.quartz-scheduler.quartz_${quartz.version}.jar"/>
                                 <move file="target/source/plugins/sqlite-jdbc.jar" tofile="target/source/plugins/org.xerial.sqlite-jdbc_${org.xerial.sqlite-jdbc.version}.jar"/>
                                 <move file="target/source/plugins/minimal-json.jar" tofile="target/source/plugins/minimal-json_${com.eclipsesource.minimal-json.version}.jar"/>
+                                <move file="target/source/plugins/org.apache.servicemix.specs.jaxb-api-2.3.jar" tofile="target/source/plugins/org.apache.servicemix.specs.jaxb-api-2.3_${org.apache.servicemix.specs.jaxb-api-2.3.version}.jar" />
+                                <move file="target/source/plugins/org.apache.servicemix.specs.stax-api-1.0.jar" tofile="target/source/plugins/org.apache.servicemix.specs.stax-api-1.0_${org.apache.servicemix.specs.stax-api-1.0.version}.jar" />
+                                <move file="target/source/plugins/org.apache.servicemix.specs.activation-api-1.1.jar" tofile="target/source/plugins/org.apache.servicemix.specs.activation-api-1.1_${org.apache.servicemix.specs.activation-api-1.1.version}.jar" />
+                                <move file="target/source/plugins/jaxb-osgi.javax.jar" tofile="target/source/plugins/jaxb-osgi_${jaxb-osgi.javax.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>

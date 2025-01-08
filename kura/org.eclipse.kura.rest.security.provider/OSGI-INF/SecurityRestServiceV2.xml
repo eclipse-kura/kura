@@ -46,5 +46,7 @@
     <property name="service.pid"
               type="String"
               value="org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2"/>
+              
+    <property name="osgi.jakartars.resource" type="String" value="true"/>
 
 </scr:component>

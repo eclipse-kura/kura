@@ -94,10 +94,10 @@ public final class RestServiceUtils {
     }
 
     public static Dictionary<String, Object> resourceProperties() {
-        return singletonDictionary("osgi.jaxrs.resource", true);
+        return singletonDictionary("osgi.jakartars.resource", true);
     }
 
     public static Dictionary<String, Object> extensionProperties() {
-        return singletonDictionary("osgi.jaxrs.extension", true);
+        return singletonDictionary("osgi.jakartars.extension", true);
     }
 }

@@ -750,45 +750,158 @@ fi]]>
             <param name="start" value=""/>
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="jersey-media-json-jackson_${org.glassfish.jersey.version}.jar" />
-            <param name="start.level" value="2" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
             <param name="bundle.file" value="jersey-media-multipart_${org.glassfish.jersey.version}.jar" />
             <param name="start.level" value="2" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="jackson-jakarta-rs-json-provider_${com.fasterxml.jackson.version}.jar" />
+            <param name="bundle.file" value="org.apache.aries.spifly.dynamic.bundle_${org.apache.aries.spifly.dynamic.bundle.version}.jar" />
             <param name="start.level" value="2" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="jackson-jakarta-rs-base_${com.fasterxml.jackson.version}.jar" />
+            <param name="bundle.file" value="asm_${org.ow2.asm.version}.jar" />
             <param name="start.level" value="2" />
-            <param name="start" value="s" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="jackson-annotations_${com.fasterxml.jackson.version}.jar" />
+            <param name="bundle.file" value="asm-commons_${org.ow2.asm.version}.jar" />
             <param name="start.level" value="2" />
-            <param name="start" value="s" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="jackson-module-jakarta-xmlbind-annotations_${com.fasterxml.jackson.version}.jar" />
+            <param name="bundle.file" value="asm-tree_${org.ow2.asm.version}.jar" />
             <param name="start.level" value="2" />
-            <param name="start" value="s" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="jackson-core_${com.fasterxml.jackson.version}.jar" />
+            <param name="bundle.file" value="asm-util_${org.ow2.asm.version}.jar" />
             <param name="start.level" value="2" />
-            <param name="start" value="s" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="jackson-databind_${com.fasterxml.jackson.version}.jar" />
+            <param name="bundle.file" value="asm-analysis_${org.ow2.asm.version}.jar" />
             <param name="start.level" value="2" />
-            <param name="start" value="s" />
+            <param name="start" value="" />
         </antcall>
+        <!--JAXB dependenices-->
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.apache.servicemix.specs.jaxb-api-2.3_${org.apache.servicemix.specs.jaxb-api-2.3.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.apache.servicemix.specs.stax-api-1.0_${org.apache.servicemix.specs.stax-api-1.0.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="org.apache.servicemix.specs.activation-api-1.1_${org.apache.servicemix.specs.activation-api-1.1.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="jaxb-osgi_${jaxb-osgi.javax.version}.jar"/>
+            <param name="start.level" value="2"/>
+            <param name="start" value="s"/>
+        </antcall>
+        <!--Jersey dependencies-->
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="hk2-api_${hk2.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="aopalliance-repackaged_${hk2.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="hk2-locator_${hk2.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="hk2-utils_${hk2.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="jersey-hk2_${jersey.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="jersey-container-servlet_${jersey.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="jersey-container-servlet-core_${jersey.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="jersey-client_${jersey.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="jersey-common_${jersey.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="jersey-server_${jersey.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="jersey-entity-filtering_${jersey.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="jersey-media-jaxb_${jersey.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="jersey-media-sse_${jersey.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="jersey-media-multipart_${jersey.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="jakarta.inject-api_${jakarta.inject-api.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="jakarta.validation-api_${jakarta.validation-api.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="jakarta.xml.bind-api_${jakarta.xml.bind-api.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="javassist_${javassist.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.file" value="mimepull_${mimepull.version}.jar"/>
+            <param name="start.level" value="3"/>
+            <param name="start" value=""/>
+        </antcall>
+        <!--END Jersey dependencies-->
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.eclipse.equinox.cm_${org.eclipse.equinox.cm.version}.jar" />
             <param name="start.level" value="1" />
@@ -860,19 +973,9 @@ fi]]>
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.osgitech.rest.config_${org.eclipse.osgi-technology.rest.version}.jar" />
-            <param name="start.level" value="5" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
             <param name="bundle.file" value="org.eclipse.osgitech.rest.sse_${org.eclipse.osgi-technology.rest.version}.jar" />
             <param name="start.level" value="5" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="org.eclipse.osgitech.rest.jetty_${org.eclipse.osgi-technology.rest.version}.jar" />
-            <param name="start.level" value="5" />
-            <param name="start" value="s" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.file" value="org.eclipse.osgitech.rest.servlet.whiteboard_${org.eclipse.osgi-technology.rest.version}.jar" />

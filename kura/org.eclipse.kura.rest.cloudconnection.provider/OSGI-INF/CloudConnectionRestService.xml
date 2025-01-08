@@ -52,5 +52,6 @@
     <property name="service.pid"
               type="String"
               value="org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService" />
+    <property name="osgi.jakartars.resource" type="String" value="true"/>
 
 </scr:component>

@@ -19,8 +19,6 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.tamper.detection.model.TamperDetectionServiceInfo;
 import org.eclipse.kura.core.tamper.detection.model.TamperStatusInfo;
 import org.eclipse.kura.core.tamper.detection.util.TamperDetectionRemoteService;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 
@@ -33,8 +31,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 
-@JakartarsResource
-@JakartarsName("tamperDetectionRestService")
 @Path("/tamper/v1")
 public class TamperDetectionRestService extends TamperDetectionRemoteService {
 

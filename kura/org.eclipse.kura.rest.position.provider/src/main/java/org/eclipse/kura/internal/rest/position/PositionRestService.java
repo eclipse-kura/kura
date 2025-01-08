@@ -22,8 +22,6 @@ import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.eclipse.kura.rest.position.api.DateTimeDTO;
 import org.eclipse.kura.rest.position.api.IsLockedDTO;
 import org.eclipse.kura.rest.position.api.PositionDTO;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
@@ -35,8 +33,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-@JakartarsResource
-@JakartarsName("positionRestService")
 @Path("/position/v1")
 public class PositionRestService {
 

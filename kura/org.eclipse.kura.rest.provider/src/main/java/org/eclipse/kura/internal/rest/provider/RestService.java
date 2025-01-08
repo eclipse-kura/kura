@@ -17,16 +17,16 @@ import static org.eclipse.kura.internal.rest.auth.SessionRestServiceConstants.BA
 import static org.eclipse.kura.internal.rest.auth.SessionRestServiceConstants.CHANGE_PASSWORD_PATH;
 import static org.eclipse.kura.internal.rest.auth.SessionRestServiceConstants.XSRF_TOKEN_PATH;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.crypto.CryptoService;
@@ -39,17 +39,18 @@ import org.eclipse.kura.rest.auth.AuthenticationProvider;
 import org.eclipse.kura.util.useradmin.UserAdminHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseFilter;
-import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.ext.MessageBodyReader;
+import jakarta.ws.rs.ext.MessageBodyWriter;
 import jakarta.ws.rs.ext.Provider;
 
 @Provider
@@ -65,7 +66,6 @@ public class RestService implements ConfigurableComponent {
     private RestServiceOptions options;
 
     private final List<ServiceRegistration<?>> registeredServices = new ArrayList<>();
-    private final Set<AuthenticationProviderHolder> authenticationProviders = new TreeSet<>();
 
     private AuthenticationProvider basicAuthProvider;
     private AuthenticationProvider certificateAuthProvider;
@@ -76,13 +76,9 @@ public class RestService implements ConfigurableComponent {
     private final IncomingPortCheckFilter incomingPortCheckFilter = new IncomingPortCheckFilter();
     private final AuthenticationFilter authenticationFilter = new AuthenticationFilter();
 
-    @Context
-    private HttpServletRequest request;
-    @Context
-    private HttpServletResponse response;
-
     public void setUserAdmin(final UserAdmin userAdmin) {
         this.userAdmin = userAdmin;
+        this.authenticationFilter.setUserAdmin(userAdmin);
     }
 
     public void setCryptoService(CryptoService cryptoService) {
@@ -94,20 +90,11 @@ public class RestService implements ConfigurableComponent {
     }
 
     public void bindAuthenticationProvider(final AuthenticationProvider provider) {
-        synchronized (this.authenticationProviders) {
-            final AuthenticationProviderHolder holder = new AuthenticationProviderHolder(provider);
-            this.authenticationProviders.add(holder);
-            holder.onEnabled();
-        }
+        this.authenticationFilter.registerAuthenticationProvider(provider);
     }
 
     public void unbindAuthenticationProvider(final AuthenticationProvider provider) {
-        synchronized (this.authenticationProviders) {
-            final AuthenticationProviderHolder holder = new AuthenticationProviderHolder(provider);
-            if (this.authenticationProviders.remove(holder)) {
-                holder.onDisabled();
-            }
-        }
+        this.authenticationFilter.unregisterAuthenticationProvider(provider);
     }
 
     public void activate(final Map<String, Object> properties) {
@@ -115,8 +102,6 @@ public class RestService implements ConfigurableComponent {
         logger.info("activating...");
 
         final BundleContext bundleContext = FrameworkUtil.getBundle(RestService.class).getBundleContext();
-
-        configureDefaultWhiteboard();
 
         userAdminHelper = new UserAdminHelper(this.userAdmin, this.cryptoService);
         final RestSessionHelper restSessionHelper = new RestSessionHelper(userAdminHelper);
@@ -130,6 +115,9 @@ public class RestService implements ConfigurableComponent {
                 serviceProperties));
         registeredServices.add(
                 bundleContext.registerService(ContainerResponseFilter.class, new AuditFilter(), serviceProperties));
+        registeredServices.add(bundleContext.registerService(
+                new String[] { MessageBodyReader.class.getName(), MessageBodyWriter.class.getName() },
+                new GsonSerializer<Object>(), serviceProperties));
 
         this.basicAuthProvider = new BasicAuthenticationProvider(bundleContext, userAdminHelper);
         this.certificateAuthProvider = new CertificateAuthenticationProvider(userAdminHelper);
@@ -140,16 +128,37 @@ public class RestService implements ConfigurableComponent {
 
         this.authRestService = new SessionRestService(userAdminHelper, restSessionHelper, this.configurationAdmin);
 
-        this.registeredServices
-                .add(bundleContext.registerService(SessionRestService.class, this.authRestService, null));
+        this.registeredServices.add(bundleContext.registerService(SessionRestService.class, this.authRestService,
+                RestServiceUtils.resourceProperties()));
 
         update(properties);
+
+        try {
+            configureDefaultWhiteboard();
+        } catch (final Exception e) {
+            logger.error("failed to configure Jax RS whiteboard", e);
+        }
 
         logger.info("activating...done");
     }
 
-    private void configureDefaultWhiteboard() {
-        // TODO Auto-generated method stub
+    private void configureDefaultWhiteboard() throws IOException, InvalidSyntaxException {
+
+        final Configuration[] configs = this.configurationAdmin
+                .listConfigurations("(kura.service.pid=kura.jakartars.whiteboard)");
+
+        if (configs == null) {
+            final Dictionary<String, Object> properties = new Hashtable<>();
+
+            properties.put("jersey.context.path", "/services");
+            properties.put("kura.service.pid", "kura.jakartars.whiteboard");
+
+            final Configuration newConfiguration = this.configurationAdmin
+                    .createFactoryConfiguration("JakartarsServletWhiteboardRuntimeComponent", null);
+
+            newConfiguration.update(properties);
+
+        }
 
     }
 
@@ -184,15 +193,15 @@ public class RestService implements ConfigurableComponent {
 
     private void updateBuiltinAuthenticationProviders(final RestServiceOptions options) {
         if (options.isPasswordAuthEnabled() && options.isBasicAuthEnabled()) {
-            this.authenticationFilter.registerAuthenticationProvider(this.basicAuthProvider);
+            bindAuthenticationProvider(this.basicAuthProvider);
         } else {
-            this.authenticationFilter.unregisterAuthenticationProvider(this.basicAuthProvider);
+            unbindAuthenticationProvider(basicAuthProvider);
         }
 
         if (options.isCertificateAuthEnabled() && options.isStatelessCertificateAuthEnabled()) {
-            this.authenticationFilter.registerAuthenticationProvider(this.certificateAuthProvider);
+            bindAuthenticationProvider(this.certificateAuthProvider);
         } else {
-            this.authenticationFilter.unregisterAuthenticationProvider(this.certificateAuthProvider);
+            unbindAuthenticationProvider(this.certificateAuthProvider);
         }
 
         if (options.isSessionManagementEnabled()) {

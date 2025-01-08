@@ -24,4 +24,5 @@
       <provide interface="org.eclipse.kura.internal.rest.command.CommandRestService"/>
    </service>
    <property name="service.pid" type="String" value="org.eclipse.kura.internal.rest.command.CommandRestService"/>
+   <property name="osgi.jakartars.resource" type="String" value="true"/>
 </scr:component>

@@ -35,8 +35,6 @@ import org.eclipse.kura.rest.deployment.agent.api.DescriptorRequest;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
@@ -57,8 +55,6 @@ import jakarta.ws.rs.core.EntityPart;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@JakartarsResource
-@JakartarsName("deploymentRestService")
 @Path("/deploy/v2")
 public class DeploymentRestService {
 

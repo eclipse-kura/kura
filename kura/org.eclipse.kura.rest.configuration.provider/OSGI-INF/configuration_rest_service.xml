@@ -27,4 +27,5 @@
    </service>
    <property name="service.pid" type="String" value="org.eclipse.kura.internal.rest.configuration.ConfigurationRestService"/>
    <reference bind="setCryptoService" cardinality="1..1" interface="org.eclipse.kura.crypto.CryptoService" name="CryptoService" policy="static"/>
+   <property name="osgi.jakartars.resource" type="String" value="true"/>
 </scr:component>

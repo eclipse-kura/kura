@@ -12,13 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.rest.security.provider;
 
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
-
 import jakarta.ws.rs.Path;
 
-@JakartarsResource
-@JakartarsName("securityRestServiceV1")
 @Path("security/v1")
 public class SecurityRestServiceV1 extends AbstractRestSecurityService {
 

@@ -26,8 +26,6 @@ import org.eclipse.kura.network.status.provider.api.InterfaceIdsDTO;
 import org.eclipse.kura.network.status.provider.api.InterfaceStatusListDTO;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
@@ -41,8 +39,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-@JakartarsResource
-@JakartarsName("networkStatusRestServiceImpl")
 @Path("/networkStatus/v1")
 public class NetworkStatusRestServiceImpl {
 

@@ -25,4 +25,5 @@
       <provide interface="org.eclipse.kura.internal.rest.position.PositionRestService"/>
    </service>
    <property name="service.pid" type="String" value="org.eclipse.kura.internal.rest.position.PositionRestService"/>
+   <property name="osgi.jakartars.resource" type="String" value="true"/>
 </scr:component>

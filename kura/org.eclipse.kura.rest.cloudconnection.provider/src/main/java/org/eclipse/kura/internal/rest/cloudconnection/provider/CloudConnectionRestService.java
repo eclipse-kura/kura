@@ -34,8 +34,6 @@ import org.eclipse.kura.rest.configuration.api.DTOUtil;
 import org.eclipse.kura.rest.configuration.api.PidAndFactoryPid;
 import org.eclipse.kura.rest.configuration.api.PidSet;
 import org.eclipse.kura.rest.configuration.api.UpdateComponentConfigurationRequest;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
@@ -52,8 +50,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@JakartarsResource
-@JakartarsName("cloudConnectionRestService")
 @Path("cloudconnection/v1")
 public class CloudConnectionRestService {
 

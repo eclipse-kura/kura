@@ -20,4 +20,5 @@
       <provide interface="org.eclipse.kura.internal.rest.asset.AssetRestService"/>
    </service>
    <reference bind="setUserAdmin" cardinality="1..1" interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin" policy="static"/>
+   <property name="osgi.jakartars.resource" type="String" value="true"/>
 </scr:component>

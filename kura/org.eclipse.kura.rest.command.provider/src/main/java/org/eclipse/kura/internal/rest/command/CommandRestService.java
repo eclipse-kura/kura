@@ -27,8 +27,6 @@ import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.rest.command.api.RestCommandRequest;
 import org.eclipse.kura.rest.command.api.RestCommandResponse;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
-import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsResource;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
@@ -42,8 +40,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@JakartarsResource
-@JakartarsName("commandRestService")
 @Path("/command/v1")
 public class CommandRestService {
 

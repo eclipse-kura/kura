@@ -50,6 +50,6 @@
 
     <property name="service.pid" type="String" value="org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2" />
     <property name="kura.service.pid" type="String" value="org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2" />
-    
+    <property name="osgi.jakartars.resource" type="String" value="true"/>
 
 </scr:component>

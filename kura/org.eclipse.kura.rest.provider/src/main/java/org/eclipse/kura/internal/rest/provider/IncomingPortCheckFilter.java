@@ -30,8 +30,6 @@ import jakarta.ws.rs.ext.Provider;
 @Priority(Priorities.AUTHENTICATION - 100)
 class IncomingPortCheckFilter implements ContainerRequestFilter {
 
-    private static final Response NOT_FOUND_RESPONSE = Response.status(Response.Status.NOT_FOUND).build();
-
     @Context
     private HttpServletRequest request;
 
@@ -53,7 +51,7 @@ class IncomingPortCheckFilter implements ContainerRequestFilter {
         final int port = request.getLocalPort();
 
         if (!allowedPorts.contains(port)) {
-            requestContext.abortWith(NOT_FOUND_RESPONSE);
+            requestContext.abortWith(Response.status(Response.Status.NOT_FOUND).build());
         }
     }
 

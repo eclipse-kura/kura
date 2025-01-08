@@ -34,5 +34,5 @@
               value="org.eclipse.kura.internal.rest.services.provider.RestServicesProvider"/>
     <reference bind="setConfigurationService" cardinality="1..1" interface="org.eclipse.kura.configuration.ConfigurationService" name="ConfigurationService" policy="static"/>
     <reference bind="setServiceComponentRuntime" cardinality="1..1" interface="org.osgi.service.component.runtime.ServiceComponentRuntime" name="ServiceComponentRuntime" policy="static"/>
-
+    <property name="osgi.jakartars.resource" type="String" value="true"/>
 </scr:component>

@@ -515,13 +515,13 @@ public class Console implements SelfConfiguringComponent {
                 SESSION_CONTEXT_NAME);
         registerServlet("usersService", DENALI_MODULE_PATH + "/users", new GwtUserServiceImpl(this.userManager),
                 SESSION_CONTEXT_NAME);
-        registerServlet("fileServlet", DENALI_MODULE_PATH + "/file", new FileServlet(), SESSION_CONTEXT_NAME);
+        registerServlet("fileServlet", DENALI_MODULE_PATH + "/file/*", new FileServlet(), SESSION_CONTEXT_NAME);
         registerServlet("deviceSnapshotsServlet", DENALI_MODULE_PATH + "/device_snapshots",
                 new DeviceSnapshotsServlet(), SESSION_CONTEXT_NAME);
         registerServlet("channelServlet", DENALI_MODULE_PATH + "/assetsUpDownload", new ChannelServlet(),
                 SESSION_CONTEXT_NAME);
         registerServlet("logServlet", DENALI_MODULE_PATH + "/log", new LogServlet(), SESSION_CONTEXT_NAME);
-        registerServlet("skinServlet", DENALI_MODULE_PATH + "/skin", new SkinServlet(), RESOURCE_CONTEXT_NAME);
+        registerServlet("skinServlet", DENALI_MODULE_PATH + "/skin/*", new SkinServlet(), RESOURCE_CONTEXT_NAME);
         registerServlet("cloudServices", DENALI_MODULE_PATH + "/cloudservices", new GwtCloudConnectionServiceImpl(),
                 SESSION_CONTEXT_NAME);
         registerServlet("wireGraphService", DENALI_MODULE_PATH + "/wires", new GwtWireGraphServiceImpl(),

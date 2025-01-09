@@ -109,7 +109,7 @@ public class NMDbusConnector {
     private NMDeviceAddedHandler deviceAddedHandler = null;
 
     private boolean configurationEnforcementHandlerIsArmed = false;
-    private Map<String, NMFailedModemResetTimerTask> failedModemResetScheduledTasks = new HashMap<>();
+    private Map<String, NMFailedModemResetHandler> failedModemResetHandlers = new HashMap<>();
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
@@ -562,35 +562,28 @@ public class NMDbusConnector {
         }
 
         try {
+            cancelAndRemoveModemResetTask(deviceId);
             this.networkManager.activateConnection(connection.get(), device);
-            if (this.failedModemResetScheduledTasks.containsKey(deviceId)) {
-                this.failedModemResetScheduledTasks.get(deviceId).cancel();
-                this.failedModemResetScheduledTasks.remove(deviceId);
-            }
             dsLock.waitForSignal();
         } catch (DBusExecutionException e) {
             logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);
             // If the connection fails at the first try, check if the modem is in failed state (sim missing?) and
             // schedule a reset after a delay time. When the timer is expired, check again for the state and perform the
             // reset if needed.
-            if (isModemInFailedState(device, deviceType)) {
+            if (isModemNotConnected(device, deviceType)) {
                 int delayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
                 Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
                 if (mmDbusPath.isPresent() && delayMinutes != 0) {
-                    if (this.failedModemResetScheduledTasks.containsKey(deviceId)) {
-                        this.failedModemResetScheduledTasks.get(deviceId).cancel();
-                        this.failedModemResetScheduledTasks.remove(deviceId);
-                    }
                     Modem mmModemDevice = this.dbusConnection.getRemoteObject("org.freedesktop.ModemManager1",
                             mmDbusPath.get(), Modem.class);
 
                     logger.info("Modem {} in failed state or unavailable. Scheduling modem reset in {} minutes ...",
                             device.getObjectPath(), delayMinutes);
 
-                    Timer failedModemResetTimer = new Timer("failedModemResetTimer");
                     NMFailedModemResetTimerTask task = new NMFailedModemResetTimerTask(mmModemDevice, device);
-                    this.failedModemResetScheduledTasks.put(deviceId, task);
-                    failedModemResetTimer.schedule(task, delayMinutes * 60L * 1000L);
+                    NMFailedModemResetHandler handler = new NMFailedModemResetHandler(task);
+                    this.failedModemResetHandlers.put(deviceId, handler);
+                    handler.schedule(delayMinutes);
                 }
             }
         }
@@ -614,10 +607,16 @@ public class NMDbusConnector {
 
     }
 
-    private boolean isModemInFailedState(Device device, NMDeviceType deviceType) throws DBusException {
-        NMDeviceState state = this.networkManager.getDeviceState(device);
-        return deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM && (NMDeviceState.NM_DEVICE_STATE_FAILED.equals(state)
-                || NMDeviceState.NM_DEVICE_STATE_UNAVAILABLE.equals(state));
+    private boolean isModemNotConnected(Device device, NMDeviceType deviceType) throws DBusException {
+        return deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM
+                && !NMDeviceState.isConnected(this.networkManager.getDeviceState(device));
+    }
+
+    private void cancelAndRemoveModemResetTask(String deviceId) {
+        if (this.failedModemResetHandlers.containsKey(deviceId)) {
+            this.failedModemResetHandlers.get(deviceId).cancel();
+            this.failedModemResetHandlers.remove(deviceId);
+        }
     }
 
     private class NMFailedModemResetTimerTask extends NMModemResetTimerTask {
@@ -633,8 +632,7 @@ public class NMDbusConnector {
         public void run() {
             try {
                 NMDeviceState state = NMDbusConnector.this.networkManager.getDeviceState(this.device);
-                if (NMDeviceState.NM_DEVICE_STATE_FAILED.equals(state)
-                        || NMDeviceState.NM_DEVICE_STATE_UNAVAILABLE.equals(state)) {
+                if (!NMDeviceState.isConnected(state)) {
                     super.run();
                 }
             } catch (DBusException e) {
@@ -642,6 +640,29 @@ public class NMDbusConnector {
             }
         }
 
+    }
+
+    private class NMFailedModemResetHandler {
+
+        private Timer failedModemResetTimer = new Timer("FailedModemResetTimer");
+        private NMFailedModemResetTimerTask task;
+
+        public NMFailedModemResetHandler(NMFailedModemResetTimerTask task) {
+            this.task = task;
+        }
+
+        public void schedule(long delayMinutes) {
+            if (this.task != null) {
+                this.failedModemResetTimer.schedule(this.task, delayMinutes * 60L * 1000L);
+            }
+        }
+
+        public void cancel() {
+            if (this.task != null) {
+                this.task.cancel();
+            }
+            this.failedModemResetTimer.cancel();
+        }
     }
 
     private void createVirtualInterface(String deviceId, NetworkProperties properties, NMDeviceType deviceType)
@@ -705,10 +726,7 @@ public class NMDbusConnector {
             logger.warn("Can't disable missing device {}", deviceId);
             return;
         }
-        if (this.failedModemResetScheduledTasks.containsKey(deviceId)) {
-            this.failedModemResetScheduledTasks.get(deviceId).cancel();
-            this.failedModemResetScheduledTasks.remove(deviceId);
-        }
+        cancelAndRemoveModemResetTask(deviceId);
         Device device = optDevice.get();
         Optional<Connection> appliedConnection = this.networkManager.getAppliedConnection(device);
 

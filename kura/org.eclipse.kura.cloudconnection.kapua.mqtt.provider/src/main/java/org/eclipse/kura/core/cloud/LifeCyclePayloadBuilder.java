@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -26,13 +26,13 @@ import org.eclipse.kura.message.KuraPosition;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetworkService;
-import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
 import org.eclipse.kura.system.ExtendedProperties;
 import org.eclipse.kura.system.ExtendedPropertyGroup;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
+import org.osgi.util.position.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,8 +92,7 @@ public class LifeCyclePayloadBuilder {
                 .withTotalMemory(deviceProfile.getTotalMemory()).withOsArch(deviceProfile.getOsArch())
                 .withOsgiFramework(deviceProfile.getOsgiFramework())
                 .withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion()).withPayloadEncoding(payloadEncoding)
-                .withJvmVendor(deviceProfile.getJvmVendor())
-                .withJdkVendorVersion(deviceProfile.getJdkVendorVersion());
+                .withJvmVendor(deviceProfile.getJvmVendor()).withJdkVendorVersion(deviceProfile.getJdkVendorVersion());
 
         tryAddTamperStatus(birthPayloadBuilder);
 
@@ -185,7 +184,7 @@ public class LifeCyclePayloadBuilder {
         SystemService systemService = this.cloudServiceImpl.getSystemService();
         SystemAdminService sysAdminService = this.cloudServiceImpl.getSystemAdminService();
         NetworkService networkService = this.cloudServiceImpl.getNetworkService();
-        PositionService positionService = this.cloudServiceImpl.getPositionService();
+        Optional<PositionService> positionService = this.cloudServiceImpl.getPositionService();
 
         //
         // get the network information
@@ -221,12 +220,12 @@ public class LifeCyclePayloadBuilder {
         double latitude = 0.0;
         double longitude = 0.0;
         double altitude = 0.0;
-        if (positionService != null) {
-            NmeaPosition position = positionService.getNmeaPosition();
+        if (positionService.isPresent()) {
+            Position position = positionService.get().getPosition();
             if (position != null) {
-                latitude = position.getLatitude();
-                longitude = position.getLongitude();
-                altitude = position.getAltitude();
+                latitude = Math.toDegrees(position.getLatitude().getValue());
+                longitude = Math.toDegrees(position.getLongitude().getValue());
+                altitude = position.getAltitude().getValue();
             } else {
                 logger.warn("Unresolved PositionService reference.");
             }

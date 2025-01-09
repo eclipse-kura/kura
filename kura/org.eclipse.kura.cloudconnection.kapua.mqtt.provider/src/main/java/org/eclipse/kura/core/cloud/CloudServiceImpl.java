@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -138,7 +138,7 @@ public class CloudServiceImpl
     private SystemService systemService;
     private SystemAdminService systemAdminService;
     private NetworkService networkService;
-    private PositionService positionService;
+    private Optional<PositionService> positionService = Optional.empty();
     private EventAdmin eventAdmin;
     private CertificatesService certificatesService;
     private Unmarshaller jsonUnmarshaller;
@@ -252,16 +252,16 @@ public class CloudServiceImpl
     }
 
     public void setPositionService(PositionService positionService) {
-        this.positionService = positionService;
+        this.positionService = Optional.of(positionService);
     }
 
     public void unsetPositionService(PositionService positionService) {
-        if (this.positionService != null && this.positionService.equals(positionService)) {
-            this.positionService = null;
+        if (this.positionService.isPresent() && this.positionService.get().equals(positionService)) {
+            this.positionService = Optional.empty();
         }
     }
 
-    public PositionService getPositionService() {
+    public Optional<PositionService> getPositionService() {
         return this.positionService;
     }
 
@@ -402,7 +402,7 @@ public class CloudServiceImpl
         this.systemService = null;
         this.systemAdminService = null;
         this.networkService = null;
-        this.positionService = null;
+        this.positionService = Optional.empty();
         this.eventAdmin = null;
         this.certificatesService = null;
 

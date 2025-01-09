@@ -65,10 +65,6 @@ The **Wireless** tab contains the following configuration parameters:
 
 - **Bgscan Long Interval**: defines the interval  between background scans (in seconds) if the actual signal level of the currently connected access point is better than signal_strength.
 
-- **Ping Access Point & renew DHCP lease if not reachable**: enables pinging the access point after connection is established.
-    - In _Access Point_ mode, this option is disabled.
-    - In _Station_ mode, if set to _true_, the unit will ping the access point and attempt to renew the DHCP lease if the access point is not reachable.
-
 - **Ignore Broadcast SSID**: operates as follows if set to _true_:
     - In _Access Point_ mode, sends an empty SSID in beacons and ignores probe request frames that do not specify full SSID.
     - In _Station_ mode, does not scan for the SSID before attempting to associate.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,23 +12,22 @@
  *******************************************************************************/
 package org.freedesktop.modemmanager1.modem;
 
-import java.util.Map;
-
-import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
+import org.freedesktop.dbus.annotations.DBusProperty;
+import org.freedesktop.dbus.annotations.DBusProperty.Access;
 import org.freedesktop.dbus.interfaces.DBusInterface;
-import org.freedesktop.dbus.types.Variant;
+import org.freedesktop.dbus.types.UInt32;
 
 /**
  * Auto-generated class.
  */
-@DBusInterfaceName("org.freedesktop.ModemManager1.Modem.Simple")
-public interface Simple extends DBusInterface {
+@DBusInterfaceName("org.freedesktop.ModemManager1.Modem.Sar")
+@DBusProperty(name = "State", type = Boolean.class, access = Access.READ)
+@DBusProperty(name = "PowerLevel", type = UInt32.class, access = Access.READ)
+public interface Sar extends DBusInterface {
 
-    public DBusPath Connect(Map<String, Variant<?>> properties);
+    public void Enable(boolean enable);
 
-    public void Disconnect(DBusPath bearer);
-
-    public Map<String, Variant<?>> GetStatus();
+    public void SetPowerLevel(UInt32 level);
 
 }

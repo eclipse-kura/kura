@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,14 +27,19 @@ import org.freedesktop.dbus.types.Variant;
  */
 @DBusInterfaceName("org.freedesktop.ModemManager1.Modem.Signal")
 @DBusProperty(name = "Rate", type = UInt32.class, access = Access.READ)
+@DBusProperty(name = "RssiThreshold", type = UInt32.class, access = Access.READ)
+@DBusProperty(name = "ErrorRateThreshold", type = Boolean.class, access = Access.READ)
 @DBusProperty(name = "Cdma", type = Signal.PropertyCdmaType.class, access = Access.READ)
 @DBusProperty(name = "Evdo", type = Signal.PropertyEvdoType.class, access = Access.READ)
 @DBusProperty(name = "Gsm", type = Signal.PropertyGsmType.class, access = Access.READ)
 @DBusProperty(name = "Umts", type = Signal.PropertyUmtsType.class, access = Access.READ)
 @DBusProperty(name = "Lte", type = Signal.PropertyLteType.class, access = Access.READ)
+@DBusProperty(name = "Nr5g", type = Signal.PropertyNr5gType.class, access = Access.READ)
 public interface Signal extends DBusInterface {
 
     public void Setup(UInt32 rate);
+
+    public void SetupThresholds(Map<String, Variant<?>> settings);
 
     public static interface PropertyCdmaType extends TypeRef<Map<String, Variant>> {
 
@@ -53,6 +58,10 @@ public interface Signal extends DBusInterface {
     }
 
     public static interface PropertyLteType extends TypeRef<Map<String, Variant>> {
+
+    }
+
+    public static interface PropertyNr5gType extends TypeRef<Map<String, Variant>> {
 
     }
 }

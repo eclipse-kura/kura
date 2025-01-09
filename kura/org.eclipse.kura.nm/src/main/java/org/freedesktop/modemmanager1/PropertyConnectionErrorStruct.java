@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,32 +10,31 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.freedesktop.modemmanager1.modem;
+package org.freedesktop.modemmanager1;
 
 import org.freedesktop.dbus.Struct;
 import org.freedesktop.dbus.annotations.Position;
-import org.freedesktop.dbus.types.UInt32;
 
 /**
  * Auto-generated class.
  */
-public class PropertyPendingNetworkInitiatedSessionsStruct extends Struct {
+public class PropertyConnectionErrorStruct extends Struct {
 
     @Position(0)
-    private final UInt32 member0;
+    private final String member0;
     @Position(1)
-    private final UInt32 member1;
+    private final String member1;
 
-    public PropertyPendingNetworkInitiatedSessionsStruct(UInt32 member0, UInt32 member1) {
+    public PropertyConnectionErrorStruct(String member0, String member1) {
         this.member0 = member0;
         this.member1 = member1;
     }
 
-    public UInt32 getMember0() {
+    public String getMember0() {
         return this.member0;
     }
 
-    public UInt32 getMember1() {
+    public String getMember1() {
         return this.member1;
     }
 

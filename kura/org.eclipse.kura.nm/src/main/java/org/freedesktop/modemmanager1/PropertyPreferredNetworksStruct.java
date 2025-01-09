@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,30 +15,28 @@ package org.freedesktop.modemmanager1;
 import org.freedesktop.dbus.Struct;
 import org.freedesktop.dbus.annotations.Position;
 import org.freedesktop.dbus.types.UInt32;
-import org.freedesktop.dbus.types.Variant;
 
 /**
  * Auto-generated class.
  */
-public class PropertyValidityStruct extends Struct {
-    @Position(0)
-    private final UInt32 member0;
-    @Position(1)
-    private final Variant<?> member1;
+public class PropertyPreferredNetworksStruct extends Struct {
 
-    public PropertyValidityStruct(UInt32 member0, Variant<?> member1) {
+    @Position(0)
+    private final String member0;
+    @Position(1)
+    private final UInt32 member1;
+
+    public PropertyPreferredNetworksStruct(String member0, UInt32 member1) {
         this.member0 = member0;
         this.member1 = member1;
     }
 
-
-    public UInt32 getMember0() {
+    public String getMember0() {
         return member0;
     }
 
-    public Variant<?> getMember1() {
+    public UInt32 getMember1() {
         return member1;
     }
-
 
 }

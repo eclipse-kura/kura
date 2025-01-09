@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -31,11 +31,14 @@ import org.freedesktop.dbus.types.Variant;
  */
 @DBusInterfaceName("org.freedesktop.ModemManager1.Modem")
 @DBusProperty(name = "Sim", type = DBusPath.class, access = Access.READ)
+@DBusProperty(name = "SimSlots", type = Modem.PropertySimSlotsType.class, access = Access.READ)
+@DBusProperty(name = "PrimarySimSlot", type = UInt32.class, access = Access.READ)
 @DBusProperty(name = "Bearers", type = Modem.PropertyBearersType.class, access = Access.READ)
 @DBusProperty(name = "SupportedCapabilities", type = Modem.PropertySupportedCapabilitiesType.class, access = Access.READ)
 @DBusProperty(name = "CurrentCapabilities", type = UInt32.class, access = Access.READ)
 @DBusProperty(name = "MaxBearers", type = UInt32.class, access = Access.READ)
 @DBusProperty(name = "MaxActiveBearers", type = UInt32.class, access = Access.READ)
+@DBusProperty(name = "MaxActiveMultiplexedBearers", type = UInt32.class, access = Access.READ)
 @DBusProperty(name = "Manufacturer", type = String.class, access = Access.READ)
 @DBusProperty(name = "Model", type = String.class, access = Access.READ)
 @DBusProperty(name = "Revision", type = String.class, access = Access.READ)
@@ -84,6 +87,10 @@ public interface Modem extends DBusInterface {
 
     public void SetCurrentBands(List<UInt32> bands);
 
+    public void SetPrimarySimSlot(UInt32 simSlot);
+
+    public List<Map<String, Variant<?>>> GetCellInfo();
+
     public String Command(String cmd, UInt32 timeout);
 
     public static class StateChanged extends DBusSignal {
@@ -100,16 +107,20 @@ public interface Modem extends DBusInterface {
         }
 
         public int getOld() {
-            return this.old;
+            return old;
         }
 
         public int getNewparam() {
-            return this.newparam;
+            return newparam;
         }
 
         public UInt32 getReason() {
-            return this.reason;
+            return reason;
         }
+
+    }
+
+    public static interface PropertySimSlotsType extends TypeRef<List<DBusPath>> {
 
     }
 

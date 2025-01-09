@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -53,30 +53,30 @@ public interface Voice extends DBusInterface {
 
     public static class CallAdded extends DBusSignal {
 
-        private final DBusPath dbusPath;
+        private final DBusPath path;
 
         public CallAdded(String _path, DBusPath _dbusPath) throws DBusException {
             super(_path, _dbusPath);
-            this.dbusPath = _dbusPath;
+            this.path = _dbusPath;
         }
 
         public DBusPath getDbusPath() {
-            return this.dbusPath;
+            return path;
         }
 
     }
 
     public static class CallDeleted extends DBusSignal {
 
-        private final DBusPath dbusPath;
+        private final DBusPath path;
 
         public CallDeleted(String _path, DBusPath _dbusPath) throws DBusException {
             super(_path, _dbusPath);
-            this.dbusPath = _dbusPath;
+            this.path = _dbusPath;
         }
 
         public DBusPath getDbusPath() {
-            return this.dbusPath;
+            return path;
         }
 
     }

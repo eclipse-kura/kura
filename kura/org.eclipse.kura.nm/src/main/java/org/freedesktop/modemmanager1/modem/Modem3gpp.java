@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,6 @@ package org.freedesktop.modemmanager1.modem;
 
 import java.util.List;
 import java.util.Map;
-
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
@@ -23,6 +22,8 @@ import org.freedesktop.dbus.annotations.DBusProperty.Access;
 import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
+import org.freedesktop.modemmanager1.modem.DisableFacilityLockStruct;
+import org.freedesktop.modemmanager1.modem.PropertyPcoStruct;
 
 /**
  * Auto-generated class.
@@ -38,21 +39,38 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Pco", type = Modem3gpp.PropertyPcoType.class, access = Access.READ)
 @DBusProperty(name = "InitialEpsBearer", type = DBusPath.class, access = Access.READ)
 @DBusProperty(name = "InitialEpsBearerSettings", type = Modem3gpp.PropertyInitialEpsBearerSettingsType.class, access = Access.READ)
+@DBusProperty(name = "PacketServiceState", type = UInt32.class, access = Access.READ)
+@DBusProperty(name = "Nr5gRegistrationSettings", type = Modem3gpp.PropertyNr5gRegistrationSettingsType.class, access = Access.READ)
 public interface Modem3gpp extends DBusInterface {
 
+
     public void Register(String operatorId);
-
     public List<Map<String, Variant<?>>> Scan();
-
     public void SetEpsUeModeOperation(UInt32 mode);
-
     public void SetInitialEpsBearerSettings(Map<String, Variant<?>> settings);
+    public void SetNr5gRegistrationSettings(Map<String, Variant<?>> properties);
+    public void DisableFacilityLock(DisableFacilityLockStruct properties);
+    public void SetPacketServiceState(UInt32 state);
+
 
     public static interface PropertyPcoType extends TypeRef<List<PropertyPcoStruct>> {
+
+
+
 
     }
 
     public static interface PropertyInitialEpsBearerSettingsType extends TypeRef<Map<String, Variant>> {
+
+
+
+
+    }
+
+    public static interface PropertyNr5gRegistrationSettingsType extends TypeRef<Map<String, Variant>> {
+
+
+
 
     }
 }

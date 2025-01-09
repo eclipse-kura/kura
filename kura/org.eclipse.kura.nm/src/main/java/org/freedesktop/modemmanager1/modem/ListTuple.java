@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -35,19 +35,19 @@ public class ListTuple extends Tuple {
     }
 
     public void setSelected(String arg) {
-        this.selected = arg;
+        selected = arg;
     }
 
     public String getSelected() {
-        return this.selected;
+        return selected;
     }
 
     public void setInstalled(List<Map<String, Variant<?>>> arg) {
-        this.installed = arg;
+        installed = arg;
     }
 
     public List<Map<String, Variant<?>>> getInstalled() {
-        return this.installed;
+        return installed;
     }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.freedesktop.modemmanager1.modem;
 
 import java.util.Map;
-
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -30,9 +29,14 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "NetworkTimezone", type = Time.PropertyNetworkTimezoneType.class, access = Access.READ)
 public interface Time extends DBusInterface {
 
+
     public String GetNetworkTime();
 
+
     public static interface PropertyNetworkTimezoneType extends TypeRef<Map<String, Variant>> {
+
+
+
 
     }
 
@@ -45,9 +49,11 @@ public interface Time extends DBusInterface {
             this.time = _time;
         }
 
+
         public String getTime() {
-            return this.time;
+            return time;
         }
+
 
     }
 }

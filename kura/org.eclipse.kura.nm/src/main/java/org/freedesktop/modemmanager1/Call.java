@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -61,7 +61,7 @@ public interface Call extends DBusInterface {
         }
 
         public String getDtmf() {
-            return this.dtmf;
+            return dtmf;
         }
 
     }
@@ -80,15 +80,15 @@ public interface Call extends DBusInterface {
         }
 
         public int getOld() {
-            return this.old;
+            return old;
         }
 
         public int getNewparam() {
-            return this.newparam;
+            return newparam;
         }
 
         public UInt32 getReason() {
-            return this.reason;
+            return reason;
         }
 
     }

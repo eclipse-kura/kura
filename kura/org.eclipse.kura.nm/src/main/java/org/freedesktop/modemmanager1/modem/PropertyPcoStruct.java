@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,6 +27,7 @@ public class PropertyPcoStruct extends Struct {
     private final UInt32 member0;
     @Position(1)
     private final boolean member1;
+
     @Position(2)
     private final List<Byte> member2;
 
@@ -37,15 +38,15 @@ public class PropertyPcoStruct extends Struct {
     }
 
     public UInt32 getMember0() {
-        return this.member0;
+        return member0;
     }
 
     public boolean getMember1() {
-        return this.member1;
+        return member1;
     }
 
     public List<Byte> getMember2() {
-        return this.member2;
+        return member2;
     }
 
 }

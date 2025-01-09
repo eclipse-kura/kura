@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,24 +12,26 @@
  *******************************************************************************/
 package org.freedesktop.modemmanager1.modem.modem3gpp;
 
+import java.util.List;
+import java.util.Map;
+
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
 import org.freedesktop.dbus.interfaces.DBusInterface;
-import org.freedesktop.dbus.types.UInt32;
+import org.freedesktop.dbus.types.Variant;
 
 /**
  * Auto-generated class.
  */
-@DBusInterfaceName("org.freedesktop.ModemManager1.Modem.Modem3gpp.Ussd")
-@DBusProperty(name = "State", type = UInt32.class, access = Access.READ)
-@DBusProperty(name = "NetworkNotification", type = String.class, access = Access.READ)
-@DBusProperty(name = "NetworkRequest", type = String.class, access = Access.READ)
-public interface Ussd extends DBusInterface {
+@DBusInterfaceName("org.freedesktop.ModemManager1.Modem.Modem3gpp.ProfileManager")
+@DBusProperty(name = "IndexField", type = String.class, access = Access.READ)
+public interface ProfileManager extends DBusInterface {
 
+    public List<Map<String, Variant<?>>> List();
 
-    public String Initiate(String command);
-    public String Respond(String response);
-    public void Cancel();
+    public Map<String, Variant<?>> Set(Map<String, Variant<?>> requestedProperties);
+
+    public void Delete(Map<String, Variant<?>> properties);
 
 }

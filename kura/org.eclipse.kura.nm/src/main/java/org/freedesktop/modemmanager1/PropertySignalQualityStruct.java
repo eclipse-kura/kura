@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,6 @@ import org.freedesktop.dbus.types.UInt32;
  * Auto-generated class.
  */
 public class PropertySignalQualityStruct extends Struct {
-
     @Position(0)
     private final UInt32 member0;
     @Position(1)
@@ -31,12 +30,14 @@ public class PropertySignalQualityStruct extends Struct {
         this.member1 = member1;
     }
 
+
     public UInt32 getMember0() {
-        return this.member0;
+        return member0;
     }
 
     public boolean getMember1() {
-        return this.member1;
+        return member1;
     }
+
 
 }

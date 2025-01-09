@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -43,36 +43,36 @@ public interface Messaging extends DBusInterface {
 
     public static class Added extends DBusSignal {
 
-        private final DBusPath dbusPath;
+        private final DBusPath path;
         private final boolean received;
 
         public Added(String _path, DBusPath _dbusPath, boolean _received) throws DBusException {
             super(_path, _dbusPath, _received);
-            this.dbusPath = _dbusPath;
+            this.path = _dbusPath;
             this.received = _received;
         }
 
         public DBusPath getDbusPath() {
-            return this.dbusPath;
+            return path;
         }
 
         public boolean getReceived() {
-            return this.received;
+            return received;
         }
 
     }
 
     public static class Deleted extends DBusSignal {
 
-        private final DBusPath dbusPath;
+        private final DBusPath path;
 
         public Deleted(String _path, DBusPath _dbusPath) throws DBusException {
             super(_path, _dbusPath);
-            this.dbusPath = _dbusPath;
+            this.path = _dbusPath;
         }
 
         public DBusPath getDbusPath() {
-            return this.dbusPath;
+            return path;
         }
 
     }

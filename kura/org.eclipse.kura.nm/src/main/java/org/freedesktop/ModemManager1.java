@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.freedesktop;
 
 import java.util.Map;
-
 import org.freedesktop.dbus.annotations.DBusProperty;
 import org.freedesktop.dbus.annotations.DBusProperty.Access;
 import org.freedesktop.dbus.interfaces.DBusInterface;
@@ -25,12 +24,10 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Version", type = String.class, access = Access.READ)
 public interface ModemManager1 extends DBusInterface {
 
+
     public void ScanDevices();
-
     public void SetLogging(String level);
-
     public void ReportKernelEvent(Map<String, Variant<?>> properties);
-
     public void InhibitDevice(String uid, boolean inhibit);
 
 }

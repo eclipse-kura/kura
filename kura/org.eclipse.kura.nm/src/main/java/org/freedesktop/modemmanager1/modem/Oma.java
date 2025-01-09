@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 package org.freedesktop.modemmanager1.modem;
 
 import java.util.List;
-
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -22,6 +21,7 @@ import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.messages.DBusSignal;
 import org.freedesktop.dbus.types.UInt32;
+import org.freedesktop.modemmanager1.modem.PropertyPendingNetworkInitiatedSessionsStruct;
 
 /**
  * Auto-generated class.
@@ -33,16 +33,17 @@ import org.freedesktop.dbus.types.UInt32;
 @DBusProperty(name = "SessionState", type = Integer.class, access = Access.READ)
 public interface Oma extends DBusInterface {
 
+
     public void Setup(UInt32 features);
-
     public void StartClientInitiatedSession(UInt32 sessionType);
-
     public void AcceptNetworkInitiatedSession(UInt32 sessionId, boolean accept);
-
     public void CancelSession();
 
-    public static interface PropertyPendingNetworkInitiatedSessionsType
-            extends TypeRef<List<PropertyPendingNetworkInitiatedSessionsStruct>> {
+
+    public static interface PropertyPendingNetworkInitiatedSessionsType extends TypeRef<List<PropertyPendingNetworkInitiatedSessionsStruct>> {
+
+
+
 
     }
 
@@ -52,25 +53,26 @@ public interface Oma extends DBusInterface {
         private final int newSessionState;
         private final UInt32 sessionStateFailedReason;
 
-        public SessionStateChanged(String _path, int _oldSessionState, int _newSessionState,
-                UInt32 _sessionStateFailedReason) throws DBusException {
+        public SessionStateChanged(String _path, int _oldSessionState, int _newSessionState, UInt32 _sessionStateFailedReason) throws DBusException {
             super(_path, _oldSessionState, _newSessionState, _sessionStateFailedReason);
             this.oldSessionState = _oldSessionState;
             this.newSessionState = _newSessionState;
             this.sessionStateFailedReason = _sessionStateFailedReason;
         }
 
+
         public int getOldSessionState() {
-            return this.oldSessionState;
+            return oldSessionState;
         }
 
         public int getNewSessionState() {
-            return this.newSessionState;
+            return newSessionState;
         }
 
         public UInt32 getSessionStateFailedReason() {
-            return this.sessionStateFailedReason;
+            return sessionStateFailedReason;
         }
+
 
     }
 }

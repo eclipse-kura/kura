@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -468,6 +468,12 @@ public class TabIp4Ui extends Composite implements NetworkTab {
 
             });
         });
+
+        // Currently the NetworkManager-based networking backend doesn't support
+        // renewing DHCP leases. Given this we decided to hide the "Renew DHCP lease"
+        // button since it's non-functional. This is a temporary solution until
+        // NetworkManager and our backend are updated to support this feature.
+        this.renew.setVisible(false);
 
         this.renew.addMouseOverHandler(event -> {
             if (TabIp4Ui.this.renew.isEnabled()) {

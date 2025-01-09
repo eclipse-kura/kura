@@ -469,10 +469,10 @@ public class TabIp4Ui extends Composite implements NetworkTab {
             });
         });
 
-        // As of ESF 8, the NetworkManager-based networking backend doesn't support
-        // renewing DHCP leases. Therefore we hide the "Renew DHCP lease" button.
-        // This is a temporary solution until the NetworkManager backend is updated to
-        // support this feature.
+        // Currently the NetworkManager-based networking backend doesn't support
+        // renewing DHCP leases. Given this we decided to hide the "Renew DHCP lease"
+        // button since it's non-functional. This is a temporary solution until
+        // NetworkManager and our backend are updated to support this feature.
         this.renew.setVisible(false);
 
         this.renew.addMouseOverHandler(event -> {

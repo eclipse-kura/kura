@@ -104,11 +104,11 @@ public class RestTransport implements Transport {
                 .trackService(classz, Optional.empty()).get(30, TimeUnit.SECONDS);
     }
     
-    private Map<String, Object> initialRestServiceConfiguration() throws KuraException {
+    private Map<String, Object> initialRestServiceConfiguration() {
 
         final Map<String, Object> restServiceConfiguration = new HashMap<>();
 
-        restServiceConfiguration.put("allowed.ports", "[8080,443,4443]");
+        restServiceConfiguration.put("allowed.ports", new Integer[0]);
 
         return restServiceConfiguration;
     }

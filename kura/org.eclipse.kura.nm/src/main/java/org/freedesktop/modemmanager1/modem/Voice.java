@@ -53,30 +53,30 @@ public interface Voice extends DBusInterface {
 
     public static class CallAdded extends DBusSignal {
 
-        private final DBusPath path;
+        private final DBusPath dbusPath;
 
         public CallAdded(String _path, DBusPath _dbusPath) throws DBusException {
             super(_path, _dbusPath);
-            this.path = _dbusPath;
+            this.dbusPath = _dbusPath;
         }
 
         public DBusPath getDbusPath() {
-            return path;
+            return dbusPath;
         }
 
     }
 
     public static class CallDeleted extends DBusSignal {
 
-        private final DBusPath path;
+        private final DBusPath dbusPath;
 
         public CallDeleted(String _path, DBusPath _dbusPath) throws DBusException {
             super(_path, _dbusPath);
-            this.path = _dbusPath;
+            this.dbusPath = _dbusPath;
         }
 
         public DBusPath getDbusPath() {
-            return this.path;
+            return this.dbusPath;
         }
 
     }

@@ -43,17 +43,17 @@ public interface Messaging extends DBusInterface {
 
     public static class Added extends DBusSignal {
 
-        private final DBusPath path;
+        private final DBusPath dbusPath;
         private final boolean received;
 
         public Added(String _path, DBusPath _dbusPath, boolean _received) throws DBusException {
             super(_path, _dbusPath, _received);
-            this.path = _dbusPath;
+            this.dbusPath = _dbusPath;
             this.received = _received;
         }
 
         public DBusPath getDbusPath() {
-            return this.path;
+            return this.dbusPath;
         }
 
         public boolean getReceived() {
@@ -64,15 +64,15 @@ public interface Messaging extends DBusInterface {
 
     public static class Deleted extends DBusSignal {
 
-        private final DBusPath path;
+        private final DBusPath dbusPath;
 
         public Deleted(String _path, DBusPath _dbusPath) throws DBusException {
             super(_path, _dbusPath);
-            this.path = _dbusPath;
+            this.dbusPath = _dbusPath;
         }
 
         public DBusPath getDbusPath() {
-            return this.path;
+            return this.dbusPath;
         }
 
     }

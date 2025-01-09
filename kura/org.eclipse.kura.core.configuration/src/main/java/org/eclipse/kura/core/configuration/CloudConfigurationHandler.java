@@ -45,6 +45,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * @deprecated Please switch to CONF-V2 and corresponding REST APIs

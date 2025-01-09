@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@ package org.eclipse.kura.nm;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Timer;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.kura.KuraException;
@@ -41,6 +43,7 @@ import org.eclipse.kura.nm.signal.handlers.DeviceCreationLock;
 import org.eclipse.kura.nm.signal.handlers.DeviceStateLock;
 import org.eclipse.kura.nm.signal.handlers.NMConfigurationEnforcementHandler;
 import org.eclipse.kura.nm.signal.handlers.NMDeviceAddedHandler;
+import org.eclipse.kura.nm.signal.handlers.NMModemResetTimerTask;
 import org.eclipse.kura.nm.status.AccessPointsProperties;
 import org.eclipse.kura.nm.status.DevicePropertiesWrapper;
 import org.eclipse.kura.nm.status.NMStatusConverter;
@@ -54,6 +57,7 @@ import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.Variant;
+import org.freedesktop.modemmanager1.Modem;
 import org.freedesktop.modemmanager1.modem.Location;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
@@ -105,6 +109,7 @@ public class NMDbusConnector {
     private NMDeviceAddedHandler deviceAddedHandler = null;
 
     private boolean configurationEnforcementHandlerIsArmed = false;
+    private Map<String, NMFailedModemResetTimerTask> failedModemResetScheduledTasks = new HashMap<>();
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
@@ -558,9 +563,36 @@ public class NMDbusConnector {
 
         try {
             this.networkManager.activateConnection(connection.get(), device);
+            if (this.failedModemResetScheduledTasks.containsKey(deviceId)) {
+                this.failedModemResetScheduledTasks.get(deviceId).cancel();
+                this.failedModemResetScheduledTasks.remove(deviceId);
+            }
             dsLock.waitForSignal();
         } catch (DBusExecutionException e) {
             logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);
+            // If the connection fails at the first try, check if the modem is in failed state (sim missing?) and
+            // schedule a reset after a delay time. When the timer is expired, check again for the state and perform the
+            // reset if needed.
+            if (isModemInFailedState(device, deviceType)) {
+                int delayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
+                Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
+                if (mmDbusPath.isPresent() && delayMinutes != 0) {
+                    if (this.failedModemResetScheduledTasks.containsKey(deviceId)) {
+                        this.failedModemResetScheduledTasks.get(deviceId).cancel();
+                        this.failedModemResetScheduledTasks.remove(deviceId);
+                    }
+                    Modem mmModemDevice = this.dbusConnection.getRemoteObject("org.freedesktop.ModemManager1",
+                            mmDbusPath.get(), Modem.class);
+
+                    logger.info("Modem {} in failed state or unavailable. Scheduling modem reset in {} minutes ...",
+                            device.getObjectPath(), delayMinutes);
+
+                    Timer failedModemResetTimer = new Timer("failedModemResetTimer");
+                    NMFailedModemResetTimerTask task = new NMFailedModemResetTimerTask(mmModemDevice, device);
+                    this.failedModemResetScheduledTasks.put(deviceId, task);
+                    failedModemResetTimer.schedule(task, delayMinutes * 60L * 1000L);
+                }
+            }
         }
 
         // Housekeeping
@@ -577,6 +609,36 @@ public class NMDbusConnector {
             if (delayMinutes != 0) {
                 Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
                 this.modemManager.resetHandlerEnable(deviceId, mmDbusPath, delayMinutes, device.getObjectPath());
+            }
+        }
+
+    }
+
+    private boolean isModemInFailedState(Device device, NMDeviceType deviceType) throws DBusException {
+        NMDeviceState state = this.networkManager.getDeviceState(device);
+        return deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM && (NMDeviceState.NM_DEVICE_STATE_FAILED.equals(state)
+                || NMDeviceState.NM_DEVICE_STATE_UNAVAILABLE.equals(state));
+    }
+
+    private class NMFailedModemResetTimerTask extends NMModemResetTimerTask {
+
+        Device device;
+
+        public NMFailedModemResetTimerTask(Modem modem, Device device) {
+            super(modem);
+            this.device = device;
+        }
+
+        @Override
+        public void run() {
+            try {
+                NMDeviceState state = NMDbusConnector.this.networkManager.getDeviceState(this.device);
+                if (NMDeviceState.NM_DEVICE_STATE_FAILED.equals(state)
+                        || NMDeviceState.NM_DEVICE_STATE_UNAVAILABLE.equals(state)) {
+                    super.run();
+                }
+            } catch (DBusException e) {
+                NMDbusConnector.logger.warn("Couldn't get state of modem interface, caused by:", e);
             }
         }
 
@@ -642,6 +704,10 @@ public class NMDbusConnector {
         if (!optDevice.isPresent()) {
             logger.warn("Can't disable missing device {}", deviceId);
             return;
+        }
+        if (this.failedModemResetScheduledTasks.containsKey(deviceId)) {
+            this.failedModemResetScheduledTasks.get(deviceId).cancel();
+            this.failedModemResetScheduledTasks.remove(deviceId);
         }
         Device device = optDevice.get();
         Optional<Connection> appliedConnection = this.networkManager.getAppliedConnection(device);

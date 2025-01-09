@@ -61,7 +61,7 @@ public interface Voice extends DBusInterface {
         }
 
         public DBusPath getDbusPath() {
-            return dbusPath;
+            return this.dbusPath;
         }
 
     }

@@ -119,11 +119,6 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.eclipse.equinox.launcher</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>log4j2-api-config</id>
                             <level>4</level>
                             <autoStart>false</autoStart>
@@ -287,10 +282,6 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.hamcrest.core</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.launcher</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>

@@ -45,6 +45,7 @@ import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
 import org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService;
+import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -64,7 +65,6 @@ import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 
 import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
@@ -338,7 +338,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     private void whenUploadIsPerformedWith(String filePath) {
         HttpAuthenticationFeature feature = HttpAuthenticationFeature.basicBuilder().credentials(USERNAME, PASSWORD)
                 .build();
-        final Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).register(feature).build();
+        final Client client = new JerseyClientBuilder().register(MultiPartFeature.class).register(feature).build();
 
         FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
         final FileDataBodyPart filePart = new FileDataBodyPart("file", new File(filePath));

@@ -151,10 +151,6 @@
                             </dependency>
                             <dependency>
                                 <type>p2-installable-unit</type>
-                                <artifactId>org.eclipse.equinox.ds</artifactId>
-                            </dependency>
-                            <dependency>
-                                <type>p2-installable-unit</type>
                                 <artifactId>org.apache.felix.scr</artifactId>
                             </dependency>
                             <dependency>
@@ -207,19 +203,11 @@
                             </dependency>
                             <dependency>
                                 <type>p2-installable-unit</type>
-                                <artifactId>org.eclipse.osgi.services</artifactId>
-                            </dependency>
-                            <dependency>
-                                <type>p2-installable-unit</type>
                                 <artifactId>org.eclipse.osgi.util</artifactId>
                             </dependency>
                             <dependency>
                                 <type>p2-installable-unit</type>
                                 <artifactId>org.hamcrest.core</artifactId>
-                            </dependency>
-                            <dependency>
-                                <type>p2-installable-unit</type>
-                                <artifactId>org.eclipse.equinox.launcher</artifactId>
                             </dependency>
                             <dependency>
                                 <type>p2-installable-unit</type>
@@ -382,11 +370,6 @@
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
-                                <id>org.eclipse.equinox.launcher</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
                                 <id>slf4j.api</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
@@ -438,6 +421,11 @@
                             </bundle>
                             <bundle>
                                 <id>org.eclipse.kura.core.configuration</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.eclipse.kura.core.deployment</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
@@ -546,12 +534,6 @@
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
-
-                            <bundle>
-                                <id>org.eclipse.equinox.http.jetty</id>
-                                <level>3</level>
-                                <autoStart>false</autoStart>
-                            </bundle>
                             <bundle>
                                 <id>org.eclipse.kura.http.server.manager</id>
                                 <level>4</level>
@@ -594,6 +576,31 @@
                             </bundle>
                             <bundle>
                                 <id>org.eclipse.kura.cloudconnection.kapua.mqtt.provider</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.apache.felix.http.bridge</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.apache.aries.spifly.dynamic.bundle</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.eclipse.osgitech.rest</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.eclipse.osgitech.rest.servlet.whiteboard</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>jersey-client</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
@@ -767,11 +774,6 @@
                                 <requirement>
                                     <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.deployment.agent</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
-                                    <id>org.eclipse.equinox.http.jetty</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
                                 <requirement>

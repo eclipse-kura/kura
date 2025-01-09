@@ -183,23 +183,30 @@ public class RestTransport implements Transport {
             connection.setRequestMethod(method.getRestMethod());
 
             if (requestBody != null) {
-                connection.setDoOutput(true);
+                connection.setChunkedStreamingMode(0);
                 connection.setRequestProperty("Content-Type", "application/json");
-                IOUtils.write(requestBody, connection.getOutputStream());
+                connection.setDoOutput(true);
+                uploadBody(requestBody, connection);
             }
-
-            connection.connect();
 
             final int status = connection.getResponseCode();
 
-            final String body = getBody(connection);
+            final Optional<String> body = getBody(connection);
             storeCookies(urlPrefix, relativeUri, connection);
 
             connection.disconnect();
 
-            return new Response(status, Optional.ofNullable(body).filter(b -> !b.isEmpty()));
+            return new Response(status, body.filter(b -> !b.isEmpty()));
         } catch (final Exception e) {
             throw new IllegalStateException("request failed", e);
+        }
+    }
+
+    private void uploadBody(final String requestBody, final HttpURLConnection connection) {
+        try {
+            IOUtils.write(requestBody, connection.getOutputStream());
+        } catch (final Exception e) {
+            logger.warn("failed to send body", e);
         }
     }
 
@@ -232,10 +239,15 @@ public class RestTransport implements Transport {
         return cookieManager;
     }
 
-    private String getBody(final HttpURLConnection connection) throws IOException {
+    private Optional<String> getBody(final HttpURLConnection connection) throws IOException {
         try (final InputStream in = ((connection.getResponseCode() / 200) == 1) ? connection.getInputStream()
                 : connection.getErrorStream()) {
-            return IOUtils.toString(in, StandardCharsets.UTF_8);
+
+            if (in == null) {
+                return Optional.empty();
+            }
+
+            return Optional.of(IOUtils.toString(in, StandardCharsets.UTF_8));
         }
     }
 

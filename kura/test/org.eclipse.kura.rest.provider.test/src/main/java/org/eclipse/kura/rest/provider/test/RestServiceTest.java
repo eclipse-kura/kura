@@ -1268,7 +1268,10 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     private <T extends TestService> void givenService(final T service) {
         final BundleContext bundleContext = FrameworkUtil.getBundle(RestServiceTest.class).getBundleContext();
 
-        registeredServices.add(bundleContext.registerService((Class<T>) service.getClass(), service, null));
+        final Dictionary<String, Object> properties = new Hashtable<>();
+        properties.put("osgi.jakartars.resource", true);
+
+        registeredServices.add(bundleContext.registerService((Class<T>) service.getClass(), service, properties));
 
         final RestTransport restTransport = (RestTransport) this.transport;
 

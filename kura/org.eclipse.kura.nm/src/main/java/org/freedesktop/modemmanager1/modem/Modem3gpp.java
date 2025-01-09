@@ -14,6 +14,7 @@ package org.freedesktop.modemmanager1.modem;
 
 import java.util.List;
 import java.util.Map;
+
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
@@ -22,8 +23,6 @@ import org.freedesktop.dbus.annotations.DBusProperty.Access;
 import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
-import org.freedesktop.modemmanager1.modem.DisableFacilityLockStruct;
-import org.freedesktop.modemmanager1.modem.PropertyPcoStruct;
 
 /**
  * Auto-generated class.
@@ -43,34 +42,29 @@ import org.freedesktop.modemmanager1.modem.PropertyPcoStruct;
 @DBusProperty(name = "Nr5gRegistrationSettings", type = Modem3gpp.PropertyNr5gRegistrationSettingsType.class, access = Access.READ)
 public interface Modem3gpp extends DBusInterface {
 
-
     public void Register(String operatorId);
+
     public List<Map<String, Variant<?>>> Scan();
+
     public void SetEpsUeModeOperation(UInt32 mode);
+
     public void SetInitialEpsBearerSettings(Map<String, Variant<?>> settings);
+
     public void SetNr5gRegistrationSettings(Map<String, Variant<?>> properties);
+
     public void DisableFacilityLock(DisableFacilityLockStruct properties);
+
     public void SetPacketServiceState(UInt32 state);
 
-
     public static interface PropertyPcoType extends TypeRef<List<PropertyPcoStruct>> {
-
-
-
 
     }
 
     public static interface PropertyInitialEpsBearerSettingsType extends TypeRef<Map<String, Variant>> {
 
-
-
-
     }
 
     public static interface PropertyNr5gRegistrationSettingsType extends TypeRef<Map<String, Variant>> {
-
-
-
 
     }
 }

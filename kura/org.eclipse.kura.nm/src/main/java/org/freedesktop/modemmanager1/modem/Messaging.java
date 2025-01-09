@@ -53,11 +53,11 @@ public interface Messaging extends DBusInterface {
         }
 
         public DBusPath getDbusPath() {
-            return path;
+            return this.path;
         }
 
         public boolean getReceived() {
-            return received;
+            return this.received;
         }
 
     }
@@ -72,7 +72,7 @@ public interface Messaging extends DBusInterface {
         }
 
         public DBusPath getDbusPath() {
-            return path;
+            return this.path;
         }
 
     }

@@ -21,6 +21,7 @@ import org.freedesktop.dbus.types.Variant;
  * Auto-generated class.
  */
 public class PropertyValidityStruct extends Struct {
+
     @Position(0)
     private final UInt32 member0;
     @Position(1)
@@ -31,14 +32,12 @@ public class PropertyValidityStruct extends Struct {
         this.member1 = member1;
     }
 
-
     public UInt32 getMember0() {
-        return member0;
+        return this.member0;
     }
 
     public Variant<?> getMember1() {
-        return member1;
+        return this.member1;
     }
-
 
 }

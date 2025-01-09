@@ -107,15 +107,15 @@ public interface Modem extends DBusInterface {
         }
 
         public int getOld() {
-            return old;
+            return this.old;
         }
 
         public int getNewparam() {
-            return newparam;
+            return this.newparam;
         }
 
         public UInt32 getReason() {
-            return reason;
+            return this.reason;
         }
 
     }

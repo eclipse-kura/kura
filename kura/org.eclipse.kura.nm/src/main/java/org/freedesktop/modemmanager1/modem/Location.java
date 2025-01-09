@@ -14,6 +14,7 @@ package org.freedesktop.modemmanager1.modem;
 
 import java.util.List;
 import java.util.Map;
+
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -36,25 +37,21 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "GpsRefreshRate", type = UInt32.class, access = Access.READ)
 public interface Location extends DBusInterface {
 
-
     public void Setup(UInt32 sources, boolean signalLocation);
+
     public Map<UInt32, Variant<?>> GetLocation();
+
     public void SetSuplServer(String supl);
+
     public void InjectAssistanceData(List<Byte> data);
+
     public void SetGpsRefreshRate(UInt32 rate);
 
-
     public static interface PropertyLocationType extends TypeRef<Map<UInt32, Variant>> {
-
-
-
 
     }
 
     public static interface PropertyAssistanceDataServersType extends TypeRef<List<String>> {
-
-
-
 
     }
 }

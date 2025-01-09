@@ -13,6 +13,7 @@
 package org.freedesktop.modemmanager1.modem;
 
 import java.util.Map;
+
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -29,14 +30,9 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "NetworkTimezone", type = Time.PropertyNetworkTimezoneType.class, access = Access.READ)
 public interface Time extends DBusInterface {
 
-
     public String GetNetworkTime();
 
-
     public static interface PropertyNetworkTimezoneType extends TypeRef<Map<String, Variant>> {
-
-
-
 
     }
 
@@ -49,11 +45,9 @@ public interface Time extends DBusInterface {
             this.time = _time;
         }
 
-
         public String getTime() {
-            return time;
+            return this.time;
         }
-
 
     }
 }

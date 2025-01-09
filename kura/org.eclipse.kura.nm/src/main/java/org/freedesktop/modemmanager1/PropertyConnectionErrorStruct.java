@@ -31,11 +31,11 @@ public class PropertyConnectionErrorStruct extends Struct {
     }
 
     public String getMember0() {
-        return member0;
+        return this.member0;
     }
 
     public String getMember1() {
-        return member1;
+        return this.member1;
     }
 
 }

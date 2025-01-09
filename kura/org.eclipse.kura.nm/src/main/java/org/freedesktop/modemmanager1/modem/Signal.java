@@ -13,6 +13,7 @@
 package org.freedesktop.modemmanager1.modem;
 
 import java.util.Map;
+
 import org.freedesktop.dbus.TypeRef;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.annotations.DBusProperty;
@@ -36,50 +37,31 @@ import org.freedesktop.dbus.types.Variant;
 @DBusProperty(name = "Nr5g", type = Signal.PropertyNr5gType.class, access = Access.READ)
 public interface Signal extends DBusInterface {
 
-
     public void Setup(UInt32 rate);
+
     public void SetupThresholds(Map<String, Variant<?>> settings);
 
-
     public static interface PropertyCdmaType extends TypeRef<Map<String, Variant>> {
-
-
-
 
     }
 
     public static interface PropertyEvdoType extends TypeRef<Map<String, Variant>> {
 
-
-
-
     }
 
     public static interface PropertyGsmType extends TypeRef<Map<String, Variant>> {
-
-
-
 
     }
 
     public static interface PropertyUmtsType extends TypeRef<Map<String, Variant>> {
 
-
-
-
     }
 
     public static interface PropertyLteType extends TypeRef<Map<String, Variant>> {
 
-
-
-
     }
 
     public static interface PropertyNr5gType extends TypeRef<Map<String, Variant>> {
-
-
-
 
     }
 }

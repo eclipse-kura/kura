@@ -38,15 +38,15 @@ public class PropertyPcoStruct extends Struct {
     }
 
     public UInt32 getMember0() {
-        return member0;
+        return this.member0;
     }
 
     public boolean getMember1() {
-        return member1;
+        return this.member1;
     }
 
     public List<Byte> getMember2() {
-        return member2;
+        return this.member2;
     }
 
 }

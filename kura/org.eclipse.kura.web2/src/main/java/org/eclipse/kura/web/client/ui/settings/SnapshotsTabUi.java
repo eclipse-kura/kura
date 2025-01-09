@@ -21,7 +21,6 @@ import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.Tab;
-import org.eclipse.kura.web.client.util.DownloadHelper;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -351,33 +350,20 @@ public class SnapshotsTabUi extends Composite implements Tab {
 
     private void downloadSnapshot(GwtXSRFToken token) {
 
-        Long snapshot = this.selected.getSnapshotId();
-        this.gwtSnapshotService.getSnapshotConfigurationFromSid(token, snapshot.longValue(),
+        Long snapshotId = this.selected.getSnapshotId();
+        this.gwtSnapshotService.getSnapshotConfigurationFromSid(token, snapshotId.longValue(),
                 new AsyncCallback<List<String>>() {
 
                     @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex);
+                    public void onFailure(Throwable caught) {
+                        FailureHandler.handle(caught);
+
                     }
 
                     @Override
-                    public void onSuccess(List<String> configs) {
-                        downloadModal.show(snapshotDownloadOptions -> {
+                    public void onSuccess(List<String> result) {
+                        downloadModal.show(result, snapshotId);
 
-                            final StringBuilder sbUrl = new StringBuilder();
-
-                            sbUrl.append("/device_snapshots?snapshotId=").append(snapshot).append("&format=")
-                                    .append(snapshotDownloadOptions.getFormat());
-
-                            if (snapshotDownloadOptions.getSelectedPids().isPresent()) {
-
-                                DownloadHelper.instance().startDownload(token, sbUrl.toString(),
-                                        snapshotDownloadOptions.getSelectedPids().get());
-
-                            } else {
-                                DownloadHelper.instance().startDownload(token, sbUrl.toString());
-                            }
-                        }, configs);
                     }
                 });
     }

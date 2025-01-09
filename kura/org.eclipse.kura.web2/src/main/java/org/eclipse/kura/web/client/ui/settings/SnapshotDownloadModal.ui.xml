@@ -55,9 +55,10 @@
 	    }
 	</ui:style>
 
-    <b:Modal closable="false" fade="true" dataBackdrop="STATIC" ui:field="modal">
+    <b:Modal closable="false" fade="true" dataBackdrop="STATIC" ui:field="downloadModal" b:id="download-modal">
             <b:ModalBody>
                 <g:FormPanel>
+                <b:Form ui:field="snapshotDownloadForm">
                     <b:FieldSet>
                         <b:FormGroup>
                             <b.html:Paragraph ui:field="downloadModalDescription" />
@@ -69,7 +70,12 @@
                             <g:ScrollPanel ui:field="pidSelectionScrollPanel"></g:ScrollPanel>
                             <b:FormLabel addStyleNames="{style.channel-name-validation-label}" ui:field="noPidSelectedError" text="{msgs.downloadSnapshotError}" />
                         </b:FormGroup>
+                        <g:Hidden ui:field="xsrfTokenField" />
+                        <g:Hidden ui:field="pidsListField" />
+                        <g:Hidden ui:field="snapshotDownloadFormatField" />
+                        <g:Hidden ui:field="snapshotIdField" />
                     </b:FieldSet>
+                </b:Form>
                 </g:FormPanel>
                  <g:HorizontalPanel addStyleNames="{style.horizontal-panel}" >
 			        <b:Anchor ui:field="selectOrRemoveAllAnchor" />

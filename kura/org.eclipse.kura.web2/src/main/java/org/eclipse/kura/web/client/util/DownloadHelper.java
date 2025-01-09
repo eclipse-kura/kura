@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.util;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.Console;
@@ -53,20 +52,6 @@ public final class DownloadHelper {
         sbUrl.append(Console.ADMIN_ROOT).append("/").append(GWT.getModuleName()).append(resource)
                 .append(resource.indexOf('?') != -1 ? '&' : '?').append("xsrfToken=")
                 .append(URL.encodeQueryString(token.getToken()));
-
-        startDownload(sbUrl.toString());
-    }
-
-    public void startDownload(GwtXSRFToken token, String resource, List<String> selectedPids) {
-        final StringBuilder sbUrl = new StringBuilder();
-
-        final StringBuilder sbPids = new StringBuilder();
-        selectedPids.forEach(pid -> sbPids.append(pid + ","));
-        selectedPids.remove(selectedPids.size() - 1);
-
-        sbUrl.append(Console.ADMIN_ROOT).append("/").append(GWT.getModuleName()).append(resource)
-                .append(resource.indexOf('?') != -1 ? '&' : '?').append("xsrfToken=")
-                .append(URL.encodeQueryString(token.getToken())).append("&selectedPids=").append(sbPids.toString());
 
         startDownload(sbUrl.toString());
     }

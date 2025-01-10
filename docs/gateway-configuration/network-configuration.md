@@ -17,7 +17,6 @@ The **IPv4** and **IPv6** tabs contain the following configuration parameters:
     - Enabled for LAN: designates the interface for a local network. It can be set as a DHCP server for hosts on the local network and can serve as a default gateway for those hosts; however, it cannot be set as an actual gateway interface for this device. That is, packets must be routed from this interface to another interface that is configured as WAN. The interface is automatically brought up at boot.
     - Enabled for WAN: designates the interface as a gateway to an external network. The interface is automatically brought up at boot.
     - Not Managed: the interface will be ignored by Kura (available only for **IPv4**).
-    - Layer 2 Only: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot (available only for **IPv4**).
 - **WAN Priority** - configure the network failover. See [here](network-failover.md) for more details.
 - **Configure**
     - Manually: allows manual entry of the _IP Address_ and _Netmask_ fields, if the interface is configured as LAN; allows manual entry of the _IP Address_, _Netmask_, _Gateway_, and _DNS Servers_ fields, if the interface is designated as WAN.
@@ -34,6 +33,10 @@ The **IPv4** and **IPv6** tabs contain the following configuration parameters:
     - Disabled: disables the privacy extension.
     - Prefer public addresses: use public address for outgoing traffic.
     - Prefer temporary addresses: prefer temporary address for outgoing traffic.
+
+??? tip "Layer 2 Only status support"
+    "Layer 2 Only" is no longer supported on Kura generic profiles.
+    "Layer 2 Only" interfaces are now considered as "Disabled" interfaces. Originally the "Layer 2 Only" status was used to configure the interface without an IP address. This configuration can now be achieved by setting the network interface as "Disabled" (which is the default).
 
 If the network interface is configured as *Enabled for LAN* and manually configured (i.e., not a DHCP client) in the **IPV4** tab, the **DHCPv4 & NAT** tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.
 
@@ -119,7 +122,7 @@ Name                                             | Type     | Description       
 
 Name                                                | Type     | Description                              | Default value
 ----------------------------------------------------|----------|------------------------------------------|----------------------------
-`net.interface.<interface>.config.ip4.status`	    | String   | The status of the interface for the IPv4 configuration; possibile values are: `netIPv4StatusDisabled`, `netIPv4StatusUnmanaged`, `netIPv4StatusL2Only`, `netIPv4StatusEnabledLAN`, `netIPv4StatusEnabledWAN`, `netIPv4StatusUnknown` | `netIPv4StatusDisabled` (see note below)
+`net.interface.<interface>.config.ip4.status`	    | String   | The status of the interface for the IPv4 configuration; possibile values are: `netIPv4StatusDisabled`, `netIPv4StatusUnmanaged`, `netIPv4StatusEnabledLAN`, `netIPv4StatusEnabledWAN`, `netIPv4StatusUnknown` | `netIPv4StatusDisabled` (see note below)
 `net.interface.<interface>.config.ip4.wan.priority` | Integer  | (NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See [Network Failover](./network-failover.md) for further details | -1
 `net.interface.<interface>.config.ip4.address`      | String   | The IPv4 address assigned to the network interface |
 `net.interface.<interface>.config.ip4.prefix`	    | Short    | The IPv4 netmask assigned to the network interface | -1
@@ -152,7 +155,7 @@ Name                                                     | Type     | Descriptio
 
 Name                                                  | Type     | Description                              | Default value
 ------------------------------------------------------|----------|------------------------------------------|----------------------------
-`net.interface.<interface>.config.ip6.status`	      | String   | The status of the interface for the IPv6 configuration; possibile values are: `netIPv6StatusDisabled`, `netIPv6StatusUnmanaged`, `netIPv6StatusL2Only`, `netIPv6StatusEnabledLAN`, `netIPv6StatusEnabledWAN`, `netIPv6StatusUnknown` | `netIPv6StatusDisabled` (see note below)
+`net.interface.<interface>.config.ip6.status`	      | String   | The status of the interface for the IPv6 configuration; possibile values are: `netIPv6StatusDisabled`, `netIPv6StatusUnmanaged`, `netIPv6StatusEnabledLAN`, `netIPv6StatusEnabledWAN`, `netIPv6StatusUnknown` | `netIPv6StatusDisabled` (see note below)
 `net.interface.<interface>.config.ip6.wan.priority`   | Integer | (NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See [Network Failover](./network-failover.md) for further details | -1
 `net.interface.<interface>.config.ip6.address.method` | String   | The IPv6 configuration method; possible values are: `AUTO`, `DHCP`, `MANUAL`. | `AUTO`
 `net.interface.<interface>.config.ip6.address`        | String   | The IPv6 address assigned to the network interface |

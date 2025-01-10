@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,10 +20,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Timer;
 
 import org.eclipse.kura.nm.enums.MMModemLocationSource;
 import org.eclipse.kura.nm.enums.MMModemState;
 import org.eclipse.kura.nm.signal.handlers.NMModemResetHandler;
+import org.eclipse.kura.nm.signal.handlers.NMModemResetTimerTask;
 import org.eclipse.kura.nm.status.SimProperties;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
@@ -49,6 +51,7 @@ public class ModemManagerDbusWrapper {
     private final DBusConnection dbusConnection;
 
     private final Map<String, NMModemResetHandler> modemHandlers = new HashMap<>();
+    private final Map<String, MMFailedModemResetHandler> failedModemHandlers = new HashMap<>();
 
     public ModemManagerDbusWrapper(DBusConnection dbusConnection) {
         this.dbusConnection = dbusConnection;
@@ -140,6 +143,15 @@ public class ModemManagerDbusWrapper {
 
     public MMModemState getMMModemState(Properties modemProperties) {
         return MMModemState.toMMModemState(modemProperties.Get(MM_MODEM_NAME, MM_MODEM_PROPERTY_STATE));
+    }
+
+    public MMModemState getMMModemState(String modemPath) throws DBusException {
+        Optional<Properties> properties = getModemProperties(modemPath);
+        if (properties.isPresent()) {
+            return getMMModemState(properties.get());
+        } else {
+            return MMModemState.MM_MODEM_STATE_UNKNOWN;
+        }
     }
 
     public Optional<Properties> getModemProperties(String modemPath) throws DBusException {
@@ -273,6 +285,86 @@ public class ModemManagerDbusWrapper {
                 logger.warn("Couldn't remove signal handler for: {}. Caused by:", handler.getNMDevicePath(), e);
             }
             this.modemHandlers.remove(deviceId);
+        }
+    }
+
+    protected void failedResetHandlerEnable(String deviceId, Optional<String> modemManagerDbusPath, int delayMinutes)
+            throws DBusException {
+        if (!modemManagerDbusPath.isPresent()) {
+            logger.warn("Cannot retrieve modem device for {}. Skipping modem reset monitor setup.", deviceId);
+            return;
+        }
+
+        Modem mmModemDevice = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemManagerDbusPath.get(), Modem.class);
+
+        MMFailedModemResetHandler resetHandler = new MMFailedModemResetHandler(mmModemDevice,
+                modemManagerDbusPath.get(), delayMinutes);
+        resetHandler.schedule();
+
+        this.failedModemHandlers.put(deviceId, resetHandler);
+    }
+
+    protected void failedResetHandlersDisable() {
+        for (String deviceId : this.failedModemHandlers.keySet()) {
+            failedResetHandlersDisable(deviceId);
+        }
+        this.modemHandlers.clear();
+    }
+
+    protected void failedResetHandlersDisable(String deviceId) {
+        if (this.failedModemHandlers.containsKey(deviceId)) {
+            MMFailedModemResetHandler handler = this.failedModemHandlers.get(deviceId);
+            handler.cancel();
+        }
+    }
+
+    protected boolean isMMFailedModemResetTimerArmed(String deviceId) {
+        return this.failedModemHandlers.containsKey(deviceId);
+    }
+
+    private class MMFailedModemResetTimerTask extends NMModemResetTimerTask {
+
+        private final String modemManagerDbusPath;
+
+        public MMFailedModemResetTimerTask(Modem modem, String modemManagerDbusPath) {
+            super(modem);
+            this.modemManagerDbusPath = modemManagerDbusPath;
+        }
+
+        @Override
+        public void run() {
+            try {
+                MMModemState modemState = getMMModemState(modemManagerDbusPath);
+                if (MMModemState.MM_MODEM_STATE_FAILED.equals(modemState)) {
+                    super.run();
+                }
+            } catch (DBusException e) {
+                ModemManagerDbusWrapper.logger.warn("Couldn't get state of modem interface, caused by:", e);
+            }
+        }
+
+    }
+
+    private class MMFailedModemResetHandler {
+
+        private final Timer timer = new Timer("FailedModemResetTimer");
+        private final MMFailedModemResetTimerTask task;
+        private final long delay;
+
+        public MMFailedModemResetHandler(Modem modem, String modemManagerDbusPath, long delayMinutes) {
+            this.delay = delayMinutes * 60L * 1000L;
+            this.task = new MMFailedModemResetTimerTask(modem, modemManagerDbusPath);
+        }
+
+        public void schedule() {
+            this.timer.schedule(this.task, this.delay);
+        }
+
+        public void cancel() {
+            if (this.task != null) {
+                this.task.cancel();
+            }
+            this.timer.cancel();
         }
     }
 }

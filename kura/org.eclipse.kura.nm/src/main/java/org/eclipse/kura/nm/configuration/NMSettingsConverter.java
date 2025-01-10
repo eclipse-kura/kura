@@ -30,8 +30,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import javax.xml.bind.DatatypeConverter;
-
 import org.bouncycastle.openssl.PKCS8Generator;
 import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
 import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8EncryptorBuilder;
@@ -58,6 +56,8 @@ import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.settings.Connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.xml.bind.DatatypeConverter;
 
 public class NMSettingsConverter {
 
@@ -148,17 +148,17 @@ public class NMSettingsConverter {
         Map<String, Variant<?>> settings = new HashMap<>();
 
         switch (Kura8021xEAP.fromString(eap)) {
-            case KURA_8021X_EAP_TTLS:
-                create8021xTunneledTls(props, deviceId, settings);
-                break;
-            case KURA_8021X_EAP_PEAP:
-                create8021xProtectedEap(props, deviceId, settings);
-                break;
-            case KURA_8021X_EAP_TLS:
-                create8021xTls(props, deviceId, settings);
-                break;
-            default:
-                throw new IllegalArgumentException(String.format("Security type 802-1x EAP \"%s\" is not supported.", eap));
+        case KURA_8021X_EAP_TTLS:
+            create8021xTunneledTls(props, deviceId, settings);
+            break;
+        case KURA_8021X_EAP_PEAP:
+            create8021xProtectedEap(props, deviceId, settings);
+            break;
+        case KURA_8021X_EAP_TLS:
+            create8021xTls(props, deviceId, settings);
+            break;
+        default:
+            throw new IllegalArgumentException(String.format("Security type 802-1x EAP \"%s\" is not supported.", eap));
         }
 
         if (!phase2.isPresent()) {
@@ -166,13 +166,13 @@ public class NMSettingsConverter {
         }
 
         switch (Kura8021xInnerAuth.fromString(phase2.get())) {
-            case KURA_8021X_INNER_AUTH_NONE:
-                break;
-            case KURA_8021X_INNER_AUTH_MSCHAPV2:
-                create8021xMschapV2(props, deviceId, settings);
-                break;
-            default:
-                throw new IllegalArgumentException(
+        case KURA_8021X_INNER_AUTH_NONE:
+            break;
+        case KURA_8021X_INNER_AUTH_MSCHAPV2:
+            create8021xMschapV2(props, deviceId, settings);
+            break;
+        default:
+            throw new IllegalArgumentException(
                     String.format("Security type 802-1x InnerAuth (Phase2) \"%s\" is not supported.", phase2));
         }
 
@@ -493,20 +493,20 @@ public class NMSettingsConverter {
                 props.get(String.class, KURA_PROPS_KEY_WIFI_SECURITY_TYPE, deviceId, propMode.toLowerCase()));
 
         switch (securityType) {
-            case SECURITY_WEP:
-                return createWEPSettings(props, deviceId, propMode);
-            case SECURITY_WPA:
-            case SECURITY_WPA2:
-            case SECURITY_WPA_WPA2:
-                return createWPAWPA2Settings(props, deviceId, propMode);
-            case SECURITY_WPA3:
-                return createWPA3Settings(props, deviceId, propMode);
-            case SECURITY_WPA2_WPA3:
-                return createWPA2WPA3Settings(props, deviceId, propMode);
-            case SECURITY_WPA2_WPA3_ENTERPRISE:
-                return createWPA2WPA3EnterpriseSettings();
-            default:
-                throw new IllegalArgumentException(String.format("Security type \"%s\" is not supported.", securityType));
+        case SECURITY_WEP:
+            return createWEPSettings(props, deviceId, propMode);
+        case SECURITY_WPA:
+        case SECURITY_WPA2:
+        case SECURITY_WPA_WPA2:
+            return createWPAWPA2Settings(props, deviceId, propMode);
+        case SECURITY_WPA3:
+            return createWPA3Settings(props, deviceId, propMode);
+        case SECURITY_WPA2_WPA3:
+            return createWPA2WPA3Settings(props, deviceId, propMode);
+        case SECURITY_WPA2_WPA3_ENTERPRISE:
+            return createWPA2WPA3EnterpriseSettings();
+        default:
+            throw new IllegalArgumentException(String.format("Security type \"%s\" is not supported.", securityType));
         }
     }
 
@@ -782,12 +782,12 @@ public class NMSettingsConverter {
 
     private static String wifiModeConvert(String kuraMode) {
         switch (kuraMode) {
-            case "INFRA":
-                return "infrastructure";
-            case "MASTER":
-                return "ap";
-            default:
-                throw new IllegalArgumentException(String.format("Unsupported WiFi mode \"%s\"", kuraMode));
+        case "INFRA":
+            return "infrastructure";
+        case "MASTER":
+            return "ap";
+        default:
+            throw new IllegalArgumentException(String.format("Unsupported WiFi mode \"%s\"", kuraMode));
         }
     }
 
@@ -808,58 +808,58 @@ public class NMSettingsConverter {
         }
 
         switch (kuraBand) {
-            case "RADIO_MODE_80211a":
-            case "RADIO_MODE_80211_AC":
-                return Optional.of("a");
-            case "RADIO_MODE_80211b":
-            case "RADIO_MODE_80211g":
-                return Optional.of("bg");
-            default:
-                throw new IllegalArgumentException(String.format("Unsupported WiFi band \"%s\"", kuraBand));
+        case "RADIO_MODE_80211a":
+        case "RADIO_MODE_80211_AC":
+            return Optional.of("a");
+        case "RADIO_MODE_80211b":
+        case "RADIO_MODE_80211g":
+            return Optional.of("bg");
+        default:
+            throw new IllegalArgumentException(String.format("Unsupported WiFi band \"%s\"", kuraBand));
         }
     }
 
     private static List<String> wifiCipherConvert(String kuraCipher) {
         switch (kuraCipher) {
-            case "CCMP":
-                return Arrays.asList("ccmp");
-            case "TKIP":
-                return Arrays.asList("tkip");
-            case "CCMP_TKIP":
-                return Arrays.asList("tkip", "ccmp");
-            default:
-                throw new IllegalArgumentException(String.format("Unsupported WiFi cipher \"%s\"", kuraCipher));
+        case "CCMP":
+            return Arrays.asList("ccmp");
+        case "TKIP":
+            return Arrays.asList("tkip");
+        case "CCMP_TKIP":
+            return Arrays.asList("tkip", "ccmp");
+        default:
+            throw new IllegalArgumentException(String.format("Unsupported WiFi cipher \"%s\"", kuraCipher));
         }
     }
 
     private static List<String> wifiProtoConvert(KuraWifiSecurityType securityType) {
         switch (securityType) {
-            case SECURITY_WPA:
-                return Arrays.asList("wpa");
-            case SECURITY_WPA2:
-            case SECURITY_WPA2_WPA3:
-            case SECURITY_WPA3:
-                return Arrays.asList("rsn");
-            case SECURITY_WPA_WPA2:
-                return Arrays.asList();
-            default:
-                throw new IllegalArgumentException(String.format("Unsupported WiFi proto \"%s\"", securityType));
+        case SECURITY_WPA:
+            return Arrays.asList("wpa");
+        case SECURITY_WPA2:
+        case SECURITY_WPA2_WPA3:
+        case SECURITY_WPA3:
+            return Arrays.asList("rsn");
+        case SECURITY_WPA_WPA2:
+            return Arrays.asList();
+        default:
+            throw new IllegalArgumentException(String.format("Unsupported WiFi proto \"%s\"", securityType));
         }
     }
 
     private static String connectionTypeConvert(NMDeviceType deviceType) {
         switch (deviceType) {
-            case NM_DEVICE_TYPE_ETHERNET:
-                return "802-3-ethernet";
-            case NM_DEVICE_TYPE_WIFI:
-                return "802-11-wireless";
-            case NM_DEVICE_TYPE_MODEM:
-                return "gsm";
-            case NM_DEVICE_TYPE_VLAN:
-                return "vlan";
-            // ... WIP
-            default:
-                throw new IllegalArgumentException(String
+        case NM_DEVICE_TYPE_ETHERNET:
+            return "802-3-ethernet";
+        case NM_DEVICE_TYPE_WIFI:
+            return "802-11-wireless";
+        case NM_DEVICE_TYPE_MODEM:
+            return "gsm";
+        case NM_DEVICE_TYPE_VLAN:
+            return "vlan";
+        // ... WIP
+        default:
+            throw new IllegalArgumentException(String
                     .format("Unsupported connection type conversion from NMDeviceType \"%s\"", deviceType.toString()));
         }
     }

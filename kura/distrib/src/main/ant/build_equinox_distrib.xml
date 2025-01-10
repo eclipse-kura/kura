@@ -776,17 +776,12 @@ fi]]>
         </antcall>
         <!--JAXB dependenices-->
         <antcall target="install-plugin">
-            <param name="bundle.file" value="org.apache.servicemix.specs.jaxb-api-2.3_${org.apache.servicemix.specs.jaxb-api-2.3.version}.jar"/>
+            <param name="bundle.file" value="jakarta.activation-api_${jakarta.activation-api.javax.version}.jar"/>
             <param name="start.level" value="2"/>
             <param name="start" value=""/>
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="org.apache.servicemix.specs.stax-api-1.0_${org.apache.servicemix.specs.stax-api-1.0.version}.jar"/>
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="org.apache.servicemix.specs.activation-api-1.1_${org.apache.servicemix.specs.activation-api-1.1.version}.jar"/>
+            <param name="bundle.file" value="jakarta.xml.bind-api_${jakarta.xml.bind-api.javax.version}.jar"/>
             <param name="start.level" value="2"/>
             <param name="start" value=""/>
         </antcall>

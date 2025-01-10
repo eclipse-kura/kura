@@ -567,9 +567,8 @@ public class NMDbusConnector {
             dsLock.waitForSignal();
         } catch (DBusExecutionException e) {
             logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);
-            // If the connection fails at the first try, check if the modem is in failed state (sim missing?) and
-            // schedule a reset after a delay time. When the timer is expired, check again for the state and perform the
-            // reset if needed.
+            // If a modem connection fails at the first try, it stays in the failed state, thus not triggering the usual
+            // modem reset procedure. So, start a reset timer here.
             if (isModemNotConnected(device, deviceType)) {
                 int delayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
                 Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
@@ -616,52 +615,6 @@ public class NMDbusConnector {
         if (this.failedModemResetHandlers.containsKey(deviceId)) {
             this.failedModemResetHandlers.get(deviceId).cancel();
             this.failedModemResetHandlers.remove(deviceId);
-        }
-    }
-
-    private class NMFailedModemResetTimerTask extends NMModemResetTimerTask {
-
-        Device device;
-
-        public NMFailedModemResetTimerTask(Modem modem, Device device) {
-            super(modem);
-            this.device = device;
-        }
-
-        @Override
-        public void run() {
-            try {
-                NMDeviceState state = NMDbusConnector.this.networkManager.getDeviceState(this.device);
-                if (!NMDeviceState.isConnected(state)) {
-                    super.run();
-                }
-            } catch (DBusException e) {
-                NMDbusConnector.logger.warn("Couldn't get state of modem interface, caused by:", e);
-            }
-        }
-
-    }
-
-    private class NMFailedModemResetHandler {
-
-        private Timer failedModemResetTimer = new Timer("FailedModemResetTimer");
-        private NMFailedModemResetTimerTask task;
-
-        public NMFailedModemResetHandler(NMFailedModemResetTimerTask task) {
-            this.task = task;
-        }
-
-        public void schedule(long delayMinutes) {
-            if (this.task != null) {
-                this.failedModemResetTimer.schedule(this.task, delayMinutes * 60L * 1000L);
-            }
-        }
-
-        public void cancel() {
-            if (this.task != null) {
-                this.task.cancel();
-            }
-            this.failedModemResetTimer.cancel();
         }
     }
 
@@ -813,5 +766,51 @@ public class NMDbusConnector {
         }
 
         return modemsPath;
+    }
+
+    private class NMFailedModemResetTimerTask extends NMModemResetTimerTask {
+
+        Device device;
+
+        public NMFailedModemResetTimerTask(Modem modem, Device device) {
+            super(modem);
+            this.device = device;
+        }
+
+        @Override
+        public void run() {
+            try {
+                NMDeviceState state = NMDbusConnector.this.networkManager.getDeviceState(this.device);
+                if (!NMDeviceState.isConnected(state)) {
+                    super.run();
+                }
+            } catch (DBusException e) {
+                NMDbusConnector.logger.warn("Couldn't get state of modem interface, caused by:", e);
+            }
+        }
+
+    }
+
+    private class NMFailedModemResetHandler {
+
+        private Timer failedModemResetTimer = new Timer("FailedModemResetTimer");
+        private NMFailedModemResetTimerTask task;
+
+        public NMFailedModemResetHandler(NMFailedModemResetTimerTask task) {
+            this.task = task;
+        }
+
+        public void schedule(long delayMinutes) {
+            if (this.task != null) {
+                this.failedModemResetTimer.schedule(this.task, delayMinutes * 60L * 1000L);
+            }
+        }
+
+        public void cancel() {
+            if (this.task != null) {
+                this.task.cancel();
+            }
+            this.failedModemResetTimer.cancel();
+        }
     }
 }

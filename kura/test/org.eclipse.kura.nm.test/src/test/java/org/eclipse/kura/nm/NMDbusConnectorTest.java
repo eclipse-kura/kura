@@ -1127,6 +1127,32 @@ public class NMDbusConnectorTest {
         thenActivateConnectionIsNotCalledFor("wlan0");
     }
 
+    @Test
+    public void shouldNotStartFailedModemResetTimerIfConnectionSucceeds() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("1-6", "wwan0", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+        givenNetworkConfigMapWith("net.interfaces", "1-6");
+        givenNetworkConfigMapWith("net.interface.1-6.config.resetTimeout", 2);
+        givenNetworkConfigMapWith("net.interface.1-6.config.dhcpClient4.enabled", true);
+        givenNetworkConfigMapWith("net.interface.1-6.config.ip4.status", "netIPv4StatusEnabledWAN");
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+    }
+
+    // @Test
+    // public void shouldStartFailedModemResetTimerIfConnectionFails() {
+    //
+    // }
+    //
+    // @Test
+    // public void shouldResetFailedModemAfterDelay() {
+    //
+    // }
+
     /*
      * Given
      */

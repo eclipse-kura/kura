@@ -745,16 +745,6 @@ fi]]>
             <param name="start" value=""/>
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.file" value="org.apache.felix.http.sslfilter_${org.apache.felix.http.sslfilter.version}.jar"/>
-            <param name="start.level" value="5"/>
-            <param name="start" value=""/>
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.file" value="jersey-media-multipart_${org.glassfish.jersey.version}.jar" />
-            <param name="start.level" value="2" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
             <param name="bundle.file" value="org.apache.aries.spifly.dynamic.bundle_${org.apache.aries.spifly.dynamic.bundle.version}.jar" />
             <param name="start.level" value="2" />
             <param name="start" value="s" />

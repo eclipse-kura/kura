@@ -197,7 +197,7 @@
                     -DbuildingWithTycho=true -Dosgi.locking=none
                     -Dds.showtrace=true
                     -Djava.io.tmpdir=/tmp
-                    -Dorg.osgi.framework.storage=${project.basedir}/osgi/framework_storage
+                    -Dorg.osgi.framework.storage=${project.basedir}/target/osgi/framework_storage
                     -Dosgi.clean=true
                     -Dkura.home=${project.basedir}/target/kura
                     -Dkura.plugins=${project.basedir}/target/kura/plugins
@@ -240,7 +240,7 @@
                     -DbuildingWithTycho=true -Dosgi.locking=none
                     -Dds.showtrace=true
                     -Djava.io.tmpdir=/tmp
-                    -Dorg.osgi.framework.storage=${project.basedir}/osgi/framework_storage
+                    -Dorg.osgi.framework.storage=${project.basedir}/target/osgi/framework_storage
                     -Dosgi.clean=true
                     -Dkura.home=${project.basedir}/target/kura
                     -Dkura.plugins=${project.basedir}/target/kura/plugins

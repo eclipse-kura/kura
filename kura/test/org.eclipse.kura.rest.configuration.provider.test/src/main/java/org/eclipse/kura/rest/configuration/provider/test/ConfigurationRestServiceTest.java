@@ -257,6 +257,17 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         thenTestPropertyTypeIs(Json.value("INTEGER"));
         thenTestPropertyValueIs(Json.value(123));
     }
+    
+    @Test
+    public void testGetShortProperty() throws KuraException {
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.SHORT, (short) 123);
+
+        whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
+
+        thenRequestSucceeds();
+        thenTestPropertyTypeIs(Json.value("SHORT"));
+        thenTestPropertyValueIs(Json.value(123));
+    }
 
     @Test
     public void testGetLongProperty() throws KuraException {
@@ -408,6 +419,17 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         thenTestPropertyTypeIs(Json.value("INTEGER"));
         thenTestPropertyValueIs(Json.array(1, 2, 3));
     }
+    
+    @Test
+    public void testGetShortArrayProperty() throws KuraException {
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.SHORT, new Short[] { 1, 2, 3 });
+
+        whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
+
+        thenRequestSucceeds();
+        thenTestPropertyTypeIs(Json.value("SHORT"));
+        thenTestPropertyValueIs(Json.array(1, 2, 3));
+    }
 
     @Test
     public void testGetLongArrayProperty() throws KuraException {
@@ -510,6 +532,15 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         thenRequestSucceeds();
         thenReceivedPropertiesForPidContains("foo", "testProp", 123);
     }
+    
+    @Test
+    public void testUpdateShortProperty() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
+                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"SHORT\",\"value\":123}}" + "}" + "]}");
+
+        thenRequestSucceeds();
+        thenReceivedPropertiesForPidContains("foo", "testProp", (short) 123);
+    }
 
     @Test
     public void testUpdateLongProperty() throws KuraException {
@@ -599,6 +630,16 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
         thenRequestSucceeds();
         thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Integer[] { 1, 2, 3 });
+    }
+    
+    @Test
+    public void testUpdateShortArrayProperty() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\","
+                        + "properties: {\"testProp\":{\"type\":\"SHORT\",\"value\":[1,2,3]}}" + "}" + "]}");
+
+        thenRequestSucceeds();
+        thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Short[] { 1, 2, 3 });
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 import java.io.File;
@@ -64,6 +65,7 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -1232,101 +1234,97 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     private ComponentConfiguration getSelfConfiguringComponentConfiguration(String pid) {
         ComponentConfiguration cc = null;
+        final ServiceReference<?>[] refs = ServiceUtil.getServiceReferences(this.bundleContext,
+                SelfConfiguringComponent.class, null);
+
         try {
-            ServiceReference<?>[] refs = this.ctx.getBundleContext().getServiceReferences((String) null, null);
-            if (refs != null) {
-                for (ServiceReference<?> ref : refs) {
-                    String ppid = (String) ref.getProperty(KURA_SERVICE_PID);
-                    if (pid.equals(ppid)) {
-                        Object obj = this.ctx.getBundleContext().getService(ref);
-                        try {
-                            if (obj instanceof SelfConfiguringComponent) {
-                                SelfConfiguringComponent selfConfigComp = null;
-                                selfConfigComp = (SelfConfiguringComponent) obj;
-                                try {
-                                    cc = selfConfigComp.getConfiguration();
-                                    if (cc.getPid() == null || !cc.getPid().equals(pid)) {
-                                        logger.error(
-                                                "Invalid pid for returned Configuration of SelfConfiguringComponent with pid: "
-                                                        + pid + ". Ignoring it.");
-                                        return null;
-                                    }
+            for (ServiceReference<?> ref : refs) {
+                String ppid = (String) ref.getProperty(KURA_SERVICE_PID);
+                final SelfConfiguringComponent selfConfigComp = (SelfConfiguringComponent) this.bundleContext
+                        .getService(ref);
+                if (pid.equals(ppid)) {
 
-                                    OCD ocd = cc.getDefinition();
-                                    if (ocd != null) {
-                                        List<AD> ads = ocd.getAD();
-
-                                        if (ads != null) {
-                                            for (AD ad : ads) {
-                                                String adId = ad.getId();
-                                                String adType = ad.getType().value();
-
-                                                if (adId == null) {
-                                                    logger.error(
-                                                            "null required id for AD for returned Configuration of SelfConfiguringComponent with pid: {}",
-                                                            pid);
-                                                    return null;
-                                                }
-                                                if (adType == null) {
-                                                    logger.error(
-                                                            "null required type for AD id: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
-                                                            adId, pid);
-                                                    return null;
-                                                }
-
-                                                Map<String, Object> props = cc.getConfigurationProperties();
-                                                if (props != null) {
-                                                    Object value = props.get(adId);
-                                                    if (value != null) {
-                                                        String propType;
-                                                        if (!value.getClass().isArray()) {
-                                                            propType = value.getClass().getSimpleName();
-                                                        } else {
-                                                            propType = value.getClass().getComponentType()
-                                                                    .getSimpleName();
-                                                        }
-
-                                                        try {
-                                                            logger.debug(
-                                                                    "pid: {}, property name: {}, type: {}, value: {}",
-                                                                    pid, adId, propType, value);
-                                                            Scalar propertyScalar = Scalar.fromValue(propType);
-                                                            Scalar adScalar = Scalar.fromValue(adType);
-                                                            if (propertyScalar != adScalar) {
-                                                                logger.error(
-                                                                        "Type: {} for property named: {} does not match the AD type: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
-                                                                        new Object[] { propType, adId, adType, pid });
-                                                                return null;
-                                                            }
-                                                        } catch (IllegalArgumentException e) {
-                                                            logger.error(
-                                                                    "Invalid class: {} for property named: {} for returned Configuration of SelfConfiguringComponent with pid: "
-                                                                            + pid,
-                                                                    propType, adId);
-                                                            return null;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                } catch (KuraException e) {
-                                    logger.error(GETTING_CONFIGURATION_ERROR, pid, e);
-                                }
-                            } else {
-                                logger.error("Component {} is not a SelfConfiguringComponent. Ignoring it.", obj);
-                            }
-                        } finally {
-                            this.ctx.getBundleContext().ungetService(ref);
-                        }
+                    cc = selfConfigComp.getConfiguration();
+                    if (!isValidSelfConfiguringComponent(pid, cc)) {
+                        return null;
                     }
                 }
             }
-        } catch (InvalidSyntaxException e) {
+        } catch (KuraException e) {
             logger.error(GETTING_CONFIGURATION_ERROR, pid, e);
+        } finally {
+            ServiceUtil.ungetServiceReferences(this.bundleContext, refs);
         }
 
         return cc;
+    }
+
+    private boolean isValidSelfConfiguringComponent(String pid, ComponentConfiguration cc) {
+
+        if (isNull(cc) || cc.getPid() == null || !cc.getPid().equals(pid)) {
+            logger.error(
+                    "Invalid pid for returned Configuration of SelfConfiguringComponent with pid: {}. Ignoring it.",
+                    pid);
+            return false;
+        }
+
+        OCD ocd = cc.getDefinition();
+        if (isNull(ocd) || isNull(ocd.getAD())) {
+            return false;
+        }
+        
+        List<AD> ads = ocd.getAD();
+
+        for (AD ad : ads) {
+            String adId = ad.getId();
+            String adType = ad.getType().value();
+
+            if (isNull(adId) || isNull(adType)) {
+                logger.error(
+                        "null required type for AD id: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
+                        adId, pid);
+                return false;
+            }
+
+            Map<String, Object> props = cc.getConfigurationProperties();
+            if (!isNull(props) && !isNull(props.get(adId)) && !isMatchingADType(pid, adId, adType, props.get(adId))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isMatchingADType(String pid, String adId, String adType, Object value) {
+        boolean result = false;
+        try {
+            logger.debug("pid: {}, property name: {}, value: {}", pid, adId, value);
+            Scalar propertyScalar = getScalarFromObject(value);
+            Scalar adScalar = Scalar.fromValue(adType);
+            if (propertyScalar != adScalar) {
+                logger.error(
+                        "Type: {} for property named: {} does not match the AD type: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
+                        propertyScalar.name(), adId, adType, pid);
+            }
+            result = true;
+        } catch (IllegalArgumentException e) {
+            logger.error(
+                    "Invalid class for property named: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
+                    adId, pid);
+        }
+        return result;
+    }
+
+    private Scalar getScalarFromObject(Object p) {
+        Class<?> clazz = p.getClass();
+        if (clazz.isArray()) {
+            Object[] tempArray = (Object[]) p;
+            if (tempArray.length > 0 && tempArray[0] != null) {
+                clazz = tempArray[0].getClass();
+            } else {
+                clazz = clazz.getComponentType();
+            }
+        }
+        return Scalar.fromValue(clazz.getSimpleName());
     }
 
     private TreeSet<Long> getSnapshotsInternal() {
@@ -1901,10 +1899,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             if (this == obj) {
                 return true;
             }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
+            if (obj == null || getClass() != obj.getClass()) {
                 return false;
             }
             TrackedComponentFactory other = (TrackedComponentFactory) obj;

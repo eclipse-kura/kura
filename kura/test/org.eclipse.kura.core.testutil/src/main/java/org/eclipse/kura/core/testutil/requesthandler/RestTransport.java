@@ -28,14 +28,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +74,12 @@ public class RestTransport implements Transport {
         }
 
         try {
+            final ConfigurationService configurationService = trackService(ConfigurationService.class);
+            Map<String, Object> restServiceConfiguration = initialRestServiceConfiguration();
+
+            ServiceUtil.updateComponentConfiguration(configurationService, "org.eclipse.kura.internal.rest.provider.RestService", restServiceConfiguration).get(30,
+                    TimeUnit.SECONDS);
+            
             waitPortOpen("localhost", 8080, 3, TimeUnit.MINUTES);
 
             ServiceUtil
@@ -78,7 +88,7 @@ public class RestTransport implements Transport {
                     .get(1, TimeUnit.MINUTES);
 
             Thread.sleep(1000);
-
+            
             initialized = true;
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -86,6 +96,21 @@ public class RestTransport implements Transport {
         } catch (final Exception e) {
             throw new IllegalStateException(e);
         }
+    }
+    
+    private <T> T trackService(final Class<T> classz)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        return ServiceUtil
+                .trackService(classz, Optional.empty()).get(30, TimeUnit.SECONDS);
+    }
+    
+    private Map<String, Object> initialRestServiceConfiguration() {
+
+        final Map<String, Object> restServiceConfiguration = new HashMap<>();
+
+        restServiceConfiguration.put("allowed.ports", new Integer[0]);
+
+        return restServiceConfiguration;
     }
 
     public static void waitPortOpen(final String host, final int port, final long timeout, final TimeUnit timeoutUnit)

@@ -11,10 +11,6 @@
     <artifactId>p2-repo-equinox</artifactId>
     <packaging>pom</packaging>
 
-    <properties>
-        <equinox.download.url>https://www.eclipse.org/downloads/download.php?file&#61;/equinox/drops/R-4.33-202409030240/equinox-SDK-4.33.zip&#38;mirror_id&#61;1</equinox.download.url>
-    </properties>
-
     <build>
         <plugins>
             <plugin>

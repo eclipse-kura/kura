@@ -323,11 +323,6 @@
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
-                                <id>org.eclipse.osgi.services</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
                                 <id>org.eclipse.osgi.util</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>

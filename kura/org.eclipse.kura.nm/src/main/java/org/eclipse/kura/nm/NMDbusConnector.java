@@ -561,26 +561,14 @@ public class NMDbusConnector {
             connection = Optional.of(createdConnection);
         }
 
+        boolean activationSucceeded = true;
         try {
-            this.modemManager.failedResetHandlersDisable(deviceId);
+            this.modemManager.failedModemResetTimerDisable(deviceId);
             this.networkManager.activateConnection(connection.get(), device);
             dsLock.waitForSignal();
         } catch (DBusExecutionException e) {
             logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);
-            // If a modem connection fails at the first try, it stays in the failed state, thus not triggering the usual
-            // modem reset procedure. So, start a reset timer here.
-            if (isModemFailed(device, deviceType)) {
-                int delayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
-
-                if (delayMinutes != 0) {
-                    Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
-
-                    logger.info("Modem {} in failed state or unavailable. Scheduling modem reset in {} minutes ...",
-                            device.getObjectPath(), delayMinutes);
-
-                    this.modemManager.failedResetHandlerEnable(deviceId, mmDbusPath, delayMinutes);
-                }
-            }
+            activationSucceeded = false;
         }
 
         // Housekeeping
@@ -593,24 +581,29 @@ public class NMDbusConnector {
 
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
             int delayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
+            Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
 
-            if (delayMinutes != 0) {
-                Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
-                this.modemManager.resetHandlerEnable(deviceId, mmDbusPath, delayMinutes, device.getObjectPath());
+            if (delayMinutes == 0 || !mmDbusPath.isPresent()) {
+                return;
             }
+
+            this.modemManager.resetHandlerEnable(deviceId, mmDbusPath, delayMinutes, device.getObjectPath());
+
+            // If a modem connection fails at the first try, it stays in the failed state, thus not triggering the usual
+            // modem reset procedure. So, start a reset timer here.
+            if (!activationSucceeded && isModemFailed(mmDbusPath.get())) {
+                logger.info("Modem {} in failed state or unavailable. Scheduling modem reset in {} minutes ...",
+                        device.getObjectPath(), delayMinutes);
+
+                this.modemManager.failedModemResetTimerEnable(deviceId, mmDbusPath, delayMinutes);
+            }
+
         }
 
     }
 
-    private boolean isModemFailed(Device device, NMDeviceType deviceType) throws DBusException {
-        if (deviceType != NMDeviceType.NM_DEVICE_TYPE_MODEM) {
-            return false;
-        }
-        Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
-        if (!mmDbusPath.isPresent()) {
-            return false;
-        }
-        MMModemState modemState = this.modemManager.getMMModemState(mmDbusPath.get());
+    private boolean isModemFailed(String mmDbusPath) throws DBusException {
+        MMModemState modemState = this.modemManager.getMMModemState(mmDbusPath);
         return MMModemState.MM_MODEM_STATE_FAILED.equals(modemState);
     }
 
@@ -675,7 +668,7 @@ public class NMDbusConnector {
             logger.warn("Can't disable missing device {}", deviceId);
             return;
         }
-        this.modemManager.failedResetHandlersDisable(deviceId);
+        this.modemManager.failedModemResetTimerDisable(deviceId);
         Device device = optDevice.get();
         Optional<Connection> appliedConnection = this.networkManager.getAppliedConnection(device);
 

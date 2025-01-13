@@ -51,7 +51,7 @@ public class ModemManagerDbusWrapper {
     private final DBusConnection dbusConnection;
 
     private final Map<String, NMModemResetHandler> modemHandlers = new HashMap<>();
-    private final Map<String, MMFailedModemResetHandler> failedModemHandlers = new HashMap<>();
+    private final Map<String, MMFailedModemResetTimer> failedModemHandlers = new HashMap<>();
 
     public ModemManagerDbusWrapper(DBusConnection dbusConnection) {
         this.dbusConnection = dbusConnection;
@@ -288,7 +288,7 @@ public class ModemManagerDbusWrapper {
         }
     }
 
-    protected void failedResetHandlerEnable(String deviceId, Optional<String> modemManagerDbusPath, int delayMinutes)
+    protected void failedModemResetTimerEnable(String deviceId, Optional<String> modemManagerDbusPath, int delayMinutes)
             throws DBusException {
         if (!modemManagerDbusPath.isPresent()) {
             logger.warn("Cannot retrieve modem device for {}. Skipping modem reset monitor setup.", deviceId);
@@ -297,24 +297,23 @@ public class ModemManagerDbusWrapper {
 
         Modem mmModemDevice = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemManagerDbusPath.get(), Modem.class);
 
-        MMFailedModemResetHandler resetHandler = new MMFailedModemResetHandler(mmModemDevice,
-                modemManagerDbusPath.get(), delayMinutes);
+        MMFailedModemResetTimer resetHandler = new MMFailedModemResetTimer(mmModemDevice, delayMinutes);
         resetHandler.schedule();
 
         this.failedModemHandlers.put(deviceId, resetHandler);
     }
 
-    protected void failedResetHandlersDisable() {
+    protected void failedModemResetTimerDisable() {
         for (String deviceId : this.failedModemHandlers.keySet()) {
-            failedResetHandlersDisable(deviceId);
+            failedModemResetTimerDisable(deviceId);
         }
         this.modemHandlers.clear();
     }
 
-    protected void failedResetHandlersDisable(String deviceId) {
+    protected void failedModemResetTimerDisable(String deviceId) {
         if (this.failedModemHandlers.containsKey(deviceId)) {
-            MMFailedModemResetHandler handler = this.failedModemHandlers.get(deviceId);
-            handler.cancel();
+            MMFailedModemResetTimer timer = this.failedModemHandlers.get(deviceId);
+            timer.cancel();
         }
     }
 
@@ -324,36 +323,35 @@ public class ModemManagerDbusWrapper {
 
     private class MMFailedModemResetTimerTask extends NMModemResetTimerTask {
 
-        private final String modemManagerDbusPath;
-
-        public MMFailedModemResetTimerTask(Modem modem, String modemManagerDbusPath) {
+        public MMFailedModemResetTimerTask(Modem modem) {
             super(modem);
-            this.modemManagerDbusPath = modemManagerDbusPath;
         }
 
         @Override
         public void run() {
             try {
-                MMModemState modemState = getMMModemState(modemManagerDbusPath);
+                MMModemState modemState = getMMModemState(this.getModemDbusPath());
                 if (MMModemState.MM_MODEM_STATE_FAILED.equals(modemState)) {
                     super.run();
+                } else {
+                    logger.info("Modem state changed. Reset skipped.");
                 }
             } catch (DBusException e) {
-                ModemManagerDbusWrapper.logger.warn("Couldn't get state of modem interface, caused by:", e);
+                logger.warn("Couldn't get state of modem interface, caused by:", e);
             }
         }
 
     }
 
-    private class MMFailedModemResetHandler {
+    private class MMFailedModemResetTimer {
 
         private final Timer timer = new Timer("FailedModemResetTimer");
         private final MMFailedModemResetTimerTask task;
         private final long delay;
 
-        public MMFailedModemResetHandler(Modem modem, String modemManagerDbusPath, long delayMinutes) {
+        public MMFailedModemResetTimer(Modem modem, long delayMinutes) {
             this.delay = delayMinutes * 60L * 1000L;
-            this.task = new MMFailedModemResetTimerTask(modem, modemManagerDbusPath);
+            this.task = new MMFailedModemResetTimerTask(modem);
         }
 
         public void schedule() {

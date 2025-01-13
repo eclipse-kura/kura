@@ -281,10 +281,6 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.ds</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
                             <artifactId>org.apache.felix.scr</artifactId>
                         </dependency>
                         <dependency>
@@ -293,15 +289,7 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.core.runtime</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.io</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.app</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -407,27 +395,12 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.eclipse.equinox.ds</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.apache.felix.scr</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.eclipse.core.runtime</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.eclipse.equinox.io</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.equinox.app</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>

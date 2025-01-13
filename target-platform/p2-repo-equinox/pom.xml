@@ -52,53 +52,198 @@
                 </configuration>
             </plugin>
             <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>${maven-dependency-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>copy-bundles-for-publishing</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.cm</artifactId>
+                                    <version>${org.osgi.service.cm.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.component</artifactId>
+                                    <version>${org.osgi.service.component.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.coordinator</artifactId>
+                                    <version>${org.osgi.service.coordinator.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.device</artifactId>
+                                    <version>${org.osgi.service.device.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.event</artifactId>
+                                    <version>${org.osgi.service.event.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.log.stream</artifactId>
+                                    <version>${org.osgi.service.log.stream.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.metatype</artifactId>
+                                    <version>${org.osgi.service.metatype.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.prefs</artifactId>
+                                    <version>${org.osgi.service.prefs.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.provisioning</artifactId>
+                                    <version>${org.osgi.service.provisioning.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.upnp</artifactId>
+                                    <version>${org.osgi.service.upnp.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.useradmin</artifactId>
+                                    <version>${org.osgi.service.useradmin.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.wireadmin</artifactId>
+                                    <version>${org.osgi.service.wireadmin.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.util.function</artifactId>
+                                    <version>${org.osgi.util.function.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.util.measurement</artifactId>
+                                    <version>${org.osgi.util.measurement.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.util.position</artifactId>
+                                    <version>${org.osgi.util.position.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.util.promise</artifactId>
+                                    <version>${org.osgi.util.promise.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.util.pushstream</artifactId>
+                                    <version>${org.osgi.util.pushstream.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.util.xml</artifactId>
+                                    <version>${org.osgi.util.xml.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.cm</artifactId>
+                                    <version>${org.eclipse.equinox.cm.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.common</artifactId>
+                                    <version>${org.eclipse.equinox.common.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.console</artifactId>
+                                    <version>${org.eclipse.equinox.console.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.registry</artifactId>
+                                    <version>${org.eclipse.equinox.registry.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.event</artifactId>
+                                    <version>${org.eclipse.equinox.event.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.io</artifactId>
+                                    <version>${org.eclipse.equinox.io.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.metatype</artifactId>
+                                    <version>${org.eclipse.equinox.metatype.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.launcher</artifactId>
+                                    <version>${org.eclipse.equinox.launcher.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.util</artifactId>
+                                    <version>${org.eclipse.equinox.util.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.wireadmin</artifactId>
+                                    <version>${org.eclipse.equinox.wireadmin.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.scr</artifactId>
+                                    <version>${org.apache.felix.scr.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.osgi</artifactId>
+                                    <version>${org.eclipse.osgi.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.osgi.util</artifactId>
+                                    <version>${org.eclipse.osgi.util.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.gogo.command</artifactId>
+                                    <version>${org.apache.felix.gogo.command.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.gogo.runtime</artifactId>
+                                    <version>${org.apache.felix.gogo.runtime.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.gogo.shell</artifactId>
+                                    <version>${org.apache.felix.gogo.shell.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                            <stripVersion>false</stripVersion>
+                            <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>${maven-antrun-plugin.version}</version>
                 <executions>
-                    <execution>
-                        <id>download-equinox</id>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <mkdir dir="${project.build.directory}/download" />
-
-                                <get src="${equinox.download.url}" dest="${project.build.directory}/download/equinox.zip" usetimestamp="true" verbose="true" />
-
-                                <delete dir="${project.build.directory}/source/plugins" />
-                                <mkdir dir="${project.build.directory}/source/plugins" />
-                                <unzip src="${project.build.directory}/download/equinox.zip" dest="${project.build.directory}/source/plugins">
-                                    <patternset>
-                                        <exclude name="plugins/org.eclipse.osgi.compatibility.state*.jar" />
-                                        <exclude name="plugins/org.eclipse.osgi.services.jar" />
-                                        <exclude name="plugins/org.eclipse.equinox.*servletbridge*.jar" />
-                                        <exclude name="plugins/org.eclipse.equinox.p2*.jar" />
-                                        <exclude name="plugins/org.eclipse.equinox.security*.jar" />
-                                        <exclude name="plugins/org.eclipse.equinox.console.ssh*.jar" />
-                                        <exclude name="plugins/org.eclipse.equinox.simpleconfig*.jar" />
-                                        <exclude name="plugins/org.eclipse.equinox.http.*.jar" />>
-
-                                        <include name="plugins/org.eclipse.equinox.launcher_*.jar" />
-                                        <include name="plugins/org.eclipse.equinox.launcher.source_*.jar" />
-                                        <exclude name="plugins/org.eclipse.equinox.launcher.*.jar" />
-
-                                        <include name="plugins/org.apache.felix.scr*.jar" />
-
-                                        <include name="plugins/org.eclipse.core*.jar" />
-                                        <include name="plugins/org.eclipse.equinox*.jar" />
-                                        <include name="plugins/org.eclipse.osgi*.jar" />
-                                        <include name="plugins/org.osgi.*.jar" />
-
-                                        <include name="plugins/org.apache.felix*.jar" />
-
-                                    </patternset>
-                                    <mapper type="flatten" />
-                                </unzip>
-                            </target>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>install-equinox</id>
                         <phase>install</phase>
@@ -111,6 +256,10 @@
                                 <mkdir dir="../../kura/target-definition/equinox/repository" />
                                 <copy todir="../../kura/target-definition/equinox/repository">
                                     <fileset dir="${project.build.directory}/repository" />
+                                </copy>
+                                <mkdir dir="../../kura/target-definition/equinox/source" />
+                                <copy todir="../../kura/target-definition/equinox/source">
+                                    <fileset dir="${project.build.directory}/source" />
                                 </copy>
                             </target>
                         </configuration>
@@ -128,14 +277,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <!-- profile for falling back to non-mirror download links -->
-            <id>no-mirror</id>
-            <properties>
-                <equinox.download.url>https://archive.eclipse.org/equinox/drops/R-4.33-202409030240/equinox-SDK-4.33.zip</equinox.download.url>
-            </properties>
-        </profile>
-    </profiles>
 </project>

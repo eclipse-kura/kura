@@ -486,12 +486,12 @@
                                 <artifactItem>
                                     <groupId>org.apache.geronimo.specs</groupId>
                                     <artifactId>geronimo-json_1.0_spec</artifactId>
-                                    <version>1.0-alpha-1</version>
+                                    <version>${org.apache.geronimo.specs.json.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.geronimo.specs</groupId>
                                     <artifactId>geronimo-jms_2.0_spec</artifactId>
-                                    <version>1.0-alpha-2</version>
+                                    <version>${org.apache.geronimo.specs.jms.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.geronimo.specs</groupId>
@@ -602,19 +602,16 @@
                                     <groupId>jakarta.activation</groupId>
                                     <artifactId>jakarta.activation-api</artifactId>
                                     <version>${jakarta.activation-api.javax.version}</version>
-                                    <destFileName>jakarta.activation-api.javax.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>jakarta.xml.bind</groupId>
                                     <artifactId>jakarta.xml.bind-api</artifactId>
                                     <version>${jakarta.xml.bind-api.javax.version}</version>
-                                    <destFileName>jakarta.xml.bind-api.javax.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.sun.xml.bind</groupId>
                                     <artifactId>jaxb-osgi</artifactId>
                                     <version>${jaxb-osgi.javax.version}</version>
-                                    <destFileName>jaxb-osgi.javax.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
@@ -858,7 +855,7 @@
                                     <version>${mimepull.version}</version>
                                 </artifactItem>
                             </artifactItems>
-                            <stripVersion>true</stripVersion>
+                            <stripVersion>false</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
                         </configuration>
                     </execution>
@@ -869,163 +866,6 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>${maven-antrun-plugin.version}</version>
                 <executions>
-                    <execution>
-                        <id>setup</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <move file="target/source/plugins/com.codeminders.hidapi.jar" tofile="target/source/plugins/com.codeminders.hidapi_${com.codeminders.hidapi.version}.jar"/>
-                                <move file="target/source/plugins/com.codeminders.hidapi.x86_64.jar" tofile="target/source/plugins/com.codeminders.hidapi.x86_64_${com.codeminders.hidapi.version}.jar"/>
-                                <move file="target/source/plugins/com.codeminders.hidapi.aarch64.jar" tofile="target/source/plugins/com.codeminders.hidapi.aarch64_${com.codeminders.hidapi.version}.jar"/>
-                                <move file="target/source/plugins/commons-net.jar" tofile="target/source/plugins/org.apache.commons.commons-net_${org.apache.commons.commons-net.version}.jar"/>
-                                <move file="target/source/plugins/commons-exec.jar" tofile="target/source/plugins/org.apache.commons.exec_${org.apache.commons.exec.version}.jar"/>
-                                <move file="target/source/plugins/protobuf-java.jar" tofile="target/source/plugins/com.google.protobuf_${com.google.protobuf.version}.jar"/>
-                                <move file="target/source/plugins/org.eclipse.paho.client.mqttv3.jar" tofile="target/source/plugins/org.eclipse.paho.client.mqttv3_${org.eclipse.paho.client.mqttv3.version}.jar"/>
-                                <move file="target/source/plugins/org.eclipse.kura.camel.sun.misc.jar" tofile="target/source/plugins/org.eclipse.kura.camel.sun.misc_${org.eclipse.kura.camel.sun.misc.version}.jar"/>
-                                <move file="target/source/plugins/org.eclipse.kura.sun.misc.jar" tofile="target/source/plugins/org.eclipse.kura.sun.misc_${org.eclipse.kura.sun.misc.version}.jar"/>
-                                <move file="target/source/plugins/org.tigris.mtoolkit.iagent.rpc.jar" tofile="target/source/plugins/org.tigris.mtoolkit.iagent.rpc_${org.tigris.mtoolkit.iagent.rpc.version}.jar"/>
-                                <move file="target/source/plugins/com.gwt.user.jar" tofile="target/source/plugins/com.gwt.user_${com.gwt.user.version}.jar"/>
-                                <move file="target/source/plugins/org.hamcrest.core.jar" tofile="target/source/plugins/org.hamcrest.core_${org.hamcrest.core.version}.jar"/>
-                                <move file="target/source/plugins/org.usb4java.jar" tofile="target/source/plugins/org.usb4java_${org.usb4java.version}.jar"/>
-                                <move file="target/source/plugins/h2.jar" tofile="target/source/plugins/com.h2database.h2_${com.h2database.h2.version}.jar"/>
-                                <move file="target/source/plugins/jdk.dio.jar" tofile="target/source/plugins/jdk.dio_${jdk.dio.version}.jar"/>
-                                <move file="target/source/plugins/jdk.dio.x86_64.jar" tofile="target/source/plugins/jdk.dio.x86_64_${jdk.dio.version}.jar"/>
-                                <move file="target/source/plugins/jdk.dio.aarch64.jar" tofile="target/source/plugins/jdk.dio.aarch64_${jdk.dio.version}.jar"/>
-                                <move file="target/source/plugins/slf4j-api.jar" tofile="target/source/plugins/slf4j.api_${slf4j.api.version}.jar"/>
-                                <move file="target/source/plugins/jcl-over-slf4j.jar" tofile="target/source/plugins/jcl.over.slf4j_${jcl.over.slf4j.version}.jar"/>
-                                <move file="target/source/plugins/log4j-api.jar" tofile="target/source/plugins/org.apache.logging.log4j.api_${log4j.version}.jar"/>
-                                <move file="target/source/plugins/log4j2-api-config.jar" tofile="target/source/plugins/log4j2-api-config_${log4j2-api-config.version}.jar"/>
-                                <move file="target/source/plugins/log4j-core.jar" tofile="target/source/plugins/org.apache.logging.log4j.core_${log4j.version}.jar"/>
-                                <move file="target/source/plugins/log4j-slf4j-impl.jar" tofile="target/source/plugins/org.apache.logging.log4j.slf4j.impl_${log4j.version}.jar"/>
-                                <move file="target/source/plugins/org.junit.jar" tofile="target/source/plugins/org.junit_${org.junit.version}.jar"/>
-                                <move file="target/source/plugins/commons-fileupload2-jakarta-servlet5.jar" tofile="target/source/plugins/org.apache.commons.commons-fileupload_${org.apache.commons.commons-fileupload.version}.jar"/>
-                                <move file="target/source/plugins/commons-fileupload2-core.jar" tofile="target/source/plugins/org.apache.commons.commons-fileupload-core_${org.apache.commons.commons-fileupload.version}.jar"/>
-                                <move file="target/source/plugins/usb4java-javax.jar" tofile="target/source/plugins/usb4java-javax_${usb4java-javax.version}.jar"/>
-                                <move file="target/source/plugins/commons-io.jar" tofile="target/source/plugins/org.apache.commons.commons-io_${org.apache.commons.commons-io.version}.jar"/>
-                                <move file="target/source/plugins/commons-lang3.jar" tofile="target/source/plugins/org.apache.commons.lang3_${org.apache.commons.lang3.version}.jar"/>
-                                <move file="target/source/plugins/commons-csv.jar" tofile="target/source/plugins/org.apache.commons.csv_${org.apache.commons.csv.version}.jar"/>
-                                <move file="target/source/plugins/org.eclipse.soda.dk.comm.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm_${org.eclipse.soda.dk.comm.version}.jar"/>
-                                <move file="target/source/plugins/org.eclipse.soda.dk.comm.x86_64.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm.x86_64_${org.eclipse.soda.dk.comm.version}.jar"/>
-                                <move file="target/source/plugins/org.eclipse.soda.dk.comm.aarch64.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm.aarch64_${org.eclipse.soda.dk.comm.version}.jar"/>
-                                <move file="target/source/plugins/camel-amqp.jar" tofile="target/source/plugins/org.apache.camel.camel-amqp_${org.apache.camel.camel-amqp.version}.jar"/>
-                                <move file="target/source/plugins/camel-core.jar" tofile="target/source/plugins/org.apache.camel.camel-core_${org.apache.camel.camel-core.version}.jar"/>
-                                <move file="target/source/plugins/camel-jms.jar" tofile="target/source/plugins/org.apache.camel.camel-jms_${org.apache.camel.camel-jms.version}.jar"/>
-                                <move file="target/source/plugins/camel-script.jar" tofile="target/source/plugins/org.apache.camel.camel-script_${org.apache.camel.camel-script.version}.jar"/>
-                                <move file="target/source/plugins/camel-stream.jar" tofile="target/source/plugins/org.apache.camel.camel-stream_${org.apache.camel.camel-stream.version}.jar"/>
-                                <move file="target/source/plugins/camel-core-osgi.jar" tofile="target/source/plugins/org.apache.camel.camel-core-osgi_${org.apache.camel.camel-core-osgi.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-beans.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-beans_${spring.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-context.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-context_${spring.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-core.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-core_${spring.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-expression.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-expression_${spring.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-jms.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-jms_${spring.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-tx.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-tx_${spring.version}.jar"/>
-                                <move file="target/source/plugins/qpid-jms-client.jar" tofile="target/source/plugins/org.apache.qpid.jms.client_${apache-qpid-jms-client.version}.jar"/>
-                                <move file="target/source/plugins/proton-j.jar" tofile="target/source/plugins/org.apache.qpid.proton-j_${apache-qpid-proton-j.version}.jar"/>
-                                <move file="target/source/plugins/osgi.annotation.jar" tofile="target/source/plugins/osgi.annotation_${osgi.annotation.version}.jar"/>
-                                <move file="target/source/plugins/org.moka7.jar" tofile="target/source/plugins/org.moka7_${org.moka7.version}.jar"/>
-                                <move file="target/source/plugins/gson.jar" tofile="target/source/plugins/com.google.gson_${com.google.gson.version}.jar"/>
-                                <move file="target/source/plugins/jakarta.xml.bind-api.jar" tofile="target/source/plugins/jakarta.xml.bind-api_${jakarta.xml.bind-api.version}.jar"/>
-                                <move file="target/source/plugins/jakarta.activation-api.jar" tofile="target/source/plugins/jakarta.activation-api_${jakarta.activation-api.version}.jar"/>
-                                <move file="target/source/plugins/jakarta.annotation-api.jar" tofile="target/source/plugins/jakarta.annotation-api_${jakarta.annotation-api.version}.jar"/>
-                                <move file="target/source/plugins/jakarta.xml.ws-api.jar" tofile="target/source/plugins/jakarta.xml.ws-api_${jakarta.xml.ws-api.version}.jar"/>
-                                <move file="target/source/plugins/jakarta.xml.soap-api.jar" tofile="target/source/plugins/jakarta.xml.soap-api_${jakarta.xml.soap-api.version}.jar"/>
-                                <move file="target/source/plugins/jaxb-osgi.jar" tofile="target/source/plugins/com.sun.xml.bind.jaxb-osgi_${jaxb-osgi.version}.jar"/>
-                                <move file="target/source/plugins/osgi-resource-locator.jar" tofile="target/source/plugins/org.glassfish.hk2.osgi-resource-locator_${osgi-resource-locator.version}.jar"/>
-                                <move file="target/source/plugins/bluez-dbus-osgi.jar" tofile="target/source/plugins/bluez-dbus-osgi_${bluez-dbus-osgi.version}.jar"/>
-                                <!-- Artemis Broker -->
-                                <move file="target/source/plugins/guava.jar" tofile="target/source/plugins/com.google.guava_${guava.version}.jar"/>
-                                <move file="target/source/plugins/failureaccess.jar" tofile="target/source/plugins/com.google.guava.failureaccess_${failureaccess.version}.jar"/>
-                                <move file="target/source/plugins/artemis-mqtt-protocol.jar" tofile="target/source/plugins/org.apache.activemq.artemis-mqtt-protocol_${org.apache.activemq.artemis.upstream.version}.jar"/>
-                                <move file="target/source/plugins/artemis-native.jar" tofile="target/source/plugins/org.apache.activemq.artemis-native_${org.apache.activemq.artemis.upstream.version}.jar"/>
-                                <move file="target/source/plugins/netty-buffer.jar" tofile="target/source/plugins/io.netty.buffer_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-codec.jar" tofile="target/source/plugins/io.netty.codec_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-common.jar" tofile="target/source/plugins/io.netty.common_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-codec-http.jar" tofile="target/source/plugins/io.netty.codec-http_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-codec-mqtt.jar" tofile="target/source/plugins/io.netty.codec-mqtt_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-handler.jar" tofile="target/source/plugins/io.netty.handler_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-resolver.jar" tofile="target/source/plugins/io.netty.resolver_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-transport.jar" tofile="target/source/plugins/io.netty.transport_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-transport-classes-epoll.jar" tofile="target/source/plugins/io.netty.transport-classes-epoll_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-transport-native-epoll.jar" tofile="target/source/plugins/io.netty.transport-native-epoll_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-transport-native-unix-common.jar" tofile="target/source/plugins/io.netty.transport-native-unix-common_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-transport-classes-kqueue.jar" tofile="target/source/plugins/io.netty.transport-classes-kqueue_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-transport-native-kqueue.jar" tofile="target/source/plugins/io.netty.transport-native-kqueue_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/jboss-logging.jar" tofile="target/source/plugins/org.jboss.logging.jboss-logging_${org.jboss.logging.version}.jar"/>
-                                <move file="target/source/plugins/commons-beanutils.jar" tofile="target/source/plugins/org.apache.commons.beanutils_${commons-beanutils.version}.jar"/>
-                                <move file="target/source/plugins/commons-collections.jar" tofile="target/source/plugins/org.apache.commons.collections_${commons-collections.version}.jar"/>
-                                <move file="target/source/plugins/geronimo-json_1.0_spec.jar" tofile="target/source/plugins/org.apache.geronimo.specs.geronimo-json_1.0_spec_${org.apache.geronimo.specs.json.version}.jar"/>
-                                <move file="target/source/plugins/geronimo-jms_2.0_spec.jar" tofile="target/source/plugins/org.apache.geronimo.specs.geronimo-jms_2.0_spec_${org.apache.geronimo.specs.jms.version}.jar"/>
-                                <move file="target/source/plugins/geronimo-jta_1.1_spec.jar" tofile="target/source/plugins/org.apache.geronimo.specs.geronimo-jta_1.1_spec_${org.apache.geronimo.specs.jta.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.activemq.artemis.jar" tofile="target/source/plugins/org.apache.activemq.artemis_${org.apache.activemq.artemis.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.felix.useradmin.jar" tofile="target/source/plugins/org.apache.felix.useradmin_${org.apache.felix.useradmin.version}.jar"/>
-                                <move file="target/source/plugins/bcpkix-jdk18on.jar" tofile="target/source/plugins/bcpkix_${org.bouncycastle.version}.jar"/>
-                                <move file="target/source/plugins/bcprov-jdk18on.jar" tofile="target/source/plugins/bcprov_${org.bouncycastle.version}.jar"/>
-                                <move file="target/source/plugins/bctls-jdk18on.jar" tofile="target/source/plugins/bctls_${org.bouncycastle.version}.jar"/>
-                                <move file="target/source/plugins/bcutil-jdk18on.jar" tofile="target/source/plugins/bcutil_${org.bouncycastle.version}.jar"/>
-                                <move file="target/source/plugins/bcpg-jdk18on.jar" tofile="target/source/plugins/bcpg_${org.bouncycastle.version}.jar"/>
-                                <move file="target/source/plugins/gpsd4java.jar" tofile="target/source/plugins/com.eurotech.gpsd4java_${com.eurotech.gpsd4java.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.c3p0.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.c3p0_${org.apache.servicemix.bundles.c3p0.version}.jar"/>
-                                <move file="target/source/plugins/HikariCP.jar" tofile="target/source/plugins/com.zaxxer.HikariCP_${hikaricp.version}.jar"/>
-                                <move file="target/source/plugins/quartz.jar" tofile="target/source/plugins/org.quartz-scheduler.quartz_${quartz.version}.jar"/>
-                                <move file="target/source/plugins/sqlite-jdbc.jar" tofile="target/source/plugins/org.xerial.sqlite-jdbc_${org.xerial.sqlite-jdbc.version}.jar"/>
-                                <move file="target/source/plugins/minimal-json.jar" tofile="target/source/plugins/minimal-json_${com.eclipsesource.minimal-json.version}.jar"/>
-                                <move file="target/source/plugins/jakarta.activation-api.javax.jar" tofile="target/source/plugins/jakarta.activation-api_${jakarta.activation-api.javax.version}.jar" />
-                                <move file="target/source/plugins/jakarta.xml.bind-api.javax.jar" tofile="target/source/plugins/jakarta.xml.bind-api_${jakarta.xml.bind-api.javax.version}.jar" />
-                                <move file="target/source/plugins/jaxb-osgi.javax.jar" tofile="target/source/plugins/jaxb-osgi_${jaxb-osgi.javax.version}.jar" />
-                                <move file="target/source/plugins/org.apache.felix.dependencymanager.jar" tofile="target/source/plugins/org.apache.felix.dependencymanager_${org.apache.felix.dependencymanager.version}.jar" />
-                                <move file="target/source/plugins/org.apache.felix.deploymentadmin.jar" tofile="target/source/plugins/org.apache.felix.deploymentadmin_${org.apache.felix.deploymentadmin.version}.jar" />
-                                <move file="target/source/plugins/monitoradmin.jar" tofile="target/source/plugins/org.knowhowlab.osgi.monitoradmin_${org.knowhowlab.osgi.monitoradmin.version}.jar" />
-                                <move file="target/source/plugins/jetty-http.jar" tofile="target/source/plugins/org.eclipse.jetty.jetty-http_${org.eclipse.jetty.version}.jar" />
-                                <move file="target/source/plugins/jetty-security.jar" tofile="target/source/plugins/org.eclipse.jetty.jetty-security_${org.eclipse.jetty.version}.jar" />
-                                <move file="target/source/plugins/jetty-server.jar" tofile="target/source/plugins/org.eclipse.jetty.jetty-server_${org.eclipse.jetty.version}.jar" />
-                                <move file="target/source/plugins/jetty-session.jar" tofile="target/source/plugins/org.eclipse.jetty.jetty-session_${org.eclipse.jetty.version}.jar" />
-                                <move file="target/source/plugins/jetty-util.jar" tofile="target/source/plugins/org.eclipse.jetty.jetty-util_${org.eclipse.jetty.version}.jar" />
-                                <move file="target/source/plugins/jetty-io.jar" tofile="target/source/plugins/org.eclipse.jetty.jetty-io_${org.eclipse.jetty.version}.jar" />
-                                <move file="target/source/plugins/jetty-ee10-servlet.jar" tofile="target/source/plugins/org.eclipse.jetty.ee10.jetty-ee10-servlet_${org.eclipse.jetty.version}.jar" />
-                                <move file="target/source/plugins/org.eclipse.equinox.io.jar" tofile="target/source/plugins/org.eclipse.equinox.io_${org.eclipse.equinox.io.version}.jar" />
-                                <move file="target/source/plugins/org.eclipse.equinox.util.jar" tofile="target/source/plugins/org.eclipse.equinox.util_${org.eclipse.equinox.util.version}.jar" />
-                                <move file="target/source/plugins/org.eclipse.equinox.wireadmin.jar" tofile="target/source/plugins/org.eclipse.equinox.wireadmin_${org.eclipse.equinox.wireadmin.version}.jar" />
-                                <move file="target/source/plugins/org.osgi.service.http.whiteboard.jar" tofile="target/source/plugins/org.osgi.service.http.whiteboard_${org.osgi.service.http.whiteboard.version}.jar" />
-                                <move file="target/source/plugins/org.osgi.service.servlet.jar" tofile="target/source/plugins/org.osgi.service.servlet_${org.osgi.service.servlet.version}.jar" />
-                                <move file="target/source/plugins/jakarta.ws.rs-api.jar" tofile="target/source/plugins/jakarta.ws.rs-api_${jakarta.ws.rs-api.version}.jar" />
-                                <move file="target/source/plugins/org.osgi.service.jakartars.jar" tofile="target/source/plugins/org.osgi.service.jakartars_${org.osgi.service.jakartars.version}.jar" />
-                                <move file="target/source/plugins/org.eclipse.osgitech.rest.jar" tofile="target/source/plugins/org.eclipse.osgitech.rest_${org.eclipse.osgi-technology.rest.version}.jar" />
-                                <move file="target/source/plugins/org.eclipse.osgitech.rest.sse.jar" tofile="target/source/plugins/org.eclipse.osgitech.rest.sse_${org.eclipse.osgi-technology.rest.version}.jar" />
-                                <move file="target/source/plugins/org.eclipse.osgitech.rest.servlet.whiteboard.jar" tofile="target/source/plugins/org.eclipse.osgitech.rest.servlet.whiteboard_${org.eclipse.osgi-technology.rest.version}.jar" />
-                                <move file="target/source/plugins/org.apache.felix.http.servlet-api.jar" tofile="target/source/plugins/org.apache.felix.http.servlet-api_${org.apache.felix.http.servlet-api.version}.jar" />
-                                <move file="target/source/plugins/org.apache.felix.http.bridge.jar"  tofile="target/source/plugins/org.apache.felix.http.bridge_${org.apache.felix.http.bridge.version}.jar" />
-                                <move file="target/source/plugins/org.apache.felix.http.proxy.jar" tofile="target/source/plugins/org.apache.felix.http.proxy_${org.apache.felix.http.proxy.version}.jar" />
-                                <move file="target/source/plugins/org.apache.felix.http.wrappers.jar" tofile="target/source/plugins/org.apache.felix.http.wrappers_${org.apache.felix.http.wrappers.version}.jar" />
-                                <move file="target/source/plugins/org.apache.aries.spifly.dynamic.bundle.jar" tofile="target/source/plugins/org.apache.aries.spifly.dynamic.bundle_${org.apache.aries.spifly.dynamic.bundle.version}.jar" />
-                                <move file="target/source/plugins/asm.jar" tofile="target/source/plugins/asm_${org.ow2.asm.version}.jar" />
-                                <move file="target/source/plugins/asm-commons.jar" tofile="target/source/plugins/asm-commons_${org.ow2.asm.version}.jar" />
-                                <move file="target/source/plugins/asm-tree.jar"  tofile="target/source/plugins/asm-tree_${org.ow2.asm.version}.jar" />
-                                <move file="target/source/plugins/asm-util.jar"  tofile="target/source/plugins/asm-util_${org.ow2.asm.version}.jar" />
-                                <move file="target/source/plugins/asm-analysis.jar" tofile="target/source/plugins/asm-analysis_${org.ow2.asm.version}.jar" />
-                                <move file="target/source/plugins/hk2-api.jar" tofile="target/source/plugins/hk2-api_${hk2.version}.jar" />
-                                <move file="target/source/plugins/aopalliance-repackaged.jar" tofile="target/source/plugins/aopalliance-repackaged_${hk2.version}.jar" />
-                                <move file="target/source/plugins/hk2-locator.jar" tofile="target/source/plugins/hk2-locator_${hk2.version}.jar" />
-                                <move file="target/source/plugins/hk2-utils.jar" tofile="target/source/plugins/hk2-utils_${hk2.version}.jar" />
-                                <move file="target/source/plugins/jersey-hk2.jar" tofile="target/source/plugins/jersey-hk2_${jersey.version}.jar" />
-                                <move file="target/source/plugins/jersey-container-servlet.jar" tofile="target/source/plugins/jersey-container-servlet_${jersey.version}.jar" />
-                                <move file="target/source/plugins/jersey-container-servlet-core.jar" tofile="target/source/plugins/jersey-container-servlet-core_${jersey.version}.jar" />
-                                <move file="target/source/plugins/jersey-client.jar" tofile="target/source/plugins/jersey-client_${jersey.version}.jar" />
-                                <move file="target/source/plugins/jersey-common.jar" tofile="target/source/plugins/jersey-common_${jersey.version}.jar" />
-                                <move file="target/source/plugins/jersey-server.jar" tofile="target/source/plugins/jersey-server_${jersey.version}.jar" />
-                                <move file="target/source/plugins/jersey-entity-filtering.jar" tofile="target/source/plugins/jersey-entity-filtering_${jersey.version}.jar" />
-                                <move file="target/source/plugins/jersey-media-jaxb.jar" tofile="target/source/plugins/jersey-media-jaxb_${jersey.version}.jar" />
-                                <move file="target/source/plugins/jersey-media-sse.jar" tofile="target/source/plugins/jersey-media-sse_${jersey.version}.jar" />
-                                <move file="target/source/plugins/jersey-media-multipart.jar" tofile="target/source/plugins/jersey-media-multipart_${jersey.version}.jar" />
-                                <move file="target/source/plugins/jakarta.inject-api.jar" tofile="target/source/plugins/jakarta.inject-api_${jakarta.inject-api.version}.jar" />
-                                <move file="target/source/plugins/jakarta.validation-api.jar" tofile="target/source/plugins/jakarta.validation-api_${jakarta.validation-api.version}.jar" />
-                                <move file="target/source/plugins/javassist.jar" tofile="target/source/plugins/javassist_${javassist.version}.jar" />
-                                <move file="target/source/plugins/mimepull.jar" tofile="target/source/plugins/mimepull_${mimepull.version}.jar" />
-                            </tasks>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>install-commons</id>
                         <phase>install</phase>

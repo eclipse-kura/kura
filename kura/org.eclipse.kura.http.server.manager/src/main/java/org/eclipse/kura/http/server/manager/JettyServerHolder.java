@@ -47,6 +47,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.ErrorHandler.ErrorRequest;
+import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.session.DefaultSessionIdManager;
 import org.eclipse.jetty.session.HouseKeeper;
 import org.eclipse.jetty.util.compression.CompressionPool;
@@ -149,11 +150,10 @@ public class JettyServerHolder {
         // handler.setMaxInactiveInterval(-1); // TODO evaluate configurability
         servletContextHandler.setSessionHandler(handler);
 
-        // TODO restore after debugging
-        // final GzipHandler gzipHandler = new GzipHandler();
-        // gzipHandler.setDeflaterPool(this.deflaterPool);
-        //
-        // servletContextHandler.insertHandler(gzipHandler);
+        final GzipHandler gzipHandler = new GzipHandler();
+        gzipHandler.setDeflaterPool(this.deflaterPool);
+
+        servletContextHandler.insertHandler(gzipHandler);
 
         // TODO restore after debugging
         // servletContextHandler.setErrorHandler(new ErrorHandler() {

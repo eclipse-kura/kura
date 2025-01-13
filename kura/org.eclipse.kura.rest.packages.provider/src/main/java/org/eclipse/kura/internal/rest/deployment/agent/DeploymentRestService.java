@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -213,12 +214,14 @@ public class DeploymentRestService {
     public DeploymentRequestStatus installUploadedDeploymentPackage(@FormParam("file") EntityPart part,
             @FormParam("file") InputStream uploadedInputStream) {
 
-        if (part == null || !part.getFileName().isPresent()) {
+        final Optional<String> filename = Optional.ofNullable(part).flatMap(EntityPart::getFileName);
+
+        if (!filename.isPresent()) {
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).type(MediaType.TEXT_PLAIN)
                     .entity("Missing file").build());
         }
 
-        final String uploadedFileName = part.getFileName().get();
+        final String uploadedFileName = filename.get();
         final String uploadedFileLocation = System.getProperty(JAVA_IO_TMPDIR) + File.separator + UUID.randomUUID()
                 + ".dp";
 

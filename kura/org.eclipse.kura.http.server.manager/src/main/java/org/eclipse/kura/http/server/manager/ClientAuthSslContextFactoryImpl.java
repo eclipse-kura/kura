@@ -22,17 +22,17 @@ import java.security.cert.PKIXRevocationChecker;
 import java.security.cert.PKIXRevocationChecker.Option;
 import java.security.cert.X509CertSelector;
 import java.util.Collection;
-import java.util.EnumSet;
+import java.util.Set;
 
 import org.eclipse.kura.security.keystore.KeystoreService;
 
 public final class ClientAuthSslContextFactoryImpl extends BaseSslContextFactory {
 
     private boolean isRevocationEnabled;
-    private EnumSet<Option> revocationOptions;
+    private Set<Option> revocationOptions;
 
     public ClientAuthSslContextFactoryImpl(final KeystoreService keystoreService, final boolean isRevocationEnabled,
-            final EnumSet<PKIXRevocationChecker.Option> revocationOptions) {
+            final Set<PKIXRevocationChecker.Option> revocationOptions) {
         super(keystoreService);
 
         this.isRevocationEnabled = isRevocationEnabled;

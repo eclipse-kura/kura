@@ -6,11 +6,11 @@ Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Import-Package: com.eclipsesource.json;version="0.9.5",
- jakarta.servlet;version="[6.0.0,7.0.0)",
- jakarta.servlet.http;version="[6.0.0,7.0.0)",
+ jakarta.servlet;version="5.0.0",
+ jakarta.servlet.http;version="5.0.0",
  javax.servlet;version="3.1.0",
  javax.servlet.http;version="3.1.0",
- junit.framework;version="[4.12.0,5.0.0)",
+ junit.framework;version="4.12.0",
  org.apache.commons.io;version="2.4.0",
  org.bouncycastle.asn1;version="1.78.1",
  org.bouncycastle.asn1.x500;version="1.78.1",

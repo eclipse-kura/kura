@@ -88,6 +88,7 @@ public class NMModemResetHandler implements DBusSigHandler<Device.StateChanged> 
             logger.info("Clearing timer for {}. Cancelling scheduled modem reset...", this.nmDevicePath);
             this.scheduledTasks.cancel();
             this.scheduledTasks = null;
+            this.modemResetTimer.cancel();
         }
         logger.debug("ModemStateHandler disarmed for {}", this.nmDevicePath);
     }

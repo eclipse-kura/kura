@@ -245,6 +245,8 @@ public class ModemManagerDbusWrapper {
             return;
         }
 
+        resetHandlersDisable(deviceId);
+
         Modem mmModemDevice = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemManagerDbusPath.get(), Modem.class);
 
         NMModemResetHandler resetHandler = new NMModemResetHandler(networkManagerDbusPath, mmModemDevice,
@@ -270,6 +272,7 @@ public class ModemManagerDbusWrapper {
             } catch (DBusException e) {
                 logger.warn("Couldn't remove signal handler for: {}. Caused by:", handler.getNMDevicePath(), e);
             }
+            this.modemHandlers.remove(deviceId);
         }
     }
 }

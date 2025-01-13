@@ -626,6 +626,7 @@
                     <configuration>
                         <strictVersions>true</strictVersions>
                         <format>${kura.build.version}</format>
+                        <skipPomGeneration>true</skipPomGeneration>
                     </configuration>
                 </plugin>
                 <plugin>

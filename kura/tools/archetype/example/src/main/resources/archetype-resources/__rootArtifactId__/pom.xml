@@ -29,7 +29,7 @@
             </plugin>
         	<plugin>
             	<groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-packaging-plugin</artifactId>
+                <artifactId></artifactId>
                 <version>1.6.0</version>
                 <configuration>
                 	<archive>
@@ -73,7 +73,7 @@
     							<pluginExecution>
     								<pluginExecutionFilter>
     									<groupId>org.eclipse.tycho</groupId>
-    									<artifactId>tycho-packaging-plugin</artifactId>
+    									<artifactId></artifactId>
     									<versionRange>[0.20.0,)</versionRange>
     									<goals>
     										<goal>validate-version</goal>

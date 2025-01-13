@@ -210,6 +210,31 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.core.runtime</artifactId>
+                                    <version>${org.eclipse.core.runtime.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.core.jobs</artifactId>
+                                    <version>${org.eclipse.core.jobs.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.preferences</artifactId>
+                                    <version>${org.eclipse.equinox.preferences.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.core.contenttype</artifactId>
+                                    <version>${org.eclipse.core.contenttype.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.app</artifactId>
+                                    <version>${org.eclipse.equinox.app.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
                                     <artifactId>org.eclipse.osgi</artifactId>
                                     <version>${org.eclipse.osgi.version}</version>
                                 </artifactItem>

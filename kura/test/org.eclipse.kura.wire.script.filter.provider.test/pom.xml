@@ -309,10 +309,6 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.preferences</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.registry</artifactId>
                         </dependency>
                         <dependency>
@@ -421,11 +417,6 @@
                         </bundle>
                         <bundle>
                             <id>org.eclipse.equinox.metatype</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.equinox.preferences</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>

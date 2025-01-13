@@ -15,6 +15,7 @@ package org.eclipse.kura.http.server.manager;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
@@ -30,10 +31,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.Deflater;
 
+import org.eclipse.jetty.ee10.servlet.ErrorHandler;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.ee10.servlet.SessionHandler;
-import org.eclipse.jetty.http.HttpFields.Mutable;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.ConnectionFactory;
@@ -41,12 +42,10 @@ import org.eclipse.jetty.server.ForwardedRequestCustomizer;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConfiguration.Customizer;
 import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.server.handler.ErrorHandler.ErrorRequest;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.session.DefaultSessionIdManager;
 import org.eclipse.jetty.session.HouseKeeper;
@@ -61,8 +60,16 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.SessionCookieConfig;
 import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class JettyServerHolder {
 
@@ -81,8 +88,7 @@ public class JettyServerHolder {
 
         // TODO make it configurable from options
         this.server = new Server(new QueuedThreadPool(200, 8));
-        // TODO restore after debugging
-        // this.server.setErrorHandler(new KuraErrorHandler());
+        this.server.setErrorHandler(new KuraErrorHandler());
 
         final BundleContext context = FrameworkUtil.getBundle(JettyServerHolder.class).getBundleContext();
         this.workDir = new File(context.getDataFile(""), "jettyWorkDir_" + System.nanoTime()); // TODO evaluate
@@ -119,6 +125,8 @@ public class JettyServerHolder {
 
         ServletContextHandler httpContext = createServletContextHandler();
         httpContext.addServlet(holder, "/*");
+        httpContext.addFilter(new BlockHttpMethods(EnumSet.of(HttpMethod.TRACE)), "/*",
+                EnumSet.of(DispatcherType.REQUEST));
         httpContext.addEventListener(eventListener);
 
         this.server.setHandler(httpContext);
@@ -155,16 +163,15 @@ public class JettyServerHolder {
 
         servletContextHandler.insertHandler(gzipHandler);
 
-        // TODO restore after debugging
-        // servletContextHandler.setErrorHandler(new ErrorHandler() {
-        //
-        // @Override
-        // protected void writeErrorPage(HttpServletRequest request, Writer writer, int code, String message,
-        // boolean showStacks) throws IOException {
-        // // do nothing
-        // }
-        //
-        // });
+        servletContextHandler.setErrorHandler(new ErrorHandler() {
+
+            @Override
+            protected void writeErrorPage(HttpServletRequest request, Writer writer, int code, String message,
+                    boolean showStacks) throws IOException {
+                // do nothing
+            }
+
+        });
 
         final SessionCookieConfig cookieConfig = servletContextHandler.getSessionHandler().getSessionCookieConfig();
 
@@ -186,7 +193,6 @@ public class JettyServerHolder {
     public ServerConnector createHttpConnector(int port) {
 
         HttpConfiguration httpConfiguration = new HttpConfiguration();
-        httpConfiguration.addCustomizer(new BlockHttpMethods(EnumSet.of(HttpMethod.TRACE)));
 
         final ServerConnector newConnector = new ServerConnector(this.server,
                 new HttpConnectionFactory(httpConfiguration));
@@ -229,7 +235,7 @@ public class JettyServerHolder {
         }
     }
 
-    private static class BlockHttpMethods implements HttpConfiguration.Customizer {
+    private static class BlockHttpMethods implements Filter {
 
         private final Set<String> blockedMethods;
 
@@ -238,12 +244,21 @@ public class JettyServerHolder {
         }
 
         @Override
-        public Request customize(Request request, Mutable responseHeaders) {
-            if (this.blockedMethods.contains(request.getMethod().toLowerCase())) {
-                return new ErrorRequest(request, HttpStatus.METHOD_NOT_ALLOWED_405, "Method now allowed.", null);
+        public void doFilter(final ServletRequest req, final ServletResponse res, final FilterChain chain)
+                throws IOException, ServletException {
+            if (req instanceof HttpServletRequest && res instanceof HttpServletResponse) {
+                final HttpServletRequest httpReq = (HttpServletRequest) req;
+                final HttpServletResponse httpRes = (HttpServletResponse) res;
+
+                if (blockedMethods.contains(httpReq.getMethod().toLowerCase())) {
+                    httpRes.sendError(HttpStatus.METHOD_NOT_ALLOWED_405);
+                    return;
+                }
+
             }
 
-            return request;
+            chain.doFilter(req, res);
+
         }
 
     }
@@ -274,7 +289,6 @@ public class JettyServerHolder {
         final HttpConfiguration httpsConfig = new HttpConfiguration();
 
         httpsConfig.addCustomizer(new SecureRequestCustomizer(false)); // TODO to check
-        httpsConfig.addCustomizer(new BlockHttpMethods(EnumSet.of(HttpMethod.TRACE)));
 
         final ServerConnector connector = new ServerConnector(server,
                 new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(httpsConfig));

@@ -162,6 +162,12 @@
         <copy file="src/main/resources/common/cacerts.ks"
             tofile="${project.build.directory}/${build.output.name}/cacerts.ks" />
 
+        <copy
+                file="${kura.osgi.repo}/plugins/org.eclipse.osgi-${org.eclipse.osgi.version}.jar"
+                tofile="${project.build.directory}/${build.output.name}/${plugins.folder}/org.eclipse.osgi_${org.eclipse.osgi.version}.jar" />
+        <copy
+                file="${kura.osgi.repo}/plugins/org.eclipse.equinox.launcher-${org.eclipse.equinox.launcher.version}.jar"
+                tofile="${project.build.directory}/${build.output.name}/${plugins.folder}/org.eclipse.equinox.launcher_${org.eclipse.equinox.launcher.version}.jar" />
 
         <!-- Populate config.ini with correct OSGi packages -->
         <antcall target="osgi-base-plugins" />
@@ -542,13 +548,9 @@ fi]]>
             <zipfileset
                 file="${project.build.directory}/${build.output.name}/kura.properties"
                 prefix="${build.output.name}/${framework.config.folder}/" />
-
-            <zipfileset dir="${kura.osgi.repo}/plugins/" prefix="${build.output.name}/${plugins.folder}">
-
-                <include name="org.eclipse.osgi_*.jar" />
-                <include name="org.eclipse.equinox.launcher_*.jar" />
-
-            </zipfileset>
+            <zipfileset
+                file="${project.build.directory}/${build.output.name}/kura.properties"
+                prefix="${build.output.name}/${framework.config.folder}/" />
 
             <zipfileset dir="${project.build.directory}/${build.output.name}/plugins"
                 prefix="${build.output.name}/${plugins.folder}">

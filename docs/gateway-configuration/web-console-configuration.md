@@ -50,7 +50,7 @@ The default value is false
 
 ## Allowed ports
 
-If set to a non empty list, Web Console access will be allowed only on the specified ports. If set to an empty list, access will be allowed on all ports. It is needed for the end user to make sure that the allowed ports are open in HttpService and Firewall configuration.
+By default, the Web Console access will only be allowed on ports 443 and 4443 (default https and certificate-based authentication ports). If set to an empty list, access will be allowed on all ports. It is needed for the end user to make sure that the allowed ports are open in HttpService and Firewall configuration.
 
 ## Authentication Method "Password" Enabled
 

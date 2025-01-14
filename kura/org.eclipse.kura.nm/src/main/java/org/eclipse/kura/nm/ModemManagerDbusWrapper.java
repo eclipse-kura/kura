@@ -297,10 +297,10 @@ public class ModemManagerDbusWrapper {
 
         Modem mmModemDevice = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemManagerDbusPath.get(), Modem.class);
 
-        MMFailedModemResetTimer resetHandler = new MMFailedModemResetTimer(mmModemDevice, delayMinutes);
-        resetHandler.schedule();
+        MMFailedModemResetTimer resetTimer = new MMFailedModemResetTimer(mmModemDevice, delayMinutes);
+        resetTimer.schedule();
 
-        this.failedModemHandlers.put(deviceId, resetHandler);
+        this.failedModemHandlers.put(deviceId, resetTimer);
     }
 
     protected void failedModemResetTimerCancel() {

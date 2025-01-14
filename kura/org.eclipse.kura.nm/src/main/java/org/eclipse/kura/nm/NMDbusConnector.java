@@ -563,7 +563,7 @@ public class NMDbusConnector {
 
         boolean activationSucceeded = true;
         try {
-            this.modemManager.failedModemResetTimerDisable(deviceId);
+            this.modemManager.failedModemResetTimerCancel(deviceId);
             this.networkManager.activateConnection(connection.get(), device);
             dsLock.waitForSignal();
         } catch (DBusExecutionException e) {
@@ -595,7 +595,7 @@ public class NMDbusConnector {
                 logger.info("Modem {} in failed state or unavailable. Scheduling modem reset in {} minutes ...",
                         device.getObjectPath(), delayMinutes);
 
-                this.modemManager.failedModemResetTimerEnable(deviceId, mmDbusPath, delayMinutes);
+                this.modemManager.failedModemResetTimerSchedule(deviceId, mmDbusPath, delayMinutes);
             }
 
         }
@@ -668,7 +668,7 @@ public class NMDbusConnector {
             logger.warn("Can't disable missing device {}", deviceId);
             return;
         }
-        this.modemManager.failedModemResetTimerDisable(deviceId);
+        this.modemManager.failedModemResetTimerCancel(deviceId);
         Device device = optDevice.get();
         Optional<Connection> appliedConnection = this.networkManager.getAppliedConnection(device);
 

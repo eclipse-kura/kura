@@ -288,7 +288,7 @@ public class ModemManagerDbusWrapper {
         }
     }
 
-    protected void failedModemResetTimerEnable(String deviceId, Optional<String> modemManagerDbusPath, int delayMinutes)
+    protected void failedModemResetTimerSchedule(String deviceId, Optional<String> modemManagerDbusPath, int delayMinutes)
             throws DBusException {
         if (!modemManagerDbusPath.isPresent()) {
             logger.warn("Cannot retrieve modem device for {}. Skipping modem reset monitor setup.", deviceId);
@@ -303,14 +303,14 @@ public class ModemManagerDbusWrapper {
         this.failedModemHandlers.put(deviceId, resetHandler);
     }
 
-    protected void failedModemResetTimerDisable() {
+    protected void failedModemResetTimerCancel() {
         for (String deviceId : this.failedModemHandlers.keySet()) {
-            failedModemResetTimerDisable(deviceId);
+            failedModemResetTimerCancel(deviceId);
         }
         this.modemHandlers.clear();
     }
 
-    protected void failedModemResetTimerDisable(String deviceId) {
+    protected void failedModemResetTimerCancel(String deviceId) {
         if (this.failedModemHandlers.containsKey(deviceId)) {
             MMFailedModemResetTimer timer = this.failedModemHandlers.get(deviceId);
             timer.cancel();

@@ -6,7 +6,7 @@ By default, REST service providers register their services using the context pat
 
 Starting from Kura 5.4.0, REST service provides built in session management support, the [Session REST APIs](doc:rest-session-api) can be used to establish a session. Using sessions is the recommended way for interacting with Kura REST APIs from a browser based application, for this use case it is also possible to disable the default session-less BASIC and certificate based authentication (see the **Basic Authentication Enabled** and **Enable Certificate Authentication Whitout Session Management** configuration parameters below).
 
-REST API access is available on all HTTP ports defined in the [HTTP/HTTPS Configuration](doc:httphttps-configuration) section, unless access is restricted to dedicated ports using the corresponding configuration parameter (see below).
+REST API access is available on all HTTP ports defined in the [HTTP/HTTPS Configuration](doc:httphttps-configuration) section. By default this parameter is set to allow access from ports 443 and 4443 (standard HTTPS and certificate-based authentication ports).
 
 Certificate authentication support is only available on the **HTTPS With Certificate Authentication Ports** configured in [HTTP/HTTPS Configuration](doc:httphttps-configuration) section.
 

@@ -334,10 +334,10 @@ public class ModemManagerDbusWrapper {
                 if (MMModemState.MM_MODEM_STATE_FAILED.equals(modemState)) {
                     super.run();
                 } else {
-                    logger.info("Modem state changed. Reset skipped.");
+                    NMModemResetTimerTask.logger.info("Modem state changed. Reset skipped.");
                 }
             } catch (DBusException e) {
-                logger.warn("Couldn't get state of modem interface, caused by:", e);
+                NMModemResetTimerTask.logger.warn("Couldn't get state of modem interface, caused by:", e);
             }
         }
 

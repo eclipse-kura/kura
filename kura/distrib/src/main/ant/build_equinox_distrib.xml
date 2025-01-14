@@ -254,14 +254,6 @@
         <antcall target="emulator-plugins" />
         <antcall target="linux-network-plugins" />
 
-        <!-- Add mToolkit to distribution -->
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.tigris.mtoolkit.iagent.rpc" />
-            <param name="bundle.version" value="${org.tigris.mtoolkit.iagent.rpc.version}" />
-            <param name="start.level" value="5" />
-            <param name="start" value="s" />
-        </antcall>
-
         <propertyfile
             file="${project.build.directory}/${build.output.name}/dpa.properties">
             <entry key="kura"

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 public class NMModemResetTimerTask extends TimerTask {
 
-    private static final Logger logger = LoggerFactory.getLogger(NMModemResetTimerTask.class);
+    protected static final Logger logger = LoggerFactory.getLogger(NMModemResetTimerTask.class);
 
     private final Modem modem;
     private boolean expired = false;

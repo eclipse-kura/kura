@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -1127,6 +1127,41 @@ public class NMDbusConnectorTest {
         thenActivateConnectionIsNotCalledFor("wlan0");
     }
 
+    @Test
+    public void shouldNotStartFailedModemResetTimerIfConnectionSucceeds() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("1-6", "wwan0", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+        givenNetworkConfigMapWith("net.interfaces", "1-6");
+        givenNetworkConfigMapWith("net.interface.1-6.config.resetTimeout", 2);
+        givenNetworkConfigMapWith("net.interface.1-6.config.dhcpClient4.enabled", true);
+        givenNetworkConfigMapWith("net.interface.1-6.config.ip4.status", "netIPv4StatusEnabledWAN");
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+        thenFailedModemResetTimerIsActive(false, "1-6");
+    }
+
+    @Test
+    public void shouldStartFailedModemResetTimerIfConnectionFails() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenNMActivationFailed();
+        givenMockedDevice("1-6", "wwan0", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_FAILED, true,
+                false, false);
+        givenMockedDeviceList();
+        givenNetworkConfigMapWith("net.interfaces", "1-6");
+        givenNetworkConfigMapWith("net.interface.1-6.config.resetTimeout", 2);
+        givenNetworkConfigMapWith("net.interface.1-6.config.dhcpClient4.enabled", true);
+        givenNetworkConfigMapWith("net.interface.1-6.config.ip4.status", "netIPv4StatusEnabledWAN");
+
+        whenApplyIsCalledWith(this.netConfig);
+
+        thenNoExceptionIsThrown();
+        thenFailedModemResetTimerIsActive(true, "1-6");
+    }
+
     /*
      * Given
      */
@@ -1152,6 +1187,11 @@ public class NMDbusConnectorTest {
 
         this.instanceNMDbusConnector = NMDbusConnector.getInstance(this.dbusConnection);
 
+    }
+
+    private void givenNMActivationFailed() {
+        when(this.mockedNetworkManager.ActivateConnection(any(), any(), any()))
+                .thenThrow(new DBusExecutionException("Activation Failed!"));
     }
 
     private void givenMockedPermissions() {
@@ -1426,7 +1466,7 @@ public class NMDbusConnectorTest {
                 .thenReturn(Arrays.asList(new UInt32[] { new UInt32(40), new UInt32(69) }));
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "PrimarySimSlot")).thenReturn(new UInt32(0));
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "UnlockRequired")).thenReturn(new UInt32(1));
-        when(modemProperties.Get(MM_MODEM_BUS_NAME, "State")).thenReturn(8);
+        when(modemProperties.Get(MM_MODEM_BUS_NAME, "State")).thenReturn(-1);
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "AccessTechnologies")).thenReturn(new UInt32(0));
         when(modemProperties.Get(MM_MODEM_BUS_NAME, "SignalQuality"))
                 .thenReturn(new UInt32[] { new UInt32(97), new UInt32(2) });
@@ -1813,7 +1853,7 @@ public class NMDbusConnectorTest {
         assertTrue(modemStatus.isGpsSupported());
         assertEquals(EnumSet.of(ModemGpsMode.UNMANAGED, ModemGpsMode.MANAGED_GPS), modemStatus.getSupporteGpsModes());
         assertFalse(modemStatus.isSimLocked());
-        assertEquals(ModemConnectionStatus.REGISTERED, modemStatus.getConnectionStatus());
+        assertEquals(ModemConnectionStatus.FAILED, modemStatus.getConnectionStatus());
         assertEquals(1, modemStatus.getAccessTechnologies().size());
         assertTrue(modemStatus.getAccessTechnologies().contains(AccessTechnology.UNKNOWN));
         assertEquals(97, modemStatus.getSignalQuality());
@@ -1849,6 +1889,10 @@ public class NMDbusConnectorTest {
 
     private void thenDeviceExists(String interfaceName) {
         assertTrue(this.mockDevices.containsKey(interfaceName));
+    }
+
+    public void thenFailedModemResetTimerIsActive(boolean expectedValue, String modemId) {
+        assertEquals(expectedValue, this.instanceNMDbusConnector.failedModemResetTimerIsActive(modemId));
     }
 
     private void simulateIwCommandOutputs(String interfaceName, Properties preMockedProperties)

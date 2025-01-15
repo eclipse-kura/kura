@@ -51,7 +51,7 @@ public class ModemManagerDbusWrapper {
     private final DBusConnection dbusConnection;
 
     private final Map<String, NMModemResetHandler> modemHandlers = new HashMap<>();
-    private final Map<String, MMFailedModemResetTimer> failedModemHandlers = new HashMap<>();
+    private final Map<String, MMFailedModemResetTimer> failedModemResetTimers = new HashMap<>();
 
     public ModemManagerDbusWrapper(DBusConnection dbusConnection) {
         this.dbusConnection = dbusConnection;
@@ -300,25 +300,25 @@ public class ModemManagerDbusWrapper {
         MMFailedModemResetTimer resetTimer = new MMFailedModemResetTimer(mmModemDevice, delayMinutes);
         resetTimer.schedule();
 
-        this.failedModemHandlers.put(deviceId, resetTimer);
+        this.failedModemResetTimers.put(deviceId, resetTimer);
     }
 
     protected void failedModemResetTimerCancel() {
-        for (String deviceId : this.failedModemHandlers.keySet()) {
+        for (String deviceId : this.failedModemResetTimers.keySet()) {
             failedModemResetTimerCancel(deviceId);
         }
         this.modemHandlers.clear();
     }
 
     protected void failedModemResetTimerCancel(String deviceId) {
-        if (this.failedModemHandlers.containsKey(deviceId)) {
-            MMFailedModemResetTimer timer = this.failedModemHandlers.get(deviceId);
+        if (this.failedModemResetTimers.containsKey(deviceId)) {
+            MMFailedModemResetTimer timer = this.failedModemResetTimers.get(deviceId);
             timer.cancel();
         }
     }
 
     protected boolean isMMFailedModemResetTimerArmed(String deviceId) {
-        return this.failedModemHandlers.containsKey(deviceId);
+        return this.failedModemResetTimers.containsKey(deviceId);
     }
 
     private class MMFailedModemResetTimerTask extends NMModemResetTimerTask {

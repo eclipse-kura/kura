@@ -18,7 +18,7 @@ The **Cellular** tab contains the following configuration parameters:
 
 - **Interface #**: provides a unique number for the modem interface (e.g., an interface # of 0 would name the modem interface ppp0).
 
-- **Dial String**: instructs how the modem should attempt to connect. Typical dial strings are as follows:
+- **Dial String**[^1]: instructs how the modem should attempt to connect. Typical dial strings are as follows:
     - HSPA modem: atd&ast;99&ast;&ast;&ast;1#
     - EVDO/CDMA modem: atd#777
 
@@ -150,3 +150,5 @@ OK	"\d\d\d"
 ""	"atd#777"
 CONNECT	"\c"
 ```
+
+[^1]: This feature is only available in Kura _specific_ profiles. For more informations about the various Kura profiles see [Kura installer types](../getting-started/install-kura.md#installer-types).

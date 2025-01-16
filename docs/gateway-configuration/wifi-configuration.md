@@ -63,7 +63,7 @@ The **Wireless** tab contains the following configuration parameters:
 
 - **Bgscan Long Interval**: defines the interval  between background scans (in seconds) if the actual signal level of the currently connected access point is better than signal_strength.
 
-- **Ping Access Point & renew DHCP lease if not reachable**: enables pinging the access point after connection is established.
+- **Ping Access Point & renew DHCP lease if not reachable**[^1]: enables pinging the access point after connection is established.
     - In _Access Point_ mode, this option is disabled.
     - In _Station_ mode, if set to _true_, the unit will ping the access point and attempt to renew the DHCP lease if the access point is not reachable.
 
@@ -197,3 +197,5 @@ network={
     bgscan=""
 }
 ```
+
+[^1]: This feature is only available in Kura _specific_ profiles. For more informations about the various Kura profiles see [Kura installer types](../getting-started/install-kura.md#installer-types).

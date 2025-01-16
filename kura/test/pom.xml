@@ -417,16 +417,16 @@
                                 <level>1</level>
                                 <autoStart>true</autoStart>
                             </bundle>
-                            <bundleStartLevel>
+                            <bundle>
                                 <id>org.apache.camel.camel-core</id>
                                 <autoStart>true</autoStart>
                                 <level>2</level>
-                            </bundleStartLevel>
-                            <bundleStartLevel>
+                            </bundle>
+                            <bundle>
                                 <id>org.eclipse.kura.camel</id>
                                 <autoStart>true</autoStart>
                                 <level>3</level>
-                            </bundleStartLevel>
+                            </bundle>
                             <bundle>
                                 <id>org.eclipse.kura.core.status</id>
                                 <level>4</level>

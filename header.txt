@@ -1,5 +1,5 @@
-^\/\*{50,}$
-^\s\* Copyright \(c\) (\d{4}|\d{4}, \d{4}) Eurotech and/or its affiliates and others$
+^\/\*{2,}$
+^\s\* Copyright \(c\) (\d{4}|\d{4}, \d{4}) .+ (and/or its affiliates )?and others$
 ^\s\*\s?$
 ^\s\* This program and the accompanying materials are made$
 ^\s\* available under the terms of the Eclipse Public License 2\.0$
@@ -8,4 +8,4 @@
 ^\s\* SPDX-License-Identifier: EPL\-2\.0$
 ^\s\*\s?$
 ^\s\* Contributors:$
-^\s\*  Eurotech$
+^\s\*  .+$

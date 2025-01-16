@@ -17,7 +17,7 @@ The **TCP/IP** tab contains the following configuration parameters:
     - Enabled for LAN: designates the interface for a local network. It can be set as a DHCP server for hosts on the local network and can serve as a default gateway for those hosts; however, it cannot be set as an actual gateway interface for this device. That is, packets must be routed from this interface to another interface that is configured as WAN. The interface is automatically brought up at boot.
     - Enabled for WAN: designates the interface as a gateway to an external network. The interface is automatically brought up at boot.
     - Not Managed: the interface will be ignored by Kura.
-    - Layer 2 Only: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot.
+    - Layer 2 Only[^1]: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot.
 - **Configure**
     - Manually: allows manual entry of the _IP Address_ and _Netmask_ fields, if the interface is configured as LAN; allows manual entry of the _IP Address_, _Netmask_, _Gateway_, and _DNS Servers_ fields, if the interface is designated as WAN.
     - Using DHCP: configures the interface as a DHCP client obtaining the IP address from a network DHCP server.
@@ -110,7 +110,7 @@ Name                                             | Type     | Description
 
 Name                                                | Type     | Description
 ----------------------------------------------------|----------|------------------------------------------
-`net.interface.<interface>.config.ip4.status`	    | String   | The status of the interface for the IPv4 configuration; possibile values are: netIPv4StatusDisabled, netIPv4StatusUnmanaged, netIPv4StatusL2Only, netIPv4StatusEnabledLAN, netIPv4StatusEnabledWAN, netIPv4StatusUnknown
+`net.interface.<interface>.config.ip4.status`	    | String   | The status of the interface for the IPv4 configuration; possibile values are: netIPv4StatusDisabled, netIPv4StatusUnmanaged, netIPv4StatusL2Only[^1], netIPv4StatusEnabledLAN, netIPv4StatusEnabledWAN, netIPv4StatusUnknown
 `net.interface.<interface>.config.ip4.wan.priority` | Integer | (NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See [Network Failover](./network-failover.md) for further details
 `net.interface.<interface>.config.ip4.address`    | String   | The IPv4 address assigned to the network interface
 `net.interface.<interface>.config.ip4.prefix`	    | Short    | The IPv4 netmask assigned to the network interface
@@ -160,7 +160,7 @@ Name                                                             | Type      | D
 `net.interface.<interface>.config.wifi.infra.passphrase`	     | Password	 | The password for the wireless network
 `net.interface.<interface>.config.wifi.infra.ignoreSSID`	     | Boolean	 | Specify if a scan for SSID is required before attempting to associate
 `net.interface.<interface>.config.wifi.infra.mode`	             | String	 | The mode of the wireless connection; for station mode set to INFRA
-`net.interface.<interface>.config.wifi.infra.pingAccessPoint`	 | Boolean	 | Enable pinging the access point after connection is established
+`net.interface.<interface>.config.wifi.infra.pingAccessPoint`[^1]| Boolean	 | Enable pinging the access point after connection is established
 `net.interface.<interface>.config.wifi.infra.driver`	         | String	 | The driver used for the connection
 `net.interface.<interface>.config.wifi.infra.securityType`       | String	 | The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2
 `net.interface.<interface>.config.wifi.infra.groupCiphers`       | String    | Group ciphers i.e. group/broadcast encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
@@ -185,7 +185,7 @@ Name                                                  | Type     | Description
 `net.interface.<interface>.config.gpsEnabled`         | Boolean  | Enable the GPS device in the modem if available
 `net.interface.<interface>.config.persist`            | Boolean  | The persist option of the PPP daemon
 `net.interface.<interface>.config.apn`                | String   | The modem Access Point Name
-`net.interface.<interface>.config.dialString`         | String   | The dial string used for connecting to the APN
+`net.interface.<interface>.config.dialString`[^1]     | String   | The dial string used for connecting to the APN
 `net.interface.<interface>.config.holdoff`            | Integer  | The holdoff option of the PPP daemon (in seconds)
 `net.interface.<interface>.config.pppNum`             | Integer  | Assigned ppp interface number
 
@@ -515,3 +515,5 @@ This section presents some snapshot examples to perform basic operations on netw
     </esf:configuration>
 </esf:configurations>
 ```
+
+[^1]: This feature is only available in Kura _specific_ profiles. For more informations about the various Kura profiles see [Kura installer types](../getting-started/install-kura.md#installer-types).

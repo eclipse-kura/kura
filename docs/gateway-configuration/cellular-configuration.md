@@ -24,7 +24,7 @@ The **Cellular** tab contains the following configuration parameters:
 
 - **APN**: defines the modem access point name (HSPA modems only).
 
-- **Auth Type**[1]: specifies the authentication type (HSPA modems only).
+- **Auth Type**[^1]: specifies the authentication type (HSPA modems only).
     - None
     - Auto
     - CHAP

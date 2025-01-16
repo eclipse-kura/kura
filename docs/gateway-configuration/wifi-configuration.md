@@ -34,7 +34,7 @@ The **Wireless** tab contains the following configuration parameters:
     - WEP: 64-bit or 128-bit encryption key
     - WPA/WPA2: pre-shared key
 
-- **Verify Password**: sets the password verification field.
+- **Verify Password**[^1]: sets the password verification field.
     - In _Access Point_ mode, allows the wireless password to be retyped for verification.
     - In _Station_ mode, this field is disabled.
 
@@ -52,16 +52,16 @@ The **Wireless** tab contains the following configuration parameters:
         - TKIP (Temporal Key Integrity Protocol)
         - CCMP and TKIP
 
-- **Bgscan Module**: requests background scans for the purpose of roaming within an ESS (i.e., within a single network block with all the APs using the same SSID).
+- **Bgscan Module**[^1]: requests background scans for the purpose of roaming within an ESS (i.e., within a single network block with all the APs using the same SSID).
     - None: background scan is disabled
     - Simple: periodic background scans based on signal strength
     - Learn: learn channels used by the network and try to avoid bgscans on other channels
 
-- **Bgscan Signal Strength Threshold**: defines a threshold (in dBm) that determines which one of the following two parameters (i.e., _Short Interval_ or _Long Interval_) will be effective.
+- **Bgscan Signal Strength Threshold**[^1]: defines a threshold (in dBm) that determines which one of the following two parameters (i.e., _Short Interval_ or _Long Interval_) will be effective.
 
-- **Bgscan Short Interval**: defines the interval between background scans (in seconds) if the actual signal level of the currently connected access point is worse than signal_strength.
+- **Bgscan Short Interval**[^1]: defines the interval between background scans (in seconds) if the actual signal level of the currently connected access point is worse than signal_strength.
 
-- **Bgscan Long Interval**: defines the interval  between background scans (in seconds) if the actual signal level of the currently connected access point is better than signal_strength.
+- **Bgscan Long Interval**[^1]: defines the interval  between background scans (in seconds) if the actual signal level of the currently connected access point is better than signal_strength.
 
 - **Ping Access Point & renew DHCP lease if not reachable**[^1]: enables pinging the access point after connection is established.
     - In _Access Point_ mode, this option is disabled.

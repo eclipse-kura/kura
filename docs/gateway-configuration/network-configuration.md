@@ -156,38 +156,38 @@ Name                                                             | Type      | D
 -----------------------------------------------------------------|-----------|------------------------------------------
 `net.interface.<interface>.config.wifi.infra.ssid`	             | String	 | The SSID of the wireless network to connect to
 `net.interface.<interface>.config.wifi.infra.channel`	         | String	 | The channel of the wireless network to connect to
-`net.interface.<interface>.config.wifi.infra.bgscan`	         | String	 | Set the background scans; possible values have the form `<mode>:<shortInterval>:<rssiThreshold>:<longInterval>` where `mode` (String) is one of NONE, SIMPLE, or LEARN, `shortInterval` (Integer) sets the Bgscan short interval (secs), `rssiThreshold` (Integer) sets the Bgscan Signal strength threshold (dBm), and `longInterval` (Integer) sets the Bgscan long interval (secs)
+`net.interface.<interface>.config.wifi.infra.bgscan`[^1]         | String	 | Set the background scans; possible values have the form `<mode>:<shortInterval>:<rssiThreshold>:<longInterval>` where `mode` (String) is one of NONE, SIMPLE, or LEARN, `shortInterval` (Integer) sets the Bgscan short interval (secs), `rssiThreshold` (Integer) sets the Bgscan Signal strength threshold (dBm), and `longInterval` (Integer) sets the Bgscan long interval (secs)
 `net.interface.<interface>.config.wifi.infra.passphrase`	     | Password	 | The password for the wireless network
 `net.interface.<interface>.config.wifi.infra.ignoreSSID`	     | Boolean	 | Specify if a scan for SSID is required before attempting to associate
 `net.interface.<interface>.config.wifi.infra.mode`	             | String	 | The mode of the wireless connection; for station mode set to INFRA
 `net.interface.<interface>.config.wifi.infra.pingAccessPoint`[^1]| Boolean	 | Enable pinging the access point after connection is established
-`net.interface.<interface>.config.wifi.infra.driver`	         | String	 | The driver used for the connection
+`net.interface.<interface>.config.wifi.infra.driver`[^1]         | String	 | The driver used for the connection
 `net.interface.<interface>.config.wifi.infra.securityType`       | String	 | The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2
 `net.interface.<interface>.config.wifi.infra.groupCiphers`       | String    | Group ciphers i.e. group/broadcast encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
 `net.interface.<interface>.config.wifi.infra.pairwiseCiphers`    | String    | Pairwise ciphers i.e. pairwise encryption algorithms which prevents connections to Wi-Fi networks that do not utilize one of the algorithms set, possible values are `CCMP`, `TKIP`, and `CCMP_TKIP`
 
 ### Cellular Modem properties
 
-Name                                                  | Type     | Description
-------------------------------------------------------|----------|------------------------------------------
-`net.interface.<interface>.config.enabled`	          | Boolean  | Enable the interface
-`net.interface.<interface>.config.idle`               | Integer  | The idle option of the PPP daemon
-`net.interface.<interface>.config.username`           | String   | The username used for the connection
-`net.interface.<interface>.config.password`           | Password | The password used for the connection
-`net.interface.<interface>.config.pdpType`            | String   | The PdP type; possible values are IP, PPP and IPv6
-`net.interface.<interface>.config.maxFail`            | Integer  | The maxfail option of the PPP daemon
-`net.interface.<interface>.config.authType`           | String   | The authentication type; possible values are None, Auto, CHAP and PAP
-`net.interface.<interface>.config.lpcEchoInterval`    | Integer  | The lcp-echo-interval option of the PPP daemon
-`net.interface.<interface>.config.activeFilter`       | String   | The active-filter option of the PPP daemon
-`net.interface.<interface>.config.lpcEchoFailure`     | Integer  | The lcp-echo-failure option of the PPP daemon
-`net.interface.<interface>.config.diversityEnabled`   | Boolean  | Enable the LTE diversity antenna
-`net.interface.<interface>.config.resetTimeout`       | Integer  | The modem reset timeout in minutes
-`net.interface.<interface>.config.gpsEnabled`         | Boolean  | Enable the GPS device in the modem if available
-`net.interface.<interface>.config.persist`            | Boolean  | The persist option of the PPP daemon
-`net.interface.<interface>.config.apn`                | String   | The modem Access Point Name
-`net.interface.<interface>.config.dialString`[^1]     | String   | The dial string used for connecting to the APN
-`net.interface.<interface>.config.holdoff`            | Integer  | The holdoff option of the PPP daemon (in seconds)
-`net.interface.<interface>.config.pppNum`             | Integer  | Assigned ppp interface number
+Name                                                   | Type     | Description
+-------------------------------------------------------|----------|------------------------------------------
+`net.interface.<interface>.config.enabled`             | Boolean  | Enable the interface
+`net.interface.<interface>.config.idle`[^1]            | Integer  | The idle option of the PPP daemon
+`net.interface.<interface>.config.username`            | String   | The username used for the connection
+`net.interface.<interface>.config.password`            | Password | The password used for the connection
+`net.interface.<interface>.config.pdpType`[^1]         | String   | The PdP type; possible values are IP, PPP and IPv6
+`net.interface.<interface>.config.maxFail`[^1]         | Integer  | The maxfail option of the PPP daemon
+`net.interface.<interface>.config.authType`[^1]        | String   | The authentication type; possible values are None, Auto, CHAP and PAP
+`net.interface.<interface>.config.lpcEchoInterval`[^1] | Integer  | The lcp-echo-interval option of the PPP daemon
+`net.interface.<interface>.config.activeFilter`[^1]    | String   | The active-filter option of the PPP daemon
+`net.interface.<interface>.config.lpcEchoFailure`[^1]  | Integer  | The lcp-echo-failure option of the PPP daemon
+`net.interface.<interface>.config.diversityEnabled`[^1]|Boolean  | Enable the LTE diversity antenna
+`net.interface.<interface>.config.resetTimeout`        | Integer  | The modem reset timeout in minutes
+`net.interface.<interface>.config.gpsEnabled`[^1]      | Boolean  | Enable the GPS device in the modem if available
+`net.interface.<interface>.config.persist`[^1]         | Boolean  | The persist option of the PPP daemon
+`net.interface.<interface>.config.apn`                 | String   | The modem Access Point Name
+`net.interface.<interface>.config.dialString`[^1]      | String   | The dial string used for connecting to the APN
+`net.interface.<interface>.config.holdoff`[^1]         | Integer  | The holdoff option of the PPP daemon (in seconds)
+`net.interface.<interface>.config.pppNum`[^1]          | Integer  | Assigned ppp interface number
 
 ## Network Configuration recipes
 

@@ -24,7 +24,7 @@ The **Cellular** tab contains the following configuration parameters:
 
 - **APN**: defines the modem access point name (HSPA modems only).
 
-- **Auth Type**: specifies the authentication type (HSPA modems only).
+- **Auth Type**[1]: specifies the authentication type (HSPA modems only).
     - None
     - Auto
     - CHAP
@@ -36,21 +36,21 @@ The **Cellular** tab contains the following configuration parameters:
 
 - **Modem Reset Timeout**: sets the modem reset timeout in minutes. If set to a non-zero value, the modem is reset after n consecutive minutes of unsuccessful connection attempts. If set to zero, the modem keeps trying to establish a PPP connection without resetting. The default value is 5 minutes.
 
-- **Reopen Connection on Termination**: sets the _persist_ option of the PPP daemon that specifies if PPP daemon should exit after connection is terminated. Note that the _maxfail_ option still has an effect on persistent connections.
+- **Reopen Connection on Termination**[^1]: sets the _persist_ option of the PPP daemon that specifies if PPP daemon should exit after connection is terminated. Note that the _maxfail_ option still has an effect on persistent connections.
 
-- **Connection Attempts Retry Delay**: Sets the _holdoff_ parameter to instruct the PPP daemon on how many seconds to wait before re-initiating the link after it terminates. This option only has any effect if the persist option (Reopen Connection on Termination) is set to true. The holdoff period is not applied if the link was terminated because it was idle. The default value is 1 second.
+- **Connection Attempts Retry Delay**[^1]: Sets the _holdoff_ parameter to instruct the PPP daemon on how many seconds to wait before re-initiating the link after it terminates. This option only has any effect if the persist option (Reopen Connection on Termination) is set to true. The holdoff period is not applied if the link was terminated because it was idle. The default value is 1 second.
 
-- **Connection Attempts**: sets the _maxfail_ option of the PPP daemon that limits the number of consecutive failed PPP connection attempts. The default value is 5 connection attempts. A value of zero means no limit. The PPP daemon terminates after the specified number of failed PPP connection attempts and restarts by the _ModemMonitor_ thread.  
+- **Connection Attempts**[^1]: sets the _maxfail_ option of the PPP daemon that limits the number of consecutive failed PPP connection attempts. The default value is 5 connection attempts. A value of zero means no limit. The PPP daemon terminates after the specified number of failed PPP connection attempts and restarts by the _ModemMonitor_ thread.  
 
-- **Disconnect if Idle**: sets the _idle_ option of the PPP daemon, which terminates the PPP connection if the link is idle for a specified number of seconds. The default value is 95 seconds. To disable this option, set it to zero.
+- **Disconnect if Idle**[^1]: sets the _idle_ option of the PPP daemon, which terminates the PPP connection if the link is idle for a specified number of seconds. The default value is 95 seconds. To disable this option, set it to zero.
 
-- **Active Filter**: sets the _active-filter_ option of the PPP daemon. This option specifies a packet filter _(filter-expression)_ to be applied to data packets in order to determine which packets are regarded as link activity, and thereby, reset the idle timer. The _filter-expression_ syntax is as described for tcpdump(1); however, qualifiers that do not apply to a PPP link, such as _ether_ and _arp_, are not permitted. The default value is _inbound_. To disable the _active-filter_ option, leave it blank.
+- **Active Filter**[^1]: sets the _active-filter_ option of the PPP daemon. This option specifies a packet filter _(filter-expression)_ to be applied to data packets in order to determine which packets are regarded as link activity, and thereby, reset the idle timer. The _filter-expression_ syntax is as described for tcpdump(1); however, qualifiers that do not apply to a PPP link, such as _ether_ and _arp_, are not permitted. The default value is _inbound_. To disable the _active-filter_ option, leave it blank.
 
-- **LCP Echo Interval**: sets the _lcp-echo-interval_ option of the PPP daemon. If set to a positive number, the modem sends LCP echo request to the peer at the specified number of seconds. To disable this option, set it to zero. This option may be used with the _lcp-echo-failure_ option to detect that the peer is no longer connected.
+- **LCP Echo Interval**[^1]: sets the _lcp-echo-interval_ option of the PPP daemon. If set to a positive number, the modem sends LCP echo request to the peer at the specified number of seconds. To disable this option, set it to zero. This option may be used with the _lcp-echo-failure_ option to detect that the peer is no longer connected.
 
-- **LCP Echo Failure**: sets the _lcp-echo-failure_ option of the PPP daemon. If set to a positive number, the modem presumes the peer to be dead if a specified number of LCP echo-requests are sent without receiving a valid LCP echo-reply. To disable this option, set it to zero.
+- **LCP Echo Failure**[^1]: sets the _lcp-echo-failure_ option of the PPP daemon. If set to a positive number, the modem presumes the peer to be dead if a specified number of LCP echo-requests are sent without receiving a valid LCP echo-reply. To disable this option, set it to zero.
 
-- **Enable GPS**: enables GPS with the following conditions:
+- **Enable GPS**[^1]: enables GPS with the following conditions:
     - One modem port will be dedicated to NMEA data stream.
     - This port may not be used to send AT commands to the modem.
     - _PositionService_ should be enabled. Serial settings of _PositionService_ should not be changed; it will be redirected to the modem GPS port automatically.

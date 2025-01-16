@@ -1,7 +1,5 @@
-package org.eclipse.kura.db.keyvalue;
-
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +10,7 @@ package org.eclipse.kura.db.keyvalue;
  * Contributors:
  *  Eurotech
  *******************************************************************************/
+package org.eclipse.kura.db.keyvalue;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.connection.listener.ConnectionListener;

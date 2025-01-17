@@ -38,7 +38,7 @@ node {
 
     stage('Check copyright headers date') {
         dir("kura") {
-            def changedFiles = sh(script: "cd ${workDirectory} && git diff --name-only origin/${env.CHANGE_TARGET} origin/${env.BRANCH_NAME}", returnStdout: true).trim().split("\n")
+            def changedFiles = sh(script: "git diff --name-only origin/${env.CHANGE_TARGET} origin/${env.BRANCH_NAME}", returnStdout: true).trim().split("\n")
             def year = new Date().format("yyyy")
             def atLeastOneFileWasNotValid = false
 

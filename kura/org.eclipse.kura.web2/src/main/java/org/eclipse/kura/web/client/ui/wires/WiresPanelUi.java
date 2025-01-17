@@ -26,7 +26,6 @@ import org.eclipse.kura.web.client.configuration.HasConfiguration;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
-import org.eclipse.kura.web.client.ui.settings.SnapshotDownloadModal;
 import org.eclipse.kura.web.client.ui.wires.composer.BlinkEffect;
 import org.eclipse.kura.web.client.ui.wires.composer.DropEvent;
 import org.eclipse.kura.web.client.ui.wires.composer.PortNames;
@@ -130,7 +129,7 @@ public class WiresPanelUi extends Composite
     NavPills wireEmitterReceiverMenu;
 
     @UiField
-    SnapshotDownloadModal snapshotDownloadModal;
+    WiregraphDownloadModal wiregraphDownloadModal;
 
     interface WiresPanelUiUiBinder extends UiBinder<Widget, WiresPanelUi> {
     }
@@ -194,7 +193,7 @@ public class WiresPanelUi extends Composite
                         AlertDialog.Severity.ALERT, (ConfirmListener) null);
                 return;
             }
-            snapshotDownloadModal.show(WiresRPC::downloadWiresSnapshot);
+            wiregraphDownloadModal.show();
         });
     }
 

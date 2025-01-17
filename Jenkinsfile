@@ -48,7 +48,7 @@ node {
                 }
 
                 // Only grep the second line of the file (which contains the year) as per our checkstyle rules
-                String command = "cat ${file} | sed -n 2p | grep -o -e '\\(\\d\\{4\\}\\)[^,]' || true"
+                String command = "cat ${file} | sed -n 2p | grep -oP '(\\d{4})[^,]'"
                 // Debug
                 echo "Command: ${command}"
 

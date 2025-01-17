@@ -936,7 +936,7 @@ The deployment package JSON message is comprised of the following package elemen
 This operation provides the Linux packages installed in OS.
 
 * Request Topic:
-    * **$EDC/account_name/client_id/INVENTORY-V1/GET/system.packages**
+    * **$EDC/account_name/client_id/INVENTORY-V1/GET/systemPackages**
   
 * Request Payload:
     * Nothing application-specific beyond the request ID and requester client ID

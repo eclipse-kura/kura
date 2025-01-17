@@ -57,6 +57,8 @@ public class SnapshotDownloadModal extends SnapshotGenericModal {
     @Override
     void show(Long snapshotId, List<String> snapshotConfigs) {
 
+        initPidSearch();
+        initSnapshotScrollPanel();
         initSnapshotPidList(snapshotConfigs);
         initSelectedPidCounter();
         initSnapshotSelectAllAnchor();

@@ -49,14 +49,7 @@ node {
 
                 // Only grep the second line of the file (which contains the year) as per our checkstyle rules
                 String command = "cat ${file} | sed -n 2p | grep -oP '(\\d{4})[^,]'"
-                // Debug
-                echo "Command: ${command}"
-
                 def out = sh(script: command , returnStdout: true).trim()
-
-                // Debug
-                echo "File: ${file}"
-                echo "Output: ${out}"
 
                 if(out != year) {
                     echo "File ${file} does not have the current year in the header"

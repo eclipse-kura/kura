@@ -13,6 +13,35 @@ def boolean onlyDocumentationFilesChangedIn(String workDirectory) {
     return changedFiles && changedFiles.every { it.endsWith(".md") || it.endsWith(".txt") }
 }
 
+// NOTE: This function needs to be ran from the root of the repository otherwise the git diff command will not work
+def String[] findFilesWithWrongCopyrightHeaderYear() {
+    if (!env.CHANGE_TARGET) {
+        echo "CHANGE_TARGET not set. Skipping check"
+        return new String[]
+    }
+
+    def changedFiles = sh(script: "git diff --name-only origin/${env.CHANGE_TARGET} origin/${env.BRANCH_NAME}", returnStdout: true).trim().split("\n")
+    def year = new Date().format("yyyy")
+    def invalidFiles = []
+
+    for (String file : changedFiles) {
+        if (!file.endsWith(".java") ) {
+            continue
+        }
+
+        // Only grep the second line of the file (which contains the year) as per our checkstyle rules
+        String command = "#!/bin/sh -e\ncat ${file} | sed -n 2p | grep -oP '(\\d{4})[^,]'"
+        def out = sh(script: command , returnStdout: true).trim()
+
+        if(out != year) {
+            echo "File ${file} does not have the current year in the header. Expected: ${year}, Found: ${out}"
+            invalidFiles.add(file)
+        }
+    }
+
+    return invalidFiles
+}
+
 node {
     properties([
         disableConcurrentBuilds(abortPrevious: true),
@@ -44,24 +73,7 @@ node {
             Utils.markStageSkippedForConditional('Check copyright headers date')
         } else {
             dir("kura") {
-                def changedFiles = sh(script: "git diff --name-only origin/${env.CHANGE_TARGET} origin/${env.BRANCH_NAME}", returnStdout: true).trim().split("\n")
-                def year = new Date().format("yyyy")
-                def invalidFiles = []
-
-                for (String file : changedFiles) {
-                    if (!file.endsWith(".java") ) {
-                        continue
-                    }
-
-                    // Only grep the second line of the file (which contains the year) as per our checkstyle rules
-                    String command = "#!/bin/sh -e\ncat ${file} | sed -n 2p | grep -oP '(\\d{4})[^,]'"
-                    def out = sh(script: command , returnStdout: true).trim()
-
-                    if(out != year) {
-                        echo "File ${file} does not have the current year in the header. Expected: ${year}, Found: ${out}"
-                        invalidFiles.add(file)
-                    }
-                }
+                def invalidFiles = findFilesWithWrongCopyrightHeaderYear()
 
                 if (invalidFiles) {
                     error "The following files do not have the correct year in the header:\n${invalidFiles.join('\n')}"

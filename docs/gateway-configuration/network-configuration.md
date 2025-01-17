@@ -199,10 +199,10 @@ Name                                                   | Type     | Description 
 `net.interface.<interface>.config.password`            | Password | The password used for the connection                                   |
 `net.interface.<interface>.config.pdpType`[^1]         | String   | The PdP type; possible values are IP, PPP and IPv6                     | IP
 `net.interface.<interface>.config.maxFail`[^1]         | Integer  | The maxfail option of the PPP daemon                                   | 5
-`net.interface.<interface>.config.authType`[^1]        | String   | The authentication type; possible values are `NONE`, `AUTO`, `CHAP` and `PAP`  | `NONE`
-`net.interface.<interface>.config.lpcEchoInterval`[^1] | Integer  | The lcp-echo-interval option of the PPP daemon                         | 0
+`net.interface.<interface>.config.authType`            | String   | The authentication type; possible values are `NONE`, `AUTO`, `CHAP` and `PAP`  | `NONE`
+`net.interface.<interface>.config.lpcEchoInterval`     | Integer  | The lcp-echo-interval option of the PPP daemon                         | 0
 `net.interface.<interface>.config.activeFilter`[^1]    | String   | The active-filter option of the PPP daemon                             | inbound
-`net.interface.<interface>.config.lpcEchoFailure`[^1]  | Integer  | The lcp-echo-failure option of the PPP daemon                          | 0
+`net.interface.<interface>.config.lpcEchoFailure`      | Integer  | The lcp-echo-failure option of the PPP daemon                          | 0
 `net.interface.<interface>.config.diversityEnabled`[^1]| Boolean  | Enable the LTE diversity antenna                                       | false
 `net.interface.<interface>.config.resetTimeout`        | Integer  | The modem reset timeout in minutes                                     | 5
 `net.interface.<interface>.config.gpsEnabled`          | Boolean  | Enable the GPS device in the modem if available                        | false

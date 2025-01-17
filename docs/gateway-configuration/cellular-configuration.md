@@ -151,4 +151,4 @@ OK	"\d\d\d"
 CONNECT	"\c"
 ```
 
-[^1]: This feature is only available in Kura _specific_ profiles. For more informations about the various Kura profiles see [Kura installer types](../getting-started/install-kura.md#installer-types).
+[^1]: This feature is only available in Eclipse Kura _specific_ profiles. For more informations about the various Kura profiles see [Kura installer types](../getting-started/install-kura.md#installer-types).

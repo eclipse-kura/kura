@@ -52,7 +52,7 @@ node {
                 def out = sh(script: command , returnStdout: true).trim()
 
                 if(out != year) {
-                    echo "File ${file} does not have the current year in the header"
+                    echo "File ${file} does not have the current year in the header. Expected: ${year}, Found: ${out}"
                     atLeastOneFileWasNotValid = true
                 }
             }

@@ -52,11 +52,11 @@ node {
                 }
 
                 // Only grep the second line of the file (which contains the year) as per our checkstyle rules
-                String command = 'cat ${file} | sed -n 2p | grep -e "\\(\\d\\{4\\}\\)[^,]"'
+                String command = 'cat ${file} | sed -n 2p | grep -o -e "\\(\\d\\{4\\}\\)[^,]" || true'
                 // Debug
                 echo "Command: ${command}"
 
-                def out = sh(script: command , returnStdout: true)
+                def out = sh(script: command , returnStdout: true).trim()
 
                 // Debug
                 echo "File: ${file}"

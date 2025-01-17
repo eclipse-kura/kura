@@ -40,7 +40,7 @@ node {
         dir("kura") {
             def changedFiles = sh(script: "git diff --name-only origin/${env.CHANGE_TARGET} origin/${env.BRANCH_NAME}", returnStdout: true).trim().split("\n")
             def year = new Date().format("yyyy")
-            String[] invalidFiles = []
+            def invalidFiles = []
 
             for (String file : changedFiles) {
                 if (!file.endsWith(".java") ) {

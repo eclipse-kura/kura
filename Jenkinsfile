@@ -56,7 +56,7 @@ node {
                 // Debug
                 echo "Command: ${command}"
 
-                def out = sh(script: command , returnStatus: true)
+                def out = sh(script: command , returnStdout: true)
 
                 // Debug
                 echo "File: ${file}"

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,12 +20,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Designate;
@@ -477,4 +481,107 @@ public class ComponentUtil {
         }
         return result;
     }
+
+    /*
+     * Encrypt a list of {@link org.eclipse.kura.ComponentConfiguration}s using the given CryptoService
+     */
+    public static void encryptConfigs(List<ComponentConfiguration> configs, final CryptoService cryptoService) {
+        if (configs != null) {
+            for (ComponentConfiguration config : configs) {
+                encryptConfigurationProperties(config.getConfigurationProperties(), cryptoService);
+            }
+        }
+    }
+
+    /*
+     * Encrypt a map of properties using the given CryptoService
+     */
+    public static void encryptConfigurationProperties(Map<String, Object> propertiesToUpdate,
+            final CryptoService cryptoService) {
+        if (propertiesToUpdate == null) {
+            return;
+        }
+
+        for (Entry<String, Object> property : propertiesToUpdate.entrySet()) {
+            Object configValue = property.getValue();
+            if (configValue instanceof Password || configValue instanceof Password[]) {
+                try {
+                    Object encryptedValue = encryptPasswordProperties(configValue, cryptoService);
+                    propertiesToUpdate.put(property.getKey(), encryptedValue);
+                } catch (KuraException e) {
+                    logger.warn("Failed to encrypt Password property: {}", property.getKey());
+                    propertiesToUpdate.remove(property.getKey());
+                }
+            }
+        }
+    }
+
+    private static Object encryptPasswordProperties(Object configValue, final CryptoService cryptoService)
+            throws KuraException {
+        Object encryptedValue = null;
+        if (configValue instanceof Password) {
+            encryptedValue = encryptPassword((Password) configValue, cryptoService);
+
+        } else if (configValue instanceof Password[]) {
+            Password[] passwordArray = (Password[]) configValue;
+            Password[] encryptedPasswords = new Password[passwordArray.length];
+
+            for (int i = 0; i < passwordArray.length; i++) {
+                encryptedPasswords[i] = encryptPassword(passwordArray[i], cryptoService);
+            }
+            encryptedValue = encryptedPasswords;
+        }
+        return encryptedValue;
+    }
+
+    private static boolean isEncrypted(Password configPassword, final CryptoService cryptoService) {
+        boolean result = false;
+        try {
+            cryptoService.decryptAes(configPassword.getPassword());
+            result = true;
+        } catch (Exception e1) {
+        }
+        return result;
+    }
+
+    private static Password encryptPassword(Password password, final CryptoService cryptoService) throws KuraException {
+        if (!isEncrypted(password, cryptoService)) {
+            return new Password(cryptoService.encryptAes(password.getPassword()));
+        }
+        return password;
+    }
+
+    /*
+     * Converts a list of {@link org.eclipse.kura.core.configuration.ComponentConfiguration}s to a map whose keys are
+     * the component pids.
+     */
+    public static Map<String, ComponentConfiguration> toMap(final List<ComponentConfiguration> configs) {
+        return configs.stream().collect(Collectors.toMap(ComponentConfiguration::getPid, Function.identity()));
+    }
+
+    // /*
+    // * Merge a collection of {@link org.eclipse.kura.core.configuration.ComponentConfiguration} properties with the
+    // * given configurations.
+    // */
+    // public static void merge(final Map<String, ComponentConfiguration> configs,
+    // final Collection<ComponentConfiguration> toBeMerged) {
+    // for (final ComponentConfiguration c : toBeMerged) {
+    // merge(configs, c);
+    // }
+    // }
+    //
+    // /*
+    // * Merge a {@link org.eclipse.kura.core.configuration.ComponentConfiguration} with the
+    // * given configurations.
+    // */
+    // public static void merge(final Map<String, ComponentConfiguration> configs, final ComponentConfiguration c) {
+    // configs.compute(c.getPid(), (k, v) -> {
+    // if (v == null) {
+    // return c;
+    // } else {
+    // v.getConfigurationProperties().putAll(c.getConfigurationProperties());
+    // return v;
+    // }
+    // });
+    // }
 }

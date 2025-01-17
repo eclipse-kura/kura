@@ -36,6 +36,40 @@ node {
         return
     }
 
+    stage('Check copyright headers date') {
+        dir("kura") {
+            def changedFiles = sh(script: "cd ${workDirectory} && git diff --name-only origin/${env.CHANGE_TARGET} origin/${env.BRANCH_NAME}", returnStdout: true).trim().split("\n")
+            def year = new Date().format("yyyy")
+            def atLeastOneFileWasNotValid = false
+
+            // Debug
+            echo "Changed files: ${changedFiles}"
+            echo "Current year: ${year}"
+
+            for (String file : changedFiles) {
+                if (!file.endsWith(".java") ) {
+                    continue
+                }
+
+                // Only grep the second line of the file (which contains the year) as per our checkstyle rules
+                def out = sh(script: "cat ${file} | sed -n 2p | grep -e '\(\d\{4\}\)[^,]'", returnStatus: true)
+
+                // Debug
+                echo "File: ${file}"
+                echo "Output: ${out}"
+
+                if(out != year) {
+                    echo "File ${file} does not have the current year in the header"
+                    atLeastOneFileWasNotValid = true
+                }
+            }
+
+            if (atLeastOneFileWasNotValid) {
+                error "At least one file does not have the correct year in the header. See console output for details"
+            }
+        }
+    }
+
     stage('Build target-platform') {
         timeout(time: 1, unit: 'HOURS') {
             dir("kura") {

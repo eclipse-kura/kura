@@ -77,15 +77,40 @@ public abstract class SnapshotGenericModal extends Composite {
      * Abstract initializers
      */
 
-    abstract void show(Long snapshotId, List<String> snapshotConfigs);
+    /**
+     * Initialize the modal title, the description and the hint paragraphs of the modal.
+     */
+    abstract void initTitleAndDescriptionAndHint();
 
-    abstract void initTitleAndDescription();
-
+    /**
+     * Initialize eventual buttons to perform the desired operations on the PIDs list.
+     * 
+     * @param snapshotId
+     *            - snapshotId of the snapshot from which the PIDs list was taken as {@link Long}
+     */
     abstract void initEventButtons(Long snapshotId);
 
+    /**
+     * Initialize the footer of the modal. It can be used to add the buttons to perform the operations.
+     */
     abstract void initFooter();
 
+    /**
+     * Initialize the eventual hidden field required to perform HTTP requests.
+     */
     abstract void initHiddenFields();
+
+    /**
+     * Method used to initialize the required elements and eventually customize the modal.
+     * 
+     * To finally show the modal, the user must call 'this.snapshotModal.show()'.
+     * 
+     * @param snapshotId
+     *            - snapshotId to be downloaded as {@link Long}
+     * @param snapshotConfigs
+     *            - list of configuration contained in the snapshot to be downloaded as {@link List<String>}
+     */
+    abstract void show(Long snapshotId, List<String> snapshotConfigs);
 
     /*
      * Generic public initializers

@@ -61,7 +61,7 @@ public class SnapshotDownloadModal extends SnapshotGenericModal {
         initSelectedPidCounter();
         initSnapshotSelectAllAnchor();
 
-        initTitleAndDescription();
+        initTitleAndDescriptionAndHint();
         initFooter();
         initHiddenFields();
         initEventButtons(snapshotId);
@@ -74,7 +74,7 @@ public class SnapshotDownloadModal extends SnapshotGenericModal {
      */
 
     @Override
-    void initTitleAndDescription() {
+    void initTitleAndDescriptionAndHint() {
         this.snapshotModal.setTitle(MSGS.deviceSnapshotDownloadModalTitle());
         this.snapshotModalDescription.setText(MSGS.deviceSnapshotDownloadModalHint());
         this.snapshotModalHint.setText(MSGS.formatDownloadHint());

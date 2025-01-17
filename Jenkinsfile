@@ -39,7 +39,7 @@ node {
     }
 
     stage('Check copyright headers date') {
-        if (true) {
+        if (!env.CHANGE_TARGET) {
             echo "CHANGE_TARGET not set. Skipping check"
             Utils.markStageSkippedForConditional('Check copyright headers date')
         } else {

@@ -58,11 +58,7 @@ node {
             }
 
             if (invalidFiles) {
-                echo """
-                    The following files do not have the correct year in the header:
-                    ${invalidFiles.join('\n')}
-                """
-                error "At least one file does not have the correct year in the header. See console output for details"
+                error "The following files do not have the correct year in the header:\n${invalidFiles.join('\n')}"
             }
         }
     }

@@ -5133,7 +5133,16 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">        </span><span class="p">}</span>
 <a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="p">]</span>
 <a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="p">}</span>
-</code></pre></div></li>
+</code></pre></div>
+Supported <strong>type</strong> values are:</li>
+<li>BUNDLE : represents a OSGi Bundle</li>
+<li>DP : represents a OSGi Deployment Package</li>
+<li>DEB : represents a Linux Debian package</li>
+<li>RPM : represents a Linux RPM package</li>
+<li>APK : represents a Linux Alpine APK package</li>
+<li>DOCKER : represents a container instance</li>
+<li>CONTAINER_IMAGE : represents a container image</li>
+<li>UNKNOWN : fallback type for unrecognized resources</li>
 </ul>
 <hr />
 <h2 id="bundles">Bundles</h2>
@@ -5391,10 +5400,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <hr />
 <h2 id="states">States</h2>
 <h3 id="bundle-states">Bundle States</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>-   `ACTIVE`: Container is running
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>-   `INSTALLED`: Container is starting
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>-   `UNINSTALLED`: Container has failed, or is stopped
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>-   `UNKNOWN`: Container state can not be determined
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>-   `ACTIVE`: Bundle is running
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>-   `INSTALLED`: Bundle is starting
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>-   `UNINSTALLED`: Bundle has failed, or is stopped
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>-   `UNKNOWN`: Bundle state can not be determined
 </code></pre></div>
 <h3 id="container-states">Container States</h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>-   `active`: Container is running

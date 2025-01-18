@@ -4,6 +4,11 @@ on:
     branches:
       - 'docs-develop'
       - 'docs-release-*.*'
+
+permissions:
+  contents: write
+  pages: write
+
 jobs:
   deploy-docs:
     runs-on: ubuntu-latest

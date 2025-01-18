@@ -4318,7 +4318,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <li>Enabled for LAN: designates the interface for a local network. It can be set as a DHCP server for hosts on the local network and can serve as a default gateway for those hosts; however, it cannot be set as an actual gateway interface for this device. That is, packets must be routed from this interface to another interface that is configured as WAN. The interface is automatically brought up at boot.</li>
 <li>Enabled for WAN: designates the interface as a gateway to an external network. The interface is automatically brought up at boot.</li>
 <li>Not Managed: the interface will be ignored by Kura.</li>
-<li>Layer 2 Only: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot.</li>
+<li>Layer 2 Only<sup id="fnref18:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot.</li>
 </ul>
 </li>
 <li><strong>Configure</strong><ul>
@@ -4451,7 +4451,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip4.status</code></td>
 <td>String</td>
-<td>The status of the interface for the IPv4 configuration; possibile values are: netIPv4StatusDisabled, netIPv4StatusUnmanaged, netIPv4StatusL2Only, netIPv4StatusEnabledLAN, netIPv4StatusEnabledWAN, netIPv4StatusUnknown</td>
+<td>The status of the interface for the IPv4 configuration; possibile values are: netIPv4StatusDisabled, netIPv4StatusUnmanaged, netIPv4StatusL2Only<sup id="fnref17:1"><a class="footnote-ref" href="#fn:1">1</a></sup>, netIPv4StatusEnabledLAN, netIPv4StatusEnabledWAN, netIPv4StatusUnknown</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip4.wan.priority</code></td>
@@ -4627,7 +4627,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>The channel of the wireless network to connect to</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.bgscan</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.bgscan</code><sup id="fnref16:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>String</td>
 <td>Set the background scans; possible values have the form <code>&lt;mode&gt;:&lt;shortInterval&gt;:&lt;rssiThreshold&gt;:&lt;longInterval&gt;</code> where <code>mode</code> (String) is one of NONE, SIMPLE, or LEARN, <code>shortInterval</code> (Integer) sets the Bgscan short interval (secs), <code>rssiThreshold</code> (Integer) sets the Bgscan Signal strength threshold (dBm), and <code>longInterval</code> (Integer) sets the Bgscan long interval (secs)</td>
 </tr>
@@ -4647,12 +4647,12 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>The mode of the wireless connection; for station mode set to INFRA</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.pingAccessPoint</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.pingAccessPoint</code><sup id="fnref15:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Boolean</td>
 <td>Enable pinging the access point after connection is established</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.driver</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.driver</code><sup id="fnref14:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>String</td>
 <td>The driver used for the connection</td>
 </tr>
@@ -4689,7 +4689,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>Enable the interface</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.idle</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.idle</code><sup id="fnref13:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Integer</td>
 <td>The idle option of the PPP daemon</td>
 </tr>
@@ -4704,37 +4704,37 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>The password used for the connection</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.pdpType</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.pdpType</code><sup id="fnref12:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>String</td>
 <td>The PdP type; possible values are IP, PPP and IPv6</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.maxFail</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.maxFail</code><sup id="fnref11:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Integer</td>
 <td>The maxfail option of the PPP daemon</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.authType</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.authType</code><sup id="fnref10:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>String</td>
 <td>The authentication type; possible values are None, Auto, CHAP and PAP</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.lpcEchoInterval</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.lpcEchoInterval</code><sup id="fnref9:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Integer</td>
 <td>The lcp-echo-interval option of the PPP daemon</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.activeFilter</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.activeFilter</code><sup id="fnref8:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>String</td>
 <td>The active-filter option of the PPP daemon</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.lpcEchoFailure</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.lpcEchoFailure</code><sup id="fnref7:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Integer</td>
 <td>The lcp-echo-failure option of the PPP daemon</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.diversityEnabled</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.diversityEnabled</code><sup id="fnref6:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Boolean</td>
 <td>Enable the LTE diversity antenna</td>
 </tr>
@@ -4744,12 +4744,12 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>The modem reset timeout in minutes</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.gpsEnabled</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.gpsEnabled</code><sup id="fnref5:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Boolean</td>
 <td>Enable the GPS device in the modem if available</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.persist</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.persist</code><sup id="fnref4:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Boolean</td>
 <td>The persist option of the PPP daemon</td>
 </tr>
@@ -4759,17 +4759,17 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>The modem Access Point Name</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.dialString</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.dialString</code><sup id="fnref3:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>String</td>
 <td>The dial string used for connecting to the APN</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.holdoff</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.holdoff</code><sup id="fnref2:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Integer</td>
 <td>The holdoff option of the PPP daemon (in seconds)</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.pppNum</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.pppNum</code><sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Integer</td>
 <td>Assigned ppp interface number</td>
 </tr>
@@ -5082,6 +5082,14 @@ Since the network configuration shown on the screen may not be synchronized with
 <a id="__codelineno-7-69" name="__codelineno-7-69" href="#__codelineno-7-69"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
 <a id="__codelineno-7-70" name="__codelineno-7-70" href="#__codelineno-7-70"></a><span class="nt">&lt;/esf:configurations&gt;</span>
 </code></pre></div>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>This feature is only available in Eclipse Kura <em>specific</em> profiles. For more informations about the various Kura profiles see <a href="../../getting-started/install-kura/#installer-types">Kura installer types</a>.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref4:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref5:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref6:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref7:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref8:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref9:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref10:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref11:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref12:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref13:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref14:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref15:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref16:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref17:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref18:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
 
 
 

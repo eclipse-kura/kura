@@ -3965,7 +3965,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>Interface #</strong>: provides a unique number for the modem interface (e.g., an interface # of 0 would name the modem interface ppp0).</p>
 </li>
 <li>
-<p><strong>Dial String</strong>: instructs how the modem should attempt to connect. Typical dial strings are as follows:</p>
+<p><strong>Dial String</strong><sup id="fnref10:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: instructs how the modem should attempt to connect. Typical dial strings are as follows:</p>
 <ul>
 <li>HSPA modem: atd&ast;99&ast;&ast;&ast;1#</li>
 <li>EVDO/CDMA modem: atd#777</li>
@@ -3975,7 +3975,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>APN</strong>: defines the modem access point name (HSPA modems only).</p>
 </li>
 <li>
-<p><strong>Auth Type</strong>: specifies the authentication type (HSPA modems only).</p>
+<p><strong>Auth Type</strong><sup id="fnref9:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: specifies the authentication type (HSPA modems only).</p>
 <ul>
 <li>None</li>
 <li>Auto</li>
@@ -3993,28 +3993,28 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>Modem Reset Timeout</strong>: sets the modem reset timeout in minutes. If set to a non-zero value, the modem is reset after n consecutive minutes of unsuccessful connection attempts. If set to zero, the modem keeps trying to establish a PPP connection without resetting. The default value is 5 minutes.</p>
 </li>
 <li>
-<p><strong>Reopen Connection on Termination</strong>: sets the <em>persist</em> option of the PPP daemon that specifies if PPP daemon should exit after connection is terminated. Note that the <em>maxfail</em> option still has an effect on persistent connections.</p>
+<p><strong>Reopen Connection on Termination</strong><sup id="fnref8:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: sets the <em>persist</em> option of the PPP daemon that specifies if PPP daemon should exit after connection is terminated. Note that the <em>maxfail</em> option still has an effect on persistent connections.</p>
 </li>
 <li>
-<p><strong>Connection Attempts Retry Delay</strong>: Sets the <em>holdoff</em> parameter to instruct the PPP daemon on how many seconds to wait before re-initiating the link after it terminates. This option only has any effect if the persist option (Reopen Connection on Termination) is set to true. The holdoff period is not applied if the link was terminated because it was idle. The default value is 1 second.</p>
+<p><strong>Connection Attempts Retry Delay</strong><sup id="fnref7:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: Sets the <em>holdoff</em> parameter to instruct the PPP daemon on how many seconds to wait before re-initiating the link after it terminates. This option only has any effect if the persist option (Reopen Connection on Termination) is set to true. The holdoff period is not applied if the link was terminated because it was idle. The default value is 1 second.</p>
 </li>
 <li>
-<p><strong>Connection Attempts</strong>: sets the <em>maxfail</em> option of the PPP daemon that limits the number of consecutive failed PPP connection attempts. The default value is 5 connection attempts. A value of zero means no limit. The PPP daemon terminates after the specified number of failed PPP connection attempts and restarts by the <em>ModemMonitor</em> thread.  </p>
+<p><strong>Connection Attempts</strong><sup id="fnref6:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: sets the <em>maxfail</em> option of the PPP daemon that limits the number of consecutive failed PPP connection attempts. The default value is 5 connection attempts. A value of zero means no limit. The PPP daemon terminates after the specified number of failed PPP connection attempts and restarts by the <em>ModemMonitor</em> thread.  </p>
 </li>
 <li>
-<p><strong>Disconnect if Idle</strong>: sets the <em>idle</em> option of the PPP daemon, which terminates the PPP connection if the link is idle for a specified number of seconds. The default value is 95 seconds. To disable this option, set it to zero.</p>
+<p><strong>Disconnect if Idle</strong><sup id="fnref5:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: sets the <em>idle</em> option of the PPP daemon, which terminates the PPP connection if the link is idle for a specified number of seconds. The default value is 95 seconds. To disable this option, set it to zero.</p>
 </li>
 <li>
-<p><strong>Active Filter</strong>: sets the <em>active-filter</em> option of the PPP daemon. This option specifies a packet filter <em>(filter-expression)</em> to be applied to data packets in order to determine which packets are regarded as link activity, and thereby, reset the idle timer. The <em>filter-expression</em> syntax is as described for tcpdump(1); however, qualifiers that do not apply to a PPP link, such as <em>ether</em> and <em>arp</em>, are not permitted. The default value is <em>inbound</em>. To disable the <em>active-filter</em> option, leave it blank.</p>
+<p><strong>Active Filter</strong><sup id="fnref4:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: sets the <em>active-filter</em> option of the PPP daemon. This option specifies a packet filter <em>(filter-expression)</em> to be applied to data packets in order to determine which packets are regarded as link activity, and thereby, reset the idle timer. The <em>filter-expression</em> syntax is as described for tcpdump(1); however, qualifiers that do not apply to a PPP link, such as <em>ether</em> and <em>arp</em>, are not permitted. The default value is <em>inbound</em>. To disable the <em>active-filter</em> option, leave it blank.</p>
 </li>
 <li>
-<p><strong>LCP Echo Interval</strong>: sets the <em>lcp-echo-interval</em> option of the PPP daemon. If set to a positive number, the modem sends LCP echo request to the peer at the specified number of seconds. To disable this option, set it to zero. This option may be used with the <em>lcp-echo-failure</em> option to detect that the peer is no longer connected.</p>
+<p><strong>LCP Echo Interval</strong><sup id="fnref3:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: sets the <em>lcp-echo-interval</em> option of the PPP daemon. If set to a positive number, the modem sends LCP echo request to the peer at the specified number of seconds. To disable this option, set it to zero. This option may be used with the <em>lcp-echo-failure</em> option to detect that the peer is no longer connected.</p>
 </li>
 <li>
-<p><strong>LCP Echo Failure</strong>: sets the <em>lcp-echo-failure</em> option of the PPP daemon. If set to a positive number, the modem presumes the peer to be dead if a specified number of LCP echo-requests are sent without receiving a valid LCP echo-reply. To disable this option, set it to zero.</p>
+<p><strong>LCP Echo Failure</strong><sup id="fnref2:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: sets the <em>lcp-echo-failure</em> option of the PPP daemon. If set to a positive number, the modem presumes the peer to be dead if a specified number of LCP echo-requests are sent without receiving a valid LCP echo-reply. To disable this option, set it to zero.</p>
 </li>
 <li>
-<p><strong>Enable GPS</strong>: enables GPS with the following conditions:</p>
+<p><strong>Enable GPS</strong><sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: enables GPS with the following conditions:</p>
 <ul>
 <li>One modem port will be dedicated to NMEA data stream.</li>
 <li>This port may not be used to send AT commands to the modem.</li>
@@ -4104,6 +4104,14 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="s2">&quot;&quot;</span><span class="w">  </span><span class="s2">&quot;atd#777&quot;</span>
 <a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>CONNECT<span class="w"> </span><span class="s2">&quot;\c&quot;</span>
 </code></pre></div>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>This feature is only available in Eclipse Kura <em>specific</em> profiles. For more informations about the various Kura profiles see <a href="../../getting-started/install-kura/#installer-types">Kura installer types</a>.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref4:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref5:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref6:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref7:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref8:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref9:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref10:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
 
 
 

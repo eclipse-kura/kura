@@ -4028,7 +4028,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 </li>
 <li>
-<p><strong>Verify Password</strong>: sets the password verification field.</p>
+<p><strong>Verify Password</strong><sup id="fnref6:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: sets the password verification field.</p>
 <ul>
 <li>In <em>Access Point</em> mode, allows the wireless password to be retyped for verification.</li>
 <li>In <em>Station</em> mode, this field is disabled.</li>
@@ -4059,7 +4059,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 </li>
 <li>
-<p><strong>Bgscan Module</strong>: requests background scans for the purpose of roaming within an ESS (i.e., within a single network block with all the APs using the same SSID).</p>
+<p><strong>Bgscan Module</strong><sup id="fnref5:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: requests background scans for the purpose of roaming within an ESS (i.e., within a single network block with all the APs using the same SSID).</p>
 <ul>
 <li>None: background scan is disabled</li>
 <li>Simple: periodic background scans based on signal strength</li>
@@ -4067,16 +4067,16 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 </li>
 <li>
-<p><strong>Bgscan Signal Strength Threshold</strong>: defines a threshold (in dBm) that determines which one of the following two parameters (i.e., <em>Short Interval</em> or <em>Long Interval</em>) will be effective.</p>
+<p><strong>Bgscan Signal Strength Threshold</strong><sup id="fnref4:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: defines a threshold (in dBm) that determines which one of the following two parameters (i.e., <em>Short Interval</em> or <em>Long Interval</em>) will be effective.</p>
 </li>
 <li>
-<p><strong>Bgscan Short Interval</strong>: defines the interval between background scans (in seconds) if the actual signal level of the currently connected access point is worse than signal_strength.</p>
+<p><strong>Bgscan Short Interval</strong><sup id="fnref3:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: defines the interval between background scans (in seconds) if the actual signal level of the currently connected access point is worse than signal_strength.</p>
 </li>
 <li>
-<p><strong>Bgscan Long Interval</strong>: defines the interval  between background scans (in seconds) if the actual signal level of the currently connected access point is better than signal_strength.</p>
+<p><strong>Bgscan Long Interval</strong><sup id="fnref2:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: defines the interval  between background scans (in seconds) if the actual signal level of the currently connected access point is better than signal_strength.</p>
 </li>
 <li>
-<p><strong>Ping Access Point &amp; renew DHCP lease if not reachable</strong>: enables pinging the access point after connection is established.</p>
+<p><strong>Ping Access Point &amp; renew DHCP lease if not reachable</strong><sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: enables pinging the access point after connection is established.</p>
 <ul>
 <li>In <em>Access Point</em> mode, this option is disabled.</li>
 <li>In <em>Station</em> mode, if set to <em>true</em>, the unit will ping the access point and attempt to renew the DHCP lease if the access point is not reachable.</li>
@@ -4211,6 +4211,14 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">    </span><span class="nv">bgscan</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
 <a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="o">}</span>
 </code></pre></div>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>This feature is only available in Eclipse Kura <em>specific</em> profiles. For more informations about the various Kura profiles see <a href="../../getting-started/install-kura/#installer-types">Kura installer types</a>.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref4:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref5:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref6:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
 
 
 

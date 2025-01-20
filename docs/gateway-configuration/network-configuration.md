@@ -583,4 +583,4 @@ This section presents some snapshot examples to perform basic operations on netw
 ```
 
 [^1]: Legacy setting that used to help establishing PPP data sessions for GSM-based modems. Deprecated by NetworkManager and not used anymore. Kura will read it and populate the configuration with the correct values but NetworkManager might not honor the setting depending on its version.
-[^2]: Supported for compatibility reasons. The behaviour of `netIPv4StatusL2Only`/`netIPv6StatusL2Only` corresponds to `netIPv4StatusDisabled`/`netIPv6StatusDisabled` (i.e. the interface will be brought up but no IP address will be assigned).
+[^2]: Supported for compatibility reasons. The behaviour of `netIPv4StatusL2Only`/`netIPv6StatusL2Only` corresponds to `netIPv4StatusUnmanaged`/`netIPv6StatusUnmanaged` (i.e. the interface will be brought up but IP configuration is left to the user).

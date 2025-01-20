@@ -540,9 +540,6 @@ fi]]>
             <zipfileset
                 file="${project.build.directory}/${build.output.name}/kura.properties"
                 prefix="${build.output.name}/${framework.config.folder}/" />
-            <zipfileset
-                file="${project.build.directory}/${build.output.name}/kura.properties"
-                prefix="${build.output.name}/${framework.config.folder}/" />
 
             <zipfileset dir="${project.build.directory}/${build.output.name}/plugins"
                 prefix="${build.output.name}/${plugins.folder}">

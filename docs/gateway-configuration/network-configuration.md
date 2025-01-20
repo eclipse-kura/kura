@@ -105,7 +105,7 @@ Name                                             | Type     | Description       
 `net.interface.<interface>.type`                 | String	| The type of the network interface; possible values are: `ETHERNET`, `WIFI`, `MODEM`, `VLAN`, `LOOPBACK` and `UNKNOWN` | `UNKNOWN`
 `net.interface.<interface>.config.wifi.mode`     | String   | For wifi interfaces, specify the modality; possible values are `INFRA`, `MASTER` and `UNKNOWN`   | `UNKNOWN`
 `net.interface.<interface>.config.nat.enabled`   | Boolean  | Enable the NAT feature                                                                           | false
-`net.interface.<interface>.config.promisc`       | Integer  | Enable the Promiscuous Mode; possible values are: -1 (System default), 0 (Disabled), 1 (Enabled) | -1
+`net.interface.<interface>.config.promisc`[^2]   | Integer  | Enable the Promiscuous Mode; possible values are: -1 (System default), 0 (Disabled), 1 (Enabled) | -1
 
 ### IPv4 properties
 

@@ -109,15 +109,15 @@ Name                                             | Type     | Description       
 
 ### IPv4 properties
 
-Name                                                | Type     | Description                              | Default value
-----------------------------------------------------|----------|------------------------------------------|----------------------------
-`net.interface.<interface>.config.ip4.status`	    | String   | The status of the interface for the IPv4 configuration; possibile values are: `netIPv4StatusDisabled`, `netIPv4StatusUnmanaged`, `netIPv4StatusL2Only`[^1], `netIPv4StatusEnabledLAN`, `netIPv4StatusEnabledWAN`, `netIPv4StatusUnknown` | `netIPv4StatusDisabled` (see note below)
-`net.interface.<interface>.config.ip4.wan.priority` | Integer  | (NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See [Network Failover](./network-failover.md) for further details | -1
-`net.interface.<interface>.config.ip4.address`      | String   | The IPv4 address assigned to the network interface |
-`net.interface.<interface>.config.ip4.prefix`	    | Short    | The IPv4 netmask assigned to the network interface | -1
-`net.interface.<interface>.config.ip4.gateway`      | String   | The IPv4 address of the default gateway |
-`net.interface.<interface>.config.ip4.dnsServers`	| String   | Comma-separated list of dns servers |
-`net.interface.<interface>.config.ip4.mtu`[^2]      | Integer  | The Maximum Transition Unit (MTU) for this interface
+Name                                                   | Type     | Description                              | Default value
+-------------------------------------------------------|----------|------------------------------------------|----------------------------
+`net.interface.<interface>.config.ip4.status`	       | String   | The status of the interface for the IPv4 configuration; possibile values are: `netIPv4StatusDisabled`, `netIPv4StatusUnmanaged`, `netIPv4StatusL2Only`[^1], `netIPv4StatusEnabledLAN`, `netIPv4StatusEnabledWAN`, `netIPv4StatusUnknown` | `netIPv4StatusDisabled` (see note below)
+`net.interface.<interface>.config.ip4.wan.priority`[^2]| Integer  | Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See [Network Failover](./network-failover.md) for further details | -1
+`net.interface.<interface>.config.ip4.address`         | String   | The IPv4 address assigned to the network interface |
+`net.interface.<interface>.config.ip4.prefix`	       | Short    | The IPv4 netmask assigned to the network interface | -1
+`net.interface.<interface>.config.ip4.gateway`         | String   | The IPv4 address of the default gateway |
+`net.interface.<interface>.config.ip4.dnsServers`	   | String   | Comma-separated list of dns servers |
+`net.interface.<interface>.config.ip4.mtu`[^2]         | Integer  | The Maximum Transition Unit (MTU) for this interface
 
 !!! note
     For physical interfaces the default status is `netIPv4StatusDisabled`. For virtual ones, instead, the default status is defined by the `kura.net.virtual.devices.config` property in the `kura.properties` file.
@@ -145,7 +145,7 @@ Name                                                     | Type     | Descriptio
 Name                                                     | Type     | Description                              | Default value
 ---------------------------------------------------------|----------|------------------------------------------|----------------------------
 `net.interface.<interface>.config.ip6.status`[^2]        | String   | The status of the interface for the IPv6 configuration; possibile values are: `netIPv6StatusDisabled`, `netIPv6StatusUnmanaged`, `netIPv6StatusL2Only`[^1], `netIPv6StatusEnabledLAN`, `netIPv6StatusEnabledWAN`, `netIPv6StatusUnknown` | `netIPv6StatusDisabled` (see note below)
-`net.interface.<interface>.config.ip6.wan.priority`[^2]  | Integer | (NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See [Network Failover](./network-failover.md) for further details | -1
+`net.interface.<interface>.config.ip6.wan.priority`[^2]  | Integer  | Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See [Network Failover](./network-failover.md) for further details | -1
 `net.interface.<interface>.config.ip6.address.method`[^2]| String   | The IPv6 configuration method; possible values are: `AUTO`, `DHCP`, `MANUAL`. | `AUTO`
 `net.interface.<interface>.config.ip6.address`[^2]       | String   | The IPv6 address assigned to the network interface |
 `net.interface.<interface>.config.ip6.prefix`[^2]        | Short    | The IPv6 netmask assigned to the network interface | -1

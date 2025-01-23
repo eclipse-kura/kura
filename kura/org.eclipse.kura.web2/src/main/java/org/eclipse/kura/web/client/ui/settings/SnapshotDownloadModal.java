@@ -13,13 +13,11 @@
 package org.eclipse.kura.web.client.ui.settings;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.CheckBox;
 import org.gwtbootstrap3.client.ui.base.form.AbstractForm.SubmitCompleteEvent;
 import org.gwtbootstrap3.client.ui.constants.ButtonType;
@@ -30,130 +28,87 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Hidden;
 
-public class SnapshotDownloadModal extends SnapshotGenericModal {
+public class SnapshotDownloadModal extends SnapshotSelectorModal {
 
+    private static final String XSRF_TOKEN_REQUEST_FIELD = "xsrfToken";
+    private static final String PIDS_LIST_REQUEST_FIELD = "pidsList";
+    private static final String DOWNLOAD_FORMAT_REQUEST_FIELD = "downloadFormat";
+    private static final String SNAPSHOT_ID_REQUEST_FIELD = "snapshotId";
+    private static final String FONT_AWESOME_STYLE_NAME = "fa";
     private static final String XML_DOWNLOAD_FORMAT = "XML";
     private static final String JSON_DOWNLOAD_FORMAT = "JSON";
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
-    Button downloadXml;
-    Button downloadJson;
-    Button cancelButton;
+    SnapshotSelectorActionButton cancelButton;
+    SnapshotSelectorActionButton jsonDownloadButton;
+    SnapshotSelectorActionButton xmlDownloadButton;
 
     Hidden xsrfTokenField;
     Hidden pidsListField;
     Hidden snapshotDownloadFormatField;
     Hidden snapshotIdField;
 
-    HandlerRegistration cancelHandler;
-    HandlerRegistration downloadHandler;
-    HandlerRegistration xmlDownloadHandler;
-    HandlerRegistration jsonDownloadHandler;
-
-    Consumer<String> wiregraphDownloadConsumer;
-
     AsyncCallback<SubmitCompleteEvent> downloadCallback;
+    HandlerRegistration downloadHandler;
 
-    @Override
-    void show(Long snapshotId, List<String> snapshotConfigs) {
+    public void customizeModal(Long snapshotId) {
 
-        initPidSearch();
-        initSnapshotScrollPanel();
-        initSnapshotPidList(snapshotConfigs);
-        initSelectedPidCounter();
-        initSnapshotSelectAllAnchor();
+        clearClickHandlers();
+        clearHiddenFields();
 
-        initTitleAndDescriptionAndHint();
-        initFooter();
-        initHiddenFields();
-        initEventButtons(snapshotId);
+        this.cancelButton = new SnapshotSelectorActionButton(MSGS.cancelButton(), FONT_AWESOME_STYLE_NAME,
+                ButtonType.PRIMARY, this::onCancelClick);
 
-        this.snapshotModal.show();
-    }
+        this.jsonDownloadButton = new SnapshotSelectorActionButton(MSGS.downloadSnapshotJsonButton(),
+                FONT_AWESOME_STYLE_NAME, ButtonType.PRIMARY,
+                e -> onSnapshotDownloadButtonClick(snapshotId, JSON_DOWNLOAD_FORMAT));
 
-    /*
-     * Init methods
-     */
+        this.xmlDownloadButton = new SnapshotSelectorActionButton(MSGS.downloadSnapshotXmlButton(),
+                FONT_AWESOME_STYLE_NAME, ButtonType.PRIMARY,
+                e -> onSnapshotDownloadButtonClick(snapshotId, XML_DOWNLOAD_FORMAT));
 
-    @Override
-    void initTitleAndDescriptionAndHint() {
-        this.snapshotModal.setTitle(MSGS.deviceSnapshotDownloadModalTitle());
-        this.snapshotModalDescription.setText(MSGS.deviceSnapshotDownloadModalHint());
-        this.snapshotModalHint.setText(MSGS.formatDownloadHint());
-    }
+        setFormType(com.google.gwt.user.client.ui.FormPanel.ENCODING_URLENCODED,
+                com.google.gwt.user.client.ui.FormPanel.METHOD_POST,
+                Console.ADMIN_ROOT + '/' + GWT.getModuleName() + "/device_snapshots");
 
-    @Override
-    void initEventButtons(Long snapshotId) {
+        this.xsrfTokenField = new Hidden();
+        this.xsrfTokenField.setID(XSRF_TOKEN_REQUEST_FIELD);
+        this.xsrfTokenField.setName(XSRF_TOKEN_REQUEST_FIELD);
+        this.xsrfTokenField.setValue("");
+        addRequestParameter(this.xsrfTokenField);
 
-        cleanClickHandlers();
+        this.pidsListField = new Hidden();
+        this.pidsListField.setID(PIDS_LIST_REQUEST_FIELD);
+        this.pidsListField.setName(PIDS_LIST_REQUEST_FIELD);
+        this.pidsListField.setValue("");
+        addRequestParameter(this.pidsListField);
 
-        this.cancelHandler = this.cancelButton.addClickHandler(this::onCancelClick);
+        this.snapshotDownloadFormatField = new Hidden();
+        this.snapshotDownloadFormatField.setID(DOWNLOAD_FORMAT_REQUEST_FIELD);
+        this.snapshotDownloadFormatField.setName(DOWNLOAD_FORMAT_REQUEST_FIELD);
+        this.snapshotDownloadFormatField.setValue("");
+        addRequestParameter(this.snapshotDownloadFormatField);
+
+        this.snapshotIdField = new Hidden();
+        this.snapshotIdField.setID(SNAPSHOT_ID_REQUEST_FIELD);
+        this.snapshotIdField.setName(SNAPSHOT_ID_REQUEST_FIELD);
+        this.snapshotIdField.setValue("");
+        addRequestParameter(this.snapshotIdField);
+
+        setTitleDescriptionAndHints(MSGS.deviceSnapshotDownloadModalTitle(), MSGS.deviceSnapshotDownloadModalHint(),
+                MSGS.formatDownloadHint());
+
+        addFooterButton(this.cancelButton.getButton());
+        addFooterButton(this.jsonDownloadButton.getButton());
+        addFooterButton(this.xmlDownloadButton.getButton());
 
         this.downloadHandler = this.snapshotForm
                 .addSubmitCompleteHandler(event -> this.downloadCallback.onSuccess(event));
-
-        this.jsonDownloadHandler = this.downloadJson
-                .addClickHandler(e -> onSnapshotDownloadButtonClick(snapshotId, JSON_DOWNLOAD_FORMAT));
-
-        this.xmlDownloadHandler = this.downloadXml
-                .addClickHandler(e -> onSnapshotDownloadButtonClick(snapshotId, XML_DOWNLOAD_FORMAT));
     }
 
-    @Override
-    void initFooter() {
-
-        this.snapshotFooter.clear();
-
-        this.cancelButton = new Button(MSGS.cancelButton());
-        this.cancelButton.addStyleName("fa");
-        this.cancelButton.setType(ButtonType.PRIMARY);
-        this.snapshotFooter.add(cancelButton);
-
-        this.downloadJson = new Button(MSGS.downloadSnapshotJsonButton());
-        this.downloadJson.addStyleName("fa");
-        this.downloadJson.setType(ButtonType.PRIMARY);
-        this.snapshotFooter.add(downloadJson);
-
-        this.downloadXml = new Button(MSGS.downloadSnapshotXmlButton());
-        this.downloadXml.addStyleName("fa");
-        this.downloadXml.setType(ButtonType.PRIMARY);
-        this.snapshotFooter.add(downloadXml);
-
-    }
-
-    @Override
-    void initHiddenFields() {
-
-        clearHiddenFields();
-
-        this.snapshotForm.setEncoding(com.google.gwt.user.client.ui.FormPanel.ENCODING_URLENCODED);
-        this.snapshotForm.setMethod(com.google.gwt.user.client.ui.FormPanel.METHOD_POST);
-        this.snapshotForm.setAction(Console.ADMIN_ROOT + '/' + GWT.getModuleName() + "/device_snapshots");
-
-        this.xsrfTokenField = new Hidden();
-        this.xsrfTokenField.setID("xsrfToken");
-        this.xsrfTokenField.setName("xsrfToken");
-        this.xsrfTokenField.setValue("");
-        this.snapshotForm.add(this.xsrfTokenField);
-
-        this.pidsListField = new Hidden();
-        this.pidsListField.setID("pidsList");
-        this.pidsListField.setName("pidsList");
-        this.pidsListField.setValue("");
-        this.snapshotForm.add(this.pidsListField);
-
-        this.snapshotDownloadFormatField = new Hidden();
-        this.snapshotDownloadFormatField.setID("downloadFormat");
-        this.snapshotDownloadFormatField.setName("downloadFormat");
-        this.snapshotDownloadFormatField.setValue("");
-        this.snapshotForm.add(this.snapshotDownloadFormatField);
-
-        this.snapshotIdField = new Hidden();
-        this.snapshotIdField.setID("snapshotId");
-        this.snapshotIdField.setName("snapshotId");
-        this.snapshotIdField.setValue("");
-        this.snapshotForm.add(this.snapshotIdField);
-
+    void show(Long snapshotId, List<String> snapshotConfigs) {
+        customizeModal(snapshotId);
+        showModal(snapshotConfigs);
     }
 
     /*
@@ -161,8 +116,7 @@ public class SnapshotDownloadModal extends SnapshotGenericModal {
      */
 
     private void onCancelClick(ClickEvent handler) {
-        this.snapshotModal.hide();
-        resetScrollPanel();
+        clearAndHide();
     }
 
     private void onSnapshotDownloadButtonClick(Long snapshotId, String format) {
@@ -181,8 +135,7 @@ public class SnapshotDownloadModal extends SnapshotGenericModal {
                 downloadPartialSnapshot(snapshotId, format, getSelectedPidsField(selectedPids));
             }
 
-            this.snapshotModal.hide();
-            resetScrollPanel();
+            clearAndHide();
         }
     }
 
@@ -210,39 +163,40 @@ public class SnapshotDownloadModal extends SnapshotGenericModal {
         })));
     }
 
-    private void cleanClickHandlers() {
-        if (this.cancelHandler != null) {
-            this.cancelHandler.removeHandler();
-        }
-
+    private void clearClickHandlers() {
         if (this.downloadHandler != null) {
             this.downloadHandler.removeHandler();
         }
 
-        if (this.jsonDownloadHandler != null) {
-            this.jsonDownloadHandler.removeHandler();
+        if (this.cancelButton != null) {
+            this.cancelButton.cleanClickHandler();
         }
 
-        if (this.xmlDownloadHandler != null) {
-            this.xmlDownloadHandler.removeHandler();
+        if (this.jsonDownloadButton != null) {
+            this.jsonDownloadButton.cleanClickHandler();
+        }
+
+        if (this.xmlDownloadButton != null) {
+            this.xmlDownloadButton.cleanClickHandler();
         }
     }
 
     private void clearHiddenFields() {
         if (this.xsrfTokenField != null) {
-            this.snapshotForm.remove(this.xsrfTokenField);
+            removeRequestParameter(this.xsrfTokenField);
         }
 
         if (this.pidsListField != null) {
-            this.snapshotForm.remove(this.pidsListField);
+            removeRequestParameter(this.pidsListField);
         }
 
         if (this.snapshotDownloadFormatField != null) {
-            this.snapshotForm.remove(this.snapshotDownloadFormatField);
+            removeRequestParameter(this.snapshotDownloadFormatField);
         }
 
         if (this.snapshotIdField != null) {
-            this.snapshotForm.remove(this.snapshotIdField);
+            removeRequestParameter(this.snapshotIdField);
         }
     }
+
 }

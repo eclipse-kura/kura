@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.gwtbootstrap3.client.ui.Anchor;
+import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.CheckBox;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormLabel;
@@ -34,17 +35,18 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public abstract class SnapshotGenericModal extends Composite {
+public abstract class SnapshotSelectorModal extends Composite {
 
     protected static final Messages MSGS = GWT.create(Messages.class);
-    private static SnapshotGenericModalUiBinder uiBinder = GWT.create(SnapshotGenericModalUiBinder.class);
+    private static SnapshotSelectorModalUiBinder uiBinder = GWT.create(SnapshotSelectorModalUiBinder.class);
 
-    interface SnapshotGenericModalUiBinder extends UiBinder<Widget, SnapshotGenericModal> {
+    interface SnapshotSelectorModalUiBinder extends UiBinder<Widget, SnapshotSelectorModal> {
     }
 
     @UiField
@@ -56,11 +58,7 @@ public abstract class SnapshotGenericModal extends Composite {
     @UiField
     Paragraph snapshotModalHint;
     @UiField
-    Label searchBoxSeparatorSmall;
-    @UiField
     TextBox pidSearch;
-    @UiField
-    Label searchBoxSeparatorBig;
     @UiField
     ScrollPanel pidSelectionScrollPanel;
     @UiField
@@ -76,55 +74,56 @@ public abstract class SnapshotGenericModal extends Composite {
 
     VerticalPanel pidPanel = new VerticalPanel();
 
-    protected SnapshotGenericModal() {
+    protected SnapshotSelectorModal() {
         initWidget(uiBinder.createAndBindUi(this));
         this.noPidSelectedError.setVisible(false);
     }
 
-    /*
-     * Abstract initializers
-     */
+    public void setTitleDescriptionAndHints(String title, String description, String hint) {
+        this.snapshotModal.setTitle(title);
+        this.snapshotModalDescription.setText(description);
+        this.snapshotModalHint.setText(hint);
+    }
 
-    /**
-     * Initialize the modal title, the description and the hint paragraphs of the modal.
-     */
-    abstract void initTitleAndDescriptionAndHint();
+    public void showModal(List<String> pidList) {
+        initPidSearch();
+        initSnapshotScrollPanel();
+        initSnapshotPidList(pidList);
+        initSelectedPidCounter();
+        initSnapshotSelectAllAnchor();
 
-    /**
-     * Initialize eventual buttons to perform the desired operations on the PIDs list.
-     * 
-     * @param snapshotId
-     *            - snapshotId of the snapshot from which the PIDs list was taken as {@link Long}
-     */
-    abstract void initEventButtons(Long snapshotId);
+        this.snapshotModal.show();
+    }
 
-    /**
-     * Initialize the footer of the modal. It can be used to add the buttons to perform the operations.
-     */
-    abstract void initFooter();
+    public void clearAndHide() {
+        this.snapshotModal.hide();
 
-    /**
-     * Initialize the eventual hidden field required to perform HTTP requests.
-     */
-    abstract void initHiddenFields();
+        this.pidSelectionScrollPanel.setVerticalScrollPosition(0);
+        this.pidSelectionScrollPanel.setHorizontalScrollPosition(0);
+        this.noPidSelectedError.setVisible(false);
 
-    /**
-     * Method used to initialize the required elements and eventually customize the modal.
-     * 
-     * To finally show the modal, the user must call 'this.snapshotModal.show()'.
-     * 
-     * @param snapshotId
-     *            - snapshotId to be downloaded as {@link Long}
-     * @param snapshotConfigs
-     *            - list of configuration contained in the snapshot to be downloaded as {@link List<String>}
-     */
-    abstract void show(Long snapshotId, List<String> snapshotConfigs);
+        this.snapshotFooter.clear();
+    }
 
     /*
      * Generic public initializers
      */
 
-    public void initSnapshotPidList(List<String> snapshotConfigs) {
+    private void initPidSearch() {
+        this.pidSearch.clear();
+        this.pidSearch.setVisible(true);
+        this.pidSearch.addKeyUpHandler(this::onSearchBoxEvent);
+    }
+
+    private void initSnapshotScrollPanel() {
+        this.pidSelectionScrollPanel.setAlwaysShowScrollBars(false);
+        this.pidSelectionScrollPanel.setHeight("350px");
+        this.pidSelectionScrollPanel.clear();
+        this.pidSelectionScrollPanel.add(pidPanel);
+        this.pidSelectionScrollPanel.setVisible(true);
+    }
+
+    private void initSnapshotPidList(List<String> snapshotConfigs) {
 
         this.pidPanel.clear();
 
@@ -137,12 +136,12 @@ public abstract class SnapshotGenericModal extends Composite {
         });
     }
 
-    public void initSelectedPidCounter() {
+    private void initSelectedPidCounter() {
         updateSelectedPidsCounter();
         this.selectedPidCounter.setVisible(true);
     }
 
-    public void initSnapshotSelectAllAnchor() {
+    private void initSnapshotSelectAllAnchor() {
         if (this.anchorClickHandler != null) {
             this.anchorClickHandler.removeHandler();
         }
@@ -156,18 +155,22 @@ public abstract class SnapshotGenericModal extends Composite {
         this.selectOrRemoveAllAnchor.setVisible(true);
     }
 
-    public void initPidSearch() {
-        this.pidSearch.clear();
-        this.pidSearch.setVisible(true);
-        this.pidSearch.addKeyUpHandler(this::onSearchBoxEvent);
+    public void setFormType(String encodingType, String method, String action) {
+        this.snapshotForm.setEncoding(encodingType);
+        this.snapshotForm.setMethod(method);
+        this.snapshotForm.setAction(action);
     }
 
-    public void initSnapshotScrollPanel() {
-        this.pidSelectionScrollPanel.setAlwaysShowScrollBars(false);
-        this.pidSelectionScrollPanel.setHeight("350px");
-        this.pidSelectionScrollPanel.clear();
-        this.pidSelectionScrollPanel.add(pidPanel);
-        this.pidSelectionScrollPanel.setVisible(true);
+    public void addRequestParameter(Hidden parameter) {
+        this.snapshotForm.add(parameter);
+    }
+
+    public void removeRequestParameter(Hidden parameter) {
+        this.snapshotForm.remove(parameter);
+    }
+
+    public void addFooterButton(Button button) {
+        this.snapshotFooter.add(button);
     }
 
     /*
@@ -256,12 +259,6 @@ public abstract class SnapshotGenericModal extends Composite {
 
         selectedPidsBuilder.replace(selectedPidsBuilder.length() - 1, selectedPidsBuilder.length(), "");
         return selectedPidsBuilder.toString();
-    }
-
-    public void resetScrollPanel() {
-        this.pidSelectionScrollPanel.setVerticalScrollPosition(0);
-        this.pidSelectionScrollPanel.setHorizontalScrollPosition(0);
-        this.noPidSelectedError.setVisible(false);
     }
 
     /*

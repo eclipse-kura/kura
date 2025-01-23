@@ -921,12 +921,6 @@ fi]]>
             <param name="start" value=""/>
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.name" value="jakarta.xml.bind-api" />
-            <param name="bundle.version" value="${jakarta.xml.bind-api.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
-        </antcall>
-        <antcall target="install-plugin">
             <param name="bundle.name" value="javassist" />
             <param name="bundle.version" value="${javassist.version}" />
             <param name="start.level" value="3"/>

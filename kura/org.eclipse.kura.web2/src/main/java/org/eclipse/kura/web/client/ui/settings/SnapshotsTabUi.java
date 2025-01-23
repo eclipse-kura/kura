@@ -362,7 +362,7 @@ public class SnapshotsTabUi extends Composite implements Tab {
 
                     @Override
                     public void onSuccess(List<String> result) {
-                        downloadModal.show(snapshotId, result);
+                        downloadModal.customizeAndShow(snapshotId, result);
 
                     }
                 });

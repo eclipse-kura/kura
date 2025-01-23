@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.gwtbootstrap3.client.ui.Anchor;
-import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.CheckBox;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormLabel;
@@ -79,12 +78,6 @@ public abstract class SnapshotSelectorModal extends Composite {
         this.noPidSelectedError.setVisible(false);
     }
 
-    public void setTitleDescriptionAndHints(String title, String description, String hint) {
-        this.snapshotModal.setTitle(title);
-        this.snapshotModalDescription.setText(description);
-        this.snapshotModalHint.setText(hint);
-    }
-
     public void showModal(List<String> pidList) {
         initPidSearch();
         initSnapshotScrollPanel();
@@ -95,7 +88,7 @@ public abstract class SnapshotSelectorModal extends Composite {
         this.snapshotModal.show();
     }
 
-    public void clearAndHide() {
+    public void resetAndHide() {
         this.snapshotModal.hide();
 
         this.pidSelectionScrollPanel.setVerticalScrollPosition(0);
@@ -103,6 +96,34 @@ public abstract class SnapshotSelectorModal extends Composite {
         this.noPidSelectedError.setVisible(false);
 
         this.snapshotFooter.clear();
+    }
+
+    /*
+     * Public Customizers
+     */
+
+    public void setFormType(String encodingType, String method, String action) {
+        this.snapshotForm.setEncoding(encodingType);
+        this.snapshotForm.setMethod(method);
+        this.snapshotForm.setAction(action);
+    }
+
+    public void addRequestParameter(Hidden parameter) {
+        this.snapshotForm.add(parameter);
+    }
+
+    public void removeRequestParameter(Hidden parameter) {
+        this.snapshotForm.remove(parameter);
+    }
+
+    public void addFooterButton(SnapshotSelectorActionButton actionButton) {
+        this.snapshotFooter.add(actionButton.getButton());
+    }
+
+    public void setTitleDescriptionAndHints(String title, String description, String hint) {
+        this.snapshotModal.setTitle(title);
+        this.snapshotModalDescription.setText(description);
+        this.snapshotModalHint.setText(hint);
     }
 
     /*
@@ -153,24 +174,6 @@ public abstract class SnapshotSelectorModal extends Composite {
         this.selectOrRemoveAllAnchor.setText(MSGS.removeAllAnchorText());
         this.anchorClickHandler = this.selectOrRemoveAllAnchor.addClickHandler(this::onSelectOrRemoveAllSelection);
         this.selectOrRemoveAllAnchor.setVisible(true);
-    }
-
-    public void setFormType(String encodingType, String method, String action) {
-        this.snapshotForm.setEncoding(encodingType);
-        this.snapshotForm.setMethod(method);
-        this.snapshotForm.setAction(action);
-    }
-
-    public void addRequestParameter(Hidden parameter) {
-        this.snapshotForm.add(parameter);
-    }
-
-    public void removeRequestParameter(Hidden parameter) {
-        this.snapshotForm.remove(parameter);
-    }
-
-    public void addFooterButton(Button button) {
-        this.snapshotFooter.add(button);
     }
 
     /*

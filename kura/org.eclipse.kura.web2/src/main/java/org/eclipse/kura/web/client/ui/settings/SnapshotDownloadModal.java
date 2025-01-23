@@ -51,6 +51,11 @@ public class SnapshotDownloadModal extends SnapshotSelectorModal {
     AsyncCallback<SubmitCompleteEvent> downloadCallback;
     HandlerRegistration downloadHandler;
 
+    void customizeAndShow(Long snapshotId, List<String> snapshotConfigs) {
+        customizeModal(snapshotId);
+        showModal(snapshotConfigs);
+    }
+    
     public void customizeModal(Long snapshotId) {
 
         clearClickHandlers();
@@ -67,48 +72,30 @@ public class SnapshotDownloadModal extends SnapshotSelectorModal {
                 FONT_AWESOME_STYLE_NAME, ButtonType.PRIMARY,
                 e -> onSnapshotDownloadButtonClick(snapshotId, XML_DOWNLOAD_FORMAT));
 
-        setFormType(com.google.gwt.user.client.ui.FormPanel.ENCODING_URLENCODED,
-                com.google.gwt.user.client.ui.FormPanel.METHOD_POST,
-                Console.ADMIN_ROOT + '/' + GWT.getModuleName() + "/device_snapshots");
+        addFooterButton(this.cancelButton);
+        addFooterButton(this.jsonDownloadButton);
+        addFooterButton(this.xmlDownloadButton);
 
-        this.xsrfTokenField = new Hidden();
-        this.xsrfTokenField.setID(XSRF_TOKEN_REQUEST_FIELD);
-        this.xsrfTokenField.setName(XSRF_TOKEN_REQUEST_FIELD);
-        this.xsrfTokenField.setValue("");
+        this.xsrfTokenField = createRequestParameter(XSRF_TOKEN_REQUEST_FIELD, XSRF_TOKEN_REQUEST_FIELD, "");
+        this.pidsListField = createRequestParameter(PIDS_LIST_REQUEST_FIELD, PIDS_LIST_REQUEST_FIELD, "");
+        this.snapshotDownloadFormatField = createRequestParameter(DOWNLOAD_FORMAT_REQUEST_FIELD,
+                DOWNLOAD_FORMAT_REQUEST_FIELD, "");
+        this.snapshotIdField = createRequestParameter(SNAPSHOT_ID_REQUEST_FIELD, SNAPSHOT_ID_REQUEST_FIELD, "");
+
         addRequestParameter(this.xsrfTokenField);
-
-        this.pidsListField = new Hidden();
-        this.pidsListField.setID(PIDS_LIST_REQUEST_FIELD);
-        this.pidsListField.setName(PIDS_LIST_REQUEST_FIELD);
-        this.pidsListField.setValue("");
         addRequestParameter(this.pidsListField);
-
-        this.snapshotDownloadFormatField = new Hidden();
-        this.snapshotDownloadFormatField.setID(DOWNLOAD_FORMAT_REQUEST_FIELD);
-        this.snapshotDownloadFormatField.setName(DOWNLOAD_FORMAT_REQUEST_FIELD);
-        this.snapshotDownloadFormatField.setValue("");
         addRequestParameter(this.snapshotDownloadFormatField);
-
-        this.snapshotIdField = new Hidden();
-        this.snapshotIdField.setID(SNAPSHOT_ID_REQUEST_FIELD);
-        this.snapshotIdField.setName(SNAPSHOT_ID_REQUEST_FIELD);
-        this.snapshotIdField.setValue("");
         addRequestParameter(this.snapshotIdField);
 
         setTitleDescriptionAndHints(MSGS.deviceSnapshotDownloadModalTitle(), MSGS.deviceSnapshotDownloadModalHint(),
                 MSGS.formatDownloadHint());
 
-        addFooterButton(this.cancelButton.getButton());
-        addFooterButton(this.jsonDownloadButton.getButton());
-        addFooterButton(this.xmlDownloadButton.getButton());
+        setFormType(com.google.gwt.user.client.ui.FormPanel.ENCODING_URLENCODED,
+                com.google.gwt.user.client.ui.FormPanel.METHOD_POST,
+                Console.ADMIN_ROOT + '/' + GWT.getModuleName() + "/device_snapshots");
 
         this.downloadHandler = this.snapshotForm
                 .addSubmitCompleteHandler(event -> this.downloadCallback.onSuccess(event));
-    }
-
-    void show(Long snapshotId, List<String> snapshotConfigs) {
-        customizeModal(snapshotId);
-        showModal(snapshotConfigs);
     }
 
     /*
@@ -116,7 +103,7 @@ public class SnapshotDownloadModal extends SnapshotSelectorModal {
      */
 
     private void onCancelClick(ClickEvent handler) {
-        clearAndHide();
+        resetAndHide();
     }
 
     private void onSnapshotDownloadButtonClick(Long snapshotId, String format) {
@@ -135,7 +122,7 @@ public class SnapshotDownloadModal extends SnapshotSelectorModal {
                 downloadPartialSnapshot(snapshotId, format, getSelectedPidsField(selectedPids));
             }
 
-            clearAndHide();
+            resetAndHide();
         }
     }
 
@@ -197,6 +184,14 @@ public class SnapshotDownloadModal extends SnapshotSelectorModal {
         if (this.snapshotIdField != null) {
             removeRequestParameter(this.snapshotIdField);
         }
+    }
+
+    private Hidden createRequestParameter(String id, String name, String defaultValue) {
+        Hidden parameter = new Hidden();
+        parameter.setID(id);
+        parameter.setName(name);
+        parameter.setValue("");
+        return parameter;
     }
 
 }

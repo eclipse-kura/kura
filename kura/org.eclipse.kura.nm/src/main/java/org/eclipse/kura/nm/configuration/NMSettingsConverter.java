@@ -148,17 +148,17 @@ public class NMSettingsConverter {
         Map<String, Variant<?>> settings = new HashMap<>();
 
         switch (Kura8021xEAP.fromString(eap)) {
-        case KURA_8021X_EAP_TTLS:
-            create8021xTunneledTls(props, deviceId, settings);
-            break;
-        case KURA_8021X_EAP_PEAP:
-            create8021xProtectedEap(props, deviceId, settings);
-            break;
-        case KURA_8021X_EAP_TLS:
-            create8021xTls(props, deviceId, settings);
-            break;
-        default:
-            throw new IllegalArgumentException(String.format("Security type 802-1x EAP \"%s\" is not supported.", eap));
+            case KURA_8021X_EAP_TTLS:
+                create8021xTunneledTls(props, deviceId, settings);
+                break;
+            case KURA_8021X_EAP_PEAP:
+                create8021xProtectedEap(props, deviceId, settings);
+                break;
+            case KURA_8021X_EAP_TLS:
+                create8021xTls(props, deviceId, settings);
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("Security type 802-1x EAP \"%s\" is not supported.", eap));
         }
 
         if (!phase2.isPresent()) {

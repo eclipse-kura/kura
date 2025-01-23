@@ -2893,6 +2893,7 @@ public class ConfigurationServiceJunitTest {
         Configuration[] configurations = new Configuration[] {};
         ConfigurationAdmin cfgAdminMock = mock(ConfigurationAdmin.class);
         when(cfgAdminMock.listConfigurations(null)).thenReturn(configurations);
+        when(cfgAdminMock.getConfiguration(ppid)).thenThrow(IOException.class);
         cs.setConfigurationAdmin(cfgAdminMock);
 
         try {

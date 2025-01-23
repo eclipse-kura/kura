@@ -984,7 +984,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         long sid = new Date().getTime();
 
         // Do not save the snapshot in the past
-        SortedSet<Long> snapshotIDs = getSnapshotsInternal();
+        SortedSet<Long> snapshotIDs = (SortedSet<Long>) getSnapshots();
         if (snapshotIDs != null && !snapshotIDs.isEmpty()) {
             Long lastestID = snapshotIDs.last();
 

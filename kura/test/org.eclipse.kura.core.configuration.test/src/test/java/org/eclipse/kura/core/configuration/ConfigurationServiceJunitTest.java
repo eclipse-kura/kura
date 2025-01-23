@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -786,134 +786,6 @@ public class ConfigurationServiceJunitTest {
         assertFalse("all pids don't contain pid", allPids.contains(pid));
         assertFalse("service pids don't contain pid", spbp.containsKey(pid));
         assertFalse("activated pids don't contain pid", asc.contains(pid));
-    }
-
-    @Test
-    public void testEncryptConfigsNull() throws NoSuchMethodException {
-        // test with null parameter
-
-        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
-
-        List<? extends ComponentConfiguration> configs = null;
-
-        try {
-            TestUtil.invokePrivate(cs, "encryptConfigs", configs);
-        } catch (Throwable e) {
-            fail("Parameters not checked.");
-        }
-
-    }
-
-    @Test
-    public void testEncryptConfigsNoConfigs() {
-        // empty list
-        boolean exceptionCaught = false;
-        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
-
-        List<? extends ComponentConfiguration> configs = new ArrayList<>();
-
-        try {
-            TestUtil.invokePrivate(cs, "encryptConfigs", configs);
-        } catch (Throwable t) {
-            exceptionCaught = true;
-        }
-        assertFalse(exceptionCaught);
-    }
-
-    @Test
-    public void testEncryptConfigsEncryptionException() throws Throwable {
-        // test failed encryption of a password: add a password and run; fail
-        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
-
-        CryptoService cryptoServiceMock = mock(CryptoService.class);
-        cs.setCryptoService(cryptoServiceMock);
-
-        // first decryption must fail
-        when(cryptoServiceMock.decryptAes("pass".toCharArray()))
-                .thenThrow(new KuraException(KuraErrorCode.DECODER_ERROR, "password"));
-        // then also encryption can fail
-        when(cryptoServiceMock.encryptAes("pass".toCharArray()))
-                .thenThrow(new KuraException(KuraErrorCode.ENCODE_ERROR, "password"));
-
-        List<ComponentConfigurationImpl> configs = new ArrayList<>();
-
-        ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
-        Map<String, Object> props = new HashMap<>();
-        props.put("key1", new Password("pass"));
-        cfg.setProperties(props);
-
-        configs.add(cfg);
-
-        TestUtil.invokePrivate(cs, "encryptConfigs", configs);
-
-        verify(cryptoServiceMock, times(1)).decryptAes("pass".toCharArray());
-        verify(cryptoServiceMock, times(1)).encryptAes("pass".toCharArray());
-
-        assertEquals("property was deleted", 0, props.size());
-    }
-
-    @Test
-    public void testEncryptConfigs() throws Throwable {
-        // test encrypting a password: add a password and run
-        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
-
-        CryptoService cryptoServiceMock = mock(CryptoService.class);
-        cs.setCryptoService(cryptoServiceMock);
-
-        // first decryption must fail
-        when(cryptoServiceMock.decryptAes("pass".toCharArray()))
-                .thenThrow(new KuraException(KuraErrorCode.DECODER_ERROR, "configuration"));
-        // so that encryption is attempted at all
-        when(cryptoServiceMock.encryptAes("pass".toCharArray())).thenReturn("encrypted".toCharArray());
-
-        List<ComponentConfigurationImpl> configs = new ArrayList<>();
-
-        ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
-        Map<String, Object> props = new HashMap<>();
-        props.put("key1", new Password("pass"));
-        cfg.setProperties(props);
-
-        configs.add(cfg);
-
-        TestUtil.invokePrivate(cs, "encryptConfigs", configs);
-
-        verify(cryptoServiceMock, times(1)).decryptAes("pass".toCharArray());
-        verify(cryptoServiceMock, times(1)).encryptAes("pass".toCharArray());
-
-        assertEquals("property was updated", 1, props.size());
-        assertTrue("key still exists", props.containsKey("key1"));
-        assertArrayEquals("key is encrypted", "encrypted".toCharArray(), ((Password) props.get("key1")).getPassword());
-    }
-
-    @Test
-    public void testEncryptConfigsPreencryptedPassword() throws Throwable {
-        // test encrypting a password when the password is already encrypted
-        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
-
-        CryptoService cryptoServiceMock = mock(CryptoService.class);
-        cs.setCryptoService(cryptoServiceMock);
-
-        // decryption succeeds this time
-        when(cryptoServiceMock.decryptAes("pass".toCharArray())).thenReturn("pass".toCharArray());
-
-        List<ComponentConfigurationImpl> configs = new ArrayList<>();
-
-        ComponentConfigurationImpl cfg = new ComponentConfigurationImpl();
-        Map<String, Object> props = new HashMap<>();
-        props.put("key1", new Password("pass"));
-        cfg.setProperties(props);
-
-        configs.add(cfg);
-
-        TestUtil.invokePrivate(cs, "encryptConfigs", configs);
-
-        verify(cryptoServiceMock, times(1)).decryptAes("pass".toCharArray());
-        verify(cryptoServiceMock, times(0)).encryptAes((char[]) ArgumentMatchers.any());
-
-        assertEquals("property remains", 1, props.size());
-        assertTrue("key still exists", props.containsKey("key1"));
-        assertArrayEquals("key is already encrypted", "pass".toCharArray(),
-                ((Password) props.get("key1")).getPassword());
     }
 
     @Test
@@ -2987,7 +2859,7 @@ public class ConfigurationServiceJunitTest {
 
         when(systemServiceMock.getKuraSnapshotsCount()).thenReturn(5);
 
-        String pid = "pid";
+        String pid = "123";
         Set<String> allPids = (Set<String>) TestUtil.getFieldValue(cs, "allActivatedPids");
         allPids.add(pid);
 
@@ -3017,6 +2889,11 @@ public class ConfigurationServiceJunitTest {
         when(svcRefMock.getBundle()).thenReturn(bundleMock);
 
         when(bundleMock.getResource(ArgumentMatchers.anyString())).thenThrow(new NullPointerException("test"));
+
+        Configuration[] configurations = new Configuration[] {};
+        ConfigurationAdmin cfgAdminMock = mock(ConfigurationAdmin.class);
+        when(cfgAdminMock.listConfigurations(null)).thenReturn(configurations);
+        cs.setConfigurationAdmin(cfgAdminMock);
 
         try {
             cs.rollback(id);

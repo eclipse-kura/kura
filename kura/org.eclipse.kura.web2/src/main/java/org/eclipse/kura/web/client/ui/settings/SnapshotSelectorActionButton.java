@@ -22,7 +22,7 @@ public class SnapshotSelectorActionButton {
         return this.button;
     }
 
-    public void cleanClickHandler() {
+    public void removeClickHandler() {
         this.clickHandler.removeHandler();
     }
 }

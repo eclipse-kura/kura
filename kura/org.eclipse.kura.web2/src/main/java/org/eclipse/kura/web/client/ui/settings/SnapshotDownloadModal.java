@@ -51,15 +51,10 @@ public class SnapshotDownloadModal extends SnapshotSelectorModal {
     AsyncCallback<SubmitCompleteEvent> downloadCallback;
     HandlerRegistration downloadHandler;
 
-    void customizeAndShow(Long snapshotId, List<String> snapshotConfigs) {
-        customizeModal(snapshotId);
-        showModal(snapshotConfigs);
-    }
-    
-    public void customizeModal(Long snapshotId) {
-
+    @Override
+    protected void customiseModal(Long snapshotId) {
         clearClickHandlers();
-        clearHiddenFields();
+        removeRequestParameters();
 
         this.cancelButton = new SnapshotSelectorActionButton(MSGS.cancelButton(), FONT_AWESOME_STYLE_NAME,
                 ButtonType.PRIMARY, this::onCancelClick);
@@ -103,7 +98,7 @@ public class SnapshotDownloadModal extends SnapshotSelectorModal {
      */
 
     private void onCancelClick(ClickEvent handler) {
-        resetAndHide();
+        hideAndReset();
     }
 
     private void onSnapshotDownloadButtonClick(Long snapshotId, String format) {
@@ -117,12 +112,12 @@ public class SnapshotDownloadModal extends SnapshotSelectorModal {
         } else {
 
             if (selectedPids.size() == this.pidPanel.getWidgetCount()) {
-                downloadEntireSnapshot(snapshotId, format);
+                onDownloadEntireSnapshot(snapshotId, format);
             } else {
-                downloadPartialSnapshot(snapshotId, format, getSelectedPidsField(selectedPids));
+                onDownloadPartialSnapshot(snapshotId, format, getSelectedPidsField(selectedPids));
             }
 
-            resetAndHide();
+            hideAndReset();
         }
     }
 
@@ -130,7 +125,7 @@ public class SnapshotDownloadModal extends SnapshotSelectorModal {
      * Utils methods
      */
 
-    private void downloadEntireSnapshot(Long snapshotId, String format) {
+    private void onDownloadEntireSnapshot(Long snapshotId, String format) {
         RequestQueue.submit(context -> this.gwtXSRFService.generateSecurityToken(context.callback(token -> {
             xsrfTokenField.setValue(token.getToken());
             pidsListField.setValue("");
@@ -140,7 +135,7 @@ public class SnapshotDownloadModal extends SnapshotSelectorModal {
         })));
     }
 
-    private void downloadPartialSnapshot(Long snapshotId, String format, String selectedPids) {
+    private void onDownloadPartialSnapshot(Long snapshotId, String format, String selectedPids) {
         RequestQueue.submit(context -> this.gwtXSRFService.generateSecurityToken(context.callback(token -> {
             xsrfTokenField.setValue(token.getToken());
             pidsListField.setValue(selectedPids);
@@ -156,19 +151,19 @@ public class SnapshotDownloadModal extends SnapshotSelectorModal {
         }
 
         if (this.cancelButton != null) {
-            this.cancelButton.cleanClickHandler();
+            this.cancelButton.removeClickHandler();
         }
 
         if (this.jsonDownloadButton != null) {
-            this.jsonDownloadButton.cleanClickHandler();
+            this.jsonDownloadButton.removeClickHandler();
         }
 
         if (this.xmlDownloadButton != null) {
-            this.xmlDownloadButton.cleanClickHandler();
+            this.xmlDownloadButton.removeClickHandler();
         }
     }
 
-    private void clearHiddenFields() {
+    private void removeRequestParameters() {
         if (this.xsrfTokenField != null) {
             removeRequestParameter(this.xsrfTokenField);
         }

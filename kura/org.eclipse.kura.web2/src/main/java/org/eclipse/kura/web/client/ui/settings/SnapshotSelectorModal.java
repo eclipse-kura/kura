@@ -78,7 +78,18 @@ public abstract class SnapshotSelectorModal extends Composite {
         this.noPidSelectedError.setVisible(false);
     }
 
-    public void showModal(List<String> pidList) {
+    /*
+     * Use it to customise the modal using the target snapshot
+     */
+    protected abstract void customiseModal(Long snapshotId);
+
+    /*
+     * Use it to show the modal
+     */
+
+    public void showModal(Long snapshotId, List<String> pidList) {
+        customiseModal(snapshotId);
+
         initPidSearch();
         initSnapshotScrollPanel();
         initSnapshotPidList(pidList);
@@ -88,7 +99,11 @@ public abstract class SnapshotSelectorModal extends Composite {
         this.snapshotModal.show();
     }
 
-    public void resetAndHide() {
+    /*
+     * Use it to hide and reset the modal
+     */
+
+    public void hideAndReset() {
         this.snapshotModal.hide();
 
         this.pidSelectionScrollPanel.setVerticalScrollPosition(0);
@@ -99,7 +114,7 @@ public abstract class SnapshotSelectorModal extends Composite {
     }
 
     /*
-     * Public Customizers
+     * Customising Helpers
      */
 
     public void setFormType(String encodingType, String method, String action) {

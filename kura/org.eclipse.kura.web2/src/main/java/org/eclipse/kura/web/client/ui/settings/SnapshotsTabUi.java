@@ -98,7 +98,7 @@ public class SnapshotsTabUi extends Composite implements Tab {
     Hidden xsrfTokenField;
 
     @UiField
-    SnapshotDownloadModal downloadModal;
+    SnapshotDownloadModal snapshotDownloadModal;
 
     @UiField
     CellTable<GwtSnapshot> snapshotsGrid = new CellTable<>();
@@ -361,8 +361,8 @@ public class SnapshotsTabUi extends Composite implements Tab {
                     }
 
                     @Override
-                    public void onSuccess(List<String> result) {
-                        downloadModal.customizeAndShow(snapshotId, result);
+                    public void onSuccess(List<String> pidList) {
+                        snapshotDownloadModal.showModal(snapshotId, pidList);
 
                     }
                 });

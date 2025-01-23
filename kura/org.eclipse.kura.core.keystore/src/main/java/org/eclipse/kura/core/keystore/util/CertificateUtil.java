@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *   Eurotech
+ * Eurotech
  *******************************************************************************/
 
 package org.eclipse.kura.core.keystore.util;

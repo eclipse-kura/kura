@@ -20,23 +20,23 @@
         <property name="fileExtensions" value="java"/>
         <property name="message" value="Do not use Windows line endings"/>
     </module>
-
+    
     <!-- Checks whether files end with a new line.                        -->
     <!-- See https://checkstyle.org/config_misc.html#NewlineAtEndOfFile -->
     <!--<module name="NewlineAtEndOfFile"/>-->
-
+    
     <!-- Checks that property files contain the same keys.         -->
     <!-- See https://checkstyle.org/config_misc.html#Translation -->
     <module name="Translation"/>
-
+    
     <!-- Checks for Size Violations.                    -->
     <!-- See https://checkstyle.org/config_sizes.html -->
     <module name="FileLength"/>
-
+    
     <!-- Checks for whitespace                               -->
     <!-- See https://checkstyle.org/config_whitespace.html -->
     <module name="FileTabCharacter"/>
-
+    
     <!-- Miscellaneous other checks.                   -->
     <!-- See https://checkstyle.org/config_misc.html -->
     <module name="RegexpSingleline">
@@ -45,19 +45,19 @@
         <property name="maximum" value="0"/>
         <property name="message" value="Line has trailing spaces."/>
     </module>
-
+    
     <!-- Checks for Headers                                -->
     <!-- See https://checkstyle.org/config_header.html   -->
-    <module name="RegexpHeader">
-        <property name="headerFile" value="header.txt"/>
+    <module name="Header">
+    <!--   <property name="headerFile" value="${checkstyle.header.file}"/> -->
         <property name="fileExtensions" value="java"/>
     </module>
 
     <module name="SuppressWarningsFilter"/>
-
+    
     <module name="TreeWalker">
         <module name="SuppressWarningsHolder" />
-
+        
         <!-- Checks for Javadoc comments.                     -->
         <!-- See https://checkstyle.org/config_javadoc.html -->
         <!--<module name="InvalidJavadocPosition"/>
@@ -70,8 +70,8 @@
         <!-- Checks for Naming Conventions.                  -->
         <!-- See https://checkstyle.org/config_naming.html -->
         <module name="ConstantName">
-            <property name="format" value="^auditLogger|log(ger)?|[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"/>
-        </module>
+        	<property name="format" value="^auditLogger|log(ger)?|[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$"/>
+		</module>
         <module name="LocalFinalVariableName"/>
         <module name="LocalVariableName"/>
         <module name="MemberName"/>
@@ -80,7 +80,7 @@
         <module name="ParameterName"/>
         <module name="StaticVariableName"/>
         <module name="TypeName"/>
-
+        
         <!-- Checks for imports                              -->
         <!-- See https://checkstyle.org/config_import.html -->
         <module name="AvoidStarImport"/>
@@ -90,15 +90,15 @@
         <module name="UnusedImports">
             <property name="processJavadoc" value="false"/>
         </module>
-
+        
         <!-- Checks for Size Violations.                    -->
         <!-- See https://checkstyle.org/config_sizes.html -->
         <module name="LineLength">
-            <property name="max" value="150"/>
+        	<property name="max" value="150"/>
         </module>
         <module name="MethodLength"/>
         <module name="ParameterNumber"/>
-
+        
         <!-- Checks for whitespace                               -->
         <!-- See https://checkstyle.org/config_whitespace.html -->
         <module name="EmptyForIteratorPad"/>
@@ -113,12 +113,12 @@
         <module name="TypecastParenPad"/>
         <module name="WhitespaceAfter"/>
         <module name="WhitespaceAround"/>
-
+        
         <!-- Modifier Checks                                    -->
         <!-- See https://checkstyle.org/config_modifiers.html -->
         <module name="ModifierOrder"/>
         <!--<module name="RedundantModifier"/>-->
-
+        
         <!-- Checks for blocks. You know, those {}'s         -->
         <!-- See https://checkstyle.org/config_blocks.html -->
         <module name="AvoidNestedBlocks"/>
@@ -126,7 +126,7 @@
         <module name="LeftCurly"/>
         <module name="NeedBraces"/>
         <module name="RightCurly"/>
-
+        
         <!-- Checks for common coding problems               -->
         <!-- See https://checkstyle.org/config_coding.html -->
         <module name="EmptyStatement"/>
@@ -145,7 +145,7 @@
         <module name="MultipleVariableDeclarations"/>
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>
-
+        
         <!-- Checks for class design                         -->
         <!-- See https://checkstyle.org/config_design.html -->
         <!--<module name="DesignForExtension"/>-->
@@ -158,7 +158,7 @@
             <property name="packageAllowed" value="true" />
             <property name="protectedAllowed" value="true" />
         </module>
-
+        
         <!-- Miscellaneous other checks.                   -->
         <!-- See https://checkstyle.org/config_misc.html -->
         <module name="ArrayTypeStyle"/>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  * 
  * Contributors:
- *  Eurotech
+ * Eurotech
  ******************************************************************************/
 package org.eclipse.kura.security;
 

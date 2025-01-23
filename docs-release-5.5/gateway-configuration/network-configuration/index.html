@@ -4873,7 +4873,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <li>Enabled for LAN: designates the interface for a local network. It can be set as a DHCP server for hosts on the local network and can serve as a default gateway for those hosts; however, it cannot be set as an actual gateway interface for this device. That is, packets must be routed from this interface to another interface that is configured as WAN. The interface is automatically brought up at boot.</li>
 <li>Enabled for WAN: designates the interface as a gateway to an external network. The interface is automatically brought up at boot.</li>
 <li>Not Managed: the interface will be ignored by Kura.</li>
-<li>Layer 2 Only: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot.</li>
+<li>Layer 2 Only<sup id="fnref15:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot.</li>
 </ul>
 </li>
 <li><strong>Configure</strong><ul>
@@ -4997,7 +4997,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>false</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.promisc</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.promisc</code><sup id="fnref26:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>Integer</td>
 <td>Enable the Promiscuous Mode; possible values are: -1 (System default), 0 (Disabled), 1 (Enabled)</td>
 <td>-1</td>
@@ -5018,13 +5018,13 @@ Since the network configuration shown on the screen may not be synchronized with
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip4.status</code></td>
 <td>String</td>
-<td>The status of the interface for the IPv4 configuration; possibile values are: <code>netIPv4StatusDisabled</code>, <code>netIPv4StatusUnmanaged</code>, <code>netIPv4StatusL2Only</code>, <code>netIPv4StatusEnabledLAN</code>, <code>netIPv4StatusEnabledWAN</code>, <code>netIPv4StatusUnknown</code></td>
+<td>The status of the interface for the IPv4 configuration; possibile values are: <code>netIPv4StatusDisabled</code>, <code>netIPv4StatusUnmanaged</code>, <code>netIPv4StatusL2Only</code><sup id="fnref14:1"><a class="footnote-ref" href="#fn:1">1</a></sup>, <code>netIPv4StatusEnabledLAN</code>, <code>netIPv4StatusEnabledWAN</code>, <code>netIPv4StatusUnknown</code></td>
 <td><code>netIPv4StatusDisabled</code> (see note below)</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.ip4.wan.priority</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip4.wan.priority</code><sup id="fnref25:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>Integer</td>
-<td>(NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
+<td>Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
 <td>-1</td>
 </tr>
 <tr>
@@ -5052,7 +5052,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <td></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.ip4.mtu</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip4.mtu</code><sup id="fnref24:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>Integer</td>
 <td>The Maximum Transition Unit (MTU) for this interface</td>
 <td></td>
@@ -5149,61 +5149,61 @@ Since the network configuration shown on the screen may not be synchronized with
 </thead>
 <tbody>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.ip6.status</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.status</code><sup id="fnref23:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
-<td>The status of the interface for the IPv6 configuration; possibile values are: <code>netIPv6StatusDisabled</code>, <code>netIPv6StatusUnmanaged</code>, <code>netIPv6StatusL2Only</code>, <code>netIPv6StatusEnabledLAN</code>, <code>netIPv6StatusEnabledWAN</code>, <code>netIPv6StatusUnknown</code></td>
+<td>The status of the interface for the IPv6 configuration; possibile values are: <code>netIPv6StatusDisabled</code>, <code>netIPv6StatusUnmanaged</code>, <code>netIPv6StatusL2Only</code><sup id="fnref13:1"><a class="footnote-ref" href="#fn:1">1</a></sup>, <code>netIPv6StatusEnabledLAN</code>, <code>netIPv6StatusEnabledWAN</code>, <code>netIPv6StatusUnknown</code></td>
 <td><code>netIPv6StatusDisabled</code> (see note below)</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.ip6.wan.priority</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.wan.priority</code><sup id="fnref22:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>Integer</td>
-<td>(NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
+<td>Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
 <td>-1</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.ip6.address.method</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.address.method</code><sup id="fnref21:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>The IPv6 configuration method; possible values are: <code>AUTO</code>, <code>DHCP</code>, <code>MANUAL</code>.</td>
 <td><code>AUTO</code></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.ip6.address</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.address</code><sup id="fnref20:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>The IPv6 address assigned to the network interface</td>
 <td></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.ip6.prefix</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.prefix</code><sup id="fnref19:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>Short</td>
 <td>The IPv6 netmask assigned to the network interface</td>
 <td>-1</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.ip6.gateway</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.gateway</code><sup id="fnref18:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>The IPv6 address of the default gateway</td>
 <td></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.ip6.dnsServers</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.dnsServers</code><sup id="fnref17:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>Comma-separated list of dns servers</td>
 <td></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.ip6.addr.gen.mode</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.addr.gen.mode</code><sup id="fnref16:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>The IPv6 address generation mode; possible values are <code>EUI64</code>, <code>STABLE_PRIVACY</code></td>
 <td></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.ip6.privacy</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.privacy</code><sup id="fnref15:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>The IPv6 Privacy Extensions for SLAAC; possible values are <code>DISABLED</code>, <code>ENABLED_PUBLIC_ADD</code>, <code>ENABLED_TEMP_ADD</code></td>
 <td></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.ip6.mtu</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip6.mtu</code><sup id="fnref14:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>Integer</td>
 <td>The Maximum Transition Unit (MTU) for Ipv6 traffic on this interface. Requires NetworkManager 1.40 or newer</td>
 <td></td>
@@ -5311,7 +5311,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>1</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.bgscan</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.bgscan</code><sup id="fnref12:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>String</td>
 <td>Set the background scans; possible values have the form <code>&lt;mode&gt;:&lt;shortInterval&gt;:&lt;rssiThreshold&gt;:&lt;longInterval&gt;</code> where <code>mode</code> (String) is one of NONE, SIMPLE, or LEARN, <code>shortInterval</code> (Integer) sets the Bgscan short interval (secs), <code>rssiThreshold</code> (Integer) sets the Bgscan Signal strength threshold (dBm), and <code>longInterval</code> (Integer) sets the Bgscan long interval (secs)</td>
 <td></td>
@@ -5335,13 +5335,13 @@ Since the network configuration shown on the screen may not be synchronized with
 <td><code>INFRA</code></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.pingAccessPoint</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.pingAccessPoint</code><sup id="fnref11:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Boolean</td>
 <td>Enable pinging the access point after connection is established</td>
 <td>false</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.driver</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.driver</code><sup id="fnref10:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>String</td>
 <td>The driver used for the connection</td>
 <td></td>
@@ -5384,7 +5384,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>false</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.idle</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.idle</code><sup id="fnref9:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Integer</td>
 <td>The idle option of the PPP daemon</td>
 <td>95</td>
@@ -5402,13 +5402,13 @@ Since the network configuration shown on the screen may not be synchronized with
 <td></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.pdpType</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.pdpType</code><sup id="fnref8:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>String</td>
 <td>The PdP type; possible values are IP, PPP and IPv6</td>
 <td>IP</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.maxFail</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.maxFail</code><sup id="fnref7:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Integer</td>
 <td>The maxfail option of the PPP daemon</td>
 <td>5</td>
@@ -5426,7 +5426,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>0</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.activeFilter</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.activeFilter</code><sup id="fnref6:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>String</td>
 <td>The active-filter option of the PPP daemon</td>
 <td>inbound</td>
@@ -5438,7 +5438,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>0</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.diversityEnabled</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.diversityEnabled</code><sup id="fnref5:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Boolean</td>
 <td>Enable the LTE diversity antenna</td>
 <td>false</td>
@@ -5456,7 +5456,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>false</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.persist</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.persist</code><sup id="fnref4:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Boolean</td>
 <td>The persist option of the PPP daemon</td>
 <td>true</td>
@@ -5468,19 +5468,19 @@ Since the network configuration shown on the screen may not be synchronized with
 <td></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.dialString</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.dialString</code><sup id="fnref3:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>String</td>
 <td>The dial string used for connecting to the APN</td>
 <td></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.holdoff</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.holdoff</code><sup id="fnref2:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Integer</td>
 <td>The holdoff option of the PPP daemon (in seconds)</td>
 <td>1</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.pppNum</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.pppNum</code><sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Integer</td>
 <td>Assigned ppp interface number</td>
 <td>0</td>
@@ -5499,31 +5499,31 @@ Since the network configuration shown on the screen may not be synchronized with
 </thead>
 <tbody>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.vlan.parent</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.vlan.parent</code><sup id="fnref13:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>Physical interface Vlan is bound to</td>
 <td></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.vlan.id</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.vlan.id</code><sup id="fnref12:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>Integer</td>
 <td>Vlan tag identifier, between 0 and 4094</td>
 <td></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.vlan.ingress</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.vlan.ingress</code><sup id="fnref11:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>Incoming traffic priorities in the format from:to, as comma separated pairs of unsigned integers (Optional)</td>
 <td></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.vlan.egress</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.vlan.egress</code><sup id="fnref10:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>Outgoing traffic priorities in the format from:to, as comma separated pairs of unsigned integer (Optional)</td>
 <td></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.vlan.flags</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.vlan.flags</code><sup id="fnref9:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>Configuration flags, between 0 and 15 (Optional)</td>
 <td>1</td>
@@ -5541,42 +5541,42 @@ Since the network configuration shown on the screen may not be synchronized with
 </thead>
 <tbody>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.802-1x.eap</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.802-1x.eap</code><sup id="fnref8:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>The EAP method to be used when authenticating to the network with 802.1x. Supported methods: "<em>Kura8021xEapTls</em>", "<em>Kura8021xEapPeap</em>", "<em>Kura8021xEapTtls</em>".</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.802-1x.innerAuth</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.802-1x.innerAuth</code><sup id="fnref7:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>Specifies the "phase 2" inner authentication method when an EAP method that uses an inner TLS tunnel is specified in the "eap" property. Supported methods: "<em>Kura8021xInnerAuthNone</em>", "<em>Kura8021xInnerAuthMschapv2</em>".</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.802-1x.identity</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.802-1x.identity</code><sup id="fnref6:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>Identity string for EAP authentication methods. Typically the user's user or login name.</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.802-1x.password</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.802-1x.password</code><sup id="fnref5:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>Password used for EAP authentication methods.</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.802-1x.client-cert-name</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.802-1x.client-cert-name</code><sup id="fnref4:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>Name referring to the corresponding Kura keystore entry containing the client certificate if used by the EAP method specified in the "eap" property. Typically is set to the same name as the <code>net.interface.&lt;interface&gt;.config.802-1x.private-key-name</code> when using EAP-TLS.</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.802-1x.private-key-name</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.802-1x.private-key-name</code><sup id="fnref3:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>Name referring to the corresponding Kura keystore entry containing the private key when the "eap" property is set to "Kura8021xEapTls". Typically is set to the same name as the <code>net.interface.&lt;interface&gt;.config.802-1x.client-cert-name</code>.</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.802-1x.ca-cert-name</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.802-1x.ca-cert-name</code><sup id="fnref2:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>Name referring to the corresponding Kura keystore entry containing the CA certificate if used by the EAP method specified in the "eap" property. This parameter is optional but this allows man-in-the-middle attacks and is <strong>NOT recommended</strong>.</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.802-1x.anonymous-identity</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.802-1x.anonymous-identity</code><sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
 <td>Anonymous identity string for EAP authentication methods. Used as the unencrypted identity with EAP types that support different tunneled identity like EAP-TTLS (Optional)</td>
 </tr>
@@ -5936,6 +5936,17 @@ Since the network configuration shown on the screen may not be synchronized with
 <a id="__codelineno-8-44" name="__codelineno-8-44" href="#__codelineno-8-44"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
 <a id="__codelineno-8-45" name="__codelineno-8-45" href="#__codelineno-8-45"></a><span class="nt">&lt;/esf:configurations&gt;</span>
 </code></pre></div>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>This feature is only available in Kura <em>specific</em> profiles. For more informations about the various Kura profiles see <a href="../../getting-started/install-kura/#installer-types">Kura installer types</a>.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref4:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref5:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref6:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref7:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref8:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref9:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref10:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref11:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref12:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref13:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref14:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref15:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:2">
+<p>This feature is only available in Kura <em>generic</em> profiles. For more informations about the various Kura profiles see <a href="../../getting-started/install-kura/#installer-types">Kura installer types</a>.&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref4:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref5:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref6:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref7:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref8:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref9:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref10:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref11:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref12:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref13:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref14:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref15:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref16:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref17:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref18:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref19:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref20:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref21:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref22:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref23:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref24:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref25:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref26:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
 
 
 

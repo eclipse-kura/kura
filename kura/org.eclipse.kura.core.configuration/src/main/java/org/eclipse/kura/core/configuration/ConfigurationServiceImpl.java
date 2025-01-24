@@ -1251,8 +1251,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             cfg.update(CollectionsUtil.mapToDictionary(newProperties));
 
         } catch (IOException e) {
-            logger.warn("Error seeding initial properties to ConfigAdmin for pid: {}", config.getPid(),
-                    e);
+            logger.warn("Error seeding initial properties to ConfigAdmin for pid: {}", config.getPid(), e);
         }
     }
 
@@ -1263,8 +1262,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         try {
             createFactoryConfiguration(factoryPid, pid, props, false);
         } catch (KuraException e) {
-            logger.warn("Error creating configuration with pid: {} and factory pid: {}", pid,
-                    factoryPid, e);
+            logger.warn("Error creating configuration with pid: {} and factory pid: {}", pid, factoryPid, e);
         }
     }
 
@@ -1530,7 +1528,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             throws KuraException {
         // Merge the current configuration of registered components with the provided configurations.
         // It is assumed that the PIDs in the provided configurations is a subset of the registered PIDs.
-        
+
         List<ComponentConfiguration> currentConfigs = getComponentConfigurationsInternal();
         if (configsToUpdate == null || configsToUpdate.isEmpty()) {
             result.addAll(currentConfigs);
@@ -1671,7 +1669,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 .ofNullable(currentConfigs.get(snapshotConfig.getPid()));
 
         try {
-            rollbackConfig(snapshotConfig, optionalCurrentConfig);
+            logger.info("Rolling back configuration for component with pid {}...", snapshotConfig.getPid());
+            rollbackConfigurationInternal(snapshotConfig, optionalCurrentConfig);
         } catch (IOException e) {
             logger.warn("Failed to rollback configuration for pid {}", snapshotConfig.getPid(), e);
             causes.add(e);
@@ -1752,12 +1751,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 registerComponentConfiguration(snapshotConfig.getPid(), target.getPid(), factoryPid.get());
             }
         }
-    }
-
-    private void rollbackConfig(final ComponentConfiguration snapshotConfig,
-            final Optional<Configuration> optionalCurrentConfig) throws IOException {
-        logger.info("Rolling back configuration for component with pid {}...", snapshotConfig.getPid());
-        rollbackConfigurationInternal(snapshotConfig, optionalCurrentConfig);
     }
 
     private void deleteFactoryComponent(Iterator<Entry<String, Configuration>> currentConfigsIterator,

@@ -213,6 +213,11 @@
                                     <version>${jcl.over.slf4j.version}</version>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>org.slf4j</groupId>
+                                    <artifactId>jul-to-slf4j</artifactId>
+                                    <version>${jul.to.slf4j.version}</version>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.apache.logging.log4j</groupId>
                                     <artifactId>log4j-api</artifactId>
                                     <version>${log4j.version}</version>

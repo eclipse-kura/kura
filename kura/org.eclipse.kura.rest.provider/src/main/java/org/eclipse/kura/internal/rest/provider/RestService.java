@@ -46,6 +46,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseFilter;
@@ -56,6 +57,11 @@ import jakarta.ws.rs.ext.Provider;
 @Provider
 @SuppressWarnings("restriction")
 public class RestService implements ConfigurableComponent {
+
+    static {
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(RestService.class);
 

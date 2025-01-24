@@ -9,5 +9,8 @@
         <Root level="all">
             <AppenderRef ref="Console" />
         </Root>
+        <Logger name="org.glassfish.jersey.internal" level="error" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
     </Loggers>
 </Configuration>

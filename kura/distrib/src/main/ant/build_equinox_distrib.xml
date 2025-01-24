@@ -1156,6 +1156,12 @@ fi]]>
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
+            <param name="bundle.name" value="jul-to-slf4j" />
+            <param name="bundle.version" value="${jul.to.slf4j.version}" />
+            <param name="start.level" value="1" />
+            <param name="start" value="s" />
+        </antcall>    	
+        <antcall target="install-plugin">
             <param name="bundle.name" value="log4j2-api-config" />
             <param name="bundle.version" value="${log4j2-api-config.version}" />
             <param name="start.level" value="1" />

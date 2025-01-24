@@ -17,12 +17,11 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -49,6 +48,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.KuraPartialSuccessException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -587,7 +587,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             try {
                 updateWithDefaultConfiguration(metatypePid, ocd);
             } catch (IOException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraIOException(e);
             }
         }
     }
@@ -617,8 +617,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 if (factoryOCD != null) {
                     try {
                         updateWithDefaultConfiguration(pid, factoryOCD);
-                    } catch (KuraException e) {
-                        logger.info("Error seeding updated configuration for pid: {}", pid);
                     } catch (IOException e) {
                         logger.info("Error seeding updated configuration for pid: {}", pid);
                     }
@@ -657,7 +655,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         this.allActivatedPids.remove(pid);
     }
 
-    boolean mergeWithDefaults(OCD ocd, Map<String, Object> properties) throws KuraException {
+    boolean mergeWithDefaults(OCD ocd, Map<String, Object> properties) {
         boolean changed = false;
         Set<String> keys = properties.keySet();
 
@@ -680,7 +678,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         return changed;
     }
 
-    Map<String, Object> getDefaultProperties(OCD ocd) throws KuraException {
+    Map<String, Object> getDefaultProperties(OCD ocd) {
         return ComponentUtil.getDefaultProperties(ocd, this.ctx);
     }
 
@@ -689,13 +687,16 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             Object configValue = property.getValue();
 
             if (configValue instanceof Password || configValue instanceof Password[]) {
+                Object decryptedValue;
                 try {
-                    Object decryptedValue = decryptPasswordProperties(configValue);
+                    decryptedValue = decryptPasswordProperties(configValue);
                     configProperties.put(property.getKey(), decryptedValue);
-                } catch (Exception e) {
+                } catch (KuraException e) {
+                    logger.error("Failed to decrypt password properties", e);
                 }
             }
         }
+
     }
 
     private Object decryptPasswordProperties(Object encryptedValue) throws KuraException {
@@ -788,7 +789,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                     configs.add(cc);
                 }
             } catch (Exception e) {
-                logger.error("Error getting configuration for component " + pid, e);
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e,
                         "Error getting configuration for component " + pid);
             }
@@ -871,7 +871,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         return cc;
     }
 
-    private void updateWithDefaultConfiguration(String pid, Tocd ocd) throws KuraException, IOException {
+    private void updateWithDefaultConfiguration(String pid, Tocd ocd) throws IOException {
         String servicePid = this.servicePidByPid.get(pid);
         if (servicePid == null) {
             servicePid = pid;
@@ -904,33 +904,29 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 try {
                     updateWithDefaultConfiguration(entry.getKey(), ocd);
                 } catch (IOException e) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                    throw new KuraIOException(e);
                 }
             }
         }
     }
 
-    private boolean allSnapshotsUnencrypted() {
+    private boolean allSnapshotsAreUnencrypted() {
+        Set<Long> snapshotIDs;
         try {
-            Set<Long> snapshotIDs = getSnapshots();
-            if (snapshotIDs == null || snapshotIDs.isEmpty()) {
-                return false;
-            }
-            Long[] snapshots = snapshotIDs.toArray(new Long[] {});
-
-            for (Long snapshot : snapshots) {
-
-                try {
-                    // Verify if the current snapshot is encrypted
-                    loadEncryptedSnapshotFileContent(snapshot);
-                    return false;
-                } catch (Exception e) {
-                }
-            }
-            return true;
-        } catch (Exception e) {
+            snapshotIDs = getSnapshots();
+        } catch (KuraException e) {
             return false;
         }
+
+        for (Long snapshot : snapshotIDs) {
+            try {
+                loadEncryptedSnapshotFileContent(snapshot);
+                return false;
+            } catch (Exception e) {
+                // Do nothing...
+            }
+        }
+        return true;
     }
 
     private static String readFully(final File file) throws IOException {
@@ -1010,53 +1006,25 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         // Marshall the configuration into an XML
         String xmlResult;
-        try {
-            xmlResult = marshal(conf);
-            if (xmlResult == null || xmlResult.trim().isEmpty()) {
-                throw new KuraException(KuraErrorCode.INVALID_PARAMETER, conf);
-            }
-        } catch (KuraException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        xmlResult = marshal(conf);
+        if (xmlResult == null || xmlResult.trim().isEmpty()) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, conf);
         }
 
         // Encrypt the XML
         char[] encryptedXML = this.cryptoService.encryptAes(xmlResult.toCharArray());
 
         // Write the snapshot
-        FileOutputStream fos = null;
-        OutputStreamWriter osw = null;
-        try {
+        try (FileOutputStream fos = new FileOutputStream(fSnapshot);
+                OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);) {
             logger.info("Writing snapshot - Saving {}...", fSnapshot.getAbsolutePath());
-            fos = new FileOutputStream(fSnapshot);
-            osw = new OutputStreamWriter(fos, "UTF-8");
             osw.append(new String(encryptedXML));
             osw.flush();
             fos.flush();
             fos.getFD().sync();
             logger.info("Writing snapshot - Saving {}... Done.", fSnapshot.getAbsolutePath());
-        } catch (FileNotFoundException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } catch (UnsupportedEncodingException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } finally {
-            if (osw != null) {
-                try {
-                    osw.close();
-                } catch (IOException e) {
-
-                }
-            }
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-
-                }
-            }
+            throw new KuraIOException(e);
         }
     }
 
@@ -1294,7 +1262,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         // Get the latest snapshot file to use as initialization
         Set<Long> snapshotIDs = getSnapshots();
         if (snapshotIDs == null || snapshotIDs.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
 
         Long[] snapshots = snapshotIDs.toArray(new Long[] {});
@@ -1313,12 +1281,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         } catch (Exception e) {
             logger.info("Unable to decrypt snapshot! Fallback to unencrypted snapshots mode.");
             try {
-                if (allSnapshotsUnencrypted()) {
+                if (allSnapshotsAreUnencrypted()) {
                     encryptPlainSnapshots();
                     configs = loadLatestSnapshotConfigurations();
                 }
             } catch (Exception ex) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, ex);
+                throw new KuraIOException(ex);
             }
         }
 
@@ -1415,9 +1383,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         if (!this.activatedSelfConfigComponents.contains(pid)) {
 
             // load the ocd to do the validation
-            BundleContext ctx = this.ctx.getBundleContext();
+            BundleContext bundleCtx = this.ctx.getBundleContext();
             // FIXME: why the returned ocd is always null?
-            ObjectClassDefinition ocd = ComponentUtil.getObjectClassDefinition(ctx, this.servicePidByPid.get(pid));
+            ObjectClassDefinition ocd = ComponentUtil.getObjectClassDefinition(bundleCtx,
+                    this.servicePidByPid.get(pid));
 
             // Validate the properties to be applied and set them
             validateProperties(pid, ocd, mergedProperties);
@@ -1542,7 +1511,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         // complete the returned configurations adding the snapshot configurations
         // of those components not yet in the list.
         List<ComponentConfiguration> snapshotConfigs = loadLatestSnapshotConfigurations();
-        if (snapshotConfigs != null) {
+        if (snapshotConfigs != null && !snapshotConfigs.isEmpty()) {
             for (ComponentConfiguration snapshotConfig : snapshotConfigs) {
                 boolean found = false;
                 for (ComponentConfiguration config : result) {
@@ -1720,7 +1689,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     }
 
     private void rollbackConfigurationInternal(final ComponentConfiguration snapshotConfig,
-            final Optional<Configuration> existingConfig) throws IOException, KuraException {
+            final Optional<Configuration> existingConfig) throws IOException {
         final Optional<String> factoryPid = Optional
                 .ofNullable(snapshotConfig.getConfigurationProperties().get(ConfigurationAdmin.SERVICE_FACTORYPID))
                 .filter(String.class::isInstance).map(String.class::cast);
@@ -1743,11 +1712,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         if (existingConfig.isPresent()) {
             target = existingConfig.get();
         } else if (factoryPid.isPresent()) {
-            logger.info("creating new factory configuration for pid {} and factory pid {}", snapshotConfig.getPid(),
+            logger.info("Creating new factory configuration for pid {} and factory pid {}", snapshotConfig.getPid(),
                     factoryPid.get());
             target = this.configurationAdmin.createFactoryConfiguration(factoryPid.get(), null);
         } else {
-            logger.info("creating new configuration for pid {}", snapshotConfig.getPid());
+            logger.info("Creating new configuration for pid {}", snapshotConfig.getPid());
             target = this.configurationAdmin.getConfiguration(snapshotConfig.getPid());
         }
 
@@ -1758,7 +1727,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
 
         if (!CollectionsUtil.equals(resultAsDictionary, currentProperties)) {
-            logger.info("updating configuration for pid {}", snapshotConfig.getPid());
+            logger.info("Updating configuration for pid {}", snapshotConfig.getPid());
             target.update(resultAsDictionary);
             if (factoryPid.isPresent()) {
                 registerComponentConfiguration(snapshotConfig.getPid(), target.getPid(), factoryPid.get());

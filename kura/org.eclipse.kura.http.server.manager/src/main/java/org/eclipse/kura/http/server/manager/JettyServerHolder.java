@@ -86,13 +86,12 @@ public class JettyServerHolder {
             final HttpServlet httpServlet, final EventListener eventListener) {
         this.options = options;
 
-        // TODO make it configurable from options
         this.server = new Server(new QueuedThreadPool(200, 8));
         this.server.setErrorHandler(new KuraErrorHandler());
 
         final BundleContext context = FrameworkUtil.getBundle(JettyServerHolder.class).getBundleContext();
-        this.workDir = new File(context.getDataFile(""), "jettyWorkDir_" + System.nanoTime()); // TODO evaluate
-                                                                                               // configurability
+        this.workDir = new File(context.getDataFile(""), "jettyWorkDir_" + System.nanoTime());
+
         this.workDir.mkdir();
 
         for (int port : this.options.getHttpPorts()) {
@@ -151,11 +150,10 @@ public class JettyServerHolder {
 
         ServletContextHandler servletContextHandler = new ServletContextHandler();
         servletContextHandler.setClassLoader(JettyServerHolder.class.getClassLoader());
-        servletContextHandler.setContextPath("/"); // TODO evaluate configurability
+        servletContextHandler.setContextPath("/");
 
         servletContextHandler.setAttribute("jakarta.servlet.context.tempdir", this.workDir);
         SessionHandler handler = new SessionHandler();
-        // handler.setMaxInactiveInterval(-1); // TODO evaluate configurability
         servletContextHandler.setSessionHandler(handler);
 
         final GzipHandler gzipHandler = new GzipHandler();
@@ -204,7 +202,6 @@ public class JettyServerHolder {
 
     private void customizeConnector(final ServerConnector serverConnector, final int port) {
         serverConnector.setPort(port);
-        // serverConnector.setHost("0.0.0.0"); // TODO evaluate configurability
         for (final ConnectionFactory factory : serverConnector.getConnectionFactories()) {
             if (!(factory instanceof HttpConnectionFactory)) {
                 continue;
@@ -288,7 +285,7 @@ public class JettyServerHolder {
 
         final HttpConfiguration httpsConfig = new HttpConfiguration();
 
-        httpsConfig.addCustomizer(new SecureRequestCustomizer(false)); // TODO to check
+        httpsConfig.addCustomizer(new SecureRequestCustomizer(false));
 
         final ServerConnector connector = new ServerConnector(server,
                 new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(httpsConfig));

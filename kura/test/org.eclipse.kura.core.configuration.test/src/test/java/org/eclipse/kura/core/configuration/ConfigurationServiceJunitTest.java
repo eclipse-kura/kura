@@ -73,7 +73,7 @@ import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 public class ConfigurationServiceJunitTest {
 
     @Test
-    public void testGetFactoryComponentPids() throws NoSuchFieldException, KuraException {
+    public void testGetFactoryComponentPids() throws KuraException {
         // test that the returned PIDs are the same as in the service and that they cannot be modified
 
         String[] expectedPIDs = { "pid1", "pid2", "pid3" };
@@ -124,7 +124,7 @@ public class ConfigurationServiceJunitTest {
     }
 
     @Test
-    public void testCreateFactoryExistingPid() throws KuraException, IOException, NoSuchFieldException {
+    public void testCreateFactoryExistingPid() throws KuraException, NoSuchFieldException {
         // negative test; what if existing PID is used
 
         final String factoryPid = "fpid";
@@ -348,7 +348,7 @@ public class ConfigurationServiceJunitTest {
 
     @Test
     public void testDeleteFactoryConfigurationNonFactoryComponent()
-            throws KuraException, NoSuchFieldException, IOException, InvalidSyntaxException {
+            throws KuraException, IOException, InvalidSyntaxException {
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
@@ -370,7 +370,7 @@ public class ConfigurationServiceJunitTest {
     }
 
     @Test
-    public void testDeleteFactoryConfigurationNonExistingServicePid() throws KuraException, NoSuchFieldException {
+    public void testDeleteFactoryConfigurationNonExistingServicePid() throws KuraException {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
         cs.setConfigurationAdmin(mock(ConfigurationAdmin.class));
 
@@ -417,8 +417,7 @@ public class ConfigurationServiceJunitTest {
     }
 
     @Test
-    public void testDeleteFactoryConfigurationNoSnapshot()
-            throws KuraException, IOException, NoSuchFieldException, InvalidSyntaxException {
+    public void testDeleteFactoryConfigurationNoSnapshot() throws KuraException, IOException, InvalidSyntaxException {
         // positive test; pid registered in factory and service pids, configuration delete is expected, no snapshot
 
         String factoryPid = "fpid";
@@ -453,8 +452,7 @@ public class ConfigurationServiceJunitTest {
     }
 
     @Test
-    public void testDeleteFactoryConfigurationWithSnapshot()
-            throws KuraException, IOException, NoSuchFieldException, InvalidSyntaxException {
+    public void testDeleteFactoryConfigurationWithSnapshot() throws KuraException, IOException, InvalidSyntaxException {
         // positive test; pid registered in factory and service pids, configuration delete is expected, take a snapshot
 
         String factoryPid = "fpid";
@@ -1052,8 +1050,7 @@ public class ConfigurationServiceJunitTest {
 
             @Override
             XmlComponentConfigurations loadEncryptedSnapshotFileContent(long snapshotID) throws KuraException {
-                XmlComponentConfigurations cfgs = null;
-                return cfgs;
+                return null;
             }
         };
 
@@ -1238,7 +1235,7 @@ public class ConfigurationServiceJunitTest {
                 try {
                     return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
-
+                    // Do nothing...
                 }
                 return null;
             }
@@ -1538,7 +1535,7 @@ public class ConfigurationServiceJunitTest {
                 try {
                     return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
-
+                    // Do nothing...
                 }
                 return null;
             }
@@ -1637,7 +1634,7 @@ public class ConfigurationServiceJunitTest {
                 try {
                     return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
-
+                    // Do nothing...
                 }
                 return null;
             }
@@ -1697,7 +1694,7 @@ public class ConfigurationServiceJunitTest {
                 try {
                     return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
-
+                    // Do nothing...
                 }
                 return null;
             }
@@ -1993,7 +1990,7 @@ public class ConfigurationServiceJunitTest {
                 try {
                     return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
-
+                    // Do nothing...
                 }
                 return null;
             }
@@ -2074,7 +2071,7 @@ public class ConfigurationServiceJunitTest {
                 try {
                     return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
-
+                    // Do nothing...
                 }
                 return null;
             }
@@ -2159,7 +2156,7 @@ public class ConfigurationServiceJunitTest {
                 try {
                     return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
-
+                    // Do nothing...
                 }
                 return null;
             }
@@ -2220,7 +2217,7 @@ public class ConfigurationServiceJunitTest {
         snapshotsDir.deleteOnExit();
 
         final SystemService ssMock = mock(SystemService.class);
-        when(ssMock.getKuraSnapshotsDirectory()).thenReturn(snapshotsDir.getAbsolutePath().toString());
+        when(ssMock.getKuraSnapshotsDirectory()).thenReturn(snapshotsDir.getAbsolutePath());
 
         final Map<String, Object> expectedConfig = Collections.singletonMap("prop", "contains\nline\nbreaks\n");
 
@@ -2243,7 +2240,7 @@ public class ConfigurationServiceJunitTest {
 
             @Override
             String getSnapshotsDirectory() {
-                return snapshotsDir.getAbsolutePath().toString();
+                return snapshotsDir.getAbsolutePath();
             }
 
             @Override
@@ -2259,7 +2256,7 @@ public class ConfigurationServiceJunitTest {
                 try {
                     return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
-
+                    // Do nothing...
                 }
                 return null;
             }
@@ -2828,7 +2825,7 @@ public class ConfigurationServiceJunitTest {
                 try {
                     return xmlMarshaller.marshal(object);
                 } catch (KuraException e) {
-
+                    // Do nothing...
                 }
                 return null;
             }
@@ -3022,8 +3019,7 @@ public class ConfigurationServiceJunitTest {
     }
 
     private OCDService createMockConfigurationServiceForOCDTests(List<String> registeredFactories,
-            List<Tocd> registeredOcds, List<ComponentDescriptionDTO> registeredComponents)
-            throws NoSuchFieldException, KuraException {
+            List<Tocd> registeredOcds, List<ComponentDescriptionDTO> registeredComponents) throws KuraException {
 
         assertEquals(registeredFactories.size(), registeredOcds.size());
         ServiceComponentRuntime scrService = mock(ServiceComponentRuntime.class);
@@ -3043,7 +3039,7 @@ public class ConfigurationServiceJunitTest {
     }
 
     @Test
-    public void testShouldReturnEmptyFactoryOCDList() throws NoSuchFieldException, KuraException {
+    public void testShouldReturnEmptyFactoryOCDList() throws KuraException {
         final OCDService ocdService = createMockConfigurationServiceForOCDTests(Arrays.asList(), Arrays.asList(),
                 Arrays.asList());
         final List<ComponentConfiguration> configs = ocdService.getFactoryComponentOCDs();
@@ -3051,7 +3047,7 @@ public class ConfigurationServiceJunitTest {
     }
 
     @Test
-    public void testShouldGetFactoryOCDList() throws NoSuchFieldException, KuraException {
+    public void testShouldGetFactoryOCDList() throws KuraException {
         final Tocd ocd1 = mock(Tocd.class);
         final Tocd ocd2 = mock(Tocd.class);
         final Tocd ocd3 = mock(Tocd.class);
@@ -3065,7 +3061,7 @@ public class ConfigurationServiceJunitTest {
     }
 
     @Test
-    public void testShouldReturnNullFactoryOCD() throws NoSuchFieldException, KuraException {
+    public void testShouldReturnNullFactoryOCD() throws KuraException {
         final OCDService ocdService = createMockConfigurationServiceForOCDTests(Arrays.asList(), Arrays.asList(),
                 Arrays.asList());
         assertNull(ocdService.getFactoryComponentOCD("bar"));
@@ -3073,7 +3069,7 @@ public class ConfigurationServiceJunitTest {
     }
 
     @Test
-    public void testShouldGetSingleFactoryOCD() throws NoSuchFieldException, KuraException {
+    public void testShouldGetSingleFactoryOCD() throws KuraException {
         final Tocd ocd1 = mock(Tocd.class);
         final Tocd ocd2 = mock(Tocd.class);
         final Tocd ocd3 = mock(Tocd.class);
@@ -3087,7 +3083,7 @@ public class ConfigurationServiceJunitTest {
     }
 
     @Test
-    public void testShouldReturnEmptyFactoryOCDListForServiceProvider() throws NoSuchFieldException, KuraException {
+    public void testShouldReturnEmptyFactoryOCDListForServiceProvider() throws KuraException {
         final OCDService ocdService = createMockConfigurationServiceForOCDTests(Arrays.asList(), Arrays.asList(),
                 Arrays.asList());
         assertTrue(ocdService.getServiceProviderOCDs(new Class<?>[0]).isEmpty());
@@ -3095,7 +3091,7 @@ public class ConfigurationServiceJunitTest {
     }
 
     @Test
-    public void testShouldReturnFactoryOCDListForServiceProvider() throws NoSuchFieldException, KuraException {
+    public void testShouldReturnFactoryOCDListForServiceProvider() throws KuraException {
         final Tocd fooOcd = mock(Tocd.class);
         final Tocd barOcd = mock(Tocd.class);
         final Tocd bazOcd = mock(Tocd.class);

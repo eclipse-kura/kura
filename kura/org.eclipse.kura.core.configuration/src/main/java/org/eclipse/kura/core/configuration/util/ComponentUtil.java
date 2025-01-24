@@ -539,7 +539,8 @@ public class ComponentUtil {
         try {
             cryptoService.decryptAes(configPassword.getPassword());
             result = true;
-        } catch (Exception e1) {
+        } catch (Exception e) {
+            // Do nothing...
         }
         return result;
     }
@@ -559,29 +560,4 @@ public class ComponentUtil {
         return configs.stream().collect(Collectors.toMap(ComponentConfiguration::getPid, Function.identity()));
     }
 
-    // /*
-    // * Merge a collection of {@link org.eclipse.kura.core.configuration.ComponentConfiguration} properties with the
-    // * given configurations.
-    // */
-    // public static void merge(final Map<String, ComponentConfiguration> configs,
-    // final Collection<ComponentConfiguration> toBeMerged) {
-    // for (final ComponentConfiguration c : toBeMerged) {
-    // merge(configs, c);
-    // }
-    // }
-    //
-    // /*
-    // * Merge a {@link org.eclipse.kura.core.configuration.ComponentConfiguration} with the
-    // * given configurations.
-    // */
-    // public static void merge(final Map<String, ComponentConfiguration> configs, final ComponentConfiguration c) {
-    // configs.compute(c.getPid(), (k, v) -> {
-    // if (v == null) {
-    // return c;
-    // } else {
-    // v.getConfigurationProperties().putAll(c.getConfigurationProperties());
-    // return v;
-    // }
-    // });
-    // }
 }

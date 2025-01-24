@@ -596,7 +596,7 @@ public class ConfigurationServiceJunitTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testMergeWithDefaultsNulls() throws KuraException {
+    public void testMergeWithDefaultsNulls() {
         // test with null parameters - null properties means error and NPE is expected
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
@@ -608,7 +608,7 @@ public class ConfigurationServiceJunitTest {
     }
 
     @Test
-    public void testMergeWithDefaultsEmpty() throws KuraException {
+    public void testMergeWithDefaultsEmpty() {
         // empty input
 
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
@@ -623,7 +623,7 @@ public class ConfigurationServiceJunitTest {
     }
 
     @Test
-    public void testMergeWithDefaults() throws KuraException {
+    public void testMergeWithDefaults() {
         // a few default values, a few overrides, one ovelap
 
         final Map<String, Object> props = new HashMap<>();
@@ -635,7 +635,7 @@ public class ConfigurationServiceJunitTest {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
             @Override
-            Map<String, Object> getDefaultProperties(OCD ocd) throws KuraException {
+            Map<String, Object> getDefaultProperties(OCD ocd) {
                 return props;
             }
         };
@@ -1302,7 +1302,7 @@ public class ConfigurationServiceJunitTest {
         List<ComponentConfigurationImpl> result = (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs,
                 "loadLatestSnapshotConfigurations");
 
-        assertNull("null result", result);
+        assertTrue("empty result", result.isEmpty());
     }
 
     @Test
@@ -1322,7 +1322,7 @@ public class ConfigurationServiceJunitTest {
         List<ComponentConfigurationImpl> result = (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs,
                 "loadLatestSnapshotConfigurations");
 
-        assertNull("null result", result);
+        assertTrue("empty result", result.isEmpty());
     }
 
     @Test
@@ -1451,7 +1451,7 @@ public class ConfigurationServiceJunitTest {
         List<ComponentConfigurationImpl> result = (List<ComponentConfigurationImpl>) TestUtil.invokePrivate(cs,
                 "loadLatestSnapshotConfigurations");
 
-        assertNull("xml config null", result);
+        assertTrue("xml config empty", result.isEmpty());
 
         assertEquals("call snapshots", 4, calls[0]);
         assertEquals("call load xml", 3, calls[1]);
@@ -1651,7 +1651,7 @@ public class ConfigurationServiceJunitTest {
             TestUtil.invokePrivate(cs, "writeSnapshot", sid, cfg);
             fail("Exception expected due to 'file' being directory.");
         } catch (KuraException e) {
-            assertEquals("Error code.", KuraErrorCode.INTERNAL_ERROR, e.getCode());
+            assertEquals("Error code.", KuraErrorCode.IO_ERROR, e.getCode());
         }
 
         verify(cryptoServiceMock, times(1)).encryptAes((char[]) ArgumentMatchers.any());
@@ -2362,7 +2362,7 @@ public class ConfigurationServiceJunitTest {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
             @Override
-            boolean mergeWithDefaults(OCD ocd, Map<String, Object> properties) throws KuraException {
+            boolean mergeWithDefaults(OCD ocd, Map<String, Object> properties) {
                 assertEquals("size", 2, properties.size());
                 assertTrue("new property", properties.containsKey(ConfigurationService.KURA_SERVICE_PID));
                 assertEquals("property value", spid, properties.get(ConfigurationService.KURA_SERVICE_PID));
@@ -2401,7 +2401,7 @@ public class ConfigurationServiceJunitTest {
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
 
             @Override
-            boolean mergeWithDefaults(OCD ocd, Map<String, Object> properties) throws KuraException {
+            boolean mergeWithDefaults(OCD ocd, Map<String, Object> properties) {
                 assertEquals("size", 1, properties.size());
                 assertTrue("new property", properties.containsKey(ConfigurationService.KURA_SERVICE_PID));
                 assertEquals("property value", pid, properties.get(ConfigurationService.KURA_SERVICE_PID));

@@ -726,25 +726,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     private synchronized void updateConfigurationsInternal(List<ComponentConfiguration> configsToUpdate,
             boolean takeSnapshot) throws KuraException {
-        boolean snapshotOnConfirmation = false;
         List<Throwable> causes = new ArrayList<>();
-
         List<ComponentConfiguration> configs = buildCurrentConfiguration(configsToUpdate);
 
-        for (ComponentConfiguration config : configs) {
-            for (ComponentConfiguration configToUpdate : configsToUpdate) {
-                if (config.getPid().equals(configToUpdate.getPid())) {
-                    try {
-                        updateConfigurationInternal(config.getPid(), config.getConfigurationProperties(),
-                                snapshotOnConfirmation);
-                    } catch (KuraException e) {
-                        logger.warn("Error during updateConfigurations for component " + config.getPid(), e);
-                        causes.add(e);
-                    }
-                    break;
-                }
-            }
-        }
+        updateConfigurationInternal(configsToUpdate, configs, causes);
 
         // this step creates any not yet existing factory configuration present in configsToUpdate
         for (ComponentConfiguration config : configsToUpdate) {
@@ -772,6 +757,23 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         if (!causes.isEmpty()) {
             throw new KuraPartialSuccessException("updateConfigurations", causes);
+        }
+    }
+
+    private void updateConfigurationInternal(List<ComponentConfiguration> configsToUpdate,
+            List<ComponentConfiguration> configs, List<Throwable> causes) {
+        for (ComponentConfiguration config : configs) {
+            for (ComponentConfiguration configToUpdate : configsToUpdate) {
+                if (config.getPid().equals(configToUpdate.getPid())) {
+                    try {
+                        updateConfigurationInternal(config.getPid(), config.getConfigurationProperties(), false);
+                    } catch (KuraException e) {
+                        logger.warn("Error during updateConfigurations for component " + config.getPid(), e);
+                        causes.add(e);
+                    }
+                    break;
+                }
+            }
         }
     }
 
@@ -1224,36 +1226,45 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                     String factoryPid = (String) props.get(ConfigurationAdmin.SERVICE_FACTORYPID);
 
                     if (factoryPid != null) {
-                        String pid = config.getPid();
-                        logger.info("Creating configuration with pid: {} and factory pid: {}", pid, factoryPid);
-                        try {
-                            createFactoryConfiguration(factoryPid, pid, props, false);
-                        } catch (KuraException e) {
-                            logger.warn("Error creating configuration with pid: {} and factory pid: {}", pid,
-                                    factoryPid, e);
-                        }
+                        createFactoryConfiguration(config, props, factoryPid);
                     } else {
-                        try {
-                            logger.debug("Pushing config to config admin: {}", config.getPid());
-
-                            // push it to the ConfigAdmin
-                            Configuration cfg = this.configurationAdmin.getConfiguration(config.getPid(), "?");
-
-                            // set kura.service.pid if missing
-                            Map<String, Object> newProperties = new HashMap<>(props);
-                            if (!newProperties.containsKey(ConfigurationService.KURA_SERVICE_PID)) {
-                                newProperties.put(ConfigurationService.KURA_SERVICE_PID, config.getPid());
-                            }
-
-                            cfg.update(CollectionsUtil.mapToDictionary(newProperties));
-
-                        } catch (IOException e) {
-                            logger.warn("Error seeding initial properties to ConfigAdmin for pid: {}", config.getPid(),
-                                    e);
-                        }
+                        loadConfiguration(config, props);
                     }
                 }
             }
+        }
+    }
+
+    private void loadConfiguration(ComponentConfiguration config, Map<String, Object> props) {
+        try {
+            logger.debug("Pushing config to config admin: {}", config.getPid());
+
+            // push it to the ConfigAdmin
+            Configuration cfg = this.configurationAdmin.getConfiguration(config.getPid(), "?");
+
+            // set kura.service.pid if missing
+            Map<String, Object> newProperties = new HashMap<>(props);
+            if (!newProperties.containsKey(ConfigurationService.KURA_SERVICE_PID)) {
+                newProperties.put(ConfigurationService.KURA_SERVICE_PID, config.getPid());
+            }
+
+            cfg.update(CollectionsUtil.mapToDictionary(newProperties));
+
+        } catch (IOException e) {
+            logger.warn("Error seeding initial properties to ConfigAdmin for pid: {}", config.getPid(),
+                    e);
+        }
+    }
+
+    private void createFactoryConfiguration(ComponentConfiguration config, Map<String, Object> props,
+            String factoryPid) {
+        String pid = config.getPid();
+        logger.info("Creating configuration with pid: {} and factory pid: {}", pid, factoryPid);
+        try {
+            createFactoryConfiguration(factoryPid, pid, props, false);
+        } catch (KuraException e) {
+            logger.warn("Error creating configuration with pid: {} and factory pid: {}", pid,
+                    factoryPid, e);
         }
     }
 
@@ -1373,7 +1384,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             updateComponentConfiguration(pid, mergedProperties, snapshotOnConfirmation);
             logger.info("Updating Configuration of ConfigurableComponent {} ... Done.", pid);
         } catch (IOException e) {
-            logger.warn("Error updating Configuration of ConfigurableComponent with pid {}", pid, e);
             throw new KuraException(KuraErrorCode.CONFIGURATION_UPDATE, e, pid);
         }
     }
@@ -1420,59 +1430,52 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     private void validateProperties(String pid, ObjectClassDefinition ocd, Map<String, Object> updatedProps)
             throws KuraException {
-        if (ocd != null) {
+        if (ocd == null) {
+            return;
+        }
 
-            // build a map of all the attribute definitions
-            Map<String, AttributeDefinition> attrDefs = new HashMap<>();
-            AttributeDefinition[] defs = ocd.getAttributeDefinitions(ObjectClassDefinition.ALL);
-            for (AttributeDefinition def : defs) {
-                attrDefs.put(def.getID(), def);
+        // build a map of all the attribute definitions
+        List<AttributeDefinition> definitions = Arrays.asList(ocd.getAttributeDefinitions(ObjectClassDefinition.ALL));
+        Map<String, AttributeDefinition> attributeDefinitions = definitions.stream()
+                .collect(Collectors.toMap(AttributeDefinition::getID, Function.identity()));
+
+        // loop over the proposed property values
+        // and validate them against the definition
+        for (Entry<String, Object> property : updatedProps.entrySet()) {
+
+            String key = property.getKey();
+            AttributeDefinition attributeDefinition = attributeDefinitions.get(key);
+
+            if (attributeDefinition == null) {
+                // For the attribute for which we do not have a definition, just accept them.
+                continue;
             }
 
-            // loop over the proposed property values
-            // and validate them against the definition
-            for (Entry<String, Object> property : updatedProps.entrySet()) {
+            validateAttribute(property, attributeDefinition);
+        }
 
-                String key = property.getKey();
-                AttributeDefinition attrDef = attrDefs.get(key);
-
-                // is attribute undefined?
-                if (attrDef == null) {
-                    // we do not have an attribute descriptor to the validation
-                    // against
-                    // As OSGI insert attributes at runtime like service.pid,
-                    // component.name,
-                    // for the attribute for which we do not have a definition,
-                    // just accept them.
-                    continue;
-                }
-
-                // validate the attribute value
-                Object objectValue = property.getValue();
-                String stringValue = StringUtil.valueToString(objectValue);
-                if (stringValue != null) {
-                    String result = attrDef.validate(stringValue);
-                    if (result != null && !result.isEmpty()) {
-                        throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, attrDef.getID(),
-                                stringValue, result);
-                    }
+        // make sure all required properties are set
+        OCD ocdFull = getOCDForPid(pid);
+        if (ocdFull != null) {
+            for (AD attrDef : ocdFull.getAD()) {
+                // to the required attributes make sure a value is defined.
+                if (attrDef.isRequired() && updatedProps.get(attrDef.getId()) == null) {
+                    // if the default one is not defined, throw exception.
+                    throw new KuraException(KuraErrorCode.CONFIGURATION_REQUIRED_ATTRIBUTE_MISSING, attrDef.getId());
                 }
             }
+        }
+    }
 
-            // make sure all required properties are set
-            OCD ocdFull = getOCDForPid(pid);
-            if (ocdFull != null) {
-                for (AD attrDef : ocdFull.getAD()) {
-                    // to the required attributes make sure a value is defined.
-                    if (attrDef.isRequired()) {
-                        if (updatedProps.get(attrDef.getId()) == null) {
-                            // if the default one is not defined, throw
-                            // exception.
-                            throw new KuraException(KuraErrorCode.CONFIGURATION_REQUIRED_ATTRIBUTE_MISSING,
-                                    attrDef.getId());
-                        }
-                    }
-                }
+    private void validateAttribute(Entry<String, Object> property, AttributeDefinition attributeDefinition)
+            throws KuraException {
+        // validate the attribute value
+        String stringValue = StringUtil.valueToString(property.getValue());
+        if (stringValue != null) {
+            String result = attributeDefinition.validate(stringValue);
+            if (result != null && !result.isEmpty()) {
+                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, attributeDefinition.getID(),
+                        stringValue, result);
             }
         }
     }
@@ -1481,33 +1484,28 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             List<ComponentConfiguration> configsToUpdate) throws KuraException {
         List<ComponentConfiguration> result = new ArrayList<>();
 
-        // Merge the current configuration of registered components with the provided configurations.
-        // It is assumed that the PIDs in the provided configurations is a subset of the registered PIDs.
-        List<ComponentConfiguration> currentConfigs = getComponentConfigurationsInternal();
-        if (currentConfigs != null) {
-            for (ComponentConfiguration currentConfig : currentConfigs) {
-                // either add this configuration or a new one obtained by merging its properties with the ones provided
-                ComponentConfiguration cc = currentConfig;
-                String pid = currentConfig.getPid();
-                if (configsToUpdate != null) {
-                    for (ComponentConfiguration configToUpdate : configsToUpdate) {
-                        if (configToUpdate.getPid().equals(pid)) {
-                            Map<String, Object> props = new HashMap<>();
-                            if (currentConfig.getConfigurationProperties() != null) {
-                                props.putAll(currentConfig.getConfigurationProperties());
-                            }
-                            if (configToUpdate.getConfigurationProperties() != null) {
-                                props.putAll(configToUpdate.getConfigurationProperties());
-                            }
-                            cc = new ComponentConfigurationImpl(pid, (Tocd) configToUpdate.getDefinition(), props);
-                            break;
-                        }
-                    }
+        mergeConfigurations(configsToUpdate, result);
+        addSnapshotConfigurations(result);
+
+        // remove configurations being deleted
+        for (String deletedPid : this.pendingDeletePids) {
+            for (ComponentConfiguration config : result) {
+                if (config.getPid().equals(deletedPid)) {
+                    result.remove(config);
+                    break;
                 }
-                result.add(cc);
             }
         }
 
+        for (final ComponentConfiguration config : result) {
+            ConfigurationUpgrade.upgrade(config, this.bundleContext);
+        }
+
+        return result;
+
+    }
+
+    private void addSnapshotConfigurations(List<ComponentConfiguration> result) throws KuraException {
         // complete the returned configurations adding the snapshot configurations
         // of those components not yet in the list.
         List<ComponentConfiguration> snapshotConfigs = loadLatestSnapshotConfigurations();
@@ -1526,23 +1524,44 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 }
             }
         }
+    }
 
-        // remove configurations being deleted
-        for (String deletedPid : this.pendingDeletePids) {
-            for (ComponentConfiguration config : result) {
-                if (config.getPid().equals(deletedPid)) {
-                    result.remove(config);
+    private void mergeConfigurations(List<ComponentConfiguration> configsToUpdate, List<ComponentConfiguration> result)
+            throws KuraException {
+        // Merge the current configuration of registered components with the provided configurations.
+        // It is assumed that the PIDs in the provided configurations is a subset of the registered PIDs.
+        
+        List<ComponentConfiguration> currentConfigs = getComponentConfigurationsInternal();
+        if (configsToUpdate == null || configsToUpdate.isEmpty()) {
+            result.addAll(currentConfigs);
+            return;
+        }
+
+        for (ComponentConfiguration currentConfig : currentConfigs) {
+            // add new configuration obtained by merging its properties with the ones provided
+            ComponentConfiguration cc = currentConfig;
+            String pid = currentConfig.getPid();
+            for (ComponentConfiguration configToUpdate : configsToUpdate) {
+                if (configToUpdate.getPid().equals(pid)) {
+                    Map<String, Object> props = getAllProperties(currentConfig, configToUpdate);
+                    cc = new ComponentConfigurationImpl(pid, (Tocd) configToUpdate.getDefinition(), props);
                     break;
                 }
             }
+            result.add(cc);
         }
+    }
 
-        for (final ComponentConfiguration config : result) {
-            ConfigurationUpgrade.upgrade(config, this.bundleContext);
+    private Map<String, Object> getAllProperties(ComponentConfiguration currentConfig,
+            ComponentConfiguration configToUpdate) {
+        Map<String, Object> props = new HashMap<>();
+        if (currentConfig.getConfigurationProperties() != null) {
+            props.putAll(currentConfig.getConfigurationProperties());
         }
-
-        return result;
-
+        if (configToUpdate.getConfigurationProperties() != null) {
+            props.putAll(configToUpdate.getConfigurationProperties());
+        }
+        return props;
     }
 
     private Tocd getOCDForPid(String pid) {
@@ -1653,7 +1672,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         try {
             rollbackConfig(snapshotConfig, optionalCurrentConfig);
-        } catch (IOException | KuraException e) {
+        } catch (IOException e) {
             logger.warn("Failed to rollback configuration for pid {}", snapshotConfig.getPid(), e);
             causes.add(e);
         }
@@ -1670,7 +1689,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             if (!optionalSnapshotConfig.isPresent() && this.allActivatedPids.contains(currentConfigEntry.getKey())) {
                 try {
                     rollbackToDefaultConfig(currentConfigEntry);
-                } catch (IOException | KuraException e) {
+                } catch (IOException e) {
                     logger.warn("Failed to revert to factory configuration {}", currentConfigEntry.getKey(), e);
                     causes.add(e);
                 }
@@ -1736,7 +1755,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     }
 
     private void rollbackConfig(final ComponentConfiguration snapshotConfig,
-            final Optional<Configuration> optionalCurrentConfig) throws IOException, KuraException {
+            final Optional<Configuration> optionalCurrentConfig) throws IOException {
         logger.info("Rolling back configuration for component with pid {}...", snapshotConfig.getPid());
         rollbackConfigurationInternal(snapshotConfig, optionalCurrentConfig);
     }
@@ -1749,8 +1768,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         unregisterComponentConfiguration(currentConfigEntry.getKey());
     }
 
-    private void rollbackToDefaultConfig(final Entry<String, Configuration> currentConfigEntry)
-            throws IOException, KuraException {
+    private void rollbackToDefaultConfig(final Entry<String, Configuration> currentConfigEntry) throws IOException {
         logger.info("Rolling back to default configuration for component pid: '{}'", currentConfigEntry.getKey());
         rollbackConfigurationInternal(
                 new ComponentConfigurationImpl(currentConfigEntry.getKey(), null, new HashMap<>()),

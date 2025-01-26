@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
+    Copyright (c) 2017, 2025 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -86,11 +86,6 @@
                             <requirement>
                                 <type>p2-installable-unit</type>
                                 <id>org.apache.logging.log4j.slf4j.impl</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>p2-installable-unit</type>
-                                <id>com.eclipsesource.jaxrs.jersey-min</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                             <requirement>
@@ -225,36 +220,6 @@
                             </requirement>
                             <requirement>
                                 <type>eclipse-plugin</type>
-                                <id>org.eclipse.kura.jetty.customizer</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>org.eclipse.equinox.http.jetty</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>com.eclipsesource.jaxrs.jersey-min</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>com.eclipsesource.jaxrs.provider.gson</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>com.eclipsesource.jaxrs.provider.security</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>com.eclipsesource.jaxrs.publisher</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
                                 <id>org.eclipse.kura.rest.provider</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
@@ -316,10 +281,6 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.ds</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
                             <artifactId>org.apache.felix.scr</artifactId>
                         </dependency>
                         <dependency>
@@ -328,15 +289,7 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.core.runtime</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.io</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.app</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -353,10 +306,6 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.metatype</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.preferences</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -381,10 +330,6 @@
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.hamcrest.core</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.launcher</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -446,27 +391,12 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.eclipse.equinox.ds</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.apache.felix.scr</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.eclipse.core.runtime</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.eclipse.equinox.io</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.equinox.app</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -487,11 +417,6 @@
                         </bundle>
                         <bundle>
                             <id>org.eclipse.equinox.metatype</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.equinox.preferences</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -527,11 +452,6 @@
                         </bundle>
                         <bundle>
                             <id>org.hamcrest.core</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.equinox.launcher</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -701,37 +621,7 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.eclipse.kura.jetty.customizer</id>
-                            <level>2</level>
-                            <autoStart>false</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.equinox.http.jetty</id>
-                            <level>3</level>
-                            <autoStart>false</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.eclipse.kura.http.server.manager</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>com.eclipsesource.jaxrs.jersey-min</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>com.eclipsesource.jaxrs.provider.gson</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>com.eclipsesource.jaxrs.provider.security</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>com.eclipsesource.jaxrs.publisher</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>

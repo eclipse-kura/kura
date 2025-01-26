@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,7 +19,6 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.ui.Tab.RefreshHandler;
 import org.eclipse.kura.web.shared.model.GwtSession;
-import org.eclipse.kura.web2.ext.WidgetFactory;
 import org.gwtbootstrap3.client.ui.Anchor;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.ButtonGroup;
@@ -30,7 +29,6 @@ import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.NavTabs;
 import org.gwtbootstrap3.client.ui.TabContent;
 import org.gwtbootstrap3.client.ui.TabListItem;
-import org.gwtbootstrap3.client.ui.TabPane;
 import org.gwtbootstrap3.client.ui.html.Paragraph;
 import org.gwtbootstrap3.client.ui.html.Span;
 
@@ -98,23 +96,6 @@ public class SettingsPanelUi extends Composite {
     public boolean isDirty() {
 
         return this.snapshotsPanel.isDirty();
-    }
-
-    public void addTab(final String name, final WidgetFactory widgetFactory) {
-
-        final TabPane tabPane = new TabPane();
-        tabPane.setId("__extension__" + name);
-
-        final TabListItem item = new TabListItem(name);
-        item.setDataTarget("#__extension__" + name);
-
-        item.addClickHandler(e -> {
-            tabPane.clear();
-            tabPane.add(widgetFactory.buildWidget());
-        });
-
-        this.navTabs.add(item);
-        this.tabContent.add(tabPane);
     }
 
     public void setDirty(boolean b) {

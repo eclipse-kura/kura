@@ -8,8 +8,7 @@ Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Import-Package: com.eclipsesource.json;version="0.9.5",
- javax.crypto,
+Import-Package: javax.crypto,
  javax.xml.namespace,
  javax.xml.parsers,
  javax.xml.stream,

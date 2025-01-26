@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2020, 2024 Eurotech and/or its affiliates and others
+    Copyright (c) 2020, 2025 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -48,22 +48,7 @@
                     <appArgLine>-consoleLog -console 5002</appArgLine>
                     <bundleStartLevel>
                         <bundle>
-                            <id>org.eclipse.equinox.ds</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.core.runtime</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.eclipse.equinox.io</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.equinox.app</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -88,11 +73,6 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.eclipse.equinox.preferences</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.eclipse.equinox.registry</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
@@ -108,22 +88,12 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.eclipse.osgi.services</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
                             <id>org.eclipse.osgi.util</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
                             <id>org.hamcrest.core</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.eclipse.equinox.launcher</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -234,19 +204,7 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.ds</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.core.runtime</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.io</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.app</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -266,10 +224,6 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.preferences</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.equinox.registry</artifactId>
                         </dependency>
                         <dependency>
@@ -282,19 +236,11 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.osgi.services</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
                             <artifactId>org.eclipse.osgi.util</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.hamcrest.core</artifactId>
-                        </dependency>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.launcher</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -397,11 +343,6 @@
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>log4j2-api-config</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>p2-installable-unit</type>
-                                <id>com.eclipsesource.jaxrs.jersey-min</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                             <requirement>

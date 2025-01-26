@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -37,7 +37,6 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
@@ -77,9 +76,16 @@ public class RestTransport implements Transport {
             final ConfigurationService configurationService = trackService(ConfigurationService.class);
             Map<String, Object> restServiceConfiguration = initialRestServiceConfiguration();
 
-            ServiceUtil.updateComponentConfiguration(configurationService, "org.eclipse.kura.internal.rest.provider.RestService", restServiceConfiguration).get(30,
-                    TimeUnit.SECONDS);
-            
+            ServiceUtil
+                    .trackService(ConfigurableComponent.class,
+                            Optional.of("(kura.service.pid=org.eclipse.kura.internal.rest.provider.RestService)"))
+                    .get(1, TimeUnit.MINUTES);
+
+            ServiceUtil
+                    .updateComponentConfiguration(configurationService,
+                            "org.eclipse.kura.internal.rest.provider.RestService", restServiceConfiguration)
+                    .get(30, TimeUnit.SECONDS);
+
             waitPortOpen("localhost", 8080, 3, TimeUnit.MINUTES);
 
             ServiceUtil
@@ -88,7 +94,7 @@ public class RestTransport implements Transport {
                     .get(1, TimeUnit.MINUTES);
 
             Thread.sleep(1000);
-            
+
             initialized = true;
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -97,13 +103,12 @@ public class RestTransport implements Transport {
             throw new IllegalStateException(e);
         }
     }
-    
+
     private <T> T trackService(final Class<T> classz)
             throws InterruptedException, ExecutionException, TimeoutException {
-        return ServiceUtil
-                .trackService(classz, Optional.empty()).get(30, TimeUnit.SECONDS);
+        return ServiceUtil.trackService(classz, Optional.empty()).get(30, TimeUnit.SECONDS);
     }
-    
+
     private Map<String, Object> initialRestServiceConfiguration() {
 
         final Map<String, Object> restServiceConfiguration = new HashMap<>();
@@ -183,23 +188,30 @@ public class RestTransport implements Transport {
             connection.setRequestMethod(method.getRestMethod());
 
             if (requestBody != null) {
-                connection.setDoOutput(true);
+                connection.setChunkedStreamingMode(0);
                 connection.setRequestProperty("Content-Type", "application/json");
-                IOUtils.write(requestBody, connection.getOutputStream());
+                connection.setDoOutput(true);
+                uploadBody(requestBody, connection);
             }
-
-            connection.connect();
 
             final int status = connection.getResponseCode();
 
-            final String body = getBody(connection);
+            final Optional<String> body = getBody(connection);
             storeCookies(urlPrefix, relativeUri, connection);
 
             connection.disconnect();
 
-            return new Response(status, Optional.ofNullable(body).filter(b -> !b.isEmpty()));
+            return new Response(status, body.filter(b -> !b.isEmpty()));
         } catch (final Exception e) {
             throw new IllegalStateException("request failed", e);
+        }
+    }
+
+    private void uploadBody(final String requestBody, final HttpURLConnection connection) {
+        try {
+            IOUtils.write(requestBody, connection.getOutputStream());
+        } catch (final Exception e) {
+            logger.warn("failed to send body", e);
         }
     }
 
@@ -232,10 +244,15 @@ public class RestTransport implements Transport {
         return cookieManager;
     }
 
-    private String getBody(final HttpURLConnection connection) throws IOException {
+    private Optional<String> getBody(final HttpURLConnection connection) throws IOException {
         try (final InputStream in = ((connection.getResponseCode() / 200) == 1) ? connection.getInputStream()
                 : connection.getErrorStream()) {
-            return IOUtils.toString(in, StandardCharsets.UTF_8);
+
+            if (in == null) {
+                return Optional.empty();
+            }
+
+            return Optional.of(IOUtils.toString(in, StandardCharsets.UTF_8));
         }
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -47,7 +47,6 @@ import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSslManagerService;
 import org.eclipse.kura.web.shared.service.GwtSslManagerServiceAsync;
-import org.eclipse.kura.web2.ext.WidgetFactory;
 import org.gwtbootstrap3.client.ui.Anchor;
 import org.gwtbootstrap3.client.ui.NavTabs;
 import org.gwtbootstrap3.client.ui.TabContent;
@@ -230,23 +229,6 @@ public class SecurityPanelUi extends Composite {
 
         return certListDirty || sslConfigDirty || keystoreConfigDirty || threatManagerDirty || securityDirty
                 || webConsoleDirty || httpServiceDirty;
-    }
-
-    public void addTab(final String name, final WidgetFactory widgetFactory) {
-
-        final TabPane tabPane = new TabPane();
-        tabPane.setId("__extension__" + name);
-
-        final TabListItem item = new TabListItem(name);
-        item.setDataTarget("#__extension__" + name);
-
-        item.addClickHandler(e -> {
-            tabPane.clear();
-            tabPane.add(widgetFactory.buildWidget());
-        });
-
-        this.navTabs.add(item);
-        this.tabContent.add(tabPane);
     }
 
     public void setDirty(boolean b) {

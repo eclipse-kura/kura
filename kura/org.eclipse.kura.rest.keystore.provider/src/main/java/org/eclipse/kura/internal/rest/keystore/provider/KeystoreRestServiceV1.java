@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,7 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.keystore.provider;
 
-import javax.ws.rs.Path;
+import jakarta.ws.rs.Path;
 
 @Path("/keystores/v1")
 public class KeystoreRestServiceV1 extends KeystoreRestService {

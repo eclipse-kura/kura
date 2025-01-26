@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-    Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -168,25 +168,10 @@
                                     <version>${org.eclipse.kura.sun.misc.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.eclipsesource.minimal-json</groupId>
-                                    <artifactId>minimal-json</artifactId>
-                                    <version>${com.eclipsesource.minimal-json.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.tigris</groupId>
-                                    <artifactId>org.tigris.mtoolkit.iagent.rpc</artifactId>
-                                    <version>${org.tigris.mtoolkit.iagent.rpc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>com.gwt.user</artifactId>
                                     <version>${com.gwt.user.version}</version>
                                 </artifactItem>
-                                <!--<artifactItem>
-									<groupId>com.gwt</groupId>
-									<artifactId>com.gwt.user</artifactId>
-									<version>0.2.0</version>
-								</artifactItem>-->
                                 <artifactItem>
                                     <groupId>org.hamcrest</groupId>
                                     <artifactId>org.hamcrest.core</artifactId>
@@ -228,6 +213,11 @@
                                     <version>${jcl.over.slf4j.version}</version>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>org.slf4j</groupId>
+                                    <artifactId>jul-to-slf4j</artifactId>
+                                    <version>${jul.to.slf4j.version}</version>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.apache.logging.log4j</groupId>
                                     <artifactId>log4j-api</artifactId>
                                     <version>${log4j.version}</version>
@@ -253,8 +243,13 @@
                                     <version>${org.junit.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>commons-fileupload</groupId>
-                                    <artifactId>commons-fileupload</artifactId>
+                                    <groupId>org.apache.commons</groupId>
+                                    <artifactId>commons-fileupload2-jakarta-servlet5</artifactId>
+                                    <version>${commons-fileupload.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.commons</groupId>
+                                    <artifactId>commons-fileupload2-core</artifactId>
                                     <version>${commons-fileupload.version}</version>
                                 </artifactItem>
                                 <artifactItem>
@@ -378,31 +373,6 @@
                                     <version>${osgi.annotation.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>com.eclipsesource.jaxrs.jersey-min</artifactId>
-                                    <version>${com.eclipsesource.jaxrs.jersey-min.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.eclipsesource.jaxrs</groupId>
-                                    <artifactId>publisher</artifactId>
-                                    <version>${com.eclipsesource.jaxrs.publisher.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.eclipsesource.jaxrs</groupId>
-                                    <artifactId>provider-gson</artifactId>
-                                    <version>${com.eclipsesource.jaxrs.provider.gson.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.eclipsesource.jaxrs</groupId>
-                                    <artifactId>provider-security</artifactId>
-                                    <version>${com.eclipsesource.jaxrs.provider.security.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.eclipsesource.jaxrs</groupId>
-                                    <artifactId>provider-multipart</artifactId>
-                                    <version>${com.eclipsesource.jaxrs.provider.multipart.version}</version>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>com.google.code.gson</groupId>
                                     <artifactId>gson</artifactId>
                                     <version>${com.google.gson.version}</version>
@@ -516,12 +486,12 @@
                                 <artifactItem>
                                     <groupId>org.apache.geronimo.specs</groupId>
                                     <artifactId>geronimo-json_1.0_spec</artifactId>
-                                    <version>1.0-alpha-1</version>
+                                    <version>${org.apache.geronimo.specs.json.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.geronimo.specs</groupId>
                                     <artifactId>geronimo-jms_2.0_spec</artifactId>
-                                    <version>1.0-alpha-2</version>
+                                    <version>${org.apache.geronimo.specs.jms.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.geronimo.specs</groupId>
@@ -534,11 +504,6 @@
                                     <version>${org.apache.activemq.artemis.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.jetty.customizer</artifactId>
-                                    <version>${org.eclipse.kura.jetty.customizer.version}</version>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>jakarta.xml.bind</groupId>
                                     <artifactId>jakarta.xml.bind-api</artifactId>
                                     <version>${jakarta.xml.bind-api.version}</version>
@@ -547,6 +512,11 @@
                                     <groupId>jakarta.activation</groupId>
                                     <artifactId>jakarta.activation-api</artifactId>
                                     <version>${jakarta.activation-api.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>jakarta.annotation</groupId>
+                                    <artifactId>jakarta.annotation-api</artifactId>
+                                    <version>${jakarta.annotation-api.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>jakarta.xml.ws</groupId>
@@ -623,8 +593,269 @@
                                     <artifactId>sqlite-jdbc</artifactId>
                                     <version>${org.xerial.sqlite-jdbc.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.eclipsesource.minimal-json</groupId>
+                                    <artifactId>minimal-json</artifactId>
+                                    <version>${com.eclipsesource.minimal-json.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>jakarta.activation</groupId>
+                                    <artifactId>jakarta.activation-api</artifactId>
+                                    <version>${jakarta.activation-api.javax.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>jakarta.xml.bind</groupId>
+                                    <artifactId>jakarta.xml.bind-api</artifactId>
+                                    <version>${jakarta.xml.bind-api.javax.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.sun.xml.bind</groupId>
+                                    <artifactId>jaxb-osgi</artifactId>
+                                    <version>${jaxb-osgi.javax.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.dependencymanager</artifactId>
+                                    <version>${org.apache.felix.dependencymanager.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.deploymentadmin</artifactId>
+                                    <version>${org.apache.felix.deploymentadmin.version}</version>
+                                </artifactItem>>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.http.servlet-api</artifactId>
+                                    <version>${org.apache.felix.http.servlet-api.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.http.bridge</artifactId>
+                                    <version>${org.apache.felix.http.bridge.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.http.proxy</artifactId>
+                                    <version>${org.apache.felix.http.proxy.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.http.wrappers</artifactId>
+                                    <version>${org.apache.felix.http.wrappers.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.knowhowlab.osgi</groupId>
+                                    <artifactId>monitoradmin</artifactId>
+                                    <version>${org.knowhowlab.osgi.monitoradmin.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.jetty</groupId>
+                                    <artifactId>jetty-http</artifactId>
+                                    <version>${org.eclipse.jetty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.jetty</groupId>
+                                    <artifactId>jetty-security</artifactId>
+                                    <version>${org.eclipse.jetty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.jetty</groupId>
+                                    <artifactId>jetty-server</artifactId>
+                                    <version>${org.eclipse.jetty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.jetty</groupId>
+                                    <artifactId>jetty-session</artifactId>
+                                    <version>${org.eclipse.jetty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.jetty</groupId>
+                                    <artifactId>jetty-util</artifactId>
+                                    <version>${org.eclipse.jetty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.jetty</groupId>
+                                    <artifactId>jetty-io</artifactId>
+                                    <version>${org.eclipse.jetty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.jetty.ee10</groupId>
+                                    <artifactId>jetty-ee10-servlet</artifactId>
+                                    <version>${org.eclipse.jetty.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.io</artifactId>
+                                    <version>${org.eclipse.equinox.io.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.util</artifactId>
+                                    <version>${org.eclipse.equinox.util.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.wireadmin</artifactId>
+                                    <version>${org.eclipse.equinox.wireadmin.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.http.whiteboard</artifactId>
+                                    <version>${org.osgi.service.http.whiteboard.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.servlet</artifactId>
+                                    <version>${org.osgi.service.servlet.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>jakarta.ws.rs</groupId>
+                                    <artifactId>jakarta.ws.rs-api</artifactId>
+                                    <version>${jakarta.ws.rs-api.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.service.jakartars</artifactId>
+                                    <version>${org.osgi.service.jakartars.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.osgi-technology.rest</groupId>
+                                    <artifactId>org.eclipse.osgitech.rest</artifactId>
+                                    <version>${org.eclipse.osgi-technology.rest.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.osgi-technology.rest</groupId>
+                                    <artifactId>org.eclipse.osgitech.rest.sse</artifactId>
+                                    <version>${org.eclipse.osgi-technology.rest.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.osgi-technology.rest</groupId>
+                                    <artifactId>org.eclipse.osgitech.rest.servlet.whiteboard</artifactId>
+                                    <version>${org.eclipse.osgi-technology.rest.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.aries.spifly</groupId>
+                                    <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
+                                    <version>${org.apache.aries.spifly.dynamic.bundle.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.ow2.asm</groupId>
+                                    <artifactId>asm</artifactId>
+                                    <version>${org.ow2.asm.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.ow2.asm</groupId>
+                                    <artifactId>asm-commons</artifactId>
+                                    <version>${org.ow2.asm.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.ow2.asm</groupId>
+                                    <artifactId>asm-tree</artifactId>
+                                    <version>${org.ow2.asm.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.ow2.asm</groupId>
+                                    <artifactId>asm-util</artifactId>
+                                    <version>${org.ow2.asm.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.ow2.asm</groupId>
+                                    <artifactId>asm-analysis</artifactId>
+                                    <version>${org.ow2.asm.version}</version>
+                                </artifactItem>
+                                <!--Jersey dependencies-->
+                                <artifactItem>
+                                    <groupId>org.glassfish.hk2</groupId>
+                                    <artifactId>hk2-api</artifactId>
+                                    <version>${hk2.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.glassfish.hk2.external</groupId>
+                                    <artifactId>aopalliance-repackaged</artifactId>
+                                    <version>${hk2.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.glassfish.hk2</groupId>
+                                    <artifactId>hk2-locator</artifactId>
+                                    <version>${hk2.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.glassfish.hk2</groupId>
+                                    <artifactId>hk2-utils</artifactId>
+                                    <version>${hk2.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.glassfish.jersey.inject</groupId>
+                                    <artifactId>jersey-hk2</artifactId>
+                                    <version>${jersey.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.glassfish.jersey.containers</groupId>
+                                    <artifactId>jersey-container-servlet</artifactId>
+                                    <version>${jersey.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.glassfish.jersey.containers</groupId>
+                                    <artifactId>jersey-container-servlet-core</artifactId>
+                                    <version>${jersey.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.glassfish.jersey.core</groupId>
+                                    <artifactId>jersey-client</artifactId>
+                                    <version>${jersey.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.glassfish.jersey.core</groupId>
+                                    <artifactId>jersey-common</artifactId>
+                                    <version>${jersey.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.glassfish.jersey.core</groupId>
+                                    <artifactId>jersey-server</artifactId>
+                                    <version>${jersey.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.glassfish.jersey.ext</groupId>
+                                    <artifactId>jersey-entity-filtering</artifactId>
+                                    <version>${jersey.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.glassfish.jersey.media</groupId>
+                                    <artifactId>jersey-media-jaxb</artifactId>
+                                    <version>${jersey.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.glassfish.jersey.media</groupId>
+                                    <artifactId>jersey-media-sse</artifactId>
+                                    <version>${jersey.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.glassfish.jersey.media</groupId>
+                                    <artifactId>jersey-media-multipart</artifactId>
+                                    <version>${jersey.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>jakarta.inject</groupId>
+                                    <artifactId>jakarta.inject-api</artifactId>
+                                    <version>${jakarta.inject-api.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>jakarta.validation</groupId>
+                                    <artifactId>jakarta.validation-api</artifactId>
+                                    <version>${jakarta.validation-api.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.javassist</groupId>
+                                    <artifactId>javassist</artifactId>
+                                    <version>${javassist.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.jvnet.mimepull</groupId>
+                                    <artifactId>mimepull</artifactId>
+                                    <version>${mimepull.version}</version>
+                                </artifactItem>
                             </artifactItems>
-                            <stripVersion>true</stripVersion>
+                            <stripVersion>false</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
                         </configuration>
                     </execution>
@@ -635,116 +866,6 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>${maven-antrun-plugin.version}</version>
                 <executions>
-                    <execution>
-                        <id>setup</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <move file="target/source/plugins/com.codeminders.hidapi.jar" tofile="target/source/plugins/com.codeminders.hidapi_${com.codeminders.hidapi.version}.jar"/>
-                                <move file="target/source/plugins/com.codeminders.hidapi.x86_64.jar" tofile="target/source/plugins/com.codeminders.hidapi.x86_64_${com.codeminders.hidapi.version}.jar"/>
-                                <move file="target/source/plugins/com.codeminders.hidapi.aarch64.jar" tofile="target/source/plugins/com.codeminders.hidapi.aarch64_${com.codeminders.hidapi.version}.jar"/>
-                                <move file="target/source/plugins/commons-net.jar" tofile="target/source/plugins/org.apache.commons.commons-net_${org.apache.commons.commons-net.version}.jar"/>
-                                <move file="target/source/plugins/commons-exec.jar" tofile="target/source/plugins/org.apache.commons.exec_${org.apache.commons.exec.version}.jar"/>
-                                <move file="target/source/plugins/protobuf-java.jar" tofile="target/source/plugins/com.google.protobuf_${com.google.protobuf.version}.jar"/>
-                                <move file="target/source/plugins/org.eclipse.paho.client.mqttv3.jar" tofile="target/source/plugins/org.eclipse.paho.client.mqttv3_${org.eclipse.paho.client.mqttv3.version}.jar"/>
-                                <move file="target/source/plugins/org.eclipse.kura.camel.sun.misc.jar" tofile="target/source/plugins/org.eclipse.kura.camel.sun.misc_${org.eclipse.kura.camel.sun.misc.version}.jar"/>
-                                <move file="target/source/plugins/org.eclipse.kura.sun.misc.jar" tofile="target/source/plugins/org.eclipse.kura.sun.misc_${org.eclipse.kura.sun.misc.version}.jar"/>
-                                <move file="target/source/plugins/org.eclipse.kura.jetty.customizer.jar" tofile="target/source/plugins/org.eclipse.kura.jetty.customizer_${org.eclipse.kura.jetty.customizer.version}.jar"/>
-                                <move file="target/source/plugins/org.tigris.mtoolkit.iagent.rpc.jar" tofile="target/source/plugins/org.tigris.mtoolkit.iagent.rpc_${org.tigris.mtoolkit.iagent.rpc.version}.jar"/>
-                                <move file="target/source/plugins/com.gwt.user.jar" tofile="target/source/plugins/com.gwt.user_${com.gwt.user.version}.jar"/>
-                                <move file="target/source/plugins/org.hamcrest.core.jar" tofile="target/source/plugins/org.hamcrest.core_${org.hamcrest.core.version}.jar"/>
-                                <move file="target/source/plugins/org.usb4java.jar" tofile="target/source/plugins/org.usb4java_${org.usb4java.version}.jar"/>
-                                <move file="target/source/plugins/h2.jar" tofile="target/source/plugins/com.h2database.h2_${com.h2database.h2.version}.jar"/>
-                                <move file="target/source/plugins/jdk.dio.jar" tofile="target/source/plugins/jdk.dio_${jdk.dio.version}.jar"/>
-                                <move file="target/source/plugins/jdk.dio.x86_64.jar" tofile="target/source/plugins/jdk.dio.x86_64_${jdk.dio.version}.jar"/>
-                                <move file="target/source/plugins/jdk.dio.aarch64.jar" tofile="target/source/plugins/jdk.dio.aarch64_${jdk.dio.version}.jar"/>
-                                <move file="target/source/plugins/slf4j-api.jar" tofile="target/source/plugins/slf4j.api_${slf4j.api.version}.jar"/>
-                                <move file="target/source/plugins/jcl-over-slf4j.jar" tofile="target/source/plugins/jcl.over.slf4j_${jcl.over.slf4j.version}.jar"/>
-                                <move file="target/source/plugins/log4j-api.jar" tofile="target/source/plugins/org.apache.logging.log4j.api_${log4j.version}.jar"/>
-                                <move file="target/source/plugins/log4j2-api-config.jar" tofile="target/source/plugins/log4j2-api-config_${log4j2-api-config.version}.jar"/>
-                                <move file="target/source/plugins/log4j-core.jar" tofile="target/source/plugins/org.apache.logging.log4j.core_${log4j.version}.jar"/>
-                                <move file="target/source/plugins/log4j-slf4j-impl.jar" tofile="target/source/plugins/org.apache.logging.log4j.slf4j.impl_${log4j.version}.jar"/>
-                                <move file="target/source/plugins/org.junit.jar" tofile="target/source/plugins/org.junit_${org.junit.version}.jar"/>
-                                <move file="target/source/plugins/commons-fileupload.jar" tofile="target/source/plugins/org.apache.commons.commons-fileupload_${org.apache.commons.commons-fileupload.version}.jar"/>
-                                <move file="target/source/plugins/usb4java-javax.jar" tofile="target/source/plugins/usb4java-javax_${usb4java-javax.version}.jar"/>
-                                <move file="target/source/plugins/commons-io.jar" tofile="target/source/plugins/org.apache.commons.commons-io_${org.apache.commons.commons-io.version}.jar"/>
-                                <move file="target/source/plugins/commons-lang3.jar" tofile="target/source/plugins/org.apache.commons.lang3_${org.apache.commons.lang3.version}.jar"/>
-                                <move file="target/source/plugins/commons-csv.jar" tofile="target/source/plugins/org.apache.commons.csv_${org.apache.commons.csv.version}.jar"/>
-                                <move file="target/source/plugins/org.eclipse.soda.dk.comm.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm_${org.eclipse.soda.dk.comm.version}.jar"/>
-                                <move file="target/source/plugins/org.eclipse.soda.dk.comm.x86_64.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm.x86_64_${org.eclipse.soda.dk.comm.version}.jar"/>
-                                <move file="target/source/plugins/org.eclipse.soda.dk.comm.aarch64.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm.aarch64_${org.eclipse.soda.dk.comm.version}.jar"/>
-                                <move file="target/source/plugins/camel-amqp.jar" tofile="target/source/plugins/org.apache.camel.camel-amqp_${org.apache.camel.camel-amqp.version}.jar"/>
-                                <move file="target/source/plugins/camel-core.jar" tofile="target/source/plugins/org.apache.camel.camel-core_${org.apache.camel.camel-core.version}.jar"/>
-                                <move file="target/source/plugins/camel-jms.jar" tofile="target/source/plugins/org.apache.camel.camel-jms_${org.apache.camel.camel-jms.version}.jar"/>
-                                <move file="target/source/plugins/camel-script.jar" tofile="target/source/plugins/org.apache.camel.camel-script_${org.apache.camel.camel-script.version}.jar"/>
-                                <move file="target/source/plugins/camel-stream.jar" tofile="target/source/plugins/org.apache.camel.camel-stream_${org.apache.camel.camel-stream.version}.jar"/>
-                                <move file="target/source/plugins/camel-core-osgi.jar" tofile="target/source/plugins/org.apache.camel.camel-core-osgi_${org.apache.camel.camel-core-osgi.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-beans.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-beans_${spring.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-context.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-context_${spring.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-core.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-core_${spring.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-expression.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-expression_${spring.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-jms.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-jms_${spring.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.spring-tx.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.spring-tx_${spring.version}.jar"/>
-                                <move file="target/source/plugins/qpid-jms-client.jar" tofile="target/source/plugins/org.apache.qpid.jms.client_${apache-qpid-jms-client.version}.jar"/>
-                                <move file="target/source/plugins/proton-j.jar" tofile="target/source/plugins/org.apache.qpid.proton-j_${apache-qpid-proton-j.version}.jar"/>
-                                <move file="target/source/plugins/minimal-json.jar" tofile="target/source/plugins/minimal-json_${com.eclipsesource.minimal-json.version}.jar"/>
-                                <move file="target/source/plugins/osgi.annotation.jar" tofile="target/source/plugins/osgi.annotation_${osgi.annotation.version}.jar"/>
-                                <move file="target/source/plugins/org.moka7.jar" tofile="target/source/plugins/org.moka7_${org.moka7.version}.jar"/>
-                                <move file="target/source/plugins/com.eclipsesource.jaxrs.jersey-min.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.jersey-min_${com.eclipsesource.jaxrs.jersey-min.version}.jar"/>
-                                <move file="target/source/plugins/publisher.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.publisher_${com.eclipsesource.jaxrs.publisher.jar.version}.jar"/>
-                                <move file="target/source/plugins/provider-gson.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.gson_${com.eclipsesource.jaxrs.provider.gson.jar.version}.jar"/>
-                                <move file="target/source/plugins/provider-security.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.security_${com.eclipsesource.jaxrs.provider.security.jar.version}.jar"/>
-                                <move file="target/source/plugins/provider-multipart.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.multipart_${com.eclipsesource.jaxrs.provider.multipart.jar.version}.jar"/>
-                                <move file="target/source/plugins/gson.jar" tofile="target/source/plugins/com.google.gson_${com.google.gson.version}.jar"/>
-                                <move file="target/source/plugins/jakarta.xml.bind-api.jar" tofile="target/source/plugins/jakarta.xml.bind-api_${jakarta.xml.bind-api.version}.jar"/>
-                                <move file="target/source/plugins/jakarta.activation-api.jar" tofile="target/source/plugins/jakarta.activation-api_${jakarta.activation-api.version}.jar"/>
-                                <move file="target/source/plugins/jakarta.xml.ws-api.jar" tofile="target/source/plugins/jakarta.xml.ws-api_${jakarta.xml.ws-api.version}.jar"/>
-                                <move file="target/source/plugins/jakarta.xml.soap-api.jar" tofile="target/source/plugins/jakarta.xml.soap-api_${jakarta.xml.soap-api.version}.jar"/>
-                                <move file="target/source/plugins/jaxb-osgi.jar" tofile="target/source/plugins/com.sun.xml.bind.jaxb-osgi_${jaxb-osgi.version}.jar"/>
-                                <move file="target/source/plugins/osgi-resource-locator.jar" tofile="target/source/plugins/org.glassfish.hk2.osgi-resource-locator_${osgi-resource-locator.version}.jar"/>
-                                <move file="target/source/plugins/bluez-dbus-osgi.jar" tofile="target/source/plugins/bluez-dbus-osgi_${bluez-dbus-osgi.version}.jar"/>
-                                <!-- Artemis Broker -->
-                                <move file="target/source/plugins/guava.jar" tofile="target/source/plugins/com.google.guava_${guava.version}.jar"/>
-                                <move file="target/source/plugins/failureaccess.jar" tofile="target/source/plugins/com.google.guava.failureaccess_${failureaccess.version}.jar"/>
-                                <move file="target/source/plugins/artemis-mqtt-protocol.jar" tofile="target/source/plugins/org.apache.activemq.artemis-mqtt-protocol_${org.apache.activemq.artemis.upstream.version}.jar"/>
-                                <move file="target/source/plugins/artemis-native.jar" tofile="target/source/plugins/org.apache.activemq.artemis-native_${org.apache.activemq.artemis.upstream.version}.jar"/>
-                                <move file="target/source/plugins/netty-buffer.jar" tofile="target/source/plugins/io.netty.buffer_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-codec.jar" tofile="target/source/plugins/io.netty.codec_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-common.jar" tofile="target/source/plugins/io.netty.common_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-codec-http.jar" tofile="target/source/plugins/io.netty.codec-http_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-codec-mqtt.jar" tofile="target/source/plugins/io.netty.codec-mqtt_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-handler.jar" tofile="target/source/plugins/io.netty.handler_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-resolver.jar" tofile="target/source/plugins/io.netty.resolver_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-transport.jar" tofile="target/source/plugins/io.netty.transport_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-transport-classes-epoll.jar" tofile="target/source/plugins/io.netty.transport-classes-epoll_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-transport-native-epoll.jar" tofile="target/source/plugins/io.netty.transport-native-epoll_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-transport-native-unix-common.jar" tofile="target/source/plugins/io.netty.transport-native-unix-common_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-transport-classes-kqueue.jar" tofile="target/source/plugins/io.netty.transport-classes-kqueue_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/netty-transport-native-kqueue.jar" tofile="target/source/plugins/io.netty.transport-native-kqueue_${io.netty.version}.jar"/>
-                                <move file="target/source/plugins/jboss-logging.jar" tofile="target/source/plugins/org.jboss.logging.jboss-logging_${org.jboss.logging.version}.jar"/>
-                                <move file="target/source/plugins/commons-beanutils.jar" tofile="target/source/plugins/org.apache.commons.beanutils_${commons-beanutils.version}.jar"/>
-                                <move file="target/source/plugins/commons-collections.jar" tofile="target/source/plugins/org.apache.commons.collections_${commons-collections.version}.jar"/>
-                                <move file="target/source/plugins/geronimo-json_1.0_spec.jar" tofile="target/source/plugins/org.apache.geronimo.specs.geronimo-json_1.0_spec_${org.apache.geronimo.specs.json.version}.jar"/>
-                                <move file="target/source/plugins/geronimo-jms_2.0_spec.jar" tofile="target/source/plugins/org.apache.geronimo.specs.geronimo-jms_2.0_spec_${org.apache.geronimo.specs.jms.version}.jar"/>
-                                <move file="target/source/plugins/geronimo-jta_1.1_spec.jar" tofile="target/source/plugins/org.apache.geronimo.specs.geronimo-jta_1.1_spec_${org.apache.geronimo.specs.jta.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.activemq.artemis.jar" tofile="target/source/plugins/org.apache.activemq.artemis_${org.apache.activemq.artemis.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.felix.useradmin.jar" tofile="target/source/plugins/org.apache.felix.useradmin_${org.apache.felix.useradmin.version}.jar"/>
-                                <move file="target/source/plugins/bcpkix-jdk18on.jar" tofile="target/source/plugins/bcpkix_${org.bouncycastle.version}.jar"/>
-                                <move file="target/source/plugins/bcprov-jdk18on.jar" tofile="target/source/plugins/bcprov_${org.bouncycastle.version}.jar"/>
-                                <move file="target/source/plugins/bctls-jdk18on.jar" tofile="target/source/plugins/bctls_${org.bouncycastle.version}.jar"/>
-                                <move file="target/source/plugins/bcutil-jdk18on.jar" tofile="target/source/plugins/bcutil_${org.bouncycastle.version}.jar"/>
-                                <move file="target/source/plugins/bcpg-jdk18on.jar" tofile="target/source/plugins/bcpg_${org.bouncycastle.version}.jar"/>
-                                <move file="target/source/plugins/gpsd4java.jar" tofile="target/source/plugins/com.eurotech.gpsd4java_${com.eurotech.gpsd4java.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.servicemix.bundles.c3p0.jar" tofile="target/source/plugins/org.apache.servicemix.bundles.c3p0_${org.apache.servicemix.bundles.c3p0.version}.jar"/>
-                                <move file="target/source/plugins/HikariCP.jar" tofile="target/source/plugins/com.zaxxer.HikariCP_${hikaricp.version}.jar"/>
-                                <move file="target/source/plugins/quartz.jar" tofile="target/source/plugins/org.quartz-scheduler.quartz_${quartz.version}.jar"/>
-                                <move file="target/source/plugins/sqlite-jdbc.jar" tofile="target/source/plugins/org.xerial.sqlite-jdbc_${org.xerial.sqlite-jdbc.version}.jar"/>
-                            </tasks>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>install-commons</id>
                         <phase>install</phase>

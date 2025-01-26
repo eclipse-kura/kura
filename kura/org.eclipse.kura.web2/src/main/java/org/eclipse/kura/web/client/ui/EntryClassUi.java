@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import org.eclipse.kura.core.configuration.ConfigurationChangeEvent;
 import org.eclipse.kura.web.client.messages.Messages;
@@ -65,11 +64,6 @@ import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSessionService;
 import org.eclipse.kura.web.shared.service.GwtSessionServiceAsync;
-import org.eclipse.kura.web2.ext.AlertSeverity;
-import org.eclipse.kura.web2.ext.AuthenticationHandler;
-import org.eclipse.kura.web2.ext.Context;
-import org.eclipse.kura.web2.ext.ExtensionRegistry;
-import org.eclipse.kura.web2.ext.WidgetFactory;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Column;
@@ -105,7 +99,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class EntryClassUi extends Composite implements Context, ServicesUi.Listener {
+public class EntryClassUi extends Composite implements ServicesUi.Listener {
 
     interface EntryClassUIUiBinder extends UiBinder<Widget, EntryClassUi> {
     }
@@ -326,15 +320,6 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
         initDropdownMenu();
         initServicesTree();
-        initExtensions();
-    }
-
-    private void initExtensions() {
-
-        ExtensionRegistry.get().addExtensionConsumer(e -> {
-            e.onLoad(this);
-        });
-
     }
 
     private void initExceptionReportModal() {
@@ -704,7 +689,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             } else {
                 name1 = pid1;
             }
-            
+
             return name0.compareTo(name1);
         });
     }
@@ -1154,7 +1139,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
     private void handleConcurrencyEvent(GwtEventInfo eventInfo) {
         String eventPid = (String) eventInfo.getProperties().get(ConfigurationChangeEvent.CONF_CHANGE_EVENT_PID_PROP);
-        if (eventPid.length() == 0) {
+        if (eventPid.isEmpty()) {
             this.dropdownNotification.show(MSGS.configurationChangeEventNotificationGeneric());
         } else {
             this.dropdownNotification.show(MSGS.configurationChangeEventNotification(eventPid));
@@ -1170,62 +1155,6 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
         this.statusBinder.setSession(EntryClassUi.this.currentSession);
         this.statusBinder.setParent(this);
         this.statusBinder.loadStatusData(false);
-    }
-
-    @Override
-    public void addSidenavComponent(final String name, final String icon, final WidgetFactory widgetFactory) {
-        final AnchorListItem item = new AnchorListItem(name);
-
-        try {
-            item.setIcon(IconType.valueOf(icon));
-        } catch (final Exception e) {
-            // do nothing
-        }
-
-        item.addClickHandler(evt -> confirmIfUiDirty(() -> {
-            EntryClassUi.this.contentPanelBody.clear();
-
-            forceTabsCleaning();
-            EntryClassUi.this.setSelectedAnchorListItem(item);
-            EntryClassUi.this.contentPanel.setVisible(true);
-            setHeader(name, null);
-            EntryClassUi.this.contentPanelBody.clear();
-
-            EntryClassUi.this.contentPanelBody.add(widgetFactory.buildWidget());
-
-            EntryClassUi.this.deviceBinder.setSession(EntryClassUi.this.currentSession);
-            EntryClassUi.this.deviceBinder.initDevicePanel();
-        }));
-
-        this.sidenavPills.add(item);
-    }
-
-    @Override
-    public void addSettingsComponent(final String name, final WidgetFactory factory) {
-        this.settingsBinder.addTab(name, factory);
-    }
-
-    @Override
-    public void addAuthenticationHandler(final AuthenticationHandler authenticationHandler) {
-        // unsupported
-    }
-
-    @Override
-    public void getXSRFToken(Callback<String, String> callback) {
-        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onSuccess(GwtXSRFToken result) {
-                callback.onSuccess(result.getToken());
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                callback.onFailure(caught.getMessage());
-            }
-
-        });
-
     }
 
     private class WrapperRequest implements Callback<Void, String>, Request {
@@ -1247,24 +1176,6 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             this.wrapped = context.callback();
         }
 
-    }
-
-    @Override
-    public Callback<Void, String> startLongRunningOperation() {
-
-        final WrapperRequest callback = new WrapperRequest();
-
-        RequestQueue.submit(callback);
-
-        return callback;
-
-    }
-
-    @Override
-    public void showAlertDialog(final String message, final AlertSeverity severity, final Consumer<Boolean> callback) {
-        this.alertDialog.show(message,
-                severity == AlertSeverity.INFO ? AlertDialog.Severity.INFO : AlertDialog.Severity.ALERT,
-                callback::accept);
     }
 
     @Override

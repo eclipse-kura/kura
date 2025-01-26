@@ -8,12 +8,12 @@ Bundle-License: Eclipse Public License v2.0
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Bundle-ActivationPolicy: lazy
 Import-Package: com.eclipsesource.json;version="0.9.5",
- javax.annotation;version="1.2.0",
- javax.annotation.security;version="1.2.0",
- javax.servlet.http;version="3.1.0",
- javax.ws.rs;version="2.0.1",
- javax.ws.rs.container;version="2.0.1",
- javax.ws.rs.ext;version="2.0.1",
+ jakarta.annotation;version="2.1.1",
+ jakarta.annotation.security;version="2.1.1",
+ jakarta.servlet;version="5.0.0",
+ jakarta.servlet.http;version="5.0.0",
+ jakarta.ws.rs;version="3.1.0",
+ jakarta.ws.rs.container;version="3.1.0",
  org.apache.commons.io;version="2.4.0",
  org.bouncycastle.asn1.x500;version="1.78.1",
  org.eclipse.kura;version="1.6.0",

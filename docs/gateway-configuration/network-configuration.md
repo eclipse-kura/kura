@@ -176,13 +176,13 @@ Name                                                   | Type     | Description
 `net.interface.<interface>.config.password`            | Password | The password used for the connection
 `net.interface.<interface>.config.pdpType`[^1]         | String   | The PdP type; possible values are IP, PPP and IPv6
 `net.interface.<interface>.config.maxFail`[^1]         | Integer  | The maxfail option of the PPP daemon
-`net.interface.<interface>.config.authType`[^1]        | String   | The authentication type; possible values are None, Auto, CHAP and PAP
-`net.interface.<interface>.config.lpcEchoInterval`[^1] | Integer  | The lcp-echo-interval option of the PPP daemon
+`net.interface.<interface>.config.authType`            | String   | The authentication type; possible values are None, Auto, CHAP and PAP
+`net.interface.<interface>.config.lpcEchoInterval`     | Integer  | The lcp-echo-interval option of the PPP daemon
 `net.interface.<interface>.config.activeFilter`[^1]    | String   | The active-filter option of the PPP daemon
-`net.interface.<interface>.config.lpcEchoFailure`[^1]  | Integer  | The lcp-echo-failure option of the PPP daemon
+`net.interface.<interface>.config.lpcEchoFailure`      | Integer  | The lcp-echo-failure option of the PPP daemon
 `net.interface.<interface>.config.diversityEnabled`[^1]|Boolean  | Enable the LTE diversity antenna
 `net.interface.<interface>.config.resetTimeout`        | Integer  | The modem reset timeout in minutes
-`net.interface.<interface>.config.gpsEnabled`[^1]      | Boolean  | Enable the GPS device in the modem if available
+`net.interface.<interface>.config.gpsEnabled`          | Boolean  | Enable the GPS device in the modem if available
 `net.interface.<interface>.config.persist`[^1]         | Boolean  | The persist option of the PPP daemon
 `net.interface.<interface>.config.apn`                 | String   | The modem Access Point Name
 `net.interface.<interface>.config.dialString`[^1]      | String   | The dial string used for connecting to the APN

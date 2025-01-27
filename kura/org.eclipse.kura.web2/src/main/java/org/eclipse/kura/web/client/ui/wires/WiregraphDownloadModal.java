@@ -60,9 +60,7 @@ public class WiregraphDownloadModal extends Composite {
     @UiField
     Button cancelButton;
 
-    @UiField
     Hidden xsrfTokenField;
-    @UiField
     Hidden wiregraphDownloadFormatField;
 
     HandlerRegistration cancelHandler;
@@ -110,13 +108,17 @@ public class WiregraphDownloadModal extends Composite {
         this.wiregraphForm.setMethod(com.google.gwt.user.client.ui.FormPanel.METHOD_POST);
         this.wiregraphForm.setAction(Console.ADMIN_ROOT + '/' + GWT.getModuleName() + "/wiresSnapshot");
 
+        this.xsrfTokenField = new Hidden();
         this.xsrfTokenField.setID("xsrfToken");
         this.xsrfTokenField.setName("xsrfToken");
         this.xsrfTokenField.setValue("");
+        this.wiregraphForm.add(this.xsrfTokenField);
 
+        this.wiregraphDownloadFormatField = new Hidden();
         this.wiregraphDownloadFormatField.setID("downloadFormat");
         this.wiregraphDownloadFormatField.setName("downloadFormat");
         this.wiregraphDownloadFormatField.setValue("");
+        this.wiregraphForm.add(this.wiregraphDownloadFormatField);
     }
 
     /*
@@ -125,6 +127,8 @@ public class WiregraphDownloadModal extends Composite {
 
     private void onCancelClick(ClickEvent handler) {
         this.wiregraphModal.hide();
+        clearClickHandlers();
+        clearHiddenFields();
     }
 
     private void onWiregraphDownload(String downloadFormat) {

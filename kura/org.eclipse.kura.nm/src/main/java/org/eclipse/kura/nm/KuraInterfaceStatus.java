@@ -28,15 +28,13 @@ public enum KuraInterfaceStatus {
         Boolean ip6Enabled = KuraIpStatus.isEnabled(ip6Status);
         boolean ip6Disabled = ip6Status == KuraIpStatus.DISABLED;
         boolean ip6Unmanaged = ip6Status == KuraIpStatus.UNMANAGED;
-        boolean ip6L2Only = ip6Status == KuraIpStatus.L2ONLY;
         boolean ip6Unknown = ip6Status == KuraIpStatus.UNKNOWN;
 
         if (ip4Enabled && ip6Enabled || ip4Enabled && ip6Disabled || ip4Disabled && ip6Enabled) {
             return ENABLED;
         }
 
-        if (ip4Unmanaged && ip6Unmanaged || ip4L2Only && ip6L2Only || ip4L2Only && ip6Unmanaged
-                || ip4Unmanaged && ip6L2Only || ip4L2Only && ip6Disabled) {
+        if (ip4L2Only || (ip4Unmanaged && ip6Unmanaged)) {
             return UNMANAGED;
         }
 

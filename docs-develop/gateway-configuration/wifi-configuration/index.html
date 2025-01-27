@@ -4471,13 +4471,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 </li>
 <li>
-<p><strong>Verify Password</strong>: sets the password verification field.</p>
-<ul>
-<li>In <em>Access Point</em> mode, allows the wireless password to be retyped for verification.</li>
-<li>In <em>Station</em> mode, this field is disabled.</li>
-</ul>
-</li>
-<li>
 <p><strong>Pairwise Ciphers</strong>: lists accepted pairwise (unicast) ciphers for WPA/WPA2.</p>
 <ul>
 <li>In <em>Access Point</em> mode, this option is disabled.</li>
@@ -4500,23 +4493,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 </li>
 </ul>
-</li>
-<li>
-<p><strong>Bgscan Module</strong>: requests background scans for the purpose of roaming within an ESS (i.e., within a single network block with all the APs using the same SSID).</p>
-<ul>
-<li>None: background scan is disabled</li>
-<li>Simple: periodic background scans based on signal strength</li>
-<li>Learn: learn channels used by the network and try to avoid bgscans on other channels</li>
-</ul>
-</li>
-<li>
-<p><strong>Bgscan Signal Strength Threshold</strong>: defines a threshold (in dBm) that determines which one of the following two parameters (i.e., <em>Short Interval</em> or <em>Long Interval</em>) will be effective.</p>
-</li>
-<li>
-<p><strong>Bgscan Short Interval</strong>: defines the interval between background scans (in seconds) if the actual signal level of the currently connected access point is worse than signal_strength.</p>
-</li>
-<li>
-<p><strong>Bgscan Long Interval</strong>: defines the interval  between background scans (in seconds) if the actual signal level of the currently connected access point is better than signal_strength.</p>
 </li>
 <li>
 <p><strong>Ignore Broadcast SSID</strong>: operates as follows if set to <em>true</em>:</p>

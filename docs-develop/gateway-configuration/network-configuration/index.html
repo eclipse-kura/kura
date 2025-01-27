@@ -4861,7 +4861,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <li>Enabled for LAN: designates the interface for a local network. It can be set as a DHCP server for hosts on the local network and can serve as a default gateway for those hosts; however, it cannot be set as an actual gateway interface for this device. That is, packets must be routed from this interface to another interface that is configured as WAN. The interface is automatically brought up at boot.</li>
 <li>Enabled for WAN: designates the interface as a gateway to an external network. The interface is automatically brought up at boot.</li>
 <li>Not Managed: the interface will be ignored by Kura (available only for <strong>IPv4</strong>).</li>
-<li>Layer 2 Only: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot (available only for <strong>IPv4</strong>).</li>
+<li>Layer 2 Only<sup id="fnref3:2"><a class="footnote-ref" href="#fn:2">2</a></sup>: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot.</li>
 </ul>
 </li>
 <li><strong>WAN Priority</strong> - configure the network failover. See <a href="../network-failover/">here</a> for more details.</li>
@@ -5020,13 +5020,13 @@ Since the network configuration shown on the screen may not be synchronized with
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip4.status</code></td>
 <td>String</td>
-<td>The status of the interface for the IPv4 configuration; possibile values are: <code>netIPv4StatusDisabled</code>, <code>netIPv4StatusUnmanaged</code>, <code>netIPv4StatusL2Only</code>, <code>netIPv4StatusEnabledLAN</code>, <code>netIPv4StatusEnabledWAN</code>, <code>netIPv4StatusUnknown</code></td>
+<td>The status of the interface for the IPv4 configuration; possibile values are: <code>netIPv4StatusDisabled</code>, <code>netIPv4StatusUnmanaged</code>, <code>netIPv4StatusL2Only</code><sup id="fnref2:2"><a class="footnote-ref" href="#fn:2">2</a></sup>, <code>netIPv4StatusEnabledLAN</code>, <code>netIPv4StatusEnabledWAN</code>, <code>netIPv4StatusUnknown</code></td>
 <td><code>netIPv4StatusDisabled</code> (see note below)</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip4.wan.priority</code></td>
 <td>Integer</td>
-<td>(NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
+<td>Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
 <td>-1</td>
 </tr>
 <tr>
@@ -5153,13 +5153,13 @@ Since the network configuration shown on the screen may not be synchronized with
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip6.status</code></td>
 <td>String</td>
-<td>The status of the interface for the IPv6 configuration; possibile values are: <code>netIPv6StatusDisabled</code>, <code>netIPv6StatusUnmanaged</code>, <code>netIPv6StatusL2Only</code>, <code>netIPv6StatusEnabledLAN</code>, <code>netIPv6StatusEnabledWAN</code>, <code>netIPv6StatusUnknown</code></td>
+<td>The status of the interface for the IPv6 configuration; possibile values are: <code>netIPv6StatusDisabled</code>, <code>netIPv6StatusUnmanaged</code>, <code>netIPv6StatusL2Only</code><sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup>, <code>netIPv6StatusEnabledLAN</code>, <code>netIPv6StatusEnabledWAN</code>, <code>netIPv6StatusUnknown</code></td>
 <td><code>netIPv6StatusDisabled</code> (see note below)</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip6.wan.priority</code></td>
 <td>Integer</td>
-<td>(NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
+<td>Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
 <td>-1</td>
 </tr>
 <tr>
@@ -5313,12 +5313,6 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>1</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.bgscan</code></td>
-<td>String</td>
-<td>Set the background scans; possible values have the form <code>&lt;mode&gt;:&lt;shortInterval&gt;:&lt;rssiThreshold&gt;:&lt;longInterval&gt;</code> where <code>mode</code> (String) is one of NONE, SIMPLE, or LEARN, <code>shortInterval</code> (Integer) sets the Bgscan short interval (secs), <code>rssiThreshold</code> (Integer) sets the Bgscan Signal strength threshold (dBm), and <code>longInterval</code> (Integer) sets the Bgscan long interval (secs)</td>
-<td></td>
-</tr>
-<tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.infra.passphrase</code></td>
 <td>Password</td>
 <td>The password for the wireless network</td>
@@ -5335,18 +5329,6 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>String</td>
 <td>The mode of the wireless connection; for station mode set to <code>INFRA</code></td>
 <td><code>INFRA</code></td>
-</tr>
-<tr>
-<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.pingAccessPoint</code></td>
-<td>Boolean</td>
-<td>Enable pinging the access point after connection is established</td>
-<td>false</td>
-</tr>
-<tr>
-<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.driver</code></td>
-<td>String</td>
-<td>The driver used for the connection</td>
-<td></td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.wifi.infra.securityType</code></td>
@@ -5386,12 +5368,6 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>false</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.idle</code></td>
-<td>Integer</td>
-<td>The idle option of the PPP daemon</td>
-<td>95</td>
-</tr>
-<tr>
 <td><code>net.interface.&lt;interface&gt;.config.username</code></td>
 <td>String</td>
 <td>The username used for the connection</td>
@@ -5404,46 +5380,16 @@ Since the network configuration shown on the screen may not be synchronized with
 <td></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.pdpType</code></td>
-<td>String</td>
-<td>The PdP type; possible values are IP, PPP and IPv6</td>
-<td>IP</td>
-</tr>
-<tr>
-<td><code>net.interface.&lt;interface&gt;.config.maxFail</code></td>
-<td>Integer</td>
-<td>The maxfail option of the PPP daemon</td>
-<td>5</td>
-</tr>
-<tr>
-<td><code>net.interface.&lt;interface&gt;.config.authType</code></td>
-<td>String</td>
-<td>The authentication type; possible values are <code>NONE</code>, <code>AUTO</code>, <code>CHAP</code> and <code>PAP</code></td>
-<td><code>NONE</code></td>
-</tr>
-<tr>
 <td><code>net.interface.&lt;interface&gt;.config.lpcEchoInterval</code></td>
 <td>Integer</td>
 <td>The lcp-echo-interval option of the PPP daemon</td>
 <td>0</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.activeFilter</code></td>
-<td>String</td>
-<td>The active-filter option of the PPP daemon</td>
-<td>inbound</td>
-</tr>
-<tr>
 <td><code>net.interface.&lt;interface&gt;.config.lpcEchoFailure</code></td>
 <td>Integer</td>
 <td>The lcp-echo-failure option of the PPP daemon</td>
 <td>0</td>
-</tr>
-<tr>
-<td><code>net.interface.&lt;interface&gt;.config.diversityEnabled</code></td>
-<td>Boolean</td>
-<td>Enable the LTE diversity antenna</td>
-<td>false</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.resetTimeout</code></td>
@@ -5464,12 +5410,6 @@ Since the network configuration shown on the screen may not be synchronized with
 <td><code>kuraModemGpsModeUnmanaged</code></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.persist</code></td>
-<td>Boolean</td>
-<td>The persist option of the PPP daemon</td>
-<td>true</td>
-</tr>
-<tr>
 <td><code>net.interface.&lt;interface&gt;.config.apn</code></td>
 <td>String</td>
 <td>The modem Access Point Name</td>
@@ -5478,20 +5418,8 @@ Since the network configuration shown on the screen may not be synchronized with
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.dialString</code></td>
 <td>String</td>
-<td>The dial string used for connecting to the APN</td>
+<td>The dial string used for connecting to the APN<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td></td>
-</tr>
-<tr>
-<td><code>net.interface.&lt;interface&gt;.config.holdoff</code></td>
-<td>Integer</td>
-<td>The holdoff option of the PPP daemon (in seconds)</td>
-<td>1</td>
-</tr>
-<tr>
-<td><code>net.interface.&lt;interface&gt;.config.pppNum</code></td>
-<td>Integer</td>
-<td>Assigned ppp interface number</td>
-<td>0</td>
 </tr>
 </tbody>
 </table>
@@ -5750,36 +5678,33 @@ Since the network configuration shown on the screen may not be synchronized with
 <a id="__codelineno-5-50" name="__codelineno-5-50" href="#__codelineno-5-50"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.mode&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
 <a id="__codelineno-5-51" name="__codelineno-5-51" href="#__codelineno-5-51"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>MASTER<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-5-52" name="__codelineno-5-52" href="#__codelineno-5-52"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-5-53" name="__codelineno-5-53" href="#__codelineno-5-53"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.driver&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-5-54" name="__codelineno-5-54" href="#__codelineno-5-54"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>nl80211<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-53" name="__codelineno-5-53" href="#__codelineno-5-53"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.passphrase&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Password&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-54" name="__codelineno-5-54" href="#__codelineno-5-54"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>ZW5hYmxlbWVwbGVhc2U=<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-5-55" name="__codelineno-5-55" href="#__codelineno-5-55"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-5-56" name="__codelineno-5-56" href="#__codelineno-5-56"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.passphrase&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Password&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-5-57" name="__codelineno-5-57" href="#__codelineno-5-57"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>ZW5hYmxlbWVwbGVhc2U=<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-56" name="__codelineno-5-56" href="#__codelineno-5-56"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.ssid&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-57" name="__codelineno-5-57" href="#__codelineno-5-57"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>kura_gateway_19<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-5-58" name="__codelineno-5-58" href="#__codelineno-5-58"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-5-59" name="__codelineno-5-59" href="#__codelineno-5-59"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.ssid&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-5-60" name="__codelineno-5-60" href="#__codelineno-5-60"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>kura_gateway_19<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-59" name="__codelineno-5-59" href="#__codelineno-5-59"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.securityType&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-60" name="__codelineno-5-60" href="#__codelineno-5-60"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>SECURITY_WPA2<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-5-61" name="__codelineno-5-61" href="#__codelineno-5-61"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-5-62" name="__codelineno-5-62" href="#__codelineno-5-62"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.securityType&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-5-63" name="__codelineno-5-63" href="#__codelineno-5-63"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>SECURITY_WPA2<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-62" name="__codelineno-5-62" href="#__codelineno-5-62"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.mode&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-63" name="__codelineno-5-63" href="#__codelineno-5-63"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>MASTER<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-5-64" name="__codelineno-5-64" href="#__codelineno-5-64"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-5-65" name="__codelineno-5-65" href="#__codelineno-5-65"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.mode&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-5-66" name="__codelineno-5-66" href="#__codelineno-5-66"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>MASTER<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-65" name="__codelineno-5-65" href="#__codelineno-5-65"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.channel&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-66" name="__codelineno-5-66" href="#__codelineno-5-66"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>11<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-5-67" name="__codelineno-5-67" href="#__codelineno-5-67"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-5-68" name="__codelineno-5-68" href="#__codelineno-5-68"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.channel&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-5-69" name="__codelineno-5-69" href="#__codelineno-5-69"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>11<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-68" name="__codelineno-5-68" href="#__codelineno-5-68"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.radioMode&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-69" name="__codelineno-5-69" href="#__codelineno-5-69"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>RADIO_MODE_80211g<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-5-70" name="__codelineno-5-70" href="#__codelineno-5-70"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-5-71" name="__codelineno-5-71" href="#__codelineno-5-71"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.radioMode&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-5-72" name="__codelineno-5-72" href="#__codelineno-5-72"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>RADIO_MODE_80211g<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-71" name="__codelineno-5-71" href="#__codelineno-5-71"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.ignoreSSID&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-72" name="__codelineno-5-72" href="#__codelineno-5-72"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-5-73" name="__codelineno-5-73" href="#__codelineno-5-73"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-5-74" name="__codelineno-5-74" href="#__codelineno-5-74"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.ignoreSSID&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-5-75" name="__codelineno-5-75" href="#__codelineno-5-75"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-5-74" name="__codelineno-5-74" href="#__codelineno-5-74"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.pairwiseCiphers&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-75" name="__codelineno-5-75" href="#__codelineno-5-75"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>CCMP<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-5-76" name="__codelineno-5-76" href="#__codelineno-5-76"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-5-77" name="__codelineno-5-77" href="#__codelineno-5-77"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.master.pairwiseCiphers&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-5-78" name="__codelineno-5-78" href="#__codelineno-5-78"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>CCMP<span class="nt">&lt;/esf:value&gt;</span>
-<a id="__codelineno-5-79" name="__codelineno-5-79" href="#__codelineno-5-79"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-5-80" name="__codelineno-5-80" href="#__codelineno-5-80"></a><span class="w">        </span><span class="nt">&lt;/esf:properties&gt;</span>
-<a id="__codelineno-5-81" name="__codelineno-5-81" href="#__codelineno-5-81"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
-<a id="__codelineno-5-82" name="__codelineno-5-82" href="#__codelineno-5-82"></a><span class="nt">&lt;/esf:configurations&gt;</span>
+<a id="__codelineno-5-77" name="__codelineno-5-77" href="#__codelineno-5-77"></a><span class="w">        </span><span class="nt">&lt;/esf:properties&gt;</span>
+<a id="__codelineno-5-78" name="__codelineno-5-78" href="#__codelineno-5-78"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
+<a id="__codelineno-5-79" name="__codelineno-5-79" href="#__codelineno-5-79"></a><span class="nt">&lt;/esf:configurations&gt;</span>
 </code></pre></div>
 <h3 id="configure-a-wireless-interface-as-station-mode-with-dhcp-client-enabled">Configure a wireless interface as station mode with DHCP client enabled</h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
@@ -5807,30 +5732,21 @@ Since the network configuration shown on the screen may not be synchronized with
 <a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.ssid&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
 <a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>MyWirelessNetwork<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.bgscan&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a><span class="w">                </span><span class="nt">&lt;esf:value/&gt;</span>
+<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.passphrase&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Password&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>MyPasswordBase64<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.passphrase&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Password&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>MyPasswordBase64<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.ignoreSSID&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.ignoreSSID&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-6-33" name="__codelineno-6-33" href="#__codelineno-6-33"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.mode&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-33" name="__codelineno-6-33" href="#__codelineno-6-33"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>INFRA<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-6-34" name="__codelineno-6-34" href="#__codelineno-6-34"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-6-35" name="__codelineno-6-35" href="#__codelineno-6-35"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.mode&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-6-36" name="__codelineno-6-36" href="#__codelineno-6-36"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>INFRA<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-6-35" name="__codelineno-6-35" href="#__codelineno-6-35"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.securityType&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-6-36" name="__codelineno-6-36" href="#__codelineno-6-36"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>SECURITY_WPA2<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-6-37" name="__codelineno-6-37" href="#__codelineno-6-37"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-6-38" name="__codelineno-6-38" href="#__codelineno-6-38"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.pingAccessPoint&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-6-39" name="__codelineno-6-39" href="#__codelineno-6-39"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
-<a id="__codelineno-6-40" name="__codelineno-6-40" href="#__codelineno-6-40"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-6-41" name="__codelineno-6-41" href="#__codelineno-6-41"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.driver&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-6-42" name="__codelineno-6-42" href="#__codelineno-6-42"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>nl80211<span class="nt">&lt;/esf:value&gt;</span>
-<a id="__codelineno-6-43" name="__codelineno-6-43" href="#__codelineno-6-43"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-6-44" name="__codelineno-6-44" href="#__codelineno-6-44"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.wlp1s0.config.wifi.infra.securityType&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-6-45" name="__codelineno-6-45" href="#__codelineno-6-45"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>SECURITY_WPA2<span class="nt">&lt;/esf:value&gt;</span>
-<a id="__codelineno-6-46" name="__codelineno-6-46" href="#__codelineno-6-46"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-6-47" name="__codelineno-6-47" href="#__codelineno-6-47"></a><span class="w">        </span><span class="nt">&lt;/esf:properties&gt;</span>
-<a id="__codelineno-6-48" name="__codelineno-6-48" href="#__codelineno-6-48"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
-<a id="__codelineno-6-49" name="__codelineno-6-49" href="#__codelineno-6-49"></a><span class="nt">&lt;/esf:configurations&gt;</span>
+<a id="__codelineno-6-38" name="__codelineno-6-38" href="#__codelineno-6-38"></a><span class="w">        </span><span class="nt">&lt;/esf:properties&gt;</span>
+<a id="__codelineno-6-39" name="__codelineno-6-39" href="#__codelineno-6-39"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
+<a id="__codelineno-6-40" name="__codelineno-6-40" href="#__codelineno-6-40"></a><span class="nt">&lt;/esf:configurations&gt;</span>
 </code></pre></div>
 <h3 id="enable-a-cellular-interface">Enable a cellular interface</h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
@@ -5852,57 +5768,33 @@ Since the network configuration shown on the screen may not be synchronized with
 <a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.dhcpServer4.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
 <a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.idle&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>95<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.password&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Password&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="w">                </span><span class="nt">&lt;esf:value/&gt;</span>
 <a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.password&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Password&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a><span class="w">                </span><span class="nt">&lt;esf:value/&gt;</span>
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.authType&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>NONE<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.pdpType&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>IP<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.lcpEchoInterval&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>0<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.ipAddress&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a><span class="w">                </span><span class="nt">&lt;esf:value/&gt;</span>
+<a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>true<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-7-31" name="__codelineno-7-31" href="#__codelineno-7-31"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-32" name="__codelineno-7-32" href="#__codelineno-7-32"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.maxFail&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-7-33" name="__codelineno-7-33" href="#__codelineno-7-33"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>5<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-32" name="__codelineno-7-32" href="#__codelineno-7-32"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.lcpEchoFailure&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-33" name="__codelineno-7-33" href="#__codelineno-7-33"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>0<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-7-34" name="__codelineno-7-34" href="#__codelineno-7-34"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-35" name="__codelineno-7-35" href="#__codelineno-7-35"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.authType&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-7-36" name="__codelineno-7-36" href="#__codelineno-7-36"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>NONE<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-35" name="__codelineno-7-35" href="#__codelineno-7-35"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.resetTimeout&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-36" name="__codelineno-7-36" href="#__codelineno-7-36"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>5<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-7-37" name="__codelineno-7-37" href="#__codelineno-7-37"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-38" name="__codelineno-7-38" href="#__codelineno-7-38"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.lcpEchoInterval&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-7-39" name="__codelineno-7-39" href="#__codelineno-7-39"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>0<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-38" name="__codelineno-7-38" href="#__codelineno-7-38"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.gpsEnabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-39" name="__codelineno-7-39" href="#__codelineno-7-39"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-7-40" name="__codelineno-7-40" href="#__codelineno-7-40"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-41" name="__codelineno-7-41" href="#__codelineno-7-41"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.enabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-7-42" name="__codelineno-7-42" href="#__codelineno-7-42"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>true<span class="nt">&lt;/esf:value&gt;</span>
+<a id="__codelineno-7-41" name="__codelineno-7-41" href="#__codelineno-7-41"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.apn&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-7-42" name="__codelineno-7-42" href="#__codelineno-7-42"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>web.omnitel.it<span class="nt">&lt;/esf:value&gt;</span>
 <a id="__codelineno-7-43" name="__codelineno-7-43" href="#__codelineno-7-43"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-44" name="__codelineno-7-44" href="#__codelineno-7-44"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.activeFilter&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-7-45" name="__codelineno-7-45" href="#__codelineno-7-45"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>inbound<span class="nt">&lt;/esf:value&gt;</span>
-<a id="__codelineno-7-46" name="__codelineno-7-46" href="#__codelineno-7-46"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-47" name="__codelineno-7-47" href="#__codelineno-7-47"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.lcpEchoFailure&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-7-48" name="__codelineno-7-48" href="#__codelineno-7-48"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>0<span class="nt">&lt;/esf:value&gt;</span>
-<a id="__codelineno-7-49" name="__codelineno-7-49" href="#__codelineno-7-49"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-50" name="__codelineno-7-50" href="#__codelineno-7-50"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.diversityEnabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-7-51" name="__codelineno-7-51" href="#__codelineno-7-51"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
-<a id="__codelineno-7-52" name="__codelineno-7-52" href="#__codelineno-7-52"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-53" name="__codelineno-7-53" href="#__codelineno-7-53"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.resetTimeout&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-7-54" name="__codelineno-7-54" href="#__codelineno-7-54"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>5<span class="nt">&lt;/esf:value&gt;</span>
-<a id="__codelineno-7-55" name="__codelineno-7-55" href="#__codelineno-7-55"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-56" name="__codelineno-7-56" href="#__codelineno-7-56"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.gpsEnabled&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-7-57" name="__codelineno-7-57" href="#__codelineno-7-57"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>false<span class="nt">&lt;/esf:value&gt;</span>
-<a id="__codelineno-7-58" name="__codelineno-7-58" href="#__codelineno-7-58"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-59" name="__codelineno-7-59" href="#__codelineno-7-59"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.persist&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;Boolean&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-7-60" name="__codelineno-7-60" href="#__codelineno-7-60"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>true<span class="nt">&lt;/esf:value&gt;</span>
-<a id="__codelineno-7-61" name="__codelineno-7-61" href="#__codelineno-7-61"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-62" name="__codelineno-7-62" href="#__codelineno-7-62"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.dialString&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-7-63" name="__codelineno-7-63" href="#__codelineno-7-63"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>atd*99***2#<span class="nt">&lt;/esf:value&gt;</span>
-<a id="__codelineno-7-64" name="__codelineno-7-64" href="#__codelineno-7-64"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-65" name="__codelineno-7-65" href="#__codelineno-7-65"></a><span class="w">            </span><span class="nt">&lt;esf:property</span><span class="w"> </span><span class="na">array=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">encrypted=</span><span class="s">&quot;false&quot;</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;net.interface.1-1.config.apn&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-7-66" name="__codelineno-7-66" href="#__codelineno-7-66"></a><span class="w">                </span><span class="nt">&lt;esf:value&gt;</span>web.omnitel.it<span class="nt">&lt;/esf:value&gt;</span>
-<a id="__codelineno-7-67" name="__codelineno-7-67" href="#__codelineno-7-67"></a><span class="w">            </span><span class="nt">&lt;/esf:property&gt;</span>
-<a id="__codelineno-7-68" name="__codelineno-7-68" href="#__codelineno-7-68"></a><span class="w">        </span><span class="nt">&lt;/esf:properties&gt;</span>
-<a id="__codelineno-7-69" name="__codelineno-7-69" href="#__codelineno-7-69"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
-<a id="__codelineno-7-70" name="__codelineno-7-70" href="#__codelineno-7-70"></a><span class="nt">&lt;/esf:configurations&gt;</span>
+<a id="__codelineno-7-44" name="__codelineno-7-44" href="#__codelineno-7-44"></a><span class="w">        </span><span class="nt">&lt;/esf:properties&gt;</span>
+<a id="__codelineno-7-45" name="__codelineno-7-45" href="#__codelineno-7-45"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
+<a id="__codelineno-7-46" name="__codelineno-7-46" href="#__codelineno-7-46"></a><span class="nt">&lt;/esf:configurations&gt;</span>
 </code></pre></div>
 <h3 id="create-a-vlan">Create a VLAN</h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><span class="nt">&lt;esf:configurations</span><span class="w"> </span><span class="na">xmlns:esf=</span><span class="s">&quot;http://eurotech.com/esf/2.0&quot;</span><span class="w"> </span><span class="na">xmlns:ocd=</span><span class="s">&quot;http://www.osgi.org/xmlns/metatype/v1.2.0&quot;</span><span class="nt">&gt;</span>
@@ -5951,6 +5843,17 @@ Since the network configuration shown on the screen may not be synchronized with
 <a id="__codelineno-8-44" name="__codelineno-8-44" href="#__codelineno-8-44"></a><span class="w">    </span><span class="nt">&lt;/esf:configuration&gt;</span>
 <a id="__codelineno-8-45" name="__codelineno-8-45" href="#__codelineno-8-45"></a><span class="nt">&lt;/esf:configurations&gt;</span>
 </code></pre></div>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>Legacy setting that used to help establishing PPP data sessions for GSM-based modems. Deprecated by NetworkManager and not used anymore. Kura will read it and populate the configuration with the correct values but NetworkManager might not honor the setting depending on its version.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:2">
+<p>Supported for compatibility reasons. The behaviour of <code>netIPv4StatusL2Only</code>/<code>netIPv6StatusL2Only</code> corresponds to <code>netIPv4StatusUnmanaged</code>/<code>netIPv6StatusUnmanaged</code> (i.e. the interface will be brought up but IP configuration is left to the user).&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
 
 
 

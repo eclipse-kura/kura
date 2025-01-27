@@ -4414,7 +4414,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 
 <h1 id="network-failover">Network Failover</h1>
-<p>For devices configured to use <a href="https://networkmanager.dev">NetworkManager</a>, it is possible to configure multiple WAN interfaces and a basic network failover functionality.</p>
+<p>Eclipse Kura <em>Network Failover</em> functionality allows to configure multiple WAN interfaces and a basic network failover functionality.</p>
 <p>As in the picture below, the Kura UI allows for multiple WAN interfaces to be defined. Each WAN interface can be configured with a <strong>WAN Priority</strong>. WAN Priority is used to determine which interface will be selected for primary WAN. In the case where the primary WAN interface loses connection, then the next highest priority interface is assigned.</p>
 <p><img alt="" src="../images/net-failover.png" /></p>
 <p>Kura uses NetworkManager's implementation to achieve network failover (see <a href="https://www.digi.com/resources/documentation/digidocs/90001548/reference/yocto/r_network_failover.htm?TocPath=Digi%20Embedded%20Yocto%7CSystem%20development%7CSoftware%20extensions%7C_____3">NetworkManager</a>). <strong>Lower values correspond to higher priority</strong>. Allowed values range from -1 to 2147483647. Value -1 means that the metric is chosen automatically based on the device type (see <a href="https://developer-old.gnome.org/NetworkManager/unstable/nm-settings-dbus.html">NetworkManager DBUS properties</a>).</p>

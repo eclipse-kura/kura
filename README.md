@@ -157,7 +157,13 @@ mvn -f kura/distrib/pom.xml clean install -DbuildAll
 ```
 
 > [!TIP]
-You can skip tests by adding `-Dmaven.test.skip=true` in the commands above and you can compile a specific target by specifying the profile (e.g. `-Pgeneric-aarch64`).
+You can skip tests by adding `-Dmaven.test.skip=true` in the commands above and you can compile a specific target by specifying the profile (e.g. `-Paarch64`).
+
+To list the available installer profiles, run:
+
+```bash
+mvn -f kura/distrib/pom.xml help:all-profiles
+```
 
 #### Build scripts
 

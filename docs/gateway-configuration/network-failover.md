@@ -1,6 +1,6 @@
 # Network Failover
 
-For devices configured to use [NetworkManager](https://networkmanager.dev), it is possible to configure multiple WAN interfaces and a basic network failover functionality.
+Eclipse Kura _Network Failover_ functionality allows to configure multiple WAN interfaces and a basic network failover functionality.
 
 As in the picture below, the Kura UI allows for multiple WAN interfaces to be defined. Each WAN interface can be configured with a **WAN Priority**. WAN Priority is used to determine which interface will be selected for primary WAN. In the case where the primary WAN interface loses connection, then the next highest priority interface is assigned.
 
@@ -25,7 +25,7 @@ The `metric` flag will correspond to the set **WAN Priority**. *NetworkManager* 
 
 
 
-## Operating modes
+## Operating modes
 
 The *NetworkManager* failover mechanism can work at two different levels:
 

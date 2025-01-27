@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -38,12 +38,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Objects;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
-
 import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport;
@@ -51,6 +45,7 @@ import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
 import org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService;
+import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -68,6 +63,11 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
+
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Response;
 
 @RunWith(Parameterized.class)
 public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
@@ -323,7 +323,8 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         doThrow(new RuntimeException()).when(deploymentAgentService).installDeploymentPackageAsync(anyString());
     }
 
-    private void givenDeploymentAgentServiceReturnsMarketplacePackageDescriptor(MarketplacePackageDescriptor descriptor) {
+    private void givenDeploymentAgentServiceReturnsMarketplacePackageDescriptor(
+            MarketplacePackageDescriptor descriptor) {
         when(deploymentAgentService.getMarketplacePackageDescriptor(anyString())).thenReturn(descriptor);
     }
 
@@ -337,7 +338,7 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
     private void whenUploadIsPerformedWith(String filePath) {
         HttpAuthenticationFeature feature = HttpAuthenticationFeature.basicBuilder().credentials(USERNAME, PASSWORD)
                 .build();
-        final Client client = ClientBuilder.newBuilder().register(MultiPartFeature.class).register(feature).build();
+        final Client client = new JerseyClientBuilder().register(MultiPartFeature.class).register(feature).build();
 
         FormDataMultiPart formDataMultiPart = new FormDataMultiPart();
         final FileDataBodyPart filePart = new FileDataBodyPart("file", new File(filePath));

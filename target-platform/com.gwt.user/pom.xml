@@ -1,97 +1,77 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<!--
+    Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
 
-	<parent>
-		<groupId>org.eclipse.kura</groupId>
-		<artifactId>target-platform</artifactId>
-		<version>6.0.0-SNAPSHOT</version>
-		<relativePath>..</relativePath>
-	</parent>
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+    
+    SPDX-License-Identifier: EPL-2.0
+  
+    Contributors:
+     Eurotech
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<artifactId>com.gwt.user</artifactId>
-	<version>2.0.0-SNAPSHOT</version>
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>target-platform</artifactId>
+        <version>6.0.0-SNAPSHOT</version>
+        <relativePath>..</relativePath>
+    </parent>
 
-	<packaging>bundle</packaging>
+    <artifactId>com.gwt.user</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
 
-	<name>gwt-user</name>
-	<description>GWT User Library</description>
+    <packaging>bundle</packaging>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.gwtproject</groupId>
-			<artifactId>gwt-user</artifactId>
-			<version>2.10.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.gwtbootstrap3</groupId>
-			<artifactId>gwtbootstrap3</artifactId>
-			<version>1.0.1</version>
-		</dependency>
-	</dependencies>
+    <name>gwt-user</name>
+    <description>GWT User Library</description>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>${maven-checkstyle-plugin.version}</version>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
-         	</plugin>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<version>${maven-bundle-plugin.version}</version>
-				<extensions>true</extensions>
-				<configuration>
-					<manifestLocation>META-INF</manifestLocation>
-					<instructions>
-						<Embed-Dependency>*</Embed-Dependency>
-						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-						<Bundle-Name>${project.name}</Bundle-Name>
-						<Bundle-Version>${project.version}</Bundle-Version>
-						<Import-Package>
-							!com.gargoylesoftware.*, !com.google.gson,
-							!com.google.debugging.*,
-							!com.google.gwt.core.ext.*,
-							!com.google.gwt.core.linker.*,
-							!com.google.gwt.dev.*,
-							!com.google.gwt.lang.*,
-							!com.google.gwt.util.regexfilter,
-							!com.google.gwt.thirdparty.*,
-							!com.google.gwt.util.tools.shared,
-							!com.google.gwt.util.tools,
-							!com.ibm.icu.*, !com.thoughtworks.*,
-							!org.apache.tapestry.*,
-							!org.eclipse.jetty.*, !org.hibernate.*,
-							!org.kohsuke.*,
-							!org.objectweb.*, !javax.validation.*,
-							!jsinterop.annotations.*,
-							!net.sourceforge.htmlunit.corejs.javascript,
-							!junit.framework,
-							!org.w3c.css.sac,
-							!javax.jdo.annotations.*,
-							!javax.persistence.*,
-							javax.servlet.http; version="2.6.0",
-							javax.servlet;version="2.6.0",
-							*
-						</Import-Package>
-						<Export-Package>
-							!com.google.gwt.user.client.ui.doc-files,
-							!com.google.gwt.user.tools.templates._eclipse-test,
-							!com.google.gwt.user.tools.templates._sample-test._testFolder_._moduleFolder_,
-							!com.google.gwt.user.tools.templates._sample-test._testFolder_._moduleFolder_.client,
-							!com.google.gwt.user.tools.templates.sample._warFolder_.WEB-INF
-						</Export-Package>
-						<_exportcontents>com.google.*, org.gwtbootstrap3.*, javax.validation.*</_exportcontents>
-						<Require-Capability>
-							osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"
-						</Require-Capability>
-					</instructions>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+    <dependencies>
+        <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-servlet-jakarta</artifactId>
+            <version>2.12.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven-checkstyle-plugin.version}</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>${maven-bundle-plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <manifestLocation>META-INF</manifestLocation>
+                    <instructions>
+                        <Embed-Dependency>*;inline=true</Embed-Dependency>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Name>${project.name}</Bundle-Name>
+                        <Bundle-Version>${project.version}</Bundle-Version>
+                        <Import-Package>
+                            jakarta.servlet,jakarta.servlet.http
+                        </Import-Package>
+                        <Export-Package>
+                            com.google.gwt.user.server.*,com.google.gwt.user.client.rpc.*,
+                            com.google.gwt.i18n.client.*,com.google.gwt.safehtml.shared.*,
+                            com.google.gwt.i18n.shared.*
+                        </Export-Package>
+                        <Require-Capability>osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"</Require-Capability>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

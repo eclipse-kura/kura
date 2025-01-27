@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -42,16 +42,10 @@ import java.util.StringTokenizer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Priority;
-import javax.annotation.security.RolesAllowed;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.container.ContainerRequestContext;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -79,6 +73,13 @@ import org.osgi.service.useradmin.UserAdmin;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
+
+import jakarta.annotation.Priority;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.container.ContainerRequestContext;
 
 public class RestServiceTest extends AbstractRequestHandlerTest {
 
@@ -1267,7 +1268,10 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     private <T extends TestService> void givenService(final T service) {
         final BundleContext bundleContext = FrameworkUtil.getBundle(RestServiceTest.class).getBundleContext();
 
-        registeredServices.add(bundleContext.registerService((Class<T>) service.getClass(), service, null));
+        final Dictionary<String, Object> properties = new Hashtable<>();
+        properties.put("osgi.jakartars.resource", true);
+
+        registeredServices.add(bundleContext.registerService((Class<T>) service.getClass(), service, properties));
 
         final RestTransport restTransport = (RestTransport) this.transport;
 

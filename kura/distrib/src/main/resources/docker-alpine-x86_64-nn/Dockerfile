@@ -14,7 +14,7 @@ COPY --from=kura_base /kura-install/kura_*_docker-x86_64-nn_installer.sh /kura-i
 
 ENV \
   KURA_DIR=/opt/eclipse/kura \
-  LAUNCHER_VERSION="1.5.800.v20200727-1323" 
+  LAUNCHER_VERSION="1.6.900" 
 
 
 

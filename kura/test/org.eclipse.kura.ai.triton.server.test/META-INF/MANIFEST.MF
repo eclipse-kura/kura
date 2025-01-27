@@ -6,8 +6,7 @@ Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Fragment-Host: org.eclipse.kura.ai.triton.server
-Import-Package: javax.annotation;version="1.2.0",
- org.apache.commons.io;version="2.4.0",
+Import-Package: org.apache.commons.io;version="2.4.0",
  org.eclipse.kura.ai.inference;version="[1.0,2.0)",
  org.eclipse.kura.core.linux.executor;version="[1.0,2.0)",
  org.eclipse.kura.core.testutil;version="1.0.0",

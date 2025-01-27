@@ -15,7 +15,7 @@ COPY --from=kura_base /kura-install/kura_*_docker-x86_64-nn_installer.sh /kura-i
 ENV \
   KURA_DIR=/opt/eclipse/kura \
   SKIP_JAVA_VERSION_CHECK=true \
-  LAUNCHER_VERSION="1.5.800.v20200727-1323"
+  LAUNCHER_VERSION="1.6.900"
 
 RUN true && \
     rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -35,8 +35,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import javax.ws.rs.WebApplicationException;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -47,13 +46,15 @@ import org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService;
 import org.eclipse.kura.rest.deployment.agent.api.DeploymentRequestStatus;
 import org.eclipse.kura.rest.deployment.agent.api.DescriptorRequest;
 import org.eclipse.kura.rest.deployment.agent.api.InstallRequest;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.junit.Test;
 import org.osgi.framework.Version;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
+
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.EntityPart;
 
 public class DeploymentRestServiceUnitTest {
 
@@ -69,7 +70,7 @@ public class DeploymentRestServiceUnitTest {
     private DeploymentAdmin mockDeploymentAdmin = mock(DeploymentAdmin.class);
     private UserAdmin mockUserAdmin = mock(UserAdmin.class);
     private InputStream mockInputStream = mock(InputStream.class);
-    private FormDataContentDisposition mockFormDataContent = mock(FormDataContentDisposition.class);
+    private EntityPart mockEntityPart = mock(EntityPart.class);
 
     private final ArrayList<DeploymentPackage> installedDeploymentPackages = new ArrayList<>();
 
@@ -192,7 +193,7 @@ public class DeploymentRestServiceUnitTest {
         givenAMockInputStream();
         givenAMockFormDataContentWithFileName("mock.dp");
 
-        whenInstallUploadedDeploymentPackageIsCalledWith(this.mockInputStream, this.mockFormDataContent);
+        whenInstallUploadedDeploymentPackageIsCalledWith(this.mockEntityPart, this.mockInputStream);
 
         thenNoExceptionOccurred();
         thenDeploymentRequestStatusIs(DeploymentRequestStatus.REQUEST_RECEIVED);
@@ -205,7 +206,7 @@ public class DeploymentRestServiceUnitTest {
         givenAMockInputStreamThrowingOnRead();
         givenAMockFormDataContentWithFileName("mock.dp");
 
-        whenInstallUploadedDeploymentPackageIsCalledWith(this.mockInputStream, this.mockFormDataContent);
+        whenInstallUploadedDeploymentPackageIsCalledWith(this.mockEntityPart, this.mockInputStream);
 
         thenExceptionOccurred(WebApplicationException.class);
         thenDeploymentAgentServiceIsNeverCalledToInstallDeploymentPackage();
@@ -334,7 +335,7 @@ public class DeploymentRestServiceUnitTest {
     }
 
     private void givenAMockFormDataContentWithFileName(String fileName) {
-        when(this.mockFormDataContent.getFileName()).thenReturn(fileName);
+        when(this.mockEntityPart.getFileName()).thenReturn(Optional.of(fileName));
     }
 
     private void givenAMockInputStream() throws IOException {
@@ -345,13 +346,13 @@ public class DeploymentRestServiceUnitTest {
         when(this.mockInputStream.read(any())).thenThrow(new IOException());
     }
 
-    private void givenDeploymentAgentServiceReturnsMarketplacePackageDescriptor(MarketplacePackageDescriptor descriptorToBeReturned) {
+    private void givenDeploymentAgentServiceReturnsMarketplacePackageDescriptor(
+            MarketplacePackageDescriptor descriptorToBeReturned) {
         when(this.mockDeploymentAgentService.getMarketplacePackageDescriptor(any())).thenReturn(descriptorToBeReturned);
     }
 
     private void givenDeploymentAgentServiceThrowsExceptionOnGetMarketplacePackageDescriptor() {
-        when(this.mockDeploymentAgentService.getMarketplacePackageDescriptor(any()))
-                .thenThrow(new RuntimeException());
+        when(this.mockDeploymentAgentService.getMarketplacePackageDescriptor(any())).thenThrow(new RuntimeException());
     }
 
     /*
@@ -382,11 +383,10 @@ public class DeploymentRestServiceUnitTest {
         }
     }
 
-    private void whenInstallUploadedDeploymentPackageIsCalledWith(InputStream mockInputStream,
-            FormDataContentDisposition mockFormDataContent) {
+    private void whenInstallUploadedDeploymentPackageIsCalledWith(EntityPart entityPart, InputStream mockInputStream) {
         try {
             this.resultingDeploymentRequestStatus = this.deploymentRestService
-                    .installUploadedDeploymentPackage(mockInputStream, mockFormDataContent);
+                    .installUploadedDeploymentPackage(entityPart, mockInputStream);
         } catch (Exception e) {
             this.occurredException = e;
         }

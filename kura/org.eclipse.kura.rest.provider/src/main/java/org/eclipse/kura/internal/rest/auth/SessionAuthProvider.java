@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,11 +18,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Priority;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.PathSegment;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
@@ -30,6 +27,10 @@ import org.eclipse.kura.internal.rest.provider.RestServiceOptions;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.core.PathSegment;
 
 @Priority(300)
 public class SessionAuthProvider implements AuthenticationProvider {
@@ -85,22 +86,19 @@ public class SessionAuthProvider implements AuthenticationProvider {
         auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), result.get().getName());
 
         if (!isXsrfTokenValid(request, requestContext)) {
-            auditLogger.warn("{} Rest - Failure - Session authentication failed, invalid XSRF token",
-                    auditContext);
+            auditLogger.warn("{} Rest - Failure - Session authentication failed, invalid XSRF token", auditContext);
             return Optional.empty();
         }
 
-        if (this.sessionHelper
-                .isSessionExpired(session.get(), this.restServiceOptions.getSessionInactivityInterval())) {
-            auditLogger.warn("{} Rest - Failure - Session authentication failed, session expired",
-                    auditContext);
+        if (this.sessionHelper.isSessionExpired(session.get(),
+                this.restServiceOptions.getSessionInactivityInterval())) {
+            auditLogger.warn("{} Rest - Failure - Session authentication failed, session expired", auditContext);
             session.get().invalidate();
             return Optional.empty();
         }
 
         if (isSessionLocked(session.get(), requestContext)) {
-            auditLogger.warn("{} Rest - Failure - Session authentication failed, session is locked",
-                    auditContext);
+            auditLogger.warn("{} Rest - Failure - Session authentication failed, session is locked", auditContext);
             return Optional.empty();
         }
 
@@ -136,8 +134,7 @@ public class SessionAuthProvider implements AuthenticationProvider {
 
     private boolean containsPath(final Set<String> paths, final ContainerRequestContext requestContext) {
         final String reuqestPath = '/' + requestContext.getUriInfo().getPathSegments().stream()
-                .map(PathSegment::getPath)
-                .collect(Collectors.joining("/"));
+                .map(PathSegment::getPath).collect(Collectors.joining("/"));
 
         return paths.contains(reuqestPath);
     }

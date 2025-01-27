@@ -6,10 +6,9 @@ Bundle-Version: 2.0.0.qualifier
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
-Import-Package: javax.annotation.security;version="1.2.0",
- javax.ws.rs;version="2.0.1",
- javax.ws.rs.core;version="2.0.1",
- javax.ws.rs.ext;version="2.0.1",
+Import-Package: jakarta.annotation.security;version="2.1.1",
+ jakarta.ws.rs;version="3.1.0",
+ jakarta.ws.rs.core;version="3.1.0",
  org.eclipse.kura;version="[1.7,2.0)",
  org.eclipse.kura.cloudconnection.request;version="[1.0,2.0)",
  org.eclipse.kura.net;version="[2.4,3.0)",
@@ -18,7 +17,7 @@ Import-Package: javax.annotation.security;version="1.2.0",
  org.eclipse.kura.net.status.ethernet;version="[1.0,1.1)",
  org.eclipse.kura.net.status.modem;version="[1.1,1.2)",
  org.eclipse.kura.net.status.wifi;version="[1.1,1.2)",
- org.eclipse.kura.request.handler.jaxrs;version="[1.0,2.0)",
+ org.eclipse.kura.request.handler.jaxrs;version="[2.0,3.0)",
  org.eclipse.kura.request.handler.jaxrs.annotation;version="[1.0,2.0)",
  org.osgi.service.useradmin;version="1.1.0",
  org.slf4j;version="1.7.36"

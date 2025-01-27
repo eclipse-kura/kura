@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,12 +19,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload2.core.DiskFileItem;
+import org.apache.commons.fileupload2.core.DiskFileItemFactory;
+import org.apache.commons.fileupload2.core.FileUploadException;
+import org.apache.commons.fileupload2.jakarta.servlet5.JakartaServletFileUpload;
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.UserManager;
@@ -37,7 +35,10 @@ import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.google.gwt.user.server.rpc.jakarta.RemoteServiceServlet;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 public class KuraRemoteServiceServlet extends RemoteServiceServlet {
 
@@ -102,8 +103,7 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
         }
 
         if (userToken == null) {
-            auditLogger.warn("{} UI XSRF - Failure - XSRF Token not provided",
-                    AuditContext.currentOrInternal());
+            auditLogger.warn("{} UI XSRF - Failure - XSRF Token not provided", AuditContext.currentOrInternal());
             session.invalidate();
             return false;
         }
@@ -111,8 +111,7 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
         if (Objects.equals(userToken, session.getAttribute(Attributes.XSRF_TOKEN.getValue()))) {
             return true;
         } else {
-            auditLogger.warn("{} UI XSRF - Failure - XSRF Token validation error",
-                    AuditContext.currentOrInternal());
+            auditLogger.warn("{} UI XSRF - Failure - XSRF Token validation error", AuditContext.currentOrInternal());
             session.invalidate();
             return false;
         }
@@ -132,8 +131,7 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
     }
 
     private static void requirePermissionsInternal(final HttpServletRequest request,
-            final RequiredPermissions.Mode mode,
-            final String[] permissions) {
+            final RequiredPermissions.Mode mode, final String[] permissions) {
 
         final HttpSession session = request.getSession(false);
 
@@ -208,13 +206,13 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
             throws FileUploadException {
         String fieldValue = null;
 
-        ServletFileUpload upload = new ServletFileUpload();
-        List<FileItem> items = upload.parseRequest(req);
+        JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory> upload = new JakartaServletFileUpload<>();
+        List<DiskFileItem> items = upload.parseRequest(req);
 
         // Process the uploaded items
-        Iterator<FileItem> iter = items.iterator();
+        Iterator<DiskFileItem> iter = items.iterator();
         while (iter.hasNext()) {
-            FileItem item = iter.next();
+            DiskFileItem item = iter.next();
             if (item.isFormField()) {
                 String name = item.getFieldName();
 

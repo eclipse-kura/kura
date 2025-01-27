@@ -1,6 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
- *
+ * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
+ * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.metatype.Scalar;

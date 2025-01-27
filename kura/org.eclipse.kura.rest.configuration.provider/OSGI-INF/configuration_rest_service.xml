@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2021 Eurotech and/or its affiliates and others
+    Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -27,4 +27,5 @@
    </service>
    <property name="service.pid" type="String" value="org.eclipse.kura.internal.rest.configuration.ConfigurationRestService"/>
    <reference bind="setCryptoService" cardinality="1..1" interface="org.eclipse.kura.crypto.CryptoService" name="CryptoService" policy="static"/>
+   <property name="osgi.jakartars.resource" type="String" value="true"/>
 </scr:component>

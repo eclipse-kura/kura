@@ -4924,7 +4924,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <li>Enabled for LAN: designates the interface for a local network. It can be set as a DHCP server for hosts on the local network and can serve as a default gateway for those hosts; however, it cannot be set as an actual gateway interface for this device. That is, packets must be routed from this interface to another interface that is configured as WAN. The interface is automatically brought up at boot.</li>
 <li>Enabled for WAN: designates the interface as a gateway to an external network. The interface is automatically brought up at boot.</li>
 <li>Not Managed: the interface will be ignored by Kura.</li>
-<li>Layer 2 Only<sup id="fnref18:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot.</li>
+<li>Layer 2 Only<sup id="fnref15:1"><a class="footnote-ref" href="#fn:1">1</a></sup>: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot.</li>
 </ul>
 </li>
 <li><strong>Configure</strong><ul>
@@ -5048,7 +5048,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>false</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.promisc</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.promisc</code><sup id="fnref26:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>Integer</td>
 <td>Enable the Promiscuous Mode; possible values are: -1 (System default), 0 (Disabled), 1 (Enabled)</td>
 <td>-1</td>
@@ -5069,13 +5069,13 @@ Since the network configuration shown on the screen may not be synchronized with
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip4.status</code></td>
 <td>String</td>
-<td>The status of the interface for the IPv4 configuration; possibile values are: <code>netIPv4StatusDisabled</code>, <code>netIPv4StatusUnmanaged</code>, <code>netIPv4StatusL2Only</code><sup id="fnref17:1"><a class="footnote-ref" href="#fn:1">1</a></sup>, <code>netIPv4StatusEnabledLAN</code>, <code>netIPv4StatusEnabledWAN</code>, <code>netIPv4StatusUnknown</code></td>
+<td>The status of the interface for the IPv4 configuration; possibile values are: <code>netIPv4StatusDisabled</code>, <code>netIPv4StatusUnmanaged</code>, <code>netIPv4StatusL2Only</code><sup id="fnref14:1"><a class="footnote-ref" href="#fn:1">1</a></sup>, <code>netIPv4StatusEnabledLAN</code>, <code>netIPv4StatusEnabledWAN</code>, <code>netIPv4StatusUnknown</code></td>
 <td><code>netIPv4StatusDisabled</code> (see note below)</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.ip4.wan.priority</code></td>
+<td><code>net.interface.&lt;interface&gt;.config.ip4.wan.priority</code><sup id="fnref25:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>Integer</td>
-<td>(NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
+<td>Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
 <td>-1</td>
 </tr>
 <tr>
@@ -5202,13 +5202,13 @@ Since the network configuration shown on the screen may not be synchronized with
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip6.status</code><sup id="fnref23:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>String</td>
-<td>The status of the interface for the IPv6 configuration; possibile values are: <code>netIPv6StatusDisabled</code>, <code>netIPv6StatusUnmanaged</code>, <code>netIPv6StatusL2Only</code><sup id="fnref16:1"><a class="footnote-ref" href="#fn:1">1</a></sup>, <code>netIPv6StatusEnabledLAN</code>, <code>netIPv6StatusEnabledWAN</code>, <code>netIPv6StatusUnknown</code></td>
+<td>The status of the interface for the IPv6 configuration; possibile values are: <code>netIPv6StatusDisabled</code>, <code>netIPv6StatusUnmanaged</code>, <code>netIPv6StatusL2Only</code><sup id="fnref13:1"><a class="footnote-ref" href="#fn:1">1</a></sup>, <code>netIPv6StatusEnabledLAN</code>, <code>netIPv6StatusEnabledWAN</code>, <code>netIPv6StatusUnknown</code></td>
 <td><code>netIPv6StatusDisabled</code> (see note below)</td>
 </tr>
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip6.wan.priority</code><sup id="fnref22:2"><a class="footnote-ref" href="#fn:2">2</a></sup></td>
 <td>Integer</td>
-<td>(NetworkManager only) Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
+<td>Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See <a href="../network-failover/">Network Failover</a> for further details</td>
 <td>-1</td>
 </tr>
 <tr>
@@ -5362,7 +5362,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>1</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.bgscan</code><sup id="fnref15:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.bgscan</code><sup id="fnref12:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>String</td>
 <td>Set the background scans; possible values have the form <code>&lt;mode&gt;:&lt;shortInterval&gt;:&lt;rssiThreshold&gt;:&lt;longInterval&gt;</code> where <code>mode</code> (String) is one of NONE, SIMPLE, or LEARN, <code>shortInterval</code> (Integer) sets the Bgscan short interval (secs), <code>rssiThreshold</code> (Integer) sets the Bgscan Signal strength threshold (dBm), and <code>longInterval</code> (Integer) sets the Bgscan long interval (secs)</td>
 <td></td>
@@ -5386,13 +5386,13 @@ Since the network configuration shown on the screen may not be synchronized with
 <td><code>INFRA</code></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.pingAccessPoint</code><sup id="fnref14:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.pingAccessPoint</code><sup id="fnref11:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Boolean</td>
 <td>Enable pinging the access point after connection is established</td>
 <td>false</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.driver</code><sup id="fnref13:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
+<td><code>net.interface.&lt;interface&gt;.config.wifi.infra.driver</code><sup id="fnref10:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>String</td>
 <td>The driver used for the connection</td>
 <td></td>
@@ -5435,7 +5435,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <td>false</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.idle</code><sup id="fnref12:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
+<td><code>net.interface.&lt;interface&gt;.config.idle</code><sup id="fnref9:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Integer</td>
 <td>The idle option of the PPP daemon</td>
 <td>95</td>
@@ -5453,37 +5453,37 @@ Since the network configuration shown on the screen may not be synchronized with
 <td></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.pdpType</code><sup id="fnref11:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
+<td><code>net.interface.&lt;interface&gt;.config.pdpType</code><sup id="fnref8:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>String</td>
 <td>The PdP type; possible values are IP, PPP and IPv6</td>
 <td>IP</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.maxFail</code><sup id="fnref10:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
+<td><code>net.interface.&lt;interface&gt;.config.maxFail</code><sup id="fnref7:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>Integer</td>
 <td>The maxfail option of the PPP daemon</td>
 <td>5</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.authType</code><sup id="fnref9:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
+<td><code>net.interface.&lt;interface&gt;.config.authType</code></td>
 <td>String</td>
 <td>The authentication type; possible values are <code>NONE</code>, <code>AUTO</code>, <code>CHAP</code> and <code>PAP</code></td>
 <td><code>NONE</code></td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.lpcEchoInterval</code><sup id="fnref8:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
+<td><code>net.interface.&lt;interface&gt;.config.lpcEchoInterval</code></td>
 <td>Integer</td>
 <td>The lcp-echo-interval option of the PPP daemon</td>
 <td>0</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.activeFilter</code><sup id="fnref7:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
+<td><code>net.interface.&lt;interface&gt;.config.activeFilter</code><sup id="fnref6:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
 <td>String</td>
 <td>The active-filter option of the PPP daemon</td>
 <td>inbound</td>
 </tr>
 <tr>
-<td><code>net.interface.&lt;interface&gt;.config.lpcEchoFailure</code><sup id="fnref6:1"><a class="footnote-ref" href="#fn:1">1</a></sup></td>
+<td><code>net.interface.&lt;interface&gt;.config.lpcEchoFailure</code></td>
 <td>Integer</td>
 <td>The lcp-echo-failure option of the PPP daemon</td>
 <td>0</td>
@@ -6004,10 +6004,10 @@ Since the network configuration shown on the screen may not be synchronized with
 <hr />
 <ol>
 <li id="fn:1">
-<p>This feature is only available in Kura <em>specific</em> profiles. For more informations about the various Kura profiles see <a href="../../getting-started/install-kura/#installer-types">Kura installer types</a>.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref4:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref5:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref6:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref7:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref8:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref9:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref10:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref11:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref12:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref13:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref14:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref15:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref16:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref17:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref18:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+<p>This feature is only available in Kura <em>specific</em> profiles. For more informations about the various Kura profiles see <a href="../../getting-started/install-kura/#installer-types">Kura installer types</a>.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref4:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref5:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref6:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref7:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref8:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref9:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref10:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref11:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref12:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref13:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref14:1" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref15:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
 <li id="fn:2">
-<p>This feature is only available in Kura <em>generic</em> profiles. For more informations about the various Kura profiles see <a href="../../getting-started/install-kura/#installer-types">Kura installer types</a>.&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref4:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref5:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref6:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref7:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref8:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref9:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref10:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref11:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref12:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref13:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref14:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref15:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref16:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref17:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref18:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref19:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref20:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref21:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref22:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref23:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref24:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+<p>This feature is only available in Kura <em>generic</em> profiles. For more informations about the various Kura profiles see <a href="../../getting-started/install-kura/#installer-types">Kura installer types</a>.&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref4:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref5:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref6:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref7:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref8:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref9:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref10:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref11:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref12:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref13:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref14:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref15:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref16:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref17:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref18:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref19:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref20:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref21:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref22:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref23:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref24:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref25:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref26:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
 </li>
 </ol>
 </div>

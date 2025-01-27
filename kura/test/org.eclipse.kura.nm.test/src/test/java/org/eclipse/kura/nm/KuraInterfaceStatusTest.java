@@ -32,6 +32,10 @@ public class KuraInterfaceStatusTest {
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] { //
                 { KuraIpStatus.DISABLED, KuraIpStatus.DISABLED, KuraInterfaceStatus.DISABLED, null }, //
+                { KuraIpStatus.ENABLEDLAN, KuraIpStatus.ENABLEDLAN, KuraInterfaceStatus.ENABLED, null }, //
+                { KuraIpStatus.ENABLEDWAN, KuraIpStatus.ENABLEDWAN, KuraInterfaceStatus.ENABLED, null }, //
+                { KuraIpStatus.ENABLEDLAN, KuraIpStatus.ENABLEDWAN, KuraInterfaceStatus.ENABLED, null }, //
+                { KuraIpStatus.ENABLEDWAN, KuraIpStatus.ENABLEDLAN, KuraInterfaceStatus.ENABLED, null }, //
                 { KuraIpStatus.ENABLEDLAN, KuraIpStatus.DISABLED, KuraInterfaceStatus.ENABLED, null }, //
                 { KuraIpStatus.ENABLEDWAN, KuraIpStatus.DISABLED, KuraInterfaceStatus.ENABLED, null }, //
                 { KuraIpStatus.DISABLED, KuraIpStatus.ENABLEDLAN, KuraInterfaceStatus.ENABLED, null }, //

@@ -85,7 +85,7 @@ public class NMDbusConnector {
     private static final List<NMDeviceType> CONFIGURATION_SUPPORTED_VIRTUAL_DEVICE_TYPES = Arrays
             .asList(NMDeviceType.NM_DEVICE_TYPE_VLAN);
     private static final List<KuraIpStatus> CONFIGURATION_SUPPORTED_STATUSES = Arrays.asList(KuraIpStatus.DISABLED,
-            KuraIpStatus.ENABLEDLAN, KuraIpStatus.ENABLEDWAN, KuraIpStatus.UNMANAGED, KuraIpStatus.L2ONLY);
+            KuraIpStatus.ENABLEDLAN, KuraIpStatus.ENABLEDWAN, KuraIpStatus.UNMANAGED);
 
     private static final List<NMDeviceType> STATUS_SUPPORTED_DEVICE_TYPES = Arrays.asList(
             NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceType.NM_DEVICE_TYPE_WIFI,

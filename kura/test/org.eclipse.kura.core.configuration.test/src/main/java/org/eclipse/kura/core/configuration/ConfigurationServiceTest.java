@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -23,7 +23,6 @@ import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -33,6 +32,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -45,17 +45,12 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.configuration.metatype.OCDService;
-import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
-import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.system.SystemService;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
 
 public class ConfigurationServiceTest {
 
@@ -136,8 +131,6 @@ public class ConfigurationServiceTest {
     private int kuraSnapshotsCount = 10;
     private String kuraSnapshotsDir = KURA_SNAPSHOTS_DIR;
 
-    // private BundleContext bundleContext;
-
     private Optional<Exception> exceptionOccurred;
 
     private Set<String> factoryComponentPids;
@@ -208,7 +201,7 @@ public class ConfigurationServiceTest {
     }
 
     @Test
-    public void testDeleteFactoryConfigurationNulls() throws KuraException {
+    public void testDeleteFactoryConfigurationNulls() {
         // negative test; null is given as pid
 
         whenDeleteFactoryConfiguration(null, false);
@@ -226,7 +219,7 @@ public class ConfigurationServiceTest {
     }
 
     @Test
-    public void testDeleteFactoryConfigurationWithSnapshot() throws KuraException, IOException, NoSuchFieldException {
+    public void testDeleteFactoryConfigurationWithSnapshot() {
         // positive test; pid registered in factory and service pids, configuration delete is expected, with snapshots
 
         givenCreateFactoryConfiguration("fpid_" + System.currentTimeMillis(), "spid-test1", this.exampleProperties,
@@ -396,7 +389,7 @@ public class ConfigurationServiceTest {
         // try it with a registered component and an existing PID with empty properties
         givenGetComponentConfiguration(TEST_COMPONENT_PID);
 
-        whenUpdateConfiguration(TEST_COMPONENT_PID, new HashMap<String, Object>());
+        whenUpdateConfiguration(TEST_COMPONENT_PID, new HashMap<>());
 
         thenConfigurationPropertiesHaveNotChanged();
     }
@@ -549,6 +542,26 @@ public class ConfigurationServiceTest {
     }
 
     @Test
+    public void testRollbackShouldDeleteFactoryComponent() throws KuraException {
+        givenSnapshotBefore();
+        givenCreateFactoryConfiguration(DATA_SERVICE_FACTORY_PID, "pid_fc_rollback_create", null, true);
+
+        whenRollback();
+
+        thenFactoryComponentHasBeenDeleted("pid_fc_rollback_create");
+    }
+
+    @Test
+    public void testRollbackShouldCreateFactoryComponent() throws KuraException {
+        givenCreateFactoryConfiguration(DATA_SERVICE_FACTORY_PID, "pid_fc_rollback_delete", null, true);
+        givenDeleteFactoryConfiguration("pid_fc_rollback_delete", true);
+
+        whenRollback();
+
+        thenFactoryComponentHasBeenCreated("pid_fc_rollback_delete");
+    }
+
+    @Test
     public void testEncryptSnapshots() {
         givenCreateFactoryConfiguration(DATA_SERVICE_FACTORY_PID, "pid_rollback_1", null, true);
 
@@ -585,6 +598,18 @@ public class ConfigurationServiceTest {
         try {
             ConfigurationServiceTest.configurationService.createFactoryConfiguration(factoryPid, pid, properties,
                     takeSnapshot);
+
+            if (takeSnapshot) {
+                this.snapshotsBefore = ConfigurationServiceTest.configurationService.getSnapshots();
+            }
+        } catch (Exception e) {
+            this.exceptionOccurred = Optional.of(e);
+        }
+    }
+
+    private void givenDeleteFactoryConfiguration(String pid, boolean takeSnapshot) {
+        try {
+            ConfigurationServiceTest.configurationService.deleteFactoryConfiguration(pid, takeSnapshot);
 
             if (takeSnapshot) {
                 this.snapshotsBefore = ConfigurationServiceTest.configurationService.getSnapshots();
@@ -647,11 +672,7 @@ public class ConfigurationServiceTest {
     }
 
     private void givenNoSnapshotsInKuraDir() {
-        try {
-            cleanSnapshots();
-        } catch (KuraException e) {
-            this.exceptionOccurred = Optional.of(e);
-        }
+        cleanSnapshots();
     }
 
     /*
@@ -903,6 +924,22 @@ public class ConfigurationServiceTest {
         }
     }
 
+    private void thenFactoryComponentHasBeenDeleted(String pid) throws KuraException {
+        Long lastSnapshotId = ((TreeSet<Long>) ConfigurationServiceTest.configurationService.getSnapshots()).last();
+        List<ComponentConfiguration> lastSnapshot = ConfigurationServiceTest.configurationService
+                .getSnapshot(lastSnapshotId);
+
+        assertEquals(0, lastSnapshot.stream().filter(cc -> cc.getPid().equals(pid)).count());
+    }
+
+    private void thenFactoryComponentHasBeenCreated(String pid) throws KuraException {
+        Long lastSnapshotId = ((TreeSet<Long>) ConfigurationServiceTest.configurationService.getSnapshots()).last();
+        List<ComponentConfiguration> lastSnapshot = ConfigurationServiceTest.configurationService
+                .getSnapshot(lastSnapshotId);
+
+        assertEquals(1, lastSnapshot.stream().filter(cc -> cc.getPid().equals(pid)).count());
+    }
+
     private void thenConfigurableComponentPidsNotAssignable() {
         try {
             this.configurableComponentPids.add("should-be-unsupported");
@@ -1016,10 +1053,10 @@ public class ConfigurationServiceTest {
     }
 
     private void thenContainsWireComponentsDefinitions(List<ComponentConfiguration> configs, boolean includesAsset) {
-        final String[] PIDS = { "org.eclipse.kura.wire.CloudPublisher", "org.eclipse.kura.wire.CloudSubscriber",
+        final String[] pids = { "org.eclipse.kura.wire.CloudPublisher", "org.eclipse.kura.wire.CloudSubscriber",
                 "org.eclipse.kura.wire.Fifo", "org.eclipse.kura.wire.Logger", "org.eclipse.kura.wire.RegexFilter",
                 "org.eclipse.kura.wire.Timer" };
-        for (final String pid : PIDS) {
+        for (final String pid : pids) {
             assertTrue(configs.stream()
                     .filter(config -> config.getPid().equals(pid) && config.getDefinition().getId().equals(pid))
                     .findAny().isPresent());
@@ -1036,9 +1073,6 @@ public class ConfigurationServiceTest {
 
     @Before
     public void cleanUp() {
-        // this.bundleContext = null;
-        // this.bundleContext = FrameworkUtil.getBundle(ConfigurationServiceTest.class).getBundleContext();
-
         this.exceptionOccurred = Optional.empty();
 
         try {
@@ -1051,7 +1085,7 @@ public class ConfigurationServiceTest {
     }
 
     private boolean snapshotContains(List<ComponentConfiguration> snapshot, String pid,
-            Map<String, Object> expectedProperties) throws KuraException {
+            Map<String, Object> expectedProperties) {
         boolean found = false;
 
         for (ComponentConfiguration cc : snapshot) {
@@ -1075,7 +1109,7 @@ public class ConfigurationServiceTest {
         return found;
     }
 
-    private void cleanSnapshots() throws KuraException {
+    private void cleanSnapshots() {
         if (systemService != null) {
             this.kuraSnapshotsCount = systemService.getKuraSnapshotsCount();
             this.kuraSnapshotsDir = systemService.getKuraSnapshotsDirectory();

@@ -1669,7 +1669,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 .ofNullable(currentConfigs.get(snapshotConfig.getPid()));
 
         try {
-            logger.info("Procession configuration rollback for component with pid {}...", snapshotConfig.getPid());
+            logger.info("Processing configuration rollback for component with pid {}...", snapshotConfig.getPid());
             rollbackConfigurationInternal(snapshotConfig, optionalCurrentConfig);
         } catch (IOException e) {
             logger.warn("Failed to rollback configuration for pid {}", snapshotConfig.getPid(), e);

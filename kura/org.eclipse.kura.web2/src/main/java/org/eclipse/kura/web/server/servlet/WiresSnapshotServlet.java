@@ -58,9 +58,6 @@ public class WiresSnapshotServlet extends AuditServlet {
     private static final String WIRE_GRAPH_SERVICE_PID = "org.eclipse.kura.wire.graph.WireGraphService";
     private static final String WIRE_ASSET_FACTORY_PID = "org.eclipse.kura.wire.WireAsset";
 
-    private static final String JSON_FORMAT = "json";
-    private static final String XML_FORMAT = "xml";
-
     private static final long serialVersionUID = -7483037360719617846L;
     private static final Logger logger = LoggerFactory.getLogger(WiresSnapshotServlet.class);
 
@@ -107,7 +104,7 @@ public class WiresSnapshotServlet extends AuditServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         KuraRemoteServiceServlet.requirePermissions(request, Mode.ALL, new String[] { KuraPermission.WIRES_ADMIN });
@@ -149,7 +146,7 @@ public class WiresSnapshotServlet extends AuditServlet {
             });
 
             GwtServerUtil.writeSnapshot(response, result, "graph_snapshot_" + System.currentTimeMillis(),
-                    request.getParameter("format"));
+                    request.getParameter("downloadFormat"));
 
         } catch (Exception e) {
             logger.warn("Failed to download snapshot", e);

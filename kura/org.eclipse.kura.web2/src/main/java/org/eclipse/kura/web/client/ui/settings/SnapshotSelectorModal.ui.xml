@@ -2,7 +2,7 @@
 
 <!--
     
-    Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -55,14 +55,14 @@
 	    }
 	</ui:style>
 
-    <b:Modal closable="false" fade="true" dataBackdrop="STATIC" ui:field="downloadModal" b:id="download-modal">
+    <b:Modal closable="false" fade="true" dataBackdrop="STATIC" ui:field="snapshotModal" b:id="snapshot-modal">
             <b:ModalBody>
                 <g:FormPanel>
-                <b:Form ui:field="snapshotDownloadForm">
+                <b:Form ui:field="snapshotForm">
                     <b:FieldSet>
                         <b:FormGroup>
-                            <b.html:Paragraph ui:field="downloadModalDescription" />
-                            <b.html:Paragraph ui:field="formatModalHint" text="{msgs.formatDownloadHint}" />
+                            <b.html:Paragraph ui:field="snapshotModalDescription" />
+                            <b.html:Paragraph ui:field="snapshotModalHint" />
                             <g:Label ui:field="searchBoxSeparatorSmall" addStyleNames="{style.small-spacing}"/>
                             <b:TextBox placeholder="{msgs.snapshotDownloadSearchBoxPlaceholder}"
 								ui:field="pidSearch" addStyleNames="services-search" />
@@ -70,10 +70,6 @@
                             <g:ScrollPanel ui:field="pidSelectionScrollPanel"></g:ScrollPanel>
                             <b:FormLabel addStyleNames="{style.channel-name-validation-label}" ui:field="noPidSelectedError" text="{msgs.downloadSnapshotError}" />
                         </b:FormGroup>
-                        <g:Hidden ui:field="xsrfTokenField" />
-                        <g:Hidden ui:field="pidsListField" />
-                        <g:Hidden ui:field="snapshotDownloadFormatField" />
-                        <g:Hidden ui:field="snapshotIdField" />
                     </b:FieldSet>
                 </b:Form>
                 </g:FormPanel>
@@ -82,11 +78,7 @@
 			        <g:Label ui:field="selectedPidCounter" addStyleNames="{style.right-label}" />
 			    </g:HorizontalPanel>
             </b:ModalBody>
-            <b:ModalFooter>
-                <b:Button addStyleNames="fa" type="PRIMARY" ui:field= "cancelButton" text="{msgs.cancelButton}" />
-                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="downloadJson" text="{msgs.downloadSnapshotJsonButton}" />
-                <b:Button addStyleNames="fa" type="PRIMARY" ui:field="downloadXml" text="{msgs.downloadSnapshotXmlButton}" />
-            </b:ModalFooter>
+            <b:ModalFooter ui:field="snapshotFooter"/>
         </b:Modal>
 
 </ui:UiBinder> 

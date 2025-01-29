@@ -61,7 +61,6 @@ public class TabIp4Ui extends Composite implements NetworkTab {
     private static final String DNS_REGEX = "[\\s,;\\n\\t]+";
     private static final String NET_IPV4_STATUS_ENABLED_WAN = "netIPv4StatusEnabledWAN";
     private static final String NET_IPV4_STATUS_ENABLED_LAN = "netIPv4StatusEnabledLAN";
-    private static final String NET_IPV4_STATUS_L2_ONLY = "netIPv4StatusL2Only";
     private static final String NET_IPV4_STATUS_UNMANAGED = "netIPv4StatusUnmanaged";
     private static final String NET_IPV4_STATUS_DISABLED = "netIPv4StatusDisabled";
     private static final String IPV4_MODE_MANUAL = GwtNetIfConfigMode.netIPv4ConfigModeManual.name();
@@ -72,7 +71,6 @@ public class TabIp4Ui extends Composite implements NetworkTab {
     private static final String IPV4_STATUS_LAN = GwtNetIfStatus.netIPv4StatusEnabledLAN.name();
     private static final String IPV4_STATUS_LAN_MESSAGE = MessageUtils.get(IPV4_STATUS_LAN);
     private static final String IPV4_STATUS_UNMANAGED = GwtNetIfStatus.netIPv4StatusUnmanaged.name();
-    private static final String IPV4_STATUS_L2ONLY = GwtNetIfStatus.netIPv4StatusL2Only.name();
 
     private static final String IPV4_STATUS_DISABLED = GwtNetIfStatus.netIPv4StatusDisabled.name();
     private static final String IPV4_STATUS_DISABLED_MESSAGE = MessageUtils.get(IPV4_STATUS_DISABLED);
@@ -220,7 +218,6 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         this.status.addItem(MessageUtils.get(NET_IPV4_STATUS_UNMANAGED));
 
         if (this.selectedNetIfConfig != null && this.selectedNetIfConfig.getHwTypeEnum() != GwtNetIfType.MODEM) {
-            this.status.addItem(MessageUtils.get(NET_IPV4_STATUS_L2_ONLY));
             this.status.addItem(MessageUtils.get(NET_IPV4_STATUS_ENABLED_LAN));
         }
         this.status.addItem(MessageUtils.get(NET_IPV4_STATUS_ENABLED_WAN));
@@ -232,8 +229,6 @@ public class TabIp4Ui extends Composite implements NetworkTab {
 
             if (this.status.getSelectedItemText().equals(MessageUtils.get(NET_IPV4_STATUS_UNMANAGED))) {
                 updatedNetIf.setStatus(IPV4_STATUS_UNMANAGED);
-            } else if (this.status.getSelectedItemText().equals(MessageUtils.get(NET_IPV4_STATUS_L2_ONLY))) {
-                updatedNetIf.setStatus(IPV4_STATUS_L2ONLY);
             } else if (this.status.getSelectedItemText().equals(MessageUtils.get(NET_IPV4_STATUS_ENABLED_LAN))) {
                 updatedNetIf.setStatus(IPV4_STATUS_LAN);
             } else if (this.status.getSelectedItemText().equals(MessageUtils.get(NET_IPV4_STATUS_ENABLED_WAN))) {

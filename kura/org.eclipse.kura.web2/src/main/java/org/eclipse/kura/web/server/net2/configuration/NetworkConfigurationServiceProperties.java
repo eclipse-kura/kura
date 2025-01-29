@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Areti
@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +88,15 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_IP4_DNS_SERVERS = "net.interface.%s.config.ip4.dnsServers";
 
     public Optional<String> getIp4Status(String ifname) {
-        return getNonEmptyStringProperty(this.properties.get(String.format(NET_INTERFACE_CONFIG_IP4_STATUS, ifname)));
+        Optional<String> ip4Status = getNonEmptyStringProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_IP4_STATUS, ifname)));
+
+        // L2Only is an alias for Unmanaged
+        if (ip4Status.isPresent() && ip4Status.get().equals(GwtNetIfStatus.netIPv4StatusL2Only.name())) {
+            return Optional.of(GwtNetIfStatus.netIPv4StatusUnmanaged.name());
+        }
+
+        return ip4Status;
     }
 
     public void setIp4Status(String ifname, String status) {

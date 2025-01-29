@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.net.util.NetworkUtil;
+import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,8 +92,8 @@ public class NetworkConfigurationServiceProperties {
                 this.properties.get(String.format(NET_INTERFACE_CONFIG_IP4_STATUS, ifname)));
 
         // L2Only is an alias for Unmanaged
-        if (ip4Status.isPresent() && ip4Status.get().equals("netIPv4StatusL2Only")) {
-            return Optional.of("netIPv4StatusUnmanaged");
+        if (ip4Status.isPresent() && ip4Status.get().equals(GwtNetIfStatus.netIPv4StatusL2Only.name())) {
+            return Optional.of(GwtNetIfStatus.netIPv4StatusUnmanaged.name());
         }
 
         return ip4Status;

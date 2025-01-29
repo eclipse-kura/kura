@@ -23,8 +23,8 @@ public class SnapshotSelectorActionButton {
     private final Button button;
     private final HandlerRegistration clickHandler;
 
-    public SnapshotSelectorActionButton(String label, String styleName, ButtonType type, ClickHandler event) {
-        this.button = new Button(label);
+    public SnapshotSelectorActionButton(String text, String styleName, ButtonType type, ClickHandler event) {
+        this.button = new Button(text);
         this.button.addStyleName(styleName);
         this.button.setType(type);
         this.clickHandler = this.button.addClickHandler(event);
@@ -36,5 +36,9 @@ public class SnapshotSelectorActionButton {
 
     public void removeClickHandler() {
         this.clickHandler.removeHandler();
+    }
+
+    public void setButtonText(String text) {
+        this.button.setText(text);
     }
 }

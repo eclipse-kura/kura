@@ -152,7 +152,7 @@ Name                                                     | Type     | Descriptio
 
 Name                                                  | Type     | Description                              | Default value
 ------------------------------------------------------|----------|------------------------------------------|----------------------------
-`net.interface.<interface>.config.ip6.status`	      | String   | The status of the interface for the IPv6 configuration; possibile values are: `netIPv6StatusDisabled`, `netIPv6StatusUnmanaged`, `netIPv6StatusL2Only`[^2], `netIPv6StatusEnabledLAN`, `netIPv6StatusEnabledWAN`, `netIPv6StatusUnknown` | `netIPv6StatusDisabled` (see note below)
+`net.interface.<interface>.config.ip6.status`	      | String   | The status of the interface for the IPv6 configuration; possibile values are: `netIPv6StatusDisabled`, `netIPv6StatusUnmanaged`, `netIPv6StatusEnabledLAN`, `netIPv6StatusEnabledWAN`, `netIPv6StatusUnknown` | `netIPv6StatusDisabled` (see note below)
 `net.interface.<interface>.config.ip6.wan.priority`   | Integer  | Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See [Network Failover](./network-failover.md) for further details | -1
 `net.interface.<interface>.config.ip6.address.method` | String   | The IPv6 configuration method; possible values are: `AUTO`, `DHCP`, `MANUAL`. | `AUTO`
 `net.interface.<interface>.config.ip6.address`        | String   | The IPv6 address assigned to the network interface |
@@ -583,4 +583,4 @@ This section presents some snapshot examples to perform basic operations on netw
 ```
 
 [^1]: Legacy setting that used to help establishing PPP data sessions for GSM-based modems. Deprecated by NetworkManager and not used anymore. Kura will read it and populate the configuration with the correct values but NetworkManager might not honor the setting depending on its version.
-[^2]: Supported for compatibility reasons. The behaviour of `netIPv4StatusL2Only`/`netIPv6StatusL2Only` corresponds to `netIPv4StatusUnmanaged`/`netIPv6StatusUnmanaged` (i.e. the interface will be brought up but IP configuration is left to the user).
+[^2]: Supported for older versions compatibility reasons. From ESF 8.0 `netIPv4StatusL2Only` is an alias for `netIPvXStatusUnmanaged` (i.e. the interface will be brought up but IP configuration is left to the user). Users still using this mode should migrate to `netIPv4StatusUnmanaged`/`netIPv6StatusUnmanaged`. Please note that `netIPv4StatusL2Only` will override any status setting for IPv6, this is needed to maintain compatibility with older snapshots where IPv6 was not supported.

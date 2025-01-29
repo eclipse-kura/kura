@@ -30,6 +30,10 @@ public enum KuraInterfaceStatus {
         boolean ip6Unmanaged = ip6Status == KuraIpStatus.UNMANAGED;
         boolean ip6Unknown = ip6Status == KuraIpStatus.UNKNOWN;
 
+        if (ip4Unknown || ip6Unknown) {
+            throw new IllegalArgumentException("ip4 and ip6 status should not be UNKNOWN");
+        }
+
         if (ip4Enabled && ip6Enabled || ip4Enabled && ip6Disabled || ip4Disabled && ip6Enabled) {
             return ENABLED;
         }
@@ -40,10 +44,6 @@ public enum KuraInterfaceStatus {
 
         if (ip4Unmanaged || ip6Unmanaged) { // && (ip4Status != ip6Status)
             throw new IllegalArgumentException("ip4 and ip6 status should be both UNMANAGED");
-        }
-
-        if (ip4Unknown || ip6Unknown) {
-            throw new IllegalArgumentException("ip4 and ip6 status should not be UNKNOWN");
         }
 
         return DISABLED;

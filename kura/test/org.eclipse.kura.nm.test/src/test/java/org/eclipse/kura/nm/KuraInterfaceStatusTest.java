@@ -44,7 +44,6 @@ public class KuraInterfaceStatusTest {
                 { KuraIpStatus.L2ONLY, KuraIpStatus.ENABLEDLAN, KuraInterfaceStatus.UNMANAGED, null }, //
                 { KuraIpStatus.L2ONLY, KuraIpStatus.ENABLEDWAN, KuraInterfaceStatus.UNMANAGED, null }, //
                 { KuraIpStatus.L2ONLY, KuraIpStatus.L2ONLY, KuraInterfaceStatus.UNMANAGED, null }, //
-                { KuraIpStatus.L2ONLY, KuraIpStatus.UNKNOWN, KuraInterfaceStatus.UNMANAGED, null }, //
                 { KuraIpStatus.UNMANAGED, KuraIpStatus.UNMANAGED, KuraInterfaceStatus.UNMANAGED, null }, //
                 { KuraIpStatus.UNMANAGED, KuraIpStatus.DISABLED, null, IllegalArgumentException.class }, //
                 { KuraIpStatus.UNMANAGED, KuraIpStatus.ENABLEDLAN, null, IllegalArgumentException.class }, //
@@ -60,6 +59,7 @@ public class KuraInterfaceStatusTest {
                 { KuraIpStatus.ENABLEDLAN, KuraIpStatus.UNKNOWN, null, IllegalArgumentException.class }, //
                 { KuraIpStatus.ENABLEDWAN, KuraIpStatus.UNKNOWN, null, IllegalArgumentException.class }, //
                 { KuraIpStatus.UNMANAGED, KuraIpStatus.UNKNOWN, null, IllegalArgumentException.class }, //
+                { KuraIpStatus.L2ONLY, KuraIpStatus.UNKNOWN, null, IllegalArgumentException.class }, //
         });
     }
 

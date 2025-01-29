@@ -87,7 +87,15 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_IP4_DNS_SERVERS = "net.interface.%s.config.ip4.dnsServers";
 
     public Optional<String> getIp4Status(String ifname) {
-        return getNonEmptyStringProperty(this.properties.get(String.format(NET_INTERFACE_CONFIG_IP4_STATUS, ifname)));
+        Optional<String> ip4Status = getNonEmptyStringProperty(
+                this.properties.get(String.format(NET_INTERFACE_CONFIG_IP4_STATUS, ifname)));
+
+        // L2Only is an alias for Unmanaged
+        if (ip4Status.isPresent() && ip4Status.get().equals("netIPv4StatusL2Only")) {
+            return Optional.of("netIPv4StatusUnmanaged");
+        } else {
+            return ip4Status;
+        }
     }
 
     public void setIp4Status(String ifname, String status) {

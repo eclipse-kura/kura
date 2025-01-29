@@ -40,13 +40,20 @@ public class KuraInterfaceStatusTest {
                 { KuraIpStatus.ENABLEDWAN, KuraIpStatus.DISABLED, KuraInterfaceStatus.ENABLED, null }, //
                 { KuraIpStatus.DISABLED, KuraIpStatus.ENABLEDLAN, KuraInterfaceStatus.ENABLED, null }, //
                 { KuraIpStatus.DISABLED, KuraIpStatus.ENABLEDWAN, KuraInterfaceStatus.ENABLED, null }, //
+                { KuraIpStatus.L2ONLY, KuraIpStatus.DISABLED, KuraInterfaceStatus.UNMANAGED, null }, //
+                { KuraIpStatus.L2ONLY, KuraIpStatus.ENABLEDLAN, KuraInterfaceStatus.UNMANAGED, null }, //
+                { KuraIpStatus.L2ONLY, KuraIpStatus.ENABLEDWAN, KuraInterfaceStatus.UNMANAGED, null }, //
+                { KuraIpStatus.L2ONLY, KuraIpStatus.L2ONLY, KuraInterfaceStatus.UNMANAGED, null }, //
+                { KuraIpStatus.L2ONLY, KuraIpStatus.UNKNOWN, KuraInterfaceStatus.UNMANAGED, null }, //
                 { KuraIpStatus.UNMANAGED, KuraIpStatus.UNMANAGED, KuraInterfaceStatus.UNMANAGED, null }, //
                 { KuraIpStatus.UNMANAGED, KuraIpStatus.DISABLED, null, IllegalArgumentException.class }, //
                 { KuraIpStatus.UNMANAGED, KuraIpStatus.ENABLEDLAN, null, IllegalArgumentException.class }, //
                 { KuraIpStatus.UNMANAGED, KuraIpStatus.ENABLEDWAN, null, IllegalArgumentException.class }, //
+                { KuraIpStatus.UNMANAGED, KuraIpStatus.L2ONLY, null, IllegalArgumentException.class }, //
                 { KuraIpStatus.UNKNOWN, KuraIpStatus.DISABLED, null, IllegalArgumentException.class }, //
                 { KuraIpStatus.UNKNOWN, KuraIpStatus.ENABLEDLAN, null, IllegalArgumentException.class }, //
                 { KuraIpStatus.UNKNOWN, KuraIpStatus.ENABLEDWAN, null, IllegalArgumentException.class }, //
+                { KuraIpStatus.UNKNOWN, KuraIpStatus.L2ONLY, null, IllegalArgumentException.class }, //
                 { KuraIpStatus.UNKNOWN, KuraIpStatus.UNMANAGED, null, IllegalArgumentException.class }, //
                 { KuraIpStatus.UNKNOWN, KuraIpStatus.UNKNOWN, null, IllegalArgumentException.class }, //
                 { KuraIpStatus.DISABLED, KuraIpStatus.UNKNOWN, null, IllegalArgumentException.class }, //

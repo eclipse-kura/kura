@@ -39,9 +39,10 @@ public enum KuraIpStatus {
             return KuraIpStatus.DISABLED;
         case "netIPv4StatusUnmanaged":
         case "netIPv6StatusUnmanaged":
+            return KuraIpStatus.UNMANAGED;
         case "netIPv4StatusL2Only":
         case "netIPv6StatusL2Only":
-            return KuraIpStatus.UNMANAGED;
+            return KuraIpStatus.L2ONLY;
         case "netIPv4StatusEnabledLAN":
         case "netIPv6StatusEnabledLAN":
             return KuraIpStatus.ENABLEDLAN;
@@ -64,9 +65,10 @@ public enum KuraIpStatus {
                 return Optional.of(KuraIpStatus.DISABLED);
             case "netIPv4StatusUnmanaged":
             case "netIPv6StatusUnmanaged":
+                return Optional.of(KuraIpStatus.UNMANAGED);
             case "netIPv4StatusL2Only":
             case "netIPv6StatusL2Only":
-                return Optional.of(KuraIpStatus.UNMANAGED);
+                return Optional.of(KuraIpStatus.L2ONLY);
             case "netIPv4StatusEnabledLAN":
             case "netIPv6StatusEnabledLAN":
                 return Optional.of(KuraIpStatus.ENABLEDLAN);

@@ -206,7 +206,7 @@ Name                                                   | Type     | Description 
 `net.interface.<interface>.config.diversityEnabled`[^1]| Boolean  | Enable the LTE diversity antenna                                       | false
 `net.interface.<interface>.config.resetTimeout`        | Integer  | The modem reset timeout in minutes                                     | 5
 `net.interface.<interface>.config.gpsEnabled`          | Boolean  | Enable the GPS device in the modem if available                        | false
-`net.interface.<interface>.config.gpsMode`             | String   | Select the GPS mode to activate for the modem if available             | `kuraModemGpsModeUnmanaged`
+`net.interface.<interface>.config.gpsMode`[^2]         | String   | Select the GPS mode to activate for the modem if available             | `kuraModemGpsModeUnmanaged`
 `net.interface.<interface>.config.persist`[^1]         | Boolean  | The persist option of the PPP daemon                                   | true
 `net.interface.<interface>.config.apn`                 | String   | The modem Access Point Name                                            |
 `net.interface.<interface>.config.dialString`[^1]      | String   | The dial string used for connecting to the APN                         |

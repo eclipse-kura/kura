@@ -4861,7 +4861,6 @@ Since the network configuration shown on the screen may not be synchronized with
 <li>Enabled for LAN: designates the interface for a local network. It can be set as a DHCP server for hosts on the local network and can serve as a default gateway for those hosts; however, it cannot be set as an actual gateway interface for this device. That is, packets must be routed from this interface to another interface that is configured as WAN. The interface is automatically brought up at boot.</li>
 <li>Enabled for WAN: designates the interface as a gateway to an external network. The interface is automatically brought up at boot.</li>
 <li>Not Managed: the interface will be ignored by Kura (available only for <strong>IPv4</strong>).</li>
-<li>Layer 2 Only<sup id="fnref3:2"><a class="footnote-ref" href="#fn:2">2</a></sup>: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot.</li>
 </ul>
 </li>
 <li><strong>WAN Priority</strong> - configure the network failover. See <a href="../network-failover/">here</a> for more details.</li>
@@ -5020,7 +5019,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip4.status</code></td>
 <td>String</td>
-<td>The status of the interface for the IPv4 configuration; possibile values are: <code>netIPv4StatusDisabled</code>, <code>netIPv4StatusUnmanaged</code>, <code>netIPv4StatusL2Only</code><sup id="fnref2:2"><a class="footnote-ref" href="#fn:2">2</a></sup>, <code>netIPv4StatusEnabledLAN</code>, <code>netIPv4StatusEnabledWAN</code>, <code>netIPv4StatusUnknown</code></td>
+<td>The status of the interface for the IPv4 configuration; possibile values are: <code>netIPv4StatusDisabled</code>, <code>netIPv4StatusUnmanaged</code>, <code>netIPv4StatusL2Only</code><sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup>, <code>netIPv4StatusEnabledLAN</code>, <code>netIPv4StatusEnabledWAN</code>, <code>netIPv4StatusUnknown</code></td>
 <td><code>netIPv4StatusDisabled</code> (see note below)</td>
 </tr>
 <tr>
@@ -5153,7 +5152,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip6.status</code></td>
 <td>String</td>
-<td>The status of the interface for the IPv6 configuration; possibile values are: <code>netIPv6StatusDisabled</code>, <code>netIPv6StatusUnmanaged</code>, <code>netIPv6StatusL2Only</code><sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup>, <code>netIPv6StatusEnabledLAN</code>, <code>netIPv6StatusEnabledWAN</code>, <code>netIPv6StatusUnknown</code></td>
+<td>The status of the interface for the IPv6 configuration; possibile values are: <code>netIPv6StatusDisabled</code>, <code>netIPv6StatusUnmanaged</code>, <code>netIPv6StatusEnabledLAN</code>, <code>netIPv6StatusEnabledWAN</code>, <code>netIPv6StatusUnknown</code></td>
 <td><code>netIPv6StatusDisabled</code> (see note below)</td>
 </tr>
 <tr>
@@ -5850,7 +5849,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <p>Legacy setting that used to help establishing PPP data sessions for GSM-based modems. Deprecated by NetworkManager and not used anymore. Kura will read it and populate the configuration with the correct values but NetworkManager might not honor the setting depending on its version.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
 <li id="fn:2">
-<p>Supported for compatibility reasons. The behaviour of <code>netIPv4StatusL2Only</code>/<code>netIPv6StatusL2Only</code> corresponds to <code>netIPv4StatusUnmanaged</code>/<code>netIPv6StatusUnmanaged</code> (i.e. the interface will be brought up but IP configuration is left to the user).&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:2" title="Jump back to footnote 2 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+<p>Supported for compatibility reasons. From Eclipse Kura 6.0 <code>netIPv4StatusL2Only</code> is an alias for <code>netIPvXStatusUnmanaged</code> (i.e. the interface will be brought up but IP configuration is left to the user). Users still using this mode should migrate to <code>netIPv4StatusUnmanaged</code>/<code>netIPv6StatusUnmanaged</code>. Please note that <code>netIPv4StatusL2Only</code> will override any status setting for IPv6, this is needed to maintain compatibility with older snapshots where IPv6 was not supported.&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
 </li>
 </ol>
 </div>

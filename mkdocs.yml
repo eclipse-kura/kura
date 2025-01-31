@@ -1,4 +1,5 @@
 site_name: Eclipse Kura™ Documentation
+site_url: 'https://eclipse-kura.github.io/kura/'
 
 nav:
     - Getting Started:

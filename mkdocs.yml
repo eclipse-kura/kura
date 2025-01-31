@@ -221,8 +221,8 @@ markdown_extensions:
   - footnotes
 
 copyright: >
-  Copyright &copy; 2025 Eurotech and/or its affiliates and others –
-  <a href="#__consent">Change cookie settings</a>
+  Copyright &copy; Eclipse Foundation AISBL. All Rights Reserved. –
+  <a href="#__consent"><b>Change cookie settings<b></a>
 
 extra:
   version:

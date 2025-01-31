@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,13 @@ package org.eclipse.kura.ai.triton.server;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
@@ -34,9 +40,10 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
-import org.eclipse.kura.ai.inference.InferenceEngineService;
+import org.eclipse.kura.ai.inference.InferenceEngineMetricsService;
 import org.eclipse.kura.ai.inference.ModelInfo;
 import org.eclipse.kura.ai.inference.ModelInfoBuilder;
 import org.eclipse.kura.ai.inference.Tensor;
@@ -74,7 +81,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 
-public abstract class TritonServerServiceAbs implements InferenceEngineService, ConfigurableComponent {
+public abstract class TritonServerServiceAbs implements InferenceEngineMetricsService, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(TritonServerServiceAbs.class);
     private static final String TEMP_DIRECTORY_PREFIX = "decrypted_models";
@@ -384,8 +391,91 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         } catch (StatusRuntimeException | IllegalArgumentException e) {
             logger.warn("Cannot infer outputs for " + modelInfo.getName() + " model", e);
         }
+
+        // Only for test
+        Map<String, String> metrics = getMetrics();
+        metrics.forEach((k, v) -> logger.info("{} {}", k, v));
+
         return inferenceResults;
 
+    }
+
+    // With HttpClient API. Available from Java 11
+    // @Override
+    // public Map<String, String> getMetrics() throws KuraException {
+    // Map<String, String> metrics = new HashMap<>();
+    // try {
+    // HttpRequest request = HttpRequest.newBuilder()
+    // .uri(new URI("http://localhost:" + this.options.getMetricsPort() + "/metrics"))
+    // .timeout(Duration.ofSeconds(10)).GET().build();
+    // HttpClient client = HttpClient.newHttpClient();
+    // HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+    // if (response.statusCode() == 200) {
+    // if (logger.isDebugEnabled()) {
+    // logger.debug(response.body());
+    // }
+    // MetricsParser metricsParser = new MetricsParser(response.body());
+    // metrics = metricsParser.parse();
+    // } else {
+    // logger.warn("Cannot retrieve metrics. Error code {}.", response.statusCode());
+    // }
+    // } catch (URISyntaxException | IOException e) {
+    // throw new KuraConnectException(e);
+    // } catch (InterruptedException e) {
+    // Thread.currentThread().interrupt();
+    // throw new KuraConnectException(e);
+    // }
+    // return metrics;
+    // }
+
+    @Override
+    public Map<String, String> getMetrics() throws KuraException {
+        Map<String, String> metrics = new HashMap<>();
+        if (!this.options.areMetricsEnabled()) {
+            logger.debug("Triton Server Metrics not enabled.");
+            return metrics;
+        }
+
+        HttpURLConnection connection = null;
+        try {
+            URL url = new URI("http://localhost:" + this.options.getMetricsPort() + "/metrics").toURL();
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setReadTimeout(10000);
+            connection.setConnectTimeout(10000);
+
+            int status = connection.getResponseCode();
+            if (status == 200) {
+                List<String> response = getResponse(connection);
+
+                MetricsParser metricsParser = new MetricsParser(response);
+                metrics = metricsParser.parse();
+            } else {
+                logger.warn("Cannot retrieve metrics. Error code {}.", status);
+            }
+        } catch (IOException | URISyntaxException e) {
+            throw new KuraConnectException(e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+
+        return metrics;
+    }
+
+    private List<String> getResponse(HttpURLConnection connection) throws IOException {
+        List<String> response = new ArrayList<>();
+        try (BufferedReader input = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            String line;
+            while ((line = input.readLine()) != null) {
+                response.add(line);
+                if (logger.isDebugEnabled()) {
+                    logger.debug(line);
+                }
+            }
+        }
+        return response;
     }
 
     private Map<String, InferParameter> getInferParameters(Map<String, Object> parameters) {

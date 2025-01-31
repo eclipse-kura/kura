@@ -41,6 +41,11 @@ public class TritonServerServiceOptions {
     private static final String PROPERTY_LOCAL_MODEL_REPOSITORY_PASSWORD = "local.model.repository.password";
     private static final String PROPERTY_LOCAL_BACKENDS_PATH = "local.backends.path";
     private static final String PROPERTY_LOCAL_BACKENDS_CONFIG = "local.backends.config";
+    private static final String PROPERTY_LOCAL_OPTIONAL_CONFIG = "local.optional.config";
+    private static final String PROPERTY_ENABLE_METRICS = "enable.metrics";
+    private static final String PROPERTY_ENABLE_GPU_METRICS = "enable.gpu.metrics";
+    private static final String PROPERTY_ENABLE_CPU_METRICS = "enable.cpu.metrics";
+    private static final String PROPERTY_METRICS_CONFIG = "metrics.config";
     private static final String PROPERTY_MODELS = "models";
     private static final String PROPERTY_LOCAL = "enable.local";
     private static final String PROPERTY_TIMEOUT = "timeout";
@@ -204,6 +209,48 @@ public class TritonServerServiceOptions {
             backendsConfigs = Arrays.asList(((String) propertyBackendsConfig).trim().split(";"));
         }
         return backendsConfigs;
+    }
+
+    public List<String> getOptionalConfigs() {
+        List<String> optionalConfigs = new ArrayList<>();
+        final Object optionalBackendsConfig = this.properties.get(PROPERTY_LOCAL_OPTIONAL_CONFIG);
+        if (optionalBackendsConfig instanceof String && !((String) optionalBackendsConfig).isEmpty()) {
+            optionalConfigs = Arrays.asList(((String) optionalBackendsConfig).trim().split(";"));
+        }
+        return optionalConfigs;
+    }
+
+    public boolean areMetricsEnabled() {
+        final Object metricEnabled = this.properties.get(PROPERTY_ENABLE_METRICS);
+        if (metricEnabled instanceof Boolean) {
+            return (Boolean) metricEnabled;
+        }
+        return true;
+    }
+
+    public boolean areGpuMetricsEnabled() {
+        final Object metricGpuEnabled = this.properties.get(PROPERTY_ENABLE_GPU_METRICS);
+        if (metricGpuEnabled instanceof Boolean) {
+            return (Boolean) metricGpuEnabled;
+        }
+        return true;
+    }
+
+    public boolean areCpuMetricsEnabled() {
+        final Object metricCpuEnabled = this.properties.get(PROPERTY_ENABLE_CPU_METRICS);
+        if (metricCpuEnabled instanceof Boolean) {
+            return (Boolean) metricCpuEnabled;
+        }
+        return true;
+    }
+
+    public List<String> getMetricsConfig() {
+        List<String> metricsConfig = new ArrayList<>();
+        final Object propertyMetricsConfig = this.properties.get(PROPERTY_METRICS_CONFIG);
+        if (propertyMetricsConfig instanceof String && !((String) propertyMetricsConfig).isEmpty()) {
+            metricsConfig = Arrays.asList(((String) propertyMetricsConfig).trim().split(";"));
+        }
+        return metricsConfig;
     }
 
     public List<String> getModels() {

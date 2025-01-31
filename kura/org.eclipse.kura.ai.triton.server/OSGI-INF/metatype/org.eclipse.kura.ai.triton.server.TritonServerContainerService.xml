@@ -91,6 +91,51 @@
             description="A semi-colon separated list of configuration for the backends. i.e. tensorflow,version=2;tensorflow,allow-soft-placement=false">
         </AD>
 
+        <AD id="local.optional.config"
+            name="Optional configuration for tritonserver (only for debug)"
+            type="String"
+            cardinality="0"
+            required="false"
+            default=""
+            description="A semi-colon separated list of configuration for the triton server application. i.e. allow-gpu-metrics">
+        </AD>
+        
+         <AD id="enable.metrics"
+            name="Enable Triton Server Metrics"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Enable the Triton Server Metrics.">
+        </AD>  
+        
+        <AD id="enable.gpu.metrics"
+            name="Enable Triton Server GPU Metrics"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Enable the Triton Server GPU Metrics.">
+        </AD> 
+        
+        <AD id="enable.cpu.metrics"
+            name="Enable Triton Server CPU Metrics"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Enable the Triton Server CPU Metrics.">
+        </AD>      
+        
+        <AD id="metrics.config"
+            name="Optional metrics-specific configuration"
+            type="String"
+            cardinality="0"
+            required="false"
+            default=""
+            description="A semi-colon separated list of metrics-specific configuration settings for the Triton Server Metrics. (i.e. counter_latencies=true)">
+        </AD>
+        
         <AD id="container.memory"
             name="Memory"
             description="The maximum amount of memory the container can use in bytes. Set it as a positive integer, optionally followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes.

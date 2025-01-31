@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>${groupId}</groupId>
+    <artifactId>${artifactId}.parent</artifactId>
+    <version>${version}</version>
+    <packaging>pom</packaging>
+
+    <name>Parent POM for ${artifactId}</name>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>cbi</id>
+            <url>https://repo.eclipse.org/content/repositories/cbi-releases/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <tycho-version>4.0.10</tycho-version>
+
+        <!-- Use this BND version as it will generate v1.2.0 DS descriptions suitable for Equinox 3.11.1 -->
+        <bnd-version>4.1.0</bnd-version>
+        <maven-resources-version>3.1.0</maven-resources-version>
+        <maven-deploy-version>2.8.2</maven-deploy-version>
+        <maven.wagon.webdav.plugin.version>2.2</maven.wagon.webdav.plugin.version>
+        <antrun-version>1.8</antrun-version>
+        <exists-version>0.0.6</exists-version>
+        <eclipse.jarsigner.version>1.1.5</eclipse.jarsigner.version>
+        <target-definition-version>${project.version}</target-definition-version>
+        <kura-workdir>${project.build.directory}/kura</kura-workdir>
+        <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
+
+        <skip.artifact.signing>true</skip.artifact.signing>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-compiler-plugin</artifactId>
+                    <version>${tycho-version}</version>
+                    <configuration>
+                        <source>17</source>
+                        <target>17</target>
+                        <showDeprecation>true</showDeprecation>
+                        <showWarnings>true</showWarnings>
+                        <requireJREPackageImports>true</requireJREPackageImports>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-maven-plugin</artifactId>
+                    <version>${tycho-version}</version>
+                    <extensions>true</extensions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>target-platform-configuration</artifactId>
+                    <version>${tycho-version}</version>
+                    <configuration>
+                        <environments>
+                            <environment>
+                                <os>win32</os>
+                                <ws>win32</ws>
+                                <arch>x86_64</arch>
+                            </environment>
+                            <environment>
+                                <os>macosx</os>
+                                <ws>cocoa</ws>
+                                <arch>x86_64</arch>
+                            </environment>
+                            <environment>
+                                <os>linux</os>
+                                <ws>gtk</ws>
+                                <arch>x86_64</arch>
+                            </environment>
+                        </environments>
+                        <target>
+                            <artifact>
+                                <groupId>${groupId}</groupId>
+                                <artifactId>${artifactId}.target-definition</artifactId>
+                                <version>${target-definition-version}</version>
+                            </artifact>
+                        </target>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-packaging-plugin</artifactId>
+                    <version>${tycho-version}</version>
+                    <configuration>
+                        <strictVersions>true</strictVersions>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>${antrun-version}</version>
+                </plugin>
+
+                <plugin>
+                    <!-- used for generating SCR descriptors in the Maven Build, supports M2E
+                    Incremental builds as well -->
+                    <groupId>biz.aQute.bnd</groupId>
+                    <artifactId>bnd-maven-plugin</artifactId>
+                    <version>${bnd-version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>bnd-process</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <!-- copy the OSGI-INF directory to a place where it is being detected and
+                    picked up by PDE Launcher as well, supported by M2E in incremental builds
+                    natively -->
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven-resources-version}</version>
+                    <executions>
+                        <execution>
+                            <id>copy-resources</id>
+                            <!-- here the phase you need -->
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${basedir}/OSGI-INF</outputDirectory>
+                                <resources>
+                                    <resource>
+                                        <directory>${project.build.outputDirectory}/OSGI-INF</directory>
+                                        <filtering>false</filtering>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jarsigner-plugin</artifactId>
+                    <version>1.4</version>
+                    <executions>
+                        <execution>
+                            <id>sign</id>
+                            <goals>
+                                <goal>sign</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <skip>${skip.artifact.signing}</skip>
+                        <storetype>${keystore.type}</storetype>
+                        <keystore>${addon.keystore.path}</keystore>
+                        <alias>${addon.key.alias}</alias>
+                        <storepass>${addon.keystore.password}</storepass>
+                        <keypass>${addon.key.password}</keypass>
+                        <arguments>
+                            <argument>-tsa</argument>
+                            <argument>http://timestamp.digicert.com</argument>
+                        </arguments>
+                        <archiverConfig>
+                            <compress>false</compress>
+                        </archiverConfig>
+                    </configuration>
+                </plugin>
+
+                <!-- enable jar signing via Eclipse Signing Server -->
+                <!-- See
+                http://codeandme.blogspot.com/2017/04/host-your-own-eclipse-signing-server.html -->
+                <!-- Note that https is not supported -->
+                <plugin>
+                    <groupId>org.eclipse.cbi.maven.plugins</groupId>
+                    <artifactId>eclipse-jarsigner-plugin</artifactId>
+                    <version>${eclipse.jarsigner.version}</version>
+                    <executions>
+                        <execution>
+                            <id>sign</id>
+                            <goals>
+                                <goal>sign</goal>
+                            </goals>
+                            <phase>verify</phase>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <signerUrl>http://localhost:8080/jarsigner</signerUrl>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>${maven-deploy-version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.honton.chas</groupId>
+                    <artifactId>exists-maven-plugin</artifactId>
+                    <version>${exists-version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>remote</goal>
+                            </goals>
+                            <configuration>
+                                <artifact>${project.artifactId}-${project.version}.jar</artifact>
+                                <skipIfSnapshot>true</skipIfSnapshot>
+                                <failIfExists>true</failIfExists>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>biz.aQute.bnd</groupId>
+                    <artifactId>bnd-baseline-maven-plugin</artifactId>
+                    <version>${bnd-version}</version>
+                    <configuration>
+                        <failOnMissing>false</failOnMissing>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>baseline</id>
+                            <goals>
+                                <goal>baseline</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jarsigner-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>sign-artifacts</id>
+            <properties>
+                <skip.artifact.signing>false</skip.artifact.signing>
+            </properties>
+        </profile>
+    </profiles>
+
+    <repositories>
+        <repository>
+            <id>repo.eclipse.org</id>
+            <name>Eclipse Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+    </repositories>
+
+    <modules>
+        <module>${artifactId}.bundle</module>
+    </modules>
+</project>

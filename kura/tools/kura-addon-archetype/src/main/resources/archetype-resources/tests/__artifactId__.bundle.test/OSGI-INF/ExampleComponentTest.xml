@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2019, 2024 Eurotech and/or its affiliates. All rights reserved.
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+    activate="activate"
+    deactivate="deactivate"
+    name="${package}.test.ExampleComponentTest">
+
+    <implementation class="${package}.test.ExampleComponentTest" />
+
+    <reference interface="org.eclipse.kura.configuration.ConfigurableComponent"
+        name="ExampleComponent"
+        bind="setExampleComponent"
+        cardinality="1..1"
+        policy="static"
+        target="(kura.service.pid=${package}.ExampleComponent)" />
+</scr:component>

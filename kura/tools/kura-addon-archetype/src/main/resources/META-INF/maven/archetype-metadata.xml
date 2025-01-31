@@ -1,0 +1,71 @@
+<!--
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+-->
+<archetype-descriptor
+    xmlns="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.0.0 http://maven.apache.org/xsd/archetype-descriptor-1.0.0.xsd"
+    partial="true">
+
+    <requiredProperties>
+        <requiredProperty key="mainBundleVendor">
+            <defaultValue>Eclipse Kura</defaultValue>
+        </requiredProperty>
+        <requiredProperty key="version">
+            <defaultValue>1.0.0-SNAPSHOT</defaultValue>
+        </requiredProperty>
+    </requiredProperties>
+
+    <fileSets>
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory>target-definition</directory>
+        </fileSet>
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory>distrib</directory>
+        </fileSet>
+        <!-- exclude keystores from filtering, otherwise they get corrupted -->
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory>tests/test-env</directory>
+            <excludes>
+                <exclude>**/*.ks</exclude>
+            </excludes>
+        </fileSet>
+        <!-- include keystores without filtering -->
+        <fileSet filtered="false">
+            <directory>tests/test-env</directory>
+            <includes>
+                <include>**/*.ks</include>
+            </includes>
+        </fileSet>
+        <!-- include bundles and tests without java file, they are selected as packaged below -->
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory>bundles</directory>
+            <excludes>
+                <exclude>**/*.java</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory>tests</directory>
+            <excludes>
+                <exclude>**/*.java</exclude>
+                <exclude>**/src/main/java/test</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet filtered="true" packaged="true">
+            <directory>bundles/__artifactId__.bundle/src/main/java</directory>
+        </fileSet>
+        <fileSet filtered="true" packaged="true">
+            <directory>tests/__artifactId__.bundle.test/src/main/java</directory>
+        </fileSet>
+    </fileSets>
+
+</archetype-descriptor>

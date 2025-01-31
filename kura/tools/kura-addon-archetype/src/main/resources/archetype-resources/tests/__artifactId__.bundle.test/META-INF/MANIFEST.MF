@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Example component tests
+Bundle-SymbolicName: ${artifactId}.bundle.test;singleton:=true
+Bundle-Version: ${version.replace("-SNAPSHOT", ".qualifier")}
+Bundle-Vendor: EUROTECH
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Require-Bundle: org.junit,
+ ${artifactId}.bundle
+Import-Package: org.eclipse.kura;version="1.5.0",
+ org.eclipse.kura.configuration;version="1.1.2",
+ org.slf4j;version="1.7.25"
+Service-Component: OSGI-INF/*.xml

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>${groupId}</groupId>
+        <artifactId>${artifactId}.parent</artifactId>
+        <version>${version}</version>
+        <relativePath>../bundles/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>${artifactId}.distrib</artifactId>
+    <packaging>pom</packaging>
+
+    <!-- Change this if your org is different -->
+    <organization>
+        <name>Eclipse Kura</name>
+        <url>https://eclipse.dev/kura/</url>
+    </organization>
+
+    <properties>
+        <!--
+            With n being the start level, config.ini will be populated depending on which plugins directory the bundle is put:
+            n => bundle.name:@n;
+            ns => bundle.name:@n:start;
+        -->
+        <addon.installation.dir>/opt/eclipse/kura/plugins/6s</addon.installation.dir>
+
+        <!-- name of the JAR produced in bundles/target -->
+        <jar.name>${artifactId}.bundle</jar.name>
+
+        <!--
+            Available DEB architectures:
+            all, amd64, arm64
+
+            Available RPM architectures:
+            noarch, x86_64, aarch64
+        -->
+        <deb.architecture>all</deb.architecture>
+        <rpm.architecture>noarch</rpm.architecture>
+
+        <!-- final name of the generated debian and rpm package -->
+        <package.name>${artifactId}</package.name>
+
+        <!-- edit following fields and file deb/control/control -->
+        <summary>Summary line (do not end this line with a dot, max 60 chars)</summary>
+        <long.description>Here goes the long description of the packages, in this case this is an example addon for the Eclipse Kura Framework.</long.description>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>1.0.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-and-rename-jar</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>${project.basedir}/../bundles/${jar.name}/target/${jar.name}-${project.version}.jar</sourceFile>
+                            <destinationFile>target/${jar.name}_${project.version}.jar</destinationFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.vafer</groupId>
+                <artifactId>jdeb</artifactId>
+                <version>1.12</version>
+                <executions>
+                    <execution>
+                        <id>generate-deb</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jdeb</goal>
+                        </goals>
+                        <configuration>
+                            <verbose>true</verbose>
+                            <deb>${basedir}/target/${package.name}_${project.version}_${deb.architecture}.deb</deb>
+                            <controlDir>${project.basedir}/deb/control</controlDir>
+                            <skipPOMs>false</skipPOMs>
+                            <dataSet>
+                                <data>
+                                    <src>${basedir}/target/${jar.name}_${project.version}.jar</src>
+                                    <dst>${jar.name}_${project.version}.jar</dst>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>${addon.installation.dir}</prefix>
+                                        <user>kurad</user>
+                                        <group>kurad</group>
+                                        <filemode>600</filemode>
+                                    </mapper>
+                                </data>
+                            </dataSet>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>rpm-maven-plugin</artifactId>
+                <version>2.3.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-rpm</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>rpm</goal>
+                        </goals>
+                        <configuration>
+                            <name>${package.name}</name>
+                            <needarch>${rpm.architecture}</needarch>
+                            <group>Applications/System</group>
+                            <targetOS>linux</targetOS>
+                            <summary>${summary}</summary>
+                            <description>${long.description}</description>
+                            <license>EPL 2.0 (https://www.eclipse.org/legal/epl-2.0/)</license>
+
+                            <mappings>
+                                <mapping>
+                                    <directory>${addon.installation.dir}</directory>
+                                    <filemode>600</filemode>
+                                    <username>kurad</username>
+                                    <groupname>kurad</groupname>
+                                    <sources>
+                                        <source>
+                                            <location>${basedir}/target/${jar.name}_${project.version}.jar</location>
+                                        </source>
+                                    </sources>
+                                </mapping>
+                            </mappings>
+
+                            <requires>
+                                <require>kura</require>
+                            </requires>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+</project>

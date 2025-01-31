@@ -223,6 +223,10 @@ markdown_extensions:
   - pymdownx.superfences
   - footnotes
 
+copyright: >
+  Copyright &copy; Eclipse Foundation AISBL. All Rights Reserved. –
+  <a href="#__consent"><b>Change cookie settings<b></a>
+
 extra:
   version:
     provider: mike

@@ -220,6 +220,10 @@ markdown_extensions:
   - pymdownx.superfences
   - footnotes
 
+copyright: >
+  Copyright &copy; 2025 Eurotech and/or its affiliates and others –
+  <a href="#__consent">Change cookie settings</a>
+
 extra:
   version:
     provider: mike

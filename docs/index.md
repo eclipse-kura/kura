@@ -1,3 +1,7 @@
+---
+hide:
+  - feedback
+---
 <figure markdown>
   ![KuraLogo](./assets/kura_logo_400.png)
   <figcaption></figcaption>

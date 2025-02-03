@@ -228,6 +228,7 @@ extra:
       link: https://gitter.im/eclipse/kura
     - icon: fontawesome/brands/docker
       link: https://hub.docker.com/r/eclipse/kura
+  scope: "/kura/"
   analytics:
     provider: google
     property: G-B5KFDTHZMV

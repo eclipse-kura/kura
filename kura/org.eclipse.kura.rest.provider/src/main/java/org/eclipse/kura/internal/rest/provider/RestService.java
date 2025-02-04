@@ -58,6 +58,8 @@ import jakarta.ws.rs.ext.Provider;
 @SuppressWarnings("restriction")
 public class RestService implements ConfigurableComponent {
 
+    private static final String KURA_DEFAULT_JAKARTARS_WHITEBOARD_NAME = "KuraDefaultJakartarsWhiteboard";
+
     static {
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
@@ -150,14 +152,14 @@ public class RestService implements ConfigurableComponent {
 
     private void configureDefaultWhiteboard() throws IOException, InvalidSyntaxException {
 
-        final Configuration[] configs = this.configurationAdmin
-                .listConfigurations("(kura.service.pid=kura.jakartars.whiteboard)");
+        final Configuration[] configs = this.configurationAdmin.listConfigurations(
+                "(jersey.jakartars.whiteboard.name=" + KURA_DEFAULT_JAKARTARS_WHITEBOARD_NAME + ")");
 
         if (configs == null) {
             final Dictionary<String, Object> properties = new Hashtable<>();
 
             properties.put("jersey.context.path", "/services");
-            properties.put("kura.service.pid", "kura.jakartars.whiteboard");
+            properties.put("jersey.jakartars.whiteboard.name", KURA_DEFAULT_JAKARTARS_WHITEBOARD_NAME);
 
             final Configuration newConfiguration = this.configurationAdmin
                     .createFactoryConfiguration("JakartarsServletWhiteboardRuntimeComponent", null);

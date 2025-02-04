@@ -15,6 +15,9 @@ package org.eclipse.kura.http.server.manager;
 import java.util.EventListener;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -42,6 +45,7 @@ public class HttpService implements ConfigurableComponent, EventHandler {
     private String keystoreServicePid;
 
     private JettyServerHolder jettyServerHolder;
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
@@ -97,22 +101,33 @@ public class HttpService implements ConfigurableComponent, EventHandler {
     }
 
     private synchronized void activateHttpService() {
-        try {
-            logger.info("starting Jetty instance...");
-            this.jettyServerHolder = new JettyServerHolder(this.options, Optional.ofNullable(this.keystoreService),
-                    this.dispatcherServlet, this.eventListener);
-            logger.info("starting Jetty instance...done");
-        } catch (final Exception e) {
-            logger.error("Could not start Jetty Web server", e);
-        }
+        this.executorService.submit(() -> {
+            try {
+                logger.info("starting Jetty instance...");
+                this.jettyServerHolder = new JettyServerHolder(this.options, Optional.ofNullable(this.keystoreService),
+                        this.dispatcherServlet, this.eventListener);
+                logger.info("starting Jetty instance...done");
+            } catch (final Exception e) {
+                logger.error("Could not start Jetty Web server", e);
+            }
+        });
     }
 
     private synchronized void deactivateHttpService() {
         try {
             logger.info("stopping Jetty instance...");
-            this.jettyServerHolder.stop();
+            if (this.jettyServerHolder != null) {
+                this.jettyServerHolder.stop();
+            }
+            this.executorService.shutdown();
+            this.executorService.awaitTermination(30, TimeUnit.SECONDS);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error("Could not stop Jetty Web server", e);
         } catch (final Exception e) {
             logger.error("Could not stop Jetty Web server", e);
+        } finally {
+            this.executorService.shutdownNow();
         }
     }
 

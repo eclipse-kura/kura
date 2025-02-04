@@ -77,8 +77,6 @@ public final class AssetTest {
     /** A latch to be initialized with the no of OSGi dependencies it needs */
     private static CountDownLatch dependencyLatch = new CountDownLatch(1);
 
-    private static int channelNumber;
-
     /**
      * JUnit Callback to be triggered before creating the instance of this suite
      *
@@ -230,8 +228,6 @@ public final class AssetTest {
         channels.put("13.CH#+offset", "4.3");
         channels.put("13.CH#DRIVER.modbus.register", "sample.channel2.modbus.register");
         channels.put("13.CH#DRIVER.modbus.DUMMY.NN", "sample.channel2.modbus.FC");
-
-        channelNumber = channels.size();
 
         ((BaseAsset) asset).updated(channels);
         sync(asset);

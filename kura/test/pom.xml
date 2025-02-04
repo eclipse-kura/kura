@@ -143,7 +143,7 @@
                             ${tycho.surefire.testenv.args}
                             -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml
                         </argLine>
-                        <appArgLine>-consoleLog -console 5002 -noExit</appArgLine>
+                        <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
                         <dependencies>
                             <dependency>
                                 <type>p2-installable-unit</type>

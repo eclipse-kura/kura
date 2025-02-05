@@ -154,8 +154,8 @@
                     <configuration>
                         <target>
                             <artifact>
-                                <groupId>testing</groupId>
-                                <artifactId>testing.target-definition</artifactId>
+                                <groupId>${groupId}</groupId>
+                                <artifactId>${artifactId}.target-definition</artifactId>
                                 <version>${target-definition-version}</version>
                             </artifact>
                         </target>

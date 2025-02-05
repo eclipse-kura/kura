@@ -144,7 +144,7 @@ public class RestService implements ConfigurableComponent {
         try {
             configureDefaultWhiteboard();
         } catch (final Exception e) {
-            logger.error("failed to configure Jax RS whiteboard", e);
+            logger.error("failed to configure JakartarsServletWhiteboard whiteboard", e);
         }
 
         logger.info("activating...done");
@@ -174,14 +174,14 @@ public class RestService implements ConfigurableComponent {
         logger.info("updating...");
 
         final RestServiceOptions newOptions = new RestServiceOptions(properties);
-
-        this.incomingPortCheckFilter.setAllowedPorts(newOptions.getAllowedPorts());
-
+        
         if (!Objects.equals(this.options, newOptions)) {
             this.options = newOptions;
-            updateBuiltinAuthenticationProviders(newOptions);
             this.authRestService.setOptions(newOptions);
             this.sessionAuthenticationProvider.setOptions(newOptions);
+            this.incomingPortCheckFilter.setAllowedPorts(newOptions.getAllowedPorts());
+
+            updateBuiltinAuthenticationProviders(newOptions);
         }
 
         logger.info("updating...done");

@@ -197,7 +197,6 @@ public class HttpServiceTest {
         try (final TestKeystore testKeystore = new TestKeystore(configSvc, cryptoSvc, TEST_KEYSTORE_PID,
                 HttpsKeystoreServiceOptions.defaultConfiguration())) {
 
-            Thread.sleep(30000);
             updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
                     HttpServiceOptions.defaultConfiguration().withHttpsPorts(4442)
                             .withKeystoreServiceTarget(testKeystore.getTargetFilter()).toProperties()).get(30,

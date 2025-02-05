@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,9 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.KeyManagementException;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -132,8 +130,8 @@ public class HttpServiceTest {
     }
 
     @Test
-    public void shouldNotOpenAnyPortWithDefaultConfig() throws KuraException, InvalidSyntaxException,
-            InterruptedException, ExecutionException, TimeoutException, MalformedURLException {
+    public void shouldNotOpenAnyPortWithDefaultConfig()
+            throws InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
         final ConfigurationService configService = configurationService.get(5, TimeUnit.MINUTES);
 
         updateComponentConfiguration(configService, HTTP_SERVER_MANAGER_PID,
@@ -147,8 +145,8 @@ public class HttpServiceTest {
     }
 
     @Test
-    public void shouldOpenHttpPorts() throws KuraException, InvalidSyntaxException, InterruptedException,
-            ExecutionException, TimeoutException, MalformedURLException {
+    public void shouldOpenHttpPorts()
+            throws InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
         final ConfigurationService configService = configurationService.get(5, TimeUnit.MINUTES);
 
         updateComponentConfiguration(configService, HTTP_SERVER_MANAGER_PID,
@@ -163,8 +161,8 @@ public class HttpServiceTest {
     }
 
     @Test
-    public void shouldOpenMultipleHttpPorts() throws KuraException, InvalidSyntaxException, InterruptedException,
-            ExecutionException, TimeoutException, MalformedURLException {
+    public void shouldOpenMultipleHttpPorts()
+            throws InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
         final ConfigurationService configService = configurationService.get(5, TimeUnit.MINUTES);
 
         updateComponentConfiguration(configService, HTTP_SERVER_MANAGER_PID,
@@ -178,8 +176,8 @@ public class HttpServiceTest {
     }
 
     @Test
-    public void shouldNotSupportHttpsWithoutKeystore() throws KuraException, InvalidSyntaxException,
-            InterruptedException, ExecutionException, TimeoutException, MalformedURLException {
+    public void shouldNotSupportHttpsWithoutKeystore()
+            throws InvalidSyntaxException, InterruptedException, ExecutionException, TimeoutException {
         final ConfigurationService configService = configurationService.get(5, TimeUnit.MINUTES);
 
         updateComponentConfiguration(configService, HTTP_SERVER_MANAGER_PID, HttpServiceOptions.defaultConfiguration()
@@ -198,6 +196,8 @@ public class HttpServiceTest {
 
         try (final TestKeystore testKeystore = new TestKeystore(configSvc, cryptoSvc, TEST_KEYSTORE_PID,
                 HttpsKeystoreServiceOptions.defaultConfiguration())) {
+
+            Thread.sleep(30000);
             updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
                     HttpServiceOptions.defaultConfiguration().withHttpsPorts(4442)
                             .withKeystoreServiceTarget(testKeystore.getTargetFilter()).toProperties()).get(30,
@@ -377,7 +377,7 @@ public class HttpServiceTest {
 
         public TestKeystore(final ConfigurationService configSvc, final CryptoService cryptoSvc, final String pid,
                 final HttpsKeystoreServiceOptions options)
-                throws InterruptedException, ExecutionException, TimeoutException, IOException, KuraException {
+                throws InterruptedException, ExecutionException, TimeoutException, KuraException {
             this.configSvc = configSvc;
             this.pid = pid;
 
@@ -615,7 +615,7 @@ public class HttpServiceTest {
     }
 
     static CompletableFuture<Void> updateComponentConfiguration(final ConfigurationService configurationService,
-            final String pid, final Map<String, Object> properties) throws KuraException, InvalidSyntaxException {
+            final String pid, final Map<String, Object> properties) throws InvalidSyntaxException {
 
         final CompletableFuture<Void> result = new CompletableFuture<>();
         final BundleContext context = FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
@@ -667,7 +667,7 @@ public class HttpServiceTest {
     }
 
     private static KeyManager[] buildClientKeyManagers() throws KeyStoreException, NoSuchAlgorithmException,
-            CertificateException, IOException, UnrecoverableKeyException, KeyManagementException {
+            CertificateException, IOException, UnrecoverableKeyException {
         final KeyStore keystore = KeyStore.getInstance("JKS");
         try (final FileInputStream in = new FileInputStream(clientKeystore)) {
             keystore.load(in, "changeit".toCharArray());

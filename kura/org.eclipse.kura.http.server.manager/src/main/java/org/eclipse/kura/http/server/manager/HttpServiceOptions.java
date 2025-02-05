@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -58,7 +58,7 @@ public class HttpServiceOptions {
     private final boolean isRevocationSoftFailEnabled;
     private final String keystoreServicePid;
 
-    public HttpServiceOptions(final Map<String, Object> properties, final String kuraHome) {
+    public HttpServiceOptions(final Map<String, Object> properties) {
         this.httpPorts = loadIntArrayProperty(HTTP_PORTS.get(properties));
         this.httpsPorts = loadIntArrayProperty(HTTPS_PORTS.get(properties));
         this.httpsWithClientAuthPorts = loadIntArrayProperty(HTTPS_CLIENT_AUTH_PORTS.get(properties));
@@ -110,7 +110,7 @@ public class HttpServiceOptions {
             }
         }
 
-        return result;
+        return Collections.unmodifiableSet(result);
     }
 
     @Override

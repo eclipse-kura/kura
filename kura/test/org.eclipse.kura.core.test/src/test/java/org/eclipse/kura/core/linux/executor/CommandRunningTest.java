@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,7 @@ import org.eclipse.kura.core.linux.executor.unprivileged.UnprivilegedExecutorSer
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.Pid;
+import org.eclipse.kura.system.SystemService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -44,7 +45,8 @@ public class CommandRunningTest {
 
     @Parameterized.Parameters
     public static Collection<CommandExecutorService> getExecutors() {
-        return Arrays.asList(new UnprivilegedExecutorServiceImpl(), new PrivilegedExecutorServiceImpl());
+        return Arrays.asList(new UnprivilegedExecutorServiceImpl(mock(SystemService.class)),
+                new PrivilegedExecutorServiceImpl());
     }
 
     @Test

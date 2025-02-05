@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,30 +27,28 @@ import org.eclipse.kura.executor.Pid;
 import org.eclipse.kura.executor.Signal;
 import org.eclipse.kura.executor.UnprivilegedExecutorService;
 import org.eclipse.kura.system.SystemService;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Component(name = "org.eclipse.kura.executor.UnprivilegedExecutorService", //
+        property = "service.pid=org.eclipse.kura.executor.UnprivilegedExecutorService" //
+)
 public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorService {
 
     private static final Logger logger = LoggerFactory.getLogger(UnprivilegedExecutorServiceImpl.class);
     private static final LinuxSignal DEFAULT_SIGNAL = LinuxSignal.SIGTERM;
-    private SystemService systemService;
-    private ExecutorUtil executorUtil;
 
-    public void setSystemService(SystemService systemService) {
-        this.systemService = systemService;
-    }
+    private final ExecutorUtil executorUtil;
 
-    public void unsetSystemService(SystemService systemService) {
-        if (this.systemService == systemService) {
-            this.systemService = null;
-        }
-    }
-
-    protected void activate() {
+    @Activate
+    public UnprivilegedExecutorServiceImpl(final @Reference SystemService systemService) {
         logger.info("activate...");
 
-        String user = this.systemService.getCommandUser();
+        String user = systemService.getCommandUser();
         if (user == null || user.equals("unknown")) {
             this.executorUtil = new ExecutorUtil();
         } else {
@@ -58,6 +56,7 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
         }
     }
 
+    @Deactivate
     protected void deactivate() {
         logger.info("deactivate...");
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,9 +27,15 @@ import org.eclipse.kura.executor.Pid;
 import org.eclipse.kura.executor.PrivilegedExecutorService;
 import org.eclipse.kura.executor.Signal;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Component(immediate = true, //
+        name = "org.eclipse.kura.executor.PrivilegedExecutorService", //
+        property = "service.pid=org.eclipse.kura.executor.PrivilegedExecutorService")
 public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService {
 
     private static final Logger logger = LoggerFactory.getLogger(PrivilegedExecutorServiceImpl.class);
@@ -40,12 +46,14 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
     @SuppressWarnings("unused")
     private ComponentContext ctx;
 
+    @Activate
     public void activate(ComponentContext componentContext) {
         logger.info("activate...");
         this.ctx = componentContext;
         this.executorUtil = new ExecutorUtil();
     }
 
+    @Deactivate
     public void deactivate(ComponentContext componentContext) {
         logger.info("deactivate...");
         this.ctx = null;

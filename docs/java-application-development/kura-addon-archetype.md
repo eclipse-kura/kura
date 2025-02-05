@@ -44,7 +44,7 @@ At the end of the procedure, the archetype will generate a subfolder in the work
 
 - **bundles**: the directory where developed bundles can be placed. After the first archetype execution, this directory contains a single project, named as `artifactId.bundle`
 
-- **features**: contains a project that builds an RPM and a DEB package that installs the JAR produced in `bundles` in Kura's plugins folder `/opt/eclipse/kura/plugins`. It is recommended to configure this project to customize the target package architecture and other parameters. The project code is commented with hints on the configurable options
+- **distrib**: contains a project that builds an RPM and a DEB package that installs the JAR produced in `bundles` in Kura's plugins folder `/opt/eclipse/kura/plugins`. It is recommended to configure this project to customize the target package architecture and other parameters. The project code is commented with hints on the configurable options
 
 - **target-definition**: The `.target` file contained in the project is the way to specify the project dependencies as maven artifacts, Tycho will then wrap them as bundles and make them available in the target platform. Since only released artifacts are published on Maven central, it is recommeded to perform a local Kura build to have the SNAPSHOT versions available
 
@@ -58,12 +58,12 @@ The minimum supported Java version for compiling is Java 17. Compile the project
 mvn clean install
 ```
 
-The build will produce the following system packages in `features/target`:
+The build will produce the following system packages in `distrib/target`:
 
 - DEB installer (`<artifactId>_<version>_<debian-architecture>.deb`)
 - RPM installer (`<artifactId>-<version>.<rpm.architecture>.rpm`)
 
-Installer properties like the architecture, organization name, package dependencies, and others can be configured in the `features` project.
+Installer properties like the architecture, organization name, package dependencies, and others can be configured in the `distrib` project.
 
 Depending on the system, the packages can be installed with:
 
@@ -107,9 +107,27 @@ If the project is put under GIT version control, it is a good idea to add a `.gi
 
 In Eclipse IDE import the projects with _File | Import | Maven | Existing Maven Projects_.
 
-![](./images/kura-addon-archetype/eclipse-ide-import-mvn-project.png)
+![](./images/kura-addon-archetype/eclipse-import-maven-projects-1.png)
 
-Note that the parent POM file cannot be selected. 
+![](./images/kura-addon-archetype/eclipse-import-maven-projects-2.png)
+
+Note that the parent POM file cannot be selected.
+
+#### Configure build paths
+
+For the bundles and test projects, select _Properties_ and then _Project Natures_ and add the natures as in picture below.
+
+![](./images/kura-addon-archetype/eclipse-project-natures.png)
+
+Then, from the _Java Build Path_ configure the correct source folder as in picture below.
+
+![](./images/kura-addon-archetype/eclipse-java-path.png)
+
+Finally, configure the external **Classpath** dependencies by selecting the plugin dependencies from the _Add Library_.
+
+![](./images/kura-addon-archetype/eclipse-add-library.png)
+
+#### Load target platform
 
 Open the _.target_ file in the _target-definition_ project and click on _Set as Active Target Platform_. Note that this will download the bundles from the Kura P2 repository and it may take a while to complete.
 

@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>${groupId}</groupId>
+        <artifactId>${artifactId}.parent</artifactId>
+        <version>${version}</version>
+        <relativePath>../bundles/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>${artifactId}.tests</artifactId>
+    <packaging>pom</packaging>
+
+    <properties>
+        <maven.resources.plugin.version>3.1.0</maven.resources.plugin.version>
+        <maven.dependency.plugin.version>3.1.1</maven.dependency.plugin.version>
+        <jacoco.maven.plugin.version>0.8.12</jacoco.maven.plugin.version>
+        <kura.workdir>${project.build.directory}/test-env</kura.workdir>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.3.1</version>
+                    <executions>
+                        <execution>
+                            <id>generate-test-env</id>
+                            <phase>generate-test-resources</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <includeEmptyDirs>true</includeEmptyDirs>
+                                <outputDirectory>${kura.workdir}</outputDirectory>
+                                <resources>
+                                    <resource>
+                                        <directory>../test-env</directory>
+                                        <includes>
+                                            <include>data</include>
+                                            <include>framework/*</include>
+                                            <include>log4j/*</include>
+                                            <include>user/**/*</include>
+                                        </includes>
+                                        <filtering>false</filtering>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>prepare-test-env</id>
+                            <phase>process-test-resources</phase>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                            <configuration>
+                                <target>
+                                    <replace
+                                        file="${kura.workdir}/framework/kura.properties"
+                                        token="/tmp/kura"
+                                        value="${kura.workdir}" />
+                                    <replace
+                                        file="${kura.workdir}/user/snapshots/snapshot_0.xml"
+                                        token="/tmp/kura"
+                                        value="${kura.workdir}" />
+                                </target>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.maven.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>report-aggregate</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-surefire-plugin</artifactId>
+                    <version>${tycho-version}</version>
+                    <configuration>
+                        <providerHint>junit4</providerHint>
+                        <parallel>classes</parallel>
+                        <useUnlimitedThreads>true</useUnlimitedThreads>
+                        <argLine>
+                            ${tycho.testArgLine}
+                            -Dosgi.console=5002
+                            -Declipse.security=osgi
+                            -Dorg.osgi.framework.security=osgi
+                            -Dosgi.signedcontent.support=all
+                            -XX:HeapDumpPath=/dev/null
+                            -Dorg.eclipse.kura.mode=emulator
+                            -Dorg.osgi.framework.trust.repositories=${kura.workdir}/user/security/.certificates.ks
+                            -Dkura.configuration=file:${kura.workdir}/framework/kura.properties
+                            -Ddpa.configuration=${kura.workdir}/data/dpa.properties
+                            -Dkura.data=${kura.workdir}/data
+                            -Dkura.snapshots=${kura.workdir}/user/snapshots
+                            -Dorg.eclipse.equinox.http.jetty.customizer.class=org.eclipse.kura.jetty.customizer.KuraJettyCustomizer
+                            -Dlog4j.configurationFile=file:${kura.workdir}/log4j/log4j.xml
+                        </argLine>
+                        <!--
+                        uncomment for gogo shell, usage: telnet localhost 5002
+                        <appArgLine>-consoleLog -console 5002 -noExit</appArgLine>
+                        -->
+                        <defaultStartLevel>
+                            <level>4</level>
+                            <autoStart>true</autoStart>
+                        </defaultStartLevel>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>target-platform-configuration</artifactId>
+                    <configuration>
+                        <target>
+                            <artifact>
+                                <groupId>${groupId}</groupId>
+                                <artifactId>${artifactId}.target-definition</artifactId>
+                                <version>${target-definition-version}</version>
+                            </artifact>
+                        </target>
+                        <!--
+                            Some bundles are not available in standard test target platform,
+                            only bundles dependent on the tested ones and some equinox standard ones are loaded by default.
+                            Other additional bundles from target definition can be made available from here
+                        -->
+                        <dependency-resolution>
+                            <extraRequirements>
+                                <!-- gogo shell console -->
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.equinox.console</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.equinox.console</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.apache.felix.gogo.command</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.apache.felix.gogo.runtime</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.apache.felix.gogo.shell</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <!-- logging -->
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.apache.logging.log4j.core</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <!-- kura emulator and other deps -->
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.apache.felix.scr</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.kura.emulator</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.kura.emulator.net</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.kura.emulator.position</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.kura.emulator.watchdog</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.kura.emulator.clock</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.kura.emulator.usb</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.kura.core.system</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.kura.core.crypto</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.kura.core.keystore</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.kura.json.marshaller.unmarshaller.provider</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.equinox.event</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.useradmin.store</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.apache.felix.useradmin</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.equinox.cm</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.equinox.metatype</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                            </extraRequirements>
+                        </dependency-resolution>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>test-debug</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.eclipse.tycho</groupId>
+                            <artifactId>tycho-surefire-plugin</artifactId>
+                            <configuration>
+                                <debugPort>8000</debugPort>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
+
+    <modules>
+        <module>${artifactId}.bundle.test</module>
+    </modules>
+
+</project>

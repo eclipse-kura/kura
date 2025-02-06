@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -13,24 +13,26 @@
 	 Eurotech
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<!-- POM file generated with GWT webAppCreator -->
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.eclipse.kura</groupId>
-		<artifactId>kura</artifactId>
-		<version>6.0.0-SNAPSHOT</version>
-	</parent>
+    <modelVersion>4.0.0</modelVersion>
 
-	<artifactId>tools</artifactId>
-	<version>6.0.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
-	<name>tools</name>
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>kura</artifactId>
+        <version>6.0.0-SNAPSHOT</version>
+    </parent>
 
-	<modules>
-		<module>archetype</module>
-	</modules>
-	
+    <groupId>org.eclipse.kura</groupId>
+    <artifactId>tools</artifactId>
+    <version>6.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>tools</name>
+
+    <modules>
+        <module>kura-addon-archetype</module>
+    </modules>
+
 </project>

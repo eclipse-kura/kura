@@ -1,0 +1,10 @@
+Package: [[package.name]]
+Version: [[project.version]]
+Section: admin
+Priority: optional
+Depends: kura
+Architecture: [[deb.architecture]]
+Maintainer: Eclipse Kura Developers <kura-dev@eclipse.org>
+Description: [[summary]]
+  [[long.description]]
+Homepage: https://eclipse-kura.github.io/kura/ (add correct link to documentation here)

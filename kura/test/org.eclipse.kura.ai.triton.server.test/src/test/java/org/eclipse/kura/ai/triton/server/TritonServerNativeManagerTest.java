@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -147,6 +147,35 @@ public class TritonServerNativeManagerTest {
         whenStartIsCalled();
 
         thenCommandServiceExecuteWasCalledWithCommandContaining("--backend-config=");
+        thenNoExceptionOccurred();
+    }
+
+    @Test
+    public void containerMetricsOptionsAreCorrectlySet() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.TRUE);
+        givenPropertyWith("enable.metrics", Boolean.TRUE);
+        givenPropertyWith("enable.gpu.metrics", Boolean.FALSE);
+        givenPropertyWith("enable.cpu.metrics", Boolean.TRUE);
+        givenPropertyWith("metrics.config", "myProp=foo;yourProp=bar");
+        givenPropertyWith("metrics.interval", "99");
+        givenServiceOptionsBuiltWith(properties);
+
+        givenMockCommandExecutionService();
+        givenMockCommandExecutionServiceReturnsTritonIsRunning(false);
+
+        givenLocalManagerBuiltWith(this.options, this.ces, MOCK_DECRYPT_FOLDER);
+
+        whenStartIsCalled();
+
+        thenCommandServiceExecuteWasCalledWithCommandContaining("--allow-metrics=true");
+        thenCommandServiceExecuteWasCalledWithCommandContaining("--allow-gpu-metrics=false");
+        thenCommandServiceExecuteWasCalledWithCommandContaining("--allow-cpu-metrics=true");
+        thenCommandServiceExecuteWasCalledWithCommandContaining("--allow-metrics=true");
+        thenCommandServiceExecuteWasCalledWithCommandContaining("--metrics-interval-ms=99");
+        thenCommandServiceExecuteWasCalledWithCommandContaining("--metrics-config=myProp=foo");
+        thenCommandServiceExecuteWasCalledWithCommandContaining("--metrics-config=yourProp=bar");
         thenNoExceptionOccurred();
     }
 

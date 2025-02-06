@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,9 @@
 package org.eclipse.kura.ai.triton.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -382,6 +384,22 @@ public class TritonServerServiceOptionsTest {
         thenDeviceListIsFilled(false);
     }
 
+    @Test
+    public void metricsGettersShouldWork() {
+        givenPropertyWith("enable.metrics", Boolean.TRUE);
+        givenPropertyWith("enable.gpu.metrics", Boolean.FALSE);
+        givenPropertyWith("enable.cpu.metrics", Boolean.TRUE);
+        givenPropertyWith("metrics.config", "myProp=foo;YourProp=bar");
+        givenPropertyWith("metrics.interval", "99");
+        givenServiceOptionsBuiltWith(properties);
+
+        thenMetricsAreEnabled(true);
+        thenGpuMetricsAreEnabled(false);
+        thenCpuMetricsAreEnabled(true);
+        thenMetricsConfigAre("myProp=foo;YourProp=bar");
+        thenMetricsIntervalIs(99);
+    }
+
     /*
      * Given
      */
@@ -497,6 +515,30 @@ public class TritonServerServiceOptionsTest {
 
     private void thenDeviceListContains(List<String> expectedResult) {
         assertEquals(expectedResult, this.options.getDevices());
+    }
+
+    private void thenMetricsAreEnabled(boolean expectedResult) {
+        assertEquals(expectedResult, this.options.areMetricsEnabled());
+    }
+
+    private void thenGpuMetricsAreEnabled(boolean expectedResult) {
+        assertEquals(expectedResult, this.options.areGpuMetricsEnabled());
+    }
+
+    private void thenCpuMetricsAreEnabled(boolean expectedResult) {
+        assertEquals(expectedResult, this.options.areMetricsEnabled());
+    }
+
+    private void thenMetricsConfigAre(String expectedProps) {
+        String[] props = expectedProps.split(";");
+        for (String entry : props) {
+            assertTrue(this.options.getMetricsConfig().contains(entry));
+        }
+    }
+
+    private void thenMetricsIntervalIs(Integer expectedResult) {
+        assertFalse(this.options.getMetricsInterval().isEmpty());
+        assertEquals(expectedResult, this.options.getMetricsInterval().get());
     }
 
 }

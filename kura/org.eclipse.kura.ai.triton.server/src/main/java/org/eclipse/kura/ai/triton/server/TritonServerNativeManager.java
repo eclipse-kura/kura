@@ -170,6 +170,15 @@ public class TritonServerNativeManager implements TritonServerInstanceManager {
         commandString.add("--grpc-port=" + this.options.getGrpcPort());
         commandString.add("--metrics-port=" + this.options.getMetricsPort());
         commandString.add("--model-control-mode=explicit");
+        commandString.add("--allow-metrics=" + this.options.areMetricsEnabled());
+        commandString.add("--allow-gpu-metrics=" + this.options.areGpuMetricsEnabled());
+        commandString.add("--allow-cpu-metrics=" + this.options.areCpuMetricsEnabled());
+        if (!this.options.getMetricsConfig().isEmpty()) {
+            this.options.getMetricsConfig().forEach(config -> commandString.add("--metrics-config=" + config));
+        }
+        if (this.options.getMetricsInterval().isPresent()) {
+            commandString.add("--metrics-interval-ms=" + this.options.getMetricsInterval().get());
+        }
         commandString.add("2>&1");
         commandString.add("|");
         commandString.add("systemd-cat");

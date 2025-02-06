@@ -18,6 +18,7 @@
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
       <provide interface="org.eclipse.kura.ai.inference.InferenceEngineService"/>
+      <provide interface="org.eclipse.kura.ai.inference.InferenceEngineMetricsService"/>
    </service>
    <property name="service.pid" type="String" value="org.eclipse.kura.ai.triton.server.TritonServerRemoteService"/>
    <reference bind="setCommandExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" />

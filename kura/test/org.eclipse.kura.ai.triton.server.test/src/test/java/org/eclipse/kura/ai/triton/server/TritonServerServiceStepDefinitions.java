@@ -85,8 +85,9 @@ public abstract class TritonServerServiceStepDefinitions {
 
     private Command startTritonServerCmd = new Command(new String[] { "tritonserver",
             "--model-repository=/fake-repository-path", "--backend-directory=/fake-backends-path", "--http-port=4001",
-            "--grpc-port=4002", "--metrics-port=4003", "--model-control-mode=explicit", "2>&1", "|", "systemd-cat",
-            "-t tritonserver", "-p info" });
+            "--grpc-port=4002", "--metrics-port=4003", "--model-control-mode=explicit", "--allow-metrics=true",
+            "--allow-gpu-metrics=true", "--allow-cpu-metrics=true", "2>&1", "|", "systemd-cat", "-t tritonserver",
+            "-p info" });
 
     public TritonServerServiceStepDefinitions() {
         this.startTritonServerCmd.setExecuteInAShell(true);

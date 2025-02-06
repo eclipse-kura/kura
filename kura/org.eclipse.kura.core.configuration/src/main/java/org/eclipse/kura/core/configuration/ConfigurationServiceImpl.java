@@ -1775,28 +1775,30 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     }
 
     private Map<String, Configuration> getCurrentConfigs() throws KuraException {
-        final Map<String, Configuration> currentConfigs;
+
+        Map<String, Configuration> currentConfigs = new HashMap<>();
 
         try {
-            currentConfigs = Arrays.stream(this.configurationAdmin.listConfigurations(null))
-                    .collect(Collectors.toMap(c -> {
-                        final Dictionary<String, Object> properties = c.getProperties();
+            Configuration[] currentKuraServiceConfigs = this.configurationAdmin
+                    .listConfigurations("(" + KURA_SERVICE_PID + "=*)");
 
-                        if (properties != null) {
-                            final Object kuraServicePid = properties.get(KURA_SERVICE_PID);
-
-                            if (kuraServicePid instanceof String) {
-                                return (String) kuraServicePid;
-                            }
-                        }
-
-                        return c.getPid();
-                    }, Function.identity()));
+            if (currentKuraServiceConfigs != null) {
+                currentConfigs = Arrays.stream(currentKuraServiceConfigs).filter(this::isKuraServicePidString)
+                        .collect(Collectors.toMap(this::getKuraServicePid, Function.identity()));
+            }
 
         } catch (final IOException | InvalidSyntaxException e) {
             throw new KuraException(KuraErrorCode.IO_ERROR, e);
         }
         return currentConfigs;
+    }
+
+    private boolean isKuraServicePidString(Configuration config) {
+        return config.getProperties().get(KURA_SERVICE_PID) instanceof String;
+    }
+
+    private String getKuraServicePid(Configuration config) {
+        return (String) config.getProperties().get(KURA_SERVICE_PID);
     }
 
     private Map<String, ComponentConfiguration> getSnapshotConfigs(long id) throws KuraException {

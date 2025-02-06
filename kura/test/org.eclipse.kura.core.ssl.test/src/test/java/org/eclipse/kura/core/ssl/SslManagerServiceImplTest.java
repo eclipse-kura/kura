@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -125,8 +125,6 @@ public class SslManagerServiceImplTest {
         // test preparation of an SslSocketFactory
         setupDefaultKeystore();
 
-        SslManagerServiceImpl svc = new SslManagerServiceImpl();
-
         SslServiceListeners listener = new SslServiceListeners(null) {
 
             @Override
@@ -147,8 +145,8 @@ public class SslManagerServiceImplTest {
         KeystoreService keystoreService = mock(KeystoreService.class);
         when(keystoreService.getKeyStore()).thenReturn(store);
 
+        SslManagerServiceImpl svc = new SslManagerServiceImpl(ccMock, properties);
         svc.setKeystoreService(keystoreService, Collections.singletonMap("kura.service.pid", "foo"));
-        svc.activate(ccMock, properties);
 
         TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
 
@@ -176,8 +174,6 @@ public class SslManagerServiceImplTest {
         // test preparation of an SslSocketFactory
         setupDefaultKeystore();
 
-        SslManagerServiceImpl svc = new SslManagerServiceImpl();
-
         SslServiceListener listener = () -> {
         };
 
@@ -193,8 +189,8 @@ public class SslManagerServiceImplTest {
         KeystoreService keystoreService = mock(KeystoreService.class);
         when(keystoreService.getKeyStore()).thenReturn(store);
 
+        SslManagerServiceImpl svc = new SslManagerServiceImpl(ccMock, properties);
         svc.setKeystoreService(keystoreService, Collections.singletonMap("kura.service.pid", "foo"));
-        svc.activate(ccMock, properties);
 
         TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
 
@@ -222,8 +218,6 @@ public class SslManagerServiceImplTest {
         // test preparation of an SslSocketFactory
         setupDefaultKeystore();
 
-        SslManagerServiceImpl svc = new SslManagerServiceImpl();
-
         SslServiceListener listener = () -> {
         };
 
@@ -239,8 +233,8 @@ public class SslManagerServiceImplTest {
         KeystoreService keystoreService = mock(KeystoreService.class);
         when(keystoreService.getKeyStore()).thenReturn(store);
 
+        SslManagerServiceImpl svc = new SslManagerServiceImpl(ccMock, properties);
         svc.setKeystoreService(keystoreService, Collections.singletonMap("kura.service.pid", "foo"));
-        svc.activate(ccMock, properties);
 
         TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
 
@@ -268,8 +262,6 @@ public class SslManagerServiceImplTest {
         // test preparation of an SslSocketFactory
         setupDefaultKeystore();
 
-        SslManagerServiceImpl svc = new SslManagerServiceImpl();
-
         SslServiceListener listener = () -> {
         };
 
@@ -285,8 +277,8 @@ public class SslManagerServiceImplTest {
         KeystoreService keystoreService = mock(KeystoreService.class);
         when(keystoreService.getKeyStore()).thenReturn(store);
 
+        SslManagerServiceImpl svc = new SslManagerServiceImpl(ccMock, properties);
         svc.setKeystoreService(keystoreService, Collections.singletonMap("kura.service.pid", "foo"));
-        svc.activate(ccMock, properties);
 
         TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
 
@@ -313,8 +305,6 @@ public class SslManagerServiceImplTest {
         // test key installation
         setupDefaultKeystore();
 
-        SslManagerServiceImpl svc = new SslManagerServiceImpl();
-
         SslServiceListeners listener = new SslServiceListeners(null) {
 
             @Override
@@ -323,14 +313,21 @@ public class SslManagerServiceImplTest {
             }
         };
 
-        TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
+        ComponentContext ccMock = mock(ComponentContext.class);
 
-        Map<ConnectionSslOptions, SSLContext> sslContexts = new ConcurrentHashMap<>();
-        TestUtil.setFieldValue(svc, "sslContexts", sslContexts);
+        BundleContext bcMock = mock(BundleContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("ssl.default.protocol", "TLSv1");
         properties.put("ssl.hostname.verification", "true");
+
+        SslManagerServiceImpl svc = new SslManagerServiceImpl(ccMock, properties);
+
+        TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
+
+        Map<ConnectionSslOptions, SSLContext> sslContexts = new ConcurrentHashMap<>();
+        TestUtil.setFieldValue(svc, "sslContexts", sslContexts);
 
         KeystoreService keystoreService = mock(KeystoreService.class);
         when(keystoreService.getKeyStore()).thenReturn(store);
@@ -394,12 +391,8 @@ public class SslManagerServiceImplTest {
 
         String alias = "kura";
 
-        SslManagerServiceImpl svc = new SslManagerServiceImpl();
-
         KeystoreService keystoreService = mock(KeystoreService.class);
         when(keystoreService.getKeyStore()).thenReturn(store);
-
-        svc.setKeystoreService(keystoreService, Collections.singletonMap("kura.service.pid", "foo"));
 
         SslServiceListeners listener = new SslServiceListeners(null) {
 
@@ -409,14 +402,22 @@ public class SslManagerServiceImplTest {
             }
         };
 
-        TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
+        ComponentContext ccMock = mock(ComponentContext.class);
 
-        Map<ConnectionSslOptions, SSLContext> sslContexts = new ConcurrentHashMap<>();
-        TestUtil.setFieldValue(svc, "sslContexts", sslContexts);
+        BundleContext bcMock = mock(BundleContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("ssl.default.protocol", "TLSv1");
         properties.put("ssl.hostname.verification", "true");
+
+        SslManagerServiceImpl svc = new SslManagerServiceImpl(ccMock, properties);
+        svc.setKeystoreService(keystoreService, Collections.singletonMap("kura.service.pid", "foo"));
+
+        TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
+
+        Map<ConnectionSslOptions, SSLContext> sslContexts = new ConcurrentHashMap<>();
+        TestUtil.setFieldValue(svc, "sslContexts", sslContexts);
 
         svc.updated(properties);
 

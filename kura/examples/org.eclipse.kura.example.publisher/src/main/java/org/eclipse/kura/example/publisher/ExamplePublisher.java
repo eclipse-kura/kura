@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -35,10 +35,22 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraPosition;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ExamplePublisher implements ConfigurableComponent, CloudSubscriberListener, CloudConnectionListener, CloudDeliveryListener {
+@Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, service = ConfigurableComponent.class)
+@Designate(ocd = ExamplePublisherOCD.class, factory = true)
+public class ExamplePublisher
+        implements ConfigurableComponent, CloudSubscriberListener, CloudConnectionListener, CloudDeliveryListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ExamplePublisher.class);
 
@@ -54,6 +66,7 @@ public class ExamplePublisher implements ConfigurableComponent, CloudSubscriberL
 
     private ExamplePublisherOptions examplePublisherOptions;
 
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
     public void setCloudPublisher(CloudPublisher cloudPublisher) {
         this.cloudPublisher = cloudPublisher;
         this.cloudPublisher.registerCloudConnectionListener(ExamplePublisher.this);
@@ -66,6 +79,7 @@ public class ExamplePublisher implements ConfigurableComponent, CloudSubscriberL
         this.cloudPublisher = null;
     }
 
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
     public void setCloudSubscriber(CloudSubscriber cloudSubscriber) {
         this.cloudSubscriber = cloudSubscriber;
         this.cloudSubscriber.registerCloudSubscriberListener(ExamplePublisher.this);
@@ -84,6 +98,7 @@ public class ExamplePublisher implements ConfigurableComponent, CloudSubscriberL
     //
     // ----------------------------------------------------------------
 
+    @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.info("Activating ExamplePublisher...");
 
@@ -100,6 +115,7 @@ public class ExamplePublisher implements ConfigurableComponent, CloudSubscriberL
         logger.info("Activating ExamplePublisher... Done.");
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         logger.info("Deactivating ExamplePublisher...");
 
@@ -109,6 +125,7 @@ public class ExamplePublisher implements ConfigurableComponent, CloudSubscriberL
         logger.info("Deactivating ExamplePublisher... Done.");
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.info("Updated ExamplePublisher...");
 

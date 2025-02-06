@@ -54,6 +54,7 @@
         <maven-site-plugin.version>3.3</maven-site-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <wagon-ssh.version>1.0-beta-6</wagon-ssh.version>
+        <bnd.version>7.1.0</bnd.version>
     </properties>
 
     <distributionManagement>
@@ -460,6 +461,21 @@
         </plugins>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>biz.aQute.bnd</groupId>
+                    <artifactId>bnd-maven-plugin</artifactId>
+                    <version>${bnd.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                            <goal>bnd-process</goal>
+                            </goals>
+                            <configuration>
+                                <packagingTypes>eclipse-plugin, eclipse-test-plugin</packagingTypes>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
                     <artifactId>tycho-packaging-plugin</artifactId>

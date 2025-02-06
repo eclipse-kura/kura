@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -69,17 +69,35 @@ import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.ssl.SslServiceListener;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Component(name = "org.eclipse.kura.ssl.SslManagerService", //
+        configurationPolicy = ConfigurationPolicy.REQUIRE, //
+        immediate = true, //
+        property = { //
+                "kura.ui.factory.hide=true", //
+                "kura.ui.service.hide=true", //
+                EventConstants.EVENT_TOPIC + "=" + KeystoreChangedEvent.EVENT_TOPIC })
+@Designate(ocd = SslManagerServiceOCD.class, factory = true)
 public class SslManagerServiceImpl implements SslManagerService, ConfigurableComponent, EventHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SslManagerServiceImpl.class);
 
-    private SslServiceListeners sslServiceListeners;
+    private final SslServiceListeners sslServiceListeners;
 
     private SslManagerServiceOptions options;
 
@@ -97,6 +115,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     //
     // ----------------------------------------------------------------
 
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
     public void setKeystoreService(KeystoreService keystoreService, final Map<String, Object> properties) {
         this.keystoreService = keystoreService;
         this.keystoreServicePid = Optional.of((String) properties.get(ConfigurationService.KURA_SERVICE_PID));
@@ -124,6 +143,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         }
     }
 
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
     public void setTruststoreKeystoreService(KeystoreService keystoreService, final Map<String, Object> properties) {
         this.truststoreKeystoreService = keystoreService;
         this.truststoreKeystoreServicePid = Optional.of((String) properties.get(ConfigurationService.KURA_SERVICE_PID));
@@ -157,7 +177,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     //
     // ----------------------------------------------------------------
 
-    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
+    @Activate
+    public SslManagerServiceImpl(ComponentContext componentContext, Map<String, Object> properties) {
         logger.info("activate...");
 
         this.options = new SslManagerServiceOptions(properties);
@@ -173,6 +194,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         this.sslServiceListeners = new SslServiceListeners(listenersTracker);
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.info("updated...");
 
@@ -183,6 +205,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         this.sslServiceListeners.onConfigurationUpdated();
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         logger.info("deactivate...");
         this.sslServiceListeners.close();

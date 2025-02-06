@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -41,7 +41,6 @@ public class TritonServerServiceOptions {
     private static final String PROPERTY_LOCAL_MODEL_REPOSITORY_PASSWORD = "local.model.repository.password";
     private static final String PROPERTY_LOCAL_BACKENDS_PATH = "local.backends.path";
     private static final String PROPERTY_LOCAL_BACKENDS_CONFIG = "local.backends.config";
-    private static final String PROPERTY_LOCAL_OPTIONAL_CONFIG = "local.optional.config";
     private static final String PROPERTY_ENABLE_METRICS = "enable.metrics";
     private static final String PROPERTY_ENABLE_GPU_METRICS = "enable.gpu.metrics";
     private static final String PROPERTY_ENABLE_CPU_METRICS = "enable.cpu.metrics";
@@ -210,15 +209,6 @@ public class TritonServerServiceOptions {
             backendsConfigs = Arrays.asList(((String) propertyBackendsConfig).trim().split(";"));
         }
         return backendsConfigs;
-    }
-
-    public List<String> getOptionalConfigs() {
-        List<String> optionalConfigs = new ArrayList<>();
-        final Object optionalBackendsConfig = this.properties.get(PROPERTY_LOCAL_OPTIONAL_CONFIG);
-        if (optionalBackendsConfig instanceof String && !((String) optionalBackendsConfig).isEmpty()) {
-            optionalConfigs = Arrays.asList(((String) optionalBackendsConfig).trim().split(";"));
-        }
-        return optionalConfigs;
     }
 
     public boolean areMetricsEnabled() {

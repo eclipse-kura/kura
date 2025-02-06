@@ -264,9 +264,6 @@ public class TritonServerContainerManager implements TritonServerInstanceManager
         if (!this.options.getBackendsConfigs().isEmpty()) {
             this.options.getBackendsConfigs().forEach(config -> entrypointOverride.add("--backend-config=" + config));
         }
-        if (!this.options.getOptionalConfigs().isEmpty()) {
-            this.options.getOptionalConfigs().forEach(config -> entrypointOverride.add("--" + config));
-        }
         entrypointOverride.add("--allow-metrics=" + this.options.areMetricsEnabled());
         entrypointOverride.add("--allow-gpu-metrics=" + this.options.areGpuMetricsEnabled());
         entrypointOverride.add("--allow-cpu-metrics=" + this.options.areCpuMetricsEnabled());

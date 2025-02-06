@@ -90,15 +90,6 @@
             default=""
             description="A semi-colon separated list of configuration for the backends. i.e. tensorflow,version=2;tensorflow,allow-soft-placement=false">
         </AD>
-
-        <AD id="local.optional.config"
-            name="Optional configuration for tritonserver (only for debug)"
-            type="String"
-            cardinality="0"
-            required="false"
-            default=""
-            description="A semi-colon separated list of configuration for the triton server application. i.e. allow-gpu-metrics">
-        </AD>
         
         <AD id="container.memory"
             name="Memory"

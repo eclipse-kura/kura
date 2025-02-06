@@ -859,11 +859,11 @@
                                     <artifactId>org.osgi.service.component.annotations</artifactId>
                                     <version>${org.osgi.service.component.annotations.version}</version>
                                 </artifactItem>
-                                <dependency>
+                                <artifactItem>
                                     <groupId>org.osgi</groupId>
                                     <artifactId>org.osgi.service.metatype.annotations</artifactId>
                                     <version>${org.osgi.service.metatype.annotations.version}</version>
-                                </dependency>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>false</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>

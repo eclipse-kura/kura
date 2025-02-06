@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -39,6 +39,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
@@ -392,45 +394,25 @@ public abstract class TritonServerServiceAbs implements InferenceEngineMetricsSe
             logger.warn("Cannot infer outputs for " + modelInfo.getName() + " model", e);
         }
 
-        // Only for test
-        Map<String, String> metrics = getMetrics();
-        metrics.forEach((k, v) -> logger.info("{} {}", k, v));
-
         return inferenceResults;
 
     }
 
-    // With HttpClient API. Available from Java 11
-    // @Override
-    // public Map<String, String> getMetrics() throws KuraException {
-    // Map<String, String> metrics = new HashMap<>();
-    // try {
-    // HttpRequest request = HttpRequest.newBuilder()
-    // .uri(new URI("http://localhost:" + this.options.getMetricsPort() + "/metrics"))
-    // .timeout(Duration.ofSeconds(10)).GET().build();
-    // HttpClient client = HttpClient.newHttpClient();
-    // HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-    // if (response.statusCode() == 200) {
-    // if (logger.isDebugEnabled()) {
-    // logger.debug(response.body());
-    // }
-    // MetricsParser metricsParser = new MetricsParser(response.body());
-    // metrics = metricsParser.parse();
-    // } else {
-    // logger.warn("Cannot retrieve metrics. Error code {}.", response.statusCode());
-    // }
-    // } catch (URISyntaxException | IOException e) {
-    // throw new KuraConnectException(e);
-    // } catch (InterruptedException e) {
-    // Thread.currentThread().interrupt();
-    // throw new KuraConnectException(e);
-    // }
-    // return metrics;
-    // }
-
     @Override
     public Map<String, String> getMetrics() throws KuraException {
-        Map<String, String> metrics = new HashMap<>();
+        List<String> response = getListMetrics();
+
+        MetricsParser metricsParser = new MetricsParser(response);
+        return metricsParser.parse();
+    }
+
+    @Override
+    public Optional<String> getRawMetrics() throws KuraException {
+        return Optional.of(getListMetrics().stream().collect(Collectors.joining("\n")));
+    }
+
+    private List<String> getListMetrics() throws KuraException {
+        List<String> metrics = new ArrayList<>();
         if (!this.options.areMetricsEnabled()) {
             logger.debug("Triton Server Metrics not enabled.");
             return metrics;
@@ -442,14 +424,11 @@ public abstract class TritonServerServiceAbs implements InferenceEngineMetricsSe
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setReadTimeout(10000);
-            connection.setConnectTimeout(10000);
+            connection.setConnectTimeout(10000); // check these values
 
             int status = connection.getResponseCode();
             if (status == 200) {
-                List<String> response = getResponse(connection);
-
-                MetricsParser metricsParser = new MetricsParser(response);
-                metrics = metricsParser.parse();
+                metrics = getResponse(connection);
             } else {
                 logger.warn("Cannot retrieve metrics. Error code {}.", status);
             }
@@ -467,13 +446,11 @@ public abstract class TritonServerServiceAbs implements InferenceEngineMetricsSe
     private List<String> getResponse(HttpURLConnection connection) throws IOException {
         List<String> response = new ArrayList<>();
         try (BufferedReader input = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-            String line;
-            while ((line = input.readLine()) != null) {
-                response.add(line);
-                if (logger.isDebugEnabled()) {
-                    logger.debug(line);
-                }
+            Stream<String> lines = input.lines();
+            if (logger.isDebugEnabled()) {
+                logger.debug(lines.collect(Collectors.joining("\n")));
             }
+            response = lines.collect(Collectors.toList());
         }
         return response;
     }

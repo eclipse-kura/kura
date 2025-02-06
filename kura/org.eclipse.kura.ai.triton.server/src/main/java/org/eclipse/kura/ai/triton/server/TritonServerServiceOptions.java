@@ -46,6 +46,7 @@ public class TritonServerServiceOptions {
     private static final String PROPERTY_ENABLE_GPU_METRICS = "enable.gpu.metrics";
     private static final String PROPERTY_ENABLE_CPU_METRICS = "enable.cpu.metrics";
     private static final String PROPERTY_METRICS_CONFIG = "metrics.config";
+    private static final String PROPERTY_METRICS_INTERVAL = "metrics.interval";
     private static final String PROPERTY_MODELS = "models";
     private static final String PROPERTY_LOCAL = "enable.local";
     private static final String PROPERTY_TIMEOUT = "timeout";
@@ -251,6 +252,15 @@ public class TritonServerServiceOptions {
             metricsConfig = Arrays.asList(((String) propertyMetricsConfig).trim().split(";"));
         }
         return metricsConfig;
+    }
+
+    public Optional<Integer> getMetricsInterval() {
+        Optional<Integer> metricsInterval = Optional.empty();
+        final Object propertyMetricsInterval = this.properties.get(PROPERTY_METRICS_INTERVAL);
+        if (propertyMetricsInterval instanceof String && !((String) propertyMetricsInterval).isEmpty()) {
+            metricsInterval = Optional.of(Integer.parseInt((String) propertyMetricsInterval));
+        }
+        return metricsInterval;
     }
 
     public List<String> getModels() {

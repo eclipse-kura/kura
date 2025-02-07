@@ -270,8 +270,9 @@ public class TritonServerContainerManager implements TritonServerInstanceManager
         if (!this.options.getMetricsConfig().isEmpty()) {
             this.options.getMetricsConfig().forEach(config -> entrypointOverride.add("--metrics-config=" + config));
         }
-        if (this.options.getMetricsInterval().isPresent()) {
-            entrypointOverride.add("--metrics-interval-ms=" + this.options.getMetricsInterval().get());
+        Optional<Integer> interval = this.options.getMetricsInterval();
+        if (interval.isPresent()) {
+            entrypointOverride.add("--metrics-interval-ms=" + interval.get());
         }
         builder.setEntryPoint(entrypointOverride);
 

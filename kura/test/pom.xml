@@ -550,7 +550,7 @@
                             <bundle>
                                 <id>org.apache.aries.spifly.dynamic.bundle</id>
                                 <level>4</level>
-                                <autoStart>true</autoStart>
+                                <autoStart>false</autoStart>
                             </bundle>
                             <bundle>
                                 <id>org.eclipse.osgitech.rest</id>

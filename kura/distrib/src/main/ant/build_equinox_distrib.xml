@@ -772,7 +772,7 @@ fi]]>
             <param name="bundle.name" value="org.apache.aries.spifly.dynamic.bundle" />
             <param name="bundle.version" value="${org.apache.aries.spifly.dynamic.bundle.version}" />
             <param name="start.level" value="2" />
-            <param name="start" value="s" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="asm" />

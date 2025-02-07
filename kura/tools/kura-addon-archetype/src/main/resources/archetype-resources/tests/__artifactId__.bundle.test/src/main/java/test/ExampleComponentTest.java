@@ -1,5 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2024 Eurotech and/or its affiliates. All rights reserved.
+ * Copyright (c) 2025 Eurotech and/or its affiliates and others
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *  Eurotech
  *******************************************************************************/
 package ${package}.test;
 
@@ -11,9 +20,14 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Component(immediate = true)
 public class ExampleComponentTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExampleComponentTest.class);
@@ -22,23 +36,14 @@ public class ExampleComponentTest {
 
     private static ConfigurableComponent exampleComponent;
 
-    public void setExampleComponent(final ConfigurableComponent component) {
-        exampleComponent = component;
+    @Reference(cardinality = ReferenceCardinality.MANDATORY, //
+        policy = ReferencePolicy.STATIC, //
+        target = "(kura.service.pid=${package}.ExampleComponent)" //
+    )
+    public void setExampleComponent(final ConfigurableComponent componentUnderTest) {
+        exampleComponent = componentUnderTest;
         dependencies.countDown();
-    }
-
-    public void unsetExampleComponent() {
-        exampleComponent = null;
-    }
-
-    public void activate() {
-    	logger.info("Activating");
-    	logger.info("Activated");
-    }
-
-    public void deactivate() {
-    	logger.info("Deactivating");
-    	logger.info("Deactivated");
+        logger.info("Got reference to service under test");
     }
 
     @BeforeClass

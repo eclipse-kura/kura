@@ -590,6 +590,16 @@
                     <artifactId>osgi-resource-locator</artifactId>
                     <version>${osgi-resource-locator.version}</version>
                 </dependency>
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.service.component.annotations</artifactId>
+                    <version>${org.osgi.service.component.annotations.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.service.metatype.annotations</artifactId>
+                    <version>${org.osgi.service.metatype.annotations.version}</version>
+                </dependency>
 
                 <!-- BouncyCastle -->
 

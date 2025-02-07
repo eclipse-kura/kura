@@ -32,8 +32,9 @@ public class ExampleComponentTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExampleComponentTest.class);
 
-    private static CountDownLatch dependencies = new CountDownLatch(1);
+    private static final CountDownLatch dependencies = new CountDownLatch(1);
 
+    // needs to be static for being available to JUnit Runner
     private static ConfigurableComponent exampleComponent;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY, //
@@ -43,7 +44,7 @@ public class ExampleComponentTest {
     public void setExampleComponent(final ConfigurableComponent componentUnderTest) {
         exampleComponent = componentUnderTest;
         dependencies.countDown();
-        logger.info("Got reference to service under test");
+        logger.info("Got service reference {}", exampleComponent.getClass().getSimpleName());
     }
 
     @BeforeClass

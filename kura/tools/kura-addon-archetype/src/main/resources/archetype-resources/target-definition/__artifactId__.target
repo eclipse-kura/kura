@@ -314,11 +314,11 @@
                     <artifactId>jakarta.ws.rs-api</artifactId>
                     <version>${jakarta.ws.rs-api.version}</version>
                 </dependency>
-                <artifactItem>
+                <dependency>
                     <groupId>com.sun.xml.bind</groupId>
                     <artifactId>jaxb-osgi</artifactId>
                     <version>${jaxb-osgi.version}</version>
-                </artifactItem>
+                </dependency>
 
                 <!-- Equinox -->
 

@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.AlertDialog.DismissListener;
+import org.eclipse.kura.web.client.ui.AlertDialog.Severity;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.model.GwtSnapshot;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
@@ -162,6 +163,9 @@ public abstract class SnapshotSelectorModal extends Composite {
 
         this.requestXsrfToken.setValue("");
 
+        this.advancedConfirmationAlert.setYesButtonAlternativeText(MSGS.yesButton());
+        this.advancedConfirmationAlert.setNoButtonAlternativeText(MSGS.noButton());
+
         this.snapshotFooter.clear();
     }
 
@@ -179,9 +183,10 @@ public abstract class SnapshotSelectorModal extends Composite {
      * modal when done.
      */
 
-    public void hideMainAndShowAdvancedModal(String title, String message, DismissListener listener) {
+    public void hideMainAndShowAdvancedModal(String title, String message, String applyButton, String cancelButton,
+            DismissListener listener) {
         this.snapshotModal.hide();
-        this.advancedConfirmationAlert.show(title, message, listener);
+        this.advancedConfirmationAlert.show(title, message, applyButton, cancelButton, Severity.ALERT, listener);
     }
 
     /*

@@ -61,8 +61,6 @@ public class SnapshotRollbackModal extends SnapshotSelectorModal {
 
         setAdvancedModePanelVisible(true);
 
-        setAdvancedModeDescriptionSpawnText(MSGS.snapshotRollbackAdvancedModeHint());
-
         setAdvancedModeClickHandler(this::onAdvancedModeClick);
     }
 
@@ -81,7 +79,6 @@ public class SnapshotRollbackModal extends SnapshotSelectorModal {
         });
 
         setAnchorEnable(!currentAdvancedModeState);
-        setAdvancedModeDescriptionVisibility(currentAdvancedModeState);
 
         if (currentAdvancedModeState) {
             this.rollbackOrNextButton.setButtonText(MSGS.next());
@@ -135,7 +132,7 @@ public class SnapshotRollbackModal extends SnapshotSelectorModal {
 
     private void onSnapshotRollback(GwtSnapshot snapshot) {
         hideMainAndShowAdvancedModal(MSGS.deviceSnapshotRollbackAdvancedModalTitle(),
-                MSGS.deviceSnapshotRollbackAdvancedModalMessage(),
+                MSGS.deviceSnapshotRollbackAdvancedModalMessage(), MSGS.apply(), MSGS.cancelButton(),
                 userConfirmed -> onSnapshotRollbackConfirmationSelection(snapshot, userConfirmed));
     }
 

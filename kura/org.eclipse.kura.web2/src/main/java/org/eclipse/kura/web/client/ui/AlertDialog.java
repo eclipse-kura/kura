@@ -92,10 +92,34 @@ public class AlertDialog extends Composite implements HasId {
         this.modal.setClosable(listener == null);
     }
 
+    public void setYesButtonAlternativeText(String yesAlternativeText) {
+        this.yes.setText(yesAlternativeText);
+    }
+
+    public void setNoButtonAlternativeText(String noAlternativeText) {
+        this.no.setText(noAlternativeText);
+    }
+
     public void show(String title, String message, Severity severity, DismissListener listener, String... extraItems) {
         setAlertText(message, severity);
         setTitle(title);
         setListener(listener);
+        this.extraItems.clear();
+        if (extraItems != null) {
+            for (final String extraItem : extraItems) {
+                this.extraItems.add(new ListItem(extraItem));
+            }
+        }
+        this.modal.show();
+    }
+
+    public void show(String title, String message, String yesButtonAlternativeText, String noButtonAlternativeText,
+            Severity severity, DismissListener listener, String... extraItems) {
+        setAlertText(message, severity);
+        setTitle(title);
+        setListener(listener);
+        setYesButtonAlternativeText(yesButtonAlternativeText);
+        setNoButtonAlternativeText(noButtonAlternativeText);
         this.extraItems.clear();
         if (extraItems != null) {
             for (final String extraItem : extraItems) {
@@ -135,6 +159,11 @@ public class AlertDialog extends Composite implements HasId {
 
     public void show(String title, String message, DismissListener listener) {
         show(title, message, Severity.INFO, listener);
+    }
+
+    public void show(String title, String message, DismissListener listener, String confirmButtonText,
+            String dismissButtonText) {
+        // TODO:
     }
 
     public void show(String title, String message, ConfirmListener listener) {

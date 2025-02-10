@@ -122,7 +122,7 @@ public class NetworkButtonBarUi extends Composite {
                                     EntryClassUi.showWaitModal();
                                     updateNetConfiguration(updatedNetIf);
                                 }
-                            }, MSGS.netConfigConsoleUnavailable(), MSGS.netConfigURLChange());
+                            }, new String[] { MSGS.netConfigConsoleUnavailable(), MSGS.netConfigURLChange() });
 
                 }
             } else {

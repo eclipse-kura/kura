@@ -171,12 +171,12 @@ public class TritonServerNativeManager implements TritonServerInstanceManager {
         commandString.add("--metrics-port=" + this.options.getMetricsPort());
         commandString.add("--model-control-mode=explicit");
         commandString.add("--allow-metrics=" + this.options.areMetricsEnabled());
-        commandString.add("--allow-gpu-metrics=" + this.options.areGpuMetricsEnabled());
-        commandString.add("--allow-cpu-metrics=" + this.options.areCpuMetricsEnabled());
-        if (!this.options.getMetricsConfig().isEmpty()) {
+        commandString.add("--allow-gpu-metrics=" + this.options.areMetricsEnabled());
+        commandString.add("--allow-cpu-metrics=" + this.options.areMetricsEnabled());
+        if (this.options.areMetricsEnabled() && !this.options.getMetricsConfig().isEmpty()) {
             this.options.getMetricsConfig().forEach(config -> commandString.add("--metrics-config=" + config));
         }
-        if (this.options.getMetricsInterval().isPresent()) {
+        if (this.options.areMetricsEnabled() && this.options.getMetricsInterval().isPresent()) {
             commandString.add("--metrics-interval-ms=" + this.options.getMetricsInterval().get());
         }
         commandString.add("2>&1");

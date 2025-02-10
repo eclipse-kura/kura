@@ -42,8 +42,6 @@ public class TritonServerServiceOptions {
     private static final String PROPERTY_LOCAL_BACKENDS_PATH = "local.backends.path";
     private static final String PROPERTY_LOCAL_BACKENDS_CONFIG = "local.backends.config";
     private static final String PROPERTY_ENABLE_METRICS = "enable.metrics";
-    private static final String PROPERTY_ENABLE_GPU_METRICS = "enable.gpu.metrics";
-    private static final String PROPERTY_ENABLE_CPU_METRICS = "enable.cpu.metrics";
     private static final String PROPERTY_METRICS_CONFIG = "metrics.config";
     private static final String PROPERTY_METRICS_INTERVAL = "metrics.interval";
     private static final String PROPERTY_MODELS = "models";
@@ -215,22 +213,6 @@ public class TritonServerServiceOptions {
         final Object metricEnabled = this.properties.get(PROPERTY_ENABLE_METRICS);
         if (metricEnabled instanceof Boolean) {
             return (Boolean) metricEnabled;
-        }
-        return true;
-    }
-
-    public boolean areGpuMetricsEnabled() {
-        final Object metricGpuEnabled = this.properties.get(PROPERTY_ENABLE_GPU_METRICS);
-        if (metricGpuEnabled instanceof Boolean) {
-            return (Boolean) metricGpuEnabled;
-        }
-        return true;
-    }
-
-    public boolean areCpuMetricsEnabled() {
-        final Object metricCpuEnabled = this.properties.get(PROPERTY_ENABLE_CPU_METRICS);
-        if (metricCpuEnabled instanceof Boolean) {
-            return (Boolean) metricCpuEnabled;
         }
         return true;
     }

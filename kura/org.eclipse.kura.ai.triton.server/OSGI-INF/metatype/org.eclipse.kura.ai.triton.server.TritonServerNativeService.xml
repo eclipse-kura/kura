@@ -102,26 +102,8 @@
             cardinality="0"
             required="true"
             default="true"
-            description="Enable the Triton Server Metrics feature. This property enables all the default metrics..">
+            description="Enable the Triton Server Metrics feature. This property enables the default, CPU and GPU metrics, if available.">
         </AD>  
-        
-        <AD id="enable.gpu.metrics"
-            name="Enable Triton Server GPU Metrics"
-            type="Boolean"
-            cardinality="0"
-            required="true"
-            default="true"
-            description="Enable the Triton Server GPU Metrics. It requires that the Enable Triton Server Metrics property is set to true.">
-        </AD> 
-        
-        <AD id="enable.cpu.metrics"
-            name="Enable Triton Server CPU Metrics"
-            type="Boolean"
-            cardinality="0"
-            required="true"
-            default="true"
-            description="Enable the Triton Server CPU Metrics. It requires that the Enable Triton Server Metrics property is set to true.">
-        </AD>      
         
         <AD id="metrics.config"
             name="Optional metrics-specific configuration"

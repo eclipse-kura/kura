@@ -114,6 +114,34 @@
         	min="1">
         </AD>        	
 
+        <AD id="enable.metrics"
+            name="Enable Triton Server Metrics"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Only for local instance, enable the Triton Server Metrics feature. This property enables the default, CPU and GPU metrics, if available. ">
+        </AD>  
+        
+        <AD id="metrics.config"
+            name="Optional metrics-specific configuration"
+            type="String"
+            cardinality="0"
+            required="false"
+            default=""
+            description="Only for local instance, a semi-colon separated list of metrics-specific configuration settings for the Triton Server Metrics. (i.e. counter_latencies=true).">
+        </AD>
+        
+        <AD id="metrics.interval"
+            name="Optional metrics polling interval"
+            type="String"
+            cardinality="0"
+            required="false"
+            default=""
+            description="Only for local instance, Sets the interval in milliseconds at which the metrics are updated by the engine. 
+            This property is applied only to metrics that are designated as 'Per Interval'. Leave empty for the default value.">
+        </AD>
+
     </OCD>
     <Designate factoryPid="org.eclipse.kura.ai.triton.server.TritonServerService">
         <Object ocdref="org.eclipse.kura.ai.triton.server.TritonServerService"/>

@@ -265,13 +265,13 @@ public class TritonServerContainerManager implements TritonServerInstanceManager
             this.options.getBackendsConfigs().forEach(config -> entrypointOverride.add("--backend-config=" + config));
         }
         entrypointOverride.add("--allow-metrics=" + this.options.areMetricsEnabled());
-        entrypointOverride.add("--allow-gpu-metrics=" + this.options.areGpuMetricsEnabled());
-        entrypointOverride.add("--allow-cpu-metrics=" + this.options.areCpuMetricsEnabled());
-        if (!this.options.getMetricsConfig().isEmpty()) {
+        entrypointOverride.add("--allow-gpu-metrics=" + this.options.areMetricsEnabled());
+        entrypointOverride.add("--allow-cpu-metrics=" + this.options.areMetricsEnabled());
+        if (this.options.areMetricsEnabled() && !this.options.getMetricsConfig().isEmpty()) {
             this.options.getMetricsConfig().forEach(config -> entrypointOverride.add("--metrics-config=" + config));
         }
         Optional<Integer> interval = this.options.getMetricsInterval();
-        if (interval.isPresent()) {
+        if (this.options.areMetricsEnabled() && interval.isPresent()) {
             entrypointOverride.add("--metrics-interval-ms=" + interval.get());
         }
         builder.setEntryPoint(entrypointOverride);

@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Kura Test Hello World
 Bundle-SymbolicName: org.eclipse.kura.test.helloworld;singleton:=true
 Bundle-Version: 6.0.0.qualifier
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Import-Package: org.osgi.service.component;version="1.2.0",

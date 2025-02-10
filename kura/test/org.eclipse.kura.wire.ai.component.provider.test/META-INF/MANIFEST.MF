@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.eclipse.kura.wire.ai.component.provider.test
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v2.0
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
 Bundle-ActivationPolicy: lazy
 Fragment-Host: org.eclipse.kura.wire.ai.component.provider
 Import-Package: org.apache.commons.io;version="2.4.0",

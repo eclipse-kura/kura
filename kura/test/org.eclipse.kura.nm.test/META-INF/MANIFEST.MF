@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.nm.test
 Bundle-SymbolicName: org.eclipse.kura.nm.test;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
 Bundle-ActivationPolicy: lazy
 Import-Package: org.bouncycastle.jce.provider;version="1.78.1",
  org.bouncycastle.pkcs;version="1.78.1",

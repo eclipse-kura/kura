@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.core.testutil
 Bundle-SymbolicName: org.eclipse.kura.core.testutil;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
 Import-Package: com.eclipsesource.json;version="0.9.5",
  jakarta.servlet;version="5.0.0",
  jakarta.servlet.http;version="5.0.0",

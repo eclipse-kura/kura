@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.core.keystore
 Bundle-SymbolicName: org.eclipse.kura.core.keystore;singleton:=true
 Bundle-Version: 2.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
 Import-Package: com.eclipsesource.json;version="0.9.5",
  org.bouncycastle.asn1;version="1.78.1",
  org.bouncycastle.asn1.cms;version="1.78.1",

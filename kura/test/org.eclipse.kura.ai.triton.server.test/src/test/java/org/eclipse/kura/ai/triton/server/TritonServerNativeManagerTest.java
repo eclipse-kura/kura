@@ -156,8 +156,6 @@ public class TritonServerNativeManagerTest {
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.TRUE);
         givenPropertyWith("enable.metrics", Boolean.TRUE);
-        givenPropertyWith("enable.gpu.metrics", Boolean.FALSE);
-        givenPropertyWith("enable.cpu.metrics", Boolean.TRUE);
         givenPropertyWith("metrics.config", "myProp=foo;yourProp=bar");
         givenPropertyWith("metrics.interval", "99");
         givenServiceOptionsBuiltWith(properties);
@@ -170,7 +168,7 @@ public class TritonServerNativeManagerTest {
         whenStartIsCalled();
 
         thenCommandServiceExecuteWasCalledWithCommandContaining("--allow-metrics=true");
-        thenCommandServiceExecuteWasCalledWithCommandContaining("--allow-gpu-metrics=false");
+        thenCommandServiceExecuteWasCalledWithCommandContaining("--allow-gpu-metrics=true");
         thenCommandServiceExecuteWasCalledWithCommandContaining("--allow-cpu-metrics=true");
         thenCommandServiceExecuteWasCalledWithCommandContaining("--allow-metrics=true");
         thenCommandServiceExecuteWasCalledWithCommandContaining("--metrics-interval-ms=99");

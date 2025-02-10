@@ -387,15 +387,11 @@ public class TritonServerServiceOptionsTest {
     @Test
     public void metricsGettersShouldWork() {
         givenPropertyWith("enable.metrics", Boolean.TRUE);
-        givenPropertyWith("enable.gpu.metrics", Boolean.FALSE);
-        givenPropertyWith("enable.cpu.metrics", Boolean.TRUE);
         givenPropertyWith("metrics.config", "myProp=foo;YourProp=bar");
         givenPropertyWith("metrics.interval", "99");
         givenServiceOptionsBuiltWith(properties);
 
         thenMetricsAreEnabled(true);
-        thenGpuMetricsAreEnabled(false);
-        thenCpuMetricsAreEnabled(true);
         thenMetricsConfigAre("myProp=foo;YourProp=bar");
         thenMetricsIntervalIs(99);
     }
@@ -518,14 +514,6 @@ public class TritonServerServiceOptionsTest {
     }
 
     private void thenMetricsAreEnabled(boolean expectedResult) {
-        assertEquals(expectedResult, this.options.areMetricsEnabled());
-    }
-
-    private void thenGpuMetricsAreEnabled(boolean expectedResult) {
-        assertEquals(expectedResult, this.options.areGpuMetricsEnabled());
-    }
-
-    private void thenCpuMetricsAreEnabled(boolean expectedResult) {
         assertEquals(expectedResult, this.options.areMetricsEnabled());
     }
 

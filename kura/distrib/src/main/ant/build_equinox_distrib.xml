@@ -804,6 +804,25 @@ fi]]>
             <param name="start.level" value="2" />
             <param name="start" value="" />
         </antcall>
+        <!--JAXB dependenices-->
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="jakarta.activation-api" />
+            <param name="bundle.version" value="${jakarta.activation-api.javax.version}" />
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="jakarta.xml.bind-api" />
+            <param name="bundle.version" value="${jakarta.xml.bind-api.javax.version}" />
+            <param name="start.level" value="2"/>
+            <param name="start" value=""/>
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="jaxb-osgi" />
+            <param name="bundle.version" value="${jaxb-osgi.javax.version}" />
+            <param name="start.level" value="2"/>
+            <param name="start" value="s"/>
+        </antcall>
         <!--Jersey dependencies-->
         <antcall target="install-plugin">
             <param name="bundle.name" value="hk2-api" />

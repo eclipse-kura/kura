@@ -429,8 +429,8 @@ public abstract class TritonServerServiceAbs implements InferenceEngineMetricsSe
                     .toURL();
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
-            connection.setReadTimeout(10000);
-            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(30000);
+            connection.setConnectTimeout(30000);
 
             int status = connection.getResponseCode();
             if (status == 200) {

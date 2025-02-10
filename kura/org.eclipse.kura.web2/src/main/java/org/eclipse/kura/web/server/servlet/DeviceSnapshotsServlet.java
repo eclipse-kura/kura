@@ -48,40 +48,6 @@ public class DeviceSnapshotsServlet extends AuditServlet {
         super("UI Snapshots", "Return device snapshot");
     }
 
-    // USED TO RETRIEVE WIREGRAPH SNAPSHOT
-    @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        KuraRemoteServiceServlet.requirePermissions(request, Mode.ALL, new String[] { KuraPermission.ADMIN });
-
-        // BEGIN XSRF - Servlet dependent code
-
-        try {
-            GwtXSRFToken token = new GwtXSRFToken(request.getParameter("xsrfToken"));
-            KuraRemoteServiceServlet.checkXSRFToken(request, token);
-        } catch (Exception e) {
-            throw new ServletException("Security error: please retry this operation correctly.", e);
-        }
-        // END XSRF security check
-
-        try {
-
-            String snapshotId = request.getParameter("snapshotId");
-            ServiceLocator locator = ServiceLocator.getInstance();
-            ConfigurationService cs = locator.getService(ConfigurationService.class);
-            if (snapshotId != null) {
-
-                long sid = Long.parseLong(snapshotId);
-
-                GwtServerUtil.writeSnapshot(response, cs.getSnapshot(sid), SNAPSHOT_DOWNLOAD_TAG + sid,
-                        request.getParameter("format"));
-
-            }
-        } catch (Exception e) {
-            logger.error("Error exporting snapshot");
-            throw new ServletException(e);
-        }
-    }
-
     // USED TO RETRIEVE SYSTEM SNAPSHOT
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

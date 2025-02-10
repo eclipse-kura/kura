@@ -33,10 +33,7 @@ import org.eclipse.kura.web.shared.service.GwtSnapshotServiceAsync;
 import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Modal;
-import org.gwtbootstrap3.client.ui.ModalBody;
-import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
-import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -99,6 +96,8 @@ public class SnapshotsTabUi extends Composite implements Tab {
 
     @UiField
     SnapshotDownloadModal snapshotDownloadModal;
+    @UiField
+    SnapshotRollbackModal snapshotRollbackModal;
 
     @UiField
     CellTable<GwtSnapshot> snapshotsGrid = new CellTable<>();
@@ -289,69 +288,31 @@ public class SnapshotsTabUi extends Composite implements Tab {
         this.download.setEnabled(false);
 
         this.rollback.setText(MSGS.rollback());
-        this.rollback.addClickHandler(event -> rollback());
+        this.rollback.addClickHandler(event -> {
+            SnapshotsTabUi.this.selected = SnapshotsTabUi.this.selectionModel.getSelectedObject();
+            if (SnapshotsTabUi.this.selected != null) {
+                SnapshotsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        FailureHandler.handle(ex);
+                    }
+
+                    @Override
+                    public void onSuccess(GwtXSRFToken token) {
+                        rollbackSnapshot(token);
+                    }
+                });
+            }
+        });
         this.rollback.setEnabled(false);
 
         this.upload.setText(MSGS.upload());
         this.upload.addClickHandler(event -> uploadAndApply());
     }
 
-    private void rollback() {
-        final GwtSnapshot snapshot = this.selectionModel.getSelectedObject();
-        if (snapshot != null) {
-            final Modal rollbackModal = new Modal();
-            ModalBody rollbackModalBody = new ModalBody();
-            ModalFooter rollbackModalFooter = new ModalFooter();
-            rollbackModal.setTitle(MSGS.confirm());
-            rollbackModal.setClosable(true);
-            rollbackModalBody.add(new Span(MSGS.deviceSnapshotRollbackConfirm()));
-
-            rollbackModalFooter.add(new Button("Yes", event -> {
-                EntryClassUi.showWaitModal();
-                SnapshotsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(ex);
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        SnapshotsTabUi.this.gwtSnapshotService.rollbackDeviceSnapshot(token, snapshot,
-                                new AsyncCallback<Void>() {
-
-                                    @Override
-                                    public void onFailure(Throwable ex) {
-                                        EntryClassUi.hideWaitModal();
-                                        FailureHandler.handle(ex);
-                                    }
-
-                                    @Override
-                                    public void onSuccess(Void result) {
-                                        Window.Location.reload();
-                                    }
-                                });
-                    }
-
-                });
-
-                rollbackModal.hide();
-            }));
-
-            rollbackModalFooter.add(new Button("No", event -> rollbackModal.hide()));
-
-            rollbackModal.add(rollbackModalBody);
-            rollbackModal.add(rollbackModalFooter);
-            rollbackModal.show();
-
-        }
-    }
-
     private void downloadSnapshot(GwtXSRFToken token) {
-
-        Long snapshotId = this.selected.getSnapshotId();
-        this.gwtSnapshotService.getSnapshotConfigurationFromSid(token, snapshotId.longValue(),
+        this.gwtSnapshotService.getSnapshotConfigurationFromSid(token, this.selected.getSnapshotId(),
                 new AsyncCallback<List<String>>() {
 
                     @Override
@@ -362,8 +323,25 @@ public class SnapshotsTabUi extends Composite implements Tab {
 
                     @Override
                     public void onSuccess(List<String> pidList) {
-                        snapshotDownloadModal.showModal(snapshotId, pidList);
+                        snapshotDownloadModal.showModal(selected, pidList);
 
+                    }
+                });
+    }
+
+    private void rollbackSnapshot(GwtXSRFToken token) {
+        this.gwtSnapshotService.getSnapshotConfigurationFromSid(token, this.selected.getSnapshotId(),
+                new AsyncCallback<List<String>>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        FailureHandler.handle(caught);
+
+                    }
+
+                    @Override
+                    public void onSuccess(List<String> pidList) {
+                        snapshotRollbackModal.showModal(selected, pidList);
                     }
                 });
     }

@@ -17,7 +17,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.KuraExceptionHandler;
@@ -75,6 +77,38 @@ public class GwtSnapshotServiceImpl extends OsgiRemoteServiceServlet implements 
         } catch (Exception e) {
             KuraExceptionHandler.handle(e);
         }
+    }
+
+    @Override
+    public void configurationRollbackDeviceSnapshot(GwtXSRFToken xsrfToken, GwtSnapshot snapshot,
+            List<String> targetPids) throws GwtKuraException {
+
+        checkXSRFToken(xsrfToken);
+
+        try {
+
+            ServiceLocator locator = ServiceLocator.getInstance();
+            ConfigurationService cs = locator.getService(ConfigurationService.class);
+
+            List<ComponentConfiguration> targetConfigurations = cs.getSnapshot(snapshot.getSnapshotId()).stream()
+                    .filter(config -> targetPids.contains(config.getPid())).collect(Collectors.toList());
+
+            cs.updateConfigurations(targetConfigurations, true);
+
+            //
+            // Add an additional delay after the configuration update
+            // to give the time to the device to apply the received
+            // configuration
+            SystemService ss = locator.getService(SystemService.class);
+            long delay = Long.parseLong(ss.getProperties().getProperty("console.updateConfigDelay", "5000"));
+            if (delay > 0) {
+                Thread.sleep(delay);
+            }
+
+        } catch (Exception e) {
+            KuraExceptionHandler.handle(e);
+        }
+
     }
 
     @Override

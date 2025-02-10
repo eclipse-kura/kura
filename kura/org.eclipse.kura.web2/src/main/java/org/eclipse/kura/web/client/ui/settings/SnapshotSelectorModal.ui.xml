@@ -16,69 +16,94 @@
 -->
 
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-    xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
-    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
-    xmlns:settings="urn:import:org.eclipse.kura.web.client.ui.settings">
+	xmlns:b="urn:import:org.gwtbootstrap3.client.ui"
+	xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
+	xmlns:settings="urn:import:org.eclipse.kura.web.client.ui.settings"
+	xmlns:client="urn:import:org.eclipse.kura.web.client.ui">
 
-    <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages" />
+	<ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages" />
 
 	<ui:style>
 		.channel-name-validation-label {
-	            padding-top: 10px;
-	            color: red;
-	            font-size: 0.35cm;
-	            font-weight: normal;
-	    }
-	    .small-spacing {
-	  	    padding-bottom: 10px;
+		padding-top: 10px;
+		color: red;
+		font-size: 0.35cm;
+		font-weight: normal;
 		}
-	    .big-spacing {
-		    padding-bottom: 20px;
-	    }
-	    	
-	    .text-button {
-		    background: none;
-		    border: none;
-		    color: blue;
-		    text-decoration: underline;
-		    cursor: pointer;
-		    float: left;
+
+		.small-spacing {
+		padding-bottom: 10px;
 		}
-		
+
+		.big-spacing {
+		padding-bottom: 20px;
+		}
+
+		.text-button {
+		background: none;
+		border: none;
+		color: blue;
+		text-decoration: underline;
+		cursor: pointer;
+		float: left;
+		}
+
 		.right-label {
-		    margin-left: auto;
-		    float: right;
-		    font-weight: bold;
+		margin-left: auto;
+		float: right;
+		font-weight: bold;
 		}
+
+		.right-checkbox {
+		margin-left: auto;
+		float: right;
+		}
+
 		.horizontal-panel {
-	    	width: 100%;
-	    }
+		width: 100%;
+		}
 	</ui:style>
 
-    <b:Modal closable="false" fade="true" dataBackdrop="STATIC" ui:field="snapshotModal" b:id="snapshot-modal">
-            <b:ModalBody>
-                <g:FormPanel>
-                <b:Form ui:field="snapshotForm">
-                    <b:FieldSet>
-                        <b:FormGroup>
-                            <b.html:Paragraph ui:field="snapshotModalDescription" />
-                            <b.html:Paragraph ui:field="snapshotModalHint" />
-                            <g:Label ui:field="searchBoxSeparatorSmall" addStyleNames="{style.small-spacing}"/>
-                            <b:TextBox placeholder="{msgs.snapshotDownloadSearchBoxPlaceholder}"
-								ui:field="pidSearch" addStyleNames="services-search" />
-						    <g:Label ui:field="searchBoxSeparatorBig" addStyleNames="{style.big-spacing}"/>
-                            <g:ScrollPanel ui:field="pidSelectionScrollPanel"></g:ScrollPanel>
-                            <b:FormLabel addStyleNames="{style.channel-name-validation-label}" ui:field="noPidSelectedError" text="{msgs.downloadSnapshotError}" />
-                        </b:FormGroup>
-                    </b:FieldSet>
-                </b:Form>
-                </g:FormPanel>
-                 <g:HorizontalPanel addStyleNames="{style.horizontal-panel}" >
-			        <b:Anchor ui:field="selectOrRemoveAllAnchor" />
-			        <g:Label ui:field="selectedPidCounter" addStyleNames="{style.right-label}" />
-			    </g:HorizontalPanel>
-            </b:ModalBody>
-            <b:ModalFooter ui:field="snapshotFooter"/>
-        </b:Modal>
-
+	<b:Container fluid="true">
+		<b:Modal closable="false" fade="true" dataBackdrop="STATIC" ui:field="snapshotModal"
+			b:id="snapshot-modal">
+			<b:ModalBody>
+				<g:FormPanel>
+					<b:Form ui:field="snapshotForm">
+						<b:FieldSet>
+							<b:FormGroup>
+								<b.html:Paragraph ui:field="snapshotModalDescription" />
+								<b.html:Paragraph ui:field="snapshotModalHint" />
+								<g:HorizontalPanel ui:field="advancedModePanel"
+									addStyleNames="{style.horizontal-panel}">
+									<b:CheckBox ui:field="advancedModeCheckbox"
+										text="{msgs.advancedMode}"
+										addStyleNames="{style.right-checkbox}" />
+								</g:HorizontalPanel>
+								<g:Label addStyleNames="{style.small-spacing}" />
+								<b:TextBox placeholder="{msgs.snapshotDownloadSearchBoxPlaceholder}"
+									ui:field="pidSearch" addStyleNames="services-search" />
+								<g:Label addStyleNames="{style.big-spacing}" />
+								<g:ScrollPanel ui:field="pidSelectionScrollPanel"></g:ScrollPanel>
+								<b:FormLabel addStyleNames="{style.channel-name-validation-label}"
+									ui:field="noPidSelectedError"
+									text="{msgs.downloadSnapshotError}" />
+							</b:FormGroup>
+						</b:FieldSet>
+					</b:Form>
+				</g:FormPanel>
+				<g:HorizontalPanel addStyleNames="{style.horizontal-panel}">
+					<b:Anchor ui:field="selectOrRemoveAllAnchor" />
+					<g:Label ui:field="selectedPidCounter" addStyleNames="{style.right-label}" />
+				</g:HorizontalPanel>
+				<g:Label ui:field="advancedModeDescriptionSeparator"
+					addStyleNames="{style.big-spacing}" />
+				<b.html:Paragraph ui:field="advancedModeDescription" />
+			</b:ModalBody>
+			<b:ModalFooter ui:field="snapshotFooter" />
+		</b:Modal>
+		<client:AlertDialog ui:field="advancedConfirmationAlert" />
+	</b:Container>
 </ui:UiBinder> 

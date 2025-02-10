@@ -34,4 +34,8 @@ public interface GwtSnapshotService extends RemoteService {
 
     @Audit(componentName = "UI Snapshots", description = "Rollback device snapshot")
     public void rollbackDeviceSnapshot(GwtXSRFToken xsrfToken, GwtSnapshot snapshot) throws GwtKuraException;
+
+    @Audit(componentName = "UI Snapshots", description = "Configuration Rollback device snapshot")
+    public void configurationRollbackDeviceSnapshot(GwtXSRFToken xsrfToken, GwtSnapshot snapshot,
+            List<String> targetPids) throws GwtKuraException;
 }

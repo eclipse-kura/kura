@@ -47,4 +47,51 @@ The **Upload and Apply** option  provides the ability to import an XML file from
 
 The **Rollback** option provides the ability to restore the system to a previous configuration.
 
+Starting with Kura 6.0, this process can be performed in two ways: the default one consists in the restoration of the configuration of one or more services to a previous state, mantaining the persistency of the system. The second is an *Advanced* rollback process, that is performed **without** the framework persistency: in this case the entire system will be restored exactly to the state represented by the selected snapshot, cleaning all configurations not present in the latter.
+
+#### Snapshot Rollback
+
+Pressing the **Rollback** button, the default rollback process will start: a dialog will be shown, similar to the one in the *Download* section, that allows choosing the desired configurations.
+
 ![](images/snapshotsRollback.png)
+
+
+In the snapshot rollback popup, a list of checkboxes is shown, representing the list of all the service configurations that can be restored. By default, all configurations (represented by the component PIDs) are selected. The user can remove from the selection the configurations he's not interested in, by deselecting the related PIDs checkboxes. Only the selected component configurations will be then rollbacked to the configuration present in the snapshot.
+
+As per the Download popup, a search box is available for the user to simplify the process of PID selection for the configurations available in the selected snapshot.
+
+Pressing the **Rollback** button, the Snapshot Rollback process will start, following the rules below:
+
+- if a service **is present in the selected snapshot**, and it's **PID was selected**, its configuration will be overwritten by the one present in the selected snapshot
+- if a service **is present in the selected snapshot**, and it's **PID was not selected**, nothing will happen on its configuration
+- if a service **is not present in the selected snapshot**, nothing will happen on its configuration
+- if a **factory component it's not already present** in the system, **but available and selected on the snapshot**, the component will be created with the configuration present in the selected snapshot
+- if a **factory component it's not already present** in the system, **and it's not available nor selected on the snapshot**, nothing will happen
+- if a **factory component is already present** in the system, **but it's not available nor selected on the snapshot**, nothing will happen on its configuration
+- if a **factory component is already present** in the system, **and it's available and selected on the snapshot**, the component configuration will be overwritten with the one in the selected snapshot
+
+!!! warning
+    Carefully select the snapshot and its PIDs to be rollbacked. Changing the configuration of some services could make Kura unresponsive or not reachable
+
+#### Advanced Snapshot Rollback
+
+The second rollback way is called **Advanced Snapshot Rollback**: this process was the default one before Kura 6.0.0, and consists in the factory restoration of the framework and application of the selected configuration.
+
+![](images/advancedSnapshotRollack.png)
+
+When checking the *Advanced Mode* box on top of the Snapshot Rollback popup, all the PIDs will be selected, and the *Rollback* button on the bottom will switch to *Next*: by pressing this button an alert message will be shown, explaining in details what is going to happen.
+
+![](images/advancedSnapshotRollackAlert.png)
+
+Pressing the **Apply** button, the rollback process will start. The framework will be restored exactly to the state represented by the selected snapshot, following the rules below:
+
+- if a service **is present in the selected snapshot**, its configuration will be overwritten by the configuration on the snapshot
+- if a service **is not present in the selected snapshot**, its configuration will be restored to its default configuration
+- if a **factory component is not already present** in the system, **but it's available on the snapshot**, the component will be created with the configuration present in the selected snapshot
+- if a **factory component is already present** in the system, **but it's not available on the selected snapshot**, the component will be removed
+- if a **factory component is already present** in the system, **and it's available on the selected snapshot**, the component configuration will be overwritten with the one in the selected snapshot
+
+!!! warning
+    Carefully select the snapshot to be rollbacked. Changing the configuration of the system could make Kura unresponsive or not reachable
+
+

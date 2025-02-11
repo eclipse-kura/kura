@@ -76,10 +76,6 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         this.configurationService = confService;
     }
 
-    public synchronized void unsetConfigurationService() {
-        this.configurationService = null;
-    }
-
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -294,7 +290,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             final boolean isInstanceEnabled = newOptions.isEnabled();
 
             try {
-                existingContainer = getExistingContainerByName(newOptions.getContainerConfiguration().getContainerName());
+                existingContainer = getExistingContainerByName(
+                        newOptions.getContainerConfiguration().getContainerName());
             } catch (final Exception e) {
                 logger.warn("failed to get existing container state", e);
                 return new Disabled(newOptions);

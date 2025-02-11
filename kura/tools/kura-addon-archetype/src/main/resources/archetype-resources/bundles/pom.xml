@@ -43,6 +43,7 @@
         <antrun-version>1.8</antrun-version>
         <exists-version>0.0.6</exists-version>
         <eclipse.jarsigner.version>1.1.5</eclipse.jarsigner.version>
+        <maven.jarsigner.plugin.version>3.1.0</maven.jarsigner.plugin.version>
         <target-definition-version>${project.version}</target-definition-version>
         <kura-workdir>${project.build.directory}/kura</kura-workdir>
         <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
@@ -140,7 +141,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jarsigner-plugin</artifactId>
-                    <version>1.4</version>
+                    <version>${maven.jarsigner.plugin.version}</version>
                     <executions>
                         <execution>
                             <id>sign</id>

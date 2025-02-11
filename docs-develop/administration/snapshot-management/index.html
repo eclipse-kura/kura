@@ -1262,6 +1262,30 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Rollback">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#snapshot-rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      Snapshot Rollback
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-snapshot-rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Snapshot Rollback
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -4646,6 +4670,30 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Rollback">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#snapshot-rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      Snapshot Rollback
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-snapshot-rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Snapshot Rollback
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -4699,7 +4747,47 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><img alt="" src="../images/snapshotsUpload.png" /></p>
 <h3 id="rollback">Rollback</h3>
 <p>The <strong>Rollback</strong> option provides the ability to restore the system to a previous configuration.</p>
+<p>Starting with Kura 6.0, this process can be performed in two ways:</p>
+<ul>
+<li><strong>Snapshot Rollback</strong>: This method restores the configuration of one or more services to a previous state, while maintaining the system’s persistency. </li>
+<li><strong>Advanced Snapshot Rollback</strong>: This process is performed only after a framework persistency cleanup. In this case, the entire system will be restored exactly to the state represented by the selected snapshot.</li>
+</ul>
+<h4 id="snapshot-rollback">Snapshot Rollback</h4>
+<p>Pressing the <strong>Rollback</strong> button, the default rollback process will start: a dialog will be shown, similar to the one in the <em>Download</em> section, that allows choosing the desired configurations.</p>
 <p><img alt="" src="../images/snapshotsRollback.png" /></p>
+<p>In the Snapshot Rollback popup, a list of checkboxes is shown, representing all the service configurations that can be restored. By default, all configurations (represented by the component PIDs) are selected. Users can remove from the selection those configurations they are not interested in, by deselecting the related PID checkboxes. Only the selected component configurations will then be rolled back to the configuration present in the snapshot.</p>
+<p>As per the Download popup, a search box is available for the user to simplify the process of PID selection for the configurations available in the selected snapshot.</p>
+<p>Pressing the <strong>Rollback</strong> button, the Snapshot Rollback process will start, following the rules below:</p>
+<ul>
+<li>if a service <strong>is present in the selected snapshot</strong>, and its <strong>PID was selected</strong>, its configuration will be overwritten by the one present in the selected snapshot</li>
+<li>if a service <strong>is present in the selected snapshot</strong>, and its <strong>PID was not selected</strong>, nothing will happen on its configuration</li>
+<li>if a service <strong>is not present in the selected snapshot</strong>, nothing will happen on its configuration</li>
+<li>if a <strong>factory component it's not already present</strong> in the system, <strong>but available and selected on the snapshot</strong>, the component will be created with the configuration present in the selected snapshot</li>
+<li>if a <strong>factory component it's not already present</strong> in the system, <strong>and it's not available nor selected on the snapshot</strong>, nothing will happen</li>
+<li>if a <strong>factory component is already present</strong> in the system, <strong>but it's not available nor selected on the snapshot</strong>, nothing will happen on its configuration</li>
+<li>if a <strong>factory component is already present</strong> in the system, <strong>and it's available and selected on the snapshot</strong>, the component configuration will be overwritten with the one in the selected snapshot</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Carefully select the snapshot and its PIDs to be rollbacked. Changing the configuration of some services could make Eclipse Kura unresponsive or not reachable</p>
+</div>
+<h4 id="advanced-snapshot-rollback">Advanced Snapshot Rollback</h4>
+<p>A more advanced rollback functionality is called <strong>Advanced Snapshot Rollback</strong>: this process was the default one before Kura 6.0.0, and consists in the factory restoration of the framework and application of the selected configuration.</p>
+<p><img alt="" src="../images/advancedSnapshotRollack.png" /></p>
+<p>When checking the <em>Advanced Mode</em> box on top of the Snapshot Rollback popup, all the PIDs will be selected, and the <em>Rollback</em> button on the bottom will switch to <em>Next</em>: by pressing this button an alert message will be shown, explaining in details what is going to happen.</p>
+<p><img alt="" src="../images/advancedSnapshotRollackAlert.png" /></p>
+<p>Pressing the <strong>Apply</strong> button, the rollback process will start. The framework will be restored exactly to the state represented by the selected snapshot, following the rules below:</p>
+<ul>
+<li>if a service <strong>is present in the selected snapshot</strong>, its configuration will be overwritten by the configuration on the snapshot</li>
+<li>if a service <strong>is not present in the selected snapshot</strong>, its configuration will be restored to its default configuration</li>
+<li>if a <strong>factory component is not already present</strong> in the system, <strong>but it's available on the snapshot</strong>, the component will be created with the configuration present in the selected snapshot</li>
+<li>if a <strong>factory component is already present</strong> in the system, <strong>but it's not available on the selected snapshot</strong>, the component will be removed</li>
+<li>if a <strong>factory component is already present</strong> in the system, <strong>and it's available on the selected snapshot</strong>, the component configuration will be overwritten with the one in the selected snapshot</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Carefully select the snapshot to be rollbacked. Changing the configuration of the system could make Eclipse Kura unresponsive or not reachable</p>
+</div>
 
 
 

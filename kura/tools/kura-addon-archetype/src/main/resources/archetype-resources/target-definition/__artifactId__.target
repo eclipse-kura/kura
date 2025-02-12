@@ -708,6 +708,16 @@
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.kura.core.inventory</artifactId>
+                    <version>${org.eclipse.kura.core.inventory.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.kura.core.system</artifactId>
+                    <version>${org.eclipse.kura.core.system.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
                     <artifactId>org.eclipse.kura.core.net</artifactId>
                     <version>${org.eclipse.kura.core.net.version}</version>
                 </dependency>

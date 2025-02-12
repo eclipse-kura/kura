@@ -116,6 +116,20 @@
                 </plugin>
 
                 <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-source-plugin</artifactId>
+                    <version>${tycho-version}</version>
+                    <executions>
+                        <execution>
+                            <id>plugin-source</id>
+                            <goals>
+                                <goal>plugin-source</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-antrun-plugin</artifactId>
                     <version>${antrun-version}</version>
@@ -258,6 +272,10 @@
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-packaging-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-source-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>

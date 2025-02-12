@@ -183,7 +183,7 @@
             cardinality="0"
             required="false"
             default=""
-            description="Sets the interval in milliseconds at which the metrics are updated by the engine. This property is applied only to metrics that are designated as 'Per Interval'. Leave empty for the default value.">
+            description="Sets the interval in milliseconds at which the engine updates the metrics. This property applies only to metrics designated as 'Per Interval.' Leave it empty to use the default value.">
         </AD>
 
     </OCD>

@@ -1,6 +1,6 @@
 # Install Kura
 
-Eclipse Kura&trade; is provided using a Debian Linux package. Visit the [Kura download page](https://github.com/eclipse-kura/kura/releases/latest) to find the correct installation file for the target system.
+Eclipse Kura&trade; is provided using a Debian Linux package. Visit the [Kura download page](https://github.com/eclipse-kura/kura/releases) to find the correct installation file for the target system.
 
 
 

@@ -1,0 +1,15 @@
+name: Copyright check
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches:
+      - 'develop'
+      - 'release-*'
+
+jobs:
+  call-workflow-in-public-repo:
+    uses: eclipse-kura/.github/.github/workflows/_shared-copyright-check.yml@main
+    with:
+      config-path: '.github/copyright-config.yml'
+

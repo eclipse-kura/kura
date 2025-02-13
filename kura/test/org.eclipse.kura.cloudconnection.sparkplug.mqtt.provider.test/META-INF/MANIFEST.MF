@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test
 Bundle-SymbolicName: org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
 Bundle-ActivationPolicy: lazy
 Fragment-Host: org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider
 Import-Package: org.eclipse.kura.core.testutil.service;version="1.0.0",

@@ -66,18 +66,6 @@
                 </pluginManagement>
             </build>
         </profile>
-
-        <profile>
-            <id>nashorn-available-tests</id>
-            <activation>
-                <jdk>[1.8,15)</jdk>
-            </activation>
-
-            <modules>
-                <module>org.eclipse.kura.wire.script.filter.provider.test</module>
-                <module>org.eclipse.kura.camel.test</module>
-            </modules>
-        </profile>
     </profiles>
 
     <build>
@@ -141,7 +129,6 @@
                         <argLine>
                             ${tycho.testArgLine}
                             ${tycho.surefire.testenv.args}
-                            -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml
                         </argLine>
                         <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
                         <dependencies>

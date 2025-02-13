@@ -28,8 +28,8 @@
         <kura.addons.url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</kura.addons.url>
         <skip.libsocket-can>true</skip.libsocket-can>
 
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
 
         <!-- plugins versions common to Java 8 and Java 17 builds -->
         <exists-maven-plugin.version>0.0.3</exists-maven-plugin.version>

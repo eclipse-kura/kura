@@ -49,6 +49,11 @@
                     <version>${com.google.gson.version}</version>
                 </dependency>
                 <dependency>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-java</artifactId>
+                    <version>${com.google.protobuf.version}</version>
+                </dependency>
+                <dependency>
                     <groupId>org.eclipse.kura</groupId>
                     <artifactId>jdk.dio</artifactId>
                     <version>${jdk.dio.version}</version>
@@ -114,6 +119,16 @@
                     <version>${commons-exec.version}</version>
                 </dependency>
                 <dependency>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-csv</artifactId>
+                    <version>${commons-csv.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>commons-net</groupId>
+                    <artifactId>commons-net</artifactId>
+                    <version>${org.apache.commons.commons-net.version}</version>
+                </dependency>
+                <dependency>
                     <groupId>com.eclipsesource.minimal-json</groupId>
                     <artifactId>minimal-json</artifactId>
                     <version>${com.eclipsesource.minimal-json.version}</version>
@@ -162,6 +177,11 @@
                     <groupId>org.apache.felix</groupId>
                     <artifactId>org.apache.felix.http.wrappers</artifactId>
                     <version>${org.apache.felix.http.wrappers.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.knowhowlab.osgi</groupId>
+                    <artifactId>monitoradmin</artifactId>
+                    <version>${org.knowhowlab.osgi.monitoradmin.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.ow2.asm</groupId>

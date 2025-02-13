@@ -13,7 +13,6 @@
 package org.eclipse.kura.ai.inference;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
@@ -37,14 +36,5 @@ public interface InferenceEngineMetricsService extends InferenceEngineService {
      * @throws KuraException
      */
     public Map<String, String> getMetrics() throws KuraException;
-
-    /**
-     * Retrieve the performance and status metrics from the Inference Engine
-     * as they are emitted by the engine.
-     * 
-     * @return an optional String representing the raw metrics.
-     * @throws KuraException
-     */
-    public Optional<String> getRawMetrics() throws KuraException;
 
 }

@@ -400,9 +400,22 @@ public abstract class TritonServerServiceAbs implements InferenceEngineMetricsSe
 
     @Override
     public Map<String, String> getMetrics() throws KuraException {
+        Map<String, String> metrics = new HashMap<>();
+        metrics.putAll(getModelStatistics());
+        metrics.putAll(getGpuMetrics());
+
+        return metrics;
+    }
+
+    private Map<String, String> getModelStatistics() {
+        Map<String, String> statistics = new HashMap<>();
+        return statistics;
+    }
+
+    private Map<String, String> getGpuMetrics() throws KuraException {
         List<String> response = getListMetrics();
 
-        MetricsParser metricsParser = new MetricsParser(response);
+        GpuMetricsParser metricsParser = new GpuMetricsParser(response);
         return metricsParser.parse();
     }
 

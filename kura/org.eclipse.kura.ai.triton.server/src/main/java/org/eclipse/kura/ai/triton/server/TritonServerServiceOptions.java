@@ -42,8 +42,6 @@ public class TritonServerServiceOptions {
     private static final String PROPERTY_LOCAL_BACKENDS_PATH = "local.backends.path";
     private static final String PROPERTY_LOCAL_BACKENDS_CONFIG = "local.backends.config";
     private static final String PROPERTY_ENABLE_METRICS = "enable.metrics";
-    private static final String PROPERTY_METRICS_CONFIG = "metrics.config";
-    private static final String PROPERTY_METRICS_INTERVAL = "metrics.interval";
     private static final String PROPERTY_MODELS = "models";
     private static final String PROPERTY_LOCAL = "enable.local";
     private static final String PROPERTY_TIMEOUT = "timeout";
@@ -215,24 +213,6 @@ public class TritonServerServiceOptions {
             return (Boolean) metricEnabled;
         }
         return true;
-    }
-
-    public List<String> getMetricsConfig() {
-        List<String> metricsConfig = new ArrayList<>();
-        final Object propertyMetricsConfig = this.properties.get(PROPERTY_METRICS_CONFIG);
-        if (propertyMetricsConfig instanceof String && !((String) propertyMetricsConfig).isEmpty()) {
-            metricsConfig = Arrays.asList(((String) propertyMetricsConfig).trim().split(";"));
-        }
-        return metricsConfig;
-    }
-
-    public Optional<Integer> getMetricsInterval() {
-        Optional<Integer> metricsInterval = Optional.empty();
-        final Object propertyMetricsInterval = this.properties.get(PROPERTY_METRICS_INTERVAL);
-        if (propertyMetricsInterval instanceof String && !((String) propertyMetricsInterval).isEmpty()) {
-            metricsInterval = Optional.of(Integer.parseInt((String) propertyMetricsInterval));
-        }
-        return metricsInterval;
     }
 
     public List<String> getModels() {

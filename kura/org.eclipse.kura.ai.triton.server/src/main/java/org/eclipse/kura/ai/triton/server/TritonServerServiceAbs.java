@@ -406,16 +406,6 @@ public abstract class TritonServerServiceAbs implements InferenceEngineMetricsSe
         return metricsParser.parse();
     }
 
-    @Override
-    public Optional<String> getRawMetrics() throws KuraException {
-        Optional<String> rawMetrics = Optional.empty();
-        List<String> rawMetricsList = getListMetrics();
-        if (!rawMetricsList.isEmpty()) {
-            rawMetrics = Optional.of(rawMetricsList.stream().collect(Collectors.joining("\n")));
-        }
-        return rawMetrics;
-    }
-
     private List<String> getListMetrics() throws KuraException {
         List<String> metrics = new ArrayList<>();
         if (!this.options.areMetricsEnabled()) {

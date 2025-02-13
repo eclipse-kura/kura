@@ -102,26 +102,8 @@
             cardinality="0"
             required="true"
             default="true"
-            description="Enable the Triton Server Metrics feature. This property enables the default, CPU and GPU metrics, if available.">
-        </AD>  
-        
-        <AD id="metrics.config"
-            name="Optional metrics-specific configuration"
-            type="String"
-            cardinality="0"
-            required="false"
-            default=""
-            description="A semi-colon separated list of metrics-specific configuration settings for the Triton Server Metrics. (i.e. counter_latencies=true)">
-        </AD>
-        
-        <AD id="metrics.interval"
-            name="Optional metrics polling interval"
-            type="String"
-            cardinality="0"
-            required="false"
-            default=""
-            description="Sets the interval in milliseconds at which the metrics are updated by the engine. This property is applied only to metrics that are designated as 'Per Interval'. Leave empty for the default value.">
-        </AD>
+            description="Enable the Triton Server Metrics feature. This property allows to retrieve model and GPU metrics from an instance of Triton Server.">
+        </AD> 
 
     </OCD>
     <Designate factoryPid="org.eclipse.kura.ai.triton.server.TritonServerNativeService">

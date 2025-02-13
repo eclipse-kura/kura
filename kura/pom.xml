@@ -13,7 +13,6 @@
      Eurotech
      Red Hat Inc
      Cavium
-
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -162,6 +161,7 @@
         <license-maven-plugin.version>2.2</license-maven-plugin.version>
         <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
         <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+        <maven-install-plugin.verion>3.1.3</maven-install-plugin.verion>
         <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
         <maven-deploy-plugin.version>3.0.0</maven-deploy-plugin.version>
         <maven-eclipse-plugin.version>2.10</maven-eclipse-plugin.version>
@@ -620,6 +620,21 @@
                             <phase>verify</phase>
                             <goals>
                                 <goal>report-aggregate</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>3.1.3</version>
+                    <executions>
+                        <execution>
+                            <id>default-install</id>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>install</goal>
                             </goals>
                         </execution>
                     </executions>

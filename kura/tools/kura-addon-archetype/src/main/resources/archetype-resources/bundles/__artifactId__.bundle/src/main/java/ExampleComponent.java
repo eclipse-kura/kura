@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 @Component(immediate = true, //
     configurationPolicy = ConfigurationPolicy.REQUIRE, //
-    service = ConfigurableComponent.class, //
     property = {"kura.service.pid=${package}.ExampleComponent"} //
 )
 @Designate(ocd = ExampleComponentOCD.class, factory = false)
@@ -34,6 +33,18 @@ public class ExampleComponent implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(ExampleComponent.class);
 
+    /*
+     * In the in activate, modified, deactivate methods it is possible to provide
+     * the ComponentContext and the ExampleComponentOCD as parameters.
+     * All parameters in activate, modified, deactivate are optional and can be
+     * removed if not needed
+     * 
+     * Examples:
+     * 
+     * public void activate()
+     * public void activate(ExampleComponentOCD  configuration)
+     * public void activate(ComponentContext componentContext, final Map<String, Object> properties, final ExampleComponentOCD  configuration)
+     */
     @Activate
     public void activate(final Map<String, Object> properties) {
         logger.info("Activating");

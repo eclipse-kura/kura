@@ -317,7 +317,7 @@
                 <dependency>
                     <groupId>com.sun.xml.bind</groupId>
                     <artifactId>jaxb-osgi</artifactId>
-                    <version>${jaxb-osgi.javax.version}</version>
+                    <version>${jaxb-osgi.version}</version>
                 </dependency>
 
                 <!-- Duplicate Jakarta packages to support javax imports -->

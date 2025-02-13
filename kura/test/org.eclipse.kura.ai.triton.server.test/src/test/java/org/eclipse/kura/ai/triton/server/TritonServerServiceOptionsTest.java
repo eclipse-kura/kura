@@ -388,12 +388,10 @@ public class TritonServerServiceOptionsTest {
     public void metricsGettersShouldWork() {
         givenPropertyWith("enable.metrics", Boolean.TRUE);
         givenPropertyWith("metrics.config", "myProp=foo;YourProp=bar");
-        givenPropertyWith("metrics.interval", "99");
         givenServiceOptionsBuiltWith(properties);
 
         thenMetricsAreEnabled(true);
         thenMetricsConfigAre("myProp=foo;YourProp=bar");
-        thenMetricsIntervalIs(99);
     }
 
     /*

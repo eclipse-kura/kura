@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -278,11 +278,11 @@ public class ExecutorUtil {
         if (out != null && err != null) {
             handler = new FlushPumpStreamHandler(out, err, in);
         } else if (out != null) {
-            handler = new FlushPumpStreamHandler(out, new NullOutputStream(), in);
+            handler = new FlushPumpStreamHandler(out, NullOutputStream.NULL_OUTPUT_STREAM, in);
         } else if (err != null) {
-            handler = new FlushPumpStreamHandler(new NullOutputStream(), err, in);
+            handler = new FlushPumpStreamHandler(NullOutputStream.NULL_OUTPUT_STREAM, err, in);
         } else {
-            handler = new FlushPumpStreamHandler(new NullOutputStream(), new NullOutputStream(), in);
+            handler = new FlushPumpStreamHandler(NullOutputStream.NULL_OUTPUT_STREAM, NullOutputStream.NULL_OUTPUT_STREAM, in);
         }
         executor.setStreamHandler(handler);
 

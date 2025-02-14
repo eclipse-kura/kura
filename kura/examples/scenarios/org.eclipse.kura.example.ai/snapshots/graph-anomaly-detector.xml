@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
+
     Copyright (c) 2025 Eurotech and/or its affiliates and others
     
     This program and the accompanying materials are made
@@ -10,6 +11,7 @@
     
     Contributors:
      Eurotech
+
 -->
 <esf:configurations xmlns:esf="http://eurotech.com/esf/2.0" xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0">
     <esf:configuration pid="timer">
@@ -614,6 +616,7 @@
             <esf:property array="false" encrypted="false" name="service.pid" type="String">
                 <esf:value>org.eclipse.kura.wire.graph.WireGraphService</esf:value>
             </esf:property>
-        </esf:properties>
+  
+ties>
     </esf:configuration>
 </esf:configurations>

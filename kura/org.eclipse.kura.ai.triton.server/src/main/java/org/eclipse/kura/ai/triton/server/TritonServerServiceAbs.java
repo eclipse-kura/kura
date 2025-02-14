@@ -58,6 +58,8 @@ import org.eclipse.kura.executor.CommandExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ProtocolStringList;
 
@@ -98,6 +100,9 @@ public abstract class TritonServerServiceAbs implements InferenceEngineMetricsSe
     private GRPCInferenceServiceBlockingStub grpcStub;
     private String decryptionFolderPath = "";
     private boolean decryptionFolderNeedsCleanup = false;
+
+    private final GsonBuilder gsonBuilder = new GsonBuilder();
+    private final Gson gson = gsonBuilder.create();
 
     public void setCommandExecutorService(CommandExecutorService executorService) {
         this.commandExecutorService = executorService;
@@ -400,6 +405,11 @@ public abstract class TritonServerServiceAbs implements InferenceEngineMetricsSe
 
     @Override
     public Map<String, String> getMetrics() throws KuraException {
+        if (!this.options.areMetricsEnabled()) {
+            logger.debug("Triton Server Metrics not enabled.");
+            return new HashMap<>();
+        }
+
         Map<String, String> metrics = new HashMap<>();
         metrics.putAll(getModelStatistics());
         metrics.putAll(getGpuMetrics());
@@ -407,29 +417,54 @@ public abstract class TritonServerServiceAbs implements InferenceEngineMetricsSe
         return metrics;
     }
 
-    private Map<String, String> getModelStatistics() {
-        Map<String, String> statistics = new HashMap<>();
-        return statistics;
+    private Map<String, String> getModelStatistics() throws KuraException {
+        Map<String, String> modelStatistics = new HashMap<>();
+        List<String> response = getListMetrics(
+                "http://" + getServerAddress() + ":" + this.options.getHttpPort() + "/v2/models/stats");
+
+        response.forEach(content -> {
+            // Remove first '"model_stats": [' string and split on model 'name'
+            String[] statistics = content.substring(16, content.length() - 2).split("\\{\\\"name\\\":");
+            for (String modelStats : statistics) {
+                if (!modelStats.isEmpty()) {
+                    String name = getModelName(modelStats);
+                    String version = getModelVersion(modelStats);
+                    modelStatistics.put(name + "." + version, "{\"name\":" + sanitizeModelStatistics(modelStats));
+                }
+            }
+        });
+
+        return modelStatistics;
+    }
+
+    private String getModelName(String statistic) {
+        String[] name = statistic.split(",");
+        return name[0].substring(1, name[0].length() - 1);
+    }
+
+    private String getModelVersion(String statistics) {
+        String[] version = statistics.split(",");
+        return version[1].substring(11, version[1].length() - 1);
+    }
+
+    private String sanitizeModelStatistics(String statistics) {
+        // Remove last comma if present
+        return statistics.endsWith(",") ? statistics.substring(0, statistics.length() - 1) : statistics;
     }
 
     private Map<String, String> getGpuMetrics() throws KuraException {
-        List<String> response = getListMetrics();
+        List<String> response = getListMetrics(
+                "http://" + getServerAddress() + ":" + this.options.getMetricsPort() + "/metrics");
 
         GpuMetricsParser metricsParser = new GpuMetricsParser(response);
         return metricsParser.parse();
     }
 
-    private List<String> getListMetrics() throws KuraException {
+    private List<String> getListMetrics(String resourceURL) throws KuraException {
         List<String> metrics = new ArrayList<>();
-        if (!this.options.areMetricsEnabled()) {
-            logger.debug("Triton Server Metrics not enabled.");
-            return metrics;
-        }
-
         HttpURLConnection connection = null;
         try {
-            URL url = new URI("http://" + getServerAddress() + ":" + this.options.getMetricsPort() + "/metrics")
-                    .toURL();
+            URL url = new URI(resourceURL).toURL();
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setReadTimeout(30000);

@@ -64,7 +64,7 @@ public class GpuMetricsParser {
                     Optional<String> uuid = parseUuid(line);
                     Optional<String> name = parseName(line);
                     String value = parseValue(line);
-                    if (uuid.isEmpty() || name.isEmpty()) {
+                    if (!uuid.isPresent() || !name.isPresent()) {
                         return;
                     }
                     if (gpuMetricsMap.containsKey(uuid.get())) {

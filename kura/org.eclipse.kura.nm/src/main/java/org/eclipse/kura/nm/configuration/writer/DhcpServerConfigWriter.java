@@ -80,8 +80,7 @@ public class DhcpServerConfigWriter {
         }
     }
 
-    private void writeConfigFile(String configFileName, DhcpServerConfig4 dhcpServerConfig)
-            throws KuraException {
+    private void writeConfigFile(String configFileName, DhcpServerConfig4 dhcpServerConfig) throws KuraException {
         try (FileOutputStream fos = new FileOutputStream(configFileName); PrintWriter pw = new PrintWriter(fos)) {
             logger.debug("writing to {} with: {}", configFileName, dhcpServerConfig);
             Optional<DhcpServerConfigConverter> configConverter = DhcpServerManager.getConfigConverter();
@@ -109,7 +108,12 @@ public class DhcpServerConfigWriter {
         IP4Address rangeEnd = getDhcpServer4RangeEnd();
         List<IP4Address> dnsServers = new ArrayList<>();
         dnsServers.add(address);
-        DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, subnetMask, prefix, address, rangeStart,
+
+        IP4Address router = null;
+        if (getDhcpServer4NatEnabled()) {
+            router = getIP4Address();
+        }
+        DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, subnetMask, prefix, router, rangeStart,
                 rangeEnd, dnsServers);
         return new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4);
     }
@@ -119,6 +123,16 @@ public class DhcpServerConfigWriter {
                 "net.interface.%s.config.dhcpServer4.enabled", this.interfaceName);
         if (isEnabled.isPresent()) {
             return isEnabled.get();
+        } else {
+            return false;
+        }
+    }
+
+    private boolean getDhcpServer4NatEnabled() {
+        Optional<Boolean> isNatEnabled = this.networkProperties.getOpt(Boolean.class,
+                "net.interface.%s.config.nat.enabled", this.interfaceName);
+        if (isNatEnabled.isPresent()) {
+            return isNatEnabled.get();
         } else {
             return false;
         }

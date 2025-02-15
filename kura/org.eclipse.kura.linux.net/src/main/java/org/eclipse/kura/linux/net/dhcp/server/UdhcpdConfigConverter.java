@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.net.dhcp.server;
 
+import static java.util.Objects.isNull;
+
 import java.util.Objects;
 
 import org.eclipse.kura.linux.net.dhcp.DhcpServerConfigConverter;
@@ -24,21 +26,24 @@ public class UdhcpdConfigConverter implements DhcpServerConfigConverter {
     @Override
     public String convert(DhcpServerConfig config) {
         StringBuilder sb = new StringBuilder();
-        sb.append("start ").append(config.getRangeStart().getHostAddress()).append("\n")
-                .append("end ").append(config.getRangeEnd().getHostAddress()).append("\n")
-                .append("interface ").append(config.getInterfaceName()).append("\n")
-                .append("pidfile ").append(DhcpServerManager.getPidFilename(config.getInterfaceName())).append("\n")
-                .append("lease_file ").append(DhcpServerManager.getLeasesFilename(config.getInterfaceName()))
-                .append("\n")
-                .append("max_leases ").append(getMaxLeases(config)).append("\n")
-                .append("auto_time 30").append("\n")
-                .append("decline_time ").append(config.getDefaultLeaseTime()).append("\n")
-                .append("conflict_time ").append(config.getDefaultLeaseTime()).append("\n")
-                .append("offer_time ").append(config.getDefaultLeaseTime()).append("\n")
-                .append("min_lease ").append(config.getDefaultLeaseTime()).append("\n")
-                .append("opt subnet ").append(config.getSubnetMask().getHostAddress()).append("\n")
-                .append("opt router ").append(config.getRouterAddress().getHostAddress()).append("\n")
-                .append("opt lease ").append(config.getDefaultLeaseTime()).append("\n");
+        sb.append("start ").append(config.getRangeStart().getHostAddress()).append("\n").append("end ")
+                .append(config.getRangeEnd().getHostAddress()).append("\n").append("interface ")
+                .append(config.getInterfaceName()).append("\n").append("pidfile ")
+                .append(DhcpServerManager.getPidFilename(config.getInterfaceName())).append("\n").append("lease_file ")
+                .append(DhcpServerManager.getLeasesFilename(config.getInterfaceName())).append("\n")
+                .append("max_leases ").append(getMaxLeases(config)).append("\n").append("auto_time 30").append("\n")
+                .append("decline_time ").append(config.getDefaultLeaseTime()).append("\n").append("conflict_time ")
+                .append(config.getDefaultLeaseTime()).append("\n").append("offer_time ")
+                .append(config.getDefaultLeaseTime()).append("\n").append("min_lease ")
+                .append(config.getDefaultLeaseTime()).append("\n").append("opt subnet ")
+                .append(config.getSubnetMask().getHostAddress()).append("\n");
+
+        if (!isNull(config.getRouterAddress()) && !config.getRouterAddress().toString().isEmpty()) {
+            sb.append("opt router ").append(config.getRouterAddress().getHostAddress()).append("\n");
+        }
+
+        sb.append("opt lease ").append(config.getDefaultLeaseTime()).append("\n");
+
         if (config.getDnsServers() != null && !config.getDnsServers().isEmpty()) {
             sb.append(addDNSServersOption(config)).append("\n");
         }

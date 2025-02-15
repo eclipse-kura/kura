@@ -101,6 +101,7 @@ public class DhcpServerConfigWriterTest {
     public void shouldWriteCorrectDhcpConfigurationFile() throws Exception {
         givenDhcpTool(DhcpServerTool.DHCPD);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.nat.enabled", true);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", true);
@@ -112,31 +113,44 @@ public class DhcpServerConfigWriterTest {
 
         whenWriteConfiguration();
 
-        thenConfigFileContains(new StringBuilder()
-                .append("# enabled? true\n")
-                .append("# prefix: 24\n")
-                .append("# pass DNS? true\n")
-                .append("\n")
-                .append("lease-file-name \"/tmp/dhcpd-eth0.leases\";\n")
-                .append("\n")
-                .append("subnet 192.168.0.0 netmask 255.255.255.0 {\n")
-                .append("    option domain-name-servers 192.168.0.11;\n")
-                .append("\n")
-                .append("    interface eth0;\n")
-                .append("    option routers 192.168.0.11;\n")
-                .append("    default-lease-time 900;\n")
-                .append("    max-lease-time 1000;\n")
-                .append("    pool {\n")
-                .append("        range 192.168.0.111 192.168.0.120;\n")
-                .append("    }\n")
-                .append("}\n")
-                .toString());
+        thenConfigFileContains(new StringBuilder().append("# enabled? true\n").append("# prefix: 24\n")
+                .append("# pass DNS? true\n").append("\n").append("lease-file-name \"/tmp/dhcpd-eth0.leases\";\n")
+                .append("\n").append("subnet 192.168.0.0 netmask 255.255.255.0 {\n")
+                .append("    option domain-name-servers 192.168.0.11;\n").append("\n").append("    interface eth0;\n")
+                .append("    option routers 192.168.0.11;\n").append("    default-lease-time 900;\n")
+                .append("    max-lease-time 1000;\n").append("    pool {\n")
+                .append("        range 192.168.0.111 192.168.0.120;\n").append("    }\n").append("}\n").toString());
+    }
+
+    @Test
+    public void shouldWriteCorrectDhcpConfigurationFileWithoutNat() throws Exception {
+        givenDhcpTool(DhcpServerTool.DHCPD);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.nat.enabled", false);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.ip4.address", "192.168.0.11");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.prefix", (short) 24);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
+        givenDhcpConfigWriter("eth0");
+
+        whenWriteConfiguration();
+
+        thenConfigFileContains(new StringBuilder().append("# enabled? true\n").append("# prefix: 24\n")
+                .append("# pass DNS? true\n").append("\n").append("lease-file-name \"/tmp/dhcpd-eth0.leases\";\n")
+                .append("\n").append("subnet 192.168.0.0 netmask 255.255.255.0 {\n")
+                .append("    option domain-name-servers 192.168.0.11;\n").append("\n").append("    interface eth0;\n")
+                .append("    default-lease-time 900;\n").append("    max-lease-time 1000;\n").append("    pool {\n")
+                .append("        range 192.168.0.111 192.168.0.120;\n").append("    }\n").append("}\n").toString());
     }
 
     @Test
     public void shouldWriteCorrectUDhcpConfigurationFile() throws Exception {
         givenDhcpTool(DhcpServerTool.UDHCPD);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.nat.enabled", true);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", true);
@@ -148,22 +162,35 @@ public class DhcpServerConfigWriterTest {
 
         whenWriteConfiguration();
 
-        thenConfigFileContains(new StringBuilder()
-                .append("start 192.168.0.111\n")
-                .append("end 192.168.0.120\n")
-                .append("interface eth0\n")
-                .append("pidfile null\n")
-                .append("lease_file /tmp/udhcpd-eth0.leases\n")
-                .append("max_leases 9\n")
-                .append("auto_time 30\n")
-                .append("decline_time 900\n")
-                .append("conflict_time 900\n")
-                .append("offer_time 900\n")
-                .append("min_lease 900\n")
-                .append("opt subnet 255.255.255.0\n")
-                .append("opt router 192.168.0.11\n")
-                .append("opt lease 900\n")
-                .append("opt dns 192.168.0.11\n")
+        thenConfigFileContains(new StringBuilder().append("start 192.168.0.111\n").append("end 192.168.0.120\n")
+                .append("interface eth0\n").append("pidfile null\n").append("lease_file /tmp/udhcpd-eth0.leases\n")
+                .append("max_leases 9\n").append("auto_time 30\n").append("decline_time 900\n")
+                .append("conflict_time 900\n").append("offer_time 900\n").append("min_lease 900\n")
+                .append("opt subnet 255.255.255.0\n").append("opt router 192.168.0.11\n").append("opt lease 900\n")
+                .append("opt dns 192.168.0.11\n").toString());
+    }
+
+    @Test
+    public void shouldWriteCorrectUDhcpConfigurationFileWithoutNat() throws Exception {
+        givenDhcpTool(DhcpServerTool.UDHCPD);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.nat.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.ip4.address", "192.168.0.11");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.prefix", (short) 24);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
+        givenDhcpConfigWriter("eth0");
+
+        whenWriteConfiguration();
+
+        thenConfigFileContains(new StringBuilder().append("start 192.168.0.111\n").append("end 192.168.0.120\n")
+                .append("interface eth0\n").append("pidfile null\n").append("lease_file /tmp/udhcpd-eth0.leases\n")
+                .append("max_leases 9\n").append("auto_time 30\n").append("decline_time 900\n")
+                .append("conflict_time 900\n").append("offer_time 900\n").append("min_lease 900\n")
+                .append("opt subnet 255.255.255.0\n").append("opt lease 900\n").append("opt dns 192.168.0.11\n")
                 .toString());
     }
 
@@ -171,6 +198,7 @@ public class DhcpServerConfigWriterTest {
     public void shouldWriteCorrectDnsmasqConfigurationFile() throws Exception {
         givenDhcpTool(DhcpServerTool.DNSMASQ);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.nat.enabled", true);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", true);
@@ -182,20 +210,39 @@ public class DhcpServerConfigWriterTest {
 
         whenWriteConfiguration();
 
-        thenConfigFileContains(new StringBuilder()
-                .append("interface=eth0\n")
+        thenConfigFileContains(new StringBuilder().append("interface=eth0\n")
                 .append("dhcp-range=eth0,192.168.0.111,192.168.0.120,900s\n")
-                .append("dhcp-option=eth0,1,255.255.255.0\n")
-                .append("dhcp-option=eth0,3,192.168.0.11\n")
-                .append("dhcp-option=eth0,6,0.0.0.0\n")
-                .append("dhcp-option=eth0,27,1\n")
-                .toString());
+                .append("dhcp-option=eth0,1,255.255.255.0\n").append("dhcp-option=eth0,3,192.168.0.11\n")
+                .append("dhcp-option=eth0,6,0.0.0.0\n").append("dhcp-option=eth0,27,1\n").toString());
+    }
+
+    @Test
+    public void shouldWriteCorrectDnsmasqConfigurationFileWithoutNat() throws Exception {
+        givenDhcpTool(DhcpServerTool.DNSMASQ);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.nat.enabled", false);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.ip4.address", "192.168.0.11");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.prefix", (short) 24);
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeStart", "192.168.0.111");
+        givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.rangeEnd", "192.168.0.120");
+        givenDhcpConfigWriter("eth0");
+
+        whenWriteConfiguration();
+
+        thenConfigFileContains(new StringBuilder().append("interface=eth0\n")
+                .append("dhcp-range=eth0,192.168.0.111,192.168.0.120,900s\n")
+                .append("dhcp-option=eth0,1,255.255.255.0\n").append("dhcp-option=eth0,3\n")
+                .append("dhcp-option=eth0,6,0.0.0.0\n").append("dhcp-option=eth0,27,1\n").toString());
     }
 
     @Test
     public void shouldWriteCorrectDnsmasqConfigurationFileWithoutPassDNS() throws Exception {
         givenDhcpTool(DhcpServerTool.DNSMASQ);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.nat.enabled", true);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", false);
@@ -207,14 +254,10 @@ public class DhcpServerConfigWriterTest {
 
         whenWriteConfiguration();
 
-        thenConfigFileContains(new StringBuilder()
-                .append("interface=eth0\n")
+        thenConfigFileContains(new StringBuilder().append("interface=eth0\n")
                 .append("dhcp-range=eth0,192.168.0.111,192.168.0.120,900s\n")
-                .append("dhcp-option=eth0,1,255.255.255.0\n")
-                .append("dhcp-option=eth0,3,192.168.0.11\n")
-                .append("dhcp-option=eth0,6\n")
-                .append("dhcp-ignore-names=eth0\n")
-                .append("dhcp-option=eth0,27,1\n")
+                .append("dhcp-option=eth0,1,255.255.255.0\n").append("dhcp-option=eth0,3,192.168.0.11\n")
+                .append("dhcp-option=eth0,6\n").append("dhcp-ignore-names=eth0\n").append("dhcp-option=eth0,27,1\n")
                 .toString());
     }
 
@@ -333,30 +376,28 @@ public class DhcpServerConfigWriterTest {
         dhcpServerMock = Mockito.mockStatic(DhcpServerManager.class);
 
         switch (tool) {
-            case DHCPD:
-                dhcpServerMock.when(DhcpServerManager::getTool).thenReturn(DhcpServerTool.DHCPD);
-                dhcpServerMock.when(DhcpServerManager::getConfigConverter)
-                        .thenReturn(Optional.of(new DhcpdConfigConverter()));
-                dhcpServerMock.when(() -> DhcpServerManager.getLeasesFilename("eth0"))
-                        .thenReturn("/tmp/dhcpd-eth0.leases");
-                break;
-            case UDHCPD:
-                dhcpServerMock.when(DhcpServerManager::getTool).thenReturn(DhcpServerTool.UDHCPD);
-                dhcpServerMock.when(DhcpServerManager::getConfigConverter)
-                        .thenReturn(Optional.of(new UdhcpdConfigConverter()));
-                dhcpServerMock.when(() -> DhcpServerManager.getLeasesFilename("eth0"))
-                        .thenReturn("/tmp/udhcpd-eth0.leases");
-                break;
-            case DNSMASQ:
-                dhcpServerMock.when(DhcpServerManager::getTool).thenReturn(DhcpServerTool.DNSMASQ);
-                dhcpServerMock.when(DhcpServerManager::getConfigConverter)
-                        .thenReturn(Optional.of(new DnsmasqConfigConverter()));
-                dhcpServerMock.when(() -> DhcpServerManager.getLeasesFilename("eth0"))
-                        .thenReturn("/tmp/dnsmasq.leases");
-                break;
-            case NONE:
-                dhcpServerMock.when(DhcpServerManager::getTool).thenReturn(DhcpServerTool.NONE);
-                break;
+        case DHCPD:
+            dhcpServerMock.when(DhcpServerManager::getTool).thenReturn(DhcpServerTool.DHCPD);
+            dhcpServerMock.when(DhcpServerManager::getConfigConverter)
+                    .thenReturn(Optional.of(new DhcpdConfigConverter()));
+            dhcpServerMock.when(() -> DhcpServerManager.getLeasesFilename("eth0")).thenReturn("/tmp/dhcpd-eth0.leases");
+            break;
+        case UDHCPD:
+            dhcpServerMock.when(DhcpServerManager::getTool).thenReturn(DhcpServerTool.UDHCPD);
+            dhcpServerMock.when(DhcpServerManager::getConfigConverter)
+                    .thenReturn(Optional.of(new UdhcpdConfigConverter()));
+            dhcpServerMock.when(() -> DhcpServerManager.getLeasesFilename("eth0"))
+                    .thenReturn("/tmp/udhcpd-eth0.leases");
+            break;
+        case DNSMASQ:
+            dhcpServerMock.when(DhcpServerManager::getTool).thenReturn(DhcpServerTool.DNSMASQ);
+            dhcpServerMock.when(DhcpServerManager::getConfigConverter)
+                    .thenReturn(Optional.of(new DnsmasqConfigConverter()));
+            dhcpServerMock.when(() -> DhcpServerManager.getLeasesFilename("eth0")).thenReturn("/tmp/dnsmasq.leases");
+            break;
+        case NONE:
+            dhcpServerMock.when(DhcpServerManager::getTool).thenReturn(DhcpServerTool.NONE);
+            break;
         }
 
         this.selectedTool = tool;
@@ -370,16 +411,16 @@ public class DhcpServerConfigWriterTest {
         String filename;
 
         switch (DhcpServerConfigWriterTest.this.selectedTool) {
-            case DHCPD:
-            case UDHCPD:
-                filename = String.format(DHCP_CONFIG_FILENAME, interfaceName);
-                break;
-            case DNSMASQ:
-                filename = String.format(DNSMASQ_CONFIG_FILENAME, interfaceName);
-                break;
-            case NONE:
-            default:
-                filename = "etc";
+        case DHCPD:
+        case UDHCPD:
+            filename = String.format(DHCP_CONFIG_FILENAME, interfaceName);
+            break;
+        case DNSMASQ:
+            filename = String.format(DNSMASQ_CONFIG_FILENAME, interfaceName);
+            break;
+        case NONE:
+        default:
+            filename = "etc";
         }
 
         this.configFilename = this.mockFiles.newFile(filename).getAbsolutePath();

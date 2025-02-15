@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,8 @@
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.linux.net.dhcp.server;
+
+import static java.util.Objects.isNull;
 
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerConfigConverter;
@@ -26,15 +28,15 @@ public class DnsmasqConfigConverter implements DhcpServerConfigConverter {
         sb.append("interface=").append(config.getInterfaceName()).append("\n");
 
         StringBuilder dhcpRangeProp = new StringBuilder("dhcp-range=").append(config.getInterfaceName()).append(",")
-                .append(config.getRangeStart()).append(",").append(config.getRangeEnd())
-                .append(",").append(config.getDefaultLeaseTime()).append("s");
+                .append(config.getRangeStart()).append(",").append(config.getRangeEnd()).append(",")
+                .append(config.getDefaultLeaseTime()).append("s");
         sb.append(dhcpRangeProp.toString()).append("\n");
 
         sb.append(DHCP_OPTION_KEY + config.getInterfaceName()).append(",1,")
                 .append(NetworkUtil.getNetmaskStringForm(config.getPrefix())).append("\n");
         // router property
-        sb.append(DHCP_OPTION_KEY).append(config.getInterfaceName()).append(",3,")
-                .append(config.getRouterAddress().toString()).append("\n");
+        String routerAddress = isNull(config.getRouterAddress()) ? "" : "," + config.getRouterAddress().toString();
+        sb.append(DHCP_OPTION_KEY).append(config.getInterfaceName()).append(",3").append(routerAddress).append("\n");
 
         if (config.isPassDns()) {
             // announce DNS servers on this device

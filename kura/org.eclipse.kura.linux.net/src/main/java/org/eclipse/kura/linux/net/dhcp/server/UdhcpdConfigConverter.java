@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -38,7 +38,7 @@ public class UdhcpdConfigConverter implements DhcpServerConfigConverter {
                 .append(config.getDefaultLeaseTime()).append("\n").append("opt subnet ")
                 .append(config.getSubnetMask().getHostAddress()).append("\n");
 
-        if (!isNull(config.getRouterAddress()) && !config.getRouterAddress().toString().isEmpty()) {
+        if (!isNull(config.getRouterAddress())) {
             sb.append("opt router ").append(config.getRouterAddress().getHostAddress()).append("\n");
         }
 

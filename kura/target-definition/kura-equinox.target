@@ -2,8 +2,8 @@
 <?pde version="3.8"?>
 <target name="Kura Target Platform Equinox" sequenceNumber="47">
     <locations>
-        <location path="/Users/matteo.maiero/git/kura/kura/target-definition/common/repository/plugins" type="Profile" />
-        <location path="/Users/matteo.maiero/git/kura/kura/target-definition/equinox/repository/plugins" type="Profile" />
-        <location path="/Users/matteo.maiero/git/kura/kura/target-definition/test-deps/repository/plugins" type="Profile" />
+        <location path="${project_loc}/common/repository/plugins" type="Profile" />
+        <location path="${project_loc}/equinox/repository/plugins" type="Profile" />
+        <location path="${project_loc}/test-deps/repository/plugins" type="Profile" />
     </locations>
 </target>

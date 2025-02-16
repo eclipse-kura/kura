@@ -174,7 +174,7 @@ public class DhcpServerConfigWriterTest {
     public void shouldWriteCorrectUDhcpConfigurationFileWithoutNat() throws Exception {
         givenDhcpTool(DhcpServerTool.UDHCPD);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.enabled", true);
-        givenNetworkPropertiesWith("net.interface.eth0.config.nat.enabled", true);
+        givenNetworkPropertiesWith("net.interface.eth0.config.nat.enabled", false);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.defaultLeaseTime", 900);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.maxLeaseTime", 1000);
         givenNetworkPropertiesWith("net.interface.eth0.config.dhcpServer4.passDns", true);

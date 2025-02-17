@@ -38,6 +38,8 @@ The command will start the generation of the archetype in interactive mode. Mave
 
 Other parameters like **version** and **mainBundleVendor** can be changed by answering `n` after the `Confirm properties configuration` prompt, which appears after editing the properties above.
 
+A `.gitignore` file is automatically added with a default configuration. The `OSGI-INF` folder is omitted because it will be generated during tests at compile-time (this is necessary to make the PDE launcher work).
+
 ## Project structure
 
 At the end of the procedure, the archetype will generate a subfolder in the working directory containing the following subfolders:
@@ -103,19 +105,25 @@ dnf remove <artifactId>
 
 ### Importing Projects in Eclipse IDE
 
-If the project is put under GIT version control, it is a good idea to add a `.gitignore` file to avoid committing files that are not necessary for the Maven build.
-
-In Eclipse IDE import the projects with _File | Import | Maven | Existing Maven Projects_.
+In Eclipse IDE , create a new workspace (it is not necessary to have the workspace in the root of the project) and import the projects with _File | Import | Maven | Existing Maven Projects_.
 
 ![](./images/kura-addon-archetype/eclipse-import-maven-projects-1.png)
 
 ![](./images/kura-addon-archetype/eclipse-import-maven-projects-2.png)
 
-Note that the parent POM file cannot be selected.
+Note that if the workspace resides in the root of the project the parent POM file cannot be selected.
 
-#### Configure build paths
+#### Load target platform
 
-For the bundles and test projects, select _Properties_ and then _Project Natures_ and add the natures as in picture below.
+Open the _.target_ file in the _target-definition_ project and click on _Set as Active Target Platform_. Note that this will download the bundles from the Kura P2 repository and it may take a while to complete.
+
+![](./images/kura-addon-archetype/eclipse-ide-reload-platform.png)
+
+Eclipse IDE should rebuild the workspace automatically and show no errors. If errors appear, see next section.
+
+#### (Optional) IDE errors resolution
+
+In some cases it might be necessary to manually configure the build path. For the bundles and test projects, select _Properties_ and then _Project Natures_ and add the natures as in picture below.
 
 ![](./images/kura-addon-archetype/eclipse-project-natures.png)
 
@@ -127,10 +135,4 @@ Finally, configure the external **Classpath** dependencies by selecting the plug
 
 ![](./images/kura-addon-archetype/eclipse-add-library.png)
 
-#### Load target platform
-
-Open the _.target_ file in the _target-definition_ project and click on _Set as Active Target Platform_. Note that this will download the bundles from the Kura P2 repository and it may take a while to complete.
-
-![](./images/kura-addon-archetype/eclipse-ide-reload-platform.png)
-
-Eclipse IDE should rebuild the workspace automatically and show no errors.
+On old Eclipse IDE installations it might be necessary to uninstall the Tycho configurator 0.1.0 plugin from _Help | Install new software... | What is already installed?_.

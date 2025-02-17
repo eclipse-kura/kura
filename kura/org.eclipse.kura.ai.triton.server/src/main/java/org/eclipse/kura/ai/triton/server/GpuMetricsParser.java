@@ -75,7 +75,7 @@ public class GpuMetricsParser {
                         this.gpuMetricsMap.put(uuid.get(), gpuMetrics);
                     }
                 });
-        this.gpuMetricsMap.forEach((key, value) -> metrics.put("gpu_metrics." + key, gson.toJson(value)));
+        this.gpuMetricsMap.forEach((key, value) -> metrics.put("gpu.metrics." + key, gson.toJson(value)));
         return metrics;
     }
 

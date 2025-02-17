@@ -429,7 +429,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineMetricsSe
                 if (!modelStats.isEmpty()) {
                     String name = getModelName(modelStats);
                     String version = getModelVersion(modelStats);
-                    modelStatistics.put("model_metrics." + name + "." + version,
+                    modelStatistics.put("model.metrics." + name + "." + version,
                             "{\"name\":" + sanitizeModelStatistics(modelStats));
                 }
             }

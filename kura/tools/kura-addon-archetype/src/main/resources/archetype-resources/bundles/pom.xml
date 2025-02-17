@@ -47,7 +47,9 @@
         <target-definition-version>${project.version}</target-definition-version>
         <kura-workdir>${project.build.directory}/kura</kura-workdir>
         <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
+        <lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
         <skip.artifact.signing>true</skip.artifact.signing>
+        <keystore.type>JKS</keystore.type>
     </properties>
 
     <build>
@@ -234,6 +236,44 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+
+                <!-- This plugin's configuration is used to store Eclipse m2e settings only. It has
+                no influence on the Maven build itself. -->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>${lifecycle.mapping.version}</version>
+                    <configuration>
+                        <lifecycleMappingFilters>
+                            <lifecycleMappingFilter>
+                                <symbolicName>org.eclipse.m2e.pde.connector</symbolicName>
+                                <versionRange>[2.1.2,)</versionRange>
+                                <packagingTypes>
+                                    <packagingType>eclipse-test-plugin</packagingType>
+                                    <packagingType>eclipse-plugin</packagingType>
+                                    <packagingType>eclipse-feature</packagingType>
+                                </packagingTypes>
+                            </lifecycleMappingFilter>
+                        </lifecycleMappingFilters>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>biz.aQute.bnd</groupId>
+                                        <artifactId>bnd-maven-plugin</artifactId>
+                                        <versionRange>[0.0.0,)</versionRange>
+                                        <goals>
+                                            <goal>bnd-process</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore/>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

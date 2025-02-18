@@ -33,7 +33,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.ai.inference.ModelInfo;
 import org.eclipse.kura.ai.inference.Tensor;
@@ -86,8 +85,7 @@ public abstract class TritonServerServiceStepDefinitions extends TritonServerSer
     private Command startTritonServerCmd = new Command(new String[] { "tritonserver",
             "--model-repository=/fake-repository-path", "--backend-directory=/fake-backends-path", "--http-port=4001",
             "--grpc-port=4002", "--metrics-port=4003", "--model-control-mode=explicit", "--allow-metrics=true",
-            "--allow-gpu-metrics=true", "--allow-cpu-metrics=true", "2>&1", "|", "systemd-cat", "-t tritonserver",
-            "-p info" });
+            "--allow-gpu-metrics=true", "2>&1", "|", "systemd-cat", "-t tritonserver", "-p info" });
 
     public TritonServerServiceStepDefinitions() {
         this.startTritonServerCmd.setExecuteInAShell(true);
@@ -105,9 +103,9 @@ public abstract class TritonServerServiceStepDefinitions extends TritonServerSer
     private CryptoService cry;
     private ContainerOrchestrationService orc;
 
-    // protected void givenTritonServerServiceImpl(Map<String, Object> properties) throws IOException {
-    // this.tritonServerService = createTritonServerServiceImpl(properties, tritonModelRepoStub, true);
-    // }
+    protected void givenTritonServerServiceImpl(Map<String, Object> properties) throws IOException {
+        this.tritonServerService = createTritonServerServiceImpl(properties, tritonModelRepoStub, true);
+    }
 
     protected void givenTritonServerServiceRemoteImpl(Map<String, Object> properties) throws IOException {
         this.tritonServerService = createTritonServerServiceRemoteImpl(properties, tritonModelRepoStub, true);
@@ -121,11 +119,11 @@ public abstract class TritonServerServiceStepDefinitions extends TritonServerSer
         this.tritonServerService = createTritonServerServiceContainerImpl(properties, tritonModelRepoStub, true);
     }
 
-    // protected void givenTritonServerServiceImplNotActive() throws IOException {
-    // this.tritonServerService = createTritonServerServiceImpl(null, tritonModelRepoStub, false);
-    // }
+    protected void givenTritonServerServiceImplNotActive() throws IOException {
+        this.tritonServerService = createTritonServerServiceImpl(new HashMap<>(), tritonModelRepoStub, false);
+    }
 
-    protected void whenLoadModel(String modelName) throws KuraIOException {
+    protected void whenLoadModel(String modelName) {
         try {
             this.tritonServerService.loadModel(modelName, Optional.empty());
         } catch (KuraException e) {
@@ -133,7 +131,7 @@ public abstract class TritonServerServiceStepDefinitions extends TritonServerSer
         }
     }
 
-    protected void whenGetModelLoadState(String modelName) throws KuraIOException {
+    protected void whenGetModelLoadState(String modelName) {
         try {
             this.tritonServerService.isModelLoaded(modelName);
         } catch (KuraException e) {
@@ -141,7 +139,7 @@ public abstract class TritonServerServiceStepDefinitions extends TritonServerSer
         }
     }
 
-    protected void whenUnloadModel(String modelName) throws KuraIOException {
+    protected void whenUnloadModel(String modelName) {
         try {
             this.tritonServerService.unloadModel(modelName);
         } catch (KuraException e) {
@@ -252,7 +250,6 @@ public abstract class TritonServerServiceStepDefinitions extends TritonServerSer
 
         properties.put("server.address", "localhost");
         properties.put("server.ports", new Integer[] { 4000, 4001, 4002 });
-        properties.put("enable.local", Boolean.FALSE);
 
         return properties;
     }
@@ -263,7 +260,6 @@ public abstract class TritonServerServiceStepDefinitions extends TritonServerSer
 
         properties.put("server.address", "localhost");
         properties.put("server.ports", new Integer[] { 4001, 4002, 4003 });
-        properties.put("enable.local", Boolean.FALSE);
 
         return properties;
     }
@@ -272,7 +268,6 @@ public abstract class TritonServerServiceStepDefinitions extends TritonServerSer
         Map<String, Object> properties = new HashMap<>();
 
         properties.put("server.ports", new Integer[] { 4000, 4001 });
-        properties.put("enable.local", Boolean.FALSE);
 
         return properties;
     }
@@ -281,7 +276,6 @@ public abstract class TritonServerServiceStepDefinitions extends TritonServerSer
         Map<String, Object> properties = new HashMap<>();
 
         properties.put("server.ports", new Integer[] { 4001, 4002, 4003 });
-        properties.put("enable.local", Boolean.TRUE);
         properties.put("local.backends.path", "/fake-backends-path");
         properties.put("local.model.repository.path", "/fake-repository-path");
 
@@ -339,34 +333,34 @@ public abstract class TritonServerServiceStepDefinitions extends TritonServerSer
         return tensors;
     }
 
-    // private TritonServerServiceAbs createTritonServerServiceImpl(Map<String, Object> properties,
-    // List<String> tritonModelRepoStub, boolean activate) throws IOException {
-    //
-    // TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceOrigImpl();
-    //
-    // this.ces = mock(CommandExecutorService.class);
-    // when(ces.isRunning(new String[] { "tritonserver" })).thenReturn(false);
-    //
-    // tritonServerServiceImpl.setCommandExecutorService(ces);
-    //
-    // this.cry = mock(CryptoService.class);
-    // tritonServerServiceImpl.setCryptoService(cry);
-    //
-    // if (activate) {
-    // tritonServerServiceImpl.activate(properties);
-    // }
-    //
-    // GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase serviceImpl = createGRPCMock(tritonModelRepoStub);
-    //
-    // String serverName = InProcessServerBuilder.generateName();
-    // grpcCleanup.register(
-    // InProcessServerBuilder.forName(serverName).directExecutor().addService(serviceImpl).build().start());
-    // ManagedChannel channel = grpcCleanup
-    // .register(InProcessChannelBuilder.forName(serverName).directExecutor().build());
-    // tritonServerServiceImpl.setGrpcStub(GRPCInferenceServiceGrpc.newBlockingStub(channel));
-    //
-    // return tritonServerServiceImpl;
-    // }
+    private TritonServerServiceAbs createTritonServerServiceImpl(Map<String, Object> properties,
+            List<String> tritonModelRepoStub, boolean activate) throws IOException {
+
+        TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceNativeImpl();
+
+        this.ces = mock(CommandExecutorService.class);
+        when(ces.isRunning(new String[] { "tritonserver" })).thenReturn(false);
+
+        tritonServerServiceImpl.setCommandExecutorService(ces);
+
+        this.cry = mock(CryptoService.class);
+        tritonServerServiceImpl.setCryptoService(cry);
+
+        if (activate) {
+            tritonServerServiceImpl.activate(properties);
+        }
+
+        GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase serviceImpl = createGRPCMock(tritonModelRepoStub);
+
+        String serverName = InProcessServerBuilder.generateName();
+        grpcCleanup.register(
+                InProcessServerBuilder.forName(serverName).directExecutor().addService(serviceImpl).build().start());
+        ManagedChannel channel = grpcCleanup
+                .register(InProcessChannelBuilder.forName(serverName).directExecutor().build());
+        tritonServerServiceImpl.setGrpcStub(GRPCInferenceServiceGrpc.newBlockingStub(channel));
+
+        return tritonServerServiceImpl;
+    }
 
     private TritonServerServiceAbs createTritonServerServiceNativeImpl(Map<String, Object> properties,
             List<String> tritonModelRepoStub, boolean activate) throws IOException {

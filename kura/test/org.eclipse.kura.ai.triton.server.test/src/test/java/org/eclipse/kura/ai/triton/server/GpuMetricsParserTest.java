@@ -22,7 +22,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-public class MetricsParserTest {
+public class GpuMetricsParserTest {
 
     private GpuMetricsParser metricsParser;
     private Map<String, String> metricsMap;

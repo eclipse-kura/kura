@@ -151,7 +151,7 @@ public class TritonServerNativeManagerTest {
     }
 
     @Test
-    public void containerMetricsOptionsAreCorrectlySet() {
+    public void nativeMetricsOptionsAreCorrectlySet() {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.TRUE);

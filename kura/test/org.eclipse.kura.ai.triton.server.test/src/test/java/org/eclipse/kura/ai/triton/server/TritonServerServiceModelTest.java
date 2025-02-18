@@ -13,70 +13,75 @@
 
 package org.eclipse.kura.ai.triton.server;
 
+import java.io.IOException;
+
+import org.eclipse.kura.KuraException;
+import org.junit.Test;
+
 public class TritonServerServiceModelTest extends TritonServerServiceStepDefinitions {
 
-    // @Test
-    // public void shouldNotLoadModel() throws KuraException, IOException {
-    // givenTritonServerServiceImpl(defaultProperties());
-    //
-    // whenLoadModel("myModel2");
-    //
-    // thenExceptionIsCaught();
-    // }
-    //
-    // @Test
-    // public void shouldLoadModel() throws KuraException, IOException {
-    // givenTritonServerServiceImpl(defaultProperties());
-    //
-    // whenLoadModel("myModel");
-    //
-    // thenModelIsLoaded();
-    // }
-    //
-    // @Test
-    // public void shouldNotUnloadModel() throws KuraException, IOException {
-    // givenTritonServerServiceImpl(defaultProperties());
-    //
-    // whenUnloadModel("myModel2");
-    //
-    // thenExceptionIsCaught();
-    // }
-    //
-    // @Test
-    // public void shouldUnloadModel() throws KuraException, IOException {
-    // givenTritonServerServiceImpl(defaultProperties());
-    //
-    // whenUnloadModel("myModel");
-    //
-    // thenModelIsUnLoaded();
-    // }
-    //
-    // @Test
-    // public void shouldNotGetModelLoadState() throws KuraException, IOException {
-    // givenTritonServerServiceImpl(defaultProperties());
-    //
-    // whenGetModelLoadState("myModel");
-    //
-    // thenExceptionIsCaught();
-    // }
-    //
-    // @Test
-    // public void shouldGetModelNamesList() throws IOException {
-    // givenTritonServerServiceImpl(defaultProperties());
-    //
-    // whenGetModelNames();
-    //
-    // thenListIsNotEmpty();
-    //
-    // }
-    //
-    // @Test
-    // public void shouldGetModelInfo() throws IOException {
-    // givenTritonServerServiceImpl(defaultProperties());
-    //
-    // whenGetModelInfo("myModel");
-    //
-    // thenModelInfoExists();
-    // }
+    @Test
+    public void shouldNotLoadModel() throws KuraException, IOException {
+        givenTritonServerServiceImpl(defaultProperties());
+
+        whenLoadModel("myModel2");
+
+        thenExceptionIsCaught();
+    }
+
+    @Test
+    public void shouldLoadModel() throws KuraException, IOException {
+        givenTritonServerServiceImpl(defaultProperties());
+
+        whenLoadModel("myModel");
+
+        thenModelIsLoaded();
+    }
+
+    @Test
+    public void shouldNotUnloadModel() throws KuraException, IOException {
+        givenTritonServerServiceImpl(defaultProperties());
+
+        whenUnloadModel("myModel2");
+
+        thenExceptionIsCaught();
+    }
+
+    @Test
+    public void shouldUnloadModel() throws KuraException, IOException {
+        givenTritonServerServiceImpl(defaultProperties());
+
+        whenUnloadModel("myModel");
+
+        thenModelIsUnLoaded();
+    }
+
+    @Test
+    public void shouldNotGetModelLoadState() throws KuraException, IOException {
+        givenTritonServerServiceImpl(defaultProperties());
+
+        whenGetModelLoadState("myModel");
+
+        thenExceptionIsCaught();
+    }
+
+    @Test
+    public void shouldGetModelNamesList() throws IOException {
+        givenTritonServerServiceImpl(defaultProperties());
+
+        whenGetModelNames();
+
+        thenListIsNotEmpty();
+
+    }
+
+    @Test
+    public void shouldGetModelInfo() throws IOException {
+        givenTritonServerServiceImpl(defaultProperties());
+
+        whenGetModelInfo("myModel");
+
+        thenModelInfoExists();
+    }
 
 }

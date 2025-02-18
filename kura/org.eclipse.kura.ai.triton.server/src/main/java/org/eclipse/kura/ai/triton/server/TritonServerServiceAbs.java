@@ -58,8 +58,6 @@ import org.eclipse.kura.executor.CommandExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ProtocolStringList;
 
@@ -100,9 +98,6 @@ public abstract class TritonServerServiceAbs implements InferenceEngineMetricsSe
     private GRPCInferenceServiceBlockingStub grpcStub;
     private String decryptionFolderPath = "";
     private boolean decryptionFolderNeedsCleanup = false;
-
-    private final GsonBuilder gsonBuilder = new GsonBuilder();
-    private final Gson gson = gsonBuilder.create();
 
     public void setCommandExecutorService(CommandExecutorService executorService) {
         this.commandExecutorService = executorService;

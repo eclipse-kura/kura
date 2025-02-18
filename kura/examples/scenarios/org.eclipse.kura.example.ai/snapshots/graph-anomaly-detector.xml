@@ -1,16 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?><esf:configurations xmlns:esf="http://eurotech.com/esf/2.0" xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0">
-    <!--
-        Copyright (c) 2022 Eurotech and/or its affiliates and others
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
 
-        This program and the accompanying materials are made
-        available under the terms of the Eclipse Public License 2.0
-        which is available at https://www.eclipse.org/legal/epl-2.0/
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
 
-        SPDX-License-Identifier: EPL-2.0
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
 
-        Contributors:
-          Eurotech
-    -->
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+
+-->
+<esf:configurations xmlns:esf="http://eurotech.com/esf/2.0" xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0">
     <esf:configuration pid="timer">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="factoryPid" type="String">
@@ -399,66 +402,6 @@
             </esf:property>
         </esf:properties>
     </esf:configuration>
-    <esf:configuration pid="script">
-        <esf:properties>
-            <esf:property array="false" encrypted="false" name="factoryPid" type="String">
-                <esf:value>org.eclipse.kura.wire.ScriptFilter</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="componentId" type="String">
-                <esf:value>script</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="factoryComponent" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="componentDescription" type="String">
-                <esf:value>A wire component that provides scripting functionalities in JavaScript.</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
-                <esf:value>org.eclipse.kura.wire.ScriptFilter</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="script" type="String">
-                <esf:value>var inRecord = input.records[0]
-
-var outRecord = newWireRecord()
-outRecord['LED_MATRIX_CHARS'] = newStringValue("ANOMALY")
-
-outRecord['LED_MATRIX_FRONT_COLOR_B'] = newFloatValue(0.0)
-outRecord['LED_MATRIX_BACK_COLOR_B'] = newFloatValue(0.0)
-
-if(inRecord.ANOMALY0.getValue() == true) {
-  outRecord['LED_MATRIX_FRONT_COLOR_R'] = newFloatValue(1.0)
-  outRecord['LED_MATRIX_BACK_COLOR_R'] = newFloatValue(1.0)
-  outRecord['LED_MATRIX_FRONT_COLOR_G'] = newFloatValue(0.0)
-  outRecord['LED_MATRIX_BACK_COLOR_G'] = newFloatValue(0.0)
-} else {
-  outRecord['LED_MATRIX_FRONT_COLOR_R'] = newFloatValue(0.0)
-  outRecord['LED_MATRIX_BACK_COLOR_R'] = newFloatValue(0.0)
-  outRecord['LED_MATRIX_FRONT_COLOR_G'] = newFloatValue(1.0)
-  outRecord['LED_MATRIX_BACK_COLOR_G'] = newFloatValue(1.0)
-}
-
-output.add(outRecord)</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
-                <esf:value>script</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="service.pid" type="String">
-                <esf:value>org.eclipse.kura.wire.ScriptFilter-1646044732464-32</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="emitter.port.count" type="Integer">
-                <esf:value>1</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="receiver.port.count" type="Integer">
-                <esf:value>1</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="componentName" type="String">
-                <esf:value>Javascript Filter</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="script.context.drop" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-        </esf:properties>
-    </esf:configuration>
     <esf:configuration pid="asset-sensehat-write">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_R#+unit" type="String">
@@ -673,6 +616,7 @@ output.add(outRecord)</esf:value>
             <esf:property array="false" encrypted="false" name="service.pid" type="String">
                 <esf:value>org.eclipse.kura.wire.graph.WireGraphService</esf:value>
             </esf:property>
-        </esf:properties>
+  
+ties>
     </esf:configuration>
 </esf:configurations>

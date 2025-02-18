@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.core.test
 Bundle-SymbolicName: org.eclipse.kura.core.test;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
 Import-Package: javax.comm,
  javax.xml.parsers,
  javax.xml.stream,

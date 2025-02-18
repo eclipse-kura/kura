@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.eclipse.kura.container.orchestration.provider
 Bundle-Version: 2.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Automatic-Module-Name: org.eclipse.kura.container.orchestration.provider
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
 Import-Package: com.google.common.base;version="32.1.1",
  com.google.common.collect;version="32.1.1",
  com.google.common.escape;version="32.1.1",

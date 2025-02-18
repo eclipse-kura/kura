@@ -1129,26 +1129,6 @@
 
     <profiles>
 
-        <profile>
-            <id>java8</id>
-            <activation>
-                <jdk>1.8</jdk>
-            </activation>
-            <properties>
-                <skip.js.nashorn.engine.components>false</skip.js.nashorn.engine.components>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>java17</id>
-            <activation>
-                <jdk>17</jdk>
-            </activation>
-            <properties>
-                <skip.js.nashorn.engine.components>true</skip.js.nashorn.engine.components>
-            </properties>
-        </profile>
-
         <!-- x86_64 -->
         <profile>
             <id>x86_64</id>
@@ -2098,25 +2078,6 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
                         <executions>
-                            <execution>
-                                <id>core-dp-js-engine</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <configuration>
-                                    <skip>${skip.js.nashorn.engine.components}</skip>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.wire.script.filter</artifactId>
-                                            <version>${org.eclipse.kura.wire.script.filter.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                    </artifactItems>
-                                    <outputDirectory>${project.build.directory}</outputDirectory>
-                                </configuration>
-                            </execution>
                             <execution>
                                 <id>core-dp</id>
                                 <phase>package</phase>

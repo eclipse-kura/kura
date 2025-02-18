@@ -494,7 +494,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineMetricsSe
             Stream<String> lines = input.lines();
             response = lines.collect(Collectors.toList());
             if (logger.isDebugEnabled()) {
-                logger.debug(String.join(", ", response));
+                logger.debug(String.join("\n ", response));
             }
         }
         return response;

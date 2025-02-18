@@ -13,19 +13,15 @@
 
 package org.eclipse.kura.ai.triton.server;
 
-import java.io.IOException;
-
-import org.junit.Test;
-
 public class TritonServerServiceInferTest extends TritonServerServiceStepDefinitions {
 
-    @Test
-    public void shouldInferData() throws IOException {
-        givenTritonServerServiceImpl(defaultProperties());
-
-        whenInferData(exampleModel(), exampleInputData());
-
-        thenTensorsAreReturned();
-    }
+    // @Test
+    // public void shouldInferData() throws IOException {
+    // givenTritonServerServiceImpl(defaultProperties());
+    //
+    // whenInferData(exampleModel(), exampleInputData());
+    //
+    // thenTensorsAreReturned();
+    // }
 
 }

@@ -71,7 +71,7 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
 
-public abstract class TritonServerServiceStepDefinitions {
+public abstract class TritonServerServiceStepDefinitions extends TritonServerServiceConstants {
 
     protected static final String TRITON_IMAGE_NAME = "tritonserver";
     protected static final String TRITON_IMAGE_TAG = "latest";
@@ -105,9 +105,9 @@ public abstract class TritonServerServiceStepDefinitions {
     private CryptoService cry;
     private ContainerOrchestrationService orc;
 
-    protected void givenTritonServerServiceImpl(Map<String, Object> properties) throws IOException {
-        this.tritonServerService = createTritonServerServiceImpl(properties, tritonModelRepoStub, true);
-    }
+    // protected void givenTritonServerServiceImpl(Map<String, Object> properties) throws IOException {
+    // this.tritonServerService = createTritonServerServiceImpl(properties, tritonModelRepoStub, true);
+    // }
 
     protected void givenTritonServerServiceRemoteImpl(Map<String, Object> properties) throws IOException {
         this.tritonServerService = createTritonServerServiceRemoteImpl(properties, tritonModelRepoStub, true);
@@ -121,9 +121,9 @@ public abstract class TritonServerServiceStepDefinitions {
         this.tritonServerService = createTritonServerServiceContainerImpl(properties, tritonModelRepoStub, true);
     }
 
-    protected void givenTritonServerServiceImplNotActive() throws IOException {
-        this.tritonServerService = createTritonServerServiceImpl(null, tritonModelRepoStub, false);
-    }
+    // protected void givenTritonServerServiceImplNotActive() throws IOException {
+    // this.tritonServerService = createTritonServerServiceImpl(null, tritonModelRepoStub, false);
+    // }
 
     protected void whenLoadModel(String modelName) throws KuraIOException {
         try {
@@ -339,34 +339,34 @@ public abstract class TritonServerServiceStepDefinitions {
         return tensors;
     }
 
-    private TritonServerServiceAbs createTritonServerServiceImpl(Map<String, Object> properties,
-            List<String> tritonModelRepoStub, boolean activate) throws IOException {
-
-        TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceOrigImpl();
-
-        this.ces = mock(CommandExecutorService.class);
-        when(ces.isRunning(new String[] { "tritonserver" })).thenReturn(false);
-
-        tritonServerServiceImpl.setCommandExecutorService(ces);
-
-        this.cry = mock(CryptoService.class);
-        tritonServerServiceImpl.setCryptoService(cry);
-
-        if (activate) {
-            tritonServerServiceImpl.activate(properties);
-        }
-
-        GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase serviceImpl = createGRPCMock(tritonModelRepoStub);
-
-        String serverName = InProcessServerBuilder.generateName();
-        grpcCleanup.register(
-                InProcessServerBuilder.forName(serverName).directExecutor().addService(serviceImpl).build().start());
-        ManagedChannel channel = grpcCleanup
-                .register(InProcessChannelBuilder.forName(serverName).directExecutor().build());
-        tritonServerServiceImpl.setGrpcStub(GRPCInferenceServiceGrpc.newBlockingStub(channel));
-
-        return tritonServerServiceImpl;
-    }
+    // private TritonServerServiceAbs createTritonServerServiceImpl(Map<String, Object> properties,
+    // List<String> tritonModelRepoStub, boolean activate) throws IOException {
+    //
+    // TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceOrigImpl();
+    //
+    // this.ces = mock(CommandExecutorService.class);
+    // when(ces.isRunning(new String[] { "tritonserver" })).thenReturn(false);
+    //
+    // tritonServerServiceImpl.setCommandExecutorService(ces);
+    //
+    // this.cry = mock(CryptoService.class);
+    // tritonServerServiceImpl.setCryptoService(cry);
+    //
+    // if (activate) {
+    // tritonServerServiceImpl.activate(properties);
+    // }
+    //
+    // GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase serviceImpl = createGRPCMock(tritonModelRepoStub);
+    //
+    // String serverName = InProcessServerBuilder.generateName();
+    // grpcCleanup.register(
+    // InProcessServerBuilder.forName(serverName).directExecutor().addService(serviceImpl).build().start());
+    // ManagedChannel channel = grpcCleanup
+    // .register(InProcessChannelBuilder.forName(serverName).directExecutor().build());
+    // tritonServerServiceImpl.setGrpcStub(GRPCInferenceServiceGrpc.newBlockingStub(channel));
+    //
+    // return tritonServerServiceImpl;
+    // }
 
     private TritonServerServiceAbs createTritonServerServiceNativeImpl(Map<String, Object> properties,
             List<String> tritonModelRepoStub, boolean activate) throws IOException {

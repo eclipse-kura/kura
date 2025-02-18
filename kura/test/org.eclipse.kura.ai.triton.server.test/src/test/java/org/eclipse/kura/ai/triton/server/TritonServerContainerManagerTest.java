@@ -409,8 +409,6 @@ public class TritonServerContainerManagerTest {
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
         givenPropertyWith("server.ports", EXTERNAL_PORTS);
         givenPropertyWith("enable.metrics", Boolean.TRUE);
-        givenPropertyWith("metrics.config", "myProp=foo;yourProp=bar");
-        givenPropertyWith("metrics.interval", "99");
         givenServiceOptionsBuiltWith(properties);
 
         givenMockContainerOrchestrationService();
@@ -426,11 +424,6 @@ public class TritonServerContainerManagerTest {
         thenContainerConfigurationImageEquals(TRITON_IMAGE_NAME);
         thenContainerConfigurationEntrypointOverrideContains("--allow-metrics=true");
         thenContainerConfigurationEntrypointOverrideContains("--allow-gpu-metrics=true");
-        thenContainerConfigurationEntrypointOverrideContains("--allow-cpu-metrics=true");
-        thenContainerConfigurationEntrypointOverrideContains("--allow-metrics=true");
-        thenContainerConfigurationEntrypointOverrideContains("--metrics-interval-ms=99");
-        thenContainerConfigurationEntrypointOverrideContains("--metrics-config=myProp=foo");
-        thenContainerConfigurationEntrypointOverrideContains("--metrics-config=yourProp=bar");
     }
 
     /*

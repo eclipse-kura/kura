@@ -165,7 +165,7 @@
             cardinality="0"
             required="true"
             default="true"
-            description="Enable the Triton Server Metrics feature. This property allows to retrieve model and GPU metrics from an instance of Triton Server.">
+            description="Enable the Triton Server Metrics feature. This property allows to retrieve models and GPU metrics from an instance of Triton Server.">
         </AD>  
 
     </OCD>

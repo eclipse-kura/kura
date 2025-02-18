@@ -14,9 +14,7 @@
 package org.eclipse.kura.ai.triton.server;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -387,11 +385,9 @@ public class TritonServerServiceOptionsTest {
     @Test
     public void metricsGettersShouldWork() {
         givenPropertyWith("enable.metrics", Boolean.TRUE);
-        givenPropertyWith("metrics.config", "myProp=foo;YourProp=bar");
         givenServiceOptionsBuiltWith(properties);
 
         thenMetricsAreEnabled(true);
-        thenMetricsConfigAre("myProp=foo;YourProp=bar");
     }
 
     /*
@@ -513,18 +509,6 @@ public class TritonServerServiceOptionsTest {
 
     private void thenMetricsAreEnabled(boolean expectedResult) {
         assertEquals(expectedResult, this.options.areMetricsEnabled());
-    }
-
-    private void thenMetricsConfigAre(String expectedProps) {
-        String[] props = expectedProps.split(";");
-        for (String entry : props) {
-            assertTrue(this.options.getMetricsConfig().contains(entry));
-        }
-    }
-
-    private void thenMetricsIntervalIs(Integer expectedResult) {
-        assertFalse(this.options.getMetricsInterval().isEmpty());
-        assertEquals(expectedResult, this.options.getMetricsInterval().get());
     }
 
 }

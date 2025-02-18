@@ -7,10 +7,10 @@
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
 
-	SPDX-License-Identifier: EPL-2.0
+    SPDX-License-Identifier: EPL-2.0
 
-	Contributors:
-	 Eurotech
+    Contributors:
+     Eurotech
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -65,18 +65,6 @@
                     </plugins>
                 </pluginManagement>
             </build>
-        </profile>
-
-        <profile>
-            <id>nashorn-available-tests</id>
-            <activation>
-                <jdk>[1.8,15)</jdk>
-            </activation>
-
-            <modules>
-                <module>org.eclipse.kura.wire.script.filter.provider.test</module>
-                <module>org.eclipse.kura.camel.test</module>
-            </modules>
         </profile>
     </profiles>
 
@@ -141,7 +129,6 @@
                         <argLine>
                             ${tycho.testArgLine}
                             ${tycho.surefire.testenv.args}
-                            -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml
                         </argLine>
                         <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
                         <dependencies>
@@ -713,7 +700,7 @@
                                     <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.core.identity</id>
                                     <versionRange>0.0.0</versionRange>
-                                </requirement>                                
+                                </requirement>
                                 <requirement>
                                     <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.core.crypto</id>

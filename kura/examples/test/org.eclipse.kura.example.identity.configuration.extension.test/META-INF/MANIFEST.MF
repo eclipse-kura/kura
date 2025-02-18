@@ -12,5 +12,5 @@ Import-Package: org.eclipse.kura.configuration;version="[1.2,2.0)",
 Require-Bundle: org.eclipse.kura.example.identity.configuration.extension;bundle-version="1.0.0"
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v2.0
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
 Bundle-ActivationPolicy: lazy

@@ -28,10 +28,9 @@
         <kura.addons.url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</kura.addons.url>
         <skip.libsocket-can>true</skip.libsocket-can>
 
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
 
-        <!-- plugins versions common to Java 8 and Java 17 builds -->
         <exists-maven-plugin.version>0.0.3</exists-maven-plugin.version>
         <lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
         <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
@@ -44,6 +43,7 @@
         <maven-site-plugin.version>3.3</maven-site-plugin.version>
         <maven-surefire-plugin.version>2.7.2</maven-surefire-plugin.version>
         <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
+        <tycho-p2-extras-plugin.version>3.0.5</tycho-p2-extras-plugin.version>
     </properties>
 
     <modules>
@@ -104,24 +104,6 @@
     </distributionManagement>
     
     <profiles>
-        <profile>
-            <id>java8</id>
-            <activation>
-                <jdk>1.8</jdk>
-            </activation>
-            <properties>
-                <tycho-p2-extras-plugin.version>1.7.0</tycho-p2-extras-plugin.version>
-            </properties>
-        </profile>
-        <profile>
-            <id>java17</id>
-            <activation>
-                <jdk>17</jdk>
-            </activation>
-            <properties>
-                <tycho-p2-extras-plugin.version>3.0.1</tycho-p2-extras-plugin.version>
-            </properties>
-        </profile>
         <profile>
             <id>can</id>
             <activation>

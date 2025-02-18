@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+
+    Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
 
-	SPDX-License-Identifier: EPL-2.0
+    SPDX-License-Identifier: EPL-2.0
 
-	Contributors:
-	 Eurotech
+    Contributors:
+     Eurotech
      Red Hat Inc
      Cavium
 
@@ -137,7 +138,7 @@
     <properties>
         <!-- SCM: Note that we are in the "kura" sub-dir here already -->
         <tycho.scmUrl>scm:git:ssh://github.com/eclipse/kura/kura</tycho.scmUrl>
-        <tycho-version>1.7.0</tycho-version>
+        <tycho-version>3.0.5</tycho-version>
         <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -149,8 +150,8 @@
         <check.plugins.exist.remote>false</check.plugins.exist.remote>
         <kura.addons.url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</kura.addons.url>
 
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
 
         <!-- plugins versions common to Java 8 and Java 17 builds -->
         <bnd.baseline.version>6.3.1</bnd.baseline.version>
@@ -170,6 +171,25 @@
         <wagon-ssh.version>1.0-beta-6</wagon-ssh.version>
         <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
         <bnd.version>7.1.0</bnd.version>
+        <tycho.surefire.testenv.args>
+            -DbuildingWithTycho=true -Dosgi.locking=none
+            -Dds.showtrace=true
+            -Djava.io.tmpdir=/tmp
+            -Dorg.osgi.framework.storage=${project.basedir}/target/osgi/framework_storage
+            -Dosgi.clean=true
+            -Dkura.home=${project.basedir}/target/kura
+            -Dkura.plugins=${project.basedir}/target/kura/plugins
+            -Dkura.packages=${project.basedir}/target/kura/data/packages
+            -Dkura.data=${project.basedir}/target/kura
+            -Dkura.tmp=${project.basedir}/target/kura/tmp
+            -Dkura.snapshots=${project.basedir}/target/kura/user/snapshots
+            -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
+            -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml
+            -Dorg.eclipse.kura.mode=emulator
+            -Ddpa.configuration=/tmp/kura/dpa.properties
+            -Dosgi.console=5002
+            --add-opens java.base/java.lang=ALL-UNNAMED
+        </tycho.surefire.testenv.args>
     </properties>
 
     <distributionManagement>
@@ -186,78 +206,6 @@
     </distributionManagement>
 
     <profiles>
-        <profile>
-            <id>java8</id>
-            <activation>
-                <jdk>1.8</jdk>
-            </activation>
-            <properties>
-                <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
-                <tycho-version>1.7.0</tycho-version>
-
-                <tycho.surefire.testenv.args>
-                    -DbuildingWithTycho=true -Dosgi.locking=none
-                    -Dds.showtrace=true
-                    -Djava.io.tmpdir=/tmp
-                    -Dorg.osgi.framework.storage=${project.basedir}/target/osgi/framework_storage
-                    -Dosgi.clean=true
-                    -Dkura.home=${project.basedir}/target/kura
-                    -Dkura.plugins=${project.basedir}/target/kura/plugins
-                    -Dkura.packages=${project.basedir}/target/kura/data/packages
-                    -Dkura.data=${project.basedir}/target/kura
-                    -Dkura.tmp=${project.basedir}/target/kura/tmp
-                    -Dkura.snapshots=${project.basedir}/target/kura/user/snapshots
-                    -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
-                    -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml
-                    -Dorg.eclipse.kura.mode=emulator
-                    -Ddpa.configuration=/tmp/kura/dpa.properties
-                    -Dosgi.console=5002
-                </tycho.surefire.testenv.args>
-            </properties>
-            <!--
-                TODO: the features module need a fix on the osgi-dp plugin for
-                working with Tycho 3.
-
-                org.eclipse.kura-p2 is working only with Java 8, we do not
-                know what this module does.
-            -->
-            <modules>
-                <module>org.eclipse.kura.wire.script.filter.provider</module>
-                <module>features</module>
-                <module>org.eclipse.kura-p2</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>java17</id>
-            <activation>
-                <jdk>17</jdk>
-            </activation>
-            <properties>
-                <!-- TODO: update when new version is released to be working with Tycho 3. -->
-                <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
-                <tycho-version>3.0.5</tycho-version>
-
-                <tycho.surefire.testenv.args>
-                    -DbuildingWithTycho=true -Dosgi.locking=none
-                    -Dds.showtrace=true
-                    -Djava.io.tmpdir=/tmp
-                    -Dorg.osgi.framework.storage=${project.basedir}/target/osgi/framework_storage
-                    -Dosgi.clean=true
-                    -Dkura.home=${project.basedir}/target/kura
-                    -Dkura.plugins=${project.basedir}/target/kura/plugins
-                    -Dkura.packages=${project.basedir}/target/kura/data/packages
-                    -Dkura.data=${project.basedir}/target/kura
-                    -Dkura.tmp=${project.basedir}/target/kura/tmp
-                    -Dkura.snapshots=${project.basedir}/target/kura/user/snapshots
-                    -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
-                    -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml
-                    -Dorg.eclipse.kura.mode=emulator
-                    -Ddpa.configuration=/tmp/kura/dpa.properties
-                    -Dosgi.console=5002
-                    --add-opens java.base/java.lang=ALL-UNNAMED
-                </tycho.surefire.testenv.args>
-            </properties>
-        </profile>
         <profile>
             <id>default</id>
             <activation>
@@ -640,7 +588,7 @@
                             <goal>bnd-process</goal>
                             </goals>
                             <configuration>
-                                <packagingTypes>eclipse-plugin, eclipse-test-plugin</packagingTypes>
+                                <packagingTypes>eclipse-plugin,eclipse-test-plugin</packagingTypes>
                             </configuration>
                         </execution>
                     </executions>
@@ -691,6 +639,19 @@
                     <configuration>
                         <lifecycleMappingMetadata>
                             <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>biz.aQute.bnd</groupId>
+                                        <artifactId>bnd-maven-plugin</artifactId>
+                                        <versionRange>[0.0.0,)</versionRange>
+                                        <goals>
+                                            <goal>bnd-process</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore/>
+                                    </action>
+                                </pluginExecution>
                                 <pluginExecution>
                                     <pluginExecutionFilter>
                                         <groupId>

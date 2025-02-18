@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
+
     Copyright (c) 2025 Eurotech and/or its affiliates and others
-  
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
+
     SPDX-License-Identifier: EPL-2.0
 
     Contributors:
      Eurotech
+
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -35,7 +37,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <tycho-version>4.0.10</tycho-version>
 
-        <!-- Use this BND version as it will generate v1.2.0 DS descriptions suitable for Equinox 3.11.1 -->
         <bnd-version>4.1.0</bnd-version>
         <maven-resources-version>3.1.0</maven-resources-version>
         <maven-deploy-version>2.8.2</maven-deploy-version>

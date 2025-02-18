@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -17,6 +17,8 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 
 import org.osgi.annotation.versioning.ProviderType;
+
+import com.google.common.net.InetAddresses;
 
 /**
  * This class represents an Internet Protocol (IP) address.
@@ -44,7 +46,7 @@ public abstract class IPAddress {
      * bytes long
      *
      * @param addr
-     *             - the raw IP address in network byte order
+     *            - the raw IP address in network byte order
      * @return an InetAddress object created from the raw IP address.
      */
     public static IPAddress getByAddress(byte[] addr) throws UnknownHostException {
@@ -81,6 +83,10 @@ public abstract class IPAddress {
      * @return
      */
     public static IPAddress parseHostAddress(String hostAddress) throws UnknownHostException {
+        if (!hostAddress.isEmpty() && !InetAddresses.isInetAddress(hostAddress)) {
+            throw new UnknownHostException("Invalid IP address: " + hostAddress);
+        }
+
         InetAddress jnetAddr = InetAddress.getByName(hostAddress);
         return getByAddress(jnetAddr.getAddress());
     }

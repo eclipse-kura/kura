@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-
     Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
-
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -12,12 +10,12 @@
     SPDX-License-Identifier: EPL-2.0
 
     Contributors:
-      Eurotech
-      Red Hat Inc
-      Kevin Read, Om7Sense GmbH
-      John Read, Om7Sense GmbH
-      Amit Kumar Mondal
-      Cavium
+     Eurotech
+     Red Hat Inc
+     Kevin Read, Om7Sense GmbH
+     John Read, Om7Sense GmbH
+     Amit Kumar Mondal
+     Cavium
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -32,7 +30,7 @@
     <name>distrib</name>
     <url>http://maven.apache.org</url>
     <properties>
-        <tycho-version>1.6.0</tycho-version>
+        <tycho-version>3.0.5</tycho-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <zip_workspace.prefix>user_workspace_archive_${project.version}</zip_workspace.prefix>
 
@@ -136,25 +134,6 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.8</version>
                 <executions>
-                    <execution>
-                        <id>get-bundles-based-on-js-engine</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${skip.js.nashorn.engine.components}</skip>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.wire.script.filter.provider</artifactId>
-                                    <version>${org.eclipse.kura.wire.script.filter.provider.version}</version>
-                                </artifactItem>
-                            </artifactItems>
-                            <stripVersion>true</stripVersion>
-                            <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>get-kura-bundles</id>
                         <phase>generate-resources</phase>
@@ -850,19 +829,6 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>setup-js-engine-jars</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${skip.js.nashorn.engine.components}</skip>
-                            <target>
-                                <move file="target/plugins/org.eclipse.kura.wire.script.filter.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.script.filter.provider_${org.eclipse.kura.wire.script.filter.provider.version}.jar" />
-                            </target>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>verify-if-snapshot</id>
                         <phase>install</phase>
                         <goals>
@@ -1131,26 +1097,6 @@
     </dependencies>
 
     <profiles>
-
-        <profile>
-            <id>java8</id>
-            <activation>
-                <jdk>1.8</jdk>
-            </activation>
-            <properties>
-                <skip.js.nashorn.engine.components>false</skip.js.nashorn.engine.components>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>java17</id>
-            <activation>
-                <jdk>17</jdk>
-            </activation>
-            <properties>
-                <skip.js.nashorn.engine.components>true</skip.js.nashorn.engine.components>
-            </properties>
-        </profile>
 
         <!-- x86_64 -->
         <profile>
@@ -2101,25 +2047,6 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
                         <executions>
-                            <execution>
-                                <id>core-dp-js-engine</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <configuration>
-                                    <skip>${skip.js.nashorn.engine.components}</skip>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.wire.script.filter</artifactId>
-                                            <version>${org.eclipse.kura.wire.script.filter.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                    </artifactItems>
-                                    <outputDirectory>${project.build.directory}</outputDirectory>
-                                </configuration>
-                            </execution>
                             <execution>
                                 <id>core-dp</id>
                                 <phase>package</phase>

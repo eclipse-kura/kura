@@ -13,6 +13,7 @@
 package org.eclipse.kura.ai.triton.server.metrics.parser;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gson.Gson;
@@ -22,23 +23,25 @@ public class ModelStatisticsParser {
 
     private final GsonBuilder gsonBuilder = new GsonBuilder();
     private final Gson gson = this.gsonBuilder.create();
-    private final inference.GrpcService.ModelStatistics modelStatistics;
+    private final List<inference.GrpcService.ModelStatistics> modelStatistics;
 
-    public ModelStatisticsParser(inference.GrpcService.ModelStatistics modelStatistics) {
+    public ModelStatisticsParser(List<inference.GrpcService.ModelStatistics> modelStatistics) {
         this.modelStatistics = modelStatistics;
     }
 
     public Map<String, String> parse() {
         Map<String, String> statistics = new HashMap<>();
 
-        String key = getKey();
-        ModelStatistics tritonModelStatistics = new ModelStatistics(modelStatistics);
-        statistics.put(key, gson.toJson(tritonModelStatistics));
+        this.modelStatistics.forEach(statistic -> {
+            String key = getKey(statistic);
+            ModelStatistics tritonModelStatistics = new ModelStatistics(statistic);
+            statistics.put(key, gson.toJson(tritonModelStatistics));
+        });
 
         return statistics;
     }
 
-    private String getKey() {
-        return "model.metrics." + this.modelStatistics.getName() + "." + this.modelStatistics.getVersion();
+    private String getKey(inference.GrpcService.ModelStatistics statistic) {
+        return "model.metrics." + statistic.getName() + "." + statistic.getVersion();
     }
 }

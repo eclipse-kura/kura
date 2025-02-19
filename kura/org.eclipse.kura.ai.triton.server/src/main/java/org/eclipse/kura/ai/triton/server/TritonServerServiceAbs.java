@@ -425,10 +425,8 @@ public abstract class TritonServerServiceAbs implements InferenceEngineMetricsSe
                     .modelStatistics(modelStatisticsRequest.build());
 
             List<ModelStatistics> statistics = modelStatisticsResponse.getModelStatsList();
-            statistics.forEach(statistic -> {
-                ModelStatisticsParser statisticsParser = new ModelStatisticsParser(statistic);
-                modelStatistics.putAll(statisticsParser.parse());
-            });
+            ModelStatisticsParser statisticsParser = new ModelStatisticsParser(statistics);
+            modelStatistics.putAll(statisticsParser.parse());
         } catch (StatusRuntimeException | IllegalArgumentException e) {
             logger.warn("Cannot get Model Statistics", e);
         }

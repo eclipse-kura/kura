@@ -32,13 +32,14 @@
     <properties>
         <kura.basedir>${project.basedir}/..</kura.basedir>
         <com.google.guava.version>32.1.1-jre</com.google.guava.version>
-        <io.netty.version>4.1.95.Final</io.netty.version>
+        <io.netty.version>4.1.118.Final</io.netty.version>
         <org.eclipse.milo.version>0.6.8</org.eclipse.milo.version>
         <com.digitalpetri.netty.netty-channel-fsm.version>0.8</com.digitalpetri.netty.netty-channel-fsm.version>
         <com.digitalpetri.fsm.strict-machine.version>0.6</com.digitalpetri.fsm.strict-machine.version>
         <com.google.guava.failureaccess.version>1.0</com.google.guava.failureaccess.version>
         <org.bouncycastle.version>1.77</org.bouncycastle.version>
-        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.internal.driver.opcua.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.basedir}/../test/org.eclipse.kura.internal.driver.opcua.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <build>

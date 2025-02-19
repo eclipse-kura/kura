@@ -3495,18 +3495,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#configure-build-paths" class="md-nav__link">
+  <a href="#load-target-platform" class="md-nav__link">
     <span class="md-ellipsis">
-      Configure build paths
+      Load target platform
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#load-target-platform" class="md-nav__link">
+  <a href="#optional-ide-errors-resolution" class="md-nav__link">
     <span class="md-ellipsis">
-      Load target platform
+      (Optional) IDE errors resolution
     </span>
   </a>
   
@@ -4656,18 +4656,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#configure-build-paths" class="md-nav__link">
+  <a href="#load-target-platform" class="md-nav__link">
     <span class="md-ellipsis">
-      Configure build paths
+      Load target platform
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#load-target-platform" class="md-nav__link">
+  <a href="#optional-ide-errors-resolution" class="md-nav__link">
     <span class="md-ellipsis">
-      Load target platform
+      (Optional) IDE errors resolution
     </span>
   </a>
   
@@ -4730,6 +4730,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><strong>package</strong>: the Java package to be used for the main bundle, usually something like <code>org.eclipse.kura.myartifact</code></li>
 </ul>
 <p>Other parameters like <strong>version</strong> and <strong>mainBundleVendor</strong> can be changed by answering <code>n</code> after the <code>Confirm properties configuration</code> prompt, which appears after editing the properties above.</p>
+<p>A <code>.gitignore</code> file is automatically added with a default configuration. The <code>OSGI-INF</code> folder is omitted because it will be generated during tests at compile-time (this is necessary to make the PDE launcher work).</p>
 <h2 id="project-structure">Project structure</h2>
 <p>At the end of the procedure, the archetype will generate a subfolder in the working directory containing the following subfolders:</p>
 <ul>
@@ -4779,22 +4780,22 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </code></pre></div>
 <h2 id="ide-setup">IDE setup</h2>
 <h3 id="importing-projects-in-eclipse-ide">Importing Projects in Eclipse IDE</h3>
-<p>If the project is put under GIT version control, it is a good idea to add a <code>.gitignore</code> file to avoid committing files that are not necessary for the Maven build.</p>
-<p>In Eclipse IDE import the projects with <em>File | Import | Maven | Existing Maven Projects</em>.</p>
+<p>In Eclipse IDE , create a new workspace (it is not necessary to have the workspace in the root of the project) and import the projects with <em>File | Import | Maven | Existing Maven Projects</em>.</p>
 <p><img alt="" src="../images/kura-addon-archetype/eclipse-import-maven-projects-1.png" /></p>
 <p><img alt="" src="../images/kura-addon-archetype/eclipse-import-maven-projects-2.png" /></p>
-<p>Note that the parent POM file cannot be selected.</p>
-<h4 id="configure-build-paths">Configure build paths</h4>
-<p>For the bundles and test projects, select <em>Properties</em> and then <em>Project Natures</em> and add the natures as in picture below.</p>
+<p>Note that if the workspace resides in the root of the project the parent POM file cannot be selected.</p>
+<h4 id="load-target-platform">Load target platform</h4>
+<p>Open the <em>.target</em> file in the <em>target-definition</em> project and click on <em>Set as Active Target Platform</em>. Note that this will download the bundles from the Kura P2 repository and it may take a while to complete.</p>
+<p><img alt="" src="../images/kura-addon-archetype/eclipse-ide-reload-platform.png" /></p>
+<p>Eclipse IDE should rebuild the workspace automatically and show no errors. If errors appear, see next section.</p>
+<h4 id="optional-ide-errors-resolution">(Optional) IDE errors resolution</h4>
+<p>In some cases it might be necessary to manually configure the build path. For the bundles and test projects, select <em>Properties</em> and then <em>Project Natures</em> and add the natures as in picture below.</p>
 <p><img alt="" src="../images/kura-addon-archetype/eclipse-project-natures.png" /></p>
 <p>Then, from the <em>Java Build Path</em> configure the correct source folder as in picture below.</p>
 <p><img alt="" src="../images/kura-addon-archetype/eclipse-java-path.png" /></p>
 <p>Finally, configure the external <strong>Classpath</strong> dependencies by selecting the plugin dependencies from the <em>Add Library</em>.</p>
 <p><img alt="" src="../images/kura-addon-archetype/eclipse-add-library.png" /></p>
-<h4 id="load-target-platform">Load target platform</h4>
-<p>Open the <em>.target</em> file in the <em>target-definition</em> project and click on <em>Set as Active Target Platform</em>. Note that this will download the bundles from the Kura P2 repository and it may take a while to complete.</p>
-<p><img alt="" src="../images/kura-addon-archetype/eclipse-ide-reload-platform.png" /></p>
-<p>Eclipse IDE should rebuild the workspace automatically and show no errors.</p>
+<p>On old Eclipse IDE installations it might be necessary to uninstall the Tycho configurator 0.1.0 plugin from <em>Help | Install new software... | What is already installed?</em>.</p>
 
 
 

@@ -134,23 +134,23 @@ public class TritonServerServiceConstants {
     protected static final String TRITON_STATS_RESPONSE = "{\"model_stats\":[{\"name\":\"identity_long\",\"version\":\"1\",\"last_inference\":1739867342484," //
             + "\"inference_count\":42,\"execution_count\":42,\"inference_stats\":{\"success\":{\"count\":42,\"ns\":30097440},\"fail\":{\"count\":0,\"ns\":0}," //
             + "\"queue\":{\"count\":42,\"ns\":7137056},\"compute_input\":{\"count\":42,\"ns\":532768},\"compute_infer\":{\"count\":42,\"ns\":4664640}," //
-            + "\"compute_output\":{\"count\":42,\"ns\":4736},\"cache_hit\":{\"count\":0,\"ns\":0},\"cache_miss\":{\"count\":0,\"ns\":0}},\"response_stats\":{}," //
-            + "\"batch_stats\":[{\"batch_size\":0,\"compute_input\":{\"count\":42,\"ns\":532768},\"compute_infer\":{\"count\":42,\"ns\":4664640}," //
-            + "\"compute_output\":{\"count\":42,\"ns\":4736}}],\"memory_usage\":[]},{\"name\":\"preprocessor\",\"version\":\"1\",\"last_inference\":1739867342480," //
+            + "\"compute_output\":{\"count\":42,\"ns\":4736},\"cache_hit\":{\"count\":0,\"ns\":0},\"cache_miss\":{\"count\":0,\"ns\":0}}," //
+            + "\"batch_stats\":[{\"batch_size\":1,\"compute_input\":{\"count\":42,\"ns\":532768},\"compute_infer\":{\"count\":42,\"ns\":4664640}," //
+            + "\"compute_output\":{\"count\":42,\"ns\":4736}}]},{\"name\":\"preprocessor\",\"version\":\"1\",\"last_inference\":1739867342480," //
             + "\"inference_count\":42,\"execution_count\":42,\"inference_stats\":{\"success\":{\"count\":42,\"ns\":278516928},\"fail\":{\"count\":0,\"ns\":0}," //
             + "\"queue\":{\"count\":42,\"ns\":8943104},\"compute_input\":{\"count\":42,\"ns\":11304704},\"compute_infer\":{\"count\":42,\"ns\":230288448}," //
-            + "\"compute_output\":{\"count\":42,\"ns\":26880672},\"cache_hit\":{\"count\":0,\"ns\":0},\"cache_miss\":{\"count\":0,\"ns\":0}},\"response_stats\":{}," //
+            + "\"compute_output\":{\"count\":42,\"ns\":26880672},\"cache_hit\":{\"count\":0,\"ns\":0},\"cache_miss\":{\"count\":0,\"ns\":0}}," //
             + "\"batch_stats\":[{\"batch_size\":1,\"compute_input\":{\"count\":42,\"ns\":11304704},\"compute_infer\":{\"count\":42,\"ns\":230288448}," //
-            + "\"compute_output\":{\"count\":42,\"ns\":26880672}}],\"memory_usage\":[]}]}";
+            + "\"compute_output\":{\"count\":42,\"ns\":26880672}}]}";
     protected static final String TRITON_EXPECTED_STATS = "model.metrics.identity_long.1 {\"name\":\"identity_long\",\"version\":\"1\",\"last_inference\":1739867342484," //
             + "\"inference_count\":42,\"execution_count\":42,\"inference_stats\":{\"success\":{\"count\":42,\"ns\":30097440},\"fail\":{\"count\":0,\"ns\":0}," //
             + "\"queue\":{\"count\":42,\"ns\":7137056},\"compute_input\":{\"count\":42,\"ns\":532768},\"compute_infer\":{\"count\":42,\"ns\":4664640}," //
-            + "\"compute_output\":{\"count\":42,\"ns\":4736},\"cache_hit\":{\"count\":0,\"ns\":0},\"cache_miss\":{\"count\":0,\"ns\":0}},\"response_stats\":{}," //
-            + "\"batch_stats\":[{\"batch_size\":0,\"compute_input\":{\"count\":42,\"ns\":532768},\"compute_infer\":{\"count\":42,\"ns\":4664640}," //
-            + "\"compute_output\":{\"count\":42,\"ns\":4736}}],\"memory_usage\":[]} model.metrics.preprocessor.1 {\"name\":\"preprocessor\",\"version\":\"1\",\"last_inference\":1739867342480," //
+            + "\"compute_output\":{\"count\":42,\"ns\":4736},\"cache_hit\":{\"count\":0,\"ns\":0},\"cache_miss\":{\"count\":0,\"ns\":0}}," //
+            + "\"batch_stats\":[{\"batch_size\":1,\"compute_input\":{\"count\":42,\"ns\":532768},\"compute_infer\":{\"count\":42,\"ns\":4664640}," //
+            + "\"compute_output\":{\"count\":42,\"ns\":4736}}]} model.metrics.preprocessor.1 {\"name\":\"preprocessor\",\"version\":\"1\",\"last_inference\":1739867342480," //
             + "\"inference_count\":42,\"execution_count\":42,\"inference_stats\":{\"success\":{\"count\":42,\"ns\":278516928},\"fail\":{\"count\":0,\"ns\":0}," //
             + "\"queue\":{\"count\":42,\"ns\":8943104},\"compute_input\":{\"count\":42,\"ns\":11304704},\"compute_infer\":{\"count\":42,\"ns\":230288448}," //
-            + "\"compute_output\":{\"count\":42,\"ns\":26880672},\"cache_hit\":{\"count\":0,\"ns\":0},\"cache_miss\":{\"count\":0,\"ns\":0}},\"response_stats\":{}," //
+            + "\"compute_output\":{\"count\":42,\"ns\":26880672},\"cache_hit\":{\"count\":0,\"ns\":0},\"cache_miss\":{\"count\":0,\"ns\":0}}," //
             + "\"batch_stats\":[{\"batch_size\":1,\"compute_input\":{\"count\":42,\"ns\":11304704},\"compute_infer\":{\"count\":42,\"ns\":230288448}," //
-            + "\"compute_output\":{\"count\":42,\"ns\":26880672}}],\"memory_usage\":[]}";
+            + "\"compute_output\":{\"count\":42,\"ns\":26880672}}]}";
 }

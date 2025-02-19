@@ -21,7 +21,7 @@ public class TritonServerServiceBundleTest extends TritonServerServiceStepDefini
 
     @Test
     public void shouldNotBeActivatedWithInvalidProperties() throws IOException {
-        givenTritonServerServiceImplNotActive();
+        givenTritonServerServiceNativeImplNotActive();
 
         whenTritonServerIsActivated(invalidProperties());
 
@@ -30,7 +30,7 @@ public class TritonServerServiceBundleTest extends TritonServerServiceStepDefini
 
     @Test
     public void shouldBeActivatedWithLocalManager() throws IOException, InterruptedException {
-        givenTritonServerServiceImplNotActive();
+        givenTritonServerServiceNativeImplNotActive();
 
         whenTritonServerIsActivated(enableLocalServerProperties());
 
@@ -40,7 +40,7 @@ public class TritonServerServiceBundleTest extends TritonServerServiceStepDefini
 
     @Test
     public void shoulBeDeactivated() throws IOException {
-        givenTritonServerServiceImpl(enableLocalServerProperties());
+        givenTritonServerServiceNativeImpl(enableLocalServerProperties(), false);
 
         whenDeactivateIsInvokedOnTritonServer();
 
@@ -49,7 +49,7 @@ public class TritonServerServiceBundleTest extends TritonServerServiceStepDefini
 
     @Test
     public void shouldBeUpdated() throws IOException {
-        givenTritonServerServiceImpl(defaultProperties());
+        givenTritonServerServiceNativeImpl(defaultProperties(), false);
 
         whenUpdatedIsInvokedOnTritonServer(updatedProperties());
 

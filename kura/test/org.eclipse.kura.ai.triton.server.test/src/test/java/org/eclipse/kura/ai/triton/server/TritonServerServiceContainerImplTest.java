@@ -45,7 +45,7 @@ public class TritonServerServiceContainerImplTest extends TritonServerServiceSte
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
-        givenTritonServerServiceContainerImpl(this.properties);
+        givenTritonServerServiceContainerImpl(this.properties, false);
 
         thenIsConfigurationValidReturns(true);
     }
@@ -56,7 +56,7 @@ public class TritonServerServiceContainerImplTest extends TritonServerServiceSte
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
-        givenTritonServerServiceContainerImpl(this.properties);
+        givenTritonServerServiceContainerImpl(this.properties, false);
 
         thenIsConfigurationValidReturns(false);
     }
@@ -67,7 +67,7 @@ public class TritonServerServiceContainerImplTest extends TritonServerServiceSte
         givenPropertyWith("container.image.tag", null);
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
-        givenTritonServerServiceContainerImpl(this.properties);
+        givenTritonServerServiceContainerImpl(this.properties, false);
 
         thenIsConfigurationValidReturns(false);
     }
@@ -78,7 +78,7 @@ public class TritonServerServiceContainerImplTest extends TritonServerServiceSte
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", "");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
-        givenTritonServerServiceContainerImpl(this.properties);
+        givenTritonServerServiceContainerImpl(this.properties, false);
 
         thenIsConfigurationValidReturns(false);
     }
@@ -89,7 +89,7 @@ public class TritonServerServiceContainerImplTest extends TritonServerServiceSte
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
-        givenTritonServerServiceContainerImpl(this.properties);
+        givenTritonServerServiceContainerImpl(this.properties, false);
 
         thenIsModelEncryptionEnabled(false);
     }
@@ -101,7 +101,7 @@ public class TritonServerServiceContainerImplTest extends TritonServerServiceSte
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("local.model.repository.password", "keyboards");
-        givenTritonServerServiceContainerImpl(this.properties);
+        givenTritonServerServiceContainerImpl(this.properties, false);
 
         thenIsModelEncryptionEnabled(true);
     }
@@ -113,9 +113,8 @@ public class TritonServerServiceContainerImplTest extends TritonServerServiceSte
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.metrics", Boolean.FALSE);
-        givenTritonServerServiceContainerImpl(this.properties);
+        givenTritonServerServiceContainerImpl(this.properties, true);
         givenMetricsServerWithResponse("/metrics", 4002, TRITON_METRICS_RESPONSE, 200);
-        givenStatisticsServerWithResponse("/v2/models/stats", 4000, TRITON_STATS_RESPONSE, 200);
 
         whenMetricsAreRetrieved();
 
@@ -123,15 +122,14 @@ public class TritonServerServiceContainerImplTest extends TritonServerServiceSte
     }
 
     @Test
-    public void shouldGetEmptyMetricsWhenResponseIsNot200() throws IOException, KuraException {
+    public void shouldGetEmptyMetricsWhenResponseIsError() throws IOException, KuraException {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.metrics", Boolean.TRUE);
-        givenTritonServerServiceContainerImpl(this.properties);
+        givenTritonServerServiceContainerImpl(this.properties, false);
         givenMetricsServerWithResponse("/metrics", 4002, TRITON_METRICS_RESPONSE, 500);
-        givenStatisticsServerWithResponse("/v2/models/stats", 4000, TRITON_STATS_RESPONSE, 500);
 
         whenMetricsAreRetrieved();
 
@@ -145,9 +143,8 @@ public class TritonServerServiceContainerImplTest extends TritonServerServiceSte
         givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.metrics", Boolean.TRUE);
-        givenTritonServerServiceContainerImpl(this.properties);
+        givenTritonServerServiceContainerImpl(this.properties, true);
         givenMetricsServerWithResponse("/metrics", 4002, TRITON_METRICS_RESPONSE, 200);
-        givenStatisticsServerWithResponse("/v2/models/stats", 4000, TRITON_STATS_RESPONSE, 200);
         givenExpectedMetricsAndStats();
 
         whenMetricsAreRetrieved();
@@ -169,15 +166,6 @@ public class TritonServerServiceContainerImplTest extends TritonServerServiceSte
 
         this.httpMetricsServer.setExecutor(null);
         this.httpMetricsServer.start();
-    }
-
-    private void givenStatisticsServerWithResponse(String urlResource, int port, String response, int responseCode)
-            throws IOException {
-        this.httpStatisticsServer = HttpServer.create(new InetSocketAddress(port), 0);
-        this.httpStatisticsServer.createContext(urlResource, new MetricsHandler(response, responseCode));
-
-        this.httpStatisticsServer.setExecutor(null);
-        this.httpStatisticsServer.start();
     }
 
     private class MetricsHandler implements HttpHandler {

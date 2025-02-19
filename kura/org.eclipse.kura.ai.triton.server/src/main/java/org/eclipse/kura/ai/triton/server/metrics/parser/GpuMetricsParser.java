@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-package org.eclipse.kura.ai.triton.server;
+package org.eclipse.kura.ai.triton.server.metrics.parser;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +25,7 @@ public class GpuMetricsParser {
     private final List<String> rawMetrics;
     private final Map<String, GpuMetrics> gpuMetricsMap = new HashMap<>();
     private final GsonBuilder gsonBuilder = new GsonBuilder();
-    private final Gson gson = gsonBuilder.create();
+    private final Gson gson = this.gsonBuilder.create();
 
     public GpuMetricsParser(List<String> metrics) {
         this.rawMetrics = metrics;
@@ -33,7 +33,8 @@ public class GpuMetricsParser {
 
     /**
      * Parse the gpu metrics provided by a Triton Server. An example of metrics are the following:
-     * 
+     *
+     * <pre>
      * # HELP nv_gpu_utilization GPU utilization rate [0.0 - 1.0)
      * # TYPE nv_gpu_utilization gauge
      * nv_gpu_utilization{gpu_uuid="GPU-340cec52-80ba-c0df-8511-5f9680aae0ed"} 0.000000
@@ -43,10 +44,11 @@ public class GpuMetricsParser {
      * # HELP nv_gpu_memory_used_bytes GPU used memory, in bytes
      * # TYPE nv_gpu_memory_used_bytes gauge
      * nv_gpu_memory_used_bytes{gpu_uuid="GPU-340cec52-80ba-c0df-8511-5f9680aae0ed"} 617611264.000000
-     * 
+     * </pre>
+     *
      * The lines beginning with a # are filtered. The metric name is the 'gpu_uuid' field.
      * The value is converted in json format. For example:
-     * 
+     *
      * <pre>
      * {
      *     "gpu_uuid" : "GPU-340cec52-80ba-c0df-8511-5f9680aae0ed",
@@ -58,7 +60,7 @@ public class GpuMetricsParser {
      */
     public Map<String, String> parse() {
         Map<String, String> metrics = new HashMap<>();
-        rawMetrics.stream().filter(
+        this.rawMetrics.stream().filter(
                 line -> !line.startsWith("#") && (line.contains("_gpu_") || line.equals("nv_energy_consumption")))
                 .forEach(line -> {
                     Optional<String> uuid = parseUuid(line);
@@ -67,7 +69,7 @@ public class GpuMetricsParser {
                     if (!uuid.isPresent() || !name.isPresent()) {
                         return;
                     }
-                    if (gpuMetricsMap.containsKey(uuid.get())) {
+                    if (this.gpuMetricsMap.containsKey(uuid.get())) {
                         this.gpuMetricsMap.get(uuid.get()).addGpuMetric(name.get(), value);
                     } else {
                         GpuMetrics gpuMetrics = new GpuMetrics(uuid.get());
@@ -75,7 +77,7 @@ public class GpuMetricsParser {
                         this.gpuMetricsMap.put(uuid.get(), gpuMetrics);
                     }
                 });
-        this.gpuMetricsMap.forEach((key, value) -> metrics.put("gpu.metrics." + key, gson.toJson(value)));
+        this.gpuMetricsMap.forEach((key, value) -> metrics.put("gpu.metrics." + key, this.gson.toJson(value)));
         return metrics;
     }
 

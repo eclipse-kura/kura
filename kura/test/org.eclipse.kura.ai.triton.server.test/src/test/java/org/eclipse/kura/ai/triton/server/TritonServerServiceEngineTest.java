@@ -21,7 +21,7 @@ public class TritonServerServiceEngineTest extends TritonServerServiceStepDefini
 
     @Test
     public void engineShouldBeReady() throws IOException {
-        givenTritonServerServiceImpl(enableLocalServerProperties());
+        givenTritonServerServiceNativeImpl(enableLocalServerProperties(), false);
 
         whenAskingIfEngineIsReady();
 

@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.ai.triton.server.metrics.parser.GpuMetricsParser;
 import org.junit.Test;
 
 public class GpuMetricsParserTest {

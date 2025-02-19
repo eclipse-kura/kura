@@ -51,6 +51,8 @@ import org.eclipse.kura.ai.inference.ModelInfoBuilder;
 import org.eclipse.kura.ai.inference.Tensor;
 import org.eclipse.kura.ai.inference.TensorDescriptor;
 import org.eclipse.kura.ai.inference.TensorDescriptorBuilder;
+import org.eclipse.kura.ai.triton.server.metrics.parser.GpuMetricsParser;
+import org.eclipse.kura.ai.triton.server.metrics.parser.ModelStatisticsParser;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.crypto.CryptoService;
@@ -72,6 +74,9 @@ import inference.GrpcService.ModelMetadataRequest;
 import inference.GrpcService.ModelMetadataResponse;
 import inference.GrpcService.ModelReadyRequest;
 import inference.GrpcService.ModelReadyResponse;
+import inference.GrpcService.ModelStatistics;
+import inference.GrpcService.ModelStatisticsRequest;
+import inference.GrpcService.ModelStatisticsResponse;
 import inference.GrpcService.RepositoryIndexRequest;
 import inference.GrpcService.RepositoryIndexResponse;
 import inference.GrpcService.RepositoryIndexResponse.ModelIndex;
@@ -414,38 +419,21 @@ public abstract class TritonServerServiceAbs implements InferenceEngineMetricsSe
 
     private Map<String, String> getModelStatistics() throws KuraException {
         Map<String, String> modelStatistics = new HashMap<>();
-        List<String> response = getListMetrics(
-                "http://" + getServerAddress() + ":" + this.options.getHttpPort() + "/v2/models/stats");
+        ModelStatisticsRequest.Builder modelStatisticsRequest = ModelStatisticsRequest.newBuilder();
+        try {
+            ModelStatisticsResponse modelStatisticsResponse = this.grpcStub
+                    .modelStatistics(modelStatisticsRequest.build());
 
-        response.forEach(content -> {
-            // Remove first '"model_stats": [' string and split on model 'name'
-            String[] statistics = content.substring(16, content.length() - 2).split("\\{\\\"name\\\":");
-            for (String modelStats : statistics) {
-                if (!modelStats.isEmpty()) {
-                    String name = getModelName(modelStats);
-                    String version = getModelVersion(modelStats);
-                    modelStatistics.put("model.metrics." + name + "." + version,
-                            "{\"name\":" + sanitizeModelStatistics(modelStats));
-                }
-            }
-        });
+            List<ModelStatistics> statistics = modelStatisticsResponse.getModelStatsList();
+            statistics.forEach(statistic -> {
+                ModelStatisticsParser statisticsParser = new ModelStatisticsParser(statistic);
+                modelStatistics.putAll(statisticsParser.parse());
+            });
+        } catch (StatusRuntimeException | IllegalArgumentException e) {
+            logger.warn("Cannot get Model Statistics", e);
+        }
 
         return modelStatistics;
-    }
-
-    private String getModelName(String statistic) {
-        String[] name = statistic.split(",");
-        return name[0].substring(1, name[0].length() - 1);
-    }
-
-    private String getModelVersion(String statistics) {
-        String[] version = statistics.split(",");
-        return version[1].substring(11, version[1].length() - 1);
-    }
-
-    private String sanitizeModelStatistics(String statistics) {
-        // Remove last comma if present
-        return statistics.endsWith(",") ? statistics.substring(0, statistics.length() - 1) : statistics;
     }
 
     private Map<String, String> getGpuMetrics() throws KuraException {

@@ -24,35 +24,35 @@ public class TritonServerServiceNativeImplTest extends TritonServerServiceStepDe
 
     @Test
     public void isConfigurationValidWorksWithNativeConfiguration() throws IOException {
-        givenTritonServerServiceNativeImpl(validNativeProperties());
+        givenTritonServerServiceNativeImpl(validNativeProperties(), false);
 
         thenIsConfigurationValidReturns(true);
     }
 
     @Test
     public void isConfigurationValidWorksWithInvalidBackend() throws IOException {
-        givenTritonServerServiceNativeImpl(invalidBackendNativeProperties());
+        givenTritonServerServiceNativeImpl(invalidBackendNativeProperties(), false);
 
         thenIsConfigurationValidReturns(false);
     }
 
     @Test
     public void isConfigurationValidWorksWithInvalidModelRepository() throws IOException {
-        givenTritonServerServiceNativeImpl(invalidModelRepositoryNativeProperties());
+        givenTritonServerServiceNativeImpl(invalidModelRepositoryNativeProperties(), false);
 
         thenIsConfigurationValidReturns(false);
     }
 
     @Test
     public void isModelEncryptionEnabledWorkWithNativeConfiguration() throws IOException {
-        givenTritonServerServiceNativeImpl(validNativeProperties());
+        givenTritonServerServiceNativeImpl(validNativeProperties(), false);
 
         thenIsModelEncryptionEnabled(false);
     }
 
     @Test
     public void isModelEncryptionEnabledWorksWhenPasswordIsSet() throws IOException {
-        givenTritonServerServiceNativeImpl(validEncryptionNativeProperties());
+        givenTritonServerServiceNativeImpl(validEncryptionNativeProperties(), false);
 
         thenIsModelEncryptionEnabled(true);
     }

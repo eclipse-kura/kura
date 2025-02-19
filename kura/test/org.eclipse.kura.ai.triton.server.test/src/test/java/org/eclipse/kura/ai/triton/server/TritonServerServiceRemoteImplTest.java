@@ -24,21 +24,21 @@ public class TritonServerServiceRemoteImplTest extends TritonServerServiceStepDe
 
     @Test
     public void isConfigurationValidWorksWithDefaultConfiguration() throws IOException {
-        givenTritonServerServiceRemoteImpl(defaultProperties());
+        givenTritonServerServiceRemoteImpl(defaultProperties(), false);
 
         thenIsConfigurationValidReturns(true);
     }
 
     @Test
     public void isConfigurationValidWorksWithInvalidRemoteConfiguration() throws IOException {
-        givenTritonServerServiceRemoteImpl(invalidRemoteProperties());
+        givenTritonServerServiceRemoteImpl(invalidRemoteProperties(), false);
 
         thenIsConfigurationValidReturns(false);
     }
 
     @Test
     public void isModelEncryptionEnabledWorkWithDefault() throws IOException {
-        givenTritonServerServiceRemoteImpl(defaultProperties());
+        givenTritonServerServiceRemoteImpl(defaultProperties(), false);
 
         thenIsModelEncryptionEnabled(false);
     }

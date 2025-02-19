@@ -21,7 +21,7 @@ public class TritonServerServiceInferTest extends TritonServerServiceStepDefinit
 
     @Test
     public void shouldInferData() throws IOException {
-        givenTritonServerServiceImpl(defaultProperties());
+        givenTritonServerServiceNativeImpl(defaultProperties(), false);
 
         whenInferData(exampleModel(), exampleInputData());
 

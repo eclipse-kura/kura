@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-package org.eclipse.kura.ai.triton.server;
+package org.eclipse.kura.ai.triton.server.metrics.parser;
 
 import java.util.HashMap;
 import java.util.Map;

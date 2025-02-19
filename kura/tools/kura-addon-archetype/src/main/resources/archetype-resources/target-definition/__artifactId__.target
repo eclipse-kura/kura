@@ -208,6 +208,16 @@
                     <artifactId>asm-analysis</artifactId>
                     <version>${org.ow2.asm.version}</version>
                 </dependency>
+                <dependency>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                    <version>${guava.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>failureaccess</artifactId>
+                    <version>${failureaccess.version}</version>
+                </dependency>
 
                 <!-- Jersey -->
 

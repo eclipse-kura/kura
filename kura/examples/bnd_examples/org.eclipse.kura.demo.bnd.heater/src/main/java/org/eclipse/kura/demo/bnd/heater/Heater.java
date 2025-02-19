@@ -112,7 +112,7 @@ public class Heater implements ConfigurableComponent, CloudClientListener, Heate
 
         this.properties = properties;
         this.config = config;
-        logger.info("Activation. More: {}. All properties: {}", config.mode(), properties);
+        logger.info("Activating Heater. Mode: {}. All properties: {}", config.mode(), properties);
 
         // get the mqtt client for this application
         try {
@@ -147,14 +147,12 @@ public class Heater implements ConfigurableComponent, CloudClientListener, Heate
     }
 
     @Modified
-    public void updated(Map<String, Object> properties) {
-        logger.info("Updated Heater...");
+    public void updated(final Map<String, Object> properties, HeaterConfig config) {
+        logger.info("Updating Heater. Mode: {}. All properties: {}", config.mode(), properties);
 
         // store the properties received
         this.properties = properties;
-        for (String s : properties.keySet()) {
-            logger.info("Update - {}: {}", s, properties.get(s));
-        }
+        this.config = config;
 
         // try to kick off a new job
         doUpdate(true);

@@ -22,10 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.audit.AuditContext.Scope;
 import org.eclipse.kura.web.Console;
@@ -37,9 +33,13 @@ import com.google.gwt.user.server.rpc.RPCRequest;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.gwt.user.server.rpc.SerializationPolicyLoader;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
 
-    private final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private final Optional<RequiredPermissions> servicePermissionRequirements;
     private final Map<Method, RequiredPermissions> methodPermissionRequirements = new HashMap<>();
@@ -100,13 +100,13 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
      * alternative approach.
      *
      * @param request
-     *                      the HTTP request being serviced
+     *            the HTTP request being serviced
      * @param moduleBaseURL
-     *                      as specified in the incoming payload
+     *            as specified in the incoming payload
      * @param strongName
-     *                      a strong name that uniquely identifies a serialization
-     *                      policy
-     *                      file
+     *            a strong name that uniquely identifies a serialization
+     *            policy
+     *            file
      * @return a {@link SerializationPolicy} for the given module base URL and
      *         strong name, or <code>null</code> if there is none
      */

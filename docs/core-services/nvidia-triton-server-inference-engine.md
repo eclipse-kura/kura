@@ -126,6 +126,8 @@ The parameters used to configure the Triton Service are the following:
 !!! note
     Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are typically used by Kura for debug purposes.
 
+
+
 ## AI Model Encryption Support
 
 For ensuring inference integrity and providing copyright protection of deep-learning models on edge devices, Kura provides decryption capabilities for trained models to be served through the Triton Server.
@@ -179,3 +181,104 @@ gpg --armor --symmetric --cipher-algo AES256 tf_autoencoder_fp32.zip
 ```
 
 The resulting archive `tf_autoencoder_fp32.zip.asc` can be transferred to the _Local Model Repository Path_ on the target machine and will be decrypted by Kura.
+
+## Triton Server Metrics and Statistics support
+
+Since version 6.0.0, Eclipse Kura supports metrics and statistics reporting from a generic Inference Engine, leveraging the [InferenceEngineMetricsService](https://github.com/eclipse-kura/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/ai/inference/InferenceEngineMetricsService.java) APIs.
+
+The implementation for the Triton Server allows to retrieve relevant metrics regarding GPU and models from the engine. It is based on the [Nvidia Triton Server Metrics feature](https://github.com/triton-inference-server/server/blob/r24.08/docs/user_guide/metrics.md) and the [Model Statistics Extension](https://github.com/triton-inference-server/server/blob/main/docs/protocol/extension_statistics.md). The feature is enabled using the `Enable Triton Server Metrics` parameter from the Eclipse Kura webUI or the `enable.metrics` property in the snapshot configuration. This property is available only for the Triton Server Native Service and Triton Server Container Service components. In the case of the Triton Server Remote Service, the metrics reporting cannot be configured but it can be available depending on the Triton Server setup.
+
+More in details, the following GPU metrics are supported:
+
+- Power Usage
+- Power Limit
+- Energy Consumption
+- GPU Utilization
+- GPU Total Memory
+- GPU Used Memory
+
+The metrics are provided in a key-value pairs, whose key is in the format `gpu.metrics.<GPU uuid>` where the `GPU uuid` is an unique identifier of the GPU. The value is in JSON format.
+An example of GPU metrics is the following:
+
+```
+key : gpu.metrics.GPU-340cec52-80ba-c0df-8511-5f9680aae0ff 
+value : 
+{
+    "gpuUuid" : "GPU-340cec52-80ba-c0df-8511-5f9680aae0ff",
+    "gpuStats" : {
+        "nvGpuMemoryTotalBytes" : "16101933056.000000",
+        "nvGpuPowerUsage" : "20.085000",
+        "nvGpuUtilization" : "0.000000",
+        "nvGpuPowerLimit" : "60.000000",
+        "nvGpuMemoryUsedBytes" : "617611264.000000"
+    }
+}
+```
+
+The format of the model statistic key is `model.metrics.<model name>.<model version>`. The value is in JSON format.
+An example of model statistics is reported below:
+
+```
+key : model.metrics.preprocessor.1
+value : 
+{
+    "name" : "preprocessor",
+    "version" : "1",
+    "lastInference" : "1740037894861",
+    "inferenceCount" : "20",
+    "executionCount" : "20",
+    "inferenceStats" : {
+        "success" : {
+            "count" : "20",
+            "ns" : "143434240"
+        },
+        "fail" : {
+            "count" : "0",
+            "ns" : "0"
+        },
+        "queue" : {
+            "count" : "20",
+            "ns" : "4805536"
+        },
+        "computeInput" : {
+            "count" : "20",
+            "ns" : "5873920"
+        },
+        "computeInfer" : {
+            "count" : "20",
+            "ns" : "119049856"
+        },
+        "computeOutput" : {
+            "count" : "20",
+            "ns" : "13182208"
+        },
+        "cacheHit" : {
+            "count" : "0",
+            "ns" : "0"
+        },
+        "cacheMiss" : {
+            "count" : "0",
+            "ns" : "0"
+        }
+    },
+    "batchStats" : [
+        {
+            "batchSize" : "1",
+            "computeInput" : {
+                "count" : "20",
+                "ns" : "5873920"
+            },
+            "computeInfer" : {
+                "count" : "20",
+                "ns" : "119049856"
+            },
+            "computeOutput" : {
+                "count" : "20",
+                "ns" : "13182208"
+            }
+        }
+    ],
+    "memoryUsage" : [],
+    "responseStats" : {}
+}
+```

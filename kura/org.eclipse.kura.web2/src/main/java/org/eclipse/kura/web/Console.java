@@ -71,6 +71,7 @@ import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.session.BaseSecurityHandler;
 import org.eclipse.kura.web.session.CreateSessionSecurityHandler;
 import org.eclipse.kura.web.session.HttpServletContextHelper;
+import org.eclipse.kura.web.session.HttpSessionTracker;
 import org.eclipse.kura.web.session.RoutingSecurityHandler;
 import org.eclipse.kura.web.session.SecurityHandler;
 import org.eclipse.kura.web.session.SessionAutorizationSecurityHandler;
@@ -92,6 +93,9 @@ import jakarta.servlet.Servlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSessionAttributeListener;
+import jakarta.servlet.http.HttpSessionIdListener;
+import jakarta.servlet.http.HttpSessionListener;
 
 public class Console implements SelfConfiguringComponent {
 
@@ -464,6 +468,10 @@ public class Console implements SelfConfiguringComponent {
         registerContextHelper(RESOURCE_CONTEXT_NAME, "/", resourceContextHelper, 5);
         registerContextHelper(SESSION_CONTEXT_NAME, "/", sessionContextHelper, 10);
 
+        HttpSessionTracker sessionTracker = new HttpSessionTracker();
+
+        registerListeners(sessionTracker, SESSION_CONTEXT_NAME);
+
         registerResources(ADMIN_ROOT + "/*", "www", new AdminResources(), RESOURCE_CONTEXT_NAME);
         registerResources(AUTH_PATH, "www/auth.html", new AuthorizationResources(), SESSION_CONTEXT_NAME);
         registerResources(CONSOLE_PATH, "www/denali.html", new ConsoleResources(), SESSION_CONTEXT_NAME);
@@ -537,6 +545,35 @@ public class Console implements SelfConfiguringComponent {
         this.eventService.start();
     }
 
+    private void registerListeners(HttpSessionTracker sessionTracker, String contextHelperName) {
+        Map<String, Object> props = new HashMap<>();
+
+        String contextHelperSelector = "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "="
+                + contextHelperName + ")";
+
+        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, "true");
+        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, contextHelperSelector);
+
+        ServiceRegistration<HttpSessionListener> listenerService1 = this.bundleContext
+                .registerService(HttpSessionListener.class, sessionTracker, new Hashtable<>(props));
+
+        ServiceRegistration<HttpSessionIdListener> listenerService2 = this.bundleContext
+                .registerService(HttpSessionIdListener.class, sessionTracker, new Hashtable<>(props));
+
+        ServiceRegistration<HttpSessionAttributeListener> listenerService3 = this.bundleContext
+                .registerService(HttpSessionAttributeListener.class, sessionTracker, new Hashtable<>(props));
+
+        logger.debug("registered listener with id: {} , contextHelperName: {}", //
+                listenerService1.getReference().getProperty(Constants.SERVICE_ID), contextHelperName);
+
+        logger.debug("registered listener with id: {} , contextHelperName: {}", //
+                listenerService2.getReference().getProperty(Constants.SERVICE_ID), contextHelperName);
+
+        logger.debug("registered listener with id: {} , contextHelperName: {}", //
+                listenerService3.getReference().getProperty(Constants.SERVICE_ID), contextHelperName);
+
+    }
+
     private void registerContextHelper(String contextName, String contextPath, ServletContextHelper contextHelper,
             int ranking) {
         Map<String, Object> props = new HashMap<>();
@@ -544,26 +581,35 @@ public class Console implements SelfConfiguringComponent {
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, contextName);
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
         props.put(Constants.SERVICE_RANKING, ranking);
+        props.put(Constants.SERVICE_SCOPE, Constants.SCOPE_BUNDLE);
 
         ServiceRegistration<ServletContextHelper> contextService = this.bundleContext
                 .registerService(ServletContextHelper.class, contextHelper, new Hashtable<>(props));
 
         this.contexts.add(contextService);
+
+        logger.debug("registered context helper with id: {} , name: {} , path {}", //
+                contextService.getReference().getProperty(Constants.SERVICE_ID), contextName, contextPath);
     }
 
     private void registerResources(String pattern, String prefix, ResourcesService resourcesService,
             String contextHelperName) {
         Map<String, Object> props = new HashMap<>();
 
+        String contextHelperSelector = "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "="
+                + contextHelperName + ")";
+
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PATTERN, pattern);
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_RESOURCE_PREFIX, prefix);
-        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
-                "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + contextHelperName + ")");
+        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, contextHelperSelector);
 
         ServiceRegistration<ResourcesService> resourcesS = this.bundleContext.registerService(ResourcesService.class,
                 resourcesService, new Hashtable<>(props));
 
         this.resources.add(resourcesS);
+
+        logger.debug("registered resource with id: {} , pattern: {} , prefix {} , contextHelper {}", //
+                resourcesS.getReference().getProperty(Constants.SERVICE_ID), pattern, prefix, contextHelperSelector);
     }
 
     private void registerServlet(String servletName, String servletPattern, HttpServlet servlet,
@@ -571,15 +617,22 @@ public class Console implements SelfConfiguringComponent {
 
         Map<String, String> props = new HashMap<>();
 
+        String contextHelperSelector = "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "="
+                + contextHelperName + ")";
+
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, servletName);
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, servletPattern);
-        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
-                "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=" + contextHelperName + ")");
+        props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, contextHelperSelector);
+        props.put(Constants.SERVICE_SCOPE, Constants.SCOPE_PROTOTYPE);
 
         ServiceRegistration<Servlet> servletService = this.bundleContext.registerService(Servlet.class, servlet,
                 new Hashtable<>(props));
 
         this.servlets.add(servletService);
+
+        logger.debug("registered servlet with id: {} , name: {} , pattern {} , contextHelper {}", //
+                servletService.getReference().getProperty(Constants.SERVICE_ID), servletName, servletPattern,
+                contextHelperSelector);
     }
 
     public interface ResourcesService {
@@ -610,4 +663,5 @@ public class Console implements SelfConfiguringComponent {
     public ComponentConfiguration getConfiguration() throws KuraException {
         return consoleOptions.getConfiguration();
     }
+
 }

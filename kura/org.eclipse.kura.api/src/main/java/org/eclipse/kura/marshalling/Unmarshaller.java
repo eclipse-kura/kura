@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.marshalling;
 
+import java.io.InputStream;
+
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -36,4 +38,6 @@ public interface Unmarshaller {
      *             when the unmarshaling operation fails.
      */
     public <T> T unmarshal(String string, Class<T> clazz) throws KuraException;
+
+    public <T> T unmarshal(InputStream in, Class<T> clazz) throws KuraException;
 }

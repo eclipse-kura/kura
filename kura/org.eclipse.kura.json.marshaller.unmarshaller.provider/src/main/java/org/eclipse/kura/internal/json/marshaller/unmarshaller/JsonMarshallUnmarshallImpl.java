@@ -12,8 +12,15 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+
+import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.core.inventory.resources.ContainerImage;
 import org.eclipse.kura.core.inventory.resources.ContainerImages;
 import org.eclipse.kura.core.inventory.resources.DockerContainer;
@@ -68,6 +75,35 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         throw new KuraException(KuraErrorCode.INVALID_PARAMETER);
     }
 
+    @Override
+    public void marshal(OutputStream out, Object object) throws KuraException {
+        try {
+            if (object instanceof WireGraphConfiguration) {
+                JsonObject result = WireGraphJsonMarshallUnmarshallImpl
+                        .marshalWireGraphConfiguration((WireGraphConfiguration) object);
+                out.write(result.toString().getBytes());
+            } else if (object instanceof KuraPayload) {
+                out.write(CloudPayloadJsonEncoder.marshal((KuraPayload) object).getBytes());
+            } else if (object instanceof SystemDeploymentPackages) {
+                out.write(JsonJavaSystemDeploymentPackagesMapper.marshal((SystemDeploymentPackages) object).getBytes());
+            } else if (object instanceof SystemBundles) {
+                out.write(JsonJavaSystemBundlesMapper.marshal((SystemBundles) object).getBytes());
+            } else if (object instanceof SystemPackages) {
+                out.write(JsonJavaSystemPackagesMapper.marshal((SystemPackages) object).getBytes());
+            } else if (object instanceof DockerContainers) {
+                out.write(JsonJavaDockerContainersMapper.marshal((DockerContainers) object).getBytes());
+            } else if (object instanceof ContainerImages) {
+                out.write(JsonJavaContainerImagesMapper.marshal((ContainerImages) object).getBytes());
+            } else if (object instanceof SystemResourcesInfo) {
+                out.write(JsonJavaSystemResourcesMapper.marshal((SystemResourcesInfo) object).getBytes());
+            }
+        } catch (IOException ex) {
+            throw new KuraIOException(ex);
+        }
+
+        throw new KuraException(KuraErrorCode.INVALID_PARAMETER);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public <T> T unmarshal(String s, Class<T> clazz) throws KuraException {
@@ -84,6 +120,31 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         } else if (clazz.equals(ContainerImage.class)) {
             return (T) JsonJavaContainerImagesMapper.unmarshal(s);
         }
+        throw new IllegalArgumentException("Invalid parameter!");
+    }
+
+    @Override
+    public <T> T unmarshal(InputStream in, Class<T> clazz) throws KuraException {
+        try {
+            String inputString = IOUtils.toString(in, StandardCharsets.UTF_8);
+
+            if (clazz.equals(WireGraphConfiguration.class)) {
+                return (T) WireGraphJsonMarshallUnmarshallImpl.unmarshalToWireGraphConfiguration(inputString);
+            } else if (clazz.equals(KuraPayload.class)) {
+                return (T) CloudPayloadJsonDecoder.buildFromString(inputString);
+            } else if (EntryInfo.class.isAssignableFrom(clazz)) {
+                return (T) KeystoreEntryInfoMapper.unmarshal(inputString, clazz);
+            } else if (clazz.equals(SystemBundleRef.class)) {
+                return (T) JsonJavaSystemBundleRefMapper.unmarshal(inputString);
+            } else if (clazz.equals(DockerContainer.class)) {
+                return (T) JsonJavaDockerContainersMapper.unmarshal(inputString);
+            } else if (clazz.equals(ContainerImage.class)) {
+                return (T) JsonJavaContainerImagesMapper.unmarshal(inputString);
+            }
+        } catch (IOException ex) {
+            throw new KuraIOException(ex);
+        }
+
         throw new IllegalArgumentException("Invalid parameter!");
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -33,7 +33,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.ai.inference.ModelInfo;
 import org.eclipse.kura.ai.inference.Tensor;
@@ -49,6 +48,8 @@ import org.junit.Rule;
 import com.google.protobuf.ByteString;
 
 import inference.GRPCInferenceServiceGrpc;
+import inference.GrpcService.InferBatchStatistics;
+import inference.GrpcService.InferStatistics;
 import inference.GrpcService.InferTensorContents;
 import inference.GrpcService.ModelInferRequest;
 import inference.GrpcService.ModelInferResponse;
@@ -56,6 +57,9 @@ import inference.GrpcService.ModelInferResponse.InferOutputTensor;
 import inference.GrpcService.ModelMetadataRequest;
 import inference.GrpcService.ModelMetadataResponse;
 import inference.GrpcService.ModelMetadataResponse.TensorMetadata;
+import inference.GrpcService.ModelStatistics;
+import inference.GrpcService.ModelStatisticsRequest;
+import inference.GrpcService.ModelStatisticsResponse;
 import inference.GrpcService.RepositoryIndexRequest;
 import inference.GrpcService.RepositoryIndexResponse;
 import inference.GrpcService.RepositoryIndexResponse.ModelIndex;
@@ -63,6 +67,7 @@ import inference.GrpcService.RepositoryModelUnloadRequest;
 import inference.GrpcService.RepositoryModelUnloadResponse;
 import inference.GrpcService.ServerLiveRequest;
 import inference.GrpcService.ServerLiveResponse;
+import inference.GrpcService.StatisticDuration;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -71,7 +76,7 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
 
-public abstract class TritonServerServiceStepDefinitions {
+public abstract class TritonServerServiceStepDefinitions extends TritonServerServiceConstants {
 
     protected static final String TRITON_IMAGE_NAME = "tritonserver";
     protected static final String TRITON_IMAGE_TAG = "latest";
@@ -85,8 +90,8 @@ public abstract class TritonServerServiceStepDefinitions {
 
     private Command startTritonServerCmd = new Command(new String[] { "tritonserver",
             "--model-repository=/fake-repository-path", "--backend-directory=/fake-backends-path", "--http-port=4001",
-            "--grpc-port=4002", "--metrics-port=4003", "--model-control-mode=explicit", "2>&1", "|", "systemd-cat",
-            "-t tritonserver", "-p info" });
+            "--grpc-port=4002", "--metrics-port=4003", "--model-control-mode=explicit", "--allow-metrics=true",
+            "--allow-gpu-metrics=true", "2>&1", "|", "systemd-cat", "-t tritonserver", "-p info" });
 
     public TritonServerServiceStepDefinitions() {
         this.startTritonServerCmd.setExecuteInAShell(true);
@@ -104,27 +109,30 @@ public abstract class TritonServerServiceStepDefinitions {
     private CryptoService cry;
     private ContainerOrchestrationService orc;
 
-    protected void givenTritonServerServiceImpl(Map<String, Object> properties) throws IOException {
-        this.tritonServerService = createTritonServerServiceImpl(properties, tritonModelRepoStub, true);
+    protected void givenTritonServerServiceRemoteImpl(Map<String, Object> properties, boolean metricsEnabled)
+            throws IOException {
+        this.tritonServerService = createTritonServerServiceRemoteImpl(properties, tritonModelRepoStub, true,
+                metricsEnabled);
     }
 
-    protected void givenTritonServerServiceRemoteImpl(Map<String, Object> properties) throws IOException {
-        this.tritonServerService = createTritonServerServiceRemoteImpl(properties, tritonModelRepoStub, true);
+    protected void givenTritonServerServiceNativeImpl(Map<String, Object> properties, boolean metricsEnabled)
+            throws IOException {
+        this.tritonServerService = createTritonServerServiceNativeImpl(properties, tritonModelRepoStub, true,
+                metricsEnabled);
     }
 
-    protected void givenTritonServerServiceNativeImpl(Map<String, Object> properties) throws IOException {
-        this.tritonServerService = createTritonServerServiceNativeImpl(properties, tritonModelRepoStub, true);
+    protected void givenTritonServerServiceContainerImpl(Map<String, Object> properties, boolean metricsEnabled)
+            throws IOException {
+        this.tritonServerService = createTritonServerServiceContainerImpl(properties, tritonModelRepoStub, true,
+                metricsEnabled);
     }
 
-    protected void givenTritonServerServiceContainerImpl(Map<String, Object> properties) throws IOException {
-        this.tritonServerService = createTritonServerServiceContainerImpl(properties, tritonModelRepoStub, true);
+    protected void givenTritonServerServiceNativeImplNotActive() throws IOException {
+        this.tritonServerService = createTritonServerServiceNativeImpl(new HashMap<>(), tritonModelRepoStub, false,
+                false);
     }
 
-    protected void givenTritonServerServiceImplNotActive() throws IOException {
-        this.tritonServerService = createTritonServerServiceImpl(null, tritonModelRepoStub, false);
-    }
-
-    protected void whenLoadModel(String modelName) throws KuraIOException {
+    protected void whenLoadModel(String modelName) {
         try {
             this.tritonServerService.loadModel(modelName, Optional.empty());
         } catch (KuraException e) {
@@ -132,7 +140,7 @@ public abstract class TritonServerServiceStepDefinitions {
         }
     }
 
-    protected void whenGetModelLoadState(String modelName) throws KuraIOException {
+    protected void whenGetModelLoadState(String modelName) {
         try {
             this.tritonServerService.isModelLoaded(modelName);
         } catch (KuraException e) {
@@ -140,7 +148,7 @@ public abstract class TritonServerServiceStepDefinitions {
         }
     }
 
-    protected void whenUnloadModel(String modelName) throws KuraIOException {
+    protected void whenUnloadModel(String modelName) {
         try {
             this.tritonServerService.unloadModel(modelName);
         } catch (KuraException e) {
@@ -251,7 +259,6 @@ public abstract class TritonServerServiceStepDefinitions {
 
         properties.put("server.address", "localhost");
         properties.put("server.ports", new Integer[] { 4000, 4001, 4002 });
-        properties.put("enable.local", Boolean.FALSE);
 
         return properties;
     }
@@ -262,7 +269,6 @@ public abstract class TritonServerServiceStepDefinitions {
 
         properties.put("server.address", "localhost");
         properties.put("server.ports", new Integer[] { 4001, 4002, 4003 });
-        properties.put("enable.local", Boolean.FALSE);
 
         return properties;
     }
@@ -271,7 +277,6 @@ public abstract class TritonServerServiceStepDefinitions {
         Map<String, Object> properties = new HashMap<>();
 
         properties.put("server.ports", new Integer[] { 4000, 4001 });
-        properties.put("enable.local", Boolean.FALSE);
 
         return properties;
     }
@@ -280,7 +285,6 @@ public abstract class TritonServerServiceStepDefinitions {
         Map<String, Object> properties = new HashMap<>();
 
         properties.put("server.ports", new Integer[] { 4001, 4002, 4003 });
-        properties.put("enable.local", Boolean.TRUE);
         properties.put("local.backends.path", "/fake-backends-path");
         properties.put("local.model.repository.path", "/fake-repository-path");
 
@@ -338,37 +342,8 @@ public abstract class TritonServerServiceStepDefinitions {
         return tensors;
     }
 
-    private TritonServerServiceAbs createTritonServerServiceImpl(Map<String, Object> properties,
-            List<String> tritonModelRepoStub, boolean activate) throws IOException {
-
-        TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceOrigImpl();
-
-        this.ces = mock(CommandExecutorService.class);
-        when(ces.isRunning(new String[] { "tritonserver" })).thenReturn(false);
-
-        tritonServerServiceImpl.setCommandExecutorService(ces);
-
-        this.cry = mock(CryptoService.class);
-        tritonServerServiceImpl.setCryptoService(cry);
-
-        if (activate) {
-            tritonServerServiceImpl.activate(properties);
-        }
-
-        GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase serviceImpl = createGRPCMock(tritonModelRepoStub);
-
-        String serverName = InProcessServerBuilder.generateName();
-        grpcCleanup.register(
-                InProcessServerBuilder.forName(serverName).directExecutor().addService(serviceImpl).build().start());
-        ManagedChannel channel = grpcCleanup
-                .register(InProcessChannelBuilder.forName(serverName).directExecutor().build());
-        tritonServerServiceImpl.setGrpcStub(GRPCInferenceServiceGrpc.newBlockingStub(channel));
-
-        return tritonServerServiceImpl;
-    }
-
     private TritonServerServiceAbs createTritonServerServiceNativeImpl(Map<String, Object> properties,
-            List<String> tritonModelRepoStub, boolean activate) throws IOException {
+            List<String> tritonModelRepoStub, boolean activate, boolean metricsEnabled) throws IOException {
 
         TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceNativeImpl();
 
@@ -384,7 +359,8 @@ public abstract class TritonServerServiceStepDefinitions {
             tritonServerServiceImpl.activate(properties);
         }
 
-        GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase serviceImpl = createGRPCMock(tritonModelRepoStub);
+        GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase serviceImpl = createGRPCMock(tritonModelRepoStub,
+                metricsEnabled);
 
         String serverName = InProcessServerBuilder.generateName();
         grpcCleanup.register(
@@ -397,7 +373,7 @@ public abstract class TritonServerServiceStepDefinitions {
     }
 
     private TritonServerServiceAbs createTritonServerServiceContainerImpl(Map<String, Object> properties,
-            List<String> tritonModelRepoStub, boolean activate) throws IOException {
+            List<String> tritonModelRepoStub, boolean activate, boolean metricsEnabled) throws IOException {
 
         TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceContainerImpl();
 
@@ -413,7 +389,8 @@ public abstract class TritonServerServiceStepDefinitions {
             tritonServerServiceImpl.activate(properties);
         }
 
-        GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase serviceImpl = createGRPCMock(tritonModelRepoStub);
+        GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase serviceImpl = createGRPCMock(tritonModelRepoStub,
+                metricsEnabled);
 
         String serverName = InProcessServerBuilder.generateName();
         grpcCleanup.register(
@@ -437,7 +414,7 @@ public abstract class TritonServerServiceStepDefinitions {
     }
 
     private TritonServerServiceAbs createTritonServerServiceRemoteImpl(Map<String, Object> properties,
-            List<String> tritonModelRepoStub, boolean activate) throws IOException {
+            List<String> tritonModelRepoStub, boolean activate, boolean metricsEnabled) throws IOException {
 
         TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceRemoteImpl();
 
@@ -451,7 +428,8 @@ public abstract class TritonServerServiceStepDefinitions {
             tritonServerServiceImpl.activate(properties);
         }
 
-        GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase serviceImpl = createGRPCMock(tritonModelRepoStub);
+        GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase serviceImpl = createGRPCMock(tritonModelRepoStub,
+                metricsEnabled);
 
         String serverName = InProcessServerBuilder.generateName();
         grpcCleanup.register(
@@ -463,7 +441,8 @@ public abstract class TritonServerServiceStepDefinitions {
         return tritonServerServiceImpl;
     }
 
-    private GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase createGRPCMock(List<String> tritonModelRepoStub) {
+    private GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase createGRPCMock(List<String> tritonModelRepoStub,
+            boolean metricsEnabled) {
         return mock(GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase.class,
                 delegatesTo(new GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase() {
 
@@ -571,6 +550,7 @@ public abstract class TritonServerServiceStepDefinitions {
 
                         responseObserver.onNext(response);
                         responseObserver.onCompleted();
+
                     }
 
                     @Override
@@ -581,6 +561,90 @@ public abstract class TritonServerServiceStepDefinitions {
                         ServerLiveResponse response = ServerLiveResponse.newBuilder().setLive(true).build();
                         responseObserver.onNext(response);
                         responseObserver.onCompleted();
+                    }
+
+                    @Override
+                    public void modelStatistics(ModelStatisticsRequest request,
+                            StreamObserver<ModelStatisticsResponse> responseObserver) {
+                        TritonServerServiceStepDefinitions.this.methodCalled = true;
+
+                        if (metricsEnabled) {
+                            InferStatistics.Builder firstInferStatisticsBuilder = InferStatistics.newBuilder();
+                            firstInferStatisticsBuilder
+                                    .setSuccess(StatisticDuration.newBuilder().setCount(42).setNs(30097440).build());
+                            firstInferStatisticsBuilder
+                                    .setFail(StatisticDuration.newBuilder().setCount(0).setNs(0).build());
+                            firstInferStatisticsBuilder
+                                    .setQueue(StatisticDuration.newBuilder().setCount(42).setNs(7137056).build());
+                            firstInferStatisticsBuilder
+                                    .setComputeInput(StatisticDuration.newBuilder().setCount(42).setNs(532768).build());
+                            firstInferStatisticsBuilder.setComputeInfer(
+                                    StatisticDuration.newBuilder().setCount(42).setNs(4664640).build());
+                            firstInferStatisticsBuilder
+                                    .setComputeOutput(StatisticDuration.newBuilder().setCount(42).setNs(4736).build());
+                            firstInferStatisticsBuilder
+                                    .setCacheHit(StatisticDuration.newBuilder().setCount(0).setNs(0).build());
+                            firstInferStatisticsBuilder
+                                    .setCacheMiss(StatisticDuration.newBuilder().setCount(0).setNs(0).build());
+
+                            InferBatchStatistics.Builder firstInferBatchStatisticsBuilder = InferBatchStatistics
+                                    .newBuilder();
+                            firstInferBatchStatisticsBuilder.setBatchSize(1);
+                            firstInferBatchStatisticsBuilder
+                                    .setComputeInput(StatisticDuration.newBuilder().setCount(42).setNs(532768).build());
+                            firstInferBatchStatisticsBuilder.setComputeInfer(
+                                    StatisticDuration.newBuilder().setCount(42).setNs(4664640).build());
+                            firstInferBatchStatisticsBuilder
+                                    .setComputeOutput(StatisticDuration.newBuilder().setCount(42).setNs(4736).build());
+
+                            ModelStatistics.Builder firstModelStatisticsBuilder = ModelStatistics.newBuilder();
+                            firstModelStatisticsBuilder.setName("identity_long").setVersion("1")
+                                    .setLastInference(1739867342484L).setInferenceCount(42).setExecutionCount(42)
+                                    .setInferenceStats(firstInferStatisticsBuilder.build())
+                                    .addBatchStats(firstInferBatchStatisticsBuilder.build());
+
+                            InferStatistics.Builder secondInferStatisticsBuilder = InferStatistics.newBuilder();
+                            secondInferStatisticsBuilder
+                                    .setSuccess(StatisticDuration.newBuilder().setCount(42).setNs(278516928).build());
+                            secondInferStatisticsBuilder
+                                    .setFail(StatisticDuration.newBuilder().setCount(0).setNs(0).build());
+                            secondInferStatisticsBuilder
+                                    .setQueue(StatisticDuration.newBuilder().setCount(42).setNs(8943104).build());
+                            secondInferStatisticsBuilder.setComputeInput(
+                                    StatisticDuration.newBuilder().setCount(42).setNs(11304704).build());
+                            secondInferStatisticsBuilder.setComputeInfer(
+                                    StatisticDuration.newBuilder().setCount(42).setNs(230288448).build());
+                            secondInferStatisticsBuilder.setComputeOutput(
+                                    StatisticDuration.newBuilder().setCount(42).setNs(26880672).build());
+                            secondInferStatisticsBuilder
+                                    .setCacheHit(StatisticDuration.newBuilder().setCount(0).setNs(0).build());
+                            secondInferStatisticsBuilder
+                                    .setCacheMiss(StatisticDuration.newBuilder().setCount(0).setNs(0).build());
+
+                            InferBatchStatistics.Builder secondInferBatchStatisticsBuilder = InferBatchStatistics
+                                    .newBuilder();
+                            secondInferBatchStatisticsBuilder.setBatchSize(1);
+                            secondInferBatchStatisticsBuilder.setComputeInput(
+                                    StatisticDuration.newBuilder().setCount(42).setNs(11304704).build());
+                            secondInferBatchStatisticsBuilder.setComputeInfer(
+                                    StatisticDuration.newBuilder().setCount(42).setNs(230288448).build());
+                            secondInferBatchStatisticsBuilder.setComputeOutput(
+                                    StatisticDuration.newBuilder().setCount(42).setNs(26880672).build());
+
+                            ModelStatistics.Builder secondModelStatisticsBuilder = ModelStatistics.newBuilder();
+                            secondModelStatisticsBuilder.setName("preprocessor").setVersion("1")
+                                    .setLastInference(1739867342480L).setInferenceCount(42).setExecutionCount(42)
+                                    .setInferenceStats(secondInferStatisticsBuilder.build())
+                                    .addBatchStats(secondInferBatchStatisticsBuilder.build());
+
+                            ModelStatisticsResponse response = ModelStatisticsResponse.newBuilder()
+                                    .addModelStats(firstModelStatisticsBuilder.build())
+                                    .addModelStats(secondModelStatisticsBuilder.build()).build();
+                            responseObserver.onNext(response);
+                            responseObserver.onCompleted();
+                        } else {
+                            responseObserver.onError(new StatusRuntimeException(Status.UNAVAILABLE));
+                        }
                     }
 
                 }));

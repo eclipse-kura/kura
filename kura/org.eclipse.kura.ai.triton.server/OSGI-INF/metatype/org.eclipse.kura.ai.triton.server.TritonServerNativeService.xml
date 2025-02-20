@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2022 Eurotech and/or its affiliates and others
+    Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -95,6 +95,15 @@
             default="4194304"
             min="1">
         </AD>
+        
+        <AD id="enable.metrics"
+            name="Enable Triton Server Metrics"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Enable the Triton Server Metrics feature. This property allows to retrieve models and GPU metrics from an instance of Triton Server.">
+        </AD> 
 
     </OCD>
     <Designate factoryPid="org.eclipse.kura.ai.triton.server.TritonServerNativeService">

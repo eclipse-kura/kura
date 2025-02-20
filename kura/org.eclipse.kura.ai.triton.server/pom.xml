@@ -2,13 +2,13 @@
 <!--
 
     Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
-  
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
+
     SPDX-License-Identifier: EPL-2.0
-    
+
     Contributors:
      Eurotech
 
@@ -86,6 +86,11 @@
                                     <groupId>io.perfmark</groupId>
                                     <artifactId>perfmark-api</artifactId>
                                     <version>0.26.0</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.google.protobuf</groupId>
+                                    <artifactId>protobuf-java-util</artifactId>
+                                    <version>3.25.3</version>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

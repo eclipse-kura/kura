@@ -14,7 +14,8 @@ Bundle-ClassPath: .,
  lib/grpc-protobuf.jar,
  lib/grpc-protobuf-lite.jar,
  lib/grpc-stub.jar,
- lib/perfmark-api.jar
+ lib/perfmark-api.jar,
+ lib/protobuf-java-util.jar
 Bundle-ActivationPolicy: lazy
 Import-Package: com.google.common.base;version="25.0.0",
  com.google.common.collect;version="25.0.0",

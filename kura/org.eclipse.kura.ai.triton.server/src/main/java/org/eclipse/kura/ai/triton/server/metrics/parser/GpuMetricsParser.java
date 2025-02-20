@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.google.common.base.CaseFormat;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -70,10 +71,12 @@ public class GpuMetricsParser {
                         return;
                     }
                     if (this.gpuMetricsMap.containsKey(uuid.get())) {
-                        this.gpuMetricsMap.get(uuid.get()).addGpuMetric(name.get(), value);
+                        this.gpuMetricsMap.get(uuid.get()).addGpuMetric(
+                                CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, name.get()), value);
                     } else {
                         GpuMetrics gpuMetrics = new GpuMetrics(uuid.get());
-                        gpuMetrics.addGpuMetric(name.get(), value);
+                        gpuMetrics.addGpuMetric(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, name.get()),
+                                value);
                         this.gpuMetricsMap.put(uuid.get(), gpuMetrics);
                     }
                 });

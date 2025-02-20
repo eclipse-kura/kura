@@ -88,11 +88,11 @@ public class GpuMetricsParserTest {
     private static final String SINGLE_GPU_METRIC_WITHOUT_NAME = "# HELP nv_gpu_utilization GPU utilization rate [0.0 - 1.0)\n" //
             + "# TYPE nv_gpu_utilization gauge\n" //
             + "{gpu_uuid=\"GPU-340cec52-80ba-c0df-8511-5f9680aae0ff\"} 0.000000\n";
-    private static final String EXPECTED_GPU_METRIC_1 = "{\"gpu_uuid\":\"GPU-340cec52-80ba-c0df-8511-5f9680aae0ed\"," //
-            + "\"gpu_stats\":{\"nv_gpu_power_limit\":\"60.000000\",\"nv_gpu_utilization\":\"0.000000\",\"nv_gpu_memory_used_bytes\":\"617611264.000000\"," //
-            + "\"nv_gpu_power_usage\":\"20.085000\",\"nv_gpu_memory_total_bytes\":\"16101933056.000000\"}}";
-    private static final String EXPECTED_GPU_METRIC_2 = "{\"gpu_uuid\":\"GPU-340cec52-80ba-c0df-8511-5f9680aae0ff\",\"gpu_stats\":{\"nv_gpu_power_limit\":\"60.000000\"," //
-            + "\"nv_gpu_utilization\":\"0.000000\",\"nv_gpu_memory_used_bytes\":\"617611264.000000\",\"nv_gpu_power_usage\":\"20.085000\",\"nv_gpu_memory_total_bytes\":\"16101933056.000000\"}}";
+    private static final String EXPECTED_GPU_METRIC_1 = "{\"gpuUuid\":\"GPU-340cec52-80ba-c0df-8511-5f9680aae0ed\"," //
+            + "\"gpuStats\":{\"nvGpuMemoryTotalBytes\":\"16101933056.000000\",\"nvGpuPowerUsage\":\"20.085000\",\"nvGpuUtilization\":\"0.000000\"," //
+            + "\"nvGpuPowerLimit\":\"60.000000\",\"nvGpuMemoryUsedBytes\":\"617611264.000000\"}}";
+    private static final String EXPECTED_GPU_METRIC_2 = "{\"gpuUuid\":\"GPU-340cec52-80ba-c0df-8511-5f9680aae0ff\",\"gpuStats\":{\"nvGpuMemoryTotalBytes\":\"16101933056.000000\"," //
+            + "\"nvGpuPowerUsage\":\"20.085000\",\"nvGpuUtilization\":\"0.000000\",\"nvGpuPowerLimit\":\"60.000000\",\"nvGpuMemoryUsedBytes\":\"617611264.000000\"}}";
 
     @Test
     public void shouldParseSingleGpuMetric() {

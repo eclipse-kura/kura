@@ -52,7 +52,6 @@ import org.eclipse.kura.ai.inference.Tensor;
 import org.eclipse.kura.ai.inference.TensorDescriptor;
 import org.eclipse.kura.ai.inference.TensorDescriptorBuilder;
 import org.eclipse.kura.ai.triton.server.metrics.parser.GpuMetricsParser;
-import org.eclipse.kura.ai.triton.server.metrics.parser.ModelStatisticsParser;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.crypto.CryptoService;
@@ -61,7 +60,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.ProtocolStringList;
+import com.google.protobuf.util.JsonFormat;
 
 import inference.GRPCInferenceServiceGrpc;
 import inference.GRPCInferenceServiceGrpc.GRPCInferenceServiceBlockingStub;
@@ -418,20 +419,36 @@ public abstract class TritonServerServiceAbs implements InferenceEngineMetricsSe
     }
 
     private Map<String, String> getModelStatistics() throws KuraException {
-        Map<String, String> modelStatistics = new HashMap<>();
+        Map<String, String> jsonModelStatistics = new HashMap<>();
         ModelStatisticsRequest.Builder modelStatisticsRequest = ModelStatisticsRequest.newBuilder();
         try {
             ModelStatisticsResponse modelStatisticsResponse = this.grpcStub
                     .modelStatistics(modelStatisticsRequest.build());
 
-            List<ModelStatistics> statistics = modelStatisticsResponse.getModelStatsList();
-            ModelStatisticsParser statisticsParser = new ModelStatisticsParser(statistics);
-            modelStatistics.putAll(statisticsParser.parse());
+            List<ModelStatistics> grpcStatistics = modelStatisticsResponse.getModelStatsList();
+            grpcStatistics.forEach(grpcStatistic -> {
+                try {
+                    String key = getKey(grpcStatistic);
+                    String jsonValue = JsonFormat.printer().includingDefaultValueFields()
+                            .omittingInsignificantWhitespace().print(grpcStatistic);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("{} {}", key, jsonValue);
+                    }
+                    jsonModelStatistics.put(key, jsonValue);
+                } catch (InvalidProtocolBufferException e) {
+                    logger.warn("Cannot convert model statistics to json format", e);
+                }
+            });
+
         } catch (StatusRuntimeException | IllegalArgumentException e) {
             logger.warn("Cannot get Model Statistics", e);
         }
 
-        return modelStatistics;
+        return jsonModelStatistics;
+    }
+
+    private String getKey(inference.GrpcService.ModelStatistics statistic) {
+        return "model.metrics." + statistic.getName() + "." + statistic.getVersion();
     }
 
     private Map<String, String> getGpuMetrics() throws KuraException {

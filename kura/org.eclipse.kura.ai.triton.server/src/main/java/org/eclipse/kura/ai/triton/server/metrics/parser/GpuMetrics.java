@@ -19,9 +19,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class GpuMetrics {
 
-    @SerializedName(value = "gpu_uuid")
+    @SerializedName(value = "gpuUuid")
     private final String uuid;
-    @SerializedName(value = "gpu_stats")
+    @SerializedName(value = "gpuStats")
     private final Map<String, String> metrics;
 
     public GpuMetrics(final String gpuUuid) {

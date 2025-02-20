@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -170,6 +170,8 @@ public class TritonServerNativeManager implements TritonServerInstanceManager {
         commandString.add("--grpc-port=" + this.options.getGrpcPort());
         commandString.add("--metrics-port=" + this.options.getMetricsPort());
         commandString.add("--model-control-mode=explicit");
+        commandString.add("--allow-metrics=" + this.options.areMetricsEnabled());
+        commandString.add("--allow-gpu-metrics=" + this.options.areMetricsEnabled());
         commandString.add("2>&1");
         commandString.add("|");
         commandString.add("systemd-cat");

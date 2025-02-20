@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -41,6 +41,7 @@ public class TritonServerServiceOptions {
     private static final String PROPERTY_LOCAL_MODEL_REPOSITORY_PASSWORD = "local.model.repository.password";
     private static final String PROPERTY_LOCAL_BACKENDS_PATH = "local.backends.path";
     private static final String PROPERTY_LOCAL_BACKENDS_CONFIG = "local.backends.config";
+    private static final String PROPERTY_ENABLE_METRICS = "enable.metrics";
     private static final String PROPERTY_MODELS = "models";
     private static final String PROPERTY_LOCAL = "enable.local";
     private static final String PROPERTY_TIMEOUT = "timeout";
@@ -204,6 +205,14 @@ public class TritonServerServiceOptions {
             backendsConfigs = Arrays.asList(((String) propertyBackendsConfig).trim().split(";"));
         }
         return backendsConfigs;
+    }
+
+    public boolean areMetricsEnabled() {
+        final Object metricEnabled = this.properties.get(PROPERTY_ENABLE_METRICS);
+        if (metricEnabled instanceof Boolean) {
+            return (Boolean) metricEnabled;
+        }
+        return true;
     }
 
     public List<String> getModels() {

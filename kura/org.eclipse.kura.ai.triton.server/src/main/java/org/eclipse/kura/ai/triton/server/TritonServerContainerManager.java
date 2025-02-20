@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -264,6 +264,8 @@ public class TritonServerContainerManager implements TritonServerInstanceManager
         if (!this.options.getBackendsConfigs().isEmpty()) {
             this.options.getBackendsConfigs().forEach(config -> entrypointOverride.add("--backend-config=" + config));
         }
+        entrypointOverride.add("--allow-metrics=" + this.options.areMetricsEnabled());
+        entrypointOverride.add("--allow-gpu-metrics=" + this.options.areMetricsEnabled());
         builder.setEntryPoint(entrypointOverride);
 
         return builder.build();

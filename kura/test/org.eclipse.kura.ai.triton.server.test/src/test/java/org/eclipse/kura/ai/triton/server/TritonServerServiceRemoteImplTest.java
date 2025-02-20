@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -24,21 +24,21 @@ public class TritonServerServiceRemoteImplTest extends TritonServerServiceStepDe
 
     @Test
     public void isConfigurationValidWorksWithDefaultConfiguration() throws IOException {
-        givenTritonServerServiceRemoteImpl(defaultProperties());
+        givenTritonServerServiceRemoteImpl(defaultProperties(), false);
 
         thenIsConfigurationValidReturns(true);
     }
 
     @Test
     public void isConfigurationValidWorksWithInvalidRemoteConfiguration() throws IOException {
-        givenTritonServerServiceRemoteImpl(invalidRemoteProperties());
+        givenTritonServerServiceRemoteImpl(invalidRemoteProperties(), false);
 
         thenIsConfigurationValidReturns(false);
     }
 
     @Test
     public void isModelEncryptionEnabledWorkWithDefault() throws IOException {
-        givenTritonServerServiceRemoteImpl(defaultProperties());
+        givenTritonServerServiceRemoteImpl(defaultProperties(), false);
 
         thenIsModelEncryptionEnabled(false);
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -382,6 +382,14 @@ public class TritonServerServiceOptionsTest {
         thenDeviceListIsFilled(false);
     }
 
+    @Test
+    public void metricsGettersShouldWork() {
+        givenPropertyWith("enable.metrics", Boolean.TRUE);
+        givenServiceOptionsBuiltWith(properties);
+
+        thenMetricsAreEnabled(true);
+    }
+
     /*
      * Given
      */
@@ -497,6 +505,10 @@ public class TritonServerServiceOptionsTest {
 
     private void thenDeviceListContains(List<String> expectedResult) {
         assertEquals(expectedResult, this.options.getDevices());
+    }
+
+    private void thenMetricsAreEnabled(boolean expectedResult) {
+        assertEquals(expectedResult, this.options.areMetricsEnabled());
     }
 
 }

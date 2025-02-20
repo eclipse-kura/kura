@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,28 +21,26 @@ public class TritonServerServiceBundleTest extends TritonServerServiceStepDefini
 
     @Test
     public void shouldNotBeActivatedWithInvalidProperties() throws IOException {
-        givenTritonServerServiceImplNotActive();
+        givenTritonServerServiceNativeImplNotActive();
 
         whenTritonServerIsActivated(invalidProperties());
 
         thenExceptionIsCaught();
-
     }
 
     @Test
     public void shouldBeActivatedWithLocalManager() throws IOException, InterruptedException {
-        givenTritonServerServiceImplNotActive();
+        givenTritonServerServiceNativeImplNotActive();
 
         whenTritonServerIsActivated(enableLocalServerProperties());
 
         thenAfterWaiting(500);
         thenTritonStartServerCommandIsExecuted();
-
     }
 
     @Test
     public void shoulBeDeactivated() throws IOException {
-        givenTritonServerServiceImpl(defaultProperties());
+        givenTritonServerServiceNativeImpl(enableLocalServerProperties(), false);
 
         whenDeactivateIsInvokedOnTritonServer();
 
@@ -51,7 +49,7 @@ public class TritonServerServiceBundleTest extends TritonServerServiceStepDefini
 
     @Test
     public void shouldBeUpdated() throws IOException {
-        givenTritonServerServiceImpl(defaultProperties());
+        givenTritonServerServiceNativeImpl(defaultProperties(), false);
 
         whenUpdatedIsInvokedOnTritonServer(updatedProperties());
 

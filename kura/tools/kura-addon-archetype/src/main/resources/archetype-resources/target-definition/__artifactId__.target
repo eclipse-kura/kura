@@ -49,6 +49,11 @@
                     <version>${com.google.gson.version}</version>
                 </dependency>
                 <dependency>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-java</artifactId>
+                    <version>${com.google.protobuf.version}</version>
+                </dependency>
+                <dependency>
                     <groupId>org.eclipse.kura</groupId>
                     <artifactId>jdk.dio</artifactId>
                     <version>${jdk.dio.version}</version>
@@ -114,6 +119,16 @@
                     <version>${commons-exec.version}</version>
                 </dependency>
                 <dependency>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-csv</artifactId>
+                    <version>${commons-csv.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>commons-net</groupId>
+                    <artifactId>commons-net</artifactId>
+                    <version>${org.apache.commons.commons-net.version}</version>
+                </dependency>
+                <dependency>
                     <groupId>com.eclipsesource.minimal-json</groupId>
                     <artifactId>minimal-json</artifactId>
                     <version>${com.eclipsesource.minimal-json.version}</version>
@@ -164,6 +179,11 @@
                     <version>${org.apache.felix.http.wrappers.version}</version>
                 </dependency>
                 <dependency>
+                    <groupId>org.knowhowlab.osgi</groupId>
+                    <artifactId>monitoradmin</artifactId>
+                    <version>${org.knowhowlab.osgi.monitoradmin.version}</version>
+                </dependency>
+                <dependency>
                     <groupId>org.ow2.asm</groupId>
                     <artifactId>asm</artifactId>
                     <version>${org.ow2.asm.version}</version>
@@ -187,6 +207,16 @@
                     <groupId>org.ow2.asm</groupId>
                     <artifactId>asm-analysis</artifactId>
                     <version>${org.ow2.asm.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                    <version>${guava.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>failureaccess</artifactId>
+                    <version>${failureaccess.version}</version>
                 </dependency>
 
                 <!-- Jersey -->
@@ -317,7 +347,7 @@
                 <dependency>
                     <groupId>com.sun.xml.bind</groupId>
                     <artifactId>jaxb-osgi</artifactId>
-                    <version>${jaxb-osgi.javax.version}</version>
+                    <version>${jaxb-osgi.version}</version>
                 </dependency>
 
                 <!-- Duplicate Jakarta packages to support javax imports -->
@@ -590,6 +620,16 @@
                     <artifactId>osgi-resource-locator</artifactId>
                     <version>${osgi-resource-locator.version}</version>
                 </dependency>
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.service.component.annotations</artifactId>
+                    <version>${org.osgi.service.component.annotations.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.service.metatype.annotations</artifactId>
+                    <version>${org.osgi.service.metatype.annotations.version}</version>
+                </dependency>
 
                 <!-- BouncyCastle -->
 
@@ -695,6 +735,16 @@
                     <groupId>org.eclipse.kura</groupId>
                     <artifactId>org.eclipse.kura.core.status</artifactId>
                     <version>${org.eclipse.kura.core.status.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.kura.core.inventory</artifactId>
+                    <version>${org.eclipse.kura.core.inventory.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.kura.core.system</artifactId>
+                    <version>${org.eclipse.kura.core.system.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>

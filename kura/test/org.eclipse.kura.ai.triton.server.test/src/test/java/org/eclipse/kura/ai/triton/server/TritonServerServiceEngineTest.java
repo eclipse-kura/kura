@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,7 +21,7 @@ public class TritonServerServiceEngineTest extends TritonServerServiceStepDefini
 
     @Test
     public void engineShouldBeReady() throws IOException {
-        givenTritonServerServiceImpl(defaultProperties());
+        givenTritonServerServiceNativeImpl(enableLocalServerProperties(), false);
 
         whenAskingIfEngineIsReady();
 

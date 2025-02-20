@@ -77,6 +77,11 @@
 			<artifactId>perfmark-api</artifactId>
 			<version>0.26.0</version>
 		</dependency>
+		<dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java-util</artifactId>
+            <version>3.25.3</version>
+        </dependency>
 	</dependencies>
 
 	<build>

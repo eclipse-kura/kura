@@ -588,7 +588,6 @@ public class Console implements SelfConfiguringComponent {
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_NAME, servletName);
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN, servletPattern);
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, contextHelperSelector);
-        props.put(Constants.SERVICE_SCOPE, Constants.SCOPE_PROTOTYPE);
 
         ServiceRegistration<Servlet> servletService = this.bundleContext.registerService(Servlet.class, servlet,
                 new Hashtable<>(props));

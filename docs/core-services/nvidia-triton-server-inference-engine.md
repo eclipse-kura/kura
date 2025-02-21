@@ -90,6 +90,7 @@ The parameters used to configure the Triton Service are the following:
 - **Optional configuration for the local backends**: A semi-colon separated list of configuration for the backends. i.e. tensorflow,version=2;tensorflow,allow-soft-placement=false 
 - **Timeout (in seconds) for time consuming tasks**: Timeout (in seconds) for time consuming tasks like server startup, shutdown or model load. If the task exceeds the timeout, the operation will be terminated with an error.
 - **Max. GRPC message size (bytes)**: this field controls the maximum allowed size for the GRPC calls to the server instance.
+- **Enable Triton Server Metrics**: Enables the [Triton Server Metrics and Statistics support](#triton-server-metrics-and-statistics-support)
 
 !!! note
     Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by Kura for debug purposes.
@@ -122,6 +123,7 @@ The parameters used to configure the Triton Service are the following:
 - **Devices**: A comma-separated list of device paths passed to the Triton server container (e.g. `/dev/video0`).
 - **Timeout (in seconds) for time consuming tasks**: Timeout (in seconds) for time consuming tasks like server startup, shutdown or model load. If the task exceeds the timeout, the operation will be terminated with an error.
 - **Max. GRPC message size (bytes)**: this field controls the maximum allowed size for the GRPC calls to the server instance.
+- **Enable Triton Server Metrics**: Enables the [Triton Server Metrics and Statistics support](#triton-server-metrics-and-statistics-support)
 
 !!! note
     Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are typically used by Kura for debug purposes.
@@ -200,7 +202,7 @@ More in details, the following GPU metrics are supported:
 The metrics are provided as key-value pairs, whose key is in the format `gpu.metrics.<GPU uuid>` where the `GPU uuid` is an unique identifier of the GPU. The value is in JSON format.
 An example of GPU metrics is the following:
 
-```
+```json
 key : gpu.metrics.GPU-340cec52-80ba-c0df-8511-5f9680aae0ff 
 value : 
 {
@@ -218,7 +220,7 @@ value :
 The format of the model statistic key is `model.metrics.<model name>.<model version>`. The value is in JSON format.
 An example of model statistics is reported below:
 
-```
+```json
 key : model.metrics.preprocessor.1
 value : 
 {

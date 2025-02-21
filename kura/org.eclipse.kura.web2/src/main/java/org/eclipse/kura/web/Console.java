@@ -95,8 +95,8 @@ import jakarta.servlet.http.HttpSession;
 
 public class Console implements SelfConfiguringComponent {
 
-    private static final String SESSION_CONTEXT_NAME = "sessionContext";
-    private static final String RESOURCE_CONTEXT_NAME = "resourceContext";
+    private static final String SESSION_CONTEXT_NAME_PREFIX = "sessionContext-";
+    private static final String RESOURCE_CONTEXT_NAME_PREFIX = "resourceContext-";
 
     private static final String SESSION = "/session";
 
@@ -461,8 +461,8 @@ public class Console implements SelfConfiguringComponent {
         ServletContextHelper resourceContextHelper = new HttpServletContextHelper(new BaseSecurityHandler());
         ServletContextHelper sessionContextHelper = new HttpServletContextHelper(createSessionHandlerChain());
 
-        String resourceContextName = RESOURCE_CONTEXT_NAME + "-" + System.nanoTime();
-        String sessionContextName = SESSION_CONTEXT_NAME + "-" + System.nanoTime();
+        String resourceContextName = RESOURCE_CONTEXT_NAME_PREFIX + System.nanoTime();
+        String sessionContextName = SESSION_CONTEXT_NAME_PREFIX + System.nanoTime();
 
         registerContextHelper(resourceContextName, "/", resourceContextHelper, 5);
         registerContextHelper(sessionContextName, "/", sessionContextHelper, 10);

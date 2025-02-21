@@ -46,7 +46,7 @@ public interface CryptoService {
     public char[] encryptAes(char[] value) throws KuraException;
 
     /**
-     * Returns an OutputStream able to AES encrypt data write on it.
+     * Returns an OutputStream able to AES encrypt data written on it.
      *
      * @param streamToEncrypt
      *            An OutputStream that will be encrypted.

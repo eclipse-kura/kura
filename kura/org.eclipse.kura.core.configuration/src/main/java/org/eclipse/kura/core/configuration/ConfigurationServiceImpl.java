@@ -1016,11 +1016,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         File tempSnapshotFile;
         try {
             tempSnapshotFile = File.createTempFile(fSnapshot.getName(), "", new File(fSnapshot.getParent()));
+            tempSnapshotFile.deleteOnExit();
         } catch (IOException ex) {
             throw new KuraIOException(ex);
         }
 
-        // Write the snapshot
+        // Write the temporary snapshot
         try (FileOutputStream fos = new FileOutputStream(tempSnapshotFile);
                 OutputStream encryptedStream = this.cryptoService.getEncryptionOutputStream(fos)) {
 
@@ -1037,6 +1038,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
 
         try {
+            // Consolidate snapshot writing
             FileUtils.copyFile(tempSnapshotFile, fSnapshot);
             FileUtils.delete(tempSnapshotFile);
         } catch (IOException e) {

@@ -186,7 +186,7 @@ The resulting archive `tf_autoencoder_fp32.zip.asc` can be transferred to the _L
 
 Since version 6.0.0, Eclipse Kura supports metrics and statistics reporting from a generic Inference Engine, leveraging the [InferenceEngineMetricsService](https://github.com/eclipse-kura/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/ai/inference/InferenceEngineMetricsService.java) APIs.
 
-The implementation for the Triton Server allows to retrieve relevant metrics regarding GPU and models from the engine. It is based on the [Nvidia Triton Server Metrics feature](https://github.com/triton-inference-server/server/blob/r24.08/docs/user_guide/metrics.md) and the [Model Statistics Extension](https://github.com/triton-inference-server/server/blob/main/docs/protocol/extension_statistics.md). The feature is enabled using the `Enable Triton Server Metrics` parameter from the Eclipse Kura webUI or the `enable.metrics` property in the snapshot configuration. This property is available only for the Triton Server Native Service and Triton Server Container Service components. In the case of the Triton Server Remote Service, the metrics reporting cannot be configured but it can be available depending on the Triton Server setup.
+The implementation for the Triton Server allows to retrieve relevant metrics regarding GPU and models from the engine. It is based on the [Nvidia Triton Server Metrics feature](https://github.com/triton-inference-server/server/blob/r24.08/docs/user_guide/metrics.md) and the [Model Statistics Extension](https://github.com/triton-inference-server/server/blob/main/docs/protocol/extension_statistics.md). The feature is enabled using the `Enable Triton Server Metrics` parameter from the Eclipse Kura webUI or the `enable.metrics` property in the snapshot configuration. This property is available only for the Triton Server Native Service and Triton Server Container Service components. In the case of the Triton Server Remote Service, the metrics reporting cannot be configured but it can be available depending on the remote Triton Server setup.
 
 More in details, the following GPU metrics are supported:
 
@@ -197,7 +197,7 @@ More in details, the following GPU metrics are supported:
 - GPU Total Memory
 - GPU Used Memory
 
-The metrics are provided in a key-value pairs, whose key is in the format `gpu.metrics.<GPU uuid>` where the `GPU uuid` is an unique identifier of the GPU. The value is in JSON format.
+The metrics are provided as key-value pairs, whose key is in the format `gpu.metrics.<GPU uuid>` where the `GPU uuid` is an unique identifier of the GPU. The value is in JSON format.
 An example of GPU metrics is the following:
 
 ```

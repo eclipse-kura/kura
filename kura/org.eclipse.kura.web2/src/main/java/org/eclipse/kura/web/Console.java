@@ -329,8 +329,8 @@ public class Console implements SelfConfiguringComponent {
 
         final AuditContext auditContext;
 
-        if (rawAuditContext instanceof AuditContext context) {
-            auditContext = context.copy();
+        if (rawAuditContext instanceof AuditContext) {
+            auditContext = ((AuditContext) rawAuditContext).copy();
             auditContext.getProperties().remove("rpc.method");
             auditContext.getProperties().put(AuditConstants.KEY_IP.getValue(), requestIp);
         } else {
@@ -406,8 +406,8 @@ public class Console implements SelfConfiguringComponent {
 
         final Object sessionAuditContext = session.getAttribute(Attributes.AUDIT_CONTEXT.getValue());
 
-        if (sessionAuditContext instanceof AuditContext auditContext) {
-            auditContext.getProperties().put("session.id", id);
+        if (sessionAuditContext instanceof AuditContext) {
+            ((AuditContext) sessionAuditContext).getProperties().put("session.id", id);
         }
 
     }

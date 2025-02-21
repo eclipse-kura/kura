@@ -292,9 +292,9 @@ public class Console implements SelfConfiguringComponent {
         this.wiresBlinkService.stop();
         this.eventService.stop();
 
-        this.contexts.forEach(ServiceRegistration::unregister);
         this.resources.forEach(ServiceRegistration::unregister);
         this.servlets.forEach(ServiceRegistration::unregister);
+        this.contexts.forEach(ServiceRegistration::unregister);
 
         this.contexts.clear();
         this.resources.clear();
@@ -461,78 +461,80 @@ public class Console implements SelfConfiguringComponent {
         ServletContextHelper resourceContextHelper = new HttpServletContextHelper(new BaseSecurityHandler());
         ServletContextHelper sessionContextHelper = new HttpServletContextHelper(createSessionHandlerChain());
 
-        registerContextHelper(RESOURCE_CONTEXT_NAME, "/", resourceContextHelper, 5);
-        registerContextHelper(SESSION_CONTEXT_NAME, "/", sessionContextHelper, 10);
+        String resourceContextName = RESOURCE_CONTEXT_NAME + "-" + System.nanoTime();
+        String sessionContextName = SESSION_CONTEXT_NAME + "-" + System.nanoTime();
 
-        registerResources(ADMIN_ROOT + "/*", "www", new AdminResources(), RESOURCE_CONTEXT_NAME);
-        registerResources(AUTH_PATH, "www/auth.html", new AuthorizationResources(), SESSION_CONTEXT_NAME);
-        registerResources(CONSOLE_PATH, "www/denali.html", new ConsoleResources(), SESSION_CONTEXT_NAME);
+        registerContextHelper(resourceContextName, "/", resourceContextHelper, 5);
+        registerContextHelper(sessionContextName, "/", sessionContextHelper, 10);
+
+        registerResources(ADMIN_ROOT + "/*", "www", new AdminResources(), resourceContextName);
+        registerResources(AUTH_PATH, "www/auth.html", new AuthorizationResources(), sessionContextName);
+        registerResources(CONSOLE_PATH, "www/denali.html", new ConsoleResources(), sessionContextName);
 
         registerServlet("gwtLoginInfoService", LOGIN_MODULE_PATH + "/loginInfo", new GwtLoginInfoServiceImpl(),
-                RESOURCE_CONTEXT_NAME);
-        registerServlet("redirectServlet", "/", new RedirectServlet("/"::equals, this.appRoot), RESOURCE_CONTEXT_NAME);
+                resourceContextName);
+        registerServlet("redirectServlet", "/", new RedirectServlet("/"::equals, this.appRoot), resourceContextName);
 
         registerServlet("notFoundAuthResourceServlet", AUTH_RESOURCE_PATH, new SendStatusServlet(404),
-                RESOURCE_CONTEXT_NAME);
+                resourceContextName);
         registerServlet("notFoundConsoleResourceServlet", CONSOLE_RESOURCE_PATH, new SendStatusServlet(404),
-                RESOURCE_CONTEXT_NAME);
+                resourceContextName);
 
         registerServlet("gwtPasswordAuthenticationService", PASSWORD_AUTH_PATH,
-                new GwtPasswordAuthenticationServiceImpl(this.userManager, CONSOLE_PATH), SESSION_CONTEXT_NAME);
+                new GwtPasswordAuthenticationServiceImpl(this.userManager, CONSOLE_PATH), sessionContextName);
         registerServlet("sslAuthenticationServlet", CERT_AUTH_PATH,
-                new SslAuthenticationServlet(CONSOLE_PATH, this.userManager), SESSION_CONTEXT_NAME);
+                new SslAuthenticationServlet(CONSOLE_PATH, this.userManager), sessionContextName);
 
         registerServlet("gwtKeystoreServiceImpl", DENALI_MODULE_PATH + "/keystore", new GwtKeystoreServiceImpl(),
-                SESSION_CONTEXT_NAME);
+                sessionContextName);
         registerServlet("gwtSslManagerServiceImpl", DENALI_MODULE_PATH + "/ssl", new GwtSslManagerServiceImpl(),
-                SESSION_CONTEXT_NAME);
+                sessionContextName);
 
         registerServlet("denaliSessionService", DENALI_MODULE_PATH + SESSION,
-                new GwtSessionServiceImpl(this.userManager), SESSION_CONTEXT_NAME);
+                new GwtSessionServiceImpl(this.userManager), sessionContextName);
 
         registerServlet("loginSessionService", LOGIN_MODULE_PATH + SESSION, new GwtSessionServiceImpl(this.userManager),
-                SESSION_CONTEXT_NAME);
+                sessionContextName);
         registerServlet("xsrfLoginServlet", LOGIN_MODULE_PATH + XSRF_PATH, new GwtSecurityTokenServiceImpl(),
-                SESSION_CONTEXT_NAME);
+                sessionContextName);
         registerServlet("xsrfDenaliServlet", DENALI_MODULE_PATH + XSRF_PATH, new GwtSecurityTokenServiceImpl(),
-                SESSION_CONTEXT_NAME);
+                sessionContextName);
         registerServlet("statusService", DENALI_MODULE_PATH + "/status", new GwtStatusServiceImpl(),
-                SESSION_CONTEXT_NAME);
+                sessionContextName);
         registerServlet("deviceService", DENALI_MODULE_PATH + "/device", new GwtDeviceServiceImpl(),
-                SESSION_CONTEXT_NAME);
-        registerServlet("logService", DENALI_MODULE_PATH + "/logservice", new GwtLogServiceImpl(),
-                SESSION_CONTEXT_NAME);
+                sessionContextName);
+        registerServlet("logService", DENALI_MODULE_PATH + "/logservice", new GwtLogServiceImpl(), sessionContextName);
         registerServlet("networkService", DENALI_MODULE_PATH + "/network", new GwtNetworkServiceImpl(),
-                SESSION_CONTEXT_NAME);
+                sessionContextName);
         registerServlet("componentService", DENALI_MODULE_PATH + "/component", new GwtComponentServiceImpl(),
-                SESSION_CONTEXT_NAME);
+                sessionContextName);
         registerServlet("packageService", DENALI_MODULE_PATH + "/package",
-                new GwtPackageServiceImpl(this.sslManagerService::get), SESSION_CONTEXT_NAME);
+                new GwtPackageServiceImpl(this.sslManagerService::get), sessionContextName);
         registerServlet("snapshotServiceImpl", DENALI_MODULE_PATH + "/snapshot", new GwtSnapshotServiceImpl(),
-                SESSION_CONTEXT_NAME);
+                sessionContextName);
         registerServlet("certificateService", DENALI_MODULE_PATH + "/certificate", new GwtCertificatesServiceImpl(),
-                SESSION_CONTEXT_NAME);
+                sessionContextName);
         registerServlet("securityService", DENALI_MODULE_PATH + "/security", new GwtSecurityServiceImpl(),
-                SESSION_CONTEXT_NAME);
+                sessionContextName);
         registerServlet("usersService", DENALI_MODULE_PATH + "/users", new GwtUserServiceImpl(this.userManager),
-                SESSION_CONTEXT_NAME);
-        registerServlet("fileServlet", DENALI_MODULE_PATH + "/file/*", new FileServlet(), SESSION_CONTEXT_NAME);
+                sessionContextName);
+        registerServlet("fileServlet", DENALI_MODULE_PATH + "/file/*", new FileServlet(), sessionContextName);
         registerServlet("deviceSnapshotsServlet", DENALI_MODULE_PATH + "/device_snapshots",
-                new DeviceSnapshotsServlet(), SESSION_CONTEXT_NAME);
+                new DeviceSnapshotsServlet(), sessionContextName);
         registerServlet("channelServlet", DENALI_MODULE_PATH + "/assetsUpDownload", new ChannelServlet(),
-                SESSION_CONTEXT_NAME);
-        registerServlet("logServlet", DENALI_MODULE_PATH + "/log", new LogServlet(), SESSION_CONTEXT_NAME);
-        registerServlet("skinServlet", DENALI_MODULE_PATH + "/skin/*", new SkinServlet(), RESOURCE_CONTEXT_NAME);
+                sessionContextName);
+        registerServlet("logServlet", DENALI_MODULE_PATH + "/log", new LogServlet(), sessionContextName);
+        registerServlet("skinServlet", DENALI_MODULE_PATH + "/skin/*", new SkinServlet(), resourceContextName);
         registerServlet("cloudServices", DENALI_MODULE_PATH + "/cloudservices", new GwtCloudConnectionServiceImpl(),
-                SESSION_CONTEXT_NAME);
+                sessionContextName);
         registerServlet("wireGraphService", DENALI_MODULE_PATH + "/wires", new GwtWireGraphServiceImpl(),
-                SESSION_CONTEXT_NAME);
+                sessionContextName);
         registerServlet("wiresSnapshotServlet", DENALI_MODULE_PATH + "/wiresSnapshot", new WiresSnapshotServlet(),
-                SESSION_CONTEXT_NAME);
+                sessionContextName);
         registerServlet("driverAndAssetService", DENALI_MODULE_PATH + "/assetservices",
-                new GwtDriverAndAssetServiceImpl(), SESSION_CONTEXT_NAME);
-        registerServlet("wiresBlinkService", ADMIN_ROOT + "/sse", this.wiresBlinkService, SESSION_CONTEXT_NAME);
-        registerServlet("eventService", DENALI_MODULE_PATH + EVENT_PATH, this.eventService, SESSION_CONTEXT_NAME);
+                new GwtDriverAndAssetServiceImpl(), sessionContextName);
+        registerServlet("wiresBlinkService", ADMIN_ROOT + "/sse", this.wiresBlinkService, sessionContextName);
+        registerServlet("eventService", DENALI_MODULE_PATH + EVENT_PATH, this.eventService, sessionContextName);
 
         this.eventService.start();
     }

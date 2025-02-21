@@ -26,6 +26,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Dictionary;
@@ -419,6 +421,16 @@ public class BirthMessagesTest {
                 return null;
             }
 
+            @Override
+            public void marshal(final OutputStream out, Object object) throws KuraException {
+                try {
+                    if (object instanceof KuraPayload) {
+                        out.write(object.toString().getBytes());
+                    }
+                } catch (IOException ex) {
+                    //do nothing
+                }
+            }
         };
 
         EventAdmin eventAdmin = mock(EventAdmin.class);

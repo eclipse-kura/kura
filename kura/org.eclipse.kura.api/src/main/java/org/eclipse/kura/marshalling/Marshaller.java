@@ -37,5 +37,15 @@ public interface Marshaller {
      */
     public String marshal(Object object) throws KuraException;
 
+    /**
+     * Writes on the provided {@link OutputStream} the {@link Object} passed as input
+     * 
+     * @param out
+     *            the {@link OutputStream} on which the data will be written
+     * @param object
+     *            the {@link Object} that will be marshalled.
+     * @throws KuraException
+     * @since 8.0
+     */
     public void marshal(final OutputStream out, Object object) throws KuraException;
 }

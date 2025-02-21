@@ -39,5 +39,18 @@ public interface Unmarshaller {
      */
     public <T> T unmarshal(String string, Class<T> clazz) throws KuraException;
 
+    /**
+     * This method takes an {@link InputStream} representation and a class that will be used as reference to construct
+     * the result.
+     *
+     * @param in
+     *            the input stream
+     * @param clazz
+     *            the class representing the type of object expected for the result
+     * @return an object that is constructed from the passed string
+     * @throws KuraException
+     *             when the unmarshaling operation fails.
+     * @since 8.0
+     */
     public <T> T unmarshal(InputStream in, Class<T> clazz) throws KuraException;
 }

@@ -116,7 +116,7 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     @Override
-    public OutputStream getEncryptionOutputStream(OutputStream stream) throws KuraException {
+    public OutputStream aesEncryptingStream(OutputStream stream) throws KuraException {
         try {
             Key key = generateKey();
             Cipher c = Cipher.getInstance(CIPHER);
@@ -233,7 +233,7 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     @Override
-    public InputStream getDecryptionInputStream(InputStream encryptedStream) throws KuraException {
+    public InputStream aesDecryptingStream(InputStream encryptedStream) throws KuraException {
         try {
 
             final BufferedInputStream buffered = new BufferedInputStream(encryptedStream);

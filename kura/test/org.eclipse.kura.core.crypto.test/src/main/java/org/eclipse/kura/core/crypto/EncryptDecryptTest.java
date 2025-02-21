@@ -45,7 +45,7 @@ public class EncryptDecryptTest {
         tempFile.deleteOnExit();
 
         try (FileOutputStream out = new FileOutputStream(tempFile);
-                OutputStream cryptoOut = this.cryptoService.getEncryptionOutputStream(out);) {
+                OutputStream cryptoOut = this.cryptoService.aesEncryptingStream(out);) {
 
             cryptoOut.write(dataToEncrypt.getBytes());
             cryptoOut.flush();
@@ -54,7 +54,7 @@ public class EncryptDecryptTest {
         }
 
         try (FileInputStream input = new FileInputStream(new File("/tmp/testingCrypto.txt"));
-                InputStream cryptoInput = this.cryptoService.getDecryptionInputStream(input);) {
+                InputStream cryptoInput = this.cryptoService.aesDecryptingStream(input);) {
             String dataDecrypted = IOUtils.toString(cryptoInput, StandardCharsets.UTF_8);
 
             assertEquals(dataToEncrypt, dataDecrypted);
@@ -72,7 +72,7 @@ public class EncryptDecryptTest {
         tempFile.deleteOnExit();
 
         try (FileOutputStream out = new FileOutputStream(tempFile);
-                OutputStream cryptoOut = this.cryptoService.getEncryptionOutputStream(out);) {
+                OutputStream cryptoOut = this.cryptoService.aesEncryptingStream(out);) {
 
             cryptoOut.write(dataToEncrypt.getBytes());
             cryptoOut.flush();
@@ -83,7 +83,7 @@ public class EncryptDecryptTest {
         char[] charEncryptedData = this.cryptoService.encryptAes(dataToEncrypt.toCharArray());
 
         try (FileInputStream input = new FileInputStream(new File("/tmp/testingCrypto.txt"));
-                InputStream cryptoInput = this.cryptoService.getDecryptionInputStream(input);) {
+                InputStream cryptoInput = this.cryptoService.aesDecryptingStream(input);) {
 
             assertEquals(new String(this.cryptoService.decryptAes(charEncryptedData)),
                     IOUtils.toString(cryptoInput, StandardCharsets.UTF_8));
@@ -99,7 +99,7 @@ public class EncryptDecryptTest {
         File tempFile = new File("/tmp/testingCrypto.txt");
         tempFile.deleteOnExit();
         try (FileOutputStream out = new FileOutputStream(tempFile);
-                OutputStream cryptoOut = this.cryptoService.getEncryptionOutputStream(out);) {
+                OutputStream cryptoOut = this.cryptoService.aesEncryptingStream(out);) {
 
             cryptoOut.write(dataToEncrypt.getBytes());
             cryptoOut.flush();
@@ -126,7 +126,7 @@ public class EncryptDecryptTest {
         char[] cryptedData = this.cryptoService.encryptAes(dataToEncrypt.toCharArray());
 
         try (ByteArrayInputStream input = new ByteArrayInputStream(new String(cryptedData).getBytes());
-                InputStream cryptoInput = this.cryptoService.getDecryptionInputStream(input);) {
+                InputStream cryptoInput = this.cryptoService.aesDecryptingStream(input);) {
 
             String decryptedData = IOUtils.toString(cryptoInput, StandardCharsets.UTF_8);
             assertEquals(dataToEncrypt, decryptedData);

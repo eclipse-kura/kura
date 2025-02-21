@@ -1023,7 +1023,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         // Write the temporary snapshot
         try (FileOutputStream fos = new FileOutputStream(tempSnapshotFile);
-                OutputStream encryptedStream = this.cryptoService.getEncryptionOutputStream(fos)) {
+                OutputStream encryptedStream = this.cryptoService.aesEncryptingStream(fos)) {
 
             logger.info("Writing snapshot - Saving {}...", fSnapshot.getAbsolutePath());
 
@@ -1328,7 +1328,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         InputStream decryptedStream = null;
         try {
-            decryptedStream = this.cryptoService.getDecryptionInputStream(new FileInputStream(fSnapshot));
+            decryptedStream = this.cryptoService.aesDecryptingStream(new FileInputStream(fSnapshot));
         } catch (FileNotFoundException e) {
             logger.error("Error loading file from disk", e);
             return null;

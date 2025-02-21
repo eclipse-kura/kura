@@ -1846,48 +1846,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#triton-server-service-component-deprecated-since-520" class="md-nav__link">
-    <span class="md-ellipsis">
-      Triton Server Service component [deprecated since 5.2.0]
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Triton Server Service component [deprecated since 5.2.0]">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#configuration-for-a-local-native-triton-server-with-triton-server-service-component-deprecated-since-520" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration for a local native Triton Server with Triton Server Service component [deprecated since 5.2.0]
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#configuration-for-a-local-triton-server-running-in-a-docker-container-with-triton-server-service-component-deprecated-since-520" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration for a local Triton Server running in a Docker container with Triton Server Service component [deprecated since 5.2.0]
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#configuration-for-a-remote-triton-server-with-triton-server-service-component-deprecated-since-520" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration for a remote Triton Server with Triton Server Service component [deprecated since 5.2.0]
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#ai-model-encryption-support" class="md-nav__link">
     <span class="md-ellipsis">
       AI Model Encryption Support
@@ -1917,6 +1875,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#triton-server-metrics-and-statistics-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Triton Server Metrics and Statistics support
+    </span>
+  </a>
   
 </li>
       
@@ -4783,48 +4750,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#triton-server-service-component-deprecated-since-520" class="md-nav__link">
-    <span class="md-ellipsis">
-      Triton Server Service component [deprecated since 5.2.0]
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Triton Server Service component [deprecated since 5.2.0]">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#configuration-for-a-local-native-triton-server-with-triton-server-service-component-deprecated-since-520" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration for a local native Triton Server with Triton Server Service component [deprecated since 5.2.0]
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#configuration-for-a-local-triton-server-running-in-a-docker-container-with-triton-server-service-component-deprecated-since-520" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration for a local Triton Server running in a Docker container with Triton Server Service component [deprecated since 5.2.0]
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#configuration-for-a-remote-triton-server-with-triton-server-service-component-deprecated-since-520" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration for a remote Triton Server with Triton Server Service component [deprecated since 5.2.0]
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#ai-model-encryption-support" class="md-nav__link">
     <span class="md-ellipsis">
       AI Model Encryption Support
@@ -4857,6 +4782,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#triton-server-metrics-and-statistics-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Triton Server Metrics and Statistics support
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4880,7 +4814,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><strong>TritonServerRemoteService</strong>: provides methods for interacting with a remote Nvidia™ Triton Server without managing the server lifecycle. Can be used both for connecting to a remote instance or a local non-managed instance. It exposes a simpler but more limited configuration.</li>
 <li><strong>TritonServerNativeService</strong>: provides methods for interacting with a local native Nvidia™ Triton Server. Requires the Triton Server executable to be already available on the device and offers more options and features (like AI Model Encryption).</li>
 <li><strong>TritonServerContainerService</strong>: provides methods for interacting with a local container running Nvidia™ Triton Server. Requires the Triton Server container image to be already available on the device and offers more options and features (like AI Model Encryption).</li>
-<li><strong>TritonServerService</strong>: provides methods for interacting with a local or remote Nvidia™ Triton Server within the same component. <strong>Note</strong>: <em>deprecated since 5.2.0</em> </li>
 </ul>
 <h2 id="nvidiatm-triton-server-installation">Nvidia™ Triton Server installation</h2>
 <p>Before running Kura's Triton Server Service, you must install the Triton Inference Server. Here you can find the necessary steps for the available suggested installation methods.</p>
@@ -4940,6 +4873,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><strong>Optional configuration for the local backends</strong>: A semi-colon separated list of configuration for the backends. i.e. tensorflow,version=2;tensorflow,allow-soft-placement=false </li>
 <li><strong>Timeout (in seconds) for time consuming tasks</strong>: Timeout (in seconds) for time consuming tasks like server startup, shutdown or model load. If the task exceeds the timeout, the operation will be terminated with an error.</li>
 <li><strong>Max. GRPC message size (bytes)</strong>: this field controls the maximum allowed size for the GRPC calls to the server instance.</li>
+<li><strong>Enable Triton Server Metrics</strong>: Enables the <a href="#triton-server-metrics-and-statistics-support">Triton Server Metrics and Statistics support</a></li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -4970,82 +4904,12 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><strong>Devices</strong>: A comma-separated list of device paths passed to the Triton server container (e.g. <code>/dev/video0</code>).</li>
 <li><strong>Timeout (in seconds) for time consuming tasks</strong>: Timeout (in seconds) for time consuming tasks like server startup, shutdown or model load. If the task exceeds the timeout, the operation will be terminated with an error.</li>
 <li><strong>Max. GRPC message size (bytes)</strong>: this field controls the maximum allowed size for the GRPC calls to the server instance.</li>
+<li><strong>Enable Triton Server Metrics</strong>: Enables the <a href="#triton-server-metrics-and-statistics-support">Triton Server Metrics and Statistics support</a></li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are typically used by Kura for debug purposes.</p>
 </div>
-<h2 id="triton-server-service-component-deprecated-since-520">Triton Server Service component [deprecated since 5.2.0]</h2>
-<p>The Kura Triton Server component is the implementation of the inference engine APIs and provides methods for interacting with a local or remote Nvidia™ Triton Server. As presented below, the component enables the user to configure a local server running on the gateway or to communicate to an external server to load specific models.</p>
-<p>The parameters used to configure the Triton Service are the following:</p>
-<ul>
-<li><strong>Local Nvidia Triton Server</strong>: If enabled, a local native Nvidia Triton Server is started on the gateway. In this case, the model repository and backends path are mandatory. Moreover, the server address property is overridden and set to localhost. Be aware that the Triton Server has to be already installed on the system.</li>
-<li><strong>Nvidia Triton Server address</strong>: the address of the Nvidia Triton Server.</li>
-<li><strong>Nvidia Triton Server ports</strong>: the ports used to connect to the server for HTTP, GRPC, and Metrics services.</li>
-<li><strong>Local model repository path</strong>: Only for a local instance, specify the path on the filesystem where the models are stored.</li>
-<li><strong>Local model decryption password</strong>: Only for local instance, specify the password to be used for decrypting models stored in the model repository. If none is specified, models are supposed to be plaintext.</li>
-<li><strong>Inference Models</strong>: a comma-separated list of inference model names that the server will load. The models have to be already present in the filesystem where the server is running. This option simply tells the server to load the given models from a local or remote repository.</li>
-<li><strong>Local backends path</strong>: Only for a local instance, specify the path on the filesystem where the backends are stored.</li>
-<li><strong>Optional configuration for the local backends</strong>: Only for local instance, a semi-colon separated list of configuration for the backends. i.e. tensorflow,version=2;tensorflow,allow-soft-placement=false </li>
-<li><strong>Timeout (in seconds) for time consuming tasks</strong>: Timeout (in seconds) for time consuming tasks like server startup, shutdown or model load. If the task exceeds the timeout, the operation will be terminated with an error.</li>
-<li><strong>Max. GRPC message size (bytes)</strong>: this field controls the maximum allowed size for the GRPC calls to the server instance.</li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by Kura for debug purposes.</p>
-</div>
-<h3 id="configuration-for-a-local-native-triton-server-with-triton-server-service-component-deprecated-since-520">Configuration for a local native Triton Server with Triton Server Service component [deprecated since 5.2.0]</h3>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><strong>Requirement</strong>: <code>tritonserver</code> executable needs to be available in the path to the <code>kurad</code> user. Be sure to have a working Triton Server installation before configuring the local native Triton Server instance through Kura UI.</p>
-</div>
-<p>When the <strong>Local Nvidia Triton Server</strong> option is set to true, a local instance of the Nvidia™ Triton Server is started on the gateway. The following configuration is required:</p>
-<ul>
-<li><strong>Local Nvidia Triton Server</strong>: true</li>
-<li><strong>Nvidia Triton Server address</strong>: localhost</li>
-<li><strong>Nvidia Triton Server ports</strong>: mandatory</li>
-<li><strong>Local model repository path</strong>: mandatory</li>
-<li><strong>Inference Models</strong>: mandatory. Note that the models have to be already present on the filesystem.</li>
-<li><strong>Local backends path</strong>: mandatory</li>
-</ul>
-<p>The typical command used to start the Triton Server is like this:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>tritonserver<span class="w"> </span>--model-repository<span class="o">=</span>&lt;model_repository_path&gt;<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>--backend-directory<span class="o">=</span>&lt;backend_repository_path&gt;<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>--backend-config<span class="o">=</span>&lt;backend_config&gt;<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>--http-port<span class="o">=</span>&lt;http_port&gt;<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>--grpc-port<span class="o">=</span>&lt;grpc_port&gt;<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>--metrics-port<span class="o">=</span>&lt;metrics_port&gt;<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>--model-control-mode<span class="o">=</span>explicit<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>--load-model<span class="o">=</span>&lt;model_name_1&gt;<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>--load-model<span class="o">=</span>&lt;model_name_2&gt;<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>...
-</code></pre></div>
-<h3 id="configuration-for-a-local-triton-server-running-in-a-docker-container-with-triton-server-service-component-deprecated-since-520">Configuration for a local Triton Server running in a Docker container with Triton Server Service component [deprecated since 5.2.0]</h3>
-<p>If the Nvidia™ Triton Server is running as a Docker container in the gateway, the following configuration is required:</p>
-<ul>
-<li><strong>Local Nvidia Triton Server</strong>: false</li>
-<li><strong>Nvidia Triton Server address</strong>: localhost</li>
-<li><strong>Nvidia Triton Server ports</strong>: \&lt;mandatory&gt;</li>
-<li><strong>Inference Models</strong>: \&lt;mandatory&gt;. The models have to be already present on the filesystem.</li>
-</ul>
-<p>In order to correctly load the models at runtime, configure the server with the <code>--model-control-mode=explicit</code> option. The typical command used for running the docker container is as follows. Note the forward of the ports to not interfere with Kura.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>-p4000:8000<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>-p4001:8001<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>-p4002:8002<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>--shm-size<span class="o">=</span>150m<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>-v<span class="w"> </span>path/to/models:/models<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>nvcr.io/nvidia/tritonserver:<span class="o">[</span>version<span class="o">]</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>tritonserver<span class="w"> </span>--model-repository<span class="o">=</span>/models<span class="w"> </span>--model-control-mode<span class="o">=</span>explicit
-</code></pre></div>
-<h3 id="configuration-for-a-remote-triton-server-with-triton-server-service-component-deprecated-since-520">Configuration for a remote Triton Server with Triton Server Service component [deprecated since 5.2.0]</h3>
-<p>When the Nvidia™ Triton Server is running on a remote server, the following configuration is needed:</p>
-<ul>
-<li><strong>Local Nvidia Triton Server</strong>: false</li>
-<li><strong>Nvidia Triton Server address</strong>: mandatory</li>
-<li><strong>Nvidia Triton Server ports</strong>: mandatory</li>
-<li>** Inference Models**: mandatory. The models have to be already present on the filesystem.</li>
-</ul>
 <h2 id="ai-model-encryption-support">AI Model Encryption Support</h2>
 <p>For ensuring inference integrity and providing copyright protection of deep-learning models on edge devices, Kura provides decryption capabilities for trained models to be served through the Triton Server.</p>
 <h3 id="how-it-works">How it works</h3>
@@ -5063,24 +4927,116 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>As an additional security measure, the <a href="https://github.com/triton-inference-server/server/blob/main/docs/model_repository.md">Model Repository</a> containing the decrypted models will be stored in a temporary subfolder and will feature restrictive permission such that only Kura, the Inference Server and the <code>root</code> user will be able to access it.</p>
 <h3 id="encryption-procedure">Encryption procedure</h3>
 <p>Given a trained model inside the folder <code>tf_autoencoder_fp32</code> (for example) with the following layout (see the <a href="https://github.com/triton-inference-server/server/blob/main/docs/model_repository.md">official documentation</a> for details):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>tf_autoencoder_fp32
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>├── 1
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>│   └── model.savedmodel
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>│       ├── assets
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>│       ├── keras_metadata.pb
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>│       ├── saved_model.pb
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>│       └── variables
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>│           ├── variables.data-00000-of-00001
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>│           └── variables.index
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>└── config.pbtxt
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>tf_autoencoder_fp32
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>├── 1
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>│   └── model.savedmodel
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>│       ├── assets
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>│       ├── keras_metadata.pb
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>│       ├── saved_model.pb
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>│       └── variables
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>│           ├── variables.data-00000-of-00001
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>│           └── variables.index
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>└── config.pbtxt
 </code></pre></div>
 <p>Compress the model into a zip archive with the following command:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>zip<span class="w"> </span>-vr<span class="w"> </span>tf_autoencoder_fp32.zip<span class="w"> </span>tf_autoencoder_fp32/
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>zip<span class="w"> </span>-vr<span class="w"> </span>tf_autoencoder_fp32.zip<span class="w"> </span>tf_autoencoder_fp32/
 </code></pre></div>
 <p>then encrypt it with the AES 256 algorithm using the following <code>gpg</code> command:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>gpg<span class="w"> </span>--armor<span class="w"> </span>--symmetric<span class="w"> </span>--cipher-algo<span class="w"> </span>AES256<span class="w"> </span>tf_autoencoder_fp32.zip
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>gpg<span class="w"> </span>--armor<span class="w"> </span>--symmetric<span class="w"> </span>--cipher-algo<span class="w"> </span>AES256<span class="w"> </span>tf_autoencoder_fp32.zip
 </code></pre></div>
 <p>The resulting archive <code>tf_autoencoder_fp32.zip.asc</code> can be transferred to the <em>Local Model Repository Path</em> on the target machine and will be decrypted by Kura.</p>
+<h2 id="triton-server-metrics-and-statistics-support">Triton Server Metrics and Statistics support</h2>
+<p>Since version 6.0.0, Eclipse Kura supports metrics and statistics reporting from a generic Inference Engine, leveraging the <a href="https://github.com/eclipse-kura/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/ai/inference/InferenceEngineMetricsService.java">InferenceEngineMetricsService</a> APIs.</p>
+<p>The implementation for the Triton Server allows to retrieve relevant metrics regarding GPU and models from the engine. It is based on the <a href="https://github.com/triton-inference-server/server/blob/r24.08/docs/user_guide/metrics.md">Nvidia Triton Server Metrics feature</a> and the <a href="https://github.com/triton-inference-server/server/blob/main/docs/protocol/extension_statistics.md">Model Statistics Extension</a>. The feature is enabled using the <code>Enable Triton Server Metrics</code> parameter from the Eclipse Kura webUI or the <code>enable.metrics</code> property in the snapshot configuration. This property is available only for the Triton Server Native Service and Triton Server Container Service components. In the case of the Triton Server Remote Service, the metrics reporting cannot be configured but it can be available depending on the remote Triton Server setup.</p>
+<p>More in details, the following GPU metrics are supported:</p>
+<ul>
+<li>Power Usage</li>
+<li>Power Limit</li>
+<li>Energy Consumption</li>
+<li>GPU Utilization</li>
+<li>GPU Total Memory</li>
+<li>GPU Used Memory</li>
+</ul>
+<p>The metrics are provided as key-value pairs, whose key is in the format <code>gpu.metrics.&lt;GPU uuid&gt;</code> where the <code>GPU uuid</code> is an unique identifier of the GPU. The value is in JSON format.
+An example of GPU metrics is the following:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="err">key</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="err">gpu.me</span><span class="kc">tr</span><span class="err">ics.GPU</span><span class="mi">-340</span><span class="err">cec</span><span class="mi">52-80</span><span class="err">ba</span><span class="mi">-</span><span class="err">c</span><span class="mi">0</span><span class="err">d</span><span class="kc">f</span><span class="mi">-8511-5</span><span class="kc">f</span><span class="mi">9680</span><span class="err">aae</span><span class="mi">0</span><span class="kc">ff</span><span class="w"> </span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="err">value</span><span class="w"> </span><span class="p">:</span><span class="w"> </span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="p">{</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="nt">&quot;gpuUuid&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GPU-340cec52-80ba-c0df-8511-5f9680aae0ff&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="nt">&quot;gpuStats&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">        </span><span class="nt">&quot;nvGpuMemoryTotalBytes&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;16101933056.000000&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">        </span><span class="nt">&quot;nvGpuPowerUsage&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20.085000&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">        </span><span class="nt">&quot;nvGpuUtilization&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.000000&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">        </span><span class="nt">&quot;nvGpuPowerLimit&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;60.000000&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">        </span><span class="nt">&quot;nvGpuMemoryUsedBytes&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;617611264.000000&quot;</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="p">}</span>
+</code></pre></div>
+<p>The format of the model statistic key is <code>model.metrics.&lt;model name&gt;.&lt;model version&gt;</code>. The value is in JSON format.
+An example of model statistics is reported below:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="err">key</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="err">model.me</span><span class="kc">tr</span><span class="err">ics.preprocessor.</span><span class="mi">1</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="err">value</span><span class="w"> </span><span class="p">:</span><span class="w"> </span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="p">{</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;preprocessor&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span><span class="nt">&quot;version&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span><span class="nt">&quot;lastInference&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1740037894861&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">    </span><span class="nt">&quot;inferenceCount&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">    </span><span class="nt">&quot;executionCount&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">    </span><span class="nt">&quot;inferenceStats&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">        </span><span class="nt">&quot;success&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">            </span><span class="nt">&quot;count&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">            </span><span class="nt">&quot;ns&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;143434240&quot;</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">        </span><span class="nt">&quot;fail&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">            </span><span class="nt">&quot;count&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">            </span><span class="nt">&quot;ns&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0&quot;</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">        </span><span class="nt">&quot;queue&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">            </span><span class="nt">&quot;count&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="w">            </span><span class="nt">&quot;ns&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4805536&quot;</span>
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="w">        </span><span class="nt">&quot;computeInput&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="w">            </span><span class="nt">&quot;count&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="w">            </span><span class="nt">&quot;ns&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5873920&quot;</span>
+<a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a><span class="w">        </span><span class="nt">&quot;computeInfer&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a><span class="w">            </span><span class="nt">&quot;count&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a><span class="w">            </span><span class="nt">&quot;ns&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;119049856&quot;</span>
+<a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-6-30" name="__codelineno-6-30" href="#__codelineno-6-30"></a><span class="w">        </span><span class="nt">&quot;computeOutput&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-31" name="__codelineno-6-31" href="#__codelineno-6-31"></a><span class="w">            </span><span class="nt">&quot;count&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-32" name="__codelineno-6-32" href="#__codelineno-6-32"></a><span class="w">            </span><span class="nt">&quot;ns&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;13182208&quot;</span>
+<a id="__codelineno-6-33" name="__codelineno-6-33" href="#__codelineno-6-33"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-6-34" name="__codelineno-6-34" href="#__codelineno-6-34"></a><span class="w">        </span><span class="nt">&quot;cacheHit&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-35" name="__codelineno-6-35" href="#__codelineno-6-35"></a><span class="w">            </span><span class="nt">&quot;count&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-36" name="__codelineno-6-36" href="#__codelineno-6-36"></a><span class="w">            </span><span class="nt">&quot;ns&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0&quot;</span>
+<a id="__codelineno-6-37" name="__codelineno-6-37" href="#__codelineno-6-37"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-6-38" name="__codelineno-6-38" href="#__codelineno-6-38"></a><span class="w">        </span><span class="nt">&quot;cacheMiss&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-39" name="__codelineno-6-39" href="#__codelineno-6-39"></a><span class="w">            </span><span class="nt">&quot;count&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-40" name="__codelineno-6-40" href="#__codelineno-6-40"></a><span class="w">            </span><span class="nt">&quot;ns&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0&quot;</span>
+<a id="__codelineno-6-41" name="__codelineno-6-41" href="#__codelineno-6-41"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-6-42" name="__codelineno-6-42" href="#__codelineno-6-42"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-6-43" name="__codelineno-6-43" href="#__codelineno-6-43"></a><span class="w">    </span><span class="nt">&quot;batchStats&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-6-44" name="__codelineno-6-44" href="#__codelineno-6-44"></a><span class="w">        </span><span class="p">{</span>
+<a id="__codelineno-6-45" name="__codelineno-6-45" href="#__codelineno-6-45"></a><span class="w">            </span><span class="nt">&quot;batchSize&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-46" name="__codelineno-6-46" href="#__codelineno-6-46"></a><span class="w">            </span><span class="nt">&quot;computeInput&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-47" name="__codelineno-6-47" href="#__codelineno-6-47"></a><span class="w">                </span><span class="nt">&quot;count&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-48" name="__codelineno-6-48" href="#__codelineno-6-48"></a><span class="w">                </span><span class="nt">&quot;ns&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;5873920&quot;</span>
+<a id="__codelineno-6-49" name="__codelineno-6-49" href="#__codelineno-6-49"></a><span class="w">            </span><span class="p">},</span>
+<a id="__codelineno-6-50" name="__codelineno-6-50" href="#__codelineno-6-50"></a><span class="w">            </span><span class="nt">&quot;computeInfer&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-51" name="__codelineno-6-51" href="#__codelineno-6-51"></a><span class="w">                </span><span class="nt">&quot;count&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-52" name="__codelineno-6-52" href="#__codelineno-6-52"></a><span class="w">                </span><span class="nt">&quot;ns&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;119049856&quot;</span>
+<a id="__codelineno-6-53" name="__codelineno-6-53" href="#__codelineno-6-53"></a><span class="w">            </span><span class="p">},</span>
+<a id="__codelineno-6-54" name="__codelineno-6-54" href="#__codelineno-6-54"></a><span class="w">            </span><span class="nt">&quot;computeOutput&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-55" name="__codelineno-6-55" href="#__codelineno-6-55"></a><span class="w">                </span><span class="nt">&quot;count&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-56" name="__codelineno-6-56" href="#__codelineno-6-56"></a><span class="w">                </span><span class="nt">&quot;ns&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;13182208&quot;</span>
+<a id="__codelineno-6-57" name="__codelineno-6-57" href="#__codelineno-6-57"></a><span class="w">            </span><span class="p">}</span>
+<a id="__codelineno-6-58" name="__codelineno-6-58" href="#__codelineno-6-58"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-6-59" name="__codelineno-6-59" href="#__codelineno-6-59"></a><span class="w">    </span><span class="p">],</span>
+<a id="__codelineno-6-60" name="__codelineno-6-60" href="#__codelineno-6-60"></a><span class="w">    </span><span class="nt">&quot;memoryUsage&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<a id="__codelineno-6-61" name="__codelineno-6-61" href="#__codelineno-6-61"></a><span class="w">    </span><span class="nt">&quot;responseStats&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<a id="__codelineno-6-62" name="__codelineno-6-62" href="#__codelineno-6-62"></a><span class="p">}</span>
+</code></pre></div>
 
 
 

@@ -546,7 +546,6 @@ public class Console implements SelfConfiguringComponent {
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, contextName);
         props.put(HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_PATH, contextPath);
         props.put(Constants.SERVICE_RANKING, ranking);
-        props.put(Constants.SERVICE_SCOPE, Constants.SCOPE_BUNDLE);
 
         ServiceRegistration<ServletContextHelper> contextService = this.bundleContext
                 .registerService(ServletContextHelper.class, contextHelper, new Hashtable<>(props));

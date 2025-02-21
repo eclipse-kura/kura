@@ -1009,6 +1009,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND);
         }
 
+        if (fSnapshot.isDirectory()) {
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, fSnapshot.getName() + "is not a file.");
+        }
+
         File tempSnapshotFile;
         try {
             tempSnapshotFile = File.createTempFile(fSnapshot.getName(), "", new File(fSnapshot.getParent()));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -414,6 +417,79 @@ public class XmlEncoderDecoderTest {
         logger.info(s);
 
         XmlComponentConfigurations config1 = xmlMarshallerImpl.unmarshal(s, XmlComponentConfigurations.class);
+        String s1 = xmlMarshallerImpl.marshal(config1);
+        logger.info(s1);
+
+        Map<String, Object> properties1 = config1.getConfigurations().get(0).getConfigurationProperties();
+        assertEquals(properties, properties1);
+    }
+    
+    @Test
+    public void testPropertiesMarshallUnmarshallWithStream() throws Exception {
+        XmlMarshallUnmarshallImpl xmlMarshallerImpl = new XmlMarshallUnmarshallImpl();
+
+        String pid = "org.eclipse.kura.cloud.CloudService";
+        Tocd definition = null;
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("prop.string", new String("prop.value"));
+        properties.put("prop.long", Long.MAX_VALUE);
+        properties.put("prop.double", Double.MAX_VALUE);
+        properties.put("prop.float", Float.MAX_VALUE);
+        properties.put("prop.integer", Integer.MAX_VALUE);
+        properties.put("prop.byte", Byte.MAX_VALUE);
+        properties.put("prop.character", 'a');
+        properties.put("prop.short", Short.MAX_VALUE);
+
+        XmlComponentConfigurations xcc = new XmlComponentConfigurations();
+        List<ComponentConfiguration> ccis = new ArrayList<>();
+        ComponentConfigurationImpl config = new ComponentConfigurationImpl(pid, definition, properties);
+        ccis.add(config);
+        xcc.setConfigurations(ccis);
+
+        String s = xmlMarshallerImpl.marshal(xcc);
+        logger.info(s);
+
+        XmlComponentConfigurations config1 = xmlMarshallerImpl.unmarshal(s, XmlComponentConfigurations.class);
+        String s1 = xmlMarshallerImpl.marshal(config1);
+        logger.info(s1);
+
+        Map<String, Object> properties1 = config1.getConfigurations().get(0).getConfigurationProperties();
+        assertEquals(properties, properties1);
+    }
+
+    @Test
+    @Ignore
+    public void testOCDMarshallUnmarshallWithStream() throws Exception { // This test needs to be done as integration test not
+                                                               // unit.
+        XmlMarshallUnmarshallImpl xmlMarshallerImpl = new XmlMarshallUnmarshallImpl();
+
+        String pid = "org.eclipse.kura.cloud.CloudService";
+
+        Tocd definition = ComponentUtil.readObjectClassDefinition(pid);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("prop.string", new String("prop.value"));
+        properties.put("prop.long", Long.MAX_VALUE);
+        properties.put("prop.double", Double.MAX_VALUE);
+        properties.put("prop.float", Float.MAX_VALUE);
+        properties.put("prop.integer", Integer.MAX_VALUE);
+        properties.put("prop.byte", Byte.MAX_VALUE);
+        properties.put("prop.character", 'a');
+        properties.put("prop.short", Short.MAX_VALUE);
+
+        XmlComponentConfigurations xcc = new XmlComponentConfigurations();
+        List<ComponentConfiguration> ccis = new ArrayList<>();
+        ComponentConfigurationImpl config = new ComponentConfigurationImpl(pid, definition, properties);
+        ccis.add(config);
+        xcc.setConfigurations(ccis);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        xmlMarshallerImpl.marshal(out, xcc);
+        String marshalString = out.toString();
+        logger.info(marshalString);
+
+        ByteArrayInputStream in = new ByteArrayInputStream(marshalString.getBytes());
+        XmlComponentConfigurations config1 = xmlMarshallerImpl.unmarshal(in, XmlComponentConfigurations.class);
         String s1 = xmlMarshallerImpl.marshal(config1);
         logger.info(s1);
 

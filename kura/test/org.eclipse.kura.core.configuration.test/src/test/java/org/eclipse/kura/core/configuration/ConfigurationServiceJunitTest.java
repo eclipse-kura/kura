@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -1262,19 +1263,23 @@ public class ConfigurationServiceJunitTest {
         f1.deleteOnExit();
 
         FileWriter fw = new FileWriter(f1);
-        fw.append("test");
+        fw.append(IOUtils.toString(
+                ConfigurationServiceJunitTest.class.getResourceAsStream("/expected_snapshot_with_description.xml"),
+                StandardCharsets.UTF_8.name()));
         fw.close();
 
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         cs.setCryptoService(cryptoServiceMock);
 
         // ensure the proper file is read
-        when(cryptoServiceMock.decryptAes("test".toCharArray())).thenReturn(decrypted.toCharArray());
+        when(cryptoServiceMock.getDecryptionInputStream((InputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
+            return answer.getArgument(0, InputStream.class);
+        });
 
         XmlComponentConfigurations configurations = cs.loadEncryptedSnapshotFileContent(snapshotID);
 
         verify(systemServiceMock, times(1)).getKuraSnapshotsDirectory();
-        verify(cryptoServiceMock, times(1)).decryptAes("test".toCharArray());
+        verify(cryptoServiceMock, times(1)).getDecryptionInputStream((InputStream) ArgumentMatchers.any());
 
         f1.delete();
         d1.delete();
@@ -1647,18 +1652,18 @@ public class ConfigurationServiceJunitTest {
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         cs.setCryptoService(cryptoServiceMock);
 
-        String encCfg = "encrypted";
-        char[] encrypted = encCfg.toCharArray();
-        when(cryptoServiceMock.encryptAes((char[]) ArgumentMatchers.any())).thenReturn(encrypted);
+        when(cryptoServiceMock.getEncryptionOutputStream((OutputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
+            return answer.getArgument(0, OutputStream.class);
+        });
 
         try {
             TestUtil.invokePrivate(cs, "writeSnapshot", sid, cfg);
             fail("Exception expected due to 'file' being directory.");
         } catch (KuraException e) {
-            assertEquals("Error code.", KuraErrorCode.IO_ERROR, e.getCode());
+            assertEquals("Error code.", KuraErrorCode.CONFIGURATION_ERROR, e.getCode());
         }
 
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) ArgumentMatchers.any());
+        verify(cryptoServiceMock, never()).getEncryptionOutputStream((OutputStream) ArgumentMatchers.any());
 
         d1.delete();
         d2.delete();
@@ -2001,9 +2006,9 @@ public class ConfigurationServiceJunitTest {
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         cs.setCryptoService(cryptoServiceMock);
 
-        String encCfg = "encrypted";
-        char[] encrypted = encCfg.toCharArray();
-        when(cryptoServiceMock.encryptAes((char[]) ArgumentMatchers.any())).thenReturn(encrypted);
+        when(cryptoServiceMock.getEncryptionOutputStream((OutputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
+            return answer.getArgument(0, OutputStream.class);
+        });
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -2015,7 +2020,7 @@ public class ConfigurationServiceJunitTest {
 
         Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
 
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) ArgumentMatchers.any());
+        verify(cryptoServiceMock, times(1)).getEncryptionOutputStream((OutputStream) ArgumentMatchers.any());
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
 
         assertNotNull(sid);
@@ -2023,12 +2028,12 @@ public class ConfigurationServiceJunitTest {
         File f1 = new File(d1, "snapshot_" + sid + ".xml");
         assertTrue("snapshot file created", f1.exists());
 
-        FileReader fr = new FileReader(f1);
-        char[] chars = new char[encCfg.length()];
-        fr.read(chars);
-        fr.close();
+        String expectedXml = IOUtils.toString(
+                ConfigurationServiceJunitTest.class.getResourceAsStream("/expected_snapshot_without_description.xml"),
+                StandardCharsets.UTF_8.name());
+        String actualXml = FileUtils.readFileToString(f1, StandardCharsets.UTF_8);
 
-        assertArrayEquals("snapshot file content matches", encCfg.toCharArray(), chars);
+        assertEquals(expectedXml, actualXml);
 
         f1.delete();
         d1.delete();
@@ -2081,9 +2086,9 @@ public class ConfigurationServiceJunitTest {
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         cs.setCryptoService(cryptoServiceMock);
 
-        String encCfg = "encrypted";
-        char[] encrypted = encCfg.toCharArray();
-        when(cryptoServiceMock.encryptAes((char[]) ArgumentMatchers.any())).thenReturn(encrypted);
+        when(cryptoServiceMock.getEncryptionOutputStream((OutputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
+            return answer.getArgument(0, OutputStream.class);
+        });
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -2098,7 +2103,7 @@ public class ConfigurationServiceJunitTest {
 
         Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
 
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) ArgumentMatchers.any());
+        verify(cryptoServiceMock, times(1)).getEncryptionOutputStream((OutputStream) ArgumentMatchers.any());
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
 
         assertNotNull(sid);
@@ -2107,12 +2112,12 @@ public class ConfigurationServiceJunitTest {
         File f1 = new File(d1, "snapshot_" + sid + ".xml");
         assertTrue("snapshot file created", f1.exists());
 
-        FileReader fr = new FileReader(f1);
-        char[] chars = new char[encCfg.length()];
-        fr.read(chars);
-        fr.close();
+        String expectedXml = IOUtils.toString(
+                ConfigurationServiceJunitTest.class.getResourceAsStream("/expected_snapshot_without_description.xml"),
+                StandardCharsets.UTF_8.name());
+        String actualXml = FileUtils.readFileToString(f1, StandardCharsets.UTF_8);
 
-        assertArrayEquals("snapshot file content matches", encCfg.toCharArray(), chars);
+        assertEquals(expectedXml, actualXml);
 
         f1.delete();
         d1.delete();
@@ -2165,9 +2170,9 @@ public class ConfigurationServiceJunitTest {
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         cs.setCryptoService(cryptoServiceMock);
 
-        String encCfg = "encrypted";
-        char[] encrypted = encCfg.toCharArray();
-        when(cryptoServiceMock.encryptAes((char[]) ArgumentMatchers.any())).thenReturn(encrypted);
+        when(cryptoServiceMock.getEncryptionOutputStream((OutputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
+            return answer.getArgument(0, OutputStream.class);
+        });
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -2179,7 +2184,7 @@ public class ConfigurationServiceJunitTest {
 
         Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
 
-        verify(cryptoServiceMock, times(1)).encryptAes((char[]) ArgumentMatchers.any());
+        verify(cryptoServiceMock, times(1)).getEncryptionOutputStream((OutputStream) ArgumentMatchers.any());
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
 
         assertNotNull(sid);
@@ -2189,12 +2194,12 @@ public class ConfigurationServiceJunitTest {
         File f1 = new File(d1, "snapshot_" + sid + ".xml");
         assertTrue("Expected snapshot file to be created", f1.exists());
 
-        FileReader fr = new FileReader(f1);
-        char[] chars = new char[encCfg.length()];
-        fr.read(chars);
-        fr.close();
+        String expectedXml = IOUtils.toString(
+                ConfigurationServiceJunitTest.class.getResourceAsStream("/expected_snapshot_without_description.xml"),
+                StandardCharsets.UTF_8.name());
+        String actualXml = FileUtils.readFileToString(f1, StandardCharsets.UTF_8);
 
-        assertArrayEquals("Expected snapshot file content to match", encCfg.toCharArray(), chars);
+        assertEquals(expectedXml, actualXml);
 
         f1.delete();
         d1.delete();
@@ -2260,6 +2265,10 @@ public class ConfigurationServiceJunitTest {
                 }
             }
         };
+
+        when(csMock.getDecryptionInputStream((InputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
+            return answer.getArgument(0, InputStream.class);
+        });
 
         configurationService.setCryptoService(csMock);
 
@@ -2838,16 +2847,21 @@ public class ConfigurationServiceJunitTest {
         f1.deleteOnExit();
 
         FileWriter fw = new FileWriter(f1);
-        fw.append("test");
+        fw.append(IOUtils.toString(
+                ConfigurationServiceJunitTest.class.getResourceAsStream("/expected_snapshot_with_description.xml"),
+                StandardCharsets.UTF_8.name()));
         fw.close();
 
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         cs.setCryptoService(cryptoServiceMock);
 
-        String decrypted = prepareSnapshotXML();
-        when(cryptoServiceMock.decryptAes("test".toCharArray())).thenReturn(decrypted.toCharArray());
+        when(cryptoServiceMock.getDecryptionInputStream((InputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
+            return answer.getArgument(0, InputStream.class);
+        });
 
-        when(cryptoServiceMock.encryptAes((char[]) any())).thenReturn("encrypted".toCharArray());
+        when(cryptoServiceMock.getEncryptionOutputStream((OutputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
+            return answer.getArgument(0, OutputStream.class);
+        });
 
         SystemService systemServiceMock = mock(SystemService.class);
         cs.setSystemService(systemServiceMock);
@@ -2898,7 +2912,7 @@ public class ConfigurationServiceJunitTest {
             // OK
         }
 
-        verify(cryptoServiceMock, times(1)).decryptAes("test".toCharArray());
+        verify(cryptoServiceMock, times(1)).getDecryptionInputStream(((InputStream) ArgumentMatchers.any()));
 
         File[] files = d1.listFiles();
 
@@ -2907,14 +2921,14 @@ public class ConfigurationServiceJunitTest {
         for (File f : files) {
             f.deleteOnExit();
         }
-        String expect = "test";
 
-        FileReader fr = new FileReader(files[0]);
-        char[] chars = new char[expect.length()];
-        fr.read(chars);
-        fr.close();
+        File file = files[0];
+        String expectedXml = IOUtils.toString(
+                ConfigurationServiceJunitTest.class.getResourceAsStream("/expected_snapshot_with_description.xml"),
+                StandardCharsets.UTF_8.name());
+        String actualXml = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 
-        assertEquals(expect, new String(chars));
+        assertEquals(expectedXml, actualXml);
     }
 
     public void testRollbackId() throws Exception {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -76,7 +76,7 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
     }
 
     @Override
-    public void marshal(OutputStream out, Object object) throws KuraException {
+    public void marshal(OutputStream out, Object object) throws KuraIOException {
         try {
             if (object instanceof WireGraphConfiguration) {
                 JsonObject result = WireGraphJsonMarshallUnmarshallImpl
@@ -100,8 +100,6 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         } catch (IOException ex) {
             throw new KuraIOException(ex);
         }
-
-        throw new KuraException(KuraErrorCode.INVALID_PARAMETER);
     }
 
     @SuppressWarnings("unchecked")

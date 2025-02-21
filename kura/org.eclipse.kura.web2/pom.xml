@@ -134,6 +134,7 @@
                     <style>OBF</style> <!-- DETAILED https://support.google.com/code/answer/55203?topic=10212 -->
                     <failOnError>true</failOnError>
                     <extraJvmArgs>-Xmx2048M -Xss1024k -XX:+UseParallelGC</extraJvmArgs>
+                    <!-- gwt-maven-plugin supports languages feature only up to java 11-->
                     <sourceLevel>auto</sourceLevel>
                     <localWorkers>2</localWorkers>
                     <runTarget>denali.html</runTarget>

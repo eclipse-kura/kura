@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-
 package org.eclipse.kura.ai.triton.server;
 
 import java.io.IOException;
@@ -22,7 +21,7 @@ public class TritonServerServiceModelTest extends TritonServerServiceStepDefinit
 
     @Test
     public void shouldNotLoadModel() throws KuraException, IOException {
-        givenTritonServerServiceImpl(defaultProperties());
+        givenTritonServerServiceNativeImpl(defaultProperties(), false);
 
         whenLoadModel("myModel2");
 
@@ -31,7 +30,7 @@ public class TritonServerServiceModelTest extends TritonServerServiceStepDefinit
 
     @Test
     public void shouldLoadModel() throws KuraException, IOException {
-        givenTritonServerServiceImpl(defaultProperties());
+        givenTritonServerServiceNativeImpl(defaultProperties(), false);
 
         whenLoadModel("myModel");
 
@@ -40,7 +39,7 @@ public class TritonServerServiceModelTest extends TritonServerServiceStepDefinit
 
     @Test
     public void shouldNotUnloadModel() throws KuraException, IOException {
-        givenTritonServerServiceImpl(defaultProperties());
+        givenTritonServerServiceNativeImpl(defaultProperties(), false);
 
         whenUnloadModel("myModel2");
 
@@ -49,7 +48,7 @@ public class TritonServerServiceModelTest extends TritonServerServiceStepDefinit
 
     @Test
     public void shouldUnloadModel() throws KuraException, IOException {
-        givenTritonServerServiceImpl(defaultProperties());
+        givenTritonServerServiceNativeImpl(defaultProperties(), false);
 
         whenUnloadModel("myModel");
 
@@ -58,7 +57,7 @@ public class TritonServerServiceModelTest extends TritonServerServiceStepDefinit
 
     @Test
     public void shouldNotGetModelLoadState() throws KuraException, IOException {
-        givenTritonServerServiceImpl(defaultProperties());
+        givenTritonServerServiceNativeImpl(defaultProperties(), false);
 
         whenGetModelLoadState("myModel");
 
@@ -67,7 +66,7 @@ public class TritonServerServiceModelTest extends TritonServerServiceStepDefinit
 
     @Test
     public void shouldGetModelNamesList() throws IOException {
-        givenTritonServerServiceImpl(defaultProperties());
+        givenTritonServerServiceNativeImpl(defaultProperties(), false);
 
         whenGetModelNames();
 
@@ -77,7 +76,7 @@ public class TritonServerServiceModelTest extends TritonServerServiceStepDefinit
 
     @Test
     public void shouldGetModelInfo() throws IOException {
-        givenTritonServerServiceImpl(defaultProperties());
+        givenTritonServerServiceNativeImpl(defaultProperties(), false);
 
         whenGetModelInfo("myModel");
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -24,35 +24,35 @@ public class TritonServerServiceNativeImplTest extends TritonServerServiceStepDe
 
     @Test
     public void isConfigurationValidWorksWithNativeConfiguration() throws IOException {
-        givenTritonServerServiceNativeImpl(validNativeProperties());
+        givenTritonServerServiceNativeImpl(validNativeProperties(), false);
 
         thenIsConfigurationValidReturns(true);
     }
 
     @Test
     public void isConfigurationValidWorksWithInvalidBackend() throws IOException {
-        givenTritonServerServiceNativeImpl(invalidBackendNativeProperties());
+        givenTritonServerServiceNativeImpl(invalidBackendNativeProperties(), false);
 
         thenIsConfigurationValidReturns(false);
     }
 
     @Test
     public void isConfigurationValidWorksWithInvalidModelRepository() throws IOException {
-        givenTritonServerServiceNativeImpl(invalidModelRepositoryNativeProperties());
+        givenTritonServerServiceNativeImpl(invalidModelRepositoryNativeProperties(), false);
 
         thenIsConfigurationValidReturns(false);
     }
 
     @Test
     public void isModelEncryptionEnabledWorkWithNativeConfiguration() throws IOException {
-        givenTritonServerServiceNativeImpl(validNativeProperties());
+        givenTritonServerServiceNativeImpl(validNativeProperties(), false);
 
         thenIsModelEncryptionEnabled(false);
     }
 
     @Test
     public void isModelEncryptionEnabledWorksWhenPasswordIsSet() throws IOException {
-        givenTritonServerServiceNativeImpl(validEncryptionNativeProperties());
+        givenTritonServerServiceNativeImpl(validEncryptionNativeProperties(), false);
 
         thenIsModelEncryptionEnabled(true);
     }

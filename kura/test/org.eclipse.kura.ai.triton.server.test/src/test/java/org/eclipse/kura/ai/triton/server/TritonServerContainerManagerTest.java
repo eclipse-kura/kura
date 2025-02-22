@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -398,8 +398,32 @@ public class TritonServerContainerManagerTest {
                 .of(new String[][] { { TRITON_REPOSITORY_PATH, TRITON_INTERNAL_MODEL_REPO },
                         { TRITON_BACKENDS_PATH, TRITON_INTERNAL_BACKENDS_FOLDER }, })
                 .collect(Collectors.collectingAndThen(Collectors.toMap(data -> data[0], data -> data[1]),
-                        Collections::<String, String> unmodifiableMap)));
+                        Collections::<String, String>unmodifiableMap)));
         thenContainerConfigurationEntrypointOverrideContains("--model-control-mode=explicit");
+    }
+
+    @Test
+    public void containerMetricsOptionsAreCorrectlySet() {
+        givenPropertyWith("container.image", TRITON_IMAGE_NAME);
+        givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
+        givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
+        givenPropertyWith("server.ports", EXTERNAL_PORTS);
+        givenPropertyWith("enable.metrics", Boolean.TRUE);
+        givenServiceOptionsBuiltWith(properties);
+
+        givenMockContainerOrchestrationService();
+        givenTritonImageIsAvailable();
+        givenTritonContainerIsNotRunning();
+        givenLocalManagerBuiltWith(this.options, this.orc, MOCK_DECRYPT_FOLDER);
+
+        whenStartIsCalled();
+
+        thenContainerOrchestrationStartContainerWasCalled();
+        thenContainerConfigurationIsFrameworkManaged(true);
+        thenContainerConfigurationPortsEquals(CONTAINER_PORTS);
+        thenContainerConfigurationImageEquals(TRITON_IMAGE_NAME);
+        thenContainerConfigurationEntrypointOverrideContains("--allow-metrics=true");
+        thenContainerConfigurationEntrypointOverrideContains("--allow-gpu-metrics=true");
     }
 
     /*

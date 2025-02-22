@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,13 @@ package org.eclipse.kura.ai.triton.server;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
@@ -33,15 +39,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
-import org.eclipse.kura.ai.inference.InferenceEngineService;
+import org.eclipse.kura.ai.inference.InferenceEngineMetricsService;
 import org.eclipse.kura.ai.inference.ModelInfo;
 import org.eclipse.kura.ai.inference.ModelInfoBuilder;
 import org.eclipse.kura.ai.inference.Tensor;
 import org.eclipse.kura.ai.inference.TensorDescriptor;
 import org.eclipse.kura.ai.inference.TensorDescriptorBuilder;
+import org.eclipse.kura.ai.triton.server.metrics.parser.GpuMetricsParser;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.crypto.CryptoService;
@@ -50,7 +60,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.ProtocolStringList;
+import com.google.protobuf.util.JsonFormat;
 
 import inference.GRPCInferenceServiceGrpc;
 import inference.GRPCInferenceServiceGrpc.GRPCInferenceServiceBlockingStub;
@@ -63,6 +75,9 @@ import inference.GrpcService.ModelMetadataRequest;
 import inference.GrpcService.ModelMetadataResponse;
 import inference.GrpcService.ModelReadyRequest;
 import inference.GrpcService.ModelReadyResponse;
+import inference.GrpcService.ModelStatistics;
+import inference.GrpcService.ModelStatisticsRequest;
+import inference.GrpcService.ModelStatisticsResponse;
 import inference.GrpcService.RepositoryIndexRequest;
 import inference.GrpcService.RepositoryIndexResponse;
 import inference.GrpcService.RepositoryIndexResponse.ModelIndex;
@@ -74,7 +89,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 
-public abstract class TritonServerServiceAbs implements InferenceEngineService, ConfigurableComponent {
+public abstract class TritonServerServiceAbs implements InferenceEngineMetricsService, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(TritonServerServiceAbs.class);
     private static final String TEMP_DIRECTORY_PREFIX = "decrypted_models";
@@ -384,8 +399,103 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         } catch (StatusRuntimeException | IllegalArgumentException e) {
             logger.warn("Cannot infer outputs for " + modelInfo.getName() + " model", e);
         }
+
         return inferenceResults;
 
+    }
+
+    @Override
+    public Map<String, String> getMetrics() throws KuraException {
+        if (!this.options.areMetricsEnabled()) {
+            logger.debug("Triton Server Metrics not enabled.");
+            return new HashMap<>();
+        }
+
+        Map<String, String> metrics = new HashMap<>();
+        metrics.putAll(getModelStatistics());
+        metrics.putAll(getGpuMetrics());
+
+        return metrics;
+    }
+
+    private Map<String, String> getModelStatistics() throws KuraException {
+        Map<String, String> jsonModelStatistics = new HashMap<>();
+        ModelStatisticsRequest.Builder modelStatisticsRequest = ModelStatisticsRequest.newBuilder();
+        try {
+            ModelStatisticsResponse modelStatisticsResponse = this.grpcStub
+                    .modelStatistics(modelStatisticsRequest.build());
+
+            List<ModelStatistics> grpcStatistics = modelStatisticsResponse.getModelStatsList();
+            grpcStatistics.forEach(grpcStatistic -> {
+                try {
+                    String key = getKey(grpcStatistic);
+                    String jsonValue = JsonFormat.printer().includingDefaultValueFields()
+                            .omittingInsignificantWhitespace().print(grpcStatistic);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("{} {}", key, jsonValue);
+                    }
+                    jsonModelStatistics.put(key, jsonValue);
+                } catch (InvalidProtocolBufferException e) {
+                    logger.warn("Cannot convert model statistics to json format", e);
+                }
+            });
+
+        } catch (StatusRuntimeException | IllegalArgumentException e) {
+            logger.warn("Cannot get Model Statistics", e);
+        }
+
+        return jsonModelStatistics;
+    }
+
+    private String getKey(inference.GrpcService.ModelStatistics statistic) {
+        return "model.metrics." + statistic.getName() + "." + statistic.getVersion();
+    }
+
+    private Map<String, String> getGpuMetrics() throws KuraException {
+        List<String> response = getListMetrics(
+                "http://" + getServerAddress() + ":" + this.options.getMetricsPort() + "/metrics");
+
+        GpuMetricsParser metricsParser = new GpuMetricsParser(response);
+        return metricsParser.parse();
+    }
+
+    private List<String> getListMetrics(String resourceURL) throws KuraException {
+        List<String> metrics = new ArrayList<>();
+        HttpURLConnection connection = null;
+        try {
+            URL url = new URI(resourceURL).toURL();
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setReadTimeout(30000);
+            connection.setConnectTimeout(30000);
+
+            int status = connection.getResponseCode();
+            if (status == 200) {
+                metrics = getResponse(connection);
+            } else {
+                logger.warn("Cannot retrieve metrics. Error code {}.", status);
+            }
+        } catch (IOException | URISyntaxException e) {
+            throw new KuraConnectException(e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+
+        return metrics;
+    }
+
+    private List<String> getResponse(HttpURLConnection connection) throws IOException {
+        List<String> response = new ArrayList<>();
+        try (BufferedReader input = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            Stream<String> lines = input.lines();
+            response = lines.collect(Collectors.toList());
+            if (logger.isDebugEnabled()) {
+                logger.debug(String.join("\n ", response));
+            }
+        }
+        return response;
     }
 
     private Map<String, InferParameter> getInferParameters(Map<String, Object> parameters) {

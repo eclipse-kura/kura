@@ -66,6 +66,12 @@
         <fileSet filtered="true" packaged="true">
             <directory>tests/__artifactId__.bundle.test/src/main/java</directory>
         </fileSet>
+        <fileSet encoding="UTF-8">
+            <directory></directory>
+            <includes>
+                <include>.gitignore</include>
+            </includes>
+        </fileSet>
     </fileSets>
 
 </archetype-descriptor>

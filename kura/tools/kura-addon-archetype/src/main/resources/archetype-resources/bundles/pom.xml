@@ -35,20 +35,21 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <tycho-version>4.0.10</tycho-version>
-
-        <bnd-version>4.1.0</bnd-version>
+        <tycho-version>3.0.5</tycho-version>
+        <bnd-version>7.1.0</bnd-version>
         <maven-resources-version>3.1.0</maven-resources-version>
         <maven-deploy-version>2.8.2</maven-deploy-version>
-        <maven.wagon.webdav.plugin.version>2.2</maven.wagon.webdav.plugin.version>
+        <maven-eclipse-plugin.version>2.10</maven-eclipse-plugin.version>
         <antrun-version>1.8</antrun-version>
         <exists-version>0.0.6</exists-version>
         <eclipse.jarsigner.version>1.1.5</eclipse.jarsigner.version>
+        <maven.jarsigner.plugin.version>1.4</maven.jarsigner.plugin.version>
         <target-definition-version>${project.version}</target-definition-version>
         <kura-workdir>${project.build.directory}/kura</kura-workdir>
         <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
-
+        <lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
         <skip.artifact.signing>true</skip.artifact.signing>
+        <keystore.type>JKS</keystore.type>
     </properties>
 
     <build>
@@ -79,23 +80,6 @@
                     <artifactId>target-platform-configuration</artifactId>
                     <version>${tycho-version}</version>
                     <configuration>
-                        <environments>
-                            <environment>
-                                <os>win32</os>
-                                <ws>win32</ws>
-                                <arch>x86_64</arch>
-                            </environment>
-                            <environment>
-                                <os>macosx</os>
-                                <ws>cocoa</ws>
-                                <arch>x86_64</arch>
-                            </environment>
-                            <environment>
-                                <os>linux</os>
-                                <ws>gtk</ws>
-                                <arch>x86_64</arch>
-                            </environment>
-                        </environments>
                         <target>
                             <artifact>
                                 <groupId>${groupId}</groupId>
@@ -116,9 +100,32 @@
                 </plugin>
 
                 <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-source-plugin</artifactId>
+                    <version>${tycho-version}</version>
+                    <executions>
+                        <execution>
+                            <id>plugin-source</id>
+                            <goals>
+                                <goal>plugin-source</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-antrun-plugin</artifactId>
                     <version>${antrun-version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-eclipse-plugin</artifactId>
+                    <version>${maven-eclipse-plugin.version}</version>
+                    <configuration>
+                        <skip>true</skip>
+                    </configuration>
                 </plugin>
 
                 <plugin>
@@ -132,31 +139,8 @@
                             <goals>
                                 <goal>bnd-process</goal>
                             </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <!-- copy the OSGI-INF directory to a place where it is being detected and
-                    picked up by PDE Launcher as well, supported by M2E in incremental builds
-                    natively -->
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>${maven-resources-version}</version>
-                    <executions>
-                        <execution>
-                            <id>copy-resources</id>
-                            <!-- here the phase you need -->
-                            <phase>prepare-package</phase>
-                            <goals>
-                                <goal>copy-resources</goal>
-                            </goals>
                             <configuration>
-                                <outputDirectory>${basedir}/OSGI-INF</outputDirectory>
-                                <resources>
-                                    <resource>
-                                        <directory>${project.build.outputDirectory}/OSGI-INF</directory>
-                                        <filtering>false</filtering>
-                                    </resource>
-                                </resources>
+                                <packagingTypes>eclipse-plugin,eclipse-test-plugin</packagingTypes>
                             </configuration>
                         </execution>
                     </executions>
@@ -165,7 +149,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jarsigner-plugin</artifactId>
-                    <version>1.4</version>
+                    <version>${maven.jarsigner.plugin.version}</version>
                     <executions>
                         <execution>
                             <id>sign</id>
@@ -253,8 +237,47 @@
                         </execution>
                     </executions>
                 </plugin>
+
+                <!-- This plugin's configuration is used to store Eclipse m2e settings only. It has
+                no influence on the Maven build itself. -->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>${lifecycle.mapping.version}</version>
+                    <configuration>
+                        <lifecycleMappingFilters>
+                            <lifecycleMappingFilter>
+                                <symbolicName>org.eclipse.m2e.pde.connector</symbolicName>
+                                <versionRange>[2.1.2,)</versionRange>
+                                <packagingTypes>
+                                    <packagingType>eclipse-test-plugin</packagingType>
+                                    <packagingType>eclipse-plugin</packagingType>
+                                    <packagingType>eclipse-feature</packagingType>
+                                </packagingTypes>
+                            </lifecycleMappingFilter>
+                        </lifecycleMappingFilters>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>biz.aQute.bnd</groupId>
+                                        <artifactId>bnd-maven-plugin</artifactId>
+                                        <versionRange>[0.0.0,)</versionRange>
+                                        <goals>
+                                            <goal>bnd-process</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore/>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
+
         <plugins>
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
@@ -263,6 +286,22 @@
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>target-platform-configuration</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-packaging-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

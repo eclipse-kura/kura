@@ -83,7 +83,7 @@ public abstract class IPAddress {
      * @return
      */
     public static IPAddress parseHostAddress(String hostAddress) throws UnknownHostException {
-        if (!hostAddress.isEmpty() && !InetAddresses.isInetAddress(hostAddress)) {
+        if (hostAddress != null && !hostAddress.isEmpty() && !InetAddresses.isInetAddress(hostAddress)) {
             throw new UnknownHostException("Invalid IP address: " + hostAddress);
         }
 

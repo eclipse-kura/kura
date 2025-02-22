@@ -107,7 +107,7 @@ public class Heater implements ConfigurableComponent, CloudClientListener, Heate
     // ----------------------------------------------------------------
 
     @Activate
-    protected void activate(final Map<String, Object> properties, HeaterConfig config) {
+    void activate(final Map<String, Object> properties, HeaterConfig config) {
         logger.info("Activating Heater...");
 
         this.properties = properties;
@@ -133,7 +133,7 @@ public class Heater implements ConfigurableComponent, CloudClientListener, Heate
     }
 
     @Deactivate
-    protected void deactivate() {
+    void deactivate() {
         logger.debug("Deactivating Heater...");
 
         // shutting down the worker and cleaning up the properties
@@ -147,7 +147,7 @@ public class Heater implements ConfigurableComponent, CloudClientListener, Heate
     }
 
     @Modified
-    public void updated(final Map<String, Object> properties, HeaterConfig config) {
+    void updated(final Map<String, Object> properties, HeaterConfig config) {
         logger.info("Updating Heater. Mode: {}. All properties: {}", config.mode(), properties);
 
         // store the properties received

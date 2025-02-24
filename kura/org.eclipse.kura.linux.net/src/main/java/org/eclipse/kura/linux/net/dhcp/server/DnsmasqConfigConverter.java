@@ -38,7 +38,7 @@ public class DnsmasqConfigConverter implements DhcpServerConfigConverter {
         String routerAddress = isNull(config.getRouterAddress()) ? "" : "," + config.getRouterAddress().toString();
         sb.append(DHCP_OPTION_KEY).append(config.getInterfaceName()).append(",3").append(routerAddress).append("\n");
 
-        if (config.isPassDns()) {
+        if (config.isPassDns() && !isNull(config.getRouterAddress())) {
             // announce DNS servers on this device
             sb.append(DHCP_OPTION_KEY).append(config.getInterfaceName()).append(",6,0.0.0.0").append("\n");
         } else {

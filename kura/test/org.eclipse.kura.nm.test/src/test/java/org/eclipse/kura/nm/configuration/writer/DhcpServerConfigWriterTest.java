@@ -140,8 +140,8 @@ public class DhcpServerConfigWriterTest {
 
         thenConfigFileContains(new StringBuilder().append("# enabled? true\n").append("# prefix: 24\n")
                 .append("# pass DNS? true\n").append("\n").append("lease-file-name \"/tmp/dhcpd-eth0.leases\";\n")
-                .append("\n").append("subnet 192.168.0.0 netmask 255.255.255.0 {\n")
-                .append("    option domain-name-servers 192.168.0.11;\n").append("\n").append("    interface eth0;\n")
+                .append("\n").append("subnet 192.168.0.0 netmask 255.255.255.0 {\n").append("    interface eth0;\n")
+                .append("    ddns-update-style none;\n").append("    ddns-updates off;\n")
                 .append("    default-lease-time 900;\n").append("    max-lease-time 1000;\n").append("    pool {\n")
                 .append("        range 192.168.0.111 192.168.0.120;\n").append("    }\n").append("}\n").toString());
     }
@@ -190,8 +190,7 @@ public class DhcpServerConfigWriterTest {
                 .append("interface eth0\n").append("pidfile null\n").append("lease_file /tmp/udhcpd-eth0.leases\n")
                 .append("max_leases 9\n").append("auto_time 30\n").append("decline_time 900\n")
                 .append("conflict_time 900\n").append("offer_time 900\n").append("min_lease 900\n")
-                .append("opt subnet 255.255.255.0\n").append("opt lease 900\n").append("opt dns 192.168.0.11\n")
-                .toString());
+                .append("opt subnet 255.255.255.0\n").append("opt lease 900\n").toString());
     }
 
     @Test
@@ -235,7 +234,8 @@ public class DhcpServerConfigWriterTest {
         thenConfigFileContains(new StringBuilder().append("interface=eth0\n")
                 .append("dhcp-range=eth0,192.168.0.111,192.168.0.120,900s\n")
                 .append("dhcp-option=eth0,1,255.255.255.0\n").append("dhcp-option=eth0,3\n")
-                .append("dhcp-option=eth0,6,0.0.0.0\n").append("dhcp-option=eth0,27,1\n").toString());
+                .append("dhcp-option=eth0,6\n").append("dhcp-ignore-names=eth0\n").append("dhcp-option=eth0,27,1\n")
+                .toString());
     }
 
     @Test

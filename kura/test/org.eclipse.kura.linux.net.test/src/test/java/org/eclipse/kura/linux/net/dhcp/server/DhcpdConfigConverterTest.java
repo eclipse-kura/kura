@@ -32,100 +32,104 @@ import org.mockito.Mockito;
 
 public class DhcpdConfigConverterTest {
 
-    private final String EXPECTED_STRING_BASIC_CONFIG = "# enabled? false\n"
-            + "# prefix: 24\n"
-            + "# pass DNS? false\n"
-            + "\n"
-            + "lease-file-name \"/var/lib/dhcp/dhcpd-eth0.leases\";\n"
-            + "\n"
-            + "subnet 172.16.0.0 netmask 255.255.255.0 {\n"
-            + "    interface eth0;\n"
-            + "    ddns-update-style none;\n"
-            + "    ddns-updates off;\n"
-            + "    default-lease-time 900;\n"
-            + "    max-lease-time 900;\n"
-            + "    pool {\n"
-            + "        range 172.16.0.100 172.16.0.120;\n"
-            + "    }\n"
+    private static final String EXPECTED_STRING_BASIC_CONFIG = "# enabled? false\n" //
+            + "# prefix: 24\n" //
+            + "# pass DNS? false\n" //
+            + "\n" //
+            + "lease-file-name \"/var/lib/dhcp/dhcpd-eth0.leases\";\n" //
+            + "\n" //
+            + "subnet 172.16.0.0 netmask 255.255.255.0 {\n" //
+            + "    interface eth0;\n" //
+            + "    ddns-update-style none;\n" //
+            + "    ddns-updates off;\n" //
+            + "    default-lease-time 900;\n" //
+            + "    max-lease-time 900;\n" //
+            + "    pool {\n" //
+            + "        range 172.16.0.100 172.16.0.120;\n" //
+            + "    }\n" //
             + "}\n";
-    private final String EXPECTED_STRING_ENABLED_CONFIG = "# enabled? true\n"
-            + "# prefix: 24\n"
-            + "# pass DNS? false\n"
-            + "\n"
-            + "lease-file-name \"/var/lib/dhcp/dhcpd-eth0.leases\";\n"
-            + "\n"
-            + "subnet 172.16.0.0 netmask 255.255.255.0 {\n"
-            + "    interface eth0;\n"
-            + "    ddns-update-style none;\n"
-            + "    ddns-updates off;\n"
-            + "    default-lease-time 900;\n"
-            + "    max-lease-time 900;\n"
-            + "    pool {\n"
-            + "        range 172.16.0.100 172.16.0.120;\n"
-            + "    }\n"
+    private static final String EXPECTED_STRING_ENABLED_CONFIG = "# enabled? true\n" //
+            + "# prefix: 24\n" //
+            + "# pass DNS? false\n" //
+            + "\n" //
+            + "lease-file-name \"/var/lib/dhcp/dhcpd-eth0.leases\";\n" //
+            + "\n" //
+            + "subnet 172.16.0.0 netmask 255.255.255.0 {\n" //
+            + "    interface eth0;\n" //
+            + "    ddns-update-style none;\n" //
+            + "    ddns-updates off;\n" //
+            + "    default-lease-time 900;\n" //
+            + "    max-lease-time 900;\n" //
+            + "    pool {\n" //
+            + "        range 172.16.0.100 172.16.0.120;\n" //
+            + "    }\n" //
             + "}\n";
-    private final String EXPECTED_STRING_PASS_DNS_CONFIG = "# enabled? false\n"
-            + "# prefix: 24\n"
-            + "# pass DNS? true\n"
-            + "\n"
-            + "lease-file-name \"/var/lib/dhcp/dhcpd-eth0.leases\";\n"
-            + "\n"
-            + "subnet 172.16.0.0 netmask 255.255.255.0 {\n"
-            + "    interface eth0;\n"
-            + "    default-lease-time 900;\n"
-            + "    max-lease-time 900;\n"
-            + "    pool {\n"
-            + "        range 172.16.0.100 172.16.0.120;\n"
-            + "    }\n"
+    private static final String EXPECTED_STRING_PASS_DNS_CONFIG = "# enabled? true\n" //
+            + "# prefix: 24\n" //
+            + "# pass DNS? true\n" //
+            + "\n" //
+            + "lease-file-name \"/var/lib/dhcp/dhcpd-eth0.leases\";\n" //
+            + "\n" //
+            + "subnet 172.16.0.0 netmask 255.255.255.0 {\n" //
+            + "    interface eth0;\n" //
+            + "    option routers 192.168.2.1;\n" //
+            + "    default-lease-time 900;\n" //
+            + "    max-lease-time 900;\n" //
+            + "    pool {\n" //
+            + "        range 172.16.0.100 172.16.0.120;\n" //
+            + "    }\n" //
             + "}\n";
-    private final String EXPECTED_STRING_ROUTER_CONFIG = "# enabled? false\n"
-            + "# prefix: 24\n"
-            + "# pass DNS? false\n"
-            + "\n"
-            + "lease-file-name \"/var/lib/dhcp/dhcpd-eth0.leases\";\n"
-            + "\n"
-            + "subnet 172.16.0.0 netmask 255.255.255.0 {\n"
-            + "    interface eth0;\n"
-            + "    option routers 192.168.2.1;\n"
-            + "    ddns-update-style none;\n"
-            + "    ddns-updates off;\n"
-            + "    default-lease-time 900;\n"
-            + "    max-lease-time 900;\n"
-            + "    pool {\n"
-            + "        range 172.16.0.100 172.16.0.120;\n"
-            + "    }\n"
+    private static final String EXPECTED_STRING_ROUTER_CONFIG = "# enabled? false\n" //
+            + "# prefix: 24\n" //
+            + "# pass DNS? false\n" //
+            + "\n" //
+            + "lease-file-name \"/var/lib/dhcp/dhcpd-eth0.leases\";\n" //
+            + "\n" //
+            + "subnet 172.16.0.0 netmask 255.255.255.0 {\n" //
+            + "    interface eth0;\n" //
+            + "    option routers 192.168.2.1;\n" //
+            + "    ddns-update-style none;\n" //
+            + "    ddns-updates off;\n" //
+            + "    default-lease-time 900;\n" //
+            + "    max-lease-time 900;\n" //
+            + "    pool {\n" //
+            + "        range 172.16.0.100 172.16.0.120;\n" //
+            + "    }\n" //
             + "}\n";
-    private final String EXPECTED_STRING_DNS_ADDRESSES_CONFIG = "# enabled? false\n"
-            + "# prefix: 24\n"
-            + "# pass DNS? true\n"
-            + "\n"
-            + "lease-file-name \"/var/lib/dhcp/dhcpd-eth0.leases\";\n"
-            + "\n"
-            + "subnet 172.16.0.0 netmask 255.255.255.0 {\n"
-            + "    option domain-name-servers 8.8.8.8,8.8.4.4;\n\n"
-            + "    interface eth0;\n"
-            + "    default-lease-time 900;\n"
-            + "    max-lease-time 900;\n"
-            + "    pool {\n"
-            + "        range 172.16.0.100 172.16.0.120;\n"
-            + "    }\n"
+    private static final String EXPECTED_STRING_FULL_CONFIG = "# enabled? true\n" //
+            + "# prefix: 24\n" //
+            + "# pass DNS? true\n" //
+            + "\n" //
+            + "lease-file-name \"/var/lib/dhcp/dhcpd-eth0.leases\";\n" //
+            + "\n" //
+            + "subnet 172.16.0.0 netmask 255.255.255.0 {\n" //
+            + "    option domain-name-servers 8.8.8.8,8.8.4.4;\n\n" //
+            + "    interface eth0;\n" //
+            + "    option routers 192.168.2.1;\n" //
+            + "    default-lease-time 900;\n" //
+            + "    max-lease-time 900;\n" //
+            + "    pool {\n" //
+            + "        range 172.16.0.100 172.16.0.120;\n" //
+            + "    }\n" //
             + "}\n";
-    private final String EXPECTED_STRING_FULL_CONFIG = "# enabled? true\n"
-            + "# prefix: 24\n"
-            + "# pass DNS? true\n"
-            + "\n"
-            + "lease-file-name \"/var/lib/dhcp/dhcpd-eth0.leases\";\n"
-            + "\n"
-            + "subnet 172.16.0.0 netmask 255.255.255.0 {\n"
-            + "    option domain-name-servers 8.8.8.8,8.8.4.4;\n\n"
-            + "    interface eth0;\n"
-            + "    option routers 192.168.2.1;\n"
-            + "    default-lease-time 900;\n"
-            + "    max-lease-time 900;\n"
-            + "    pool {\n"
-            + "        range 172.16.0.100 172.16.0.120;\n"
-            + "    }\n"
+
+    private static final String EXPECTED_STRING_NO_NAT_CONFIG = "# enabled? false\n" //
+            + "# prefix: 24\n" //
+            + "# pass DNS? true\n" //
+            + "\n" //
+            + "lease-file-name \"/var/lib/dhcp/dhcpd-eth0.leases\";\n" //
+            + "\n" //
+            + "subnet 172.16.0.0 netmask 255.255.255.0 {\n" //
+            + "    interface eth0;\n" //
+            + "    ddns-update-style none;\n" //
+            + "    ddns-updates off;\n" //
+            + "    default-lease-time 900;\n" //
+            + "    max-lease-time 900;\n" //
+            + "    pool {\n" //
+            + "        range 172.16.0.100 172.16.0.120;\n" //
+            + "    }\n" //
             + "}\n";
+
     private DhcpServerConfig config;
     private DhcpdConfigConverter converter;
     private String convertedConfig;
@@ -161,6 +165,16 @@ public class DhcpdConfigConverterTest {
     }
 
     @Test
+    public void shouldReturnConfigNoNatWithPassDns() throws UnknownHostException, KuraException {
+        givenDhcpServerConfigNoNatWithPassDns();
+        givenDhcpdConfigConverter();
+
+        whenDhcpdServerConfigIsConverted();
+
+        thenDhcpdServerConfigIs(EXPECTED_STRING_NO_NAT_CONFIG);
+    }
+
+    @Test
     public void shouldReturnConfigWithRouterAddress() throws UnknownHostException, KuraException {
         givenDhcpServerConfigWithRouterAddress();
         givenDhcpdConfigConverter();
@@ -177,7 +191,17 @@ public class DhcpdConfigConverterTest {
 
         whenDhcpdServerConfigIsConverted();
 
-        thenDhcpdServerConfigIs(EXPECTED_STRING_DNS_ADDRESSES_CONFIG);
+        thenDhcpdServerConfigIs(EXPECTED_STRING_FULL_CONFIG);
+    }
+
+    @Test
+    public void shouldReturnConfigNoNatWithDnsAddresses() throws UnknownHostException, KuraException {
+        givenDhcpServerConfigNoNatWithDnsAddresses();
+        givenDhcpdConfigConverter();
+
+        whenDhcpdServerConfigIsConverted();
+
+        thenDhcpdServerConfigIs(EXPECTED_STRING_NO_NAT_CONFIG);
     }
 
     @Test
@@ -196,8 +220,7 @@ public class DhcpdConfigConverterTest {
                 (IP4Address) IPAddress.parseHostAddress("172.16.0.0"),
                 (IP4Address) IPAddress.parseHostAddress("255.255.255.0"), (short) 24, (IP4Address) null,
                 (IP4Address) IPAddress.parseHostAddress("172.16.0.100"),
-                (IP4Address) IPAddress.parseHostAddress("172.16.0.120"),
-                (List<IP4Address>) null);
+                (IP4Address) IPAddress.parseHostAddress("172.16.0.120"), (List<IP4Address>) null);
 
         this.config = new DhcpServerConfigIP4(dhcpServerConfig, dhcpServerConfigIP4);
     }
@@ -208,20 +231,30 @@ public class DhcpdConfigConverterTest {
                 (IP4Address) IPAddress.parseHostAddress("172.16.0.0"),
                 (IP4Address) IPAddress.parseHostAddress("255.255.255.0"), (short) 24, (IP4Address) null,
                 (IP4Address) IPAddress.parseHostAddress("172.16.0.100"),
-                (IP4Address) IPAddress.parseHostAddress("172.16.0.120"),
-                (List<IP4Address>) null);
+                (IP4Address) IPAddress.parseHostAddress("172.16.0.120"), (List<IP4Address>) null);
 
         this.config = new DhcpServerConfigIP4(dhcpServerConfig, dhcpServerConfigIP4);
     }
 
     private void givenDhcpServerConfigWithPassDns() throws UnknownHostException, KuraException {
+        DhcpServerCfg dhcpServerConfig = new DhcpServerCfg("eth0", true, 900, 900, true);
+        DhcpServerCfgIP4 dhcpServerConfigIP4 = new DhcpServerCfgIP4(
+                (IP4Address) IPAddress.parseHostAddress("172.16.0.0"),
+                (IP4Address) IPAddress.parseHostAddress("255.255.255.0"), (short) 24,
+                (IP4Address) IPAddress.parseHostAddress("192.168.2.1"),
+                (IP4Address) IPAddress.parseHostAddress("172.16.0.100"),
+                (IP4Address) IPAddress.parseHostAddress("172.16.0.120"), (List<IP4Address>) null);
+
+        this.config = new DhcpServerConfigIP4(dhcpServerConfig, dhcpServerConfigIP4);
+    }
+
+    private void givenDhcpServerConfigNoNatWithPassDns() throws UnknownHostException, KuraException {
         DhcpServerCfg dhcpServerConfig = new DhcpServerCfg("eth0", false, 900, 900, true);
         DhcpServerCfgIP4 dhcpServerConfigIP4 = new DhcpServerCfgIP4(
                 (IP4Address) IPAddress.parseHostAddress("172.16.0.0"),
                 (IP4Address) IPAddress.parseHostAddress("255.255.255.0"), (short) 24, (IP4Address) null,
                 (IP4Address) IPAddress.parseHostAddress("172.16.0.100"),
-                (IP4Address) IPAddress.parseHostAddress("172.16.0.120"),
-                (List<IP4Address>) null);
+                (IP4Address) IPAddress.parseHostAddress("172.16.0.120"), (List<IP4Address>) null);
 
         this.config = new DhcpServerConfigIP4(dhcpServerConfig, dhcpServerConfigIP4);
     }
@@ -233,13 +266,27 @@ public class DhcpdConfigConverterTest {
                 (IP4Address) IPAddress.parseHostAddress("255.255.255.0"), (short) 24,
                 (IP4Address) IPAddress.parseHostAddress("192.168.2.1"),
                 (IP4Address) IPAddress.parseHostAddress("172.16.0.100"),
-                (IP4Address) IPAddress.parseHostAddress("172.16.0.120"),
-                (List<IP4Address>) null);
+                (IP4Address) IPAddress.parseHostAddress("172.16.0.120"), (List<IP4Address>) null);
 
         this.config = new DhcpServerConfigIP4(dhcpServerConfig, dhcpServerConfigIP4);
     }
 
     private void givenDhcpServerConfigWithDnsAddresses() throws UnknownHostException, KuraException {
+        DhcpServerCfg dhcpServerConfig = new DhcpServerCfg("eth0", true, 900, 900, true);
+        List<IP4Address> dnsAddresses = new ArrayList<>();
+        dnsAddresses.add((IP4Address) IPAddress.parseHostAddress("8.8.8.8"));
+        dnsAddresses.add((IP4Address) IPAddress.parseHostAddress("8.8.4.4"));
+        DhcpServerCfgIP4 dhcpServerConfigIP4 = new DhcpServerCfgIP4(
+                (IP4Address) IPAddress.parseHostAddress("172.16.0.0"),
+                (IP4Address) IPAddress.parseHostAddress("255.255.255.0"), (short) 24,
+                (IP4Address) IPAddress.parseHostAddress("192.168.2.1"),
+                (IP4Address) IPAddress.parseHostAddress("172.16.0.100"),
+                (IP4Address) IPAddress.parseHostAddress("172.16.0.120"), dnsAddresses);
+
+        this.config = new DhcpServerConfigIP4(dhcpServerConfig, dhcpServerConfigIP4);
+    }
+
+    private void givenDhcpServerConfigNoNatWithDnsAddresses() throws UnknownHostException, KuraException {
         DhcpServerCfg dhcpServerConfig = new DhcpServerCfg("eth0", false, 900, 900, true);
         List<IP4Address> dnsAddresses = new ArrayList<>();
         dnsAddresses.add((IP4Address) IPAddress.parseHostAddress("8.8.8.8"));
@@ -248,8 +295,7 @@ public class DhcpdConfigConverterTest {
                 (IP4Address) IPAddress.parseHostAddress("172.16.0.0"),
                 (IP4Address) IPAddress.parseHostAddress("255.255.255.0"), (short) 24, (IP4Address) null,
                 (IP4Address) IPAddress.parseHostAddress("172.16.0.100"),
-                (IP4Address) IPAddress.parseHostAddress("172.16.0.120"),
-                dnsAddresses);
+                (IP4Address) IPAddress.parseHostAddress("172.16.0.120"), dnsAddresses);
 
         this.config = new DhcpServerConfigIP4(dhcpServerConfig, dhcpServerConfigIP4);
     }
@@ -264,8 +310,7 @@ public class DhcpdConfigConverterTest {
                 (IP4Address) IPAddress.parseHostAddress("255.255.255.0"), (short) 24,
                 (IP4Address) IPAddress.parseHostAddress("192.168.2.1"),
                 (IP4Address) IPAddress.parseHostAddress("172.16.0.100"),
-                (IP4Address) IPAddress.parseHostAddress("172.16.0.120"),
-                dnsAddresses);
+                (IP4Address) IPAddress.parseHostAddress("172.16.0.120"), dnsAddresses);
 
         this.config = new DhcpServerConfigIP4(dhcpServerConfig, dhcpServerConfigIP4);
     }

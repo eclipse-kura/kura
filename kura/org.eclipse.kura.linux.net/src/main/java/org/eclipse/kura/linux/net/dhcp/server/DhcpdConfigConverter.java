@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,8 @@
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.linux.net.dhcp.server;
+
+import static java.util.Objects.isNull;
 
 import org.eclipse.kura.linux.net.dhcp.DhcpServerConfigConverter;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
@@ -33,7 +35,8 @@ public class DhcpdConfigConverter implements DhcpServerConfigConverter {
                 + config.getSubnetMask().getHostAddress() + " {\n");
 
         // DNS servers
-        if (config.isPassDns() && config.getDnsServers() != null && !config.getDnsServers().isEmpty()) {
+        if (config.isPassDns() && config.getDnsServers() != null && !config.getDnsServers().isEmpty()
+                && !isNull(config.getRouterAddress())) {
             sb.append("    option domain-name-servers ");
             for (int i = 0; i < config.getDnsServers().size(); i++) {
                 if (config.getDnsServers().get(i) != null) {
@@ -48,15 +51,15 @@ public class DhcpdConfigConverter implements DhcpServerConfigConverter {
             }
         }
         // interface
-        if (config.getInterfaceName() != null) {
+        if (!isNull(config.getInterfaceName())) {
             sb.append("    interface " + config.getInterfaceName() + ";\n");
         }
         // router address
-        if (config.getRouterAddress() != null) {
+        if (!isNull(config.getRouterAddress())) {
             sb.append("    option routers " + config.getRouterAddress().getHostAddress() + ";\n");
         }
         // if DNS should not be forwarded, add the following lines
-        if (!config.isPassDns()) {
+        if (!config.isPassDns() || isNull(config.getRouterAddress())) {
             sb.append("    ddns-update-style none;\n");
             sb.append("    ddns-updates off;\n");
         }

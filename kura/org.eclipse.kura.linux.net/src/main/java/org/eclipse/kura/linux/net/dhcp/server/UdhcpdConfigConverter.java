@@ -44,7 +44,7 @@ public class UdhcpdConfigConverter implements DhcpServerConfigConverter {
 
         sb.append("opt lease ").append(config.getDefaultLeaseTime()).append("\n");
 
-        if (config.getDnsServers() != null && !config.getDnsServers().isEmpty()) {
+        if (config.getDnsServers() != null && !config.getDnsServers().isEmpty() && !isNull(config.getRouterAddress())) {
             sb.append(addDNSServersOption(config)).append("\n");
         }
         return sb.toString();

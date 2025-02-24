@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -755,7 +756,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
 
         if (takeSnapshot && configs != null && !configs.isEmpty()) {
-            snapshot();
+            saveSnapshot(configs);
         }
 
         if (!causes.isEmpty()) {
@@ -1009,13 +1010,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND);
         }
 
-        if (fSnapshot.isDirectory()) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, fSnapshot.getName() + "is not a file.");
-        }
-
         File tempSnapshotFile;
         try {
-            tempSnapshotFile = File.createTempFile(fSnapshot.getName(), "", new File(fSnapshot.getParent()));
+            tempSnapshotFile = File.createTempFile(fSnapshot.getName(), null, new File(fSnapshot.getParent()));
             tempSnapshotFile.deleteOnExit();
         } catch (IOException ex) {
             throw new KuraIOException(ex);
@@ -1039,9 +1036,15 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         try {
             // Consolidate snapshot writing
-            FileUtils.copyFile(tempSnapshotFile, fSnapshot);
-            FileUtils.delete(tempSnapshotFile);
+            Files.move(tempSnapshotFile.toPath(), fSnapshot.toPath(), StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.ATOMIC_MOVE);
+
         } catch (IOException e) {
+            try {
+                FileUtils.delete(tempSnapshotFile);
+            } catch (IOException e1) {
+                throw new KuraIOException(e1);
+            }
             throw new KuraIOException(e);
         }
 

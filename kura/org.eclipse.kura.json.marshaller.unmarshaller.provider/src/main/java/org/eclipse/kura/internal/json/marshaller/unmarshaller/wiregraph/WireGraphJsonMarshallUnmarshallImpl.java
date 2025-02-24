@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.wiregraph;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -154,12 +156,12 @@ public class WireGraphJsonMarshallUnmarshallImpl {
         return outputPortElems;
     }
 
-    public static WireGraphConfiguration unmarshalToWireGraphConfiguration(String jsonString) {
+    public static WireGraphConfiguration unmarshalToWireGraphConfiguration(Reader jsonReader) throws IOException {
 
         List<WireComponentConfiguration> wireCompConfigList = new ArrayList<>();
         List<MultiportWireConfiguration> wireConfigList = new ArrayList<>();
 
-        JsonObject json = Json.parse(jsonString).asObject();
+        JsonObject json = Json.parse(jsonReader).asObject();
 
         for (JsonObject.Member member : json) {
             String name = member.getName();

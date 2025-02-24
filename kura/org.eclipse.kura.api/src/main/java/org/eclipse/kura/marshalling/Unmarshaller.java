@@ -40,9 +40,8 @@ public interface Unmarshaller {
     public <T> T unmarshal(String string, Class<T> clazz) throws KuraException;
 
     /**
-     * This method takes an {@link InputStream} representation and a class that will be used as reference to construct
-     * the result.
-     *
+     * Deserialises an object of the specified type from the provided {@link InputStream}
+     * 
      * @param in
      *            the input stream
      * @param clazz

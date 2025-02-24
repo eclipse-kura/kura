@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.keystore;
 
+import java.io.Reader;
+
 import org.eclipse.kura.core.keystore.util.CertificateInfo;
 import org.eclipse.kura.core.keystore.util.CsrInfo;
 import org.eclipse.kura.core.keystore.util.EntryInfo;
@@ -28,9 +30,9 @@ public class KeystoreEntryInfoMapper {
         // empty constructor
     }
 
-    public static EntryInfo unmarshal(String jsonString, Class<?> clazz) {
-        Gson gson = new Gson();
-        JsonObject json = new JsonParser().parse(jsonString).getAsJsonObject();
+    public static EntryInfo unmarshal(Reader jsonReader, Class<?> clazz) {
+        final Gson gson = new Gson();
+        final JsonObject json = JsonParser.parseReader(jsonReader).getAsJsonObject();
 
         if (clazz.equals(CertificateInfo.class)) {
             return gson.fromJson(json, CertificateInfo.class);

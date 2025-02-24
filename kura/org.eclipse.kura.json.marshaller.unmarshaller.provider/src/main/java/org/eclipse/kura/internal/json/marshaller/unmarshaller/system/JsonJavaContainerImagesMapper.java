@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.system;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.util.Optional;
 
 import org.eclipse.kura.core.inventory.resources.ContainerImage;
@@ -43,8 +45,8 @@ public class JsonJavaContainerImagesMapper {
         // empty constructor
     }
 
-    public static ContainerImage unmarshal(final String encoded) {
-        final JsonObject object = Json.parse(encoded).asObject();
+    public static ContainerImage unmarshal(final Reader jsonReader) throws IOException {
+        final JsonObject object = Json.parse(jsonReader).asObject();
 
         final String name = getStringValue(object, SYSTEM_IMAGES_IMAGE_NAME);
         final String version = getStringValue(object, SYSTEM_IMAGES_IMAGE_VERSION);

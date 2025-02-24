@@ -1660,10 +1660,10 @@ public class ConfigurationServiceJunitTest {
             TestUtil.invokePrivate(cs, "writeSnapshot", sid, cfg);
             fail("Exception expected due to 'file' being directory.");
         } catch (KuraException e) {
-            assertEquals("Error code.", KuraErrorCode.CONFIGURATION_ERROR, e.getCode());
+            assertEquals("Error code.", KuraErrorCode.IO_ERROR, e.getCode());
         }
 
-        verify(cryptoServiceMock, never()).aesEncryptingStream((OutputStream) ArgumentMatchers.any());
+        verify(cryptoServiceMock, times(1)).aesEncryptingStream((OutputStream) ArgumentMatchers.any());
 
         d1.delete();
         d2.delete();

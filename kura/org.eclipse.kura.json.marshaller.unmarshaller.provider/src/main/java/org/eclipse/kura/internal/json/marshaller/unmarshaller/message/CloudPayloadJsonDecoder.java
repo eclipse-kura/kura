@@ -25,6 +25,8 @@ import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.Clo
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SPEED;
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.STATUS;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
@@ -55,12 +57,14 @@ public class CloudPayloadJsonDecoder {
      * If the mapping fails, the entire string, received as argument, will be placed in the body of the returned
      * {@link KuraPayload}.
      *
-     * @param stringJson
+     * @param jsonReader
      *            a Json encoded as a String.
      * @return a {@link KuraPayload} that directly maps the received array.
+     * @throws IOException
      */
-    public static KuraPayload buildFromString(String stringJson) {
-        JsonObject json = Json.parse(stringJson).asObject();
+    public static KuraPayload buildFromReader(Reader jsonReader) throws IOException {
+
+        final JsonObject json = Json.parse(jsonReader).asObject();
 
         KuraPayload payload = new KuraPayload();
 
@@ -83,7 +87,7 @@ public class CloudPayloadJsonDecoder {
         } catch (Exception e) {
             logger.warn("Cannot parse Json", e);
             payload = new KuraPayload();
-            payload.setBody(stringJson.getBytes(StandardCharsets.UTF_8));
+            payload.setBody(json.toString().getBytes(StandardCharsets.UTF_8));
         }
         return payload;
     }

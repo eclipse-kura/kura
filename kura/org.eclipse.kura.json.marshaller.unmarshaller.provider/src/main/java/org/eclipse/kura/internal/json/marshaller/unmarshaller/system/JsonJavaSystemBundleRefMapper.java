@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.system;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.util.Optional;
 
 import org.eclipse.kura.core.inventory.resources.SystemBundleRef;
@@ -27,8 +29,8 @@ public class JsonJavaSystemBundleRefMapper {
     private static final String NAME_KEY = "name";
     private static final String VERSION_KEY = "version";
 
-    public static SystemBundleRef unmarshal(final String encoded) {
-        final JsonObject object = Json.parse(encoded).asObject();
+    public static SystemBundleRef unmarshal(final Reader jsonReader) throws IOException {
+        final JsonObject object = Json.parse(jsonReader).asObject();
 
         final String name = getStringValue(object, NAME_KEY);
         final Optional<String> version = getOptionalStringValue(object, VERSION_KEY);

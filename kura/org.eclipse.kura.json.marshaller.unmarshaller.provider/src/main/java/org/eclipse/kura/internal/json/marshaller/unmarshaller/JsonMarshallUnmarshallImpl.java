@@ -14,10 +14,12 @@ package org.eclipse.kura.internal.json.marshaller.unmarshaller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.CharSequenceInputStream;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
@@ -102,42 +104,33 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> T unmarshal(String s, Class<T> clazz) throws KuraException {
-        if (clazz.equals(WireGraphConfiguration.class)) {
-            return (T) WireGraphJsonMarshallUnmarshallImpl.unmarshalToWireGraphConfiguration(s);
-        } else if (clazz.equals(KuraPayload.class)) {
-            return (T) CloudPayloadJsonDecoder.buildFromString(s);
-        } else if (EntryInfo.class.isAssignableFrom(clazz)) {
-            return (T) KeystoreEntryInfoMapper.unmarshal(s, clazz);
-        } else if (clazz.equals(SystemBundleRef.class)) {
-            return (T) JsonJavaSystemBundleRefMapper.unmarshal(s);
-        } else if (clazz.equals(DockerContainer.class)) {
-            return (T) JsonJavaDockerContainersMapper.unmarshal(s);
-        } else if (clazz.equals(ContainerImage.class)) {
-            return (T) JsonJavaContainerImagesMapper.unmarshal(s);
-        }
-        throw new IllegalArgumentException("Invalid parameter!");
+    public <T> T unmarshal(String inputString, Class<T> clazz) throws KuraException {
+
+        CharSequenceInputStream stream = CharSequenceInputStream.builder().setCharSequence(inputString)
+                .setBufferSize(8192).setCharset(StandardCharsets.UTF_8).get();
+
+        return unmarshal(stream, clazz);
     }
 
     @Override
-    public <T> T unmarshal(InputStream in, Class<T> clazz) throws KuraException {
+    public <T> T unmarshal(InputStream inputStream, Class<T> clazz) throws KuraException {
         try {
-            String inputString = IOUtils.toString(in, StandardCharsets.UTF_8);
+
+            final Reader jsonReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 
             if (clazz.equals(WireGraphConfiguration.class)) {
-                return (T) WireGraphJsonMarshallUnmarshallImpl.unmarshalToWireGraphConfiguration(inputString);
+                return (T) WireGraphJsonMarshallUnmarshallImpl.unmarshalToWireGraphConfiguration(jsonReader);
             } else if (clazz.equals(KuraPayload.class)) {
-                return (T) CloudPayloadJsonDecoder.buildFromString(inputString);
+                return (T) CloudPayloadJsonDecoder.buildFromReader(jsonReader);
             } else if (EntryInfo.class.isAssignableFrom(clazz)) {
-                return (T) KeystoreEntryInfoMapper.unmarshal(inputString, clazz);
+                return (T) KeystoreEntryInfoMapper.unmarshal(jsonReader, clazz);
             } else if (clazz.equals(SystemBundleRef.class)) {
-                return (T) JsonJavaSystemBundleRefMapper.unmarshal(inputString);
+                return (T) JsonJavaSystemBundleRefMapper.unmarshal(jsonReader);
             } else if (clazz.equals(DockerContainer.class)) {
-                return (T) JsonJavaDockerContainersMapper.unmarshal(inputString);
+                return (T) JsonJavaDockerContainersMapper.unmarshal(jsonReader);
             } else if (clazz.equals(ContainerImage.class)) {
-                return (T) JsonJavaContainerImagesMapper.unmarshal(inputString);
+                return (T) JsonJavaContainerImagesMapper.unmarshal(jsonReader);
             }
         } catch (IOException ex) {
             throw new KuraIOException(ex);

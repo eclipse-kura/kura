@@ -1,18 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2019, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.web.session;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.servlet.context.ServletContextHelper;
@@ -27,15 +28,13 @@ public class HttpServletContextHelper extends ServletContextHelper {
 
     public HttpServletContextHelper(SecurityHandler securityHandler) {
         super(FrameworkUtil.getBundle(HttpServletContextHelper.class));
+
+        Objects.requireNonNull(securityHandler);
         this.securityHandler = securityHandler;
     }
 
     @Override
     public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-        if (this.securityHandler == null) {
-            return super.handleSecurity(request, response);
-        }
 
         if (handleSecurityInternal(request, response)) {
             return true;

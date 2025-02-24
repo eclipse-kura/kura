@@ -50,7 +50,7 @@ public interface Unmarshaller {
      * @return an object that is constructed from the passed string
      * @throws KuraException
      *             when the unmarshaling operation fails.
-     * @since 8.0
+     * @since 3.0
      */
     public <T> T unmarshal(InputStream in, Class<T> clazz) throws KuraException;
 }

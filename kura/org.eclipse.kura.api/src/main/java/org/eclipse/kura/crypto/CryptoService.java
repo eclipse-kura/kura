@@ -53,7 +53,7 @@ public interface CryptoService {
      *            The OutputStream on which the encrypted data will be written.
      * @return The OutputStream able to encrypt data.
      * @throws KuraException
-     * @since 8.0
+     * @since 3.0
      */
     public OutputStream aesEncryptingStream(OutputStream destination) throws KuraException;
 
@@ -64,7 +64,7 @@ public interface CryptoService {
      *            The InputStream to read the encrypted data from.
      * @return InputStream able to decrypt data.
      * @throws KuraException
-     * @since 8.0
+     * @since 3.0
      */
     public InputStream aesDecryptingStream(InputStream source) throws KuraException;
 

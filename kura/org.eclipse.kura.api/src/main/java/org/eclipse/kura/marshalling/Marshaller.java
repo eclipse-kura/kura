@@ -45,7 +45,7 @@ public interface Marshaller {
      * @param object
      *            the {@link Object} that will be marshalled.
      * @throws KuraException
-     * @since 8.0
+     * @since 3.0
      */
     public void marshal(final OutputStream out, Object object) throws KuraException;
 }

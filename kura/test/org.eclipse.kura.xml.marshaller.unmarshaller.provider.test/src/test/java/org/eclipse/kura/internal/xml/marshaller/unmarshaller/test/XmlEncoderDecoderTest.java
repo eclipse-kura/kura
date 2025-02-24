@@ -9,7 +9,7 @@
  *
  * Contributors:
  *  Eurotech
- *******************************************************************************/
+ ******************************************************************************/
 package org.eclipse.kura.internal.xml.marshaller.unmarshaller.test;
 
 import static org.junit.Assert.assertEquals;

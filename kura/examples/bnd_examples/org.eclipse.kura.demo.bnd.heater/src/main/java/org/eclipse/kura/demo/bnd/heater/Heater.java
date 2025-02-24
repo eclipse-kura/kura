@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  *
- *  This program and the accompanying materials are made
- *  available under the terms of the Eclipse Public License 2.0
- *  which is available at https://www.eclipse.org/legal/epl-2.0/
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
- *  SPDX-License-Identifier: EPL-2.0
+ * SPDX-License-Identifier: EPL-2.0
  *
- *  Contributors:
- *   Eurotech
+ * Contributors:
+ *  Eurotech
  *******************************************************************************/
 
 package org.eclipse.kura.demo.bnd.heater;
@@ -39,15 +39,11 @@ import org.osgi.service.component.ComponentException;
  * {@code immediate = true} and {@code configurationPolicy = REQUIRE}.
  * </p>
  *
- * @author David Woodard
+ * @author David Woodard, Giorgio Nunzi
  */
 @Designate(ocd = HeaterConfig.class)
-@Component(
-        immediate = true,
-        configurationPolicy = ConfigurationPolicy.REQUIRE,
-        property = "service.pid=org.eclipse.kura.demo.bnd.heater.Heater"
-)
-public class Heater implements ConfigurableComponent, CloudClientListener {
+@Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE, property = "service.pid=org.eclipse.kura.demo.bnd.heater.Heater")
+public class Heater implements ConfigurableComponent, CloudClientListener, HeaterService {
 
     private static final Logger logger = LoggerFactory.getLogger(Heater.class);
 
@@ -71,6 +67,8 @@ public class Heater implements ConfigurableComponent, CloudClientListener {
     private static final String PUBLISH_QOS_PROP_NAME = "publish.qos";
     private static final String PUBLISH_RETAIN_PROP_NAME = "publish.retain";
 
+    private HeaterConfig config;
+
     private CloudService cloudService;
     private CloudClient cloudClient;
 
@@ -93,14 +91,7 @@ public class Heater implements ConfigurableComponent, CloudClientListener {
         this.worker = Executors.newSingleThreadScheduledExecutor();
     }
 
-    @Reference(
-            name = "CloudService",
-            service = CloudService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.STATIC,
-            unbind = "unsetCloudService",
-            target = "(kura.service.pid=org.eclipse.kura.cloud.CloudService)"
-    )
+    @Reference(name = "CloudService", service = CloudService.class, cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.STATIC, unbind = "unsetCloudService", target = "(kura.service.pid=org.eclipse.kura.cloud.CloudService)")
     public void setCloudService(CloudService cloudService) {
         this.cloudService = cloudService;
     }
@@ -116,13 +107,12 @@ public class Heater implements ConfigurableComponent, CloudClientListener {
     // ----------------------------------------------------------------
 
     @Activate
-    protected void activate(Map<String, Object> properties) {
+    void activate(final Map<String, Object> properties, HeaterConfig config) {
         logger.info("Activating Heater...");
 
         this.properties = properties;
-        for (String s : properties.keySet()) {
-            logger.info("Activate - {}: {}", s, properties.get(s));
-        }
+        this.config = config;
+        logger.info("Activating Heater. Mode: {}. All properties: {}", config.mode(), properties);
 
         // get the mqtt client for this application
         try {
@@ -143,7 +133,7 @@ public class Heater implements ConfigurableComponent, CloudClientListener {
     }
 
     @Deactivate
-    protected void deactivate() {
+    void deactivate() {
         logger.debug("Deactivating Heater...");
 
         // shutting down the worker and cleaning up the properties
@@ -157,14 +147,12 @@ public class Heater implements ConfigurableComponent, CloudClientListener {
     }
 
     @Modified
-    public void updated(Map<String, Object> properties) {
-        logger.info("Updated Heater...");
+    void updated(final Map<String, Object> properties, HeaterConfig config) {
+        logger.info("Updating Heater. Mode: {}. All properties: {}", config.mode(), properties);
 
         // store the properties received
         this.properties = properties;
-        for (String s : properties.keySet()) {
-            logger.info("Update - {}: {}", s, properties.get(s));
-        }
+        this.config = config;
 
         // try to kick off a new job
         doUpdate(true);
@@ -303,5 +291,11 @@ public class Heater implements ConfigurableComponent, CloudClientListener {
         } catch (Exception e) {
             logger.error("Cannot publish topic: {}", topic, e);
         }
+    }
+
+    @Override
+    public String getMode() {
+        return this.config.mode();
+        // alternative: return (String) this.properties.get(MODE_PROP_NAME);
     }
 }

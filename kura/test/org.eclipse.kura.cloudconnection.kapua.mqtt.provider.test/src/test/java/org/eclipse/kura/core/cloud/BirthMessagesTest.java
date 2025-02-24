@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -425,7 +426,7 @@ public class BirthMessagesTest {
             public void marshal(final OutputStream out, Object object) throws KuraException {
                 try {
                     if (object instanceof KuraPayload) {
-                        out.write(object.toString().getBytes());
+                        out.write(object.toString().getBytes(StandardCharsets.UTF_8));
                     }
                 } catch (IOException ex) {
                     //do nothing

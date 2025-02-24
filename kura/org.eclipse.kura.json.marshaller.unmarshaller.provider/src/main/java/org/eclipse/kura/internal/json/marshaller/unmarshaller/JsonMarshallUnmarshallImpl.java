@@ -82,21 +82,27 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         try {
             if (object instanceof WireGraphConfiguration) {
                 out.write(WireGraphJsonMarshallUnmarshallImpl
-                        .marshalWireGraphConfiguration((WireGraphConfiguration) object).toString().getBytes());
+                        .marshalWireGraphConfiguration((WireGraphConfiguration) object).toString()
+                        .getBytes(StandardCharsets.UTF_8));
             } else if (object instanceof KuraPayload) {
-                out.write(CloudPayloadJsonEncoder.marshal((KuraPayload) object).getBytes());
+                out.write(CloudPayloadJsonEncoder.marshal((KuraPayload) object).getBytes(StandardCharsets.UTF_8));
             } else if (object instanceof SystemDeploymentPackages) {
-                out.write(JsonJavaSystemDeploymentPackagesMapper.marshal((SystemDeploymentPackages) object).getBytes());
+                out.write(JsonJavaSystemDeploymentPackagesMapper.marshal((SystemDeploymentPackages) object)
+                        .getBytes(StandardCharsets.UTF_8));
             } else if (object instanceof SystemBundles) {
-                out.write(JsonJavaSystemBundlesMapper.marshal((SystemBundles) object).getBytes());
+                out.write(JsonJavaSystemBundlesMapper.marshal((SystemBundles) object).getBytes(StandardCharsets.UTF_8));
             } else if (object instanceof SystemPackages) {
-                out.write(JsonJavaSystemPackagesMapper.marshal((SystemPackages) object).getBytes());
+                out.write(
+                        JsonJavaSystemPackagesMapper.marshal((SystemPackages) object).getBytes(StandardCharsets.UTF_8));
             } else if (object instanceof DockerContainers) {
-                out.write(JsonJavaDockerContainersMapper.marshal((DockerContainers) object).getBytes());
+                out.write(JsonJavaDockerContainersMapper.marshal((DockerContainers) object)
+                        .getBytes(StandardCharsets.UTF_8));
             } else if (object instanceof ContainerImages) {
-                out.write(JsonJavaContainerImagesMapper.marshal((ContainerImages) object).getBytes());
+                out.write(JsonJavaContainerImagesMapper.marshal((ContainerImages) object)
+                        .getBytes(StandardCharsets.UTF_8));
             } else if (object instanceof SystemResourcesInfo) {
-                out.write(JsonJavaSystemResourcesMapper.marshal((SystemResourcesInfo) object).getBytes());
+                out.write(JsonJavaSystemResourcesMapper.marshal((SystemResourcesInfo) object)
+                        .getBytes(StandardCharsets.UTF_8));
             }
         } catch (IOException ex) {
             throw new KuraIOException(ex);

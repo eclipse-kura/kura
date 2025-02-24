@@ -19,6 +19,7 @@ import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -488,7 +489,7 @@ public class XmlEncoderDecoderTest {
         String marshalString = out.toString();
         logger.info(marshalString);
 
-        ByteArrayInputStream in = new ByteArrayInputStream(marshalString.getBytes());
+        ByteArrayInputStream in = new ByteArrayInputStream(marshalString.getBytes(StandardCharsets.UTF_8));
         XmlComponentConfigurations config1 = xmlMarshallerImpl.unmarshal(in, XmlComponentConfigurations.class);
         String s1 = xmlMarshallerImpl.marshal(config1);
         logger.info(s1);

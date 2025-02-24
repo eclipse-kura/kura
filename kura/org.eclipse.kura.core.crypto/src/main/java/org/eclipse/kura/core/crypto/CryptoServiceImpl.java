@@ -125,8 +125,8 @@ public class CryptoServiceImpl implements CryptoService {
             this.random.nextBytes(iv);
             c.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(AUTH_TAG_LENGTH_BIT, iv));
 
-            stream.write(base64Encode(iv).getBytes());
-            stream.write(ENCRYPTED_STRING_SEPARATOR.getBytes());
+            stream.write(base64Encode(iv).getBytes(StandardCharsets.UTF_8));
+            stream.write(ENCRYPTED_STRING_SEPARATOR.getBytes(StandardCharsets.UTF_8));
 
             final OutputStream base64Encoder = Base64.getEncoder().wrap(stream);
 

@@ -99,7 +99,7 @@ public class CloudPayloadJsonDecoderTest {
         String stringToConvert = ("{\"SENTON\":1490275324619,"
                 + "\"POSITION\":{\"LATITUDE\":10,\"LONGITUDE\":20,\"ALTITUDE\":200,\"HEADING\":30,\"PRECISION\":1,\"SATELLITES\":3,\"SPEED\":50,\"TIMESTAMP\":123456789,\"STATUS\":0},"
                 + "\"METRICS\":{\"metric.name\":\"metric.value\",\"metric.int\":1,\"metric.long\":12345,\"metric.boolean\":true,\"metric.character\":\"c\",\"metric.float\":1.2,\"metric.bytearray\":\"VGVzdA==\",\"metric.double\":1.7976931348623157E308},"
-                + "\"BODY\":\"" + Base64.getEncoder().encodeToString("test".getBytes()) + "\"}");
+                + "\"BODY\":\"" + Base64.getEncoder().encodeToString("test".getBytes(StandardCharsets.UTF_8)) + "\"}");
 
         KuraPayload payload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(stringToConvert));
 

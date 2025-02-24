@@ -81,9 +81,8 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
     public void marshal(OutputStream out, Object object) throws KuraIOException {
         try {
             if (object instanceof WireGraphConfiguration) {
-                JsonObject result = WireGraphJsonMarshallUnmarshallImpl
-                        .marshalWireGraphConfiguration((WireGraphConfiguration) object);
-                out.write(result.toString().getBytes());
+                out.write(WireGraphJsonMarshallUnmarshallImpl
+                        .marshalWireGraphConfiguration((WireGraphConfiguration) object).toString().getBytes());
             } else if (object instanceof KuraPayload) {
                 out.write(CloudPayloadJsonEncoder.marshal((KuraPayload) object).getBytes());
             } else if (object instanceof SystemDeploymentPackages) {

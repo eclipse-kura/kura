@@ -15,6 +15,7 @@ package org.eclipse.kura.internal.xml.marshaller.unmarshaller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 
@@ -69,7 +70,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
     @Override
     public void marshal(OutputStream out, Object object) throws KuraException {
         try {
-            marshal(object, new StreamResult(out));
+            marshal(object, new StreamResult(new OutputStreamWriter(out, StandardCharsets.UTF_8)));
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.ENCODE_ERROR, VALUE_CONSTANT);
         }

@@ -49,7 +49,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
@@ -1041,7 +1040,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         } catch (IOException e) {
             try {
-                FileUtils.delete(tempSnapshotFile);
+                Files.delete(tempSnapshotFile.toPath());
             } catch (IOException e1) {
                 throw new KuraIOException(e1);
             }

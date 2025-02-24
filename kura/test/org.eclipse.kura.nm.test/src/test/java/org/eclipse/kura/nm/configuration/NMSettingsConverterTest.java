@@ -1250,8 +1250,8 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildPPPSettingsShouldWorkWhenGivenOptionalLcpParameters() {
-        givenMapWith("net.interface.ttyACM0.config.lcpEchoInterval", 30);
-        givenMapWith("net.interface.ttyACM0.config.lcpEchoFailure", 5);
+        givenMapWith("net.interface.ttyACM0.config.lpcEchoInterval", 30);
+        givenMapWith("net.interface.ttyACM0.config.lpcEchoFailure", 5);
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildPPPSettingsIsRunWith(this.networkProperties, "ttyACM0");

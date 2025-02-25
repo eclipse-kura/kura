@@ -48,40 +48,40 @@ public class DhcpdConfigConverter implements DhcpServerConfigConverter {
         return sb.toString();
     }
 
-	private void appendPoolRange(DhcpServerConfig config, StringBuilder sb) {
+    private void appendPoolRange(DhcpServerConfig config, StringBuilder sb) {
         sb.append("    pool {\n");
         sb.append("        range " + config.getRangeStart().getHostAddress() + " "
                 + config.getRangeEnd().getHostAddress() + ";\n");
-	}
+    }
 
-	private void appendLeaseTime(DhcpServerConfig config, StringBuilder sb) {
+    private void appendLeaseTime(DhcpServerConfig config, StringBuilder sb) {
         sb.append("    default-lease-time " + config.getDefaultLeaseTime() + ";\n");
         if (config.getMaximumLeaseTime() > -1) {
             sb.append("    max-lease-time " + config.getMaximumLeaseTime() + ";\n");
         }
-	}
+    }
 
-	private void appendPassDNS(DhcpServerConfig config, StringBuilder sb) {
+    private void appendPassDNS(DhcpServerConfig config, StringBuilder sb) {
         if (!config.isPassDns() || isNull(config.getRouterAddress())) {
             sb.append("    ddns-update-style none;\n");
             sb.append("    ddns-updates off;\n");
         }
-	}
+    }
 
-	private void appendRouterAddress(DhcpServerConfig config, StringBuilder sb) {
+    private void appendRouterAddress(DhcpServerConfig config, StringBuilder sb) {
         if (!isNull(config.getRouterAddress())) {
             sb.append("    option routers " + config.getRouterAddress().getHostAddress() + ";\n");
         }
-	}
+    }
 
-	private void appendInterfaceName(DhcpServerConfig config, StringBuilder sb) {
+    private void appendInterfaceName(DhcpServerConfig config, StringBuilder sb) {
         if (!isNull(config.getInterfaceName())) {
             sb.append("    interface " + config.getInterfaceName() + ";\n");
         }
-	}
+    }
 
-	private void appendDNSServers(DhcpServerConfig config, StringBuilder sb) {
-        if (config.isPassDns() && config.getDnsServers() != null && !config.getDnsServers().isEmpty()
+    private void appendDNSServers(DhcpServerConfig config, StringBuilder sb) {
+        if (config.isPassDns() && !isNull(config.getDnsServers()) && !config.getDnsServers().isEmpty()
                 && !isNull(config.getRouterAddress())) {
             sb.append("    option domain-name-servers ");
             for (int i = 0; i < config.getDnsServers().size(); i++) {
@@ -96,6 +96,6 @@ public class DhcpdConfigConverter implements DhcpServerConfigConverter {
                 }
             }
         }
-	}
+    }
 
 }

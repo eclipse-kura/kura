@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -99,9 +99,10 @@ public class IdentityRestServiceV2DependenciesTest {
     }
 
     @Test
-    public void shouldBindRestIdentityServiceDependencies() throws KuraException {
+    public void shouldBindRestIdentityServiceDependencies() {
         givenUserAdminMock();
         givenIdentityServiceMock();
+        givenRequestHandlerRegistryMock();
 
         whenBindDependencies();
 

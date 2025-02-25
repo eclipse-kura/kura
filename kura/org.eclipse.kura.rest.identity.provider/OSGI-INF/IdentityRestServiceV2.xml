@@ -13,7 +13,7 @@
      Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.4.0" 
     immediate="true" 
     name="org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2">
     
@@ -40,7 +40,7 @@
                
     <reference interface="org.eclipse.kura.identity.IdentityService" 
                bind="bindIdentityService" 
-               cardinality="0..1"  
+               cardinality="1..1"  
                name="IdentityService" 
                policy="static" />
 

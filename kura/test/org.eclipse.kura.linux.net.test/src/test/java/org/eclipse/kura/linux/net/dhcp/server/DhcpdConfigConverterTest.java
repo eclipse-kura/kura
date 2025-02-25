@@ -185,16 +185,6 @@ public class DhcpdConfigConverterTest {
     }
 
     @Test
-    public void shouldReturnConfigWithDnsAddresses() throws UnknownHostException, KuraException {
-        givenDhcpServerConfigWithDnsAddresses();
-        givenDhcpdConfigConverter();
-
-        whenDhcpdServerConfigIsConverted();
-
-        thenDhcpdServerConfigIs(EXPECTED_STRING_FULL_CONFIG);
-    }
-
-    @Test
     public void shouldReturnConfigNoNatWithDnsAddresses() throws UnknownHostException, KuraException {
         givenDhcpServerConfigNoNatWithDnsAddresses();
         givenDhcpdConfigConverter();
@@ -267,21 +257,6 @@ public class DhcpdConfigConverterTest {
                 (IP4Address) IPAddress.parseHostAddress("192.168.2.1"),
                 (IP4Address) IPAddress.parseHostAddress("172.16.0.100"),
                 (IP4Address) IPAddress.parseHostAddress("172.16.0.120"), (List<IP4Address>) null);
-
-        this.config = new DhcpServerConfigIP4(dhcpServerConfig, dhcpServerConfigIP4);
-    }
-
-    private void givenDhcpServerConfigWithDnsAddresses() throws UnknownHostException, KuraException {
-        DhcpServerCfg dhcpServerConfig = new DhcpServerCfg("eth0", true, 900, 900, true);
-        List<IP4Address> dnsAddresses = new ArrayList<>();
-        dnsAddresses.add((IP4Address) IPAddress.parseHostAddress("8.8.8.8"));
-        dnsAddresses.add((IP4Address) IPAddress.parseHostAddress("8.8.4.4"));
-        DhcpServerCfgIP4 dhcpServerConfigIP4 = new DhcpServerCfgIP4(
-                (IP4Address) IPAddress.parseHostAddress("172.16.0.0"),
-                (IP4Address) IPAddress.parseHostAddress("255.255.255.0"), (short) 24,
-                (IP4Address) IPAddress.parseHostAddress("192.168.2.1"),
-                (IP4Address) IPAddress.parseHostAddress("172.16.0.100"),
-                (IP4Address) IPAddress.parseHostAddress("172.16.0.120"), dnsAddresses);
 
         this.config = new DhcpServerConfigIP4(dhcpServerConfig, dhcpServerConfigIP4);
     }

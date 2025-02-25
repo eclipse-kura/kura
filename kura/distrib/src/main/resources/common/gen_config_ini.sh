@@ -41,7 +41,7 @@ do
         continue
     fi
 
-    if ! expr "${DIR_NAME}" : '^[0-9]\{1,\}s\{0,1\}$' > /dev/null
+    if ! expr "${DIR_NAME}" : '[0-9]\{1,\}s\{0,1\}$' > /dev/null
     then
         continue
     fi

@@ -67,7 +67,7 @@ Build
 
 In order to be able to build Eclipse Kura™ on your development machine, you need to have the following programs installed in your system:
 * JDK 17
-* Maven 3.5.x
+* Maven 3.9.x
 
 <details>
 <summary>
@@ -97,12 +97,12 @@ Reload the terminal and run `java -version` to make sure it is installed correct
 Using [Brew](https://brew.sh/) you can easily install Maven from the command line:
 
 ```bash
-brew install maven@3.5
+brew install maven@3.9
 ```
-Run `mvn -version` to ensure that Maven has been added to the PATH. If Maven cannot be found, try running `brew link maven@3.5 --force` or manually add it to your path with:
+Run `mvn -version` to ensure that Maven has been added to the PATH. If Maven cannot be found, try running `brew link maven@3.9 --force` or manually add it to your path with:
 
 ```bash
-export PATH="/usr/local/opt/maven@3.5/bin:$PATH"
+export PATH="/usr/local/opt/maven@3.9/bin:$PATH"
 ```
 
 </details>
@@ -120,7 +120,7 @@ sudo apt install openjdk-17-jdk
 ```
 For Maven   
 
-You can follow the tutorial from the official [Maven](http://maven.apache.org/install.html) site. Remember that you need to install the 3.5.x version.
+You can follow the tutorial from the official [Maven](http://maven.apache.org/install.html) site. Remember that you need to install the 3.9.x version.
 
 </details>
 

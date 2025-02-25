@@ -2,16 +2,6 @@
 
 set -e
 
-#get java version
-JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
-JAVA_VERSION_NUM=$(echo "$JAVA_VERSION" | awk -F. '{printf("%03d%03d",$1,$2);}')
-
-OPEN_MODULE_OPTIONS=''
-
-if [ $JAVA_VERSION_NUM -gt 001008 ] ; then
-        OPEN_MODULE_OPTIONS="--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED"
-fi
-
 mkdir -p /tmp/.kura/configuration
 "${KURA_DIR}/bin/gen_config_ini.sh" "${KURA_DIR}"/framework/config.ini "${KURA_DIR}"/plugins > /tmp/.kura/configuration/config.ini
 
@@ -21,7 +11,7 @@ JAVA_INT_OPTS="$JAVA_INT_OPTS -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMem
 
 JAVA_INT_OPTS="$JAVA_INT_OPTS -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof"
 JAVA_INT_OPTS="$JAVA_INT_OPTS -XX:ErrorFile=/var/log/kura-error.log"
-JAVA_INT_OPTS="$JAVA_INT_OPTS ${OPEN_MODULE_OPTIONS}"
+JAVA_INT_OPTS="$JAVA_INT_OPTS --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED"
 JAVA_INT_OPTS="$JAVA_INT_OPTS --add-modules=ALL-SYSTEM"
 
 JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.os.version=centos"
@@ -39,13 +29,13 @@ JAVA_INT_OPTS="$JAVA_INT_OPTS -Djava.security.policy=\"${KURA_DIR}/framework/jdk
 JAVA_INT_OPTS="$JAVA_INT_OPTS -Djdk.dio.registry=\"${KURA_DIR}/framework/jdk.dio.properties\""
 
 if [ -n "${PERSISTENT_DIR}" ]; then
-	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.data=\"${PERSISTENT_DIR}/data\""
-	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.snapshots=\"${PERSISTENT_DIR}/user/snapshots\""
-	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.packages=\"${PERSISTENT_DIR}/packages\""
-	JAVA_INT_OPTS="$JAVA_INT_OPTS -Ddpa.configuration=\"${PERSISTENT_DIR}/packages/dpa.properties\""
+    JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.data=\"${PERSISTENT_DIR}/data\""
+    JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.snapshots=\"${PERSISTENT_DIR}/user/snapshots\""
+    JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.packages=\"${PERSISTENT_DIR}/packages\""
+    JAVA_INT_OPTS="$JAVA_INT_OPTS -Ddpa.configuration=\"${PERSISTENT_DIR}/packages/dpa.properties\""
 else
-	JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.data=\"${KURA_DIR}/data\""
-	JAVA_INT_OPTS="$JAVA_INT_OPTS -Ddpa.configuration=\"${KURA_DIR}/packages/dpa.properties\""
+    JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.data=\"${KURA_DIR}/data\""
+    JAVA_INT_OPTS="$JAVA_INT_OPTS -Ddpa.configuration=\"${KURA_DIR}/packages/dpa.properties\""
 fi
 
 JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.custom.configuration=file:\"${KURA_CUSTOM_PROPERTIES_FILE:-${KURA_DIR}/user/kura_custom.properties}\""

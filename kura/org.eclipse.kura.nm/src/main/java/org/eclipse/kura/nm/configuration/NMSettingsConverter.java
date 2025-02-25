@@ -619,10 +619,14 @@ public class NMSettingsConverter {
     public static Map<String, Variant<?>> buildPPPSettings(NetworkProperties props, String deviceId) {
         Map<String, Variant<?>> settings = new HashMap<>();
 
-        Optional<Integer> lcpEchoInterval = props.getOpt(Integer.class, "net.interface.%s.config.lcpEchoInterval",
+        // The property is wrongly named in Kura's snapshot, it should be "net.interface.%s.config.lcpEchoInterval"
+        // we're keeping the typo for backward compatibility reasons.
+        Optional<Integer> lcpEchoInterval = props.getOpt(Integer.class, "net.interface.%s.config.lpcEchoInterval",
                 deviceId);
         lcpEchoInterval.ifPresent(interval -> settings.put("lcp-echo-interval", new Variant<>(interval)));
-        Optional<Integer> lcpEchoFailure = props.getOpt(Integer.class, "net.interface.%s.config.lcpEchoFailure",
+        // The property is wrongly named in Kura's snapshot, it should be "net.interface.%s.config.lcpEchoFailure"
+        // we're keeping the typo for backward compatibility reasons.
+        Optional<Integer> lcpEchoFailure = props.getOpt(Integer.class, "net.interface.%s.config.lpcEchoFailure",
                 deviceId);
         lcpEchoFailure.ifPresent(failure -> settings.put("lcp-echo-failure", new Variant<>(failure)));
 

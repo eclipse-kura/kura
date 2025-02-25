@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -1250,8 +1250,8 @@ public class NMSettingsConverterTest {
 
     @Test
     public void buildPPPSettingsShouldWorkWhenGivenOptionalLcpParameters() {
-        givenMapWith("net.interface.ttyACM0.config.lcpEchoInterval", 30);
-        givenMapWith("net.interface.ttyACM0.config.lcpEchoFailure", 5);
+        givenMapWith("net.interface.ttyACM0.config.lpcEchoInterval", 30);
+        givenMapWith("net.interface.ttyACM0.config.lpcEchoFailure", 5);
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildPPPSettingsIsRunWith(this.networkProperties, "ttyACM0");

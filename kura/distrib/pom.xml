@@ -30,7 +30,7 @@
     <name>distrib</name>
     <url>http://maven.apache.org</url>
     <properties>
-        <tycho-version>3.0.5</tycho-version>
+        <tycho-version>4.0.11</tycho-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <zip_workspace.prefix>user_workspace_archive_${project.version}</zip_workspace.prefix>
 
@@ -964,7 +964,8 @@
                     <configuration>
                         <strictVersions>true</strictVersions>
                         <format>${kura.build.version}</format>
-                        <skipPomGeneration>true</skipPomGeneration> 
+                        <skipPomGeneration>true</skipPomGeneration>
+                        <deriveHeaderFromSource>false</deriveHeaderFromSource>
                     </configuration>
                 </plugin>
                 <!--This plugin's configuration is used to store Eclipse m2e settings

@@ -32,16 +32,4 @@
 		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.stress.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.9</version>
-				<configuration>
-					<skip>false</skip>
-				</configuration>
-			</plugin>
-        </plugins>
-	</build>
 </project>

@@ -31,7 +31,8 @@
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.ai.triton.server.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <grpc.version>1.68.2</grpc.version>
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
-        <protoc.version>3.12.0</protoc.version>
+        <protoc.version>3.25.6</protoc.version>
+        <protobuf-java-util.version>3.25.6</protobuf-java-util.version>
     </properties>
 
     <build>
@@ -90,7 +91,7 @@
                                 <artifactItem>
                                     <groupId>com.google.protobuf</groupId>
                                     <artifactId>protobuf-java-util</artifactId>
-                                    <version>3.25.3</version>
+                                    <version>${protobuf-java-util.version}</version>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

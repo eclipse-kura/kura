@@ -116,7 +116,6 @@
                             </configuration>
                         </execution>
                     </executions>
-                    <configuration />
                 </plugin>
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
@@ -130,7 +129,7 @@
                             ${tycho.testArgLine}
                             ${tycho.surefire.testenv.args}
                         </argLine>
-                        <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
+ <!--                       <appArgLine>-consoleLog -console 5002 -noExit</appArgLine>-->
                         <dependencies>
                             <dependency>
                                 <type>p2-installable-unit</type>
@@ -203,6 +202,10 @@
                             <dependency>
                                 <type>p2-installable-unit</type>
                                 <artifactId>org.eclipse.kura.core</artifactId>
+                            </dependency>
+                            <dependency>
+                                <type>p2-installable-unit</type>
+                                <artifactId>org.eclipse.kura.core.identity</artifactId>
                             </dependency>
                             <dependency>
                                 <type>p2-installable-unit</type>

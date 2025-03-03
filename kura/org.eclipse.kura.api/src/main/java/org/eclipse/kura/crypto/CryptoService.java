@@ -58,7 +58,8 @@ public interface CryptoService {
     public OutputStream aesEncryptingStream(OutputStream destination) throws KuraException;
 
     /**
-     * Returns an InputStream able to AES decrypt data read from it.
+     * Returns an InputStream that decrypts data obtained from the supplied stream using AES in the same way as the
+     * decryptAes(char[]) method.
      *
      * @param streamToDecrypt
      *            The InputStream to read the encrypted data from.
@@ -69,8 +70,7 @@ public interface CryptoService {
     public InputStream aesDecryptingStream(InputStream source) throws KuraException;
 
     /**
-     * Returns an InputStream that decrypts data obtained from the supplied stream using AES in the same way as the
-     * decryptAes(char[]) method.
+     * Returns a char array based on the provided encrypted value.
      *
      * @param encryptedValue
      *            A char array representing the value to be decrypted.

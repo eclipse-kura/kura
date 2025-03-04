@@ -13,9 +13,8 @@
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.system;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
+import java.io.Writer;
 import java.util.Optional;
 
 import org.eclipse.kura.core.inventory.resources.DockerContainer;
@@ -24,6 +23,7 @@ import org.eclipse.kura.core.inventory.resources.DockerContainers;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.WriterConfig;
 
 public class JsonJavaDockerContainersMapper {
 
@@ -59,13 +59,13 @@ public class JsonJavaDockerContainersMapper {
 
     }
 
-    public static void marshal(OutputStream outStream, DockerContainers dockerContainers) throws IOException {
+    public static void marshal(Writer writer, DockerContainers dockerContainers) throws IOException {
         JsonObject json = Json.object();
         JsonArray containers = new JsonArray();
         dockerContainers.getDockerContainers().stream().forEach(p -> containers.add(getJsonPackage(p)));
         json.add(SYSTEM_CONTAINERS, containers);
 
-        outStream.write(json.toString().getBytes(StandardCharsets.UTF_8));
+        json.writeTo(writer, WriterConfig.MINIMAL);
     }
 
     private static JsonObject getJsonPackage(DockerContainer p) {

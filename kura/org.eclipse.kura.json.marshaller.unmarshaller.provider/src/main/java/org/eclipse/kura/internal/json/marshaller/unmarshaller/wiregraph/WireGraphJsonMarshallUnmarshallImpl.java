@@ -13,9 +13,8 @@
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.wiregraph;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -34,6 +33,7 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
+import com.eclipsesource.json.WriterConfig;
 
 @SuppressWarnings("checkstyle:hideUtilityClassConstructor")
 public class WireGraphJsonMarshallUnmarshallImpl {
@@ -56,7 +56,7 @@ public class WireGraphJsonMarshallUnmarshallImpl {
         // Public for testing purposes
     }
 
-    public static void marshalWireGraphConfiguration(OutputStream outStream, WireGraphConfiguration graphConfiguration)
+    public static void marshalWireGraphConfiguration(Writer writer, WireGraphConfiguration graphConfiguration)
             throws IOException {
         JsonArray wireConfigurationJson = marshalWireConfigurationList(graphConfiguration.getWireConfigurations());
         JsonArray wireComponentConfigurationJson = marshalWireComponentConfigurationList(
@@ -66,7 +66,7 @@ public class WireGraphJsonMarshallUnmarshallImpl {
         wireGraphConfiguration.add(COMPONENTS_KEY, wireComponentConfigurationJson);
         wireGraphConfiguration.add(WIRES_KEY, wireConfigurationJson);
 
-        outStream.write(wireGraphConfiguration.toString().getBytes(StandardCharsets.UTF_8));
+        wireGraphConfiguration.writeTo(writer, WriterConfig.MINIMAL);
     }
 
     private static JsonObject marshalWireConfiguration(MultiportWireConfiguration wireConfig) {

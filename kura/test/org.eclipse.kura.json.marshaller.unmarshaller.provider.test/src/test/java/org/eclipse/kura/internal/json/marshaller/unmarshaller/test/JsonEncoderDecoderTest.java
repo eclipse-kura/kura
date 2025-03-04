@@ -17,6 +17,8 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -477,8 +479,9 @@ public class JsonEncoderDecoderTest {
                 wireConfigurations);
 
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-
-        TestUtil.invokePrivate(jsonEncoderDecoder, "marshalWireGraphConfiguration", outStream, wireGraphConfiguration);
+        OutputStreamWriter writer = new OutputStreamWriter(outStream, StandardCharsets.UTF_8);
+        TestUtil.invokePrivate(jsonEncoderDecoder, "marshalWireGraphConfiguration", writer, wireGraphConfiguration);
+        writer.flush();
 
         assertNotNull(outStream.toString());
 

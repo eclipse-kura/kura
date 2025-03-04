@@ -13,8 +13,7 @@
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.system;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.Writer;
 
 import org.eclipse.kura.core.inventory.resources.SystemPackage;
 import org.eclipse.kura.core.inventory.resources.SystemPackages;
@@ -22,6 +21,7 @@ import org.eclipse.kura.core.inventory.resources.SystemPackages;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.WriterConfig;
 
 public class JsonJavaSystemPackagesMapper {
 
@@ -45,13 +45,13 @@ public class JsonJavaSystemPackagesMapper {
         // empty constructor
     }
 
-    public static void marshal(OutputStream outStream, SystemPackages systemPackages) throws IOException {
+    public static void marshal(Writer writer, SystemPackages systemPackages) throws IOException {
         JsonObject json = Json.object();
         JsonArray packages = new JsonArray();
         systemPackages.getSystemPackages().stream().forEach(p -> packages.add(getJsonPackage(p)));
         json.add(SYSTEM_PACKAGES, packages);
 
-        outStream.write(json.toString().getBytes(StandardCharsets.UTF_8));
+        json.writeTo(writer, WriterConfig.MINIMAL);
     }
 
     private static JsonObject getJsonPackage(SystemPackage p) {

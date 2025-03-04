@@ -20,7 +20,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonDecoder;
@@ -46,7 +48,9 @@ public class CloudPayloadJsonEncoderTest {
     public void testToJsonEmptyKuraPayload() throws IOException {
         KuraPayload payload = new KuraPayload();
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        CloudPayloadJsonEncoder.marshal(outStream, payload);
+        OutputStreamWriter writer = new OutputStreamWriter(outStream, StandardCharsets.UTF_8);
+        CloudPayloadJsonEncoder.marshal(writer, payload);
+        writer.flush();
 
         assertNotNull(outStream.toString());
         assertFalse(outStream.toString().isEmpty());
@@ -69,7 +73,9 @@ public class CloudPayloadJsonEncoderTest {
         payload.addMetric("nan", Float.NaN);
         payload.addMetric("foo", "bar");
 
-        CloudPayloadJsonEncoder.marshal(outStream, payload);
+        OutputStreamWriter writer = new OutputStreamWriter(outStream, StandardCharsets.UTF_8);
+        CloudPayloadJsonEncoder.marshal(writer, payload);
+        writer.flush();
 
         assertNotNull(outStream.toString());
         assertFalse(outStream.toString().isEmpty());
@@ -102,7 +108,9 @@ public class CloudPayloadJsonEncoderTest {
 
         payload.setPosition(position);
 
-        CloudPayloadJsonEncoder.marshal(outStream, payload);
+        OutputStreamWriter writer = new OutputStreamWriter(outStream, StandardCharsets.UTF_8);
+        CloudPayloadJsonEncoder.marshal(writer, payload);
+        writer.flush();
 
         assertNotNull(outStream.toString());
         assertFalse(outStream.toString().isEmpty());
@@ -134,7 +142,9 @@ public class CloudPayloadJsonEncoderTest {
 
         payload.setPosition(position);
 
-        CloudPayloadJsonEncoder.marshal(outStream, payload);
+        OutputStreamWriter writer = new OutputStreamWriter(outStream, StandardCharsets.UTF_8);
+        CloudPayloadJsonEncoder.marshal(writer, payload);
+        writer.flush();
 
         assertNotNull(outStream.toString());
         assertFalse(outStream.toString().isEmpty());
@@ -166,7 +176,9 @@ public class CloudPayloadJsonEncoderTest {
 
         payload.setPosition(position);
 
-        CloudPayloadJsonEncoder.marshal(outStream, payload);
+        OutputStreamWriter writer = new OutputStreamWriter(outStream, StandardCharsets.UTF_8);
+        CloudPayloadJsonEncoder.marshal(writer, payload);
+        writer.flush();
 
         assertNotNull(outStream.toString());
         assertFalse(outStream.toString().isEmpty());
@@ -192,7 +204,9 @@ public class CloudPayloadJsonEncoderTest {
         payload.addMetric("nan", Double.NaN);
         payload.addMetric("foo", "bar");
 
-        CloudPayloadJsonEncoder.marshal(outStream, payload);
+        OutputStreamWriter writer = new OutputStreamWriter(outStream, StandardCharsets.UTF_8);
+        CloudPayloadJsonEncoder.marshal(writer, payload);
+        writer.flush();
 
         assertNotNull(outStream.toString());
         assertFalse(outStream.toString().isEmpty());
@@ -217,7 +231,9 @@ public class CloudPayloadJsonEncoderTest {
 
         payload.setPosition(position);
 
-        CloudPayloadJsonEncoder.marshal(outStream, payload);
+        OutputStreamWriter writer = new OutputStreamWriter(outStream, StandardCharsets.UTF_8);
+        CloudPayloadJsonEncoder.marshal(writer, payload);
+        writer.flush();
 
         assertNotNull(outStream.toString());
         assertFalse(outStream.toString().isEmpty());
@@ -239,7 +255,9 @@ public class CloudPayloadJsonEncoderTest {
 
         payload.setTimestamp(new Date());
 
-        CloudPayloadJsonEncoder.marshal(outStream, payload);
+        OutputStreamWriter writer = new OutputStreamWriter(outStream, StandardCharsets.UTF_8);
+        CloudPayloadJsonEncoder.marshal(writer, payload);
+        writer.flush();
 
         assertNotNull(outStream.toString());
         assertFalse(outStream.toString().isEmpty());
@@ -264,7 +282,9 @@ public class CloudPayloadJsonEncoderTest {
 
         payload.setBody("Test body".getBytes());
 
-        CloudPayloadJsonEncoder.marshal(outStream, payload);
+        OutputStreamWriter writer = new OutputStreamWriter(outStream, StandardCharsets.UTF_8);
+        CloudPayloadJsonEncoder.marshal(writer, payload);
+        writer.flush();
     }
 
     @Test
@@ -297,7 +317,9 @@ public class CloudPayloadJsonEncoderTest {
 
         payload.setBody("Test body".getBytes());
 
-        CloudPayloadJsonEncoder.marshal(outStream, payload);
+        OutputStreamWriter writer = new OutputStreamWriter(outStream, StandardCharsets.UTF_8);
+        CloudPayloadJsonEncoder.marshal(writer, payload);
+        writer.flush();
 
         assertNotNull(outStream.toString());
         assertFalse(outStream.toString().isEmpty());

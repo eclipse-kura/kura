@@ -26,8 +26,7 @@ import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.Clo
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.STATUS;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.Writer;
 import java.util.Base64;
 import java.util.Date;
 
@@ -38,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.WriterConfig;
 
 /**
  * This class provides a set of methods that allow to encode the {@link KuraPayload} into a byte[] message.
@@ -60,7 +60,7 @@ public class CloudPayloadJsonEncoder {
      * @throws IllegalArgumentException
      *             if the conversion fails
      */
-    public static void marshal(OutputStream outStream, KuraPayload kuraPayload) throws IOException {
+    public static void marshal(Writer writer, KuraPayload kuraPayload) throws IOException {
         JsonObject json = Json.object();
 
         encodeTimestamp(kuraPayload, json);
@@ -71,7 +71,7 @@ public class CloudPayloadJsonEncoder {
 
         encodeBody(kuraPayload, json);
 
-        outStream.write(json.toString().getBytes(StandardCharsets.UTF_8));
+        json.writeTo(writer, WriterConfig.MINIMAL);
     }
 
     private static void encodeBody(KuraPayload kuraPayload, JsonObject json) {

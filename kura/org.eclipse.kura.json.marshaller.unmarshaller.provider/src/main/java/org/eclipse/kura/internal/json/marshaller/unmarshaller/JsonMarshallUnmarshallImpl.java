@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 
@@ -62,25 +63,29 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
     @Override
     public void marshal(OutputStream outStream, Object object) throws KuraIOException {
         try {
+            OutputStreamWriter writer = new OutputStreamWriter(outStream, StandardCharsets.UTF_8);
+
             if (object instanceof WireGraphConfiguration) {
-                WireGraphJsonMarshallUnmarshallImpl.marshalWireGraphConfiguration(outStream,
+                WireGraphJsonMarshallUnmarshallImpl.marshalWireGraphConfiguration(writer,
                         (WireGraphConfiguration) object);
             } else if (object instanceof KuraPayload) {
-                CloudPayloadJsonEncoder.marshal(outStream, (KuraPayload) object);
+                CloudPayloadJsonEncoder.marshal(writer, (KuraPayload) object);
             } else if (object instanceof SystemDeploymentPackages) {
-                JsonJavaSystemDeploymentPackagesMapper.marshal(outStream, (SystemDeploymentPackages) object);
+                JsonJavaSystemDeploymentPackagesMapper.marshal(writer, (SystemDeploymentPackages) object);
             } else if (object instanceof SystemBundles) {
-                JsonJavaSystemBundlesMapper.marshal(outStream, (SystemBundles) object);
+                JsonJavaSystemBundlesMapper.marshal(writer, (SystemBundles) object);
             } else if (object instanceof SystemPackages) {
-
-                JsonJavaSystemPackagesMapper.marshal(outStream, (SystemPackages) object);
+                JsonJavaSystemPackagesMapper.marshal(writer, (SystemPackages) object);
             } else if (object instanceof DockerContainers) {
-                JsonJavaDockerContainersMapper.marshal(outStream, (DockerContainers) object);
+                JsonJavaDockerContainersMapper.marshal(writer, (DockerContainers) object);
             } else if (object instanceof ContainerImages) {
-                JsonJavaContainerImagesMapper.marshal(outStream, (ContainerImages) object);
+                JsonJavaContainerImagesMapper.marshal(writer, (ContainerImages) object);
             } else if (object instanceof SystemResourcesInfo) {
-                JsonJavaSystemResourcesMapper.marshal(outStream, (SystemResourcesInfo) object);
+                JsonJavaSystemResourcesMapper.marshal(writer, (SystemResourcesInfo) object);
             }
+
+            writer.flush();
+
         } catch (IOException ex) {
             throw new KuraIOException(ex);
         }

@@ -18,6 +18,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Date;
@@ -37,19 +38,20 @@ public class CloudPayloadJsonEncoderTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testToJsonNullKuraPayload() {
-        CloudPayloadJsonEncoder.marshal(null);
+    public void testToJsonNullKuraPayload() throws IOException {
+        CloudPayloadJsonEncoder.marshal(null, null);
     }
 
     @Test
     public void testToJsonEmptyKuraPayload() throws IOException {
         KuraPayload payload = new KuraPayload();
-        String result = CloudPayloadJsonEncoder.marshal(payload);
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+        CloudPayloadJsonEncoder.marshal(outStream, payload);
 
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
+        assertNotNull(outStream.toString());
+        assertFalse(outStream.toString().isEmpty());
 
-        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(result));
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(outStream.toString()));
 
         assertEquals(payload.getPosition(), decodedPayload.getPosition());
         assertEquals(payload.getBody(), decodedPayload.getBody());
@@ -60,18 +62,19 @@ public class CloudPayloadJsonEncoderTest {
     @Test
     public void shouldDiscardNonFiniteFloatMetrics() throws IOException {
         KuraPayload payload = new KuraPayload();
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 
         payload.addMetric("positive.infinity", Float.POSITIVE_INFINITY);
         payload.addMetric("negative.infinity", Float.NEGATIVE_INFINITY);
         payload.addMetric("nan", Float.NaN);
         payload.addMetric("foo", "bar");
 
-        String result = CloudPayloadJsonEncoder.marshal(payload);
+        CloudPayloadJsonEncoder.marshal(outStream, payload);
 
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
+        assertNotNull(outStream.toString());
+        assertFalse(outStream.toString().isEmpty());
 
-        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(result));
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(outStream.toString()));
 
         assertEquals(payload.getPosition(), decodedPayload.getPosition());
         assertEquals(payload.getBody(), decodedPayload.getBody());
@@ -87,6 +90,7 @@ public class CloudPayloadJsonEncoderTest {
     public void shouldDiscardPositiveInfinityInPositionFields() throws IOException {
         KuraPayload payload = new KuraPayload();
         KuraPosition position = new KuraPosition();
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 
         position.setAltitude(Double.POSITIVE_INFINITY);
         position.setHeading(Double.POSITIVE_INFINITY);
@@ -98,12 +102,12 @@ public class CloudPayloadJsonEncoderTest {
 
         payload.setPosition(position);
 
-        String result = CloudPayloadJsonEncoder.marshal(payload);
+        CloudPayloadJsonEncoder.marshal(outStream, payload);
 
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
+        assertNotNull(outStream.toString());
+        assertFalse(outStream.toString().isEmpty());
 
-        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(result));
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(outStream.toString()));
 
         assertNull(decodedPayload.getPosition().getAltitude());
         assertNull(decodedPayload.getPosition().getHeading());
@@ -118,6 +122,7 @@ public class CloudPayloadJsonEncoderTest {
     public void shouldDiscardNegativeInfinityInPositionFields() throws IOException {
         KuraPayload payload = new KuraPayload();
         KuraPosition position = new KuraPosition();
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 
         position.setAltitude(Double.NEGATIVE_INFINITY);
         position.setHeading(Double.NEGATIVE_INFINITY);
@@ -129,12 +134,12 @@ public class CloudPayloadJsonEncoderTest {
 
         payload.setPosition(position);
 
-        String result = CloudPayloadJsonEncoder.marshal(payload);
+        CloudPayloadJsonEncoder.marshal(outStream, payload);
 
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
+        assertNotNull(outStream.toString());
+        assertFalse(outStream.toString().isEmpty());
 
-        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(result));
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(outStream.toString()));
 
         assertNull(decodedPayload.getPosition().getAltitude());
         assertNull(decodedPayload.getPosition().getHeading());
@@ -149,6 +154,7 @@ public class CloudPayloadJsonEncoderTest {
     public void shouldDiscardNaNInfinityInPositionFields() throws IOException {
         KuraPayload payload = new KuraPayload();
         KuraPosition position = new KuraPosition();
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 
         position.setAltitude(Double.NaN);
         position.setHeading(Double.NaN);
@@ -160,12 +166,12 @@ public class CloudPayloadJsonEncoderTest {
 
         payload.setPosition(position);
 
-        String result = CloudPayloadJsonEncoder.marshal(payload);
+        CloudPayloadJsonEncoder.marshal(outStream, payload);
 
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
+        assertNotNull(outStream.toString());
+        assertFalse(outStream.toString().isEmpty());
 
-        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(result));
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(outStream.toString()));
 
         assertNull(decodedPayload.getPosition().getAltitude());
         assertNull(decodedPayload.getPosition().getHeading());
@@ -179,18 +185,19 @@ public class CloudPayloadJsonEncoderTest {
     @Test
     public void shoyldDiscardNonFiniteDoubleMetrics() throws IOException {
         KuraPayload payload = new KuraPayload();
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 
         payload.addMetric("positive.infinity", Double.POSITIVE_INFINITY);
         payload.addMetric("negative.infinity", Double.NEGATIVE_INFINITY);
         payload.addMetric("nan", Double.NaN);
         payload.addMetric("foo", "bar");
 
-        String result = CloudPayloadJsonEncoder.marshal(payload);
+        CloudPayloadJsonEncoder.marshal(outStream, payload);
 
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
+        assertNotNull(outStream.toString());
+        assertFalse(outStream.toString().isEmpty());
 
-        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(result));
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(outStream.toString()));
 
         assertEquals(payload.getPosition(), decodedPayload.getPosition());
         assertEquals(payload.getBody(), decodedPayload.getBody());
@@ -206,15 +213,16 @@ public class CloudPayloadJsonEncoderTest {
     public void shouldEncodeEmptyPosition() throws IOException {
         KuraPayload payload = new KuraPayload();
         KuraPosition position = new KuraPosition();
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 
         payload.setPosition(position);
 
-        String result = CloudPayloadJsonEncoder.marshal(payload);
+        CloudPayloadJsonEncoder.marshal(outStream, payload);
 
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
+        assertNotNull(outStream.toString());
+        assertFalse(outStream.toString().isEmpty());
 
-        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(result));
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(outStream.toString()));
 
         assertNull(decodedPayload.getPosition().getAltitude());
         assertNull(decodedPayload.getPosition().getHeading());
@@ -227,13 +235,16 @@ public class CloudPayloadJsonEncoderTest {
     @Test
     public void testToJsonKuraPayloadOnlyTimestamp() throws IOException {
         KuraPayload payload = new KuraPayload();
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+
         payload.setTimestamp(new Date());
-        String result = CloudPayloadJsonEncoder.marshal(payload);
 
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
+        CloudPayloadJsonEncoder.marshal(outStream, payload);
 
-        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(result));
+        assertNotNull(outStream.toString());
+        assertFalse(outStream.toString().isEmpty());
+
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(outStream.toString()));
 
         assertNull(decodedPayload.getPosition());
         assertNull(decodedPayload.getBody());
@@ -243,8 +254,9 @@ public class CloudPayloadJsonEncoderTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testToJsonKuraPayloadChar() {
+    public void testToJsonKuraPayloadChar() throws IOException {
         KuraPayload payload = new KuraPayload();
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         payload.setTimestamp(new Date());
 
         payload.addMetric("metric.name", "metric.value");
@@ -252,11 +264,12 @@ public class CloudPayloadJsonEncoderTest {
 
         payload.setBody("Test body".getBytes());
 
-        CloudPayloadJsonEncoder.marshal(payload);
+        CloudPayloadJsonEncoder.marshal(outStream, payload);
     }
 
     @Test
     public void testToJsonKuraPayload() throws IOException {
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         KuraPayload payload = new KuraPayload();
         payload.setTimestamp(new Date());
         KuraPosition position = new KuraPosition();
@@ -284,12 +297,12 @@ public class CloudPayloadJsonEncoderTest {
 
         payload.setBody("Test body".getBytes());
 
-        String result = CloudPayloadJsonEncoder.marshal(payload);
+        CloudPayloadJsonEncoder.marshal(outStream, payload);
 
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
+        assertNotNull(outStream.toString());
+        assertFalse(outStream.toString().isEmpty());
 
-        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(result));
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromReader(new StringReader(outStream.toString()));
 
         assertEquals(payload.getTimestamp(), decodedPayload.getTimestamp());
 

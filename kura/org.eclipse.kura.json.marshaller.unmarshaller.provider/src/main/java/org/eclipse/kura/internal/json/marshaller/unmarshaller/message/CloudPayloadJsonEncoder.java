@@ -25,6 +25,9 @@ import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.Clo
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SPEED;
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.STATUS;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
 
@@ -53,10 +56,11 @@ public class CloudPayloadJsonEncoder {
      * @param kuraPayload
      *            a {@link KuraPayload} object that has to be converted.
      * @return a String that maps the received {@link KuraPayload} object
+     * @throws IOException
      * @throws IllegalArgumentException
      *             if the conversion fails
      */
-    public static String marshal(KuraPayload kuraPayload) {
+    public static void marshal(OutputStream outStream, KuraPayload kuraPayload) throws IOException {
         JsonObject json = Json.object();
 
         encodeTimestamp(kuraPayload, json);
@@ -67,7 +71,7 @@ public class CloudPayloadJsonEncoder {
 
         encodeBody(kuraPayload, json);
 
-        return json.toString();
+        outStream.write(json.toString().getBytes(StandardCharsets.UTF_8));
     }
 
     private static void encodeBody(KuraPayload kuraPayload, JsonObject json) {

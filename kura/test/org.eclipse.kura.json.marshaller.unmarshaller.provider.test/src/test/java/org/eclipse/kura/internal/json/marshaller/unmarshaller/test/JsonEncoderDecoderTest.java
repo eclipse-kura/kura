@@ -476,13 +476,14 @@ public class JsonEncoderDecoderTest {
         WireGraphConfiguration wireGraphConfiguration = new WireGraphConfiguration(wireComponentConfigurations,
                 wireConfigurations);
 
-        JsonObject result = (JsonObject) TestUtil.invokePrivate(jsonEncoderDecoder, "marshalWireGraphConfiguration",
-                wireGraphConfiguration);
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 
-        assertNotNull(result);
+        TestUtil.invokePrivate(jsonEncoderDecoder, "marshalWireGraphConfiguration", outStream, wireGraphConfiguration);
+
+        assertNotNull(outStream.toString());
 
         String expected = "{\"components\":[{\"pid\":\"emitterPid\",\"inputPortCount\":0,\"outputPortCount\":5,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":100},\"inputPortNames\":{\"0\":\"resetPort\"},\"outputPortNames\":{\"3\":\"then\"}}},{\"pid\":\"receiverPid\",\"inputPortCount\":0,\"outputPortCount\":5,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":100},\"inputPortNames\":{\"0\":\"resetPort\"},\"outputPortNames\":{\"3\":\"then\"}}}],\"wires\":[{\"emitter\":\"emitterPid\",\"emitterPort\":0,\"receiver\":\"receiverPid\",\"receiverPort\":0}]}";
-        assertEquals(expected, result.toString());
+        assertEquals(expected, outStream.toString());
     }
 
     @Test

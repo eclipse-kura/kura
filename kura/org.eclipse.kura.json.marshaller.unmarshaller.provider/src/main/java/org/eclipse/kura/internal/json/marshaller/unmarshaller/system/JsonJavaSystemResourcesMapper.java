@@ -12,6 +12,10 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.system;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+
 import org.eclipse.kura.core.inventory.resources.SystemResourcesInfo;
 import org.eclipse.kura.system.SystemResourceInfo;
 
@@ -41,13 +45,13 @@ public class JsonJavaSystemResourcesMapper {
         // empty constructor
     }
 
-    public static String marshal(SystemResourcesInfo systemResourcesInfo) {
+    public static void marshal(OutputStream outStream, SystemResourcesInfo systemResourcesInfo) throws IOException {
         JsonObject json = Json.object();
         JsonArray resources = new JsonArray();
         systemResourcesInfo.getSystemResources().stream().forEach(sri -> resources.add(getJsonSystemResource(sri)));
         json.add(INVENTORY, resources);
 
-        return json.toString();
+        outStream.write(json.toString().getBytes(StandardCharsets.UTF_8));
     }
 
     private static JsonObject getJsonSystemResource(SystemResourceInfo sri) {

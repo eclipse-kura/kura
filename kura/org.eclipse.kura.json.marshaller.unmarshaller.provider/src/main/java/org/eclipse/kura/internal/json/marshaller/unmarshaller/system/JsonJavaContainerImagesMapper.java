@@ -13,7 +13,9 @@
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.system;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import org.eclipse.kura.core.inventory.resources.ContainerImage;
@@ -54,13 +56,13 @@ public class JsonJavaContainerImagesMapper {
         return new ContainerImage(name, version);
     }
 
-    public static String marshal(ContainerImages contianerImages) {
+    public static void marshal(OutputStream outStream, ContainerImages contianerImages) throws IOException {
         JsonObject json = Json.object();
         JsonArray images = new JsonArray();
         contianerImages.getContainerImages().stream().forEach(p -> images.add(getJsonPackage(p)));
         json.add(SYSTEM_IMAGES, images);
 
-        return json.toString();
+        outStream.write(json.toString().getBytes(StandardCharsets.UTF_8));
     }
 
     private static JsonObject getJsonPackage(ContainerImage p) {

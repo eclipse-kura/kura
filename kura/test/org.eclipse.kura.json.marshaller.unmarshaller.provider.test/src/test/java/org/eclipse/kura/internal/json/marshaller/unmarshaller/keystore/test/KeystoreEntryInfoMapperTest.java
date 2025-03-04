@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,11 +9,13 @@
  *
  * Contributors:
  *  Eurotech
- *******************************************************************************/
+ ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.keystore.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import java.io.StringReader;
 
 import org.eclipse.kura.core.keystore.util.CertificateInfo;
 import org.eclipse.kura.core.keystore.util.EntryInfo;
@@ -24,16 +26,18 @@ import org.junit.Test;
 
 public class KeystoreEntryInfoMapperTest {
 
+    private static final String MY_KEYSTORE = "MyKeystore";
+
     @Test
     public void unmarshalTest() {
 
         String jsonString = "{\n" + "    \"keystoreServicePid\" : \"MyKeystore\",\n"
                 + "    \"alias\" : \"mycerttestec\"\n" + "}";
-        EntryInfo entry = KeystoreEntryInfoMapper.unmarshal(jsonString, EntryInfo.class);
+        EntryInfo entry = KeystoreEntryInfoMapper.unmarshal(new StringReader(jsonString), EntryInfo.class);
 
         assertTrue(entry instanceof EntryInfo);
         assertEquals("mycerttestec", entry.getAlias());
-        assertEquals("MyKeystore", entry.getKeystoreServicePid());
+        assertEquals(MY_KEYSTORE, entry.getKeystoreServicePid());
     }
 
     @Test
@@ -61,12 +65,12 @@ public class KeystoreEntryInfoMapperTest {
                 + "44da9A02FAf5nRRQpwP2x/4IZ5RTRBzrqbqD\n" + "-----END CERTIFICATE-----";
         String jsonString = "{\n" + "   \"keystoreServicePid\":\"MyKeystore\",\n" + "   \"alias\":\"myCertTest99\",\n"
                 + "   \"type\":\"TRUSTED_CERTIFICATE\",\n" + "   \"certificate\":\"" + CERTIFICATE + "\"" + "}";
-        EntryInfo entry = KeystoreEntryInfoMapper.unmarshal(jsonString, CertificateInfo.class);
+        EntryInfo entry = KeystoreEntryInfoMapper.unmarshal(new StringReader(jsonString), CertificateInfo.class);
 
         assertTrue(entry instanceof CertificateInfo);
         CertificateInfo certificateInfo = (CertificateInfo) entry;
         assertEquals("myCertTest99", certificateInfo.getAlias());
-        assertEquals("MyKeystore", certificateInfo.getKeystoreServicePid());
+        assertEquals(MY_KEYSTORE, certificateInfo.getKeystoreServicePid());
         assertEquals(CERTIFICATE, certificateInfo.getCertificate());
         assertEquals(EntryType.TRUSTED_CERTIFICATE, certificateInfo.getType());
     }
@@ -124,12 +128,12 @@ public class KeystoreEntryInfoMapperTest {
         String jsonString = "{\n" + "   \"keystoreServicePid\":\"MyKeystore\",\n" + "   \"alias\":\"myPrivateKey1\",\n"
                 + "   \"type\":\"PRIVATE_KEY\",\n" + "   \"privateKey\" : \"" + PRIVATEKEY + "\",\n"
                 + "   \"certificateChain\":[\"" + CERTIFICATE_CHAIN + "\"]\n" + "}";
-        EntryInfo entry = KeystoreEntryInfoMapper.unmarshal(jsonString, PrivateKeyInfo.class);
+        EntryInfo entry = KeystoreEntryInfoMapper.unmarshal(new StringReader(jsonString), PrivateKeyInfo.class);
 
         assertTrue(entry instanceof PrivateKeyInfo);
         PrivateKeyInfo privateKeyInfo = (PrivateKeyInfo) entry;
         assertEquals("myPrivateKey1", privateKeyInfo.getAlias());
-        assertEquals("MyKeystore", privateKeyInfo.getKeystoreServicePid());
+        assertEquals(MY_KEYSTORE, privateKeyInfo.getKeystoreServicePid());
         assertEquals(CERTIFICATE_CHAIN, privateKeyInfo.getCertificateChain()[0]);
         assertEquals(PRIVATEKEY, privateKeyInfo.getPrivateKey());
         assertEquals(EntryType.PRIVATE_KEY, privateKeyInfo.getType());

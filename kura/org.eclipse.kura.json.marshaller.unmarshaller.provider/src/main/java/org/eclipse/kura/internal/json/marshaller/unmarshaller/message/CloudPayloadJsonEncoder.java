@@ -1,15 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
- *******************************************************************************/
+ ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.message;
 
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.BODY;
@@ -25,6 +25,8 @@ import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.Clo
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.SPEED;
 import static org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonFields.CloudPayloadJsonPositionFields.STATUS;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Base64;
 import java.util.Date;
 
@@ -35,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.WriterConfig;
 
 /**
  * This class provides a set of methods that allow to encode the {@link KuraPayload} into a byte[] message.
@@ -53,10 +56,11 @@ public class CloudPayloadJsonEncoder {
      * @param kuraPayload
      *            a {@link KuraPayload} object that has to be converted.
      * @return a String that maps the received {@link KuraPayload} object
+     * @throws IOException
      * @throws IllegalArgumentException
      *             if the conversion fails
      */
-    public static String marshal(KuraPayload kuraPayload) {
+    public static void marshal(Writer writer, KuraPayload kuraPayload) throws IOException {
         JsonObject json = Json.object();
 
         encodeTimestamp(kuraPayload, json);
@@ -67,7 +71,7 @@ public class CloudPayloadJsonEncoder {
 
         encodeBody(kuraPayload, json);
 
-        return json.toString();
+        json.writeTo(writer, WriterConfig.MINIMAL);
     }
 
     private static void encodeBody(KuraPayload kuraPayload, JsonObject json) {

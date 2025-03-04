@@ -1,17 +1,20 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
- *******************************************************************************/
+ ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.system;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.Optional;
 
 import org.eclipse.kura.core.inventory.resources.DockerContainer;
@@ -20,6 +23,7 @@ import org.eclipse.kura.core.inventory.resources.DockerContainers;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.WriterConfig;
 
 public class JsonJavaDockerContainersMapper {
 
@@ -45,8 +49,8 @@ public class JsonJavaDockerContainersMapper {
         // empty constructor
     }
 
-    public static DockerContainer unmarshal(final String encoded) {
-        final JsonObject object = Json.parse(encoded).asObject();
+    public static DockerContainer unmarshal(final Reader jsonReader) throws IOException {
+        final JsonObject object = Json.parse(jsonReader).asObject();
 
         final String name = getStringValue(object, SYSTEM_CONTAINERS_CONTAINER_NAME);
         final String version = getStringValue(object, SYSTEM_CONTAINERS_CONTAINER_VERSION);
@@ -55,13 +59,13 @@ public class JsonJavaDockerContainersMapper {
 
     }
 
-    public static String marshal(DockerContainers dockerContainers) {
+    public static void marshal(Writer writer, DockerContainers dockerContainers) throws IOException {
         JsonObject json = Json.object();
         JsonArray containers = new JsonArray();
         dockerContainers.getDockerContainers().stream().forEach(p -> containers.add(getJsonPackage(p)));
         json.add(SYSTEM_CONTAINERS, containers);
 
-        return json.toString();
+        json.writeTo(writer, WriterConfig.MINIMAL);
     }
 
     private static JsonObject getJsonPackage(DockerContainer p) {

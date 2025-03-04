@@ -4,5 +4,6 @@ Bundle-Name: Unit tests for 'org.eclipse.kura.core.crypto'
 Bundle-SymbolicName: org.eclipse.kura.core.crypto.test
 Bundle-Version: 6.0.0.qualifier
 Fragment-Host: org.eclipse.kura.core.crypto
+Import-Package: org.apache.commons.io;version="2.18.0"
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
 Require-Bundle: org.junit;bundle-version="4.10.0"

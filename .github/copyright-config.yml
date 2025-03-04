@@ -29,3 +29,4 @@ template_xml: |2
 # Ignore specific files and paths. The syntax and semantics are the same as in the .gitignore file.
 ignore:
   - target-platform/
+  - kura/test/org.eclipse.kura.core.configuration.test/src/test/resources/

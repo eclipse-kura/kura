@@ -1,18 +1,20 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.crypto;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -42,6 +44,30 @@ public interface CryptoService {
      * @throws KuraException
      */
     public char[] encryptAes(char[] value) throws KuraException;
+
+    /**
+     * Returns an OutputStream that encrypts provided data using AES in the same way as the encryptAes(char[]) method,
+     * and then writes it to the supplied OutputStream lazily. *
+     * 
+     * @param streamToEncrypt
+     *            The OutputStream on which the encrypted data will be written.
+     * @return The OutputStream able to encrypt data.
+     * @throws KuraException
+     * @since 3.0
+     */
+    public OutputStream aesEncryptingStream(OutputStream destination) throws KuraException;
+
+    /**
+     * Returns an InputStream that decrypts data obtained from the supplied stream using AES in the same way as the
+     * decryptAes(char[]) method.
+     *
+     * @param streamToDecrypt
+     *            The InputStream to read the encrypted data from.
+     * @return InputStream able to decrypt data.
+     * @throws KuraException
+     * @since 3.0
+     */
+    public InputStream aesDecryptingStream(InputStream source) throws KuraException;
 
     /**
      * Returns a char array based on the provided encrypted value.

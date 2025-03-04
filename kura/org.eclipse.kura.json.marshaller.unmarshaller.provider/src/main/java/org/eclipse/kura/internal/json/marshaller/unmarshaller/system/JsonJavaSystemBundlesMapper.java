@@ -1,17 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
- *******************************************************************************/
+ ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.system;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Arrays;
 
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
@@ -20,6 +22,7 @@ import org.eclipse.kura.core.inventory.resources.SystemBundles;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.WriterConfig;
 
 public class JsonJavaSystemBundlesMapper {
 
@@ -46,13 +49,13 @@ public class JsonJavaSystemBundlesMapper {
         // empty constructor
     }
 
-    public static String marshal(SystemBundles systemBundles) {
+    public static void marshal(Writer writer, SystemBundles systemBundles) throws IOException {
         JsonObject json = Json.object();
         JsonArray bundles = new JsonArray();
         Arrays.asList(systemBundles.getBundles()).stream().forEach(sb -> bundles.add(getJsonBundle(sb)));
         json.add(SYSTEM_BUNDLES, bundles);
 
-        return json.toString();
+        json.writeTo(writer, WriterConfig.MINIMAL);
     }
 
     private static JsonObject getJsonBundle(SystemBundle sb) {

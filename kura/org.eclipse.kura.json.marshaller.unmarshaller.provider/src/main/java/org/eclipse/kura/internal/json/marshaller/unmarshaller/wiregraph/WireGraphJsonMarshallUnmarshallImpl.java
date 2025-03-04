@@ -1,17 +1,20 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2019, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.wiregraph;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,6 +33,7 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
+import com.eclipsesource.json.WriterConfig;
 
 @SuppressWarnings("checkstyle:hideUtilityClassConstructor")
 public class WireGraphJsonMarshallUnmarshallImpl {
@@ -52,7 +56,8 @@ public class WireGraphJsonMarshallUnmarshallImpl {
         // Public for testing purposes
     }
 
-    public static JsonObject marshalWireGraphConfiguration(WireGraphConfiguration graphConfiguration) {
+    public static void marshalWireGraphConfiguration(Writer writer, WireGraphConfiguration graphConfiguration)
+            throws IOException {
         JsonArray wireConfigurationJson = marshalWireConfigurationList(graphConfiguration.getWireConfigurations());
         JsonArray wireComponentConfigurationJson = marshalWireComponentConfigurationList(
                 graphConfiguration.getWireComponentConfigurations());
@@ -61,7 +66,7 @@ public class WireGraphJsonMarshallUnmarshallImpl {
         wireGraphConfiguration.add(COMPONENTS_KEY, wireComponentConfigurationJson);
         wireGraphConfiguration.add(WIRES_KEY, wireConfigurationJson);
 
-        return wireGraphConfiguration;
+        wireGraphConfiguration.writeTo(writer, WriterConfig.MINIMAL);
     }
 
     private static JsonObject marshalWireConfiguration(MultiportWireConfiguration wireConfig) {
@@ -154,12 +159,12 @@ public class WireGraphJsonMarshallUnmarshallImpl {
         return outputPortElems;
     }
 
-    public static WireGraphConfiguration unmarshalToWireGraphConfiguration(String jsonString) {
+    public static WireGraphConfiguration unmarshalToWireGraphConfiguration(Reader jsonReader) throws IOException {
 
         List<WireComponentConfiguration> wireCompConfigList = new ArrayList<>();
         List<MultiportWireConfiguration> wireConfigList = new ArrayList<>();
 
-        JsonObject json = Json.parse(jsonString).asObject();
+        JsonObject json = Json.parse(jsonReader).asObject();
 
         for (JsonObject.Member member : json) {
             String name = member.getName();

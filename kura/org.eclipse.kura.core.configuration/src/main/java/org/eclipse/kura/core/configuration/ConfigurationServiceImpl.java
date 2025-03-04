@@ -17,13 +17,16 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -261,7 +264,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     }
 
-    protected void deactivate(ComponentContext componentContext) {
+    protected void deactivate() {
         logger.info("deactivate...");
 
         if (this.bundleTracker != null) {
@@ -959,7 +962,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, snapshot);
             }
 
-            final XmlComponentConfigurations xmlConfigs = unmarshal(readFully(fSnapshot),
+            final XmlComponentConfigurations xmlConfigs = unmarshal(new FileInputStream(fSnapshot),
                     XmlComponentConfigurations.class);
 
             ComponentUtil.encryptConfigs(xmlConfigs.getConfigurations(), this.cryptoService);
@@ -1006,28 +1009,44 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND);
         }
 
-        // Marshall the configuration into an XML
-        String xmlResult;
-        xmlResult = marshal(conf);
-        if (xmlResult == null || xmlResult.trim().isEmpty()) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, conf);
+        File tempSnapshotFile;
+        try {
+            tempSnapshotFile = File.createTempFile(fSnapshot.getName(), null, new File(fSnapshot.getParent()));
+            tempSnapshotFile.deleteOnExit();
+        } catch (IOException ex) {
+            throw new KuraIOException(ex);
         }
 
-        // Encrypt the XML
-        char[] encryptedXML = this.cryptoService.encryptAes(xmlResult.toCharArray());
+        // Write the temporary snapshot
+        try (FileOutputStream fos = new FileOutputStream(tempSnapshotFile);
+                OutputStream encryptedStream = this.cryptoService.aesEncryptingStream(fos)) {
 
-        // Write the snapshot
-        try (FileOutputStream fos = new FileOutputStream(fSnapshot);
-                OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);) {
             logger.info("Writing snapshot - Saving {}...", fSnapshot.getAbsolutePath());
-            osw.append(new String(encryptedXML));
-            osw.flush();
+
+            marshal(encryptedStream, conf);
+            encryptedStream.flush();
             fos.flush();
             fos.getFD().sync();
+
             logger.info("Writing snapshot - Saving {}... Done.", fSnapshot.getAbsolutePath());
         } catch (IOException e) {
             throw new KuraIOException(e);
         }
+
+        try {
+            // Consolidate snapshot writing
+            Files.move(tempSnapshotFile.toPath(), fSnapshot.toPath(), StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.ATOMIC_MOVE);
+
+        } catch (IOException e) {
+            try {
+                Files.delete(tempSnapshotFile.toPath());
+            } catch (IOException e1) {
+                throw new KuraIOException(e1);
+            }
+            throw new KuraIOException(e);
+        }
+
     }
 
     private ComponentConfiguration getConfigurableComponentConfiguration(String pid) {
@@ -1309,25 +1328,18 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                     fSnapshot != null ? fSnapshot.getAbsolutePath() : "null");
         }
 
-        final String rawSnapshot;
+        InputStream decryptedStream = null;
         try {
-            rawSnapshot = readFully(fSnapshot);
-        } catch (IOException e) {
+            decryptedStream = this.cryptoService.aesDecryptingStream(new FileInputStream(fSnapshot));
+        } catch (FileNotFoundException e) {
             logger.error("Error loading file from disk", e);
             return null;
         }
 
-        // File loaded, try to decrypt and unmarshall
-        char[] decryptAes = this.cryptoService.decryptAes(rawSnapshot.toCharArray());
-        if (decryptAes == null) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR, "snapshot");
-        }
-        String decryptedContent = new String(decryptAes);
-
         XmlComponentConfigurations xmlConfigs = null;
 
         try {
-            xmlConfigs = unmarshal(decryptedContent, XmlComponentConfigurations.class);
+            xmlConfigs = unmarshal(decryptedStream, XmlComponentConfigurations.class);
         } catch (KuraException e) {
             logger.warn("Error parsing xml", e);
         }
@@ -1647,17 +1659,17 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         return getServiceProviderOCDs(classNames);
     }
 
-    protected <T> T unmarshal(final String string, final Class<T> clazz) throws KuraException {
+    protected <T> T unmarshal(final InputStream input, final Class<T> clazz) throws KuraException {
         try {
-            return requireNonNull(this.xmlUnmarshaller.unmarshal(string, clazz));
+            return requireNonNull(this.xmlUnmarshaller.unmarshal(input, clazz));
         } catch (final Exception e) {
             throw new KuraException(KuraErrorCode.DECODER_ERROR, "configuration", e);
         }
     }
 
-    protected String marshal(final Object object) throws KuraException {
+    protected void marshal(final OutputStream out, final Object object) throws KuraException {
         try {
-            return requireNonNull(this.xmlMarshaller.marshal(object));
+            this.xmlMarshaller.marshal(out, object);
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.ENCODE_ERROR, "configuration", e);
         }

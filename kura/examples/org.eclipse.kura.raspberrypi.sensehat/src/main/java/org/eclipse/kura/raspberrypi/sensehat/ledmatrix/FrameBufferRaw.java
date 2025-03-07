@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2018, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 public class FrameBufferRaw {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(FrameBufferRaw.class);
+    private static final Logger logger = LoggerFactory.getLogger(FrameBufferRaw.class);
 
     private static final String SENSE_HAT_FB_NAME = "RPi-Sense FB";
 
@@ -37,7 +37,7 @@ public class FrameBufferRaw {
     private static File graphicsFolder = new File("/sys/class/graphics/");
     private static final byte[] ZEROES = new byte[RGB565_BUFFER_SIZE];
 
-    private static FrameBufferRaw INSTANCE;
+    private static FrameBufferRaw instance;
 
     private File frameBufferFile;
     private RandomAccessFile raf;
@@ -65,7 +65,6 @@ public class FrameBufferRaw {
                     if (null != currentLine && currentLine.equals(SENSE_HAT_FB_NAME)) {
                         String eventFolderPath = fbFolder.getAbsolutePath();
                         frameBufferFile = new File("/dev/fb" + eventFolderPath.substring(eventFolderPath.length() - 1));
-                        br.close();
                         break;
                     }
                 }
@@ -75,16 +74,16 @@ public class FrameBufferRaw {
         try {
             raf = new RandomAccessFile(frameBufferFile, "rw");
         } catch (FileNotFoundException e) {
-            s_logger.error("FrameBuffer not found!", e);
+            logger.error("FrameBuffer not found!", e);
         }
     }
 
     public static FrameBufferRaw getFrameBuffer(ComponentContext ctx) throws IOException {
 
-        if (INSTANCE == null) {
-            INSTANCE = new FrameBufferRaw(ctx);
+        if (instance == null) {
+            instance = new FrameBufferRaw(ctx);
         }
-        return INSTANCE;
+        return instance;
     }
 
     public void setTransform(Transform transform) {
@@ -220,7 +219,7 @@ public class FrameBufferRaw {
 
         if (!alphabet.isAvailable(letter)) {
             clearFrameBuffer();
-            s_logger.warn("Letter not available");
+            logger.warn("Letter not available");
             return;
         }
 

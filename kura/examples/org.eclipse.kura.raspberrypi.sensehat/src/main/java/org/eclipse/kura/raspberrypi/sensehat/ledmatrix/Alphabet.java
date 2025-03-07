@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -23,15 +23,15 @@ import org.slf4j.LoggerFactory;
 
 public class Alphabet {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(Alphabet.class);
+    private static final Logger logger = LoggerFactory.getLogger(Alphabet.class);
 
-    private static final String alphabet = " +-*/!\"#$><0123456789.=)(ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz?,;:|@%[&_']\\~";
+    private static final String ALPABHET = " +-*/!\"#$><0123456789.=)(ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz?,;:|@%[&_']\\~";
     private static InputStream is;
     private static Map<String, short[][][]> letters;
 
     public Alphabet(URL url) {
 
-        letters = new HashMap<String, short[][][]>();
+        letters = new HashMap<>();
         short[][][] letter = new short[8][8][3];
         int c;
         try {
@@ -62,16 +62,16 @@ public class Alphabet {
                         }
                     }
                 }
-                letters.put(Character.toString(alphabet.charAt(i)), rotate(letter));
+                letters.put(Character.toString(ALPABHET.charAt(i)), rotate(letter));
             }
         } catch (IOException e) {
-            s_logger.error("Error in opening Alphabet file.", e);
+            logger.error("Error in opening Alphabet file.", e);
         } finally {
             if (is != null) {
                 try {
                     is.close();
                 } catch (IOException e) {
-                    s_logger.error("Error in closing stream.", e);
+                    logger.error("Error in closing stream.", e);
                 }
             }
         }
@@ -83,12 +83,7 @@ public class Alphabet {
     }
 
     public boolean isAvailable(String letter) {
-
-        if (alphabet.contains(letter)) {
-            return true;
-        } else {
-            return false;
-        }
+        return ALPABHET.contains(letter);
     }
 
     private short[][][] rotate(short[][][] letter) {
@@ -116,7 +111,6 @@ public class Alphabet {
             for (int y = 0; y < 8; y++) {
                 transposedLetter[x][y] = letter[y][x];
                 transposedLetter[y][x] = letter[x][y];
-                ;
             }
         }
 

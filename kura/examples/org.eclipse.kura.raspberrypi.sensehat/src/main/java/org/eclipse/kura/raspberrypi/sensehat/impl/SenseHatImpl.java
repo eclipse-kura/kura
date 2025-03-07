@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -27,16 +27,16 @@ import org.slf4j.LoggerFactory;
 
 public class SenseHatImpl implements SenseHat {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(SenseHatImpl.class);
-    private ComponentContext m_ctx;
+    private static final Logger logger = LoggerFactory.getLogger(SenseHatImpl.class);
+    private ComponentContext ctx;
 
     protected void activate(ComponentContext componentContext) {
-        s_logger.info("Activate SenseHat Service.");
-        this.m_ctx = componentContext;
+        logger.info("Activate SenseHat Service.");
+        this.ctx = componentContext;
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        s_logger.info("Deactivate SenseHat Service.");
+        logger.info("Deactivate SenseHat Service.");
         FrameBuffer.closeFrameBuffer();
         Joystick.closeJoystick();
         HTS221.closeDevice();
@@ -46,7 +46,7 @@ public class SenseHatImpl implements SenseHat {
 
     @Override
     public FrameBuffer getFrameBuffer() {
-        return FrameBuffer.getFrameBuffer(this.m_ctx);
+        return FrameBuffer.getFrameBuffer(this.ctx);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class SenseHatImpl implements SenseHat {
     @Override
     public FrameBufferRaw getFrameBufferRaw() {
         try {
-            return FrameBufferRaw.getFrameBuffer(m_ctx);
+            return FrameBufferRaw.getFrameBuffer(ctx);
         } catch (IOException e) {
             return null;
         }

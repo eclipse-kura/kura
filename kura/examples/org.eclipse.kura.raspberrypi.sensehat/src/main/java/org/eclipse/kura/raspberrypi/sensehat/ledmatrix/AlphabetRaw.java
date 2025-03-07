@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2018, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -25,18 +25,16 @@ public class AlphabetRaw {
 
     private static final int LETTER_SIZE = 8 * 8;
 
-    private static final Logger s_logger = LoggerFactory.getLogger(AlphabetRaw.class);
+    private static final Logger logger = LoggerFactory.getLogger(AlphabetRaw.class);
 
-    private static final String alphabet = " +-*/!\"#$><0123456789.=)(ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz?,;:|@%[&_']\\~";
-    private static InputStream is;
-    private static Map<Character, byte[]> letters;
+    private static final String ALPHABET = " +-*/!\"#$><0123456789.=)(ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz?,;:|@%[&_']\\~";
+
+    private static Map<Character, byte[]> letters = new HashMap<>();
 
     public AlphabetRaw(URL url) {
 
-        letters = new HashMap<Character, byte[]>();
         int c;
-        try {
-            is = url.openStream();
+        try (InputStream is = url.openStream();) {
             for (int i = 0; i < 91; i++) {
                 final byte[] letter = new byte[LETTER_SIZE];
                 for (int y = 0; y < 8; y++) {
@@ -58,32 +56,18 @@ public class AlphabetRaw {
                         }
                     }
                 }
-                letters.put(alphabet.charAt(i), letter);
+                letters.put(ALPHABET.charAt(i), letter);
             }
         } catch (IOException e) {
-            s_logger.error("Error in opening Alphabet file.", e);
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    s_logger.error("Error in closing stream.", e);
-                }
-            }
+            logger.error("Error in opening Alphabet file.", e);
         }
     }
 
     public byte[] getLetter(Character letter) {
-
         return letters.get(letter);
     }
 
     public boolean isAvailable(Character letter) {
-
-        if (alphabet.indexOf(letter) != -1) {
-            return true;
-        } else {
-            return false;
-        }
+        return ALPHABET.indexOf(letter) != -1;
     }
 }

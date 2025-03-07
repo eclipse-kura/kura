@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 public class Joystick {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(Joystick.class);
+    private static final Logger logger = LoggerFactory.getLogger(Joystick.class);
 
     private static final String SENSE_HAT_EVDEV_NAME = "Raspberry Pi Sense HAT Joystick";
     private static final int EVENT_SIZE = 16;
@@ -42,7 +42,7 @@ public class Joystick {
     public static final int KEY_DOWN = 108;
     public static final int KEY_ENTER = 28;
 
-    private static Joystick SenseHatJoystick = new Joystick();
+    private static Joystick senseHatJoystick = new Joystick();
     private static ByteBuffer bb;
     private static FileChannel deviceInput;
     private static FileInputStream fis;
@@ -61,31 +61,20 @@ public class Joystick {
 
         je = new JoystickEvent();
 
-        BufferedReader br = null;
         String currentLine;
         for (final File eventFolder : inputFolder.listFiles()) {
             if (eventFolder.getName().contains("event")) {
 
-                try {
-                    br = new BufferedReader(new FileReader(eventFolder + "/device/name"));
+                try (BufferedReader br = new BufferedReader(new FileReader(eventFolder + "/device/name"))) {
                     currentLine = br.readLine();
                     if (null != currentLine && currentLine.equals(SENSE_HAT_EVDEV_NAME)) {
                         String eventFolderPath = eventFolder.getAbsolutePath();
                         joystickEventFile = new File(
                                 "/dev/input/event" + eventFolderPath.substring(eventFolderPath.length() - 1));
-                        br.close();
                         break;
                     }
                 } catch (IOException e) {
-                    s_logger.error("Error in opening file {}", e);
-                } finally {
-                    if (br != null) {
-                        try {
-                            br.close();
-                        } catch (IOException e) {
-                            s_logger.error("Error in closing file {}", e);
-                        }
-                    }
+                    logger.error("Error in opening file.", e);
                 }
 
             }
@@ -94,11 +83,11 @@ public class Joystick {
         try {
             fis = new FileInputStream(joystickEventFile);
         } catch (FileNotFoundException e) {
-            s_logger.error("Joystick resource not found. {}", e);
+            logger.error("Joystick resource not found.", e);
         }
         deviceInput = fis.getChannel();
 
-        return SenseHatJoystick;
+        return senseHatJoystick;
     }
 
     public JoystickEvent read() {
@@ -112,6 +101,7 @@ public class Joystick {
                 je.parse(bb.asShortBuffer());
             }
         } catch (IOException e) {
+            logger.error("Error reading from joystick", e);
         }
 
         return je;
@@ -125,7 +115,7 @@ public class Joystick {
                 fis.close();
             }
         } catch (IOException e) {
-            s_logger.error("Error in closing resources", e);
+            logger.error("Error in closing resources", e);
         }
 
     }

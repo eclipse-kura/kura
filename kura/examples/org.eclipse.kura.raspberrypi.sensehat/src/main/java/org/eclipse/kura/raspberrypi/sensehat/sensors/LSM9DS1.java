@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -21,7 +21,11 @@ import org.slf4j.LoggerFactory;
 
 public class LSM9DS1 {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(LSM9DS1.class);
+    private static final String UNABLE_TO_READ_ERROR_MESSAGE = "Unable to read to I2C device.";
+
+    private static final String METHOD_NOT_YET_IMPLEMENTED_MESSAGE = "Method not yet implemented";
+
+    private static final Logger logger = LoggerFactory.getLogger(LSM9DS1.class);
 
     // Accelerometer and gyroscope register address map
     public static final int ACT_THS = 0x04;
@@ -175,7 +179,7 @@ public class LSM9DS1 {
     private float compassOffsetY;
     private float compassOffsetZ;
 
-    private final float[] CompassAverage = { 0.0F, 0.0F, 0.0F };
+    private final float[] compassAverage = { 0.0F, 0.0F, 0.0F };
 
     private LSM9DS1() {
 
@@ -191,7 +195,7 @@ public class LSM9DS1 {
                 accI2CDevice = new KuraI2CDevice(bus, accAddress, addressSize, frequency);
                 magI2CDevice = new KuraI2CDevice(bus, magAddress, addressSize, frequency);
             } catch (IOException e) {
-                s_logger.error("Could not create I2C Device", e);
+                logger.error("Could not create I2C Device", e);
             }
         }
         return imuSensor;
@@ -226,7 +230,7 @@ public class LSM9DS1 {
 
             }
         } catch (KuraException e) {
-            s_logger.info(e.toString());
+            logger.info(e.toString());
         }
 
         return result;
@@ -248,7 +252,7 @@ public class LSM9DS1 {
                 imuSensor = null;
             }
         } catch (Exception e) {
-            s_logger.error("Error in closing device", e);
+            logger.error("Error in closing device", e);
         }
     }
 
@@ -267,9 +271,10 @@ public class LSM9DS1 {
                 throw KuraException.internalError("Device not supported.");
             }
         } catch (IOException e) {
-            s_logger.error("Unable to read to I2C device", e);
+            logger.error("Unable to read to I2C device", e);
         } catch (InterruptedException e1) {
-            s_logger.error(e1.toString());
+            logger.error(e1.toString());
+            Thread.currentThread().interrupt();
         }
 
         return result;
@@ -285,23 +290,23 @@ public class LSM9DS1 {
                 throw KuraException.internalError("Device not supported.");
             }
         } catch (IOException e) {
-            s_logger.error("Unable to write to I2C device", e);
+            logger.error("Unable to write to I2C device", e);
         }
     }
 
     public void getOrientationRadiants() {
         // Returns the current orientation in radians using the aircraft principal axes of pitch, roll and yaw
-        s_logger.info("Method not yet implemented");
+        logger.info(METHOD_NOT_YET_IMPLEMENTED_MESSAGE);
     }
 
     public void getOrientationDegrees() {
         // Returns the current orientation in degrees using the aircraft principal axes of pitch, roll and yaw
-        s_logger.info("Method not yet implemented");
+        logger.info(METHOD_NOT_YET_IMPLEMENTED_MESSAGE);
     }
 
     public void getCompass() {
         // Gets the direction of North from the magnetometer in degrees
-        s_logger.info("Method not yet implemented");
+        logger.info(METHOD_NOT_YET_IMPLEMENTED_MESSAGE);
     }
 
     public float[] getCompassRaw() {
@@ -337,21 +342,21 @@ public class LSM9DS1 {
             calibrateMagnetometer(mag);
 
         } catch (KuraException e) {
-            s_logger.error("Unable to read to I2C device.", e);
+            logger.error(UNABLE_TO_READ_ERROR_MESSAGE, e);
         }
 
         // Swap X and Y axis to match SenseHat library
-        float[] Compass = new float[3];
-        Compass[0] = this.CompassAverage[1];
-        Compass[1] = this.CompassAverage[0];
-        Compass[2] = this.CompassAverage[2];
+        float[] compass = new float[3];
+        compass[0] = this.compassAverage[1];
+        compass[1] = this.compassAverage[0];
+        compass[2] = this.compassAverage[2];
 
-        return Compass;
+        return compass;
     }
 
     public void getGyroscope() {
         // Gets the orientation in degrees from the gyroscope only
-        s_logger.info("Method not yet implemented");
+        logger.info(METHOD_NOT_YET_IMPLEMENTED_MESSAGE);
     }
 
     public float[] getGyroscopeRaw() {
@@ -391,7 +396,7 @@ public class LSM9DS1 {
             calibrateGyroscope(gyro);
 
         } catch (KuraException e) {
-            s_logger.error("Unable to read to I2C device.", e);
+            logger.error(UNABLE_TO_READ_ERROR_MESSAGE, e);
         }
 
         return gyro;
@@ -400,7 +405,7 @@ public class LSM9DS1 {
 
     public void getAccelerometer() {
         // Gets the orientation in degrees from the accelerometer only
-        s_logger.info("Method not yet implemented");
+        logger.info(METHOD_NOT_YET_IMPLEMENTED_MESSAGE);
     }
 
     public float[] getAccelerometerRaw() {
@@ -444,7 +449,7 @@ public class LSM9DS1 {
             acc[0] = accTemp;
 
         } catch (KuraException e) {
-            s_logger.error("Unable to read to I2C device.", e);
+            logger.error(UNABLE_TO_READ_ERROR_MESSAGE, e);
         }
 
         return acc;
@@ -460,22 +465,23 @@ public class LSM9DS1 {
             byte[] value = { 0x7B };
             write(ACC_DEVICE, CTRL_REG6_XL, value);
         } catch (KuraException e) {
-            s_logger.error("Unable to write to I2C device.", e);
+            logger.error("Unable to write to I2C device.", e);
         } catch (InterruptedException e) {
-            s_logger.error(e.toString());
+            logger.error(e.toString());
+            Thread.currentThread().interrupt();
         }
     }
 
     public static void disableAccelerometer() {
 
-        int ctrl_reg = 0x00000000;
+        int ctrlReg = 0x00000000;
         try {
-            ctrl_reg = read(ACC_DEVICE, CTRL_REG6_XL) & 0x000000FF;
-            int value = ctrl_reg & 0x0000001F;
+            ctrlReg = read(ACC_DEVICE, CTRL_REG6_XL) & 0x000000FF;
+            int value = ctrlReg & 0x0000001F;
             byte[] valueBytes = ByteBuffer.allocate(4).putInt(value).array();
             write(ACC_DEVICE, CTRL_REG6_XL, valueBytes);
         } catch (KuraException e) {
-            s_logger.error("Unable to write to I2C device.", e);
+            logger.error("Unable to write to I2C device.", e);
         }
 
     }
@@ -492,23 +498,24 @@ public class LSM9DS1 {
             write(ACC_DEVICE, CTRL_REG3_G, value);
             gyroSampleRate = 119;
         } catch (KuraException e) {
-            s_logger.error("Unable to write to I2C device.", e);
+            logger.error("Unable to write to I2C device.", e);
         } catch (InterruptedException e) {
-            s_logger.error(e.toString());
+            logger.error(e.toString());
+            Thread.currentThread().interrupt();
         }
 
     }
 
     public static void disableGyroscope() {
 
-        int ctrl_reg = 0x00000000;
+        int ctrlReg = 0x00000000;
         try {
-            ctrl_reg = read(ACC_DEVICE, CTRL_REG1_G) & 0x000000FF;
-            int value = ctrl_reg & 0x0000001F;
+            ctrlReg = read(ACC_DEVICE, CTRL_REG1_G) & 0x000000FF;
+            int value = ctrlReg & 0x0000001F;
             byte[] valueBytes = ByteBuffer.allocate(4).putInt(value).array();
             write(ACC_DEVICE, CTRL_REG1_G, valueBytes);
         } catch (KuraException e) {
-            s_logger.error("Can't write to the device.", e);
+            logger.error("Can't write to the device.", e);
         }
 
     }
@@ -525,9 +532,10 @@ public class LSM9DS1 {
             write(MAG_DEVICE, CTRL_REG2_M, value);
             write(MAG_DEVICE, CTRL_REG3_M, value);
         } catch (KuraException e) {
-            s_logger.error("Unable to write to I2C device.", e);
+            logger.error("Unable to write to I2C device.", e);
         } catch (InterruptedException e) {
-            s_logger.error(e.toString());
+            logger.error(e.toString());
+            Thread.currentThread().interrupt();
         }
 
     }
@@ -538,7 +546,7 @@ public class LSM9DS1 {
             byte[] value = { 0x03 };
             write(MAG_DEVICE, CTRL_REG3_M, value);
         } catch (KuraException e) {
-            s_logger.error("Unable to write to I2C device.", e);
+            logger.error("Unable to write to I2C device.", e);
         }
 
     }
@@ -602,7 +610,7 @@ public class LSM9DS1 {
         gyro[2] -= this.gyroBiasZ;
     }
 
-    public void setGyroSampleRate(int sampleRate) {
+    public static void setGyroSampleRate(int sampleRate) {
         gyroSampleRate = sampleRate;
     }
 
@@ -625,9 +633,9 @@ public class LSM9DS1 {
         mag[2] = mag[0] * COMPASS_ELLIPSOID_CORR_31 + mag[1] * COMPASS_ELLIPSOID_CORR_32
                 + mag[2] * COMPASS_ELLIPSOID_CORR_33;
 
-        this.CompassAverage[0] = mag[0] * COMPASS_ALPHA + this.CompassAverage[0] * (1.0F - COMPASS_ALPHA);
-        this.CompassAverage[1] = mag[1] * COMPASS_ALPHA + this.CompassAverage[1] * (1.0F - COMPASS_ALPHA);
-        this.CompassAverage[2] = mag[2] * COMPASS_ALPHA + this.CompassAverage[2] * (1.0F - COMPASS_ALPHA);
+        this.compassAverage[0] = mag[0] * COMPASS_ALPHA + this.compassAverage[0] * (1.0F - COMPASS_ALPHA);
+        this.compassAverage[1] = mag[1] * COMPASS_ALPHA + this.compassAverage[1] * (1.0F - COMPASS_ALPHA);
+        this.compassAverage[2] = mag[2] * COMPASS_ALPHA + this.compassAverage[2] * (1.0F - COMPASS_ALPHA);
 
     }
 

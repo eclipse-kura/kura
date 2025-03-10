@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -34,7 +34,7 @@ public class FrameBuffer {
     private static FrameBuffer frameBuffer = new FrameBuffer();
 
     private static File graphicsFolder = new File("/sys/class/graphics/");
-    private static File FrameBufferFile = null;
+    private static File frameBufferFile = null;
     private static RandomAccessFile raf = null;
 
     private static int rotation = 0;
@@ -61,7 +61,7 @@ public class FrameBuffer {
                     currentLine = br.readLine();
                     if (null != currentLine && currentLine.equals(SENSE_HAT_FB_NAME)) {
                         String eventFolderPath = fbFolder.getAbsolutePath();
-                        FrameBufferFile = new File("/dev/fb" + eventFolderPath.substring(eventFolderPath.length() - 1));
+                        frameBufferFile = new File("/dev/fb" + eventFolderPath.substring(eventFolderPath.length() - 1));
                         br.close();
                         break;
                     }
@@ -81,7 +81,7 @@ public class FrameBuffer {
         }
 
         try {
-            raf = new RandomAccessFile(FrameBufferFile, "rw");
+            raf = new RandomAccessFile(frameBufferFile, "rw");
         } catch (FileNotFoundException e) {
             s_logger.error("FrameBuffer not found!", e);
         }
@@ -104,7 +104,7 @@ public class FrameBuffer {
             return;
         }
 
-        int coordinates[] = new int[2];
+        int[] coordinates = new int[2];
 
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
@@ -127,7 +127,7 @@ public class FrameBuffer {
             return;
         }
 
-        int coordinates[] = new int[2];
+        int[] coordinates = new int[2];
 
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
@@ -150,7 +150,7 @@ public class FrameBuffer {
             return;
         }
 
-        int coordinates[] = new int[2];
+        int[] coordinates = new int[2];
 
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {

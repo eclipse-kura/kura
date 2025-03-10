@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 public class HTS221 {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(HTS221.class);
+    private static final Logger logger = LoggerFactory.getLogger(HTS221.class);
 
     public static final int WHO_AM_I = 0x0F;
     public static final int AV_CONF = 0x10;
@@ -32,11 +32,11 @@ public class HTS221 {
     public static final int HUMIDITY_H_REG = 0x29;
     public static final int TEMP_L_REG = 0x2A;
     public static final int TEMP_H_REG = 0x2B;
-    public static final int H0_rH_x2 = 0x30;
-    public static final int H1_rH_x2 = 0x31;
-    public static final int T0_degC_x8 = 0x32;
-    public static final int T1_degC_x8 = 0x33;
-    public static final int T0_T1_msb = 0x35;
+    public static final int H0_RH_X2 = 0x30;
+    public static final int H1_RH_X2 = 0x31;
+    public static final int T0_DEGC_X8 = 0x32;
+    public static final int T1_DEGC_X8 = 0x33;
+    public static final int T0_T1_MSB = 0x35;
     public static final int H0_T0_OUT_L = 0x36;
     public static final int H0_T0_OUT_H = 0x37;
     public static final int H1_T0_OUT_L = 0x3A;
@@ -50,14 +50,6 @@ public class HTS221 {
 
     private static HTS221 humiditySensor = null;
     private static KuraI2CDevice humidityI2CDevice = null;
-    private static float h0_rh;
-    private static float h1_rh;
-    private static float t0_degC;
-    private static float t1_degC;
-    private static int h0_t0;
-    private static int h1_t0;
-    private static int t0_out;
-    private static int t1_out;
 
     private static float mt;
     private static float qt;
@@ -73,7 +65,7 @@ public class HTS221 {
             try {
                 humidityI2CDevice = new KuraI2CDevice(bus, address, addressSize, frequency);
             } catch (IOException e) {
-                s_logger.error("Could not create I2C Device", e);
+                logger.error("Could not create I2C Device", e);
             }
         }
         return humiditySensor;
@@ -110,7 +102,7 @@ public class HTS221 {
                 humiditySensor = null;
             }
         } catch (Exception e) {
-            s_logger.error("Error in closing device", e);
+            logger.error("Error in closing device", e);
         }
     }
 
@@ -127,22 +119,11 @@ public class HTS221 {
     }
 
     public boolean isHumidityReady() {
-
-        if ((read(STATUS_REG) & 0x00000002) == 2) {
-            return true;
-        } else {
-            return false;
-        }
-
+        return ((read(STATUS_REG) & 0x00000002) == 2);
     }
 
     public boolean isTemperatureReady() {
-
-        if ((read(STATUS_REG) & 0x00000001) == 1) {
-            return true;
-        } else {
-            return false;
-        }
+        return (read(STATUS_REG) & 0x00000001) == 1;
 
     }
 
@@ -153,9 +134,10 @@ public class HTS221 {
             Thread.sleep(5);
             result = humidityI2CDevice.read();
         } catch (IOException e) {
-            s_logger.error("Unable to read to I2C device", e);
+            logger.error("Unable to read to I2C device", e);
         } catch (InterruptedException e1) {
-            s_logger.error(e1.toString());
+            logger.error(e1.toString());
+            Thread.currentThread().interrupt();
         }
 
         return result;
@@ -165,58 +147,58 @@ public class HTS221 {
         try {
             humidityI2CDevice.write(register, 1, ByteBuffer.wrap(value));
         } catch (IOException e) {
-            s_logger.error("Unable to write to I2C device", e);
+            logger.error("Unable to write to I2C device", e);
         }
     }
 
-    private void readCalibration() {
+    private static void readCalibration() {
 
-        int h0_rh_x2 = read(H0_rH_x2) & 0x000000FF;
-        int h1_rh_x2 = read(H1_rH_x2) & 0x000000FF;
-        int t0_degC_x8 = (read(T0_T1_msb) & 0x00000003) << 8 | read(T0_degC_x8) & 0x000000FF;
-        int t1_degC_x8 = (read(T0_T1_msb) & 0x0000000C) << 6 | read(T1_degC_x8) & 0x000000FF;
+        int h0RhX2 = read(H0_RH_X2) & 0x000000FF;
+        int h1RhX2 = read(H1_RH_X2) & 0x000000FF;
+        int t0DegCX8 = (read(T0_T1_MSB) & 0x00000003) << 8 | read(T0_DEGC_X8) & 0x000000FF;
+        int t1DegCX8 = (read(T0_T1_MSB) & 0x0000000C) << 6 | read(T1_DEGC_X8) & 0x000000FF;
 
-        h0_rh = (float) h0_rh_x2 / 2;
-        h1_rh = (float) h1_rh_x2 / 2;
-        t0_degC = (float) t0_degC_x8 / 8;
-        t1_degC = (float) t1_degC_x8 / 8;
+        float h0Rh = (float) h0RhX2 / 2;
+        float h1Rh = (float) h1RhX2 / 2;
+        float t0DegC = (float) t0DegCX8 / 8;
+        float t1DegC = (float) t1DegCX8 / 8;
 
-        h0_t0 = read(H0_T0_OUT_H) << 8 | read(H0_T0_OUT_L) & 0x000000FF;
-        h1_t0 = read(H1_T0_OUT_H) << 8 | read(H1_T0_OUT_L) & 0x000000FF;
-        t0_out = read(T0_OUT_H) << 8 | read(T0_OUT_L) & 0x000000FF;
-        t1_out = read(T1_OUT_H) << 8 | read(T1_OUT_L) & 0x000000FF;
+        int h0T0 = read(H0_T0_OUT_H) << 8 | read(H0_T0_OUT_L) & 0x000000FF;
+        int h1T0 = read(H1_T0_OUT_H) << 8 | read(H1_T0_OUT_L) & 0x000000FF;
+        int t0Out = read(T0_OUT_H) << 8 | read(T0_OUT_L) & 0x000000FF;
+        int t1Out = read(T1_OUT_H) << 8 | read(T1_OUT_L) & 0x000000FF;
 
-        mt = (t1_degC - t0_degC) / (t1_out - t0_out);
-        qt = -mt * t0_out + t0_degC;
+        mt = (t1DegC - t0DegC) / (t1Out - t0Out);
+        qt = -mt * t0Out + t0DegC;
 
-        mh = (h1_rh - h0_rh) / (h1_t0 - h0_t0);
-        qh = -mh * h0_t0 + h0_rh;
+        mh = (h1Rh - h0Rh) / (h1T0 - h0T0);
+        qh = -mh * h0T0 + h0Rh;
 
-        s_logger.debug("t0_degC : " + t0_degC);
-        s_logger.debug("t1_degC : " + t1_degC);
-        s_logger.debug("t0_out : " + t0_out);
-        s_logger.debug("t1_out : " + t1_out);
+        logger.debug("t0_degC : {}", t0DegC);
+        logger.debug("t1_degC : {}", t1DegC);
+        logger.debug("t0_out : {}", t0Out);
+        logger.debug("t1_out : {}", t1Out);
 
-        s_logger.debug("h0_rh : " + h0_rh);
-        s_logger.debug("h1_rh : " + h1_rh);
-        s_logger.debug("h0_t0 : " + h0_t0);
-        s_logger.debug("h1_t0 : " + h1_t0);
+        logger.debug("h0_rh : {}", h0Rh);
+        logger.debug("h1_rh : {}", h1Rh);
+        logger.debug("h0_t0 : {}", h0T0);
+        logger.debug("h1_t0 : {}", h1T0);
 
-        s_logger.debug("mt : " + mt);
-        s_logger.debug("qt : " + qt);
-        s_logger.debug("mh : " + mh);
-        s_logger.debug("qh : " + qh);
+        logger.debug("mt : {}", mt);
+        logger.debug("qt : {}", qt);
+        logger.debug("mh : {}", mh);
+        logger.debug("qh : {}", qh);
     }
 
     private int readHumidity() {
         int hum = read(HUMIDITY_H_REG) << 8 | read(HUMIDITY_L_REG) & 0x000000FF;
-        s_logger.debug("hum : " + hum);
+        logger.debug("hum : {}", hum);
         return hum;
     }
 
     private int readTemperature() {
         int temp = read(TEMP_H_REG) << 8 | read(TEMP_L_REG) & 0x000000FF;
-        s_logger.debug("temp : " + temp);
+        logger.debug("temp : {}", temp);
         return temp;
     }
 }

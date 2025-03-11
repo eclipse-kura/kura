@@ -1,16 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.linux.net.dhcp.server;
+
+import static java.util.Objects.isNull;
 
 import org.eclipse.kura.linux.net.dhcp.DhcpServerConfigConverter;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
@@ -32,8 +34,55 @@ public class DhcpdConfigConverter implements DhcpServerConfigConverter {
         sb.append("subnet " + config.getSubnet().getHostAddress() + " netmask "
                 + config.getSubnetMask().getHostAddress() + " {\n");
 
-        // DNS servers
-        if (config.isPassDns() && config.getDnsServers() != null && !config.getDnsServers().isEmpty()) {
+        appendDNSServers(config, sb);
+
+        appendInterfaceName(config, sb);
+        appendRouterAddress(config, sb);
+        appendPassDNS(config, sb);
+        appendLeaseTime(config, sb);
+        appendPoolRange(config, sb);
+
+        sb.append("    }\n");
+        sb.append("}\n");
+
+        return sb.toString();
+    }
+
+    private void appendPoolRange(DhcpServerConfig config, StringBuilder sb) {
+        sb.append("    pool {\n");
+        sb.append("        range " + config.getRangeStart().getHostAddress() + " "
+                + config.getRangeEnd().getHostAddress() + ";\n");
+    }
+
+    private void appendLeaseTime(DhcpServerConfig config, StringBuilder sb) {
+        sb.append("    default-lease-time " + config.getDefaultLeaseTime() + ";\n");
+        if (config.getMaximumLeaseTime() > -1) {
+            sb.append("    max-lease-time " + config.getMaximumLeaseTime() + ";\n");
+        }
+    }
+
+    private void appendPassDNS(DhcpServerConfig config, StringBuilder sb) {
+        if (!config.isPassDns() || isNull(config.getRouterAddress())) {
+            sb.append("    ddns-update-style none;\n");
+            sb.append("    ddns-updates off;\n");
+        }
+    }
+
+    private void appendRouterAddress(DhcpServerConfig config, StringBuilder sb) {
+        if (!isNull(config.getRouterAddress())) {
+            sb.append("    option routers " + config.getRouterAddress().getHostAddress() + ";\n");
+        }
+    }
+
+    private void appendInterfaceName(DhcpServerConfig config, StringBuilder sb) {
+        if (!isNull(config.getInterfaceName())) {
+            sb.append("    interface " + config.getInterfaceName() + ";\n");
+        }
+    }
+
+    private void appendDNSServers(DhcpServerConfig config, StringBuilder sb) {
+        if (config.isPassDns() && !isNull(config.getDnsServers()) && !config.getDnsServers().isEmpty()
+                && !isNull(config.getRouterAddress())) {
             sb.append("    option domain-name-servers ");
             for (int i = 0; i < config.getDnsServers().size(); i++) {
                 if (config.getDnsServers().get(i) != null) {
@@ -47,32 +96,6 @@ public class DhcpdConfigConverter implements DhcpServerConfigConverter {
                 }
             }
         }
-        // interface
-        if (config.getInterfaceName() != null) {
-            sb.append("    interface " + config.getInterfaceName() + ";\n");
-        }
-        // router address
-        if (config.getRouterAddress() != null) {
-            sb.append("    option routers " + config.getRouterAddress().getHostAddress() + ";\n");
-        }
-        // if DNS should not be forwarded, add the following lines
-        if (!config.isPassDns()) {
-            sb.append("    ddns-update-style none;\n");
-            sb.append("    ddns-updates off;\n");
-        }
-        // Lease times
-        sb.append("    default-lease-time " + config.getDefaultLeaseTime() + ";\n");
-        if (config.getMaximumLeaseTime() > -1) {
-            sb.append("    max-lease-time " + config.getMaximumLeaseTime() + ";\n");
-        }
-        // Add the pool and range
-        sb.append("    pool {\n");
-        sb.append("        range " + config.getRangeStart().getHostAddress() + " "
-                + config.getRangeEnd().getHostAddress() + ";\n");
-        sb.append("    }\n");
-        sb.append("}\n");
-
-        return sb.toString();
     }
 
 }

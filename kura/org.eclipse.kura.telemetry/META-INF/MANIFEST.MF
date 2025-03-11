@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.telemetry
+Bundle-SymbolicName: org.eclipse.kura.telemetry;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Service-Component: OSGI-INF/*.xml
+Bundle-ClassPath: .
+Bundle-ActivationPolicy: lazy
+Import-Package:

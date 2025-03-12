@@ -64,6 +64,7 @@
                         <showDeprecation>true</showDeprecation>
                         <showWarnings>true</showWarnings>
                         <requireJREPackageImports>true</requireJREPackageImports>
+                        <useProjectSettings>false</useProjectSettings>
                     </configuration>
                 </plugin>
 

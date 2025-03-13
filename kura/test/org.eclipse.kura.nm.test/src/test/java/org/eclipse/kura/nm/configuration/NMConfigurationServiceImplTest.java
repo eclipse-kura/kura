@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -610,7 +610,7 @@ public class NMConfigurationServiceImplTest {
     private void thenComponentDefinitionHasCorrectNumberOfResources() {
         assertEquals(105, this.retrievedProperties.size());
         assertNotNull(this.ads);
-        assertEquals(157, this.ads.size());
+        assertEquals(155, this.ads.size());
     }
 
     private void thenComponentDefinitionHasCorrectProperties() {

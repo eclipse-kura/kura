@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -122,22 +122,6 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig {
 
     public void setHoldoff(int holdoff) {
         set("holdoff", Integer.valueOf(holdoff));
-    }
-
-    public int getIdle() {
-        return ((Integer) get("idle")).intValue();
-    }
-
-    public void setIdle(int idle) {
-        set("idle", Integer.valueOf(idle));
-    }
-
-    public String getActiveFilter() {
-        return get("activeFilter");
-    }
-
-    public void setActiveFilter(String activeFilter) {
-        set("activeFilter", activeFilter);
     }
 
     public int getLcpEchoInterval() {

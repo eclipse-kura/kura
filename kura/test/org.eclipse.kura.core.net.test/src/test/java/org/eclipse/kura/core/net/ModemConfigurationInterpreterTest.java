@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -43,8 +43,6 @@ public class ModemConfigurationInterpreterTest {
         properties.put("net.interface.ppp.config.persist", null);
         properties.put("net.interface.ppp.config.maxFail", null);
         properties.put("net.interface.ppp.config.holdoff", null);
-        properties.put("net.interface.ppp.config.idle", null);
-        properties.put("net.interface.ppp.config.activeFilter", null);
         properties.put("net.interface.ppp.config.resetTimeout", null);
         properties.put("net.interface.ppp.config.lcpEchoInterval", null);
         properties.put("net.interface.ppp.config.lcpEchoFailure", null);
@@ -67,8 +65,6 @@ public class ModemConfigurationInterpreterTest {
         expected.setPersist(true);
         expected.setMaxFail(5);
         expected.setHoldoff(1);
-        expected.setIdle(95);
-        expected.setActiveFilter("inbound");
         expected.setResetTimeout(5);
         expected.setLcpEchoFailure(0);
         expected.setLcpEchoInterval(0);
@@ -102,8 +98,6 @@ public class ModemConfigurationInterpreterTest {
         properties.put("net.interface.ppp.config.persist", true);
         properties.put("net.interface.ppp.config.maxFail", 5);
         properties.put("net.interface.ppp.config.holdoff", 1);
-        properties.put("net.interface.ppp.config.idle", 6);
-        properties.put("net.interface.ppp.config.activeFilter", "activeFilter");
         properties.put("net.interface.ppp.config.resetTimeout", 7);
         properties.put("net.interface.ppp.config.lcpEchoInterval", 8);
         properties.put("net.interface.ppp.config.lcpEchoFailure", 9);
@@ -125,8 +119,6 @@ public class ModemConfigurationInterpreterTest {
         expected.setPersist(true);
         expected.setMaxFail(5);
         expected.setHoldoff(1);
-        expected.setIdle(6);
-        expected.setActiveFilter("activeFilter");
         expected.setResetTimeout(7);
         expected.setLcpEchoInterval(8);
         expected.setLcpEchoFailure(9);
@@ -164,8 +156,6 @@ public class ModemConfigurationInterpreterTest {
         properties.put("net.interface.ppp.config.persist", true);
         properties.put("net.interface.ppp.config.maxFail", 5);
         properties.put("net.interface.ppp.config.holdoff", 1);
-        properties.put("net.interface.ppp.config.idle", 6);
-        properties.put("net.interface.ppp.config.activeFilter", "activeFilter");
         properties.put("net.interface.ppp.config.resetTimeout", 7);
         properties.put("net.interface.ppp.config.lcpEchoInterval", 8);
         properties.put("net.interface.ppp.config.lcpEchoFailure", 9);
@@ -187,8 +177,6 @@ public class ModemConfigurationInterpreterTest {
         expected.setPersist(true);
         expected.setMaxFail(5);
         expected.setHoldoff(1);
-        expected.setIdle(6);
-        expected.setActiveFilter("activeFilter");
         expected.setResetTimeout(7);
         expected.setLcpEchoInterval(8);
         expected.setLcpEchoFailure(9);
@@ -210,7 +198,7 @@ public class ModemConfigurationInterpreterTest {
 
         assertEquals(expected, modemConfig);
     }
-    
+
     @Test
     public void testGetModemConfigAllOverload() throws Throwable {
 
@@ -226,8 +214,6 @@ public class ModemConfigurationInterpreterTest {
         properties.put("net.interface.ppp.config.persist", true);
         properties.put("net.interface.ppp.config.maxFail", 5);
         properties.put("net.interface.ppp.config.holdoff", 1);
-        properties.put("net.interface.ppp.config.idle", 6);
-        properties.put("net.interface.ppp.config.activeFilter", "activeFilter");
         properties.put("net.interface.ppp.config.resetTimeout", 7);
         properties.put("net.interface.ppp.config.lcpEchoInterval", 8);
         properties.put("net.interface.ppp.config.lcpEchoFailure", 9);
@@ -249,8 +235,6 @@ public class ModemConfigurationInterpreterTest {
         expected.setPersist(true);
         expected.setMaxFail(5);
         expected.setHoldoff(1);
-        expected.setIdle(6);
-        expected.setActiveFilter("activeFilter");
         expected.setResetTimeout(7);
         expected.setLcpEchoInterval(8);
         expected.setLcpEchoFailure(9);

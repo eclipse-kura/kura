@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -402,8 +402,6 @@ public class NetworkConfigurationServicePropertiesBuilder {
             this.properties.setModemHoldoff(this.ifname, gwtModemConfig.getHoldoff());
             this.properties.setModemPppNum(this.ifname, gwtModemConfig.getPppNum());
             this.properties.setModemMaxFail(this.ifname, gwtModemConfig.getMaxFail());
-            this.properties.setModemIdle(this.ifname, gwtModemConfig.getIdle());
-            this.properties.setModemActiveFilter(this.ifname, gwtModemConfig.getActiveFilter());
             this.properties.setModemLpcEchoInterval(this.ifname, gwtModemConfig.getLcpEchoInterval());
             this.properties.setModemLpcEchoFailure(this.ifname, gwtModemConfig.getLcpEchoFailure());
             this.properties.setModemDiversityEnabled(this.ifname, gwtModemConfig.isDiversityEnabled());

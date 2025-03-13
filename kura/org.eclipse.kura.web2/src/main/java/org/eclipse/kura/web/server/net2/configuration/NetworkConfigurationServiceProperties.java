@@ -154,7 +154,7 @@ public class NetworkConfigurationServiceProperties {
     public void setIp4DnsServers(String ifname, String dnsServers) {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_IP4_DNS_SERVERS, ifname), dnsServers);
     }
-    
+
     /*
      * IPv6 properties
      */
@@ -168,7 +168,7 @@ public class NetworkConfigurationServiceProperties {
     private static final String NET_INTERFACE_CONFIG_IP6_NETMASK = "net.interface.%s.config.ip6.prefix";
     private static final String NET_INTERFACE_CONFIG_IP6_GATEWAY = "net.interface.%s.config.ip6.gateway";
     private static final String NET_INTERFACE_CONFIG_IP6_DNS_SERVERS = "net.interface.%s.config.ip6.dnsServers";
-    
+
     public Optional<String> getIp6Status(String ifname) {
         return getNonEmptyStringProperty(this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_STATUS, ifname)));
     }
@@ -248,7 +248,7 @@ public class NetworkConfigurationServiceProperties {
     public void setIp6DnsServers(String ifname, String dnsServers) {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_DNS_SERVERS, ifname), dnsServers);
     }
-    
+
     /*
      * IPv4 DHCP Server properties
      */
@@ -598,14 +598,12 @@ public class NetworkConfigurationServiceProperties {
      */
 
     private static final String NET_INTERFACE_CONFIG_ENABLED = "net.interface.%s.config.enabled";
-    private static final String NET_INTERFACE_CONFIG_IDLE = "net.interface.%s.config.idle";
     private static final String NET_INTERFACE_CONFIG_USERNAME = "net.interface.%s.config.username";
     private static final String NET_INTERFACE_CONFIG_PASSWORD = "net.interface.%s.config.password";
     private static final String NET_INTERFACE_CONFIG_PDP_TYPE = "net.interface.%s.config.pdpType";
     private static final String NET_INTERFACE_CONFIG_MAX_FAIL = "net.interface.%s.config.maxFail";
     private static final String NET_INTERFACE_CONFIG_AUTH_TYPE = "net.interface.%s.config.authType";
     private static final String NET_INTERFACE_CONFIG_LPC_ECHO_INTERVAL = "net.interface.%s.config.lpcEchoInterval";
-    private static final String NET_INTERFACE_CONFIG_ACTIVE_FILTER = "net.interface.%s.config.activeFilter";
     private static final String NET_INTERFACE_CONFIG_LPC_ECHO_FAILURE = "net.interface.%s.config.lpcEchoFailure";
     private static final String NET_INTERFACE_CONFIG_DIVERSITY_ENABLED = "net.interface.%s.config.diversityEnabled";
     private static final String NET_INTERFACE_CONFIG_RESET_TIMEOUT = "net.interface.%s.config.resetTimeout";
@@ -629,14 +627,6 @@ public class NetworkConfigurationServiceProperties {
 
     public void setModemEnabled(String ifname, boolean isModemEnabled) {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_ENABLED, ifname), isModemEnabled);
-    }
-
-    public int getModemIdle(String ifname) {
-        return (int) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_IDLE, ifname), 0);
-    }
-
-    public void setModemIdle(String ifname, int modemIdle) {
-        this.properties.put(String.format(NET_INTERFACE_CONFIG_IDLE, ifname), modemIdle);
     }
 
     public String getModemUsername(String ifname) {
@@ -685,14 +675,6 @@ public class NetworkConfigurationServiceProperties {
 
     public void setModemLpcEchoInterval(String ifname, int echoInterval) {
         this.properties.put(String.format(NET_INTERFACE_CONFIG_LPC_ECHO_INTERVAL, ifname), echoInterval);
-    }
-
-    public String getModemActiveFilter(String ifname) {
-        return (String) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_ACTIVE_FILTER, ifname), "");
-    }
-
-    public void setModemActiveFilter(String ifname, String activeFilter) {
-        this.properties.put(String.format(NET_INTERFACE_CONFIG_ACTIVE_FILTER, ifname), activeFilter);
     }
 
     public int getModemLpcEchoFailure(String ifname) {
@@ -906,23 +888,22 @@ public class NetworkConfigurationServiceProperties {
         return (String) this.properties
                 .get(String.format(NET_INTERFACE_CONFIG_8021X_PUBLIC_PRIVATE_KEY_PAIR_NAME, ifname));
     }
-    
+
     /**
      * Advanced properties
      */
     private static final String NET_INTERFACE_CONFIG_IP4_MTU = "net.interface.%s.config.ip4.mtu";
     private static final String NET_INTERFACE_CONFIG_IP6_MTU = "net.interface.%s.config.ip6.mtu";
     private static final String NET_INTERFACE_CONFIG_PROMISC_MODE = "net.interface.%s.config.promisc";
-    
+
     public Optional<Integer> getIp4Mtu(String ifName) {
-    	return Optional.ofNullable(
-                (Integer) properties.get(String.format(NET_INTERFACE_CONFIG_IP4_MTU, ifName)));
+        return Optional.ofNullable((Integer) properties.get(String.format(NET_INTERFACE_CONFIG_IP4_MTU, ifName)));
     }
 
     public void setIp4Mtu(String ifName, int mtu) {
-    	this.properties.put(String.format(NET_INTERFACE_CONFIG_IP4_MTU, ifName), mtu);
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_IP4_MTU, ifName), mtu);
     }
-    
+
     public Optional<Integer> getIp6Mtu(String ifname) {
         if (this.properties.containsKey(String.format(NET_INTERFACE_CONFIG_IP6_MTU, ifname))) {
             Integer mtu = (Integer) this.properties.get(String.format(NET_INTERFACE_CONFIG_IP6_MTU, ifname));
@@ -932,9 +913,9 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public void setIp6Mtu(String ifname, Integer mtu) {
-    	this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_MTU, ifname), mtu);
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_IP6_MTU, ifname), mtu);
     }
-    
+
     public Optional<Integer> getPromisc(String ifname) {
         if (this.properties.containsKey(String.format(NET_INTERFACE_CONFIG_PROMISC_MODE, ifname))) {
             Integer mtu = (Integer) this.properties.get(String.format(NET_INTERFACE_CONFIG_PROMISC_MODE, ifname));
@@ -944,7 +925,7 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public void setPromisc(String ifname, Integer promisc) {
-    	this.properties.put(String.format(NET_INTERFACE_CONFIG_PROMISC_MODE, ifname), promisc);
+        this.properties.put(String.format(NET_INTERFACE_CONFIG_PROMISC_MODE, ifname), promisc);
     }
 
     /**

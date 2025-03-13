@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -101,11 +101,11 @@ public class NetworkConfiguration {
      * set of properties
      *
      * @param properties
-     *                   The properties that represent the new configuration
+     *            The properties that represent the new configuration
      * @throws UnknownHostException
-     *                              If some hostnames can not be resolved
+     *             If some hostnames can not be resolved
      * @throws KuraException
-     *                              It there is an internal error
+     *             It there is an internal error
      */
     public NetworkConfiguration(Map<String, Object> properties) throws UnknownHostException, KuraException {
         logger.debug("Creating NetworkConfiguration from properties");
@@ -178,23 +178,23 @@ public class NetworkConfiguration {
 
         if (netInterfaceConfig == null) {
             switch (netInterfaceType) {
-                case LOOPBACK:
-                    netInterfaceConfig = new LoopbackInterfaceConfigImpl(interfaceName);
-                    break;
-                case ETHERNET:
-                    netInterfaceConfig = new EthernetInterfaceConfigImpl(interfaceName);
-                    break;
-                case WIFI:
-                    netInterfaceConfig = new WifiInterfaceConfigImpl(interfaceName);
-                    break;
-                case MODEM:
-                    netInterfaceConfig = new ModemInterfaceConfigImpl(interfaceName);
-                    break;
-                case VLAN:
-                    netInterfaceConfig = new VlanInterfaceConfigImpl(interfaceName);
-                    break;
-                default:
-                    throw new KuraException(KuraErrorCode.INVALID_PARAMETER);
+            case LOOPBACK:
+                netInterfaceConfig = new LoopbackInterfaceConfigImpl(interfaceName);
+                break;
+            case ETHERNET:
+                netInterfaceConfig = new EthernetInterfaceConfigImpl(interfaceName);
+                break;
+            case WIFI:
+                netInterfaceConfig = new WifiInterfaceConfigImpl(interfaceName);
+                break;
+            case MODEM:
+                netInterfaceConfig = new ModemInterfaceConfigImpl(interfaceName);
+                break;
+            case VLAN:
+                netInterfaceConfig = new VlanInterfaceConfigImpl(interfaceName);
+                break;
+            default:
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER);
             }
         }
 
@@ -701,8 +701,6 @@ public class NetworkConfiguration {
         properties.put(prefix + "pdpType", modemConfig.getPdpType() != null ? modemConfig.getPdpType().toString() : "");
         properties.put(prefix + "persist", modemConfig.isPersist());
         properties.put(prefix + "maxFail", modemConfig.getMaxFail());
-        properties.put(prefix + "idle", modemConfig.getIdle());
-        properties.put(prefix + "activeFilter", modemConfig.getActiveFilter());
         properties.put(prefix + "resetTimeout", modemConfig.getResetTimeout());
         properties.put(prefix + "lcpEchoInterval", modemConfig.getLcpEchoInterval());
         properties.put(prefix + "lcpEchoFailure", modemConfig.getLcpEchoFailure());
@@ -799,87 +797,84 @@ public class NetworkConfiguration {
         NetInterfaceConfig<?> interfaceConfig = null;
 
         switch (type) {
-            case LOOPBACK:
-                interfaceConfig = new LoopbackInterfaceConfigImpl(interfaceName);
-                List<NetInterfaceAddressConfig> loopbackInterfaceAddressConfigs = new ArrayList<>();
-                NetInterfaceAddressConfigImpl netInterfaceAddressConfigImpl = new NetInterfaceAddressConfigImpl();
-                netInterfaceAddressConfigImpl.setNetConfigs(IpConfigurationInterpreter.populateConfiguration(props,
-                        interfaceName, netInterfaceAddressConfigImpl.getAddress(), interfaceConfig.isVirtual()));
-                loopbackInterfaceAddressConfigs.add(netInterfaceAddressConfigImpl);
-                ((LoopbackInterfaceConfigImpl) interfaceConfig)
-                        .setNetInterfaceAddresses(loopbackInterfaceAddressConfigs);
+        case LOOPBACK:
+            interfaceConfig = new LoopbackInterfaceConfigImpl(interfaceName);
+            List<NetInterfaceAddressConfig> loopbackInterfaceAddressConfigs = new ArrayList<>();
+            NetInterfaceAddressConfigImpl netInterfaceAddressConfigImpl = new NetInterfaceAddressConfigImpl();
+            netInterfaceAddressConfigImpl.setNetConfigs(IpConfigurationInterpreter.populateConfiguration(props,
+                    interfaceName, netInterfaceAddressConfigImpl.getAddress(), interfaceConfig.isVirtual()));
+            loopbackInterfaceAddressConfigs.add(netInterfaceAddressConfigImpl);
+            ((LoopbackInterfaceConfigImpl) interfaceConfig).setNetInterfaceAddresses(loopbackInterfaceAddressConfigs);
 
-                ((LoopbackInterfaceConfigImpl) interfaceConfig).setUsbDevice(usbDevice);
+            ((LoopbackInterfaceConfigImpl) interfaceConfig).setUsbDevice(usbDevice);
 
-                break;
-            case ETHERNET:
-                interfaceConfig = new EthernetInterfaceConfigImpl(interfaceName);
-                List<NetInterfaceAddressConfig> ethernetInterfaceAddressConfigs = new ArrayList<>();
-                netInterfaceAddressConfigImpl = new NetInterfaceAddressConfigImpl();
-                netInterfaceAddressConfigImpl.setNetConfigs(IpConfigurationInterpreter.populateConfiguration(props,
-                        interfaceName, netInterfaceAddressConfigImpl.getAddress(), interfaceConfig.isVirtual()));
-                ethernetInterfaceAddressConfigs.add(netInterfaceAddressConfigImpl);
-                ((EthernetInterfaceConfigImpl) interfaceConfig)
-                        .setNetInterfaceAddresses(ethernetInterfaceAddressConfigs);
+            break;
+        case ETHERNET:
+            interfaceConfig = new EthernetInterfaceConfigImpl(interfaceName);
+            List<NetInterfaceAddressConfig> ethernetInterfaceAddressConfigs = new ArrayList<>();
+            netInterfaceAddressConfigImpl = new NetInterfaceAddressConfigImpl();
+            netInterfaceAddressConfigImpl.setNetConfigs(IpConfigurationInterpreter.populateConfiguration(props,
+                    interfaceName, netInterfaceAddressConfigImpl.getAddress(), interfaceConfig.isVirtual()));
+            ethernetInterfaceAddressConfigs.add(netInterfaceAddressConfigImpl);
+            ((EthernetInterfaceConfigImpl) interfaceConfig).setNetInterfaceAddresses(ethernetInterfaceAddressConfigs);
 
-                ((EthernetInterfaceConfigImpl) interfaceConfig).setUsbDevice(usbDevice);
+            ((EthernetInterfaceConfigImpl) interfaceConfig).setUsbDevice(usbDevice);
 
-                break;
-            case WIFI:
-                interfaceConfig = new WifiInterfaceConfigImpl(interfaceName);
+            break;
+        case WIFI:
+            interfaceConfig = new WifiInterfaceConfigImpl(interfaceName);
 
-                List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = new ArrayList<>();
+            List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = new ArrayList<>();
 
-                WifiInterfaceAddressConfig wifiInterfaceAddressConfig = new WifiInterfaceAddressConfigImpl();
-                List<NetConfig> wifiNetConfigs = IpConfigurationInterpreter.populateConfiguration(props, interfaceName,
-                        wifiInterfaceAddressConfig.getAddress(), interfaceConfig.isVirtual());
-                wifiNetConfigs.addAll(WifiConfigurationInterpreter.populateConfiguration(props, interfaceName));
-                ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig).setNetConfigs(wifiNetConfigs);
-                ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig)
-                        .setMode(WifiConfigurationInterpreter.getWifiMode(props, interfaceName));
-                wifiInterfaceAddressConfigs.add(wifiInterfaceAddressConfig);
+            WifiInterfaceAddressConfig wifiInterfaceAddressConfig = new WifiInterfaceAddressConfigImpl();
+            List<NetConfig> wifiNetConfigs = IpConfigurationInterpreter.populateConfiguration(props, interfaceName,
+                    wifiInterfaceAddressConfig.getAddress(), interfaceConfig.isVirtual());
+            wifiNetConfigs.addAll(WifiConfigurationInterpreter.populateConfiguration(props, interfaceName));
+            ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig).setNetConfigs(wifiNetConfigs);
+            ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig)
+                    .setMode(WifiConfigurationInterpreter.getWifiMode(props, interfaceName));
+            wifiInterfaceAddressConfigs.add(wifiInterfaceAddressConfig);
 
-                ((WifiInterfaceConfigImpl) interfaceConfig).setNetInterfaceAddresses(wifiInterfaceAddressConfigs);
+            ((WifiInterfaceConfigImpl) interfaceConfig).setNetInterfaceAddresses(wifiInterfaceAddressConfigs);
 
-                ((WifiInterfaceConfigImpl) interfaceConfig).setUsbDevice(usbDevice);
+            ((WifiInterfaceConfigImpl) interfaceConfig).setUsbDevice(usbDevice);
 
-                break;
-            case MODEM:
-                interfaceConfig = new ModemInterfaceConfigImpl(interfaceName);
+            break;
+        case MODEM:
+            interfaceConfig = new ModemInterfaceConfigImpl(interfaceName);
 
-                ModemInterfaceAddressConfig modemInterfaceAddressConfig = new ModemInterfaceAddressConfigImpl();
-                List<NetConfig> modemNetConfigs = IpConfigurationInterpreter.populateConfiguration(props, interfaceName,
-                        modemInterfaceAddressConfig.getAddress(), interfaceConfig.isVirtual());
-                modemNetConfigs.addAll(ModemConfigurationInterpreter.populateConfiguration(
-                        modemInterfaceAddressConfig, props, interfaceName));
-                ((ModemInterfaceAddressConfigImpl) modemInterfaceAddressConfig).setNetConfigs(modemNetConfigs);
+            ModemInterfaceAddressConfig modemInterfaceAddressConfig = new ModemInterfaceAddressConfigImpl();
+            List<NetConfig> modemNetConfigs = IpConfigurationInterpreter.populateConfiguration(props, interfaceName,
+                    modemInterfaceAddressConfig.getAddress(), interfaceConfig.isVirtual());
+            modemNetConfigs.addAll(ModemConfigurationInterpreter.populateConfiguration(modemInterfaceAddressConfig,
+                    props, interfaceName));
+            ((ModemInterfaceAddressConfigImpl) modemInterfaceAddressConfig).setNetConfigs(modemNetConfigs);
 
-                List<ModemInterfaceAddressConfig> modemInterfaceAddressConfigs = new ArrayList<>();
-                modemInterfaceAddressConfigs.add(modemInterfaceAddressConfig);
-                ((ModemInterfaceConfigImpl) interfaceConfig).setNetInterfaceAddresses(modemInterfaceAddressConfigs);
+            List<ModemInterfaceAddressConfig> modemInterfaceAddressConfigs = new ArrayList<>();
+            modemInterfaceAddressConfigs.add(modemInterfaceAddressConfig);
+            ((ModemInterfaceConfigImpl) interfaceConfig).setNetInterfaceAddresses(modemInterfaceAddressConfigs);
 
-                ((ModemInterfaceConfigImpl) interfaceConfig).setUsbDevice(usbDevice);
+            ((ModemInterfaceConfigImpl) interfaceConfig).setUsbDevice(usbDevice);
 
-                break;
-            case VLAN:
-                interfaceConfig = new VlanInterfaceConfigImpl(interfaceName);
-                List<NetInterfaceAddressConfig> vlanInterfaceAddressConfigs = new ArrayList<>();
-                netInterfaceAddressConfigImpl = new NetInterfaceAddressConfigImpl();
-                netInterfaceAddressConfigImpl.setNetConfigs(IpConfigurationInterpreter.populateConfiguration(props,
-                        interfaceName, netInterfaceAddressConfigImpl.getAddress(), interfaceConfig.isVirtual()));
-                vlanInterfaceAddressConfigs.add(netInterfaceAddressConfigImpl);
-                ((VlanInterfaceConfigImpl) interfaceConfig)
-                        .setNetInterfaceAddresses(vlanInterfaceAddressConfigs);
+            break;
+        case VLAN:
+            interfaceConfig = new VlanInterfaceConfigImpl(interfaceName);
+            List<NetInterfaceAddressConfig> vlanInterfaceAddressConfigs = new ArrayList<>();
+            netInterfaceAddressConfigImpl = new NetInterfaceAddressConfigImpl();
+            netInterfaceAddressConfigImpl.setNetConfigs(IpConfigurationInterpreter.populateConfiguration(props,
+                    interfaceName, netInterfaceAddressConfigImpl.getAddress(), interfaceConfig.isVirtual()));
+            vlanInterfaceAddressConfigs.add(netInterfaceAddressConfigImpl);
+            ((VlanInterfaceConfigImpl) interfaceConfig).setNetInterfaceAddresses(vlanInterfaceAddressConfigs);
 
-                ((VlanInterfaceConfigImpl) interfaceConfig).setUsbDevice(usbDevice);
+            ((VlanInterfaceConfigImpl) interfaceConfig).setUsbDevice(usbDevice);
 
-                break;
-            case UNKNOWN:
-                logger.trace("Found interface of unknown type in current configuration: {}", interfaceName);
-                return;
-            default:
-                logger.error("Unsupported type {} for interface {}", type, interfaceName);
-                return;
+            break;
+        case UNKNOWN:
+            logger.trace("Found interface of unknown type in current configuration: {}", interfaceName);
+            return;
+        default:
+            logger.error("Unsupported type {} for interface {}", type, interfaceName);
+            return;
         }
 
         this.netInterfaceConfigs.put(interfaceName, interfaceConfig);

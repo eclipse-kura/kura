@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -324,7 +324,7 @@ public class NetworkConfigurationServiceCommonTest {
 
     private void thenComponentDefinitionHasCorrectNumberOfResources() {
         assertNotNull(this.ads);
-        assertEquals(191, this.ads.size());
+        assertEquals(189, this.ads.size());
     }
 
     private void thenReturnedPropertyEquals(final String key, final Object value) {
@@ -628,7 +628,7 @@ public class NetworkConfigurationServiceCommonTest {
     }
 
     private void thenComponentDefinitionHasModemProperties() {
-        assertEquals(39, this.ads.stream().filter(ad -> ad.getName().contains("1-4")).count());
+        assertEquals(37, this.ads.stream().filter(ad -> ad.getName().contains("1-4")).count());
     }
 
     private void thenComponentDefinitionHasVlanProperties() {
@@ -937,7 +937,7 @@ public class NetworkConfigurationServiceCommonTest {
                 adsConfigured++;
             }
         }
-        assertEquals(12, adsConfigured);
+        assertEquals(10, adsConfigured);
     }
 
     private void thenComponentDefinitionHasVlanProperties(String interfaceName) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -28,8 +28,6 @@ public final class NetworkConfigurationConstants {
     public static final int DEFAULT_MODEM_HOLDOFF_VALUE = 1;
     public static final int DEFAULT_MODEM_MAXFAIL_VALUE = 5;
     public static final int DEFAULT_MODEM_RESET_TIMEOUT_VALUE = 5;
-    public static final int DEFAULT_MODEM_IDLE_VALUE = 95;
-    public static final String DEFAULT_MODEM_ACTIVE_FILTER_VALUE = "inbound";
     public static final int DEFAULT_MODEM_LCP_ECHO_FAILURE_VALUE = 0;
     public static final int DEFAULT_MODEM_LCP_ECHO_INTERVAL_VALUE = 0;
     public static final boolean DEFAULT_MODEM_GPS_ENABLED_VALUE = false;

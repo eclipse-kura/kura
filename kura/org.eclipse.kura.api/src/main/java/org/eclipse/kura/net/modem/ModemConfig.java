@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -288,7 +288,9 @@ public class ModemConfig implements NetConfig {
      * The 'idle' option specifies that pppd should disconnect if the link is idle for n seconds.
      *
      * @return value of the 'idle' option as {@link int}
+     * @deprecated since 3.0
      */
+    @Deprecated
     public int getIdle() {
         return this.idle;
     }
@@ -298,7 +300,9 @@ public class ModemConfig implements NetConfig {
      * The 'idle' option specifies that pppd should disconnect if the link is idle for n seconds.
      *
      * @param idle
+     * @deprecated since 3.0
      */
+    @Deprecated
     public void setIdle(int idle) {
         this.idle = idle;
     }
@@ -308,7 +312,9 @@ public class ModemConfig implements NetConfig {
      * applied to data packets to determine which packets are to be regarded as link activity.
      *
      * @return value of the 'active-filter' option as {@link String}
+     * @deprecated since 3.0
      */
+    @Deprecated
     public String getActiveFilter() {
         return this.activeFilter;
     }
@@ -319,7 +325,9 @@ public class ModemConfig implements NetConfig {
      *
      * @param activeFilter
      *            - active filter as {@link String}
+     * @deprecated since 3.0
      */
+    @Deprecated
     public void setActiveFilter(String activeFilter) {
         this.activeFilter = activeFilter;
     }

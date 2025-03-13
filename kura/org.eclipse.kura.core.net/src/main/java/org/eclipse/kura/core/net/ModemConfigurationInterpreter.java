@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -123,8 +123,6 @@ public class ModemConfigurationInterpreter {
         modemConfig.setHoldoff(getHoldoff(prefix, properties));
         modemConfig.setMaxFail(getMaximumFailures(prefix, properties));
         modemConfig.setResetTimeout(getResetTimeout(prefix, properties));
-        modemConfig.setIdle(getIdle(prefix, properties));
-        modemConfig.setActiveFilter(getActiveFilter(prefix, properties));
         modemConfig.setLcpEchoInterval(getLcpEchoInterval(prefix, properties));
         modemConfig.setLcpEchoFailure(getLcpEchoFailure(prefix, properties));
         modemConfig.setUsername((String) properties.get(prefix + "username"));
@@ -143,7 +141,8 @@ public class ModemConfigurationInterpreter {
 
     private static boolean isDiversityEnabled(String prefix, Map<String, Object> properties) {
         String key = prefix + "diversityEnabled";
-        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_DIVERSITY_ENABLED_VALUE);
+        Object value = properties.getOrDefault(key,
+                NetworkConfigurationConstants.DEFAULT_MODEM_DIVERSITY_ENABLED_VALUE);
         return value != null ? (Boolean) value : NetworkConfigurationConstants.DEFAULT_MODEM_DIVERSITY_ENABLED_VALUE;
     }
 
@@ -161,20 +160,9 @@ public class ModemConfigurationInterpreter {
 
     private static int getLcpEchoInterval(String prefix, Map<String, Object> properties) {
         String key = prefix + "lcpEchoInterval";
-        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_LCP_ECHO_INTERVAL_VALUE);
+        Object value = properties.getOrDefault(key,
+                NetworkConfigurationConstants.DEFAULT_MODEM_LCP_ECHO_INTERVAL_VALUE);
         return value != null ? (Integer) value : NetworkConfigurationConstants.DEFAULT_MODEM_LCP_ECHO_INTERVAL_VALUE;
-    }
-
-    private static String getActiveFilter(String prefix, Map<String, Object> properties) {
-        String key = prefix + "activeFilter";
-        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_ACTIVE_FILTER_VALUE);
-        return value != null ? (String) value : NetworkConfigurationConstants.DEFAULT_MODEM_ACTIVE_FILTER_VALUE;
-    }
-
-    private static int getIdle(String prefix, Map<String, Object> properties) {
-        String key = prefix + "idle";
-        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_IDLE_VALUE);
-        return value != null ? (Integer) value : NetworkConfigurationConstants.DEFAULT_MODEM_IDLE_VALUE;
     }
 
     private static int getResetTimeout(String prefix, Map<String, Object> properties) {
@@ -210,7 +198,8 @@ public class ModemConfigurationInterpreter {
     private static PdpType getPdpType(String prefix, Map<String, Object> properties) {
         String key = prefix + "pdpType";
         Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_PDP_TYPE_VALUE.name());
-        return value != null ? parsePdpType((String) value) : NetworkConfigurationConstants.DEFAULT_MODEM_PDP_TYPE_VALUE;
+        return value != null ? parsePdpType((String) value)
+                : NetworkConfigurationConstants.DEFAULT_MODEM_PDP_TYPE_VALUE;
     }
 
     private static PdpType parsePdpType(String pdpTypeString) {
@@ -262,7 +251,8 @@ public class ModemConfigurationInterpreter {
 
     private static int getHeaderCompression(String prefix, Map<String, Object> properties) {
         String key = prefix + "headerCompression";
-        Object value = properties.getOrDefault(key, NetworkConfigurationConstants.DEFAULT_MODEM_HEADER_COMPRESSION_VALUE);
+        Object value = properties.getOrDefault(key,
+                NetworkConfigurationConstants.DEFAULT_MODEM_HEADER_COMPRESSION_VALUE);
         return value != null ? (Integer) value : NetworkConfigurationConstants.DEFAULT_MODEM_HEADER_COMPRESSION_VALUE;
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -72,14 +72,12 @@ public enum NetworkConfigurationPropertyNames {
     CONFIG_WIFI_MASTER_PAIRWISE_CIPHERS,
     CONFIG_WIFI_MASTER_GROUP_CIPHERS,
     CONFIG_MODEM_ENABLED,
-    CONFIG_MODEM_IDLE,
     CONFIG_MODEM_USERNAME,
     CONFIG_MODEM_PASSWORD,
     CONFIG_MODEM_PDP_TYPE,
     CONFIG_MODEM_MAX_FAIL,
     CONFIG_MODEM_AUTH_TYPE,
     CONFIG_MODEM_LPC_ECHO_INTERVAL,
-    CONFIG_MODEM_ACTIVE_FILTER,
     CONFIG_MODEM_LPC_ECHO_FAILURE,
     CONFIG_MODEM_DIVERSITY_ENABLED,
     CONFIG_MODEM_RESET_TIMEOUT,

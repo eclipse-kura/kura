@@ -1,15 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
- *******************************************************************************/
+ ******************************************************************************/
 
 package org.eclipse.kura.web.client.ui.drivers.assets;
 
@@ -78,13 +78,18 @@ public class LegacyChannelModel implements AssetModel.ChannelModel {
             }
         }
 
-        if (scaleOffsetType != null && valueType != null) {
+        if (isScalarType(valueType) && scaleOffsetType != null && valueType != null) {
             subType = scaleOffsetType == ScaleOffsetType.DEFINED_BY_VALUE_TYPE
                     ? GwtConfigParameterType.valueOf(valueType.name())
                     : GwtConfigParameterType.valueOf(scaleOffsetType.name());
         }
 
         this.subtype = subType;
+    }
+
+    private boolean isScalarType(DataType valueType) {
+        return valueType != null && valueType != DataType.BOOLEAN && valueType != DataType.STRING
+                && valueType != DataType.BYTE_ARRAY;
     }
 
     private String getId(AssetConstants assetConstant) {

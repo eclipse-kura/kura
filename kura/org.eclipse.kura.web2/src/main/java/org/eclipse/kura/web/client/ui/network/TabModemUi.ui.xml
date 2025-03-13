@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -177,26 +177,6 @@
                                     ui:field="helpMaxfail" />
                                 <b:TextBox b:id="maxfail"
                                     ui:field="maxfail" />
-                            </b:FormGroup>
-
-                            <b:FormGroup ui:field="groupIdle">
-                                <b:FormLabel for="idle"
-                                    ui:field="labelIdle" />
-                                <util:HelpButton
-                                    ui:field="idleHelp" />
-                                <b:HelpBlock color="red"
-                                    ui:field="helpIdle" />
-                                <b:TextBox b:id="idle"
-                                    ui:field="idle" />
-                            </b:FormGroup>
-
-                            <b:FormGroup>
-                                <b:FormLabel for="active"
-                                    ui:field="labelActive" />
-                                <util:HelpButton
-                                    ui:field="activeHelp" />
-                                <b:TextBox b:id="active"
-                                    ui:field="active" />
                             </b:FormGroup>
 
                             <b:FormGroup ui:field="groupInterval">

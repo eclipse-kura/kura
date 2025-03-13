@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -321,8 +321,6 @@ public class GwtNetInterfaceConfigBuilder {
             gwtModemConfig.setHoldoff(this.properties.getModemHoldoff(this.ifName));
             gwtModemConfig.setPppNum(this.properties.getModemPppNum(this.ifName));
             gwtModemConfig.setMaxFail(this.properties.getModemMaxFail(this.ifName));
-            gwtModemConfig.setIdle(this.properties.getModemIdle(this.ifName));
-            gwtModemConfig.setActiveFilter(this.properties.getModemActiveFilter(this.ifName));
             gwtModemConfig.setLcpEchoInterval(this.properties.getModemLpcEchoInterval(this.ifName));
             gwtModemConfig.setLcpEchoFailure(this.properties.getModemLpcEchoFailure(this.ifName));
             gwtModemConfig.setGpsEnabled(this.properties.getModemGpsEnabled(this.ifName));
@@ -352,12 +350,12 @@ public class GwtNetInterfaceConfigBuilder {
     }
 
     private void setAdvancedProperties() {
-    	Optional<Integer> mtu = this.properties.getIp4Mtu(this.ifName);
+        Optional<Integer> mtu = this.properties.getIp4Mtu(this.ifName);
         this.gwtConfig.setMtu(mtu.orElse(DEFAULT_MTU));
-        
+
         Optional<Integer> ip6mtu = this.properties.getIp6Mtu(this.ifName);
         this.gwtConfig.setIpv6Mtu(ip6mtu.orElse(DEFAULT_MTU));
-        
+
         Optional<Integer> promisc = this.properties.getPromisc(this.ifName);
         this.gwtConfig.setPromisc(promisc.orElse(DEFAULT_PROMISC));
     }

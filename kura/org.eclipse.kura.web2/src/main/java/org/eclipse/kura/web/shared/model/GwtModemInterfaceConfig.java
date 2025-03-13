@@ -124,22 +124,6 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig {
         set("holdoff", Integer.valueOf(holdoff));
     }
 
-    public int getIdle() {
-        return ((Integer) get("idle")).intValue();
-    }
-
-    public void setIdle(int idle) {
-        set("idle", Integer.valueOf(idle));
-    }
-
-    public String getActiveFilter() {
-        return get("activeFilter");
-    }
-
-    public void setActiveFilter(String activeFilter) {
-        set("activeFilter", activeFilter);
-    }
-
     public int getLcpEchoInterval() {
         return ((Integer) get("lcpEchoInterval")).intValue();
     }

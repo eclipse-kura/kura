@@ -78,13 +78,18 @@ public class LegacyChannelModel implements AssetModel.ChannelModel {
             }
         }
 
-        if (scaleOffsetType != null && valueType != null) {
+        if (isScalarType(valueType) && scaleOffsetType != null && valueType != null) {
             subType = scaleOffsetType == ScaleOffsetType.DEFINED_BY_VALUE_TYPE
                     ? GwtConfigParameterType.valueOf(valueType.name())
                     : GwtConfigParameterType.valueOf(scaleOffsetType.name());
         }
 
         this.subtype = subType;
+    }
+
+    private boolean isScalarType(DataType valueType) {
+        return valueType != null && valueType != DataType.BOOLEAN && valueType != DataType.STRING
+                && valueType != DataType.BYTE_ARRAY;
     }
 
     private String getId(AssetConstants assetConstant) {

@@ -61,10 +61,8 @@ node {
             dir("kura") {
                 withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
                     sh "mvn -f kura/distrib/pom.xml clean install -DbuildAll"
-
-    stage('Generate test reports') {
-        dir("kura") {
-            junit 'kura/test/*/target/surefire-reports/*.xml'
+                }
+            }
         }
     }
 

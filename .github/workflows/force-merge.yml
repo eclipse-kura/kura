@@ -96,7 +96,7 @@ jobs:
         if: ${{ (steps.should-run.outputs.result == 'true') && (steps.count-votes.outputs.result >= env.quorum) }}
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.PAT_TOKEN }} // Personal Access Token TBD
+          github-token: ${{ secrets.KURA_BOT_GITHUB_TOKEN }}
           script: |
             await github.rest.pulls.merge({
               pull_number: context.issue.number,

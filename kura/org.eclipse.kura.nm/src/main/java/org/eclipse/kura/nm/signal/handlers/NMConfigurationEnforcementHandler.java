@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -51,7 +51,8 @@ public class NMConfigurationEnforcementHandler implements DBusSigHandler<Device.
             try {
                 logger.info("Network change detected on interface {}. Roll-back to cached configuration", s.getPath());
                 String deviceId = this.nm.getInterfaceIdByDBusPath(s.getPath());
-                this.nm.apply(deviceId);
+                // Disable the configuration rollback for now
+                // this.nm.apply(deviceId);
             } catch (DBusException e) {
                 logger.error("Failed to handle network configuration change event for device: {}. Caused by:",
                         s.getPath(), e);

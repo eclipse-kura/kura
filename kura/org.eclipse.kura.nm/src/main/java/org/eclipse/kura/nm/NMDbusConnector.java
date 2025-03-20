@@ -35,7 +35,6 @@ import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.eclipse.kura.nm.configuration.NMSettingsConverter;
 import org.eclipse.kura.nm.enums.MMModemLocationSource;
-import org.eclipse.kura.nm.enums.MMModemState;
 import org.eclipse.kura.nm.enums.NMDeviceState;
 import org.eclipse.kura.nm.enums.NMDeviceType;
 import org.eclipse.kura.nm.signal.handlers.DeviceCreationLock;
@@ -139,8 +138,8 @@ public class NMDbusConnector {
                 && this.configurationEnforcementHandlerIsArmed;
     }
 
-    protected boolean failedModemResetTimerIsActive(String modemId) {
-        return this.modemManager.isMMFailedModemResetTimerArmed(modemId);
+    protected boolean modemTaskHandlerIsPresent(String modemId) {
+        return this.modemManager.isModemTaskHandlerActive(modemId);
     }
 
     public void checkPermissions() {
@@ -358,7 +357,7 @@ public class NMDbusConnector {
     public synchronized void apply(Map<String, Object> networkConfiguration) throws DBusException {
         try {
             configurationEnforcementDisable();
-            this.modemManager.resetHandlersDisable();
+            this.modemManager.modemTaskHandlerDisable();
             doApply(networkConfiguration);
             this.cachedConfiguration = networkConfiguration;
         } finally {
@@ -373,7 +372,7 @@ public class NMDbusConnector {
         }
         try {
             configurationEnforcementDisable();
-            this.modemManager.resetHandlersDisable();
+            this.modemManager.modemTaskHandlerDisable();
             doApply(this.cachedConfiguration);
         } finally {
             configurationEnforcementEnable();
@@ -390,7 +389,7 @@ public class NMDbusConnector {
         }
         try {
             configurationEnforcementDisable();
-            this.modemManager.resetHandlersDisable(deviceId);
+            this.modemManager.modemTaskHandlerDisable(deviceId);
             doApply(deviceId, this.cachedConfiguration);
         } finally {
             configurationEnforcementEnable();
@@ -561,31 +560,8 @@ public class NMDbusConnector {
             connection = Optional.of(createdConnection);
         }
 
-        // boolean activationSucceeded = true;
-        // try {
-        // this.modemManager.failedModemResetTimerCancel(deviceId);
-        // // this.modemManager.modemConnectionTaskCancel(deviceId);
-        // this.modemManager.connectionHandlersDisable(deviceId);
-        // this.networkManager.activateConnection(connection.get(), device);
-        // dsLock.waitForSignal();
-        // } catch (DBusExecutionException e) {
-        // logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);
-        // activationSucceeded = false;
-        // }
-        //
-        // // Housekeeping
-        // List<Connection> availableConnections = this.networkManager.getAvaliableConnections(device);
-        // for (Connection availableConnection : availableConnections) {
-        // if (!connection.get().getObjectPath().equals(availableConnection.getObjectPath())) {
-        // availableConnection.Delete();
-        // }
-        // }
-
         if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
-            this.modemManager.failedModemResetTimerCancel(deviceId);
-            // this.modemManager.modemConnectionTaskCancel(deviceId);
-            this.modemManager.connectionHandlersDisable(deviceId);
-
+            this.modemManager.modemTaskHandlerDisable(deviceId);
             Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
             if (!mmDbusPath.isPresent()) {
                 return;
@@ -599,52 +575,16 @@ public class NMDbusConnector {
                 return;
             }
 
-            // int resetDelayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
-            // boolean autoconnect = properties.get(Boolean.class, "net.interface.%s.config.persist", deviceId);
-            int holdoff = properties.get(Integer.class, "net.interface.%s.config.holdoff", deviceId);
-            int maxFail = properties.get(Integer.class, "net.interface.%s.config.maxFail", deviceId);
-
             logger.info("Modem {} activated. Starting monitoring task...", deviceId);
-            this.modemManager.modemConnectionTask(deviceId, this.modemManager, this.networkManager, connection.get(),
-                    device, maxFail, holdoff, autoconnect, resetDelayMinutes); // maybe change to handler...
-
-            // this.modemManager.resetHandlerEnable(deviceId, mmDbusPath, resetDelayMinutes, device.getObjectPath());
-            //
-            //
-            //
-            // if (autoconnect) {
-            // logger.info("Modem {} configured for autoconnect. Starting connection task...", deviceId);
-            // this.modemManager.modemConnectionTask(deviceId, this.networkManager, connection.get(), device, maxFail,
-            // holdoff);
-            // }
-            //
-            // // If a modem connection fails at the first try, it stays in the failed state, thus not triggering the
-            // usual
-            // // modem reset procedure. So, start a reset timer here.
-            // if (!activationSucceeded && isModemFailed(mmDbusPath.get())) {
-            // logger.info("Modem {} in failed state or unavailable. Scheduling modem reset in {} minutes ...",
-            // device.getObjectPath(), resetDelayMinutes);
-            //
-            // this.modemManager.failedModemResetTimerSchedule(deviceId, mmDbusPath, resetDelayMinutes);
-            //
-            // // if (autoconnect) {
-            // // logger.info("Modem {} configured for autoconnect. Starting connection task...", deviceId);
-            // // this.modemManager.modemConnectionTask(deviceId, this.networkManager, connection.get(), device,
-            // // maxFail, holdoff);
-            // // }
-            // }
+            this.modemManager.modemTaskHandler(deviceId, this.modemManager, this.networkManager, connection.get(),
+                    device, properties);
 
         } else {
-            boolean activationSucceeded = true;
             try {
-                // this.modemManager.failedModemResetTimerCancel(deviceId);
-                // // this.modemManager.modemConnectionTaskCancel(deviceId);
-                // this.modemManager.connectionHandlersDisable(deviceId);
                 this.networkManager.activateConnection(connection.get(), device);
                 dsLock.waitForSignal();
             } catch (DBusExecutionException e) {
                 logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);
-                activationSucceeded = false;
             }
         }
 
@@ -656,48 +596,6 @@ public class NMDbusConnector {
             }
         }
 
-        // if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) { // add checks for reset and autoconnect
-        // int delayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
-        // Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
-        //
-        // if (delayMinutes == 0 || !mmDbusPath.isPresent()) {
-        // return;
-        // }
-        //
-        // this.modemManager.resetHandlerEnable(deviceId, mmDbusPath, delayMinutes, device.getObjectPath());
-        //
-        // boolean autoconnect = properties.get(Boolean.class, "net.interface.%s.config.persist", deviceId);
-        // int holdoff = properties.get(Integer.class, "net.interface.%s.config.holdoff", deviceId);
-        // int maxFail = properties.get(Integer.class, "net.interface.%s.config.maxFail", deviceId);
-        //
-        // if (autoconnect) {
-        // logger.info("Modem {} configured for autoconnect. Starting connection task...", deviceId);
-        // this.modemManager.modemConnectionTask(deviceId, this.networkManager, connection.get(), device, maxFail,
-        // holdoff);
-        // }
-        //
-        // // If a modem connection fails at the first try, it stays in the failed state, thus not triggering the usual
-        // // modem reset procedure. So, start a reset timer here.
-        // if (!activationSucceeded && isModemFailed(mmDbusPath.get())) {
-        // logger.info("Modem {} in failed state or unavailable. Scheduling modem reset in {} minutes ...",
-        // device.getObjectPath(), delayMinutes);
-        //
-        // this.modemManager.failedModemResetTimerSchedule(deviceId, mmDbusPath, delayMinutes);
-        //
-        // // if (autoconnect) {
-        // // logger.info("Modem {} configured for autoconnect. Starting connection task...", deviceId);
-        // // this.modemManager.modemConnectionTask(deviceId, this.networkManager, connection.get(), device,
-        // // maxFail, holdoff);
-        // // }
-        // }
-        //
-        // }
-
-    }
-
-    private boolean isModemFailed(String mmDbusPath) throws DBusException {
-        MMModemState modemState = this.modemManager.getMMModemState(mmDbusPath);
-        return MMModemState.MM_MODEM_STATE_FAILED.equals(modemState);
     }
 
     private void createVirtualInterface(String deviceId, NetworkProperties properties, NMDeviceType deviceType)
@@ -761,8 +659,7 @@ public class NMDbusConnector {
             logger.warn("Can't disable missing device {}", deviceId);
             return;
         }
-        this.modemManager.failedModemResetTimerCancel(deviceId);
-        this.modemManager.modemConnectionTaskCancel(deviceId);
+        this.modemManager.modemTaskHandlerDisable(deviceId);
         Device device = optDevice.get();
         Optional<Connection> appliedConnection = this.networkManager.getAppliedConnection(device);
 

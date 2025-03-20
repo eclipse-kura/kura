@@ -28,8 +28,7 @@ Recommended additional software:
 
 #### Installing Prerequisites in Mac OS 
 
-To install Java 17, download the JDK tar archive from the [Adoptium Project Repository](https://adoptium.net/en-GB/temurin/releases/?variant=openjdk8&jvmVariant=hotspot&version=17).
-
+To install Java 17, download the JDK tar archive from the [Adoptium Project Repository](https://adoptium.net/en-GB/temurin/releases/?variant=openjdk17&jvmVariant=hotspot&version=17).
 Once downloaded, copy the tar archive in `/Library/Java/JavaVirtualMachines/` and cd into it. Unpack the archive with the following command:
 
 ```bash

@@ -32,7 +32,6 @@
     <properties>
         <tycho-version>4.0.11</tycho-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <zip_workspace.prefix>user_workspace_archive_${project.version}</zip_workspace.prefix>
 
         <kura.basedir>${project.basedir}</kura.basedir>
         <kura.build.version>${maven.build.timestamp}</kura.build.version>

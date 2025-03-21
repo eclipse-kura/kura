@@ -125,6 +125,7 @@ public class ModemTaskScheduler {
                     if (this.connectionHandler != null) {
                         this.connectionHandler.cancel(true);
                     }
+                    this.isConnectionScheduled.set(false);
                     if (this.mmDbusPath.isPresent()) {
                         Modem modem = this.modemManager.getModem(mmDbusPath.get());
                         modem.Reset();
@@ -158,6 +159,14 @@ public class ModemTaskScheduler {
 
     public Device getDevice() {
         return this.device;
+    }
+
+    protected boolean isConnectionScheduled() {
+        return this.isConnectionScheduled.get();
+    }
+
+    protected boolean isResetScheduled() {
+        return this.isResetScheduled.get();
     }
 
     private boolean isModemConnected() throws DBusException {

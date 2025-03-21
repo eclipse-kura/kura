@@ -3495,6 +3495,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#kura-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kura examples
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3538,7 +3547,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../kura-workspace-setup/" class="md-nav__link">
+      <a href="../kura-workspace-setup.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4678,6 +4687,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#kura-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kura examples
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -4700,7 +4718,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 
 <h1 id="development-environment-setup">Development Environment Setup</h1>
-<p>In this document we'll cover the required steps to setup the Development Environment for contributing to the Eclipse Kura project. If, instead, you want to develop applications or bundles running on Eclipse Kura refer to the <a href="../kura-workspace-setup/">Eclipse Kura Workspace setup guide</a>.</p>
+<p>In this document we'll cover the required steps to setup the Development Environment for contributing to the Eclipse Kura project. If, instead, you want to develop applications or bundles running on Eclipse Kura refer to the <a href="./kura-workspace-setup.md">Eclipse Kura Workspace setup guide</a>.</p>
 <p>The Eclipse Kura development environment may be installed on Windows, Linux, or Mac OS. The setup instructions will be the same across each OS though each system may have unique characteristics.</p>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
@@ -4716,38 +4734,35 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h2 id="requirements">Requirements</h2>
 <p>Before building Eclipse Kura, you need to have the following programs installed in your system:</p>
 <ul>
-<li>JDK 1.8 (or JDK 17)</li>
-<li>Maven 3.5.x (or greater)</li>
+<li>JDK 17 </li>
+<li>Maven 3.9.x</li>
 </ul>
 <p>Recommended additional software:</p>
 <ul>
 <li>Git</li>
 </ul>
 <h4 id="installing-prerequisites-in-mac-os">Installing Prerequisites in Mac OS</h4>
-<p>To install Java 8, download the JDK tar archive from the <a href="https://adoptium.net/releases.html?variant=openjdk8&amp;jvmVariant=hotspot">Adoptium Project Repository</a>.</p>
-<p>Once downloaded, copy the tar archive in <code>/Library/Java/JavaVirtualMachines/</code> and cd into it. Unpack the archive with the following command:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>tar<span class="w"> </span>-xzf<span class="w"> </span>&lt;archive-name&gt;.tar.gz
+<p>To install Java 17, download the JDK tar archive from the <a href="https://adoptium.net/en-GB/temurin/releases/?variant=openjdk17&amp;jvmVariant=hotspot&amp;version=17">Adoptium Project Repository</a>.
+Once downloaded, copy the tar archive in <code>/Library/Java/JavaVirtualMachines/</code> and cd into it. Unpack the archive with the following command:</p>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>tar<span class="w"> </span>-xzf<span class="w"> </span>&lt;archive-name&gt;.tar.gz
 </code></pre></div>
 The tar archive can be deleted afterwards.</p>
-<p>Depending on which terminal you are using, edit the profiles (.zshrc, .profile, .bash_profile) to contain:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Adoptium JDK 8</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">JAVA_8_HOME</span><span class="o">=</span>/Library/Java/JavaVirtualMachines/&lt;archive-name&gt;/Contents/Home
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nb">alias</span><span class="w"> </span><span class="nv">java8</span><span class="o">=</span><span class="s1">&#39;export JAVA_HOME=$JAVA_8_HOME&#39;</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>java8<span class="w"> </span>
+<p>Depending on which terminal you are using, edit the profiles (.zshrc, .profile, .bash_profile) to contain:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">JAVA_HOME</span><span class="o">=</span>/Library/Java/JavaVirtualMachines/&lt;archive-name&gt;/Contents/Home
 </code></pre></div>
-Reload the terminal and run <code>java -version</code> to make sure it is installed correctly.</p>
-<p>Using <a href="https://brew.sh/">Brew</a> you can easily install Maven from the command line:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>brew<span class="w"> </span>install<span class="w"> </span>maven@3.5
+<p>Reload the terminal and run <code>java -version</code> to make sure it is installed correctly.</p>
+<p>Using <a href="https://brew.sh/">Brew</a> you can easily install Maven from the command line:</p>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>brew<span class="w"> </span>install<span class="w"> </span>maven@3.9
 </code></pre></div>
-Run <code>mvn -version</code> to ensure that Maven has been added to the PATH. If Maven cannot be found, try running <code>brew link maven@3.5 --force</code> or manually add it to your path with:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;/usr/local/opt/maven@3.5/bin:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
-</code></pre></div></p>
+Run <code>mvn -version</code> to ensure that Maven has been added to the PATH. If Maven cannot be found, try running <code>brew link maven@3.9 --force</code> or manually add it to your path with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;/usr/local/opt/maven@3.9/bin:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+</code></pre></div>
 <h4 id="installing-prerequisites-in-linux">Installing Prerequisites in Linux</h4>
-<p>For Java
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>openjdk-8-jdk
-</code></pre></div></p>
-<p>For Maven   </p>
-<p>You can follow the tutorial from the official <a href="http://maven.apache.org/install.html">Maven</a> site. Remember that you need to install 3.5.x version or greater.</p>
+<p>For Java</p>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>openjdk-17-jdk
+</code></pre></div>
+For Maven   </p>
+<p>You can follow the tutorial from the official <a href="http://maven.apache.org/install.html">Maven</a> site. Remember that you need to install the 3.9.x version.</p>
 <h3 id="eclipse-oomph-setup">Eclipse Oomph setup</h3>
 <p>Download the latest Eclipse Installer appropriate for your platform from the <a href="https://www.eclipse.org/downloads/packages/installer">Eclipse Downloads page</a> and start it.</p>
 <p><img alt="" src="../images/development-environment-setup/devenvsetup-0.png" /></p>
@@ -4786,11 +4801,8 @@ Run <code>mvn -version</code> to ensure that Maven has been added to the PATH. I
 <p>Then build the core components:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mvn<span class="w"> </span>-f<span class="w"> </span>kura/pom.xml<span class="w"> </span>clean<span class="w"> </span>install
 </code></pre></div>
-<p>Build the examples (optional):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>mvn<span class="w"> </span>-f<span class="w"> </span>kura/examples/pom.xml<span class="w"> </span>clean<span class="w"> </span>install
-</code></pre></div>
 <p>Build the target profiles:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>mvn<span class="w"> </span>-f<span class="w"> </span>kura/distrib/pom.xml<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DbuildAll
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>mvn<span class="w"> </span>-f<span class="w"> </span>kura/distrib/pom.xml<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DbuildAll
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -4798,12 +4810,14 @@ Run <code>mvn -version</code> to ensure that Maven has been added to the PATH. I
 </div>
 <h4 id="build-scripts">Build scripts</h4>
 <p>Alternatively you can use the build scripts available in the root directory.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>./build-all.sh
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>./build-all.sh
 </code></pre></div>
 <p>or</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>./build-menu.sh
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>./build-menu.sh
 </code></pre></div>
 <p>and select the profiles you want to build.</p>
+<h3 id="kura-examples">Kura examples</h3>
+<p>To get inspirations and become familiar with the development in Eclipse Kura, some example bundles are available on the <a href="https://github.com/eclipse-kura/kura-apps">kura-apps repository</a>.</p>
 
 
 

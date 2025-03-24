@@ -128,7 +128,6 @@ nav:
     - Java Application Development:
       - Kura Development Environment Setup: java-application-development/development-environment-setup.md
       - Kura Addon Archetype: java-application-development/kura-addon-archetype.md
-      - Add-ons Development Environment Setup: java-application-development/kura-workspace-setup.md
       - Hello World Application: java-application-development/hello-world-application.md
       - Deploy and Debug Applications: java-application-development/deploy-and-debug-applications.md
       - Remote Debugging on Target Platform: java-application-development/remote-debugging-on-target-platform.md

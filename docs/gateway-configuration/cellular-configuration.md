@@ -1,6 +1,6 @@
 # Cellular Configuration
 
-If it is not configured, the cellular interface is presented on the interface list by modem USB address (i.e. 2-1). This 'fake' interface name is completed by 'proper' interface name (e.g., ppp0) when the first modem configuration is submitted.
+If it is not configured, the cellular interface is presented on the interface list by modem USB address (i.e. 2-1). This 'fake' interface name is completed by 'proper' interface name (e.g.  ppp0, wwan0,...) when the first modem configuration is submitted.
 
 The cellular interface should be configured by first enabling it in the **IPv4** or **IPv6** tab, and then setting the **Cellular** tab. Note that the cellular interface can only be set as _WAN using DHCP_, _Disabled_ or _Not Managed_ (only for IPv4 connections). The cellular interface configuration options are described below.
 
@@ -48,11 +48,27 @@ The **Cellular** tab contains the following configuration parameters:
 
 - **Password**: supplies the password; disabled if no authentication method is specified.
 
-- **Modem Reset Timeout**: sets the modem reset timeout in minutes. If set to a non-zero value, the modem is reset after n consecutive minutes of unsuccessful connection attempts. If set to zero, the modem keeps trying to establish a PPP connection without resetting. The default value is 5 minutes.
+- **Modem Reset Timeout**: sets the modem reset timeout in minutes. If set to a non-zero value, the modem is reset after n consecutive minutes of unsuccessful connection attempts. If set to zero, the modem keeps trying to establish a connection without resetting. The default value is 5 minutes.
 
-- **LCP Echo Interval**: sets the _lcp-echo-interval_ option of the PPP daemon. If set to a positive number, the modem sends LCP echo request to the peer at the specified number of seconds. To disable this option, set it to zero. This option may be used with the _lcp-echo-failure_ option to detect that the peer is no longer connected.
+- **Reopen Connection On Termination**: specifies if the modem should retry to establish a connection after it is terminated. If set to true, the modem will keep trying to establish a connection. The **Connection Attempts Retry Delay** and **Connection Attempts** options are used only if this parameter is set to true.
 
-- **LCP Echo Failure**: sets the _lcp-echo-failure_ option of the PPP daemon. If set to a positive number, the modem presumes the peer to be dead if a specified number of LCP echo-requests are sent without receiving a valid LCP echo-reply. To disable this option, set it to zero.
+- **Connection Attempts Retry Delay**: sets the delay in seconds between connection attempts, if the **Reopen Connection On Termination** option is enabled. The default value is 30 seconds.
+
+- **Connection Attempts**: sets the maximum number of consecutive modem connection attempts, if the **Reopen Connection On Termination** option is enabled. The default value is 5 connection attempts. A value of 0 means no limit. When the connection attempts are exhausted, the process will be restarted after a grace period.
+
+- **LCP Echo Interval**: when a PPP connection is used, sets the _lcp-echo-interval_ option of the PPP daemon. If set to a positive number, the modem sends LCP echo request to the peer at the specified number of seconds. To disable this option, set it to zero. This option may be used with the _lcp-echo-failure_ option to detect that the peer is no longer connected.
+
+- **LCP Echo Failure**: when a PPP connection is used, sets the _lcp-echo-failure_ option of the PPP daemon. If set to a positive number, the modem presumes the peer to be dead if a specified number of LCP echo-requests are sent without receiving a valid LCP echo-reply. To disable this option, set it to zero.
+
+#### Cellular automatic reconnection
+
+When the **Reopen Connection On Termination** is enabled, Kura will keep trying to establish a cellular connection if it is unsuccessful or terminated. The **Connection Attempts Retry Delay** option specifies the time interval between consecutive connection attempts, while the **Connection Attempts** specifies the maximum number of attempts before giving up. If the maximum attempts limit is reached, Kura will restart the process after a grace time. The number of attempts and the delay determines the grace time with the following formula:
+
+```
+"Grace Time" = "Connection Attempts Retry Delay" x "Connection Attempts" [s]
+```
+
+So, if the **Connection Attempts** are set to 3 and the **Connection Attempts Retry Delay** to 15s, Kura will try to establish a connection for 3 times every 15s. If it fails, Kura will wait for 45s and restart the process. Be aware that the **Connection Attempts Retry Delay** should be carefully set in order to not prevent a successful connection to the selected APN. Please refer to the cellular connection provider.
 
 ### GPS
 

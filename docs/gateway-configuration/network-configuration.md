@@ -207,6 +207,9 @@ Name                                                  | Type     | Description  
 `net.interface.<interface>.config.gpsMode`            | String   | Select the GPS mode to activate for the modem if available             | `kuraModemGpsModeUnmanaged`
 `net.interface.<interface>.config.apn`                | String   | The modem Access Point Name                                            |
 `net.interface.<interface>.config.dialString`         | String   | The dial string used for connecting to the APN[^1]                     |
+`net.interface.<interface>.config.persist`            | String   | Enable the cellular automatic reconnection                             | true
+`net.interface.<interface>.config.holdoff`            | String   | The time delay in seconds between connection attempts                  | 30
+`net.interface.<interface>.config.maxFail`            | String   | The maximum number of connection attempts                              | 5
 
 #### GPS Mode
 

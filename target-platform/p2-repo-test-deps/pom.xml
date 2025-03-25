@@ -12,10 +12,6 @@
     <artifactId>p2-repo-tests-deps</artifactId>
     <packaging>pom</packaging>
 
-    <properties>
-        <io.dropwizard.metrics.version>3.2.2</io.dropwizard.metrics.version>
-    </properties>
-
     <repositories>
         <repository>
             <id>Metrics</id>

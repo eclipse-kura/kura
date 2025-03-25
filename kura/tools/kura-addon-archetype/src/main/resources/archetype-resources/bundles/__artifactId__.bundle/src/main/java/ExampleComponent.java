@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 public class ExampleComponent implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(ExampleComponent.class);
+    
+    private ExampleComponentOptions options; 
 
     /*
      * In the in activate, modified, deactivate methods it is possible to provide
@@ -59,7 +61,7 @@ public class ExampleComponent implements ConfigurableComponent {
         logger.info("Updating");
 
         logger.debug("Updating with properties: {}", properties);
-        ExampleComponentOptions options = new ExampleComponentOptions(properties);
+        this.options = new ExampleComponentOptions(properties);
 
         logger.info("Updated");
     }
@@ -68,6 +70,10 @@ public class ExampleComponent implements ConfigurableComponent {
     public synchronized void deactivate() {
         logger.info("Deactivating");
         logger.info("Deactivated");
+    }
+    
+    public ExampleComponentOptions getOptions() {
+        return this.options;
     }
 
 }

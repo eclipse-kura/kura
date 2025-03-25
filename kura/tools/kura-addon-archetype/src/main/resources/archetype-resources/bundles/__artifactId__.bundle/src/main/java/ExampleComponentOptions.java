@@ -14,7 +14,7 @@ package ${package};
 
 import java.util.Map;
 
-class ExampleComponentOptions {
+public class ExampleComponentOptions {
 
     private static final Property<String> EXAMPLE_PROPERTY = new Property<>("example.property", "example");
 

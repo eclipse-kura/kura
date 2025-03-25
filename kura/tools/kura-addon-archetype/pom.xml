@@ -10,10 +10,7 @@
 
     Contributors:
      Eurotech
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+--><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -42,7 +39,6 @@
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
-                <filtering>false</filtering>
                 <excludes>
                     <exclude>archetype-resources/test/test-env/framework/kura.properties</exclude>
                     <exclude>META-INF/maven/archetype-metadata.xml</exclude>
@@ -106,6 +102,7 @@
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 

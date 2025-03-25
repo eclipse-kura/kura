@@ -5,6 +5,7 @@ Bundle-SymbolicName: ${artifactId}.bundle.test;singleton:=true
 Bundle-Version: ${version.replace("-SNAPSHOT", ".qualifier")}
 Bundle-Vendor: EUROTECH
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Fragment-Host: ${artifactId}.bundle
 Require-Bundle: org.junit,
  ${artifactId}.bundle
 Import-Package: org.eclipse.kura;version="1.5.0",

@@ -398,11 +398,11 @@
                                     <artifactId>artemis-mqtt-protocol</artifactId>
                                     <version>${org.apache.activemq.artemis.upstream.version}</version>
                                 </artifactItem>
-                                <dependency>
+                                <artifactItem>
                                     <groupId>org.apache.activemq</groupId>
                                     <artifactId>artemis-native</artifactId>
                                     <version>${org.apache.activemq.artemis.upstream.version}</version>
-                                </dependency>
+                                </artifactItem>
                                 <artifactItem>
                                     <groupId>io.netty</groupId>
                                     <artifactId>netty-buffer</artifactId>
@@ -682,21 +682,6 @@
                                     <groupId>org.eclipse.jetty.ee10</groupId>
                                     <artifactId>jetty-ee10-servlet</artifactId>
                                     <version>${org.eclipse.jetty.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.platform</groupId>
-                                    <artifactId>org.eclipse.equinox.io</artifactId>
-                                    <version>${org.eclipse.equinox.io.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.platform</groupId>
-                                    <artifactId>org.eclipse.equinox.util</artifactId>
-                                    <version>${org.eclipse.equinox.util.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.platform</groupId>
-                                    <artifactId>org.eclipse.equinox.wireadmin</artifactId>
-                                    <version>${org.eclipse.equinox.wireadmin.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.osgi</groupId>

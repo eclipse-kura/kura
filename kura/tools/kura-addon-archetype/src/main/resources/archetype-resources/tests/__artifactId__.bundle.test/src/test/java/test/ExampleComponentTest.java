@@ -17,8 +17,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.griso.ExampleComponent;
 import org.junit.Test;
+
+import ${package}.ExampleComponent;
 
 public class ExampleComponentTest {
 

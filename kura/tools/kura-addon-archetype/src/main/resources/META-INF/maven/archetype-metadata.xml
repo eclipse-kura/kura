@@ -58,6 +58,7 @@
             <excludes>
                 <exclude>**/*.java</exclude>
                 <exclude>**/src/main/java/test</exclude>
+                <exclude>**/src/test/java/test</exclude>
             </excludes>
         </fileSet>
         <fileSet filtered="true" packaged="true">

@@ -117,6 +117,32 @@ When the tasks are completed, go to into the Package Explorer and Target Platfor
 
 ![](./images/development-environment-setup/devenvsetup-10.png)
 
+!!! info
+    Additional workspace configuration:
+
+    - In the Eclipse workspace modify the lifecycle mapping by adding these XML lines to the `lifecycle-mapping-metadata.xml` in Eclipse Kura workspace.
+      You can find the file in the Windows -> Preferences -> Maven -> Lifecycle Mappings -> Open workspace lifecycle mappings metadata.
+      After editing the file, reload it by pressing the "Reload workspace lifecycle mappings metadata" button.
+      ```xml
+      <?xml version="1.0" encoding="UTF-8"?>
+      <lifecycleMappingMetadata>
+          <lifecycleMappingFilters>
+              <lifecycleMappingFilter>
+                  <symbolicName>org.eclipse.m2e.pde.connector</symbolicName>
+                  <versionRange>[2.1.2,)</versionRange>
+                  <packagingTypes>
+                      <packagingType>eclipse-test-plugin</packagingType>
+                      <packagingType>eclipse-plugin</packagingType>
+                      <packagingType>eclipse-feature</packagingType>
+                  </packagingTypes>
+              </lifecycleMappingFilter>
+          </lifecycleMappingFilters>
+      </lifecycleMappingMetadata>
+      ```
+    - Install the `eclipse-tycho` plugin following this steps:
+        1. Menu Help -> Install new software... -> Paste the [m2eclipse-tycho repository URL](https://github.com/tesla/m2eclipse-tycho/releases/download/latest/) in the `Work with:` text field -> expand the category and select the `Tycho Project Configurators Feature` and proceed with the installation.
+        2. Then restart Eclipse. 
+
 ### Eclipse Kura maven build
 
 Navigate to the `git` folder created within the Eclipse workspace (`~/iot-kura-workspace` in the example above) and build the target platform:

@@ -139,7 +139,7 @@ When the tasks are completed, go to into the Package Explorer and Target Platfor
           </lifecycleMappingFilters>
       </lifecycleMappingMetadata>
       ```
-    - Install the `eclipse-tycho` plugin following this steps:
+    - Install the `eclipse-tycho` plugin by following these steps:
         1. Menu Help -> Install new software... -> Paste the [m2eclipse-tycho repository URL](https://github.com/tesla/m2eclipse-tycho/releases/download/latest/) in the `Work with:` text field -> expand the category and select the `Tycho Project Configurators Feature` and proceed with the installation.
         2. Then restart Eclipse. 
 

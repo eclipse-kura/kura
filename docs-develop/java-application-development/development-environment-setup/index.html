@@ -4772,15 +4772,44 @@ For Maven   </p>
 <p>When the tasks are completed, go to into the Package Explorer and Target Platform &gt; Target-Definition &gt; Kura Target Platform Equinox 3.16.0, and press "Set as Target Platform" located at the top right of the window:</p>
 <p><img alt="" src="../images/development-environment-setup/devenvsetup-9.png" /></p>
 <p><img alt="" src="../images/development-environment-setup/devenvsetup-10.png" /></p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Additional workspace configuration:</p>
+<ul>
+<li>In the Eclipse workspace modify the lifecycle mapping by adding these XML lines to the <code>lifecycle-mapping-metadata.xml</code> in Eclipse Kura workspace.
+  You can find the file in the Windows -&gt; Preferences -&gt; Maven -&gt; Lifecycle Mappings -&gt; Open workspace lifecycle mappings metadata.
+  After editing the file, reload it by pressing the "Reload workspace lifecycle mappings metadata" button.
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nt">&lt;lifecycleMappingMetadata&gt;</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nt">&lt;lifecycleMappingFilters&gt;</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">        </span><span class="nt">&lt;lifecycleMappingFilter&gt;</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">            </span><span class="nt">&lt;symbolicName&gt;</span>org.eclipse.m2e.pde.connector<span class="nt">&lt;/symbolicName&gt;</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">            </span><span class="nt">&lt;versionRange&gt;</span>[2.1.2,)<span class="nt">&lt;/versionRange&gt;</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">            </span><span class="nt">&lt;packagingTypes&gt;</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-test-plugin<span class="nt">&lt;/packagingType&gt;</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-plugin<span class="nt">&lt;/packagingType&gt;</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-feature<span class="nt">&lt;/packagingType&gt;</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="w">            </span><span class="nt">&lt;/packagingTypes&gt;</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="w">        </span><span class="nt">&lt;/lifecycleMappingFilter&gt;</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="w">    </span><span class="nt">&lt;/lifecycleMappingFilters&gt;</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="nt">&lt;/lifecycleMappingMetadata&gt;</span>
+</code></pre></div></li>
+<li>Install the <code>eclipse-tycho</code> plugin by following these steps:<ol>
+<li>Menu Help -&gt; Install new software... -&gt; Paste the <a href="https://github.com/tesla/m2eclipse-tycho/releases/download/latest/">m2eclipse-tycho repository URL</a> in the <code>Work with:</code> text field -&gt; expand the category and select the <code>Tycho Project Configurators Feature</code> and proceed with the installation.</li>
+<li>Then restart Eclipse. </li>
+</ol>
+</li>
+</ul>
+</div>
 <h3 id="eclipse-kura-maven-build">Eclipse Kura maven build</h3>
 <p>Navigate to the <code>git</code> folder created within the Eclipse workspace (<code>~/iot-kura-workspace</code> in the example above) and build the target platform:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mvn<span class="w"> </span>-f<span class="w"> </span>target-platform/pom.xml<span class="w"> </span>clean<span class="w"> </span>install
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mvn<span class="w"> </span>-f<span class="w"> </span>target-platform/pom.xml<span class="w"> </span>clean<span class="w"> </span>install
 </code></pre></div>
 <p>Then build the core components:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mvn<span class="w"> </span>-f<span class="w"> </span>kura/pom.xml<span class="w"> </span>clean<span class="w"> </span>install
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>mvn<span class="w"> </span>-f<span class="w"> </span>kura/pom.xml<span class="w"> </span>clean<span class="w"> </span>install
 </code></pre></div>
 <p>Build the target profiles:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>mvn<span class="w"> </span>-f<span class="w"> </span>kura/distrib/pom.xml<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DbuildAll
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>mvn<span class="w"> </span>-f<span class="w"> </span>kura/distrib/pom.xml<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DbuildAll
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -4788,10 +4817,10 @@ For Maven   </p>
 </div>
 <h4 id="build-scripts">Build scripts</h4>
 <p>Alternatively you can use the build scripts available in the root directory.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>./build-all.sh
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>./build-all.sh
 </code></pre></div>
 <p>or</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>./build-menu.sh
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>./build-menu.sh
 </code></pre></div>
 <p>and select the profiles you want to build.</p>
 <h3 id="kura-examples">Kura examples</h3>

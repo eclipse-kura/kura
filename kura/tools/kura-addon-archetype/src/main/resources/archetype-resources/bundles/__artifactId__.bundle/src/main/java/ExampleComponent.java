@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 @Component(immediate = true, //
         configurationPolicy = ConfigurationPolicy.REQUIRE, //
-        property = { "kura.service.pid=it.coppola.ExampleComponent" } //
+        property = { "kura.service.pid=${package}.ExampleComponent" } //
 )
 @Designate(ocd = ExampleComponentOCD.class, factory = false)
 public class ExampleComponent implements ConfigurableComponent {

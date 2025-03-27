@@ -20,20 +20,29 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(immediate = true, //
-    configurationPolicy = ConfigurationPolicy.REQUIRE, //
-    property = {"kura.service.pid=${package}.ExampleComponent"} //
+        configurationPolicy = ConfigurationPolicy.REQUIRE, //
+        property = { "kura.service.pid=it.coppola.ExampleComponent" } //
 )
 @Designate(ocd = ExampleComponentOCD.class, factory = false)
 public class ExampleComponent implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(ExampleComponent.class);
-    
-    private ExampleComponentOptions options; 
+
+    private ExampleComponentOptions options;
+
+    @Reference
+    private ExampleDependencyService exampleDependencyService;
+
+    @Reference
+    public void setExampleDependencyService(ExampleDependencyService exampleDependencyService) {
+        this.exampleDependencyService = exampleDependencyService;
+    }
 
     /*
      * In the in activate, modified, deactivate methods it is possible to provide
@@ -44,8 +53,9 @@ public class ExampleComponent implements ConfigurableComponent {
      * Examples:
      * 
      * public void activate()
-     * public void activate(ExampleComponentOCD  configuration)
-     * public void activate(ComponentContext componentContext, final Map<String, Object> properties, final ExampleComponentOCD  configuration)
+     * public void activate(ExampleComponentOCD configuration)
+     * public void activate(ComponentContext componentContext, final Map<String, Object> properties, final
+     * ExampleComponentOCD configuration)
      */
     @Activate
     public void activate(final Map<String, Object> properties) {
@@ -63,6 +73,8 @@ public class ExampleComponent implements ConfigurableComponent {
         logger.debug("Updating with properties: {}", properties);
         this.options = new ExampleComponentOptions(properties);
 
+        this.exampleDependencyService.run();
+
         logger.info("Updated");
     }
 
@@ -71,7 +83,7 @@ public class ExampleComponent implements ConfigurableComponent {
         logger.info("Deactivating");
         logger.info("Deactivated");
     }
-    
+
     public ExampleComponentOptions getOptions() {
         return this.options;
     }

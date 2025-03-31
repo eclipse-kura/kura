@@ -12,6 +12,7 @@ def boolean onlyDocumentationFilesChangedIn(String workDirectory) {
 }
 
 node {
+
     properties([
         disableConcurrentBuilds(abortPrevious: true),
         buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '2', daysToKeepStr: '', numToKeepStr: '5')),
@@ -36,11 +37,16 @@ node {
         return
     }
 
+    def buildType = 'install'
+    if ("${env.BRANCH_NAME}".equals('develop')) {
+        buildType = 'deploy'
+    }
+
     stage('Build target-platform') {
         timeout(time: 1, unit: 'HOURS') {
             dir("kura") {
                 withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
-                    sh "mvn -f target-platform/pom.xml clean install -Pno-mirror -Pcheck-exists-plugin"
+                    sh "mvn -f target-platform/pom.xml clean ${buildType} -Pno-mirror -Pcheck-exists-plugin"
                 }
             }
         }
@@ -50,7 +56,7 @@ node {
         timeout(time: 2, unit: 'HOURS') {
             dir("kura") {
                 withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
-                    sh "mvn -f kura/pom.xml -Dsurefire.rerunFailingTestsCount=3 clean install -Pcheck-exists-plugin"
+                    sh "mvn -f kura/pom.xml -Dsurefire.rerunFailingTestsCount=3 clean ${buildType} -Pcheck-exists-plugin"
                 }
             }
         }
@@ -70,7 +76,7 @@ node {
         timeout(time: 1, unit: 'HOURS') {
             dir("kura") {
                 withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
-                    sh "mvn -f kura/examples/pom.xml clean install -Pcheck-exists-plugin"
+                    sh "mvn -f kura/examples/pom.xml clean ${buildType} -Pcheck-exists-plugin"
                 }
             }
         }

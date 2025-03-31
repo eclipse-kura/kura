@@ -25,7 +25,8 @@ node {
 
     stage('Preparation') {
         dir("kura") {
-            checkout scm
+            def scmResult = checkout scm
+            env.GIT_BRANCH = scmResult.GIT_BRANCH
             sh "touch /tmp/isJenkins.txt"
         }
     }
@@ -38,9 +39,9 @@ node {
     }
 
 
-    echo "Current branch is \"${env.GIT_BRANCH}\""
+    echo "Current branch is \"${env.GIT_BRANCH}\", primary: ${env.BRANCH_IS_PRIMARY}"
     def buildType = 'install'
-    if ('develop'.equals(env.GIT_BRANCH)) {
+    if (env.BRANCH_IS_PRIMARY && 'develop'.equals(scmResult.GIT_BRANCH)) {
         echo "Using deploy target"
         buildType = 'deploy'
     } else {

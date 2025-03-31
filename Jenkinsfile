@@ -37,9 +37,15 @@ node {
         return
     }
 
+
+    echo "Current branch is \"${env.BRANCH_NAME}\""
     def buildType = 'install'
-    if ("${env.BRANCH_NAME}".equals('develop')) {
+    if ('develop'.equals(env.BRANCH_NAME)) {
+        echo "Using deploy target"
         buildType = 'deploy'
+    } else {
+        echo "Using install target"
+        buildType = 'install'
     }
 
     stage('Build target-platform') {

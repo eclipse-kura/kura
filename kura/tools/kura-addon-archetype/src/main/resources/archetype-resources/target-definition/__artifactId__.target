@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?>
+<!--
+
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+
+-->
 <target includeMode="feature" name="target-definition" sequenceNumber="1">
     <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17" />
     <locations>
@@ -17,6 +31,10 @@
                     <id>eurotech-kura</id>
                     <url>https://raw.githubusercontent.com/eurotech/kura_addons/mvn-repo/</url>
                 </repository>
+                <repository>
+                    <id>central</id>
+                    <url>https://repo1.maven.org/maven2/</url>
+                </repository>
             </repositories>
 
             <dependencies>
@@ -24,9 +42,40 @@
                 <!-- target platform bundles -->
 
                 <dependency>
+                    <groupId>org.eclipse.paho</groupId>
+                    <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+                    <version>${org.eclipse.paho.client.mqttv3.version}</version>
+                </dependency>
+
+                <dependency>
+                    <groupId>com.github.hypfvieh</groupId>
+                    <artifactId>bluez-dbus-osgi</artifactId>
+                    <version>${bluez-dbus-osgi.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>com.codeminders.hidapi.x86_64</artifactId>
+                    <version>${com.codeminders.hidapi.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>com.codeminders.hidapi.aarch64</artifactId>
+                    <version>${com.codeminders.hidapi.version}</version>
+                </dependency>
+                <dependency>
                     <groupId>org.eclipse.kura</groupId>
                     <artifactId>com.codeminders.hidapi</artifactId>
                     <version>${com.codeminders.hidapi.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.eurotech</groupId>
+                    <artifactId>gpsd4java</artifactId>
+                    <version>${com.eurotech.gpsd4java.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>com.gwt.user</artifactId>
+                    <version>${com.gwt.user.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
@@ -37,6 +86,16 @@
                     <groupId>org.eclipse.kura</groupId>
                     <artifactId>log4j2-api-config</artifactId>
                     <version>${log4j2-api-config.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.soda.dk.comm.aarch64</artifactId>
+                    <version>${org.eclipse.soda.dk.comm.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.soda.dk.comm.x86_64</artifactId>
+                    <version>${org.eclipse.soda.dk.comm.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
@@ -60,6 +119,16 @@
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
+                    <artifactId>jdk.dio.aarch64</artifactId>
+                    <version>${jdk.dio.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>jdk.dio.x86_64</artifactId>
+                    <version>${jdk.dio.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
                     <artifactId>org.eclipse.kura.sun.misc</artifactId>
                     <version>${org.eclipse.kura.sun.misc.version}</version>
                 </dependency>
@@ -72,6 +141,26 @@
                     <groupId>org.eclipse.kura</groupId>
                     <artifactId>usb4java-javax</artifactId>
                     <version>${usb4java-javax.version}</version>
+                </dependency>
+               <dependency>
+                    <groupId>commons-beanutils</groupId>
+                    <artifactId>commons-beanutils</artifactId>
+                    <version>${commons-beanutils.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>commons-collections</groupId>
+                    <artifactId>commons-collections</artifactId>
+                    <version>${commons-collections.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-fileupload2-jakarta-servlet5</artifactId>
+                    <version>${commons-fileupload.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-fileupload2-core</artifactId>
+                    <version>${commons-fileupload.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>commons-io</groupId>
@@ -92,6 +181,21 @@
                     <groupId>org.apache.logging.log4j</groupId>
                     <artifactId>log4j-slf4j-impl</artifactId>
                     <version>${log4j.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.logging</groupId>
+                    <artifactId>jboss-logging</artifactId>
+                    <version>${org.jboss.logging.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.qpid</groupId>
+                    <artifactId>qpid-jms-client</artifactId>
+                    <version>${apache-qpid-jms-client.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.qpid</groupId>
+                    <artifactId>proton-j</artifactId>
+                    <version>${apache-qpid-proton-j.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.slf4j</groupId>
@@ -132,7 +236,7 @@
                     <groupId>com.eclipsesource.minimal-json</groupId>
                     <artifactId>minimal-json</artifactId>
                     <version>${com.eclipsesource.minimal-json.version}</version>
-                </dependency>
+                </dependency>                
                 <dependency>
                     <groupId>org.quartz-scheduler</groupId>
                     <artifactId>quartz</artifactId>
@@ -144,9 +248,84 @@
                     <version>${org.apache.servicemix.bundles.c3p0.version}</version>
                 </dependency>
                 <dependency>
+                    <groupId>org.apache.servicemix.bundles</groupId>
+                    <artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
+                    <version>${spring.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.servicemix.bundles</groupId>
+                    <artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
+                    <version>${spring.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.servicemix.bundles</groupId>
+                    <artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
+                    <version>${spring.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.servicemix.bundles</groupId>
+                    <artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>
+                    <version>${spring.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.servicemix.bundles</groupId>
+                    <artifactId>org.apache.servicemix.bundles.spring-jms</artifactId>
+                    <version>${spring.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.servicemix.bundles</groupId>
+                    <artifactId>org.apache.servicemix.bundles.spring-tx</artifactId>
+                    <version>${spring.version}</version>
+                </dependency>
+               <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.apache.activemq.artemis</artifactId>
+                    <version>${org.apache.activemq.artemis.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.activemq</groupId>
+                    <artifactId>artemis-mqtt-protocol</artifactId>
+                    <version>${org.apache.activemq.artemis.upstream.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.activemq</groupId>
+                    <artifactId>artemis-native</artifactId>
+                    <version>${org.apache.activemq.artemis.upstream.version}</version>
+                </dependency>
+                <dependency>
                     <groupId>org.apache.aries.spifly</groupId>
                     <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
                     <version>${org.apache.aries.spifly.dynamic.bundle.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-amqp</artifactId>
+                    <version>${org.apache.camel.camel-amqp.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-core</artifactId>
+                    <version>${org.apache.camel.camel-core.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-core-osgi</artifactId>
+                    <version>${org.apache.camel.camel-core-osgi.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-jms</artifactId>
+                    <version>${org.apache.camel.camel-jms.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-script</artifactId>
+                    <version>${org.apache.camel.camel-script.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.camel</groupId>
+                    <artifactId>camel-stream</artifactId>
+                    <version>${org.apache.camel.camel-stream.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>com.zaxxer</groupId>
@@ -217,6 +396,73 @@
                     <groupId>com.google.guava</groupId>
                     <artifactId>failureaccess</artifactId>
                     <version>${failureaccess.version}</version>
+                </dependency>
+
+                <!-- Netty -->
+                <dependency>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-buffer</artifactId>
+                    <version>${io.netty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-codec</artifactId>
+                    <version>${io.netty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-codec-http</artifactId>
+                    <version>${io.netty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-codec-mqtt</artifactId>
+                    <version>${io.netty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-common</artifactId>
+                    <version>${io.netty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-handler</artifactId>
+                    <version>${io.netty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-resolver</artifactId>
+                    <version>${io.netty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-transport</artifactId>
+                    <version>${io.netty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-transport-native-epoll</artifactId>
+                    <version>${io.netty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-transport-classes-epoll</artifactId>
+                    <version>${io.netty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-transport-classes-kqueue</artifactId>
+                    <version>${io.netty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-transport-native-kqueue</artifactId>
+                    <version>${io.netty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-transport-native-unix-common</artifactId>
+                    <version>${io.netty.version}</version>
                 </dependency>
 
                 <!-- Jersey -->
@@ -301,6 +547,11 @@
                     <artifactId>mimepull</artifactId>
                     <version>${mimepull.version}</version>
                 </dependency>
+                <dependency>
+                    <groupId>io.dropwizard.metrics</groupId>
+                    <artifactId>metrics-core</artifactId>
+                    <version>${io.dropwizard.metrics.version}</version>
+                </dependency>
 
                 <!-- Jakarta -->
 
@@ -330,6 +581,11 @@
                     <version>${jakarta.xml.bind-api.version}</version>
                 </dependency>
                 <dependency>
+                    <groupId>jakarta.xml.bind</groupId>
+                    <artifactId>jakarta.xml.bind-api</artifactId>
+                    <version>${jakarta.xml.bind-api.javax.version}</version>
+                </dependency>
+                <dependency>
                     <groupId>jakarta.xml.ws</groupId>
                     <artifactId>jakarta.xml.ws-api</artifactId>
                     <version>${jakarta.xml.ws-api.version}</version>
@@ -348,6 +604,11 @@
                     <groupId>com.sun.xml.bind</groupId>
                     <artifactId>jaxb-osgi</artifactId>
                     <version>${jaxb-osgi.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>com.sun.xml.bind</groupId>
+                    <artifactId>jaxb-osgi</artifactId>
+                    <version>${jaxb-osgi.javax.version}</version>
                 </dependency>
 
                 <!-- Duplicate Jakarta packages to support javax imports -->
@@ -430,6 +691,7 @@
                     <artifactId>org.osgi.service.wireadmin</artifactId>
                     <version>${org.osgi.service.wireadmin.version}</version>
                 </dependency>
+
                 <dependency>
                     <groupId>org.osgi</groupId>
                     <artifactId>org.osgi.util.function</artifactId>
@@ -535,6 +797,50 @@
                     <artifactId>org.eclipse.equinox.wireadmin</artifactId>
                     <version>${org.eclipse.equinox.wireadmin.version}</version>
                 </dependency>
+
+                <!-- Jetty -->
+                <dependency>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-http</artifactId>
+                    <version>${org.eclipse.jetty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-security</artifactId>
+                    <version>${org.eclipse.jetty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-server</artifactId>
+                    <version>${org.eclipse.jetty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-session</artifactId>
+                    <version>${org.eclipse.jetty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-util</artifactId>
+                    <version>${org.eclipse.jetty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-io</artifactId>
+                    <version>${org.eclipse.jetty.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.jetty.ee10</groupId>
+                    <artifactId>jetty-ee10-servlet</artifactId>
+                    <version>${org.eclipse.jetty.version}</version>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.kura.sun.misc</artifactId>
+                    <version>${org.eclipse.kura.sun.misc.version}</version>
+                </dependency>
+
                 <dependency>
                     <groupId>org.eclipse.platform</groupId>
                     <artifactId>org.eclipse.core.runtime</artifactId>
@@ -616,6 +922,21 @@
                     <version>${org.apache.felix.useradmin.version}</version>
                 </dependency>
                 <dependency>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-json_1.0_spec</artifactId>
+                    <version>${org.apache.geronimo.specs.json.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-jms_2.0_spec</artifactId>
+                    <version>${org.apache.geronimo.specs.jms.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-jta_1.1_spec</artifactId>
+                    <version>${org.apache.geronimo.specs.jta.version}</version>
+                </dependency>
+                <dependency>
                     <groupId>org.glassfish.hk2</groupId>
                     <artifactId>osgi-resource-locator</artifactId>
                     <version>${osgi-resource-locator.version}</version>
@@ -668,6 +989,11 @@
                 </dependency>
                 <dependency>
                     <groupId>org.hamcrest</groupId>
+                    <artifactId>org.hamcrest</artifactId>
+                    <version>${org.hamcrest.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.hamcrest</groupId>
                     <artifactId>org.hamcrest.core</artifactId>
                     <version>${org.hamcrest.core.version}</version>
                 </dependency>
@@ -675,6 +1001,16 @@
                     <groupId>org.hamcrest</groupId>
                     <artifactId>org.hamcrest.integration</artifactId>
                     <version>${org.hamcrest.integration.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>org.hamcrest.library</artifactId>
+                    <version>${org.hamcrest.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>org.hamcrest.text</artifactId>
+                    <version>${org.hamcrest.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.mockito</groupId>
@@ -697,6 +1033,11 @@
                     <artifactId>byte-buddy-agent</artifactId>
                     <version>${byte-buddy.version}</version>
                     <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>moquette-broker</artifactId>
+                    <version>${moquette-broker.version}</version>
                 </dependency>
 
                 <!-- Kura core -->

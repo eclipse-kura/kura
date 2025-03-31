@@ -58,6 +58,7 @@
             <excludes>
                 <exclude>**/*.java</exclude>
                 <exclude>**/src/main/java/test</exclude>
+                <exclude>**/src/test/java/test</exclude>
             </excludes>
         </fileSet>
         <fileSet filtered="true" packaged="true">
@@ -65,6 +66,9 @@
         </fileSet>
         <fileSet filtered="true" packaged="true">
             <directory>tests/__artifactId__.bundle.test/src/main/java</directory>
+        </fileSet>
+        <fileSet filtered="true" packaged="true">
+            <directory>tests/__artifactId__.bundle.test/src/test/java</directory>
         </fileSet>
         <fileSet encoding="UTF-8">
             <directory></directory>

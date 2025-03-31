@@ -28,9 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(immediate = true)
-public class ExampleComponentTest {
+public class ExampleComponentItTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(ExampleComponentTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(ExampleComponentItTest.class);
 
     private static final CountDownLatch dependencies = new CountDownLatch(1);
 

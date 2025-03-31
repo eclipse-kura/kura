@@ -12,20 +12,7 @@
  *******************************************************************************/
 package ${package};
 
-import java.util.Map;
+public interface ExampleDependencyService {
 
-public class ExampleComponentOptions {
-
-    private static final Property<String> EXAMPLE_PROPERTY = new Property<>("example.property", "example");
-
-    private final String exampleProperty;
-
-    public ExampleComponentOptions(final Map<String, Object> properties) {
-        this.exampleProperty = EXAMPLE_PROPERTY.getOrDefault(properties);
-    }
-
-    public String getExampleProperty() {
-        return this.exampleProperty;
-    }
-
+    public void run();
 }

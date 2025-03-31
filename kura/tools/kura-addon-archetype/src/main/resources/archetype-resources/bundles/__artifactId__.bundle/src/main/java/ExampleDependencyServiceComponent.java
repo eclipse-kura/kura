@@ -12,20 +12,18 @@
  *******************************************************************************/
 package ${package};
 
-import java.util.Map;
+import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class ExampleComponentOptions {
+@Component(service = ExampleDependencyService.class, immediate = true)
+public class ExampleDependencyServiceComponent implements ExampleDependencyService {
 
-    private static final Property<String> EXAMPLE_PROPERTY = new Property<>("example.property", "example");
+    private static final Logger logger = LoggerFactory.getLogger(ExampleDependencyServiceComponent.class);
 
-    private final String exampleProperty;
-
-    public ExampleComponentOptions(final Map<String, Object> properties) {
-        this.exampleProperty = EXAMPLE_PROPERTY.getOrDefault(properties);
-    }
-
-    public String getExampleProperty() {
-        return this.exampleProperty;
+    @Override
+    public void run() {
+        logger.info("Running ExampleDependencyServiceComponent");
     }
 
 }

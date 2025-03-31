@@ -38,9 +38,9 @@ node {
     }
 
 
-    echo "Current branch is \"${env.BRANCH_NAME}\""
+    echo "Current branch is \"${env.GIT_BRANCH}\""
     def buildType = 'install'
-    if ('develop'.equals(env.BRANCH_NAME)) {
+    if ('develop'.equals(env.GIT_BRANCH)) {
         echo "Using deploy target"
         buildType = 'deploy'
     } else {

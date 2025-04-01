@@ -123,10 +123,10 @@
                     </execution>
                 </executions>
             </plugin>
-           	<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-maven-plugin</artifactId>
-			</plugin>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 </project>

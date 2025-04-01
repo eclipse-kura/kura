@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -34,7 +34,7 @@ public class DeviceStateLock {
     public DeviceStateLock(DBusConnection dbusConnection, String dbusPath, NMDeviceState expectedNmDeviceState)
             throws DBusException {
         if (Objects.isNull(dbusPath) || dbusPath.isEmpty() || dbusPath.equals("/")) {
-            throw new IllegalArgumentException(String.format("Illegal DBus path for DeviceSateLock \"%s\"", dbusPath));
+            throw new IllegalArgumentException(String.format("Illegal DBus path for DeviceStateLock \"%s\"", dbusPath));
         }
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.stateHandler = new NMDeviceStateChangeHandler(this.latch, dbusPath, expectedNmDeviceState);

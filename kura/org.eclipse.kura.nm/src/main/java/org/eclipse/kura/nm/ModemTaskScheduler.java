@@ -20,12 +20,10 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.eclipse.kura.nm.enums.MMModemState;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.modemmanager1.Modem;
 import org.freedesktop.networkmanager.Device;
-import org.freedesktop.networkmanager.settings.Connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,30 +31,30 @@ public class ModemTaskScheduler {
 
     private static final Logger logger = LoggerFactory.getLogger(ModemTaskScheduler.class);
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(5);
-    private final NetworkManagerDbusWrapper networkManager;
-    private final ModemManagerDbusWrapper modemManager;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
     private final Device device;
-    private final Connection connection;
     private final int maxFail;
     private final int holdoff;
     private final boolean autoconnect;
     private final int resetDelayMinutes;
     private final String deviceId;
 
+    private Optional<NMDbusConnector> nmDbusConnector = Optional.empty();
     private ScheduledFuture<?> connectionHandler;
     private ScheduledFuture<?> resetHandler;
     private AtomicBoolean isConnectionScheduled = new AtomicBoolean(false);
     private AtomicBoolean isResetScheduled = new AtomicBoolean(false);
-    private Optional<String> mmDbusPath;
     private int delay = 0;
 
-    public ModemTaskScheduler(NetworkManagerDbusWrapper networkManager, ModemManagerDbusWrapper modemManager,
-            Connection connection, Device device, String deviceId, NetworkProperties properties) {
-        this.networkManager = Objects.requireNonNull(networkManager);
-        this.modemManager = Objects.requireNonNull(modemManager);
+    public ModemTaskScheduler(String deviceId, Device device, NetworkProperties properties) {
+
+        try {
+            this.nmDbusConnector = Optional.of(NMDbusConnector.getInstance());
+        } catch (DBusExecutionException | DBusException e) {
+            logger.error("Cannot initialize NMDbusConnector due to: ", e);
+        }
+
         this.device = Objects.requireNonNull(device);
-        this.connection = Objects.requireNonNull(connection);
         this.resetDelayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
         this.autoconnect = properties.get(Boolean.class, "net.interface.%s.config.persist", deviceId);
         this.holdoff = properties.get(Integer.class, "net.interface.%s.config.holdoff", deviceId);
@@ -64,15 +62,13 @@ public class ModemTaskScheduler {
         this.deviceId = deviceId;
 
         this.delay = this.holdoff != 0 && this.maxFail != 0 ? this.holdoff * this.maxFail : 90;
-        try {
-            this.mmDbusPath = this.networkManager.getModemManagerDbusPath(this.device.getObjectPath());
-        } catch (DBusException e) {
-            logger.warn("Could not get ModemManager dbus path for device {} because: ", this.device.getObjectPath(), e);
-            this.mmDbusPath = Optional.empty();
-        }
     }
 
     public void scheduleConnection() {
+        if (isModemConnected()) {
+            logger.info("Connection for modem {} successful", this.deviceId);
+            return;
+        }
         if (isConnectionScheduled.get() || !this.autoconnect) {
             return;
         }
@@ -85,7 +81,9 @@ public class ModemTaskScheduler {
         try {
             logger.debug("Connection attempt {} for modem {} with path {} ...", attemptNumber, this.deviceId,
                     this.device.getObjectPath());
-            this.networkManager.activateConnection(this.connection, this.device);
+            if (this.nmDbusConnector.isPresent()) {
+                this.nmDbusConnector.get().apply(deviceId);
+            }
             if (isModemConnected()) {
                 logger.info("Connection for modem {} successful", this.deviceId);
                 if (this.connectionHandler != null) {
@@ -114,7 +112,7 @@ public class ModemTaskScheduler {
     }
 
     public void scheduleReset() {
-        if (isResetScheduled.get() || this.resetDelayMinutes <= 0) {
+        if (isResetScheduled.get() || this.resetDelayMinutes <= 0 || isModemConnected()) {
             return;
         }
         logger.info("Schedule reset for modem {} with path {}", this.deviceId, this.device.getObjectPath());
@@ -126,9 +124,12 @@ public class ModemTaskScheduler {
                         this.connectionHandler.cancel(true);
                     }
                     this.isConnectionScheduled.set(false);
-                    if (this.mmDbusPath.isPresent()) {
-                        Modem modem = this.modemManager.getModem(mmDbusPath.get());
-                        modem.Reset();
+                    Optional<Modem> modem = Optional.empty();
+                    if (this.nmDbusConnector.isPresent()) {
+                        modem = this.nmDbusConnector.get().getModem(device);
+                    }
+                    if (modem.isPresent()) {
+                        modem.get().Reset();
                         logger.info("Modem reset successful for modem {} with path {}", this.deviceId,
                                 this.device.getObjectPath());
                     }
@@ -169,11 +170,20 @@ public class ModemTaskScheduler {
         return this.isResetScheduled.get();
     }
 
-    private boolean isModemConnected() throws DBusException {
-        if (!this.mmDbusPath.isPresent()) {
-            return false;
+    private boolean isModemConnected() {
+        boolean isConnected = false;
+        try {
+            if (this.nmDbusConnector.isPresent()) {
+                isConnected = this.nmDbusConnector.get().isModemConnected(this.device);
+            }
+        } catch (DBusException e) {
+            logger.warn("Could not get modem connection status for modem {} with path {} because: ", this.deviceId,
+                    this.device.getObjectPath(), e);
         }
-        MMModemState modemState = this.modemManager.getMMModemState(mmDbusPath.get());
-        return MMModemState.MM_MODEM_STATE_CONNECTED.equals(modemState);
+        return isConnected;
+    }
+
+    protected void setNMDBusConnector(NMDbusConnector nmDbusConnector) {
+        this.nmDbusConnector = Optional.of(nmDbusConnector);
     }
 }

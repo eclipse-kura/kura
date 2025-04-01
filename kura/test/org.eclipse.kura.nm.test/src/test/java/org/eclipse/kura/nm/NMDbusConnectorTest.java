@@ -97,7 +97,6 @@ import org.freedesktop.networkmanager.device.Wired;
 import org.freedesktop.networkmanager.device.Wireless;
 import org.freedesktop.networkmanager.settings.Connection;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import fi.w1.Wpa_supplicant1;
@@ -872,7 +871,6 @@ public class NMDbusConnectorTest {
         thenConfigurationEnforcementIsActive(true);
     }
 
-    @Ignore
     @Test
     public void configurationEnforcementShouldTriggerWithExternalChangeSignal() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
@@ -899,7 +897,6 @@ public class NMDbusConnectorTest {
         thenConfigurationEnforcementIsActive(true);
     }
 
-    @Ignore
     @Test
     public void configurationEnforcementShouldTriggerWithExternalDisconnect() throws DBusException, IOException {
         givenBasicMockedDbusConnector();

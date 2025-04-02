@@ -313,9 +313,14 @@
 
     <repositories>
         <repository>
-            <id>repo.eclipse.org</id>
+            <id>kura-releases</id>
             <name>Eclipse Kura Repository - Releases</name>
             <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+        <repository>
+            <id>kura-snapshots</id>
+            <name>Eclipse Kura Repository - Snapshots</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
         </repository>
     </repositories>
 

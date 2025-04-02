@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.linux.position.options.PositionServiceOptions;
 import org.eclipse.kura.linux.position.provider.GpsDeviceAvailabilityListener;
+import org.eclipse.kura.linux.position.provider.LinuxPositionProviderConstants;
 import org.eclipse.kura.linux.position.provider.LockStatusListener;
 import org.eclipse.kura.linux.position.provider.PositionProvider;
 import org.eclipse.kura.linux.position.provider.PositionProviderType;
@@ -35,10 +36,18 @@ import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.modemmanager1.modem.Location;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.condition.Condition;
 import org.osgi.util.position.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Component(name = "ModemManagerPositionProvider", //
+        property = "service.pid=org.eclipse.kura.nm.position.MMPositionProvider", //
+        reference = @Reference(name = "LinuxPositionProviderCondition", service = Condition.class, //
+                target = "(" + Condition.CONDITION_ID + "=" + LinuxPositionProviderConstants.CONDITION_ID + ")" //
+        ))
 public class MMPositionProvider implements PositionProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(MMPositionProvider.class);

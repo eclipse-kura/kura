@@ -30,8 +30,8 @@
     <properties>
         <kura.basedir>${project.basedir}/../..</kura.basedir>
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-        <grpc.version>1.68.2</grpc.version>
-        <protobuf-java-util.version>3.25.6</protobuf-java-util.version>
+        <grpc.version>1.71.0</grpc.version>
+        <protobuf-java-util.version>4.30.2</protobuf-java-util.version>
     </properties>
 
     <dependencies>

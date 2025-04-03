@@ -36,14 +36,14 @@
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
-                    <include>archetype-resources/test/test-env/framework/kura.properties</include>
+                    <include>archetype-resources/tests/test-env/framework/kura.properties</include>
                     <include>META-INF/maven/archetype-metadata.xml</include>
                 </includes>
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
                 <excludes>
-                    <exclude>archetype-resources/test/test-env/framework/kura.properties</exclude>
+                    <exclude>archetype-resources/tests/test-env/framework/kura.properties</exclude>
                     <exclude>META-INF/maven/archetype-metadata.xml</exclude>
                 </excludes>
             </resource>

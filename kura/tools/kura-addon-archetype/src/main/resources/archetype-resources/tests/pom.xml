@@ -307,6 +307,11 @@
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
                                 <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.equinox.wireadmin</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
                                     <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.useradmin.store</id>
                                     <versionRange>0.0.0</versionRange>

@@ -77,7 +77,7 @@
                         </goals>
                         <configuration>
                             <sourceFile>${project.basedir}/../bundles/${jar.name}/target/${jar.name}-${project.version}.jar</sourceFile>
-                            <destinationFile>target/${jar.name}_${project.version}.jar</destinationFile>
+                            <destinationFile>target/input_files/${jar.name}_${project.version}.jar</destinationFile>
                         </configuration>
                     </execution>
                 </executions>
@@ -96,12 +96,12 @@
                         </goals>
                         <configuration>
                             <verbose>true</verbose>
-                            <deb>${basedir}/target/${package.name}_${project.version}_${deb.architecture}.deb</deb>
+                            <deb>${basedir}/target/deb/${package.name}_${project.version}_${deb.architecture}.deb</deb>
                             <controlDir>${project.basedir}/deb/control</controlDir>
                             <skipPOMs>false</skipPOMs>
                             <dataSet>
                                 <data>
-                                    <src>${basedir}/target/${jar.name}_${project.version}.jar</src>
+                                    <src>${basedir}/target/input_files/${jar.name}_${project.version}.jar</src>
                                     <dst>${jar.name}_${project.version}.jar</dst>
                                     <type>file</type>
                                     <mapper>
@@ -131,6 +131,7 @@
                         </goals>
                         <configuration>
                             <name>${package.name}</name>
+                            <workarea>${basedir}/target/rpm</workarea>
                             <needarch>${rpm.architecture}</needarch>
                             <group>Applications/System</group>
                             <targetOS>linux</targetOS>
@@ -146,7 +147,7 @@
                                     <groupname>kurad</groupname>
                                     <sources>
                                         <source>
-                                            <location>${basedir}/target/${jar.name}_${project.version}.jar</location>
+                                            <location>${basedir}/target/input_files/${jar.name}_${project.version}.jar</location>
                                         </source>
                                     </sources>
                                 </mapping>

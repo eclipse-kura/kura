@@ -180,7 +180,7 @@ use the following
 <rpm.aarch64.architecture>aarch64</rpm.aarch64.architecture>
 ```
 !!! tip
-    These properties are usefull to define the architecture-specific jars and the architecture-specific debian and rpm architectures. The `addon.installation.dir` property is used to define the installation directory of the bundle in Kura. The `native.core.installation.dir` property is used to define the installation directory of the native code in Kura. It is important that the fragments are installed in a higher level directory than the main bundle, otherwise Kura will not be able to load the native code.
+    These properties are useful to define the architecture-specific jars and the architecture-specific debian and rpm architectures. The `addon.installation.dir` property is used to define the installation directory of the bundle in Kura. The `native.core.installation.dir` property is used to define the installation directory of the native code in Kura. It is important that the fragments are installed in a higher level directory than the main bundle, otherwise Kura will not be able to load the native code.
 
     The `jar.name` property is used to define the name of the main bundle, while the `jar.aarch64.core` and `jar.x86_64.core` properties are used to define the names of the architecture-specific fragments.
 
@@ -261,7 +261,7 @@ Homepage: https://eclipse-kura.github.io/kura/ (add correct link to documentatio
 
 The Architecture field is the one responsible to specify the architecture of the package. The value is set in the `/distrib/pom.xml` file, by the property `<deb.architecture>all</deb.architecture>`. The value `all` means that the package can be installed on any architecture. This is the recommended value for packages that do not contain architecture-specific files.
 
-To build a package that contains architecture-specific files, it is necessary to separate the control files of the different architectures (namely, `aarch64` and `amd64`). To do so, create two directoris in the `distrib/deb/` folder with this structure:
+To build a package that contains architecture-specific files, it is necessary to separate the control files of the different architectures (namely, `aarch64` and `amd64`). To do so, create two directories in the `distrib/deb/` folder with this structure:
 
 ```
 distrib
@@ -355,7 +355,7 @@ To build the architecture-dependant installers, the execution must change to:
                 </mapper>
             </data>
             <data>
-                <src>${basedir}/target/input_jars/${jar.aarch64.core}_${project.version}.jar</src>
+                <src>${basedir}/target/input_files/${jar.aarch64.core}_${project.version}.jar</src>
                 <dst>${jar.aarch64.core}_${project.version}.jar</dst>
                 <type>file</type>
                 <mapper>

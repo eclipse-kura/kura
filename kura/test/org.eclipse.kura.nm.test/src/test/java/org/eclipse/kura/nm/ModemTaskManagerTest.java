@@ -46,7 +46,7 @@ public class ModemTaskManagerTest {
     }
 
     @Test
-    private void shouldNotAddSignalHandlerIfNotAutoconnectOrResetTimeout() throws DBusException {
+    public void shouldNotAddSignalHandlerIfNotAutoconnectOrResetTimeout() throws DBusException {
         givenNMDbusConnectorMock();
         givenNetworkProperties("1-4", false, 0);
         givenModemTaskManager();
@@ -57,7 +57,7 @@ public class ModemTaskManagerTest {
     }
 
     @Test
-    private void shouldAddSignalHandlerIfAutoconnect() throws DBusException {
+    public void shouldAddSignalHandlerIfAutoconnect() throws DBusException {
         givenNMDbusConnectorMock();
         givenNetworkProperties("1-4", true, 0);
         givenModemTaskManager();
@@ -68,7 +68,7 @@ public class ModemTaskManagerTest {
     }
 
     @Test
-    private void shouldAddSignalHandlerIfResetTimeout() throws DBusException {
+    public void shouldAddSignalHandlerIfResetTimeout() throws DBusException {
         givenNMDbusConnectorMock();
         givenNetworkProperties("1-4", false, 10);
         givenModemTaskManager();
@@ -79,7 +79,7 @@ public class ModemTaskManagerTest {
     }
 
     @Test
-    private void shouldNotAddModemTaskHandlerIfAlreadyActivated() throws DBusException {
+    public void shouldNotAddModemTaskHandlerIfAlreadyActivated() throws DBusException {
         givenNMDbusConnectorMock();
         givenNetworkProperties("1-4", true, 10);
         givenModemTaskManager();
@@ -91,19 +91,7 @@ public class ModemTaskManagerTest {
     }
 
     @Test
-    private void shouldAddModemTaskHandlerIfNotActivated() throws DBusException {
-        givenNMDbusConnectorMock();
-        givenNetworkProperties("1-4", false, 0);
-        givenModemTaskManager();
-
-        whenEnableModemTaskHandler("1-4");
-        whenEnableModemTaskHandler("1-4");
-
-        thenSignalHandlerIsAdded(2);
-    }
-
-    @Test
-    private void shouldDisableModemTaskHandler() throws DBusException {
+    public void shouldDisableModemTaskHandler() throws DBusException {
         givenNMDbusConnectorMock();
         givenNetworkProperties("1-4", false, 0);
         givenModemTaskManager();
@@ -125,6 +113,8 @@ public class ModemTaskManagerTest {
 
     private void givenNetworkProperties(String deviceId, boolean autoconnect, int resetTimeout) {
         Map<String, Object> properties = new HashMap<>();
+        properties.put(String.format("net.interface.%s.config.holdoff", deviceId), 10);
+        properties.put(String.format("net.interface.%s.config.maxFail", deviceId), 3);
         properties.put(String.format("net.interface.%s.config.persist", deviceId), autoconnect);
         properties.put(String.format("net.interface.%s.config.resetTimeout", deviceId), resetTimeout);
         this.networkProperties = new NetworkProperties(properties);

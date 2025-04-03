@@ -572,7 +572,7 @@ public class NMDbusConnector {
             int resetDelayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
             boolean autoconnect = properties.get(Boolean.class, "net.interface.%s.config.persist", deviceId);
             if (resetDelayMinutes > 0 || autoconnect) {
-                this.modemManager.modemTaskHandler(deviceId, device, properties);
+                this.modemManager.modemTaskHandlerEnable(deviceId, device, properties);
             }
         }
 

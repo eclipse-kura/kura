@@ -248,7 +248,7 @@ public class ModemManagerDbusWrapper {
 
     }
 
-    protected void modemTaskHandler(String deviceId, Device device, NetworkProperties properties) throws DBusException {
+    protected void modemTaskHandlerEnable(String deviceId, Device device, NetworkProperties properties) throws DBusException {
         int resetDelayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
         boolean autoconnect = properties.get(Boolean.class, "net.interface.%s.config.persist", deviceId);
         if (isModemTaskAlreadyActivated(deviceId, resetDelayMinutes, autoconnect)) {

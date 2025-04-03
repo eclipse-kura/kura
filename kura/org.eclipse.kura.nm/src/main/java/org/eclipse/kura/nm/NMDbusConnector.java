@@ -107,12 +107,14 @@ public class NMDbusConnector {
     private NMDeviceAddedHandler deviceAddedHandler = null;
 
     private boolean configurationEnforcementHandlerIsArmed = false;
+    private ModemTaskManager modemTaskManager;
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.networkManager = new NetworkManagerDbusWrapper(this.dbusConnection);
         this.modemManager = new ModemManagerDbusWrapper(this.dbusConnection);
         this.wpaSupplicant = new WpaSupplicantDbusWrapper(this.dbusConnection);
+        this.modemTaskManager = new ModemTaskManager(this.dbusConnection);
     }
 
     public static synchronized NMDbusConnector getInstance() throws DBusException {
@@ -140,8 +142,8 @@ public class NMDbusConnector {
                 && this.configurationEnforcementHandlerIsArmed;
     }
 
-    protected boolean modemTaskHandlerIsPresent(String modemId) {
-        return this.modemManager.isModemTaskHandlerPresent(modemId);
+    protected boolean modemTaskHandlerIsPresent(String deviceId) {
+        return this.modemTaskManager.isModemTaskHandlerPresent(deviceId);
     }
 
     public void checkPermissions() {
@@ -360,7 +362,7 @@ public class NMDbusConnector {
         try {
             configurationEnforcementDisable();
             // Disable ModemTaskHandler since it is supposed to be a new configuration
-            this.modemManager.modemTaskHandlerDisable();
+            this.modemTaskManager.modemTaskHandlerDisable();
             doApply(networkConfiguration);
             this.cachedConfiguration = networkConfiguration;
         } finally {
@@ -572,7 +574,7 @@ public class NMDbusConnector {
             int resetDelayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
             boolean autoconnect = properties.get(Boolean.class, "net.interface.%s.config.persist", deviceId);
             if (resetDelayMinutes > 0 || autoconnect) {
-                this.modemManager.modemTaskHandlerEnable(deviceId, device, properties);
+                this.modemTaskManager.modemTaskHandlerEnable(deviceId, device, properties);
             }
         }
 
@@ -647,7 +649,7 @@ public class NMDbusConnector {
             logger.warn("Can't disable missing device {}", deviceId);
             return;
         }
-        this.modemManager.modemTaskHandlerDisable(deviceId);
+        this.modemTaskManager.modemTaskHandlerDisable(deviceId);
         Device device = optDevice.get();
         Optional<Connection> appliedConnection = this.networkManager.getAppliedConnection(device);
 
@@ -696,7 +698,7 @@ public class NMDbusConnector {
     public List<Location> getAvailableMMLocations() {
         List<Location> availableLocations = new ArrayList<>();
 
-        this.getModemsPaths().forEach(modemPath -> {
+        this.getNMModemsPaths().forEach(modemPath -> {
             try {
                 Properties locationProperties = this.modemManager
                         .getLocationProperties(this.modemManager.getModemManagerLocation(modemPath));
@@ -717,12 +719,12 @@ public class NMDbusConnector {
 
     }
 
-    private List<String> getModemsPaths() {
+    private List<String> getNMModemsPaths() {
         List<String> modemsPath = new ArrayList<>();
 
         try {
             for (Device device : this.networkManager.getAllDevices()) {
-                getModemPath(device).ifPresent(modemsPath::add);
+                getNMModemPath(device).ifPresent(modemsPath::add);
             }
         } catch (DBusException ex) {
             logger.debug("Impossible to retrieve information regarding available modems");
@@ -731,7 +733,7 @@ public class NMDbusConnector {
         return modemsPath;
     }
 
-    private Optional<String> getModemPath(Device device) throws DBusException {
+    private Optional<String> getNMModemPath(Device device) throws DBusException {
         Optional<String> mmDbusPath = Optional.empty();
 
         if (networkManager.getDeviceType(device.getObjectPath()).equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
@@ -744,7 +746,7 @@ public class NMDbusConnector {
     public boolean isModemConnected(Device modemDevice) throws DBusException {
         Optional<String> mmDbusPath = Optional.empty();
         try {
-            mmDbusPath = getModemPath(modemDevice);
+            mmDbusPath = getNMModemPath(modemDevice);
         } catch (DBusException e) {
             logger.warn("Could not get ModemManager dbus path for device {} because: ", modemDevice.getObjectPath(), e);
         }
@@ -758,7 +760,7 @@ public class NMDbusConnector {
 
     public Optional<Modem> getModem(Device device) throws DBusException {
         Optional<Modem> modem = Optional.empty();
-        Optional<String> mmDbusPath = getModemPath(device);
+        Optional<String> mmDbusPath = getNMModemPath(device);
         if (mmDbusPath.isPresent()) {
             modem = Optional.of(this.modemManager.getModem(mmDbusPath.get()));
         }

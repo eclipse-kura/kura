@@ -14,16 +14,13 @@ package org.eclipse.kura.nm;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.kura.nm.enums.MMModemLocationSource;
 import org.eclipse.kura.nm.enums.MMModemState;
-import org.eclipse.kura.nm.signal.handlers.NMModemTaskHandler;
 import org.eclipse.kura.nm.status.SimProperties;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
@@ -33,7 +30,6 @@ import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.modemmanager1.Modem;
 import org.freedesktop.modemmanager1.modem.Location;
-import org.freedesktop.networkmanager.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +45,7 @@ public class ModemManagerDbusWrapper {
 
     private final DBusConnection dbusConnection;
 
-    private final Map<String, NMModemTaskHandler> modemTaskHandlers = new HashMap<>();
+    // private final Map<String, NMModemTaskHandler> modemTaskHandlers = new HashMap<>();
 
     public ModemManagerDbusWrapper(DBusConnection dbusConnection) {
         this.dbusConnection = dbusConnection;
@@ -248,69 +244,70 @@ public class ModemManagerDbusWrapper {
 
     }
 
-    protected void modemTaskHandlerEnable(String deviceId, Device device, NetworkProperties properties) throws DBusException {
-        int resetDelayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
-        boolean autoconnect = properties.get(Boolean.class, "net.interface.%s.config.persist", deviceId);
-        if (isModemTaskAlreadyActivated(deviceId, resetDelayMinutes, autoconnect)) {
-            return;
-        }
-        modemTaskHandlerDisable(deviceId);
-
-        logger.info("Modem {} activated. Starting monitoring task...", deviceId);
-        ModemTaskScheduler connectionScheduler = new ModemTaskScheduler(deviceId, device, properties);
-        if (autoconnect) {
-            connectionScheduler.scheduleConnection();
-        }
-        if (resetDelayMinutes > 0) {
-            connectionScheduler.scheduleReset();
-        }
-        NMModemTaskHandler modemConnectionHandler = new NMModemTaskHandler(connectionScheduler);
-
-        this.modemTaskHandlers.put(deviceId, modemConnectionHandler);
-
-        if (autoconnect || resetDelayMinutes > 0) {
-            this.dbusConnection.addSigHandler(org.freedesktop.networkmanager.Device.StateChanged.class,
-                    modemConnectionHandler);
-        }
-    }
-
-    private boolean isModemTaskAlreadyActivated(String deviceId, int resetDelayMinutes, boolean autoconnect) {
-        return isModemTaskHandlerPresent(deviceId) && (isModemTaskHandlerResetActivated(deviceId, resetDelayMinutes)
-                || isModemTaskHandlerAutoconnectActivated(deviceId, autoconnect));
-    }
-
-    protected boolean isModemTaskHandlerPresent(String deviceId) {
-        return this.modemTaskHandlers.containsKey(deviceId);
-    }
-
-    private boolean isModemTaskHandlerResetActivated(String deviceId, int resetDelayMinutes) {
-        return resetDelayMinutes > 0
-                && this.modemTaskHandlers.get(deviceId).getModemConnectionScheduler().isResetScheduled();
-    }
-
-    private boolean isModemTaskHandlerAutoconnectActivated(String deviceId, boolean autoconnect) {
-        return autoconnect
-                && this.modemTaskHandlers.get(deviceId).getModemConnectionScheduler().isConnectionScheduled();
-    }
-
-    protected void modemTaskHandlerDisable(String deviceId) {
-        if (this.modemTaskHandlers.containsKey(deviceId)) {
-            NMModemTaskHandler handler = this.modemTaskHandlers.get(deviceId);
-            handler.getModemConnectionScheduler().cancelAndShutdown();
-            try {
-                this.dbusConnection.removeSigHandler(org.freedesktop.networkmanager.Device.StateChanged.class, handler);
-            } catch (DBusException e) {
-                logger.warn("Couldn't remove signal handler for: {}. Caused by:", deviceId, e);
-            }
-            this.modemTaskHandlers.remove(deviceId);
-        }
-    }
-
-    protected void modemTaskHandlerDisable() {
-        for (String deviceId : this.modemTaskHandlers.keySet()) {
-            modemTaskHandlerDisable(deviceId);
-        }
-        this.modemTaskHandlers.clear();
-    }
+    // protected void modemTaskHandlerEnable(String deviceId, Device device, NetworkProperties properties) throws
+    // DBusException {
+    // int resetDelayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
+    // boolean autoconnect = properties.get(Boolean.class, "net.interface.%s.config.persist", deviceId);
+    // if (isModemTaskAlreadyActivated(deviceId, resetDelayMinutes, autoconnect)) {
+    // return;
+    // }
+    // modemTaskHandlerDisable(deviceId);
+    //
+    // logger.info("Modem {} activated. Starting monitoring task...", deviceId);
+    // ModemTaskScheduler connectionScheduler = new ModemTaskScheduler(deviceId, device, properties);
+    // if (autoconnect) {
+    // connectionScheduler.scheduleConnection();
+    // }
+    // if (resetDelayMinutes > 0) {
+    // connectionScheduler.scheduleReset();
+    // }
+    // NMModemTaskHandler modemConnectionHandler = new NMModemTaskHandler(connectionScheduler);
+    //
+    // this.modemTaskHandlers.put(deviceId, modemConnectionHandler);
+    //
+    // if (autoconnect || resetDelayMinutes > 0) {
+    // this.dbusConnection.addSigHandler(org.freedesktop.networkmanager.Device.StateChanged.class,
+    // modemConnectionHandler);
+    // }
+    // }
+    //
+    // private boolean isModemTaskAlreadyActivated(String deviceId, int resetDelayMinutes, boolean autoconnect) {
+    // return isModemTaskHandlerPresent(deviceId) && (isModemTaskHandlerResetActivated(deviceId, resetDelayMinutes)
+    // || isModemTaskHandlerAutoconnectActivated(deviceId, autoconnect));
+    // }
+    //
+    // protected boolean isModemTaskHandlerPresent(String deviceId) {
+    // return this.modemTaskHandlers.containsKey(deviceId);
+    // }
+    //
+    // private boolean isModemTaskHandlerResetActivated(String deviceId, int resetDelayMinutes) {
+    // return resetDelayMinutes > 0
+    // && this.modemTaskHandlers.get(deviceId).getModemConnectionScheduler().isResetScheduled();
+    // }
+    //
+    // private boolean isModemTaskHandlerAutoconnectActivated(String deviceId, boolean autoconnect) {
+    // return autoconnect
+    // && this.modemTaskHandlers.get(deviceId).getModemConnectionScheduler().isConnectionScheduled();
+    // }
+    //
+    // protected void modemTaskHandlerDisable(String deviceId) {
+    // if (this.modemTaskHandlers.containsKey(deviceId)) {
+    // NMModemTaskHandler handler = this.modemTaskHandlers.get(deviceId);
+    // handler.getModemConnectionScheduler().cancelAndShutdown();
+    // try {
+    // this.dbusConnection.removeSigHandler(org.freedesktop.networkmanager.Device.StateChanged.class, handler);
+    // } catch (DBusException e) {
+    // logger.warn("Couldn't remove signal handler for: {}. Caused by:", deviceId, e);
+    // }
+    // this.modemTaskHandlers.remove(deviceId);
+    // }
+    // }
+    //
+    // protected void modemTaskHandlerDisable() {
+    // for (String deviceId : this.modemTaskHandlers.keySet()) {
+    // modemTaskHandlerDisable(deviceId);
+    // }
+    // this.modemTaskHandlers.clear();
+    // }
 
 }

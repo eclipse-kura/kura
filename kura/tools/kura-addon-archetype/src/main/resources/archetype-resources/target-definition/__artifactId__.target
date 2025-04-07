@@ -46,12 +46,6 @@
                     <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
                     <version>${org.eclipse.paho.client.mqttv3.version}</version>
                 </dependency>
-
-                <dependency>
-                    <groupId>com.github.hypfvieh</groupId>
-                    <artifactId>bluez-dbus-osgi</artifactId>
-                    <version>${bluez-dbus-osgi.version}</version>
-                </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
                     <artifactId>com.codeminders.hidapi.x86_64</artifactId>
@@ -66,11 +60,6 @@
                     <groupId>org.eclipse.kura</groupId>
                     <artifactId>com.codeminders.hidapi</artifactId>
                     <version>${com.codeminders.hidapi.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>com.eurotech</groupId>
-                    <artifactId>gpsd4java</artifactId>
-                    <version>${com.eurotech.gpsd4java.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>

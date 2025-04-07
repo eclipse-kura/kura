@@ -163,6 +163,8 @@ public class ModemTaskSchedulerTest {
     private void givenNMDbusConnectorMock(boolean isConnectedFirstCall, boolean isConnectedSecondCall)
             throws DBusException {
         this.nmDbusConnector = mock(NMDbusConnector.class);
+        when(this.nmDbusConnector.isConnectionActivated(any())).thenReturn(isConnectedFirstCall)
+                .thenReturn(isConnectedSecondCall);
         when(this.nmDbusConnector.isModemConnected(any())).thenReturn(isConnectedFirstCall)
                 .thenReturn(isConnectedSecondCall);
         this.modem = mock(Modem.class);

@@ -734,13 +734,7 @@ public class NMDbusConnector {
     }
 
     private Optional<String> getNMModemPath(Device device) throws DBusException {
-        Optional<String> mmDbusPath = Optional.empty();
-
-        if (networkManager.getDeviceType(device.getObjectPath()).equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
-            mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
-        }
-
-        return mmDbusPath;
+        return this.networkManager.getModemManagerDbusPath(device.getObjectPath());
     }
 
     public boolean isModemConnected(Device modemDevice) throws DBusException {
@@ -756,6 +750,11 @@ public class NMDbusConnector {
         }
         MMModemState modemState = this.modemManager.getMMModemState(mmDbusPath.get());
         return MMModemState.MM_MODEM_STATE_CONNECTED.equals(modemState);
+    }
+
+    public boolean isConnectionActivated(Device device) throws DBusException {
+        NMDeviceState deviceState = this.networkManager.getDeviceState(device);
+        return NMDeviceState.NM_DEVICE_STATE_ACTIVATED.equals(deviceState);
     }
 
     public Optional<Modem> getModem(Device device) throws DBusException {

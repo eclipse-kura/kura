@@ -65,7 +65,7 @@ public class ModemTaskScheduler {
     }
 
     public void scheduleConnection() {
-        if (isModemConnected()) {
+        if (isModemConnectedAndConnectionActivated()) {
             logger.info("Connection for modem {} successful", this.deviceId);
             return;
         }
@@ -84,7 +84,7 @@ public class ModemTaskScheduler {
             if (this.nmDbusConnector.isPresent()) {
                 this.nmDbusConnector.get().apply(deviceId);
             }
-            if (isModemConnected()) {
+            if (isModemConnectedAndConnectionActivated()) {
                 logger.info("Connection for modem {} successful", this.deviceId);
                 if (this.connectionHandler != null) {
                     this.connectionHandler.cancel(true);
@@ -112,14 +112,14 @@ public class ModemTaskScheduler {
     }
 
     public void scheduleReset() {
-        if (isResetScheduled.get() || this.resetDelayMinutes <= 0 || isModemConnected()) {
+        if (isResetScheduled.get() || this.resetDelayMinutes <= 0 || isModemConnectedAndConnectionActivated()) {
             return;
         }
         logger.info("Schedule reset for modem {} with path {}", this.deviceId, this.device.getObjectPath());
         this.isResetScheduled.set(true);
         this.resetHandler = this.scheduler.schedule(() -> {
             try {
-                if (!isModemConnected()) {
+                if (!isModemConnectedAndConnectionActivated()) {
                     if (this.connectionHandler != null) {
                         this.connectionHandler.cancel(true);
                     }
@@ -170,17 +170,19 @@ public class ModemTaskScheduler {
         return this.isResetScheduled.get();
     }
 
-    private boolean isModemConnected() {
+    private boolean isModemConnectedAndConnectionActivated() {
         boolean isConnected = false;
+        boolean isActivated = false;
         try {
             if (this.nmDbusConnector.isPresent()) {
                 isConnected = this.nmDbusConnector.get().isModemConnected(this.device);
+                isActivated = this.nmDbusConnector.get().isConnectionActivated(this.device);
             }
         } catch (DBusException e) {
             logger.warn("Could not get modem connection status for modem {} with path {} because: ", this.deviceId,
                     this.device.getObjectPath(), e);
         }
-        return isConnected;
+        return isConnected && isActivated;
     }
 
     protected void setNMDBusConnector(NMDbusConnector nmDbusConnector) {

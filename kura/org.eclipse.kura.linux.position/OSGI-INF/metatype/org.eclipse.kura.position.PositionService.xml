@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
-  
+    Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
-	SPDX-License-Identifier: EPL-2.0
-	
-	Contributors:
-	 Eurotech
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
@@ -41,7 +41,7 @@
             type="String"
             cardinality="0"
             required="true"
-            default="serial"
+            default="gpsd"
             description="Source for setting the position provider. Verify the availabiliy of the selected provider before activate it.">
             
             <Option label="serial" value="serial" />

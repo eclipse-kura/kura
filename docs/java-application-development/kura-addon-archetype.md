@@ -141,13 +141,13 @@ On old Eclipse IDE installations it might be necessary to uninstall the Tycho co
 
 The Addon Archetype standard procedure allows to build generic debian and RPM installers not dependant on the architecture on which the bundle will be installed.
 
-However, it is possible to adjust the files in the `distrib` folder to develop architecture-dependant installers: it could be necessary to build a bundle that contains native code (C/C++ libraries, jars that use JNI, etc.) or to build a bundle that contains architecture-specific files (e.g. a systemd service file). In this case, the `distrib` folder should be modified to include the architecture-specific files in the generated package.
+However, it is possible to customise the files in the `distrib` folder to develop architecture-dependant installers: this might be necessary when a bundle contains native code (C/C++ libraries, jars that use JNI, etc.) or architecture-specific files (e.g. a systemd service file).
 
-In the following sections we will see how to modify the `distrib` folder to build a package that contains architecture-specific files, for both the RPM and the DEB package. These steps assume that in the source code the architecture-specific jars are build in the form of fragments of the agnostic java code. The architecture-specific jars will then be copied in the `distrib` folder and included in the package.
+In the following sections we will see how this can be accomplished for both the RPM and the DEB packages. These steps assume that architecture-specific jars are built in the form of fragments of the architecture-agnostic java code. The architecture-specific jars will then be copied in the `distrib` folder and included in the package.
 
 ### Getting the source code
 
-The first modification is the copy and rename of the source code target files generated under the `bundles` project. Supposed that the bundles structure is the following:
+The first modification is the copy and rename of the source code target files generated under the `bundles` project. Given the following bundles structure:
 
 ```
 org.eclipse.kura.myartifact
@@ -244,7 +244,7 @@ In this way, in the `input_files` folder all the necessary jars will be copied a
 
 ### Debian architecture dependant packages
 
-The `/distrib/deb/control/control` file contains the DEB package metadata. The standard file is configure like this:
+The `/distrib/deb/control/control` file contains the DEB package metadata. The standard file is configured as follows:
 
 ```
 Package: [[package.name]]

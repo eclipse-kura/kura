@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider
 Bundle-Version: 2.0.0.qualifier
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
 Import-Package: com.google.gson;version="[2.7,3.0)",
- com.google.protobuf;version="[4.0,5.0]",
+ com.google.protobuf;version="4.30.2",
  org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.cloud;version="[1.1,2.0)",
  org.eclipse.kura.cloudconnection;version="[1.0,1.1)",

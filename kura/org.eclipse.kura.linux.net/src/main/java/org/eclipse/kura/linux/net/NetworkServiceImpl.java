@@ -12,10 +12,12 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.net;
 
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.EnumSet;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -33,6 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.core.net.EthernetInterfaceImpl;
@@ -326,6 +329,21 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         interfaceNames = interfaceNames.stream()
                 .filter(name -> !name.endsWith(LinuxNetworkUtil.ACCESS_POINT_INTERFACE_SUFFIX))
                 .collect(Collectors.toList());
+
+        if (interfaceNames.isEmpty()) {
+            logger.debug("No network interfaces found. Trying to get them from java.net.NetworkInterface");
+            java.net.NetworkInterface jnInterface = null;
+            Enumeration<java.net.NetworkInterface> interfaces = null;
+            try {
+                interfaces = java.net.NetworkInterface.getNetworkInterfaces();
+                while (interfaces.hasMoreElements()) {
+                    jnInterface = interfaces.nextElement();
+                    interfaceNames.add(jnInterface.getName());
+                }
+            } catch (SocketException e) {
+                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            }
+        }
 
         return interfaceNames;
     }

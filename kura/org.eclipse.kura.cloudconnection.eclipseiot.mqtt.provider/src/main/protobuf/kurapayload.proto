@@ -6,7 +6,7 @@ syntax = "proto2";
 
 package kuradatatypes;
 
-option java_package         = "org.eclipse.kura.core.message.protobuf";
+option java_package         = "org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.message.protobuf";
 option java_outer_classname = "KuraPayloadProto";
 
 message KuraPayload {

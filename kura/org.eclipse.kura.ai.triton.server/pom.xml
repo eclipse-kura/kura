@@ -29,10 +29,10 @@
     <properties>
         <kura.basedir>${project.basedir}/..</kura.basedir>
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.ai.triton.server.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-        <grpc.version>1.68.2</grpc.version>
+        <grpc.version>1.71.0</grpc.version>
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
-        <protoc.version>3.25.6</protoc.version>
-        <protobuf-java-util.version>3.25.6</protobuf-java-util.version>
+        <protoc.version>4.30.2</protoc.version>
+        <protobuf-java-util.version>4.30.2</protobuf-java-util.version>
     </properties>
 
     <build>
@@ -154,6 +154,17 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>lib</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
             </plugin>
         </plugins>
     </build>

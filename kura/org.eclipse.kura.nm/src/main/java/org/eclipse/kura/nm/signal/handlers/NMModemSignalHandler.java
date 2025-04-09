@@ -21,12 +21,12 @@ import org.freedesktop.networkmanager.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NMModemTaskHandler implements DBusSigHandler<Device.StateChanged> {
+public class NMModemSignalHandler implements DBusSigHandler<Device.StateChanged> {
 
-    private static final Logger logger = LoggerFactory.getLogger(NMModemTaskHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(NMModemSignalHandler.class);
     private final ModemTaskScheduler modemTaskScheduler;
 
-    public NMModemTaskHandler(ModemTaskScheduler modemTaskScheduler) {
+    public NMModemSignalHandler(ModemTaskScheduler modemTaskScheduler) {
         this.modemTaskScheduler = Objects.requireNonNull(modemTaskScheduler);
     }
 

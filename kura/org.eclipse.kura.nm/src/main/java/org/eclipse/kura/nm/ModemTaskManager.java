@@ -15,7 +15,7 @@ package org.eclipse.kura.nm;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.kura.nm.signal.handlers.NMModemTaskHandler;
+import org.eclipse.kura.nm.signal.handlers.NMModemSignalHandler;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.networkmanager.Device;
@@ -27,7 +27,7 @@ public class ModemTaskManager {
     private static final Logger logger = LoggerFactory.getLogger(ModemTaskManager.class);
 
     private final DBusConnection dbusConnection;
-    private final Map<String, NMModemTaskHandler> modemTaskHandlers = new HashMap<>();
+    private final Map<String, NMModemSignalHandler> modemTaskHandlers = new HashMap<>();
 
     public ModemTaskManager(DBusConnection dbusConnection) {
         this.dbusConnection = dbusConnection;
@@ -41,20 +41,20 @@ public class ModemTaskManager {
             return;
         }
         modemTaskHandlerDisable(deviceId);
-
-        logger.info("Modem {} activated. Starting monitoring task...", deviceId);
-        ModemTaskScheduler connectionScheduler = new ModemTaskScheduler(deviceId, device, properties);
-        if (autoconnect) {
-            connectionScheduler.scheduleConnection();
-        }
-        if (resetDelayMinutes > 0) {
-            connectionScheduler.scheduleReset();
-        }
-        NMModemTaskHandler modemConnectionHandler = new NMModemTaskHandler(connectionScheduler);
-
-        this.modemTaskHandlers.put(deviceId, modemConnectionHandler);
-
         if (autoconnect || resetDelayMinutes > 0) {
+
+            logger.info("Modem {} activated. Starting monitoring task...", deviceId);
+            ModemTaskScheduler connectionScheduler = new ModemTaskScheduler(deviceId, device, properties);
+            if (autoconnect) {
+                connectionScheduler.scheduleConnection();
+            }
+            if (resetDelayMinutes > 0) {
+                connectionScheduler.scheduleReset();
+            }
+            NMModemSignalHandler modemConnectionHandler = new NMModemSignalHandler(connectionScheduler);
+
+            this.modemTaskHandlers.put(deviceId, modemConnectionHandler);
+
             this.dbusConnection.addSigHandler(org.freedesktop.networkmanager.Device.StateChanged.class,
                     modemConnectionHandler);
         }
@@ -81,7 +81,7 @@ public class ModemTaskManager {
 
     protected void modemTaskHandlerDisable(String deviceId) {
         if (this.modemTaskHandlers.containsKey(deviceId)) {
-            NMModemTaskHandler handler = this.modemTaskHandlers.get(deviceId);
+            NMModemSignalHandler handler = this.modemTaskHandlers.get(deviceId);
             handler.getModemConnectionScheduler().cancelAndShutdown();
             try {
                 this.dbusConnection.removeSigHandler(org.freedesktop.networkmanager.Device.StateChanged.class, handler);

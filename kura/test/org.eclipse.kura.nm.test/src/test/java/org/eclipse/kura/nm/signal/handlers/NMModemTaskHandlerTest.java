@@ -26,7 +26,7 @@ import org.junit.Test;
 
 public class NMModemTaskHandlerTest {
 
-    private NMModemTaskHandler modemTaskHandler = null;
+    private NMModemSignalHandler modemTaskHandler = null;
     private ModemTaskScheduler modemTaskScheduler = null;
     private Device.StateChanged signal;
     private Device device;
@@ -73,7 +73,7 @@ public class NMModemTaskHandlerTest {
 
     private void givenModemTaskScheduler(String devicePath) {
         this.modemTaskScheduler = mock(ModemTaskScheduler.class);
-        this.modemTaskHandler = new NMModemTaskHandler(this.modemTaskScheduler);
+        this.modemTaskHandler = new NMModemSignalHandler(this.modemTaskScheduler);
 
         this.device = mock(Device.class);
         when(this.modemTaskScheduler.getDevice()).thenReturn(this.device);

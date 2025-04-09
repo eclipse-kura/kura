@@ -83,6 +83,8 @@ public class ModemTaskScheduler {
                     this.device.getObjectPath());
             if (this.nmDbusConnector.isPresent()) {
                 this.nmDbusConnector.get().apply(deviceId);
+            } else {
+                logger.warn("Could not attempt reconnection since the NMDbusConnector is not available.");
             }
             if (isModemConnectedAndConnectionActivated()) {
                 logger.info("Connection for modem {} successful", this.deviceId);
@@ -127,6 +129,8 @@ public class ModemTaskScheduler {
                     Optional<Modem> modem = Optional.empty();
                     if (this.nmDbusConnector.isPresent()) {
                         modem = this.nmDbusConnector.get().getModem(device);
+                    } else {
+                        logger.warn("Could get modem since the NMDbusConnector is not available.");
                     }
                     if (modem.isPresent()) {
                         modem.get().Reset();

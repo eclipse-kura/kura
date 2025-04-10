@@ -435,6 +435,7 @@ public class NMDbusConnector {
             if (CONFIGURATION_SUPPORTED_VIRTUAL_DEVICE_TYPES.contains(propertyDeviceType)) {
                 manageConfiguredInterface(Optional.empty(), deviceIdToBeConfigured, properties);
             } else {
+                this.modemTaskManager.modemTaskHandlerDisable(deviceIdToBeConfigured);
                 logger.warn("Can't apply configuration to disconnected or unsupported virtual device "
                         + "\"{}\" of type \"{}\"", deviceIdToBeConfigured, propertyDeviceType);
             }

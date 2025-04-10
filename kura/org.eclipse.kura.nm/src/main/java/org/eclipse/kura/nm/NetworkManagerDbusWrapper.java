@@ -204,7 +204,7 @@ public class NetworkManagerDbusWrapper {
         return connections;
     }
 
-    protected void activateConnection(Connection connection, Device device) throws DBusException {
+    protected void activateConnection(Connection connection, Device device) {
         this.networkManager.ActivateConnection(new DBusPath(connection.getObjectPath()),
                 new DBusPath(device.getObjectPath()), new DBusPath("/"));
     }

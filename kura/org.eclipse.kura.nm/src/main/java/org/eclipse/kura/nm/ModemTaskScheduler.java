@@ -119,31 +119,33 @@ public class ModemTaskScheduler {
         }
         logger.info("Schedule reset for modem {} with path {}", this.deviceId, this.device.getObjectPath());
         this.isResetScheduled.set(true);
-        this.resetHandler = this.scheduler.schedule(() -> {
-            try {
-                if (!isModemConnectedAndConnectionActivated()) {
-                    if (this.connectionHandler != null) {
-                        this.connectionHandler.cancel(true);
-                    }
-                    this.isConnectionScheduled.set(false);
-                    Optional<Modem> modem = Optional.empty();
-                    if (this.nmDbusConnector.isPresent()) {
-                        modem = this.nmDbusConnector.get().getModem(device);
-                    } else {
-                        logger.warn("Could get modem since the NMDbusConnector is not available.");
-                    }
-                    if (modem.isPresent()) {
-                        modem.get().Reset();
-                        logger.info("Modem reset successful for modem {} with path {}", this.deviceId,
-                                this.device.getObjectPath());
-                    }
+        this.resetHandler = this.scheduler.schedule(this::resetModem, this.resetDelayMinutes, TimeUnit.MINUTES);
+    }
+
+    private void resetModem() {
+        try {
+            if (!isModemConnectedAndConnectionActivated()) {
+                if (this.connectionHandler != null) {
+                    this.connectionHandler.cancel(true);
                 }
-            } catch (DBusException | DBusExecutionException e) {
-                logger.warn("Could not reset modem {} with path {} because: ", this.deviceId,
-                        this.device.getObjectPath(), e);
+                this.isConnectionScheduled.set(false);
+                Optional<Modem> modem = Optional.empty();
+                if (this.nmDbusConnector.isPresent()) {
+                    modem = this.nmDbusConnector.get().getModem(device);
+                } else {
+                    logger.warn("Could get modem since the NMDbusConnector is not available.");
+                }
+                if (modem.isPresent()) {
+                    modem.get().Reset();
+                    logger.info("Modem reset successful for modem {} with path {}", this.deviceId,
+                            this.device.getObjectPath());
+                }
             }
-            this.isResetScheduled.set(false);
-        }, this.resetDelayMinutes, TimeUnit.MINUTES);
+        } catch (DBusException | DBusExecutionException e) {
+            logger.warn("Could not reset modem {} with path {} because: ", this.deviceId, this.device.getObjectPath(),
+                    e);
+        }
+        this.isResetScheduled.set(false);
     }
 
     public void cancelAndShutdown() {

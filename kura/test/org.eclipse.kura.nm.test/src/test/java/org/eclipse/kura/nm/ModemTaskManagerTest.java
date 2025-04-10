@@ -37,7 +37,7 @@ public class ModemTaskManagerTest {
     @Test
     public void shouldEnableModemTaskHandler() throws DBusException {
         givenNMDbusConnectorMock();
-        givenNetworkProperties("1-4", false, 0);
+        givenNetworkProperties("1-4", true, 1);
         givenModemTaskManager();
 
         whenEnableModemTaskHandler("1-4");
@@ -93,7 +93,7 @@ public class ModemTaskManagerTest {
     @Test
     public void shouldDisableModemTaskHandler() throws DBusException {
         givenNMDbusConnectorMock();
-        givenNetworkProperties("1-4", false, 0);
+        givenNetworkProperties("1-4", true, 1);
         givenModemTaskManager();
 
         whenEnableModemTaskHandler("1-4");
@@ -133,7 +133,7 @@ public class ModemTaskManagerTest {
         this.modemTaskManager.modemTaskHandlerEnable(deviceId, mock(Device.class), this.networkProperties);
     }
 
-    private void whenDisableModemTaskHandler(String deviceId) throws DBusException {
+    private void whenDisableModemTaskHandler(String deviceId) {
         this.modemTaskManager.modemTaskHandlerDisable(deviceId);
     }
 

@@ -16,7 +16,7 @@ podTemplate(
     yaml: '''
 spec:
   containers:
-    name: "jnlp"
+  - name: "jnlp"
     resources:
       limits:
         cpu: "2000m"

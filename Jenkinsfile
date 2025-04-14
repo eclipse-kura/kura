@@ -14,18 +14,16 @@ def boolean onlyDocumentationFilesChangedIn(String workDirectory) {
 podTemplate(
     inheritFrom: 'basic',
     yaml: '''
-apiVersion: v1
-kind: Pod
 spec:
   containers:
-  - name: jnlp
+    name: "jnlp"
     resources:
       limits:
-        memory: "5Gi"
         cpu: "2000m"
+        memory: "5Gi"
       requests:
-        memory: "3Gi"
         cpu: "1000m"
+        memory: "3Gi"
     '''
 ) {
     node {

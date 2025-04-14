@@ -22,7 +22,7 @@ podTemplate(inheritFrom: 'basic', yaml: '''spec:
         cpu: "1000m"
         memory: "3Gi"
 ''') {
-    node {
+    node(POD_LABEL) {
 
         properties([
             disableConcurrentBuilds(abortPrevious: true),

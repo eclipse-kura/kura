@@ -11,10 +11,7 @@ def boolean onlyDocumentationFilesChangedIn(String workDirectory) {
     return changedFiles && changedFiles.every { it.endsWith(".md") || it.endsWith(".txt") }
 }
 
-podTemplate(
-    inheritFrom: 'basic',
-    yaml: '''
-spec:
+podTemplate(inheritFrom: 'basic', yaml: '''spec:
   containers:
   - name: "jnlp"
     resources:
@@ -24,8 +21,7 @@ spec:
       requests:
         cpu: "1000m"
         memory: "3Gi"
-    '''
-) {
+''') {
     node {
 
         properties([

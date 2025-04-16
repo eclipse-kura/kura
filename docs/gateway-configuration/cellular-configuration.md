@@ -70,6 +70,8 @@ When the **Reopen Connection On Termination** is enabled, Kura will keep trying 
 
 So, if the **Connection Attempts** are set to 3 and the **Connection Attempts Retry Delay** to 15s, Kura will try to establish a connection for 3 times every 15s. If it fails, Kura will wait for 45s and restart the process. Be aware that the **Connection Attempts Retry Delay** should be carefully set in order to not prevent a successful connection to the selected APN. Please refer to the cellular connection provider.
 
+The cellular connection is delegated to NetworkManager and ModemManager, therefore Kura has not a direct control of the connection process. In some situations, depending on the status of the modem, the tools don't guarantee the configured number of reconnections and the delay between connection attempts can be higher.
+
 ### GPS
 
 ![](./images/IMG-14-10-2024-11-27-34.png)

@@ -13,46 +13,65 @@
 	 Eurotech
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.eclipse.kura</groupId>
-        <artifactId>kura</artifactId>
-        <version>6.0.0-SNAPSHOT</version>
-    </parent>
-    <artifactId>target-definition</artifactId>
-    <packaging>pom</packaging>
-    <name>Kura Target Definition</name>
-    <properties>
-        <kura.basedir>${project.basedir}/..</kura.basedir>
-    </properties>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>initialize</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <echo 
-                                    file="${project.basedir}/../distrib/build.properties" 
-                                    append="false">kura.build.version=${kura.build.version}</echo>
-                            </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>${maven-site-plugin.version}</version>
-            </plugin>
-        </plugins>
-    </build>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse.kura</groupId>
+		<artifactId>kura</artifactId>
+		<version>6.0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>target-definition</artifactId>
+	<packaging>pom</packaging>
+	<name>Kura Target Definition</name>
+
+	<properties>
+		<kura.basedir>${project.basedir}/..</kura.basedir>
+	</properties>
+
+	<build>
+		<plugins>
+			<!-- 1. Append the two properties files -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<id>merge-properties</id>
+						<phase>initialize</phase>
+						<configuration>
+							<target>
+								<concat
+									destfile="${project.basedir}/resources/merged.properties"
+									fixlastline="true">
+									<fileset
+										file="${project.basedir}/../../target-platform/config/kura.target-platform.build.properties" />
+									<fileset
+										file="${project.basedir}/../distrib/config/kura.build.properties" />
+								</concat>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>${maven-site-plugin.version}</version>
+			</plugin>
+		</plugins>
+	</build>
+
+	<modules>
+		<module>resources</module>
+		<module>kura-target-definition</module>
+	</modules>
 </project>

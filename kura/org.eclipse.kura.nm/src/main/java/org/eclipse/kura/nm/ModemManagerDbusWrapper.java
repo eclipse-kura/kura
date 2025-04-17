@@ -14,18 +14,13 @@ package org.eclipse.kura.nm;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Timer;
 
 import org.eclipse.kura.nm.enums.MMModemLocationSource;
 import org.eclipse.kura.nm.enums.MMModemState;
-import org.eclipse.kura.nm.signal.handlers.NMModemResetHandler;
-import org.eclipse.kura.nm.signal.handlers.NMModemResetTimerTask;
 import org.eclipse.kura.nm.status.SimProperties;
 import org.freedesktop.dbus.DBusPath;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
@@ -49,9 +44,6 @@ public class ModemManagerDbusWrapper {
     private static final String MM_MODEM_PROPERTY_STATE = "State";
 
     private final DBusConnection dbusConnection;
-
-    private final Map<String, NMModemResetHandler> modemHandlers = new HashMap<>();
-    private final Map<String, MMFailedModemResetTimer> failedModemResetTimers = new HashMap<>();
 
     public ModemManagerDbusWrapper(DBusConnection dbusConnection) {
         this.dbusConnection = dbusConnection;
@@ -250,119 +242,4 @@ public class ModemManagerDbusWrapper {
 
     }
 
-    protected void resetHandlerEnable(String deviceId, Optional<String> modemManagerDbusPath, int delayMinutes,
-            String networkManagerDbusPath) throws DBusException {
-        if (!modemManagerDbusPath.isPresent()) {
-            logger.warn("Cannot retrieve modem device for {}. Skipping modem reset monitor setup.", deviceId);
-            return;
-        }
-
-        resetHandlersDisable(deviceId);
-
-        Modem mmModemDevice = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemManagerDbusPath.get(), Modem.class);
-
-        NMModemResetHandler resetHandler = new NMModemResetHandler(networkManagerDbusPath, mmModemDevice,
-                delayMinutes * 60L * 1000L);
-
-        this.modemHandlers.put(deviceId, resetHandler);
-        this.dbusConnection.addSigHandler(org.freedesktop.networkmanager.Device.StateChanged.class, resetHandler);
-    }
-
-    protected void resetHandlersDisable() {
-        for (String deviceId : this.modemHandlers.keySet()) {
-            resetHandlersDisable(deviceId);
-        }
-        this.modemHandlers.clear();
-    }
-
-    protected void resetHandlersDisable(String deviceId) {
-        if (this.modemHandlers.containsKey(deviceId)) {
-            NMModemResetHandler handler = this.modemHandlers.get(deviceId);
-            handler.clearTimer();
-            try {
-                this.dbusConnection.removeSigHandler(org.freedesktop.networkmanager.Device.StateChanged.class, handler);
-            } catch (DBusException e) {
-                logger.warn("Couldn't remove signal handler for: {}. Caused by:", handler.getNMDevicePath(), e);
-            }
-            this.modemHandlers.remove(deviceId);
-        }
-    }
-
-    protected void failedModemResetTimerSchedule(String deviceId, Optional<String> modemManagerDbusPath, int delayMinutes)
-            throws DBusException {
-        if (!modemManagerDbusPath.isPresent()) {
-            logger.warn("Cannot retrieve modem device for {}. Skipping modem reset monitor setup.", deviceId);
-            return;
-        }
-
-        Modem mmModemDevice = this.dbusConnection.getRemoteObject(MM_BUS_NAME, modemManagerDbusPath.get(), Modem.class);
-
-        MMFailedModemResetTimer resetTimer = new MMFailedModemResetTimer(mmModemDevice, delayMinutes);
-        resetTimer.schedule();
-
-        this.failedModemResetTimers.put(deviceId, resetTimer);
-    }
-
-    protected void failedModemResetTimerCancel() {
-        for (String deviceId : this.failedModemResetTimers.keySet()) {
-            failedModemResetTimerCancel(deviceId);
-        }
-        this.modemHandlers.clear();
-    }
-
-    protected void failedModemResetTimerCancel(String deviceId) {
-        if (this.failedModemResetTimers.containsKey(deviceId)) {
-            MMFailedModemResetTimer timer = this.failedModemResetTimers.get(deviceId);
-            timer.cancel();
-        }
-    }
-
-    protected boolean isMMFailedModemResetTimerArmed(String deviceId) {
-        return this.failedModemResetTimers.containsKey(deviceId);
-    }
-
-    private class MMFailedModemResetTimerTask extends NMModemResetTimerTask {
-
-        public MMFailedModemResetTimerTask(Modem modem) {
-            super(modem);
-        }
-
-        @Override
-        public void run() {
-            try {
-                MMModemState modemState = getMMModemState(this.getModemDbusPath());
-                if (MMModemState.MM_MODEM_STATE_FAILED.equals(modemState)) {
-                    super.run();
-                } else {
-                    NMModemResetTimerTask.logger.info("Modem state changed. Reset skipped.");
-                }
-            } catch (DBusException e) {
-                NMModemResetTimerTask.logger.warn("Couldn't get state of modem interface, caused by:", e);
-            }
-        }
-
-    }
-
-    private class MMFailedModemResetTimer {
-
-        private final Timer timer = new Timer("FailedModemResetTimer");
-        private final MMFailedModemResetTimerTask task;
-        private final long delay;
-
-        public MMFailedModemResetTimer(Modem modem, long delayMinutes) {
-            this.delay = delayMinutes * 60L * 1000L;
-            this.task = new MMFailedModemResetTimerTask(modem);
-        }
-
-        public void schedule() {
-            this.timer.schedule(this.task, this.delay);
-        }
-
-        public void cancel() {
-            if (this.task != null) {
-                this.task.cancel();
-            }
-            this.timer.cancel();
-        }
-    }
 }

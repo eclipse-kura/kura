@@ -25,7 +25,7 @@ public final class NetworkConfigurationConstants {
 
     // Modem properties default values
     public static final boolean DEFAULT_MODEM_PERSIST_VALUE = true;
-    public static final int DEFAULT_MODEM_HOLDOFF_VALUE = 1;
+    public static final int DEFAULT_MODEM_HOLDOFF_VALUE = 30;
     public static final int DEFAULT_MODEM_MAXFAIL_VALUE = 5;
     public static final int DEFAULT_MODEM_RESET_TIMEOUT_VALUE = 5;
     public static final int DEFAULT_MODEM_LCP_ECHO_FAILURE_VALUE = 0;

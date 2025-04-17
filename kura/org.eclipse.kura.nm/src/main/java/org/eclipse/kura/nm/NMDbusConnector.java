@@ -55,6 +55,7 @@ import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.Variant;
+import org.freedesktop.modemmanager1.Modem;
 import org.freedesktop.modemmanager1.modem.Location;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
@@ -106,12 +107,14 @@ public class NMDbusConnector {
     private NMDeviceAddedHandler deviceAddedHandler = null;
 
     private boolean configurationEnforcementHandlerIsArmed = false;
+    private ModemTaskManager modemTaskManager;
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.networkManager = new NetworkManagerDbusWrapper(this.dbusConnection);
         this.modemManager = new ModemManagerDbusWrapper(this.dbusConnection);
         this.wpaSupplicant = new WpaSupplicantDbusWrapper(this.dbusConnection);
+        this.modemTaskManager = new ModemTaskManager(this.dbusConnection);
     }
 
     public static synchronized NMDbusConnector getInstance() throws DBusException {
@@ -139,8 +142,8 @@ public class NMDbusConnector {
                 && this.configurationEnforcementHandlerIsArmed;
     }
 
-    protected boolean failedModemResetTimerIsActive(String modemId) {
-        return this.modemManager.isMMFailedModemResetTimerArmed(modemId);
+    protected boolean modemTaskHandlerIsPresent(String deviceId) {
+        return this.modemTaskManager.isModemTaskHandlerPresent(deviceId);
     }
 
     public void checkPermissions() {
@@ -358,7 +361,8 @@ public class NMDbusConnector {
     public synchronized void apply(Map<String, Object> networkConfiguration) throws DBusException {
         try {
             configurationEnforcementDisable();
-            this.modemManager.resetHandlersDisable();
+            // Disable ModemTaskHandler since it is supposed to be a new configuration
+            this.modemTaskManager.modemTaskHandlerDisable();
             doApply(networkConfiguration);
             this.cachedConfiguration = networkConfiguration;
         } finally {
@@ -373,7 +377,6 @@ public class NMDbusConnector {
         }
         try {
             configurationEnforcementDisable();
-            this.modemManager.resetHandlersDisable();
             doApply(this.cachedConfiguration);
         } finally {
             configurationEnforcementEnable();
@@ -390,7 +393,6 @@ public class NMDbusConnector {
         }
         try {
             configurationEnforcementDisable();
-            this.modemManager.resetHandlersDisable(deviceId);
             doApply(deviceId, this.cachedConfiguration);
         } finally {
             configurationEnforcementEnable();
@@ -433,6 +435,7 @@ public class NMDbusConnector {
             if (CONFIGURATION_SUPPORTED_VIRTUAL_DEVICE_TYPES.contains(propertyDeviceType)) {
                 manageConfiguredInterface(Optional.empty(), deviceIdToBeConfigured, properties);
             } else {
+                this.modemTaskManager.modemTaskHandlerDisable(deviceIdToBeConfigured);
                 logger.warn("Can't apply configuration to disconnected or unsupported virtual device "
                         + "\"{}\" of type \"{}\"", deviceIdToBeConfigured, propertyDeviceType);
             }
@@ -561,14 +564,15 @@ public class NMDbusConnector {
             connection = Optional.of(createdConnection);
         }
 
-        boolean activationSucceeded = true;
         try {
-            this.modemManager.failedModemResetTimerCancel(deviceId);
             this.networkManager.activateConnection(connection.get(), device);
             dsLock.waitForSignal();
         } catch (DBusExecutionException e) {
             logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);
-            activationSucceeded = false;
+        }
+
+        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
+            this.modemTaskManager.modemTaskHandlerEnable(deviceId, device, properties);
         }
 
         // Housekeeping
@@ -579,32 +583,6 @@ public class NMDbusConnector {
             }
         }
 
-        if (deviceType == NMDeviceType.NM_DEVICE_TYPE_MODEM) {
-            int delayMinutes = properties.get(Integer.class, "net.interface.%s.config.resetTimeout", deviceId);
-            Optional<String> mmDbusPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
-
-            if (delayMinutes == 0 || !mmDbusPath.isPresent()) {
-                return;
-            }
-
-            this.modemManager.resetHandlerEnable(deviceId, mmDbusPath, delayMinutes, device.getObjectPath());
-
-            // If a modem connection fails at the first try, it stays in the failed state, thus not triggering the usual
-            // modem reset procedure. So, start a reset timer here.
-            if (!activationSucceeded && isModemFailed(mmDbusPath.get())) {
-                logger.info("Modem {} in failed state or unavailable. Scheduling modem reset in {} minutes ...",
-                        device.getObjectPath(), delayMinutes);
-
-                this.modemManager.failedModemResetTimerSchedule(deviceId, mmDbusPath, delayMinutes);
-            }
-
-        }
-
-    }
-
-    private boolean isModemFailed(String mmDbusPath) throws DBusException {
-        MMModemState modemState = this.modemManager.getMMModemState(mmDbusPath);
-        return MMModemState.MM_MODEM_STATE_FAILED.equals(modemState);
     }
 
     private void createVirtualInterface(String deviceId, NetworkProperties properties, NMDeviceType deviceType)
@@ -668,7 +646,7 @@ public class NMDbusConnector {
             logger.warn("Can't disable missing device {}", deviceId);
             return;
         }
-        this.modemManager.failedModemResetTimerCancel(deviceId);
+        this.modemTaskManager.modemTaskHandlerDisable(deviceId);
         Device device = optDevice.get();
         Optional<Connection> appliedConnection = this.networkManager.getAppliedConnection(device);
 
@@ -717,7 +695,7 @@ public class NMDbusConnector {
     public List<Location> getAvailableMMLocations() {
         List<Location> availableLocations = new ArrayList<>();
 
-        this.getModemsPaths().forEach(modemPath -> {
+        this.getNMModemsPaths().forEach(modemPath -> {
             try {
                 Properties locationProperties = this.modemManager
                         .getLocationProperties(this.modemManager.getModemManagerLocation(modemPath));
@@ -738,23 +716,51 @@ public class NMDbusConnector {
 
     }
 
-    private List<String> getModemsPaths() {
+    private List<String> getNMModemsPaths() {
         List<String> modemsPath = new ArrayList<>();
 
         try {
-
             for (Device device : this.networkManager.getAllDevices()) {
-                if (networkManager.getDeviceType(device.getObjectPath()).equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
-                    Optional<String> modemPath = this.networkManager.getModemManagerDbusPath(device.getObjectPath());
-
-                    modemPath.ifPresent(modemsPath::add);
-                }
+                getNMModemPath(device).ifPresent(modemsPath::add);
             }
         } catch (DBusException ex) {
             logger.debug("Impossible to retrieve information regarding available modems");
         }
 
         return modemsPath;
+    }
+
+    private Optional<String> getNMModemPath(Device device) throws DBusException {
+        return this.networkManager.getModemManagerDbusPath(device.getObjectPath());
+    }
+
+    public boolean isModemConnected(Device modemDevice) throws DBusException {
+        Optional<String> mmDbusPath = Optional.empty();
+        try {
+            mmDbusPath = getNMModemPath(modemDevice);
+        } catch (DBusException e) {
+            logger.warn("Could not get ModemManager dbus path for device {} because: ", modemDevice.getObjectPath(), e);
+        }
+
+        if (!mmDbusPath.isPresent()) {
+            return false;
+        }
+        MMModemState modemState = this.modemManager.getMMModemState(mmDbusPath.get());
+        return MMModemState.MM_MODEM_STATE_CONNECTED.equals(modemState);
+    }
+
+    public boolean isConnectionActivated(Device device) throws DBusException {
+        NMDeviceState deviceState = this.networkManager.getDeviceState(device);
+        return NMDeviceState.NM_DEVICE_STATE_ACTIVATED.equals(deviceState);
+    }
+
+    public Optional<Modem> getModem(Device device) throws DBusException {
+        Optional<Modem> modem = Optional.empty();
+        Optional<String> mmDbusPath = getNMModemPath(device);
+        if (mmDbusPath.isPresent()) {
+            modem = Optional.of(this.modemManager.getModem(mmDbusPath.get()));
+        }
+        return modem;
     }
 
 }

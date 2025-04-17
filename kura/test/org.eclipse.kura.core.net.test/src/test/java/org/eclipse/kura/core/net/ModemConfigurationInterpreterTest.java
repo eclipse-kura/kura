@@ -64,7 +64,7 @@ public class ModemConfigurationInterpreterTest {
         expected.setGpsEnabled(false);
         expected.setPersist(true);
         expected.setMaxFail(5);
-        expected.setHoldoff(1);
+        expected.setHoldoff(30);
         expected.setResetTimeout(5);
         expected.setLcpEchoFailure(0);
         expected.setLcpEchoInterval(0);

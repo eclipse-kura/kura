@@ -858,7 +858,7 @@ public class NetworkConfigurationServiceCommonTest {
             }
 
             if (String.format("net.interface.%s.config.holdoff", interfaceName).equals(ad.getId())) {
-                assertEquals(1, Integer.parseInt(ad.getDefault()));
+                assertEquals(30, Integer.parseInt(ad.getDefault()));
                 adsConfigured++;
             }
 

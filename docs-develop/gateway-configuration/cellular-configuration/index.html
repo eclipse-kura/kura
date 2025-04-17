@@ -762,6 +762,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#cellular-automatic-reconnection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cellular automatic reconnection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#gps" class="md-nav__link">
     <span class="md-ellipsis">
       GPS
@@ -4566,6 +4575,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#cellular-automatic-reconnection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cellular automatic reconnection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#gps" class="md-nav__link">
     <span class="md-ellipsis">
       GPS
@@ -4596,7 +4614,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 
 <h1 id="cellular-configuration">Cellular Configuration</h1>
-<p>If it is not configured, the cellular interface is presented on the interface list by modem USB address (i.e. 2-1). This 'fake' interface name is completed by 'proper' interface name (e.g., ppp0) when the first modem configuration is submitted.</p>
+<p>If it is not configured, the cellular interface is presented on the interface list by modem USB address (i.e. 2-1). This 'fake' interface name is completed by 'proper' interface name (e.g.  ppp0, wwan0,...) when the first modem configuration is submitted.</p>
 <p>The cellular interface should be configured by first enabling it in the <strong>IPv4</strong> or <strong>IPv6</strong> tab, and then setting the <strong>Cellular</strong> tab. Note that the cellular interface can only be set as <em>WAN using DHCP</em>, <em>Disabled</em> or <em>Not Managed</em> (only for IPv4 connections). The cellular interface configuration options are described below.</p>
 <h2 id="cellular-configuration_1">Cellular Configuration</h2>
 <p>The <strong>Cellular</strong> tab contains the following configuration parameters:</p>
@@ -4656,15 +4674,30 @@ configured.</p>
 <p><strong>Password</strong>: supplies the password; disabled if no authentication method is specified.</p>
 </li>
 <li>
-<p><strong>Modem Reset Timeout</strong>: sets the modem reset timeout in minutes. If set to a non-zero value, the modem is reset after n consecutive minutes of unsuccessful connection attempts. If set to zero, the modem keeps trying to establish a PPP connection without resetting. The default value is 5 minutes.</p>
+<p><strong>Modem Reset Timeout</strong>: sets the modem reset timeout in minutes. If set to a non-zero value, the modem is reset after n consecutive minutes of unsuccessful connection attempts. If set to zero, the modem keeps trying to establish a connection without resetting. The default value is 5 minutes.</p>
 </li>
 <li>
-<p><strong>LCP Echo Interval</strong>: sets the <em>lcp-echo-interval</em> option of the PPP daemon. If set to a positive number, the modem sends LCP echo request to the peer at the specified number of seconds. To disable this option, set it to zero. This option may be used with the <em>lcp-echo-failure</em> option to detect that the peer is no longer connected.</p>
+<p><strong>Reopen Connection On Termination</strong>: specifies if the modem should retry to establish a connection after it is terminated. If set to true, the modem will keep trying to establish a connection. The <strong>Connection Attempts Retry Delay</strong> and <strong>Connection Attempts</strong> options are used only if this parameter is set to true.</p>
 </li>
 <li>
-<p><strong>LCP Echo Failure</strong>: sets the <em>lcp-echo-failure</em> option of the PPP daemon. If set to a positive number, the modem presumes the peer to be dead if a specified number of LCP echo-requests are sent without receiving a valid LCP echo-reply. To disable this option, set it to zero.</p>
+<p><strong>Connection Attempts Retry Delay</strong>: sets the delay in seconds between connection attempts, if the <strong>Reopen Connection On Termination</strong> option is enabled. The default value is 30 seconds.</p>
+</li>
+<li>
+<p><strong>Connection Attempts</strong>: sets the maximum number of consecutive modem connection attempts, if the <strong>Reopen Connection On Termination</strong> option is enabled. The default value is 5 connection attempts. A value of 0 means no limit. When the connection attempts are exhausted, the process will be restarted after a grace period.</p>
+</li>
+<li>
+<p><strong>LCP Echo Interval</strong>: when a PPP connection is used, sets the <em>lcp-echo-interval</em> option of the PPP daemon. If set to a positive number, the modem sends LCP echo request to the peer at the specified number of seconds. To disable this option, set it to zero. This option may be used with the <em>lcp-echo-failure</em> option to detect that the peer is no longer connected.</p>
+</li>
+<li>
+<p><strong>LCP Echo Failure</strong>: when a PPP connection is used, sets the <em>lcp-echo-failure</em> option of the PPP daemon. If set to a positive number, the modem presumes the peer to be dead if a specified number of LCP echo-requests are sent without receiving a valid LCP echo-reply. To disable this option, set it to zero.</p>
 </li>
 </ul>
+<h4 id="cellular-automatic-reconnection">Cellular automatic reconnection</h4>
+<p>When the <strong>Reopen Connection On Termination</strong> is enabled, Kura will keep trying to establish a cellular connection if it is unsuccessful or terminated. The <strong>Connection Attempts Retry Delay</strong> option specifies the time interval between consecutive connection attempts, while the <strong>Connection Attempts</strong> specifies the maximum number of attempts before giving up. If the maximum attempts limit is reached, Kura will restart the process after a grace time. The number of attempts and the delay determines the grace time with the following formula:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>&quot;Grace Time&quot; = &quot;Connection Attempts Retry Delay&quot; x &quot;Connection Attempts&quot; [s]
+</code></pre></div>
+<p>So, if the <strong>Connection Attempts</strong> are set to 3 and the <strong>Connection Attempts Retry Delay</strong> to 15s, Kura will try to establish a connection for 3 times every 15s. If it fails, Kura will wait for 45s and restart the process. Be aware that the <strong>Connection Attempts Retry Delay</strong> should be carefully set in order to not prevent a successful connection to the selected APN. Please refer to the cellular connection provider.</p>
+<p>The cellular connection is delegated to NetworkManager and ModemManager, therefore Kura has not a direct control of the connection process. In some situations, depending on the status of the modem, the tools don't guarantee the configured number of reconnections and the delay between connection attempts can be higher.</p>
 <h3 id="gps">GPS</h3>
 <p><img alt="" src="../images/IMG-14-10-2024-11-27-34.png" /></p>
 <p>The <strong>GPS</strong> tab allows the user to enable or disable the GPS module provided by the cellular modem. The available properties are:</p>

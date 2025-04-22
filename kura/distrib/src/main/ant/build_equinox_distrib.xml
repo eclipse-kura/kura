@@ -250,7 +250,6 @@
             property="linux.gpio.jar.present" />
         <antcall target="gpio-plugins" />
         <antcall target="emulator-gpio-plugins" />
-        <antcall target="emulator-plugins" />
         <antcall target="linux-network-plugins" />
 
         <propertyfile
@@ -2161,21 +2160,6 @@ fi]]>
             <param name="bundle.version" value="${org.eclipse.kura.broker.artemis.xml.version}" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
-        </antcall>
-    </target>
-
-    <target name="emulator-plugins" if="is.nn">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.emulator" />
-            <param name="bundle.version" value="${org.eclipse.kura.emulator.version}" />
-            <param name="start.level" value="4" />
-            <param name="start" value="" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.emulator.net" />
-            <param name="bundle.version" value="${org.eclipse.kura.emulator.net.version}" />
-            <param name="start.level" value="4" />
-            <param name="start" value="" />
         </antcall>
     </target>
 

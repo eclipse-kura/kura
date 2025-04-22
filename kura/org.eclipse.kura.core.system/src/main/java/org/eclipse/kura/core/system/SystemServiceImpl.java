@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,9 +19,11 @@ import static java.util.Objects.isNull;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.InetAddress;
@@ -29,6 +31,10 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -37,6 +43,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.StringJoiner;
@@ -44,15 +51,11 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
-import org.eclipse.kura.net.NetInterface;
-import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceStatus;
-import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.system.ExtendedProperties;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemResourceType;
@@ -65,6 +68,7 @@ import org.slf4j.LoggerFactory;
 
 public class SystemServiceImpl extends SuperSystemService implements SystemService {
 
+    private static final String SYS_CLASS_NET = "/sys/class/net/";
     private static final Logger logger = LoggerFactory.getLogger(SystemServiceImpl.class);
     private static final String PROPERTY_PROVIDER_SUFFIX = ".provider";
     private static final String DMIDECODE_COMMAND = "dmidecode -t system";
@@ -83,23 +87,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     private Properties kuraProperties;
     private ComponentContext componentContext;
 
-    private NetworkService networkService;
     private CommandExecutorService executorService;
 
     private String primaryInterfaceMacAddress;
-
-    // ----------------------------------------------------------------
-    //
-    // Dependencies
-    //
-    // ----------------------------------------------------------------
-    public void setNetworkService(NetworkService networkService) {
-        this.networkService = networkService;
-    }
-
-    public void unsetNetworkService(NetworkService networkService) {
-        this.networkService = null;
-    }
 
     public void setExecutorService(CommandExecutorService executorService) {
         this.executorService = executorService;
@@ -630,20 +620,35 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             return this.primaryInterfaceMacAddress;
         }
 
-        List<NetInterface<? extends NetInterfaceAddress>> interfaces = null;
         try {
-            interfaces = this.networkService.getNetworkInterfaces();
-        } catch (KuraException e) {
-            logger.error("Failed to get network interfaces", e);
+            Optional<File> interfaceSysfsDir = Optional.empty();
+
+            try (final DirectoryStream<Path> s = Files.newDirectoryStream(new File(SYS_CLASS_NET).toPath())) {
+
+                for (final Path p : s) {
+                    final File file = p.toFile();
+
+                    if (Objects.equals(primaryNetworkInterfaceName, file.getName().split("@")[0])) {
+                        interfaceSysfsDir = Optional.of(file);
+                        break;
+                    }
+                }
+            }
+
+            if (!interfaceSysfsDir.isPresent()) {
+                logger.error("Failed to find primary network interface");
+                return null;
+            }
+
+            try (final FileInputStream in = new FileInputStream(new File(interfaceSysfsDir.get(), "address"));
+                    final BufferedReader r = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
+
+                this.primaryInterfaceMacAddress = r.readLine().trim().toUpperCase();
+            }
+
+        } catch (final Exception e) {
+            logger.error("Failed to get network interface address", e);
             return null;
-        }
-
-        Optional<NetInterface<? extends NetInterfaceAddress>> primaryInterface = interfaces.stream()
-                .filter(iface -> !isNull(iface.getName()))
-                .filter(iface -> primaryNetworkInterfaceName.equals(iface.getName().split("@")[0])).findFirst();
-
-        if (primaryInterface.isPresent()) {
-            this.primaryInterfaceMacAddress = hardwareAddressToString(primaryInterface.get().getHardwareAddress());
         }
 
         return this.primaryInterfaceMacAddress;

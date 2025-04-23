@@ -30,8 +30,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import jakarta.servlet.http.HttpSession;
-
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.eclipse.kura.asset.Asset;
@@ -48,17 +46,22 @@ import org.eclipse.kura.web.server.util.GwtComponentServiceInternal;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceConsumer;
+import org.eclipse.kura.web.server.util.GwtWireAssetConstants;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtChannelOperationResult;
 import org.eclipse.kura.web.shared.model.GwtChannelRecord;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
+import org.eclipse.kura.web.shared.model.GwtDriversAndAssetsInfo;
+import org.eclipse.kura.web.shared.model.GwtSupportedFeatures;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDriverAndAssetService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+
+import jakarta.servlet.http.HttpSession;
 
 public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet implements GwtDriverAndAssetService {
 
@@ -67,6 +70,12 @@ public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet imple
     private static final Decoder BASE64_DECODER = Base64.getDecoder();
     private static final Encoder BASE64_ENCODER = Base64.getEncoder();
     private static final AtomicInteger nextId = new AtomicInteger();
+
+    private final GwtSupportedFeatures supportedFeatures;
+
+    public GwtDriverAndAssetServiceImpl(final GwtSupportedFeatures supportedFeatures) {
+        this.supportedFeatures = supportedFeatures;
+    }
 
     @Override
     public GwtChannelOperationResult readAllChannels(GwtXSRFToken xsrfToken, String assetPid) throws GwtKuraException {
@@ -388,5 +397,51 @@ public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet imple
                 || GwtServerUtil.providesService(kuraServicePid, Asset.class))) {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
         }
+    }
+
+    @Override
+    public GwtDriversAndAssetsInfo getDriverAndAssetInfo(GwtXSRFToken token) throws GwtKuraException {
+        checkXSRFToken(token);
+
+        final GwtDriversAndAssetsInfo result = new GwtDriversAndAssetsInfo();
+
+        final List<GwtConfigComponent> componentDefinitions = new ArrayList<>();
+        final List<GwtConfigComponent> driverDescriptors = new ArrayList<>();
+
+        GwtServerUtil.fillDriverDefinitions(componentDefinitions);
+        GwtServerUtil.fillDriverDescriptors(driverDescriptors);
+
+        final List<String> allActivePids = new ArrayList<>();
+
+        ServiceLocator.withAllServiceReferences("(" + KURA_SERVICE_PID + "=*)", (r, c) -> {
+            final Object kuraServicePid = r.getProperty(KURA_SERVICE_PID);
+
+            if (kuraServicePid instanceof String) {
+                allActivePids.add((String) kuraServicePid);
+            }
+        });
+
+        final List<GwtConfigComponent> componentConfigurations = GwtComponentServiceInternal
+                .findComponentConfigurations(
+                        "(|(objectClass=" + Driver.class.getName() + ")(objectClass=" + Asset.class.getName() + "))");
+
+        if (supportedFeatures.isAssetAvailable()) {
+            result.setBaseChannelDescriptor(GwtWireAssetConstants.WIRE_ASSET_CHANNEL_DESCRIPTOR);
+            componentDefinitions.add(GwtWireAssetConstants.WIRE_ASSET_OCD);
+        }
+
+        result.setComponentDefinitions(componentDefinitions);
+        result.setDriverDescriptors(driverDescriptors);
+        result.setComponentConfigurations(componentConfigurations);
+        result.setAllActivePids(allActivePids);
+
+        return result;
+    }
+
+    @Override
+    public GwtConfigComponent getChannelDescriptor(GwtXSRFToken token, String driverPid) throws GwtKuraException {
+        checkXSRFToken(token);
+
+        return GwtServerUtil.getChannelDescriptor(driverPid);
     }
 }

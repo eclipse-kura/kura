@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,7 @@ import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtChannelOperationResult;
 import org.eclipse.kura.web.shared.model.GwtChannelRecord;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtDriversAndAssetsInfo;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -63,4 +64,10 @@ public interface GwtDriverAndAssetService extends RemoteService {
     @Audit(componentName = "UI Asset", description = "Delete driver or asset configuration")
     public void deleteDriverOrAssetConfiguration(GwtXSRFToken token, String pid, boolean takeSnapshot)
             throws GwtKuraException;
+
+    @Audit(componentName = "UI Asset", description = "Get driver and asset configurations")
+    public GwtDriversAndAssetsInfo getDriverAndAssetInfo(GwtXSRFToken token) throws GwtKuraException;
+
+    @Audit(componentName = "UI Asset", description = "Get driver channel descriptor")
+    public GwtConfigComponent getChannelDescriptor(GwtXSRFToken token, final String driverPid) throws GwtKuraException;
 }

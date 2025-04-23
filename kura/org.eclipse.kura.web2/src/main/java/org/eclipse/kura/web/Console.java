@@ -66,6 +66,7 @@ import org.eclipse.kura.web.server.servlet.SkinServlet;
 import org.eclipse.kura.web.server.servlet.SslAuthenticationServlet;
 import org.eclipse.kura.web.server.servlet.WiresBlinkServlet;
 import org.eclipse.kura.web.server.servlet.WiresSnapshotServlet;
+import org.eclipse.kura.web.server.util.GwtFeatureUtil;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.session.BaseSecurityHandler;
@@ -76,6 +77,7 @@ import org.eclipse.kura.web.session.SecurityHandler;
 import org.eclipse.kura.web.session.SessionAutorizationSecurityHandler;
 import org.eclipse.kura.web.session.SessionExpirationSecurityHandler;
 import org.eclipse.kura.web.session.SessionLockedSecurityHandler;
+import org.eclipse.kura.web.shared.model.GwtSupportedFeatures;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
@@ -455,6 +457,8 @@ public class Console implements SelfConfiguringComponent {
 
     private synchronized void initResourcesAndServlets() {
 
+        final GwtSupportedFeatures supportedFeatures = GwtFeatureUtil.getSupportedFeatures();
+
         this.eventService = new GwtEventServiceImpl();
         this.wiresBlinkService = new WiresBlinkServlet();
 
@@ -521,18 +525,24 @@ public class Console implements SelfConfiguringComponent {
         registerServlet("fileServlet", DENALI_MODULE_PATH + "/file/*", new FileServlet(), sessionContextName);
         registerServlet("deviceSnapshotsServlet", DENALI_MODULE_PATH + "/device_snapshots",
                 new DeviceSnapshotsServlet(), sessionContextName);
-        registerServlet("channelServlet", DENALI_MODULE_PATH + "/assetsUpDownload", new ChannelServlet(),
-                sessionContextName);
+        if (supportedFeatures.isAssetAvailable()) {
+            registerServlet("channelServlet", DENALI_MODULE_PATH + "/assetsUpDownload", new ChannelServlet(),
+                    sessionContextName);
+        }
         registerServlet("logServlet", DENALI_MODULE_PATH + "/log", new LogServlet(), sessionContextName);
         registerServlet("skinServlet", DENALI_MODULE_PATH + "/skin/*", new SkinServlet(), resourceContextName);
         registerServlet("cloudServices", DENALI_MODULE_PATH + "/cloudservices", new GwtCloudConnectionServiceImpl(),
                 sessionContextName);
-        registerServlet("wireGraphService", DENALI_MODULE_PATH + "/wires", new GwtWireGraphServiceImpl(),
-                sessionContextName);
-        registerServlet("wiresSnapshotServlet", DENALI_MODULE_PATH + "/wiresSnapshot", new WiresSnapshotServlet(),
-                sessionContextName);
-        registerServlet("driverAndAssetService", DENALI_MODULE_PATH + "/assetservices",
-                new GwtDriverAndAssetServiceImpl(), sessionContextName);
+        if (supportedFeatures.areWiresServicesAvailable()) {
+            registerServlet("wireGraphService", DENALI_MODULE_PATH + "/wires",
+                    new GwtWireGraphServiceImpl(supportedFeatures), sessionContextName);
+            registerServlet("wiresSnapshotServlet", DENALI_MODULE_PATH + "/wiresSnapshot", new WiresSnapshotServlet(),
+                    sessionContextName);
+        }
+        if (supportedFeatures.areDriverServicesAvailable()) {
+            registerServlet("driverAndAssetService", DENALI_MODULE_PATH + "/assetservices",
+                    new GwtDriverAndAssetServiceImpl(supportedFeatures), sessionContextName);
+        }
         registerServlet("wiresBlinkService", ADMIN_ROOT + "/sse", this.wiresBlinkService, sessionContextName);
         registerServlet("eventService", DENALI_MODULE_PATH + EVENT_PATH, this.eventService, sessionContextName);
 

@@ -29,23 +29,20 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Icon;
 import org.eclipse.kura.configuration.metatype.OCD;
+import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.driver.descriptor.DriverDescriptor;
+import org.eclipse.kura.driver.descriptor.DriverDescriptorService;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.rest.configuration.api.ComponentConfigurationList;
 import org.eclipse.kura.rest.configuration.api.DTOUtil;
@@ -76,6 +73,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * The Class GwtServerUtil is an utility class required for Kura Server
@@ -122,35 +123,35 @@ public final class GwtServerUtil {
         } else if (strValue != null && !strValue.trim().isEmpty()) {
             final String trimmedValue = strValue.trim();
             switch (gwtType) {
-                case LONG:
-                    objValue = Long.parseLong(trimmedValue);
-                    break;
-                case DOUBLE:
-                    objValue = Double.parseDouble(trimmedValue);
-                    break;
-                case FLOAT:
-                    objValue = Float.parseFloat(trimmedValue);
-                    break;
-                case INTEGER:
-                    objValue = Integer.parseInt(trimmedValue);
-                    break;
-                case SHORT:
-                    objValue = Short.parseShort(trimmedValue);
-                    break;
-                case BYTE:
-                    objValue = Byte.parseByte(trimmedValue);
-                    break;
-                case BOOLEAN:
-                    objValue = Boolean.parseBoolean(trimmedValue);
-                    break;
-                case PASSWORD:
-                    objValue = new Password(trimmedValue);
-                    break;
-                case CHAR:
-                    objValue = Character.valueOf(trimmedValue.charAt(0));
-                    break;
-                default:
-                    break;
+            case LONG:
+                objValue = Long.parseLong(trimmedValue);
+                break;
+            case DOUBLE:
+                objValue = Double.parseDouble(trimmedValue);
+                break;
+            case FLOAT:
+                objValue = Float.parseFloat(trimmedValue);
+                break;
+            case INTEGER:
+                objValue = Integer.parseInt(trimmedValue);
+                break;
+            case SHORT:
+                objValue = Short.parseShort(trimmedValue);
+                break;
+            case BYTE:
+                objValue = Byte.parseByte(trimmedValue);
+                break;
+            case BOOLEAN:
+                objValue = Boolean.parseBoolean(trimmedValue);
+                break;
+            case PASSWORD:
+                objValue = new Password(trimmedValue);
+                break;
+            case CHAR:
+                objValue = Character.valueOf(trimmedValue.charAt(0));
+                break;
+            default:
+                break;
             }
         }
         return objValue;
@@ -163,87 +164,87 @@ public final class GwtServerUtil {
         List<String> trimmedValues = Stream.of(defaultValues).map(String::trim).collect(Collectors.toList());
 
         switch (type) {
-            case BOOLEAN:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(Boolean.valueOf(value));
-                    }
+        case BOOLEAN:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(Boolean.valueOf(value));
                 }
-                return values.toArray(new Boolean[] {});
+            }
+            return values.toArray(new Boolean[] {});
 
-            case BYTE:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(Byte.valueOf(value));
-                    }
+        case BYTE:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(Byte.valueOf(value));
                 }
-                return values.toArray(new Byte[] {});
+            }
+            return values.toArray(new Byte[] {});
 
-            case CHAR:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(new Character(value.charAt(0)));
-                    }
+        case CHAR:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(new Character(value.charAt(0)));
                 }
-                return values.toArray(new Character[] {});
+            }
+            return values.toArray(new Character[] {});
 
-            case DOUBLE:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(Double.valueOf(value));
-                    }
+        case DOUBLE:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(Double.valueOf(value));
                 }
-                return values.toArray(new Double[] {});
+            }
+            return values.toArray(new Double[] {});
 
-            case FLOAT:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(Float.valueOf(value));
-                    }
+        case FLOAT:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(Float.valueOf(value));
                 }
-                return values.toArray(new Float[] {});
+            }
+            return values.toArray(new Float[] {});
 
-            case INTEGER:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(Integer.valueOf(value));
-                    }
+        case INTEGER:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(Integer.valueOf(value));
                 }
-                return values.toArray(new Integer[] {});
+            }
+            return values.toArray(new Integer[] {});
 
-            case LONG:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(Long.valueOf(value));
-                    }
+        case LONG:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(Long.valueOf(value));
                 }
-                return values.toArray(new Long[] {});
+            }
+            return values.toArray(new Long[] {});
 
-            case SHORT:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(Short.valueOf(value));
-                    }
+        case SHORT:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(Short.valueOf(value));
                 }
-                return values.toArray(new Short[] {});
+            }
+            return values.toArray(new Short[] {});
 
-            case PASSWORD:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(new Password(value));
-                    }
+        case PASSWORD:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(new Password(value));
                 }
-                return values.toArray(new Password[] {});
+            }
+            return values.toArray(new Password[] {});
 
-            case STRING:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(value);
-                    }
+        case STRING:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(value);
                 }
-                return values.toArray(new String[] {});
-            default:
-                return null;
+            }
+            return values.toArray(new String[] {});
+        default:
+            return null;
         }
     }
 
@@ -807,5 +808,45 @@ public final class GwtServerUtil {
 
     public static String getSessionIdHash(final HttpSession session) {
         return Integer.toUnsignedString(Objects.hash(session.getId()));
+    }
+
+    public static void fillDriverDefinitions(List<GwtConfigComponent> resultDefinitions) throws GwtKuraException {
+        ServiceLocator.applyToServiceOptionally(OCDService.class, ocdService -> {
+
+            for (ComponentConfiguration config : ocdService.getServiceProviderOCDs("org.eclipse.kura.driver.Driver")) {
+                final GwtConfigComponent descriptor = GwtServerUtil.toGwtConfigComponent(config);
+                if (descriptor != null) {
+                    descriptor.setIsDriver(true);
+                    resultDefinitions.add(descriptor);
+                }
+            }
+            return (Void) null;
+        });
+    }
+
+    public static void fillDriverDescriptors(List<GwtConfigComponent> resultDescriptors) throws GwtKuraException {
+
+        ServiceLocator.applyToServiceOptionally(DriverDescriptorService.class, driverDescriptorService -> {
+
+            if (driverDescriptorService != null) {
+                driverDescriptorService.listDriverDescriptors().stream().map(GwtServerUtil::toGwtConfigComponent)
+                        .filter(Objects::nonNull).forEach(resultDescriptors::add);
+            }
+            return (Void) null;
+        });
+    }
+
+    public static GwtConfigComponent getChannelDescriptor(final String driverPid) throws GwtKuraException {
+        final DriverDescriptorService driverDescriptorService = ServiceLocator.getInstance()
+                .getService(DriverDescriptorService.class);
+
+        Optional<DriverDescriptor> driverDescriptorOptional = driverDescriptorService.getDriverDescriptor(driverPid);
+
+        if (driverDescriptorOptional.isPresent()) {
+            DriverDescriptor driverDescriptor = driverDescriptorOptional.get();
+            return toGwtConfigComponent(driverDescriptor);
+        } else {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -53,9 +54,10 @@ import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.service.GwtWireGraphService;
+import org.eclipse.kura.wire.WireComponent;
+import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireHelperService;
-import org.eclipse.kura.wire.graph.WireComponentDefinition;
-import org.eclipse.kura.wire.graph.WireComponentDefinitionService;
+import org.eclipse.kura.wire.WireReceiver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
@@ -253,9 +255,21 @@ public class GwtComponentServiceInternal {
     }
 
     private static List<String> findWireComponents() throws GwtKuraException {
-        return ServiceLocator.applyToServiceOptionally(WireComponentDefinitionService.class,
-                wireComponentDefinitionService -> wireComponentDefinitionService.getComponentDefinitions().stream()
-                        .map(WireComponentDefinition::getFactoryPid).collect(Collectors.toList()));
+        final Set<String> wiresInterfaces = new HashSet<>(Arrays.asList(WireEmitter.class.getName(),
+                WireReceiver.class.getName(), WireComponent.class.getName()));
+
+        return ServiceLocator.applyToServiceOptionally(ServiceComponentRuntime.class,
+                scr -> scr.getComponentDescriptionDTOs().stream().filter(dto -> {
+
+                    for (String s : dto.serviceInterfaces) {
+                        if (wiresInterfaces.contains(s)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }).map(dto -> dto.name).collect(Collectors.toList()));
+
     }
 
     private static List<String> findFactoryHideComponents() throws GwtKuraException {
@@ -484,8 +498,20 @@ public class GwtComponentServiceInternal {
             throws GwtKuraException {
         final GwtConfigComponent gwtConfig = createMetatypeOnlyGwtComponentConfigurationInternal(config);
         if (gwtConfig != null) {
-            gwtConfig.setIsWireComponent(ServiceLocator.applyToServiceOptionally(WireHelperService.class,
-                    wireHelperService -> wireHelperService.getServicePid(gwtConfig.getComponentName()) != null));
+
+            boolean isWireComponent;
+
+            final BundleContext bundleContext = FrameworkUtil.getBundle(GwtComponentServiceInternal.class)
+                    .getBundleContext();
+
+            try {
+                isWireComponent = !bundleContext.getServiceReferences(WireComponent.class,
+                        "(kura.service.pid=" + gwtConfig.getComponentName() + ")").isEmpty();
+            } catch (InvalidSyntaxException e) {
+                isWireComponent = false;
+            }
+
+            gwtConfig.setIsWireComponent(isWireComponent);
         }
         return gwtConfig;
     }

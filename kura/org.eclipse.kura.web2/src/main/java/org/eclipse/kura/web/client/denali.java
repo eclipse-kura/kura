@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -135,8 +135,8 @@ public class denali implements EntryPoint {
 
                                             @Override
                                             public void onSuccess(GwtSupportedFeatures supportedFeatures) {
-                                                EntryClassUi entryUi = new EntryClassUi(userConfig, securityCapabilities, gwtSession,
-                                                        supportedFeatures);
+                                                EntryClassUi entryUi = new EntryClassUi(userConfig,
+                                                        securityCapabilities, gwtSession, supportedFeatures);
                                                 RootPanel.get().add(entryUi);
                                                 entryUi.init();
                                             }

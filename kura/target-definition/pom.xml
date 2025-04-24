@@ -69,9 +69,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<modules>
-		<module>resources</module>
-		<module>kura-target-definition</module>
-	</modules>
 </project>

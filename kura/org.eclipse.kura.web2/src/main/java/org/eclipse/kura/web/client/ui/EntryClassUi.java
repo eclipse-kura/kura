@@ -228,7 +228,7 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
     private static PopupPanel waitModal;
 
     private final StatusPanelUi statusBinder = GWT.create(StatusPanelUi.class);
-    private final DevicePanelUi deviceBinder = GWT.create(DevicePanelUi.class);
+    private final DevicePanelUi deviceBinder;
     private final PackagesPanelUi packagesBinder = GWT.create(PackagesPanelUi.class);
     private final SettingsPanelUi settingsBinder = GWT.create(SettingsPanelUi.class);
     private final SecurityPanelUi securityBinder;
@@ -294,6 +294,7 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
         this.securityCapabilities = securityCapabilities;
         this.securityBinder = new SecurityPanelUi(gwtUserData, securityCapabilities);
         this.driversAndTwinsBinder = new DriversAndAssetsUi(supportedFeatures);
+        this.deviceBinder = new DevicePanelUi(supportedFeatures);
 
         setFooter(session);
         initSystemPanel(session, supportedFeatures);

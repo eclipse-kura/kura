@@ -505,7 +505,7 @@ public class Console implements SelfConfiguringComponent {
                 sessionContextName);
         registerServlet("statusService", DENALI_MODULE_PATH + "/status", new GwtStatusServiceImpl(),
                 sessionContextName);
-        registerServlet("deviceService", DENALI_MODULE_PATH + "/device", new GwtDeviceServiceImpl(),
+        registerServlet("deviceService", DENALI_MODULE_PATH + "/device", new GwtDeviceServiceImpl(supportedFeatures),
                 sessionContextName);
         registerServlet("logService", DENALI_MODULE_PATH + "/logservice", new GwtLogServiceImpl(), sessionContextName);
         registerServlet("networkService", DENALI_MODULE_PATH + "/network", new GwtNetworkServiceImpl(),
@@ -522,7 +522,8 @@ public class Console implements SelfConfiguringComponent {
                 sessionContextName);
         registerServlet("usersService", DENALI_MODULE_PATH + "/users", new GwtUserServiceImpl(this.userManager),
                 sessionContextName);
-        registerServlet("fileServlet", DENALI_MODULE_PATH + "/file/*", new FileServlet(), sessionContextName);
+        registerServlet("fileServlet", DENALI_MODULE_PATH + "/file/*", new FileServlet(supportedFeatures),
+                sessionContextName);
         registerServlet("deviceSnapshotsServlet", DENALI_MODULE_PATH + "/device_snapshots",
                 new DeviceSnapshotsServlet(), sessionContextName);
         if (supportedFeatures.isAssetAvailable()) {

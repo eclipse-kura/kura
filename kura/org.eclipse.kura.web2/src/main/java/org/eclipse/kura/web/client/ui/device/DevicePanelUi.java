@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -17,6 +17,7 @@ import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtSupportedFeatures;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
@@ -59,6 +60,8 @@ public class DevicePanelUi extends Composite {
     TabListItem systemProperties;
     @UiField
     TabListItem containers;
+    @UiField
+    TabListItem command;
 
     @UiField
     ProfileTabUi profilePanel;
@@ -77,7 +80,7 @@ public class DevicePanelUi extends Composite {
     @UiField
     DockerContainersTabUi dockerContainersPanel;
 
-    public DevicePanelUi() {
+    public DevicePanelUi(final GwtSupportedFeatures supportedFeatures) {
         initWidget(uiBinder.createAndBindUi(this));
         this.deviceIntro.add(new Span("<p>" + MSGS.deviceIntro() + "</p"));
 
@@ -89,6 +92,10 @@ public class DevicePanelUi extends Composite {
         this.containers.addClickHandler(new Tab.RefreshHandler(this.dockerContainersPanel));
 
         this.containers.setVisible(false); // hidden by default
+
+        this.command.setVisible(supportedFeatures.isCommandServiceAvailable());
+        this.commandPanel.setVisible(supportedFeatures.isCommandServiceAvailable());
+
     }
 
     public void initDevicePanel() {

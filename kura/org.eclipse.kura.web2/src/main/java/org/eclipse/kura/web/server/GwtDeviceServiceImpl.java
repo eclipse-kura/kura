@@ -32,7 +32,6 @@ import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemService;
-import org.eclipse.kura.web.server.util.GwtFeatureUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -64,6 +63,12 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
     private static final String KURA_MODE = "org.eclipse.kura.mode";
     private static final String EMULATOR = "emulator";
+
+    private final GwtSupportedFeatures supportedFeatures;
+
+    public GwtDeviceServiceImpl(final GwtSupportedFeatures supportedFeatures) {
+        this.supportedFeatures = supportedFeatures;
+    }
 
     @Override
     public List<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException {
@@ -597,7 +602,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public GwtSupportedFeatures getSupportedFeatures(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        return GwtFeatureUtil.getSupportedFeatures();
+        return supportedFeatures;
     }
 }
 

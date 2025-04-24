@@ -619,6 +619,9 @@ public class NMDbusConnectorTest {
         givenNetworkConfigMapWith("net.interface.1-5.config.apn", "myAwesomeAPN");
         givenNetworkConfigMapWith("net.interface.1-5.config.gpsEnabled", false);
         givenNetworkConfigMapWith("net.interface.1-5.config.resetTimeout", 0);
+        givenNetworkConfigMapWith("net.interface.1-5.config.persist", false);
+        givenNetworkConfigMapWith("net.interface.1-5.config.holdoff", 15);
+        givenNetworkConfigMapWith("net.interface.1-5.config.maxFail", 3);
 
         whenApplyIsCalledWith(this.netConfig);
 
@@ -641,6 +644,9 @@ public class NMDbusConnectorTest {
         givenNetworkConfigMapWith("net.interface.1-5.config.apn", "myAwesomeAPN");
         givenNetworkConfigMapWith("net.interface.1-5.config.gpsEnabled", true);
         givenNetworkConfigMapWith("net.interface.1-5.config.resetTimeout", 0);
+        givenNetworkConfigMapWith("net.interface.1-5.config.persist", false);
+        givenNetworkConfigMapWith("net.interface.1-5.config.holdoff", 15);
+        givenNetworkConfigMapWith("net.interface.1-5.config.maxFail", 3);
 
         whenApplyIsCalledWith(this.netConfig);
 
@@ -666,6 +672,9 @@ public class NMDbusConnectorTest {
         givenNetworkConfigMapWith("net.interface.1-5.config.gpsEnabled", true);
         givenNetworkConfigMapWith("net.interface.1-5.config.gpsMode", "kuraModemGpsModeUnmanaged");
         givenNetworkConfigMapWith("net.interface.1-5.config.resetTimeout", 0);
+        givenNetworkConfigMapWith("net.interface.1-5.config.persist", false);
+        givenNetworkConfigMapWith("net.interface.1-5.config.holdoff", 15);
+        givenNetworkConfigMapWith("net.interface.1-5.config.maxFail", 3);
 
         whenApplyIsCalledWith(this.netConfig);
 
@@ -691,6 +700,9 @@ public class NMDbusConnectorTest {
         givenNetworkConfigMapWith("net.interface.1-5.config.gpsEnabled", true);
         givenNetworkConfigMapWith("net.interface.1-5.config.gpsMode", "kuraModemGpsModeManagedGps");
         givenNetworkConfigMapWith("net.interface.1-5.config.resetTimeout", 0);
+        givenNetworkConfigMapWith("net.interface.1-5.config.persist", false);
+        givenNetworkConfigMapWith("net.interface.1-5.config.holdoff", 15);
+        givenNetworkConfigMapWith("net.interface.1-5.config.maxFail", 3);
 
         whenApplyIsCalledWith(this.netConfig);
 
@@ -714,6 +726,9 @@ public class NMDbusConnectorTest {
         givenNetworkConfigMapWith("net.interface.1-5.config.dhcpClient4.enabled", true);
         givenNetworkConfigMapWith("net.interface.1-5.config.apn", "myAwesomeAPN");
         givenNetworkConfigMapWith("net.interface.1-5.config.resetTimeout", 0);
+        givenNetworkConfigMapWith("net.interface.1-5.config.persist", false);
+        givenNetworkConfigMapWith("net.interface.1-5.config.holdoff", 15);
+        givenNetworkConfigMapWith("net.interface.1-5.config.maxFail", 3);
 
         whenApplyIsCalledWith(this.netConfig);
 
@@ -1128,24 +1143,23 @@ public class NMDbusConnectorTest {
     }
 
     @Test
-    public void shouldNotStartFailedModemResetTimerIfConnectionSucceeds() throws DBusException, IOException {
+    public void shouldNotStartModemTaskHandlerWithEthernetInterface() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
-        givenMockedDevice("1-6", "wwan0", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+        givenMockedDevice("eno1", "eno1", NMDeviceType.NM_DEVICE_TYPE_ETHERNET, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
                 true, false, false);
         givenMockedDeviceList();
-        givenNetworkConfigMapWith("net.interfaces", "1-6");
-        givenNetworkConfigMapWith("net.interface.1-6.config.resetTimeout", 2);
+        givenNetworkConfigMapWith("net.interfaces", "eno1");
         givenNetworkConfigMapWith("net.interface.1-6.config.dhcpClient4.enabled", true);
         givenNetworkConfigMapWith("net.interface.1-6.config.ip4.status", "netIPv4StatusEnabledWAN");
 
         whenApplyIsCalledWith(this.netConfig);
 
         thenNoExceptionIsThrown();
-        thenFailedModemResetTimerIsActive(false, "1-6");
+        thenModemTaskHandlerIsActive(false, "eno1");
     }
 
     @Test
-    public void shouldStartFailedModemResetTimerIfConnectionFails() throws DBusException, IOException {
+    public void shouldStartModemTaskHanlderWithModemInterface() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
         givenNMActivationFailed();
         givenMockedDevice("1-6", "wwan0", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_FAILED, true,
@@ -1155,11 +1169,14 @@ public class NMDbusConnectorTest {
         givenNetworkConfigMapWith("net.interface.1-6.config.resetTimeout", 2);
         givenNetworkConfigMapWith("net.interface.1-6.config.dhcpClient4.enabled", true);
         givenNetworkConfigMapWith("net.interface.1-6.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.1-6.config.persist", true);
+        givenNetworkConfigMapWith("net.interface.1-6.config.holdoff", 15);
+        givenNetworkConfigMapWith("net.interface.1-6.config.maxFail", 3);
 
         whenApplyIsCalledWith(this.netConfig);
 
         thenNoExceptionIsThrown();
-        thenFailedModemResetTimerIsActive(true, "1-6");
+        thenModemTaskHandlerIsActive(true, "1-6");
     }
 
     /*
@@ -1887,12 +1904,8 @@ public class NMDbusConnectorTest {
         }
     }
 
-    private void thenDeviceExists(String interfaceName) {
-        assertTrue(this.mockDevices.containsKey(interfaceName));
-    }
-
-    public void thenFailedModemResetTimerIsActive(boolean expectedValue, String modemId) {
-        assertEquals(expectedValue, this.instanceNMDbusConnector.failedModemResetTimerIsActive(modemId));
+    public void thenModemTaskHandlerIsActive(boolean expectedValue, String modemId) {
+        assertEquals(expectedValue, this.instanceNMDbusConnector.modemTaskHandlerIsPresent(modemId));
     }
 
     private void simulateIwCommandOutputs(String interfaceName, Properties preMockedProperties)

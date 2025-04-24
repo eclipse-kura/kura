@@ -654,7 +654,7 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public int getModemMaxFail(String ifname) {
-        return (int) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_MAX_FAIL, ifname), 1);
+        return (int) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_MAX_FAIL, ifname), 5);
     }
 
     public void setModemMaxFail(String ifname, int maxFail) {
@@ -720,7 +720,7 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public boolean getModemPersistEnabled(String ifname) {
-        return (boolean) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_PERSIST, ifname), false);
+        return (boolean) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_PERSIST, ifname), true);
     }
 
     public void setModemPersistEnabled(String ifname, boolean isPersistEnabled) {
@@ -744,7 +744,7 @@ public class NetworkConfigurationServiceProperties {
     }
 
     public int getModemHoldoff(String ifname) {
-        return (int) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_HOLDOFF, ifname), 0);
+        return (int) this.properties.getOrDefault(String.format(NET_INTERFACE_CONFIG_HOLDOFF, ifname), 30);
     }
 
     public void setModemHoldoff(String ifname, int holdoff) {

@@ -7,10 +7,10 @@
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
 
-	SPDX-License-Identifier: EPL-2.0
+    SPDX-License-Identifier: EPL-2.0
 
-	Contributors:
-	 Eurotech
+    Contributors:
+     Eurotech
 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
@@ -20,7 +20,7 @@
 
         <Icon resource="ClockService" size="32"/>
 
-       	<AD id="enabled"
+        <AD id="enabled"
             name="enabled"
             type="Boolean"
             cardinality="0"

@@ -16,11 +16,13 @@ The ClockService provides the following configuration parameters:
 
 - **clock.set.hwclock**: defines if the hardware clock of the gateway must be synced after the system time is set. If enabled, the service calls the Linux command `hwclock --utc --systohc`.
 
-- **clock.provider**: specifies one among Java NTP client (java-ntp), Linux chrony command (chrony-advanced), Linux ntpdate command (ntpd) (Required field). If chrony-advanced is used, Kura will not change system and/or hardware clock directly, delegating these operations to chrony.
+- **clock.provider**: specifies the source for setting the system clock. The following provider are supported:
+    - `java-ntp`: a Java-based NTP client implementation provided by Kura
+    - `chrony-advanced`: an implementation relying on the [chrony](https://chrony-project.org/) project. If `chrony-advanced` is used, Kura will not change system and/or hardware clock directly, delegating all operations to chrony.
 
 - **clock.ntp.host**: sets a valid NTP server host address.
 
-- **clock.ntp.port**: sets a valid NTP port number (not supported by ntpd, use the port 123 in that case).
+- **clock.ntp.port**: sets a valid NTP port number.
 
 - **clock.ntp.timeout**: specifies the NTP timeout in milliseconds.
 

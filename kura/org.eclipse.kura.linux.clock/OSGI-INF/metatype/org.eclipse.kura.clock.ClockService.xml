@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -45,7 +45,6 @@
             description="Source for setting the system clock. Verify the availabiliy of the selected provider before activate it. Using chrony-advanced causes all fields, except Chrony Configuration, to be ignored.">
 
                <Option label="java-ntp" value="java-ntp"/>
-               <Option label="ntpd" value="ntpd"/>
                <Option label="chrony-advanced" value="chrony-advanced"/>
         </AD>
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,7 @@ import org.eclipse.kura.web.server.RequiredPermissions.Mode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
+import org.eclipse.kura.web.shared.model.GwtSupportedFeatures;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -41,7 +42,7 @@ public interface GwtDeviceService extends RemoteService {
     public void stopBundle(GwtXSRFToken xsrfToken, String bundleId) throws GwtKuraException;
 
     public List<GwtGroupedNVPair> findContainers(GwtXSRFToken xsrfToken) throws GwtKuraException;
-    
+
     public List<GwtGroupedNVPair> findImages(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     public List<GwtGroupedNVPair> findThreads(GwtXSRFToken xsrfToken) throws GwtKuraException;
@@ -50,6 +51,9 @@ public interface GwtDeviceService extends RemoteService {
 
     @RequiredPermissions({})
     public List<GwtGroupedNVPair> findSystemProperties(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    @RequiredPermissions({})
+    public GwtSupportedFeatures getSupportedFeatures(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     @Audit(componentName = "UI Device", description = "Execute command")
     public String executeCommand(GwtXSRFToken xsrfToken, String cmd, String pwd) throws GwtKuraException;
@@ -62,7 +66,7 @@ public interface GwtDeviceService extends RemoteService {
 
     @Audit(componentName = "UI Device", description = "check if container orchestrator is active")
     public boolean checkIfContainerOrchestratorIsActive(GwtXSRFToken token) throws GwtKuraException;
-    
+
     @Audit(componentName = "UI Device", description = "Delete Container Image")
     public void deleteImage(GwtXSRFToken xsrfToken, String imageId) throws GwtKuraException;
 

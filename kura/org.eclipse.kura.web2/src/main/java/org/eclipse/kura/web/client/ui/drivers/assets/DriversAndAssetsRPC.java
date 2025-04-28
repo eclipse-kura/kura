@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -19,15 +19,12 @@ import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtChannelOperationResult;
 import org.eclipse.kura.web.shared.model.GwtChannelRecord;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
-import org.eclipse.kura.web.shared.model.GwtWireGraph;
+import org.eclipse.kura.web.shared.model.GwtDriversAndAssetsInfo;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDriverAndAssetService;
 import org.eclipse.kura.web.shared.service.GwtDriverAndAssetServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtWireGraphService;
-import org.eclipse.kura.web.shared.service.GwtWireGraphServiceAsync;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -37,11 +34,11 @@ public final class DriversAndAssetsRPC {
     private DriversAndAssetsRPC() {
     }
 
-    private static final GwtDriverAndAssetServiceAsync gwtAssetService = GWT.create(GwtDriverAndAssetService.class);
+    private static final GwtDriverAndAssetServiceAsync gwtDriverAssetService = GWT
+            .create(GwtDriverAndAssetService.class);
     private static final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-    private static final GwtWireGraphServiceAsync gwtWireGraphService = GWT.create(GwtWireGraphService.class);
 
-    public static void loadStaticInfo(final Callback<GwtWireComposerStaticInfo> callback) {
+    public static void loadDriverAndAssetInfo(final Callback<GwtDriversAndAssetsInfo> callback) {
         EntryClassUi.showWaitModal();
         gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
@@ -53,7 +50,7 @@ public final class DriversAndAssetsRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtWireGraphService.getWireComposerStaticInfo(result, new AsyncCallback<GwtWireComposerStaticInfo>() {
+                gwtDriverAssetService.getDriverAndAssetInfo(result, new AsyncCallback<GwtDriversAndAssetsInfo>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -62,37 +59,7 @@ public final class DriversAndAssetsRPC {
                     }
 
                     @Override
-                    public void onSuccess(GwtWireComposerStaticInfo result) {
-                        EntryClassUi.hideWaitModal();
-                        callback.onSuccess(result);
-                    }
-                });
-            }
-        });
-    }
-
-    public static void loadWireGraph(final Callback<GwtWireGraph> callback) {
-        EntryClassUi.showWaitModal();
-        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(Throwable ex) {
-                EntryClassUi.hideWaitModal();
-                FailureHandler.handle(ex);
-            }
-
-            @Override
-            public void onSuccess(GwtXSRFToken result) {
-                gwtWireGraphService.getWireGraph(result, new AsyncCallback<GwtWireGraph>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(ex);
-                    }
-
-                    @Override
-                    public void onSuccess(GwtWireGraph result) {
+                    public void onSuccess(GwtDriversAndAssetsInfo result) {
                         EntryClassUi.hideWaitModal();
                         callback.onSuccess(result);
                     }
@@ -113,7 +80,7 @@ public final class DriversAndAssetsRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtAssetService.updateDriverOrAssetConfiguration(result, config, new AsyncCallback<Void>() {
+                gwtDriverAssetService.updateDriverOrAssetConfiguration(result, config, new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -144,7 +111,7 @@ public final class DriversAndAssetsRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtAssetService.createDriverOrAssetConfiguration(result, factoryPid, pid, configuration,
+                gwtDriverAssetService.createDriverOrAssetConfiguration(result, factoryPid, pid, configuration,
                         new AsyncCallback<Void>() {
 
                             @Override
@@ -175,7 +142,7 @@ public final class DriversAndAssetsRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtAssetService.deleteDriverOrAssetConfiguration(result, pid, true, new AsyncCallback<Void>() {
+                gwtDriverAssetService.deleteDriverOrAssetConfiguration(result, pid, true, new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -205,7 +172,7 @@ public final class DriversAndAssetsRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtAssetService.readAllChannels(result, assetPid, new AsyncCallback<GwtChannelOperationResult>() {
+                gwtDriverAssetService.readAllChannels(result, assetPid, new AsyncCallback<GwtChannelOperationResult>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -236,17 +203,8 @@ public final class DriversAndAssetsRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtAssetService.createDriverOrAssetConfiguration(result, factoryPid, pid, new AsyncCallback<Void>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(ex);
-                    }
-
-                    @Override
-                    public void onSuccess(Void result) {
-                        gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                gwtDriverAssetService.createDriverOrAssetConfiguration(result, factoryPid, pid,
+                        new AsyncCallback<Void>() {
 
                             @Override
                             public void onFailure(Throwable ex) {
@@ -255,26 +213,36 @@ public final class DriversAndAssetsRPC {
                             }
 
                             @Override
-                            public void onSuccess(GwtXSRFToken result) {
-                                gwtWireGraphService.getGwtChannelDescriptor(result, pid,
-                                        new AsyncCallback<GwtConfigComponent>() {
+                            public void onSuccess(Void result) {
+                                gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-                                            @Override
-                                            public void onFailure(Throwable ex) {
-                                                EntryClassUi.hideWaitModal();
-                                                FailureHandler.handle(ex);
-                                            }
+                                    @Override
+                                    public void onFailure(Throwable ex) {
+                                        EntryClassUi.hideWaitModal();
+                                        FailureHandler.handle(ex);
+                                    }
 
-                                            @Override
-                                            public void onSuccess(GwtConfigComponent result) {
-                                                EntryClassUi.hideWaitModal();
-                                                callback.onSuccess(result);
-                                            }
-                                        });
+                                    @Override
+                                    public void onSuccess(GwtXSRFToken result) {
+                                        gwtDriverAssetService.getChannelDescriptor(result, pid,
+                                                new AsyncCallback<GwtConfigComponent>() {
+
+                                                    @Override
+                                                    public void onFailure(Throwable ex) {
+                                                        EntryClassUi.hideWaitModal();
+                                                        FailureHandler.handle(ex);
+                                                    }
+
+                                                    @Override
+                                                    public void onSuccess(GwtConfigComponent result) {
+                                                        EntryClassUi.hideWaitModal();
+                                                        callback.onSuccess(result);
+                                                    }
+                                                });
+                                    }
+                                });
                             }
                         });
-                    }
-                });
             }
         });
     }
@@ -292,7 +260,7 @@ public final class DriversAndAssetsRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtAssetService.write(result, assetPid, records, new AsyncCallback<GwtChannelOperationResult>() {
+                gwtDriverAssetService.write(result, assetPid, records, new AsyncCallback<GwtChannelOperationResult>() {
 
                     @Override
                     public void onFailure(Throwable ex) {

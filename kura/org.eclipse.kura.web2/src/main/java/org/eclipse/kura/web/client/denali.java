@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -20,6 +20,7 @@ import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtSecurityCapabilities;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtSupportedFeatures;
 import org.eclipse.kura.web.shared.model.GwtUserConfig;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
@@ -124,13 +125,28 @@ public class denali implements EntryPoint {
                             }
 
                             @Override
-                            public void onSuccess(final GwtSecurityCapabilities result) {
-                                if (result.isDebugMode()) {
+                            public void onSuccess(final GwtSecurityCapabilities securityCapabilities) {
+                                if (securityCapabilities.isDebugMode()) {
                                     gwtSession.setDevelopMode(true);
                                 }
-                                EntryClassUi entryUi = new EntryClassUi(userConfig, result, gwtSession);
-                                RootPanel.get().add(entryUi);
-                                entryUi.init();
+
+                                denali.this.gwtDeviceService.getSupportedFeatures(token,
+                                        new AsyncCallback<GwtSupportedFeatures>() {
+
+                                            @Override
+                                            public void onSuccess(GwtSupportedFeatures supportedFeatures) {
+                                                EntryClassUi entryUi = new EntryClassUi(userConfig,
+                                                        securityCapabilities, gwtSession, supportedFeatures);
+                                                RootPanel.get().add(entryUi);
+                                                entryUi.init();
+                                            }
+
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                FailureHandler.handle(caught, denali.class.getSimpleName());
+
+                                            }
+                                        });
 
                             }
                         });

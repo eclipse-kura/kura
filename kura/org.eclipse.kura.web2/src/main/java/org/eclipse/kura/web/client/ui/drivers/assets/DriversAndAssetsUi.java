@@ -1,19 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.drivers.assets;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.kura.web.client.configuration.Configurations;
 import org.eclipse.kura.web.client.configuration.HasConfiguration;
@@ -24,9 +23,7 @@ import org.eclipse.kura.web.client.ui.drivers.assets.DriversAndAssetsListUi.Driv
 import org.eclipse.kura.web.client.util.PidTextBox;
 import org.eclipse.kura.web.shared.AssetConstants;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import org.eclipse.kura.web.shared.model.GwtWireComponentConfiguration;
-import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
-import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
+import org.eclipse.kura.web.shared.model.GwtSupportedFeatures;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
@@ -86,8 +83,10 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
     AlertDialog confirmDialog;
 
     private final Configurations configurations = new Configurations();
+    private final GwtSupportedFeatures supportedFeatures;
 
-    public DriversAndAssetsUi() {
+    public DriversAndAssetsUi(final GwtSupportedFeatures supportedFeatures) {
+        this.supportedFeatures = supportedFeatures;
         initWidget(uiBinder.createAndBindUi(this));
 
         initButtonBar();
@@ -100,28 +99,23 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
 
     public void refresh() {
         this.configurations.clear();
-        DriversAndAssetsRPC.loadWireGraph(result -> {
-            final GwtWireComposerStaticInfo staticInfo = result.getStaticInfo();
+        DriversAndAssetsRPC.loadDriverAndAssetInfo(result -> {
 
-            this.configurations.setChannelDescriptiors(staticInfo.getDriverDescriptors());
-            this.configurations.setBaseChannelDescriptor(staticInfo.getBaseChannelDescriptor());
-            this.configurations.setComponentDefinitions(staticInfo.getComponentDefinitions());
+            this.configurations.setChannelDescriptiors(result.getDriverDescriptors());
 
-            final GwtWireGraphConfiguration wireConfigurations = result.getWireGraphConfiguration();
+            final Optional<GwtConfigComponent> baseChannelDescriptor = result.getBaseChannelDescriptor();
 
-            final List<GwtConfigComponent> configurationList = new ArrayList<>();
-
-            for (GwtWireComponentConfiguration config : wireConfigurations.getWireComponentConfigurations()) {
-                configurationList.add(config.getConfiguration());
+            if (baseChannelDescriptor.isPresent()) {
+                this.configurations.setBaseChannelDescriptor(baseChannelDescriptor.get());
             }
-
-            configurationList.addAll(wireConfigurations.getAdditionalConfigurations());
-
-            this.configurations.setComponentConfigurations(configurationList);
-            this.configurations.setAllActivePids(wireConfigurations.getAllActivePids());
+            this.configurations.setComponentDefinitions(result.getComponentDefinitions());
+            this.configurations.setComponentConfigurations(result.getComponentConfigurations());
+            this.configurations.setAllActivePids(result.getAllActivePids());
 
             init();
+
         });
+
     }
 
     private void init() {
@@ -150,10 +144,16 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
             DriversAndAssetsUi.this.newDriverModal.show();
         });
 
-        this.newAssetButton.addClickHandler(event -> {
-            DriversAndAssetsUi.this.driverPid.setValue(this.driverAndAssetsListUi.getSelectedItem().getPid());
-            DriversAndAssetsUi.this.newAssetModal.show();
-        });
+        if (supportedFeatures.isAssetAvailable()) {
+
+            this.newAssetButton.addClickHandler(event -> {
+                DriversAndAssetsUi.this.driverPid.setValue(this.driverAndAssetsListUi.getSelectedItem().getPid());
+                DriversAndAssetsUi.this.newAssetModal.show();
+            });
+
+        } else {
+            this.newAssetButton.setVisible(false);
+        }
 
         this.deleteButton.addClickHandler(event -> {
             final DriverAssetInfo info = this.driverAndAssetsListUi.getSelectedItem();
@@ -276,7 +276,7 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
     public void onSelectionChanged(DriverAssetInfo info) {
         if (info != null) {
             this.deleteButton.setEnabled(true);
-            this.newAssetButton.setEnabled(!info.isAsset() && info.isValid());
+            this.newAssetButton.setEnabled(supportedFeatures.isAssetAvailable() && !info.isAsset() && info.isValid());
         } else {
             this.deleteButton.setEnabled(false);
             this.newAssetButton.setEnabled(false);

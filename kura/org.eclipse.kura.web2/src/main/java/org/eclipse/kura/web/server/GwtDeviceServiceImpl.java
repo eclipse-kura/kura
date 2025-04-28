@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -36,6 +36,7 @@ import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
+import org.eclipse.kura.web.shared.model.GwtSupportedFeatures;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.osgi.framework.Bundle;
@@ -62,6 +63,12 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
     private static final String KURA_MODE = "org.eclipse.kura.mode";
     private static final String EMULATOR = "emulator";
+
+    private final GwtSupportedFeatures supportedFeatures;
+
+    public GwtDeviceServiceImpl(final GwtSupportedFeatures supportedFeatures) {
+        this.supportedFeatures = supportedFeatures;
+    }
 
     @Override
     public List<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException {
@@ -589,6 +596,13 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
     private boolean isEmulatorMode() {
         return System.getProperty(KURA_MODE, "").equals(EMULATOR);
+    }
+
+    @Override
+    public GwtSupportedFeatures getSupportedFeatures(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        return supportedFeatures;
     }
 }
 

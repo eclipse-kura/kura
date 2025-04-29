@@ -19,12 +19,22 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	
-	<groupId>org.eclipse.kura</groupId>
-	<version>6.0.0-SNAPSHOT</version>
-	<artifactId>kura-target-definition-prova.target</artifactId>
+	<properties>
+		<kura.basedir>${project.basedir}/..</kura.basedir>
+		<kura.skip.if.target.definition.profile>true</kura.skip.if.target.definition.profile>
+		<kura.skip.replace.target.file>true</kura.skip.replace.target.file>
+	</properties>
+
+	<parent>
+		<groupId>org.eclipse.kura</groupId>
+		<version>6.0.0-SNAPSHOT</version>
+		<artifactId>distrib</artifactId>
+	</parent>
+
+	<artifactId>kura-target-definition.target</artifactId>
 	<packaging>eclipse-target-definition</packaging>
 	<name>Target Definition for Kura Enviroment</name>
-	
+
 	<build>
 		<plugins>
 			<plugin>

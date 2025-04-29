@@ -1800,6 +1800,39 @@
                 </plugins>
             </build>
         </profile>
+        
+        <profile>
+            <id>can-dp</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>can-dp</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${kura.skip.can}</skip>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.kura</groupId>
+                                            <artifactId>org.eclipse.kura.protocol.can</artifactId>
+                                            <version>${org.eclipse.kura.protocol.can.version}</version>
+                                            <type>dp</type>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
 
         <profile>
             <properties>

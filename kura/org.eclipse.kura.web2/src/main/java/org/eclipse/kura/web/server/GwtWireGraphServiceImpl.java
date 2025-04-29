@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,31 +22,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.configuration.metatype.AD;
-import org.eclipse.kura.configuration.metatype.OCDService;
-import org.eclipse.kura.configuration.metatype.Option;
-import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.driver.Driver;
-import org.eclipse.kura.driver.descriptor.DriverDescriptor;
-import org.eclipse.kura.driver.descriptor.DriverDescriptorService;
-import org.eclipse.kura.internal.wire.asset.WireAssetChannelDescriptor;
-import org.eclipse.kura.internal.wire.asset.WireAssetOCD;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.server.util.GwtWireAssetConstants;
 import org.eclipse.kura.web.shared.FilterUtil;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.IdHelper;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import org.eclipse.kura.web.shared.model.GwtConfigParameter;
-import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
+import org.eclipse.kura.web.shared.model.GwtSupportedFeatures;
 import org.eclipse.kura.web.shared.model.GwtWireComponentConfiguration;
 import org.eclipse.kura.web.shared.model.GwtWireComponentDescriptor;
 import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
@@ -75,64 +66,24 @@ import org.osgi.service.cm.ConfigurationAdmin;
  */
 public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet implements GwtWireGraphService {
 
-    private static final GwtConfigComponent WIRE_ASSET_OCD = GwtServerUtil.toGwtConfigComponent(
-            new ComponentConfigurationImpl("org.eclipse.kura.wire.WireAsset", new WireAssetOCD(), new HashMap<>()));
-
-    private static final GwtConfigComponent WIRE_ASSET_CHANNEL_DESCRIPTOR = GwtServerUtil.toGwtConfigComponent(null,
-            WireAssetChannelDescriptor.get().getDescriptor());
-
     private static final Filter DRIVER_FILTER = getFilterUnchecked("(objectClass=org.eclipse.kura.driver.Driver)");
     private static final Filter ADDITIONAL_CONFIGS_FILTER = getFilterUnchecked(
             "(|(objectClass=org.eclipse.kura.driver.Driver)(service.factoryPid=org.eclipse.kura.wire.WireAsset))");
 
     private static final long serialVersionUID = -6577843865830245755L;
 
+    final GwtSupportedFeatures supportedFeatures;
+
+    public GwtWireGraphServiceImpl(final GwtSupportedFeatures supportedFeatures) {
+        this.supportedFeatures = supportedFeatures;
+    }
+
     @Override
     public GwtConfigComponent getGwtChannelDescriptor(final GwtXSRFToken xsrfToken, final String driverPid)
             throws GwtKuraException {
-        final DriverDescriptorService driverDescriptorService = ServiceLocator.getInstance()
-                .getService(DriverDescriptorService.class);
+        checkXSRFToken(xsrfToken);
 
-        Optional<DriverDescriptor> driverDescriptorOptional = driverDescriptorService.getDriverDescriptor(driverPid);
-
-        if (driverDescriptorOptional.isPresent()) {
-            DriverDescriptor driverDescriptor = driverDescriptorOptional.get();
-            return getGwtConfigComponent(driverDescriptor);
-        } else {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
-        }
-    }
-
-    private GwtConfigComponent getGwtConfigComponent(DriverDescriptor driverDescriptor) {
-        @SuppressWarnings("unchecked")
-        final List<AD> params = (List<AD>) driverDescriptor.getChannelDescriptor();
-        final GwtConfigComponent gwtConfig = new GwtConfigComponent();
-        gwtConfig.setComponentId(driverDescriptor.getPid());
-
-        final List<GwtConfigParameter> gwtParams = new ArrayList<>();
-        gwtConfig.setParameters(gwtParams);
-        for (final AD ad : params) {
-            final GwtConfigParameter gwtParam = new GwtConfigParameter();
-            gwtParam.setId(ad.getId());
-            gwtParam.setName(ad.getName());
-            gwtParam.setDescription(ad.getDescription());
-            gwtParam.setType(GwtConfigParameterType.valueOf(ad.getType().name()));
-            gwtParam.setRequired(ad.isRequired());
-            gwtParam.setCardinality(ad.getCardinality());
-            if (ad.getOption() != null && !ad.getOption().isEmpty()) {
-                final Map<String, String> options = new HashMap<>();
-                for (final Option option : ad.getOption()) {
-                    options.put(option.getLabel(), option.getValue());
-                }
-                gwtParam.setOptions(options);
-            }
-            gwtParam.setMin(ad.getMin());
-            gwtParam.setMax(ad.getMax());
-            gwtParam.setDefault(ad.getDefault());
-
-            gwtParams.add(gwtParam);
-        }
-        return gwtConfig;
+        return GwtServerUtil.getChannelDescriptor(driverPid);
     }
 
     private void fillGwtRenderingProperties(GwtWireComponentConfiguration component,
@@ -343,12 +294,6 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
         });
     }
 
-    @Deprecated
-    private GwtConfigComponent getWireAssetDefinition() { // TODO provide a metatype for WireAsset
-
-        return WIRE_ASSET_OCD;
-    }
-
     private void fillWireComponentDefinitions(List<GwtWireComponentDescriptor> resultDescriptors,
             List<GwtConfigComponent> resultDefinitions) throws GwtKuraException {
 
@@ -356,6 +301,7 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
                 wireComponentDefinitionService -> {
                     for (WireComponentDefinition wireComponentDefinition : wireComponentDefinitionService
                             .getComponentDefinitions()) {
+
                         final GwtWireComponentDescriptor result = new GwtWireComponentDescriptor(
                                 toComponentName(wireComponentDefinition), wireComponentDefinition.getFactoryPid(),
                                 wireComponentDefinition.getMinInputPorts(), wireComponentDefinition.getMaxInputPorts(),
@@ -374,7 +320,13 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
 
                         resultDescriptors.add(result);
                     }
-                    resultDefinitions.add(getWireAssetDefinition());
+
+                    if (supportedFeatures.isAssetAvailable() && supportedFeatures.areDriverServicesAvailable()) {
+                        resultDefinitions.add(GwtWireAssetConstants.WIRE_ASSET_OCD);
+                    }
+                    if (supportedFeatures.isAssetAvailable() && !supportedFeatures.areDriverServicesAvailable()) {
+                        resultDescriptors.removeIf(c -> GwtWireAssetConstants.WIRE_ASSET_PID.equals(c.getFactoryPid()));
+                    }
                     return (Void) null;
                 });
     }
@@ -395,30 +347,6 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
         return wireComponentDefinition.getComponentOCD().getDefinition().getName();
     }
 
-    private void fillDriverDefinitions(List<GwtConfigComponent> resultDefinitions) throws GwtKuraException {
-        ServiceLocator.applyToServiceOptionally(OCDService.class, ocdService -> {
-
-            for (ComponentConfiguration config : ocdService.getServiceProviderOCDs("org.eclipse.kura.driver.Driver")) {
-                final GwtConfigComponent descriptor = GwtServerUtil.toGwtConfigComponent(config);
-                if (descriptor != null) {
-                    descriptor.setIsDriver(true);
-                    resultDefinitions.add(descriptor);
-                }
-            }
-            return (Void) null;
-        });
-    }
-
-    private void fillDriverDescriptors(List<GwtConfigComponent> resultDescriptors) throws GwtKuraException {
-
-        ServiceLocator.applyToServiceOptionally(DriverDescriptorService.class, driverDescriptorService -> {
-
-            driverDescriptorService.listDriverDescriptors().stream().map(GwtServerUtil::toGwtConfigComponent)
-                    .filter(Objects::nonNull).forEach(resultDescriptors::add);
-            return (Void) null;
-        });
-    }
-
     @Override
     public GwtWireComposerStaticInfo getWireComposerStaticInfo(GwtXSRFToken xsrfToken) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
@@ -434,13 +362,19 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
         final List<GwtConfigComponent> driverDescriptors = new ArrayList<>();
 
         fillWireComponentDefinitions(componentDescriptors, componentDefinitions);
-        fillDriverDefinitions(componentDefinitions);
-        fillDriverDescriptors(driverDescriptors);
+
+        if (supportedFeatures.areDriverServicesAvailable()) {
+            GwtServerUtil.fillDriverDefinitions(componentDefinitions);
+            GwtServerUtil.fillDriverDescriptors(driverDescriptors);
+        }
 
         result.setComponentDefinitions(componentDefinitions);
         result.setWireComponentDescriptors(componentDescriptors);
         result.setDriverDescriptors(driverDescriptors);
-        result.setBaseChannelDescriptor(WIRE_ASSET_CHANNEL_DESCRIPTOR);
+
+        if (supportedFeatures.isAssetAvailable() && supportedFeatures.areDriverServicesAvailable()) {
+            result.setBaseChannelDescriptor(GwtWireAssetConstants.WIRE_ASSET_CHANNEL_DESCRIPTOR);
+        }
 
         return result;
     }

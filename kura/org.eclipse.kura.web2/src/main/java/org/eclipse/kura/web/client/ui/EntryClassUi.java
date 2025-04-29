@@ -55,6 +55,7 @@ import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 import org.eclipse.kura.web.shared.model.GwtEventInfo;
 import org.eclipse.kura.web.shared.model.GwtSecurityCapabilities;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtSupportedFeatures;
 import org.eclipse.kura.web.shared.model.GwtUserConfig;
 import org.eclipse.kura.web.shared.model.GwtUserData;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -227,7 +228,7 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
     private static PopupPanel waitModal;
 
     private final StatusPanelUi statusBinder = GWT.create(StatusPanelUi.class);
-    private final DevicePanelUi deviceBinder = GWT.create(DevicePanelUi.class);
+    private final DevicePanelUi deviceBinder;
     private final PackagesPanelUi packagesBinder = GWT.create(PackagesPanelUi.class);
     private final SettingsPanelUi settingsBinder = GWT.create(SettingsPanelUi.class);
     private final SecurityPanelUi securityBinder;
@@ -236,7 +237,7 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
     private final NetworkPanelUi networkBinder = GWT.create(NetworkPanelUi.class);
     private final CloudConnectionsUi cloudServicesBinder = GWT.create(CloudConnectionsUi.class);
     private final WiresPanelUi wiresBinder = GWT.create(WiresPanelUi.class);
-    private final DriversAndAssetsUi driversAndTwinsBinder = GWT.create(DriversAndAssetsUi.class);
+    private final DriversAndAssetsUi driversAndTwinsBinder;
 
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
@@ -285,16 +286,18 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
     private static GwtConsoleUserOptions userOptions;
 
     public EntryClassUi(final GwtUserData gwtUserData, final GwtSecurityCapabilities securityCapabilities,
-            final GwtSession session) {
+            final GwtSession session, final GwtSupportedFeatures supportedFeatures) {
         initWidget(uiBinder.createAndBindUi(this));
 
         this.ui = this;
         this.userData = gwtUserData;
         this.securityCapabilities = securityCapabilities;
         this.securityBinder = new SecurityPanelUi(gwtUserData, securityCapabilities);
+        this.driversAndTwinsBinder = new DriversAndAssetsUi(supportedFeatures);
+        this.deviceBinder = new DevicePanelUi(supportedFeatures);
 
         setFooter(session);
-        initSystemPanel(session);
+        initSystemPanel(session, supportedFeatures);
         setSession(session);
 
         initWaitModal();
@@ -369,12 +372,26 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
         }
     }
 
-    public void initSystemPanel(GwtSession gwtSession) {
+    public void initSystemPanel(GwtSession gwtSession, final GwtSupportedFeatures supportedFeatures) {
         final EntryClassUi instanceReference = this;
         if (!gwtSession.isNetAdminAvailable()
                 || !this.userData.checkPermissions(Collections.singleton(KuraPermission.NETWORK_ADMIN))) {
             this.network.setVisible(false);
             this.firewall.setVisible(false);
+        }
+
+        final boolean areWireServicesAvailable = supportedFeatures.areWiresServicesAvailable();
+        final boolean areDriverServicesAvailable = supportedFeatures.areDriverServicesAvailable();
+
+        this.wires.setVisible(areWireServicesAvailable);
+        this.driversAndAssetsServices.setVisible(areDriverServicesAvailable);
+
+        if (areDriverServicesAvailable) {
+            initDriversAndAssetsPanel();
+        }
+
+        if (areWireServicesAvailable) {
+            initWiresPanel();
         }
 
         initStatusPanel(instanceReference);
@@ -394,10 +411,6 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
         initUsersPanel();
 
         initCloudServicesPanel();
-
-        initWiresPanel();
-
-        initDriversAndAssetsPanel();
 
     }
 

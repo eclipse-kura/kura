@@ -4613,13 +4613,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>clock.set.hwclock</strong>: defines if the hardware clock of the gateway must be synced after the system time is set. If enabled, the service calls the Linux command <code>hwclock --utc --systohc</code>.</p>
 </li>
 <li>
-<p><strong>clock.provider</strong>: specifies one among Java NTP client (java-ntp), Linux chrony command (chrony-advanced), Linux ntpdate command (ntpd) (Required field). If chrony-advanced is used, Kura will not change system and/or hardware clock directly, delegating these operations to chrony.</p>
+<p><strong>clock.provider</strong>: specifies the source for setting the system clock. The following providers are supported:</p>
+<ul>
+<li><code>java-ntp</code>: a Java-based NTP client implementation provided by Eclipse Kura (default provider)</li>
+<li><code>chrony-advanced</code>: an implementation relying on the <a href="https://chrony-project.org/">chrony</a> project. If <code>chrony-advanced</code> is used, Kura will not change system and/or hardware clock directly, delegating all operations to chrony.</li>
+</ul>
 </li>
 <li>
 <p><strong>clock.ntp.host</strong>: sets a valid NTP server host address.</p>
 </li>
 <li>
-<p><strong>clock.ntp.port</strong>: sets a valid NTP port number (not supported by ntpd, use the port 123 in that case).</p>
+<p><strong>clock.ntp.port</strong>: sets a valid NTP port number.</p>
 </li>
 <li>
 <p><strong>clock.ntp.timeout</strong>: specifies the NTP timeout in milliseconds.</p>

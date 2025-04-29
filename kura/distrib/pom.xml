@@ -143,7 +143,7 @@
                             <goal>copy</goal>
                         </goals>
                         <configuration>
-                            <kura.skip.if.target.definition.profile>false</kura.skip.if.target.definition.profile>
+                            <skip>${kura.skip.if.target.definition.profile}</skip>
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -721,7 +721,7 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <kura.skip.if.target.definition.profile>false</kura.skip.if.target.definition.profile>
+                            <skip>${kura.skip.if.target.definition.profile}</skip>
                             <target>
                                 <move file="target/plugins/org.eclipse.kura.api.jar" tofile="target/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.asset.provider.jar" tofile="target/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar" />
@@ -925,7 +925,7 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <kura.skip.if.target.definition.profile>false</kura.skip.if.target.definition.profile>
+                            <skip>${kura.skip.if.target.definition.profile}</skip>
                             <target>
                                 <checksum algorithm="md5">
                                     <fileset dir="${basedir}/target/">

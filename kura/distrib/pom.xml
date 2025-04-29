@@ -1835,6 +1835,11 @@
         </profile>
 
         <profile>
+        	<activation>
+                <property>
+                    <name>buildAll</name>
+                </property>
+            </activation>
             <properties>
                 <kura.skip.if.target.definition.profile>true</kura.skip.if.target.definition.profile>
                 <kura.skip.replace.target.file>false</kura.skip.replace.target.file>

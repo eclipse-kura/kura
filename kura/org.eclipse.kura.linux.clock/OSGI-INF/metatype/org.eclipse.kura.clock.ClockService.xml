@@ -1,122 +1,121 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
-  
+    Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
-	SPDX-License-Identifier: EPL-2.0
-	
-	Contributors:
-	 Eurotech
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.clock.ClockService" 
-         name="ClockService" 
+    <OCD id="org.eclipse.kura.clock.ClockService"
+         name="ClockService"
          description="ClockService Configuration">
-        
+
         <Icon resource="ClockService" size="32"/>
-        
-       	<AD id="enabled"
+
+        <AD id="enabled"
             name="enabled"
             type="Boolean"
             cardinality="0"
             required="true"
             default="true"
             description="Whether or not to enable the ClockService"/>
-            
-        <AD id="clock.set.hwclock"  
+
+        <AD id="clock.set.hwclock"
             name="clock.set.hwclock"
             type="Boolean"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="true" 
+            default="true"
             description="Whether or not to sync the system hardware clock after the system time gets set"/>
-        
-        <AD id="clock.provider"  
+
+        <AD id="clock.provider"
             name="clock.provider"
             type="String"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="java-ntp" 
+            default="java-ntp"
             description="Source for setting the system clock. Verify the availabiliy of the selected provider before activate it. Using chrony-advanced causes all fields, except Chrony Configuration, to be ignored.">
 
                <Option label="java-ntp" value="java-ntp"/>
-               <Option label="ntpd" value="ntpd"/>
                <Option label="chrony-advanced" value="chrony-advanced"/>
         </AD>
 
-        <AD id="clock.ntp.host"  
+        <AD id="clock.ntp.host"
             name="clock.ntp.host"
             type="String"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="0.pool.ntp.org" 
+            default="0.pool.ntp.org"
             description="The hostname that provides the system time via NTP"/>
 
-        <AD id="clock.ntp.port"  
+        <AD id="clock.ntp.port"
             name="clock.ntp.port"
             type="Integer"
-            cardinality="0" 
+            cardinality="0"
             required="true"
             min="1"
             max="65535"
-            default="123" 
-            description="The port number that provides the system time via NTP (not supported by ntpd, use the port 123 in that case)"/>
+            default="123"
+            description="The port number that provides the system time via NTP"/>
 
-        <AD id="clock.ntp.timeout"  
+        <AD id="clock.ntp.timeout"
             name="clock.ntp.timeout"
             type="Integer"
-            cardinality="0" 
+            cardinality="0"
             required="true"
             min="1000"
-            default="10000" 
+            default="10000"
             description="The NTP timeout in milliseconds"/>
 
-        <AD id="clock.ntp.max-retry"  
+        <AD id="clock.ntp.max-retry"
             name="clock.ntp.max-retry"
             type="Integer"
-            cardinality="0" 
+            cardinality="0"
             required="true"
             min="0"
-            default="0" 
+            default="0"
             description="The maximum number of retries for the initial synchronization (with interval clock.ntp.retry.interval). If set to 0 the service will retry forever."/>
 
-        <AD id="clock.ntp.retry.interval"  
+        <AD id="clock.ntp.retry.interval"
             name="clock.ntp.retry.interval"
             type="Integer"
-            cardinality="0" 
+            cardinality="0"
             required="true"
             min="1"
-            default="5" 
+            default="5"
             description="When sync fails, interval in seconds between each retry."/>
 
-        <AD id="clock.ntp.refresh-interval"  
+        <AD id="clock.ntp.refresh-interval"
             name="clock.ntp.refresh-interval"
             type="Integer"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="3600" 
+            default="3600"
             description="Whether or not to sync the clock and if so, the frequency in seconds.  If less than zero - no update, if equal to zero - sync once at startup, if greater than zero - the frequency in seconds to perform a new clock sync"/>
-        
-        <AD id="rtc.filename"  
+
+        <AD id="rtc.filename"
             name="RTC File Name"
             type="String"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="/dev/rtc0" 
+            default="/dev/rtc0"
             description="The RTC File Name. It defaults to /dev/rtc0. This option is not used if chrony-advanced option is selected in clock.provider."/>
-            
+
         <AD id="chrony.advanced.config"
             name="Chrony Configuration"
             type="String"
             cardinality="0"
             required="false"
             description="Chrony configuration file. All fields above will be ignored.|TextArea" />
-            
+
     </OCD>
     <Designate pid="org.eclipse.kura.clock.ClockService">
         <Object ocdref="org.eclipse.kura.clock.ClockService"/>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -172,8 +172,8 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
             this.provider = new JavaNtpClockSyncProvider();
             break;
         case NTPD:
-            this.provider = new NtpdClockSyncProvider(this.executorService);
-            break;
+            logger.error("NTPD clock provider is not supported anymore. Use JAVA_NTP or CHRONY_ADVANCED instead.");
+            return;
         case CHRONY_ADVANCED:
             this.provider = new ChronyClockSyncProvider(this.executorService, this.cryptoService);
             break;

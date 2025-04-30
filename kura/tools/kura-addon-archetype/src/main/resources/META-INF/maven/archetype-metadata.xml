@@ -27,9 +27,6 @@
 
     <fileSets>
         <fileSet filtered="true" encoding="UTF-8">
-            <directory>target-definition</directory>
-        </fileSet>
-        <fileSet filtered="true" encoding="UTF-8">
             <directory>distrib</directory>
         </fileSet>
         <!-- exclude keystores from filtering, otherwise they get corrupted -->

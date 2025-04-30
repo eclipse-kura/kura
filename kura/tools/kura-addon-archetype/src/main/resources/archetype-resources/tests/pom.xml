@@ -33,6 +33,7 @@
         <maven.dependency.plugin.version>3.1.1</maven.dependency.plugin.version>
         <jacoco.maven.plugin.version>0.8.12</jacoco.maven.plugin.version>
         <kura.workdir>${project.build.directory}/test-env</kura.workdir>
+        <skip.copy.target.definition>true</skip.copy.target.definition>
     </properties>
 
     <build>
@@ -196,9 +197,9 @@
                     <configuration>
                         <target>
                             <artifact>
-                                <groupId>${groupId}</groupId>
-                                <artifactId>${artifactId}.target-definition</artifactId>
-                                <version>${target-definition-version}</version>
+                                <groupId>org.eclipse.kura</groupId>
+								<version>${kura.target.definition.version}</version>
+								<artifactId>kura-target-definition.target</artifactId>
                             </artifact>
                         </target>
                         <!--

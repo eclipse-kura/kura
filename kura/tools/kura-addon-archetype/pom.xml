@@ -31,32 +31,6 @@
     </properties>
 
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>archetype-resources/tests/test-env/framework/kura.properties</include>
-                    <include>META-INF/maven/archetype-metadata.xml</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-                <excludes>
-                    <exclude>archetype-resources/tests/test-env/framework/kura.properties</exclude>
-                    <exclude>META-INF/maven/archetype-metadata.xml</exclude>
-                </excludes>
-            </resource>
-            <!-- process projects versions properties in target definition -->
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>archetype-resources/target-definition/__artifactId__.target</include>
-                </includes>
-            </resource>
-        </resources>
-
         <extensions>
             <extension>
                 <groupId>org.apache.maven.archetype</groupId>
@@ -84,26 +58,6 @@
                     <!-- needed to include .gitignore -->
                     <useDefaultExcludes>false</useDefaultExcludes>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>properties-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>read-project-properties</goal>
-                        </goals>
-                        <configuration>
-                            <files>
-                                <file>${basedir}/../../../target-platform/config/kura.target-platform.build.properties</file>
-                                <file>${basedir}/../../distrib/config/kura.build.properties</file>
-                            </files>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
 
         </plugins>

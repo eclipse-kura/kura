@@ -44,15 +44,15 @@ A `.gitignore` file is automatically added with a default configuration. The `OS
 
 The project _requires_ source control management via `git` to correctly build. To add the project to `git` run the following:
 
-```shell Shell
+```bash
 git init
 ```
 
-```shell
+```bash
 git add .
 ```
 
-```shell shell
+```bash
 git commit -m "initial commit"
 ```
 
@@ -132,7 +132,7 @@ By default the `package.revision` is set to `1`. It can be overridden via CLI us
 
 Example:
 
-```shell shell
+```bash
 mvn clean install -Dpackage.revision=6 -DreleaseBuild
 ```
 

@@ -31,6 +31,7 @@
     <url>http://maven.apache.org</url>
     <properties>
         <tycho-version>4.0.11</tycho-version>
+        <jdeb-version>1.0</jdeb-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <kura.basedir>${project.basedir}</kura.basedir>
@@ -1266,7 +1267,7 @@
                     <plugin>
                         <groupId>org.vafer</groupId>
                         <artifactId>jdeb</artifactId>
-                        <version>1.0</version>
+                        <version>${jdeb-version}</version>
                         <executions>
                             <execution>
                                 <id>x86_64-deb</id>
@@ -1365,7 +1366,7 @@
                     <plugin>
                         <groupId>org.vafer</groupId>
                         <artifactId>jdeb</artifactId>
-                        <version>1.0</version>
+                        <version>${jdeb-version}</version>
                         <executions>
                             <execution>
                                 <id>x86_64-nn-deb</id>
@@ -1459,7 +1460,7 @@
                     <plugin>
                         <groupId>org.vafer</groupId>
                         <artifactId>jdeb</artifactId>
-                        <version>1.0</version>
+                        <version>${jdeb-version}</version>
                         <executions>
                             <execution>
                                 <id>aarch64-deb</id>
@@ -1558,7 +1559,7 @@
                     <plugin>
                         <groupId>org.vafer</groupId>
                         <artifactId>jdeb</artifactId>
-                        <version>1.0</version>
+                        <version>${jdeb-version}</version>
                         <executions>
                             <execution>
                                 <id>aarch64-nn-deb</id>
@@ -1680,7 +1681,7 @@
                     <plugin>
                         <groupId>org.vafer</groupId>
                         <artifactId>jdeb</artifactId>
-                        <version>1.0</version>
+                        <version>${jdeb-version}</version>
                         <executions>
                             <execution>
                                 <id>docker-x86_64-nn-deb</id>

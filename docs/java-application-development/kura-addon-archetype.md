@@ -40,6 +40,24 @@ Other parameters like **version** and **mainBundleVendor** can be changed by ans
 
 A `.gitignore` file is automatically added with a default configuration. The `OSGI-INF` folder is omitted because it will be generated during tests at compile-time (this is necessary to make the PDE launcher work).
 
+### Add the generated sources to `git`
+
+The project _requires_ source control management via `git` to correctly build. To add the project to `git` run the following:
+
+```shell Shell
+git init
+```
+
+```shell
+git add .
+```
+
+```shell shell
+git commit -m "initial commit"
+```
+
+Once this steps are completed you can safely build the project.
+
 ## Project structure
 
 At the end of the procedure, the archetype will generate a subfolder in the working directory containing the following subfolders:
@@ -99,6 +117,23 @@ apt purge <artifactId> # or apt remove <artifactId>
 
 # fedora/redhat/centos/others
 dnf remove <artifactId>
+```
+
+### Debug builds and Release builds
+
+Since version 6.0.0 of the archetype, two type of builds are supported:
+
+- **Debug builds**: active by default, generate artifacts whose version is computed from the timestamp and the `git` commit hash. Versioning scheme: `X.X.X~git{timestamp}.{hash}-{revision}`
+- **Release builds**: generate release-ready artifacts. This build _requires_ that no artifact/version is in "snapshot" mode. A "snapshot" version will result in a build failure. Versioning scheme: `X.X.X-{revision}`.
+
+The build defaults to the `debugBuild` profile, if the `-DreleaseBuild` parameter is specified, the build selects the `releaseBuild` profile.
+
+By default the `package.revision` is set to `1`. It can be overridden via CLI using the `-Dpackage.revision=N` parameters.
+
+Example:
+
+```shell shell
+mvn clean install -Dpackage.revision=6 -DreleaseBuild
 ```
 
 ## IDE setup

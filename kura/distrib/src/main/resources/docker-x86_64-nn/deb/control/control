@@ -11,7 +11,7 @@
 #  Eurotech
 #
 Package: kura-nn
-Version: [[project.version]]
+Version: [[version]]-[[package.revision]]
 Section: admin
 Priority: optional
 Depends: dos2unix, unzip,

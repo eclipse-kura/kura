@@ -31,7 +31,7 @@
     <url>http://maven.apache.org</url>
     <properties>
         <tycho-version>4.0.11</tycho-version>
-        <jdeb-version>1.0</jdeb-version>
+        <jdeb-version>1.12</jdeb-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <kura.basedir>${project.basedir}</kura.basedir>
@@ -881,30 +881,13 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>verify-if-snapshot</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <exportAntProperties>true</exportAntProperties>
-                            <target name="is-snapshot-check">
-                                <condition property="is.not.snapshot">
-                                    <not>
-                                        <contains string="${project.version}" substring="-SNAPSHOT" />
-                                    </not>
-                                </condition>
-                            </target>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>release-copy</id>
                         <phase>install</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <target name="distrib-store-files" if="${is.not.snapshot}">
+                            <target name="distrib-store-files">
                                 <!-- Copy distrib/config/kura.build.properties in distrib/RELEASE_INFO/${project.version}/config -->
                                 <copy file="config/kura.build.properties" todir="RELEASE_INFO/${project.version}/config" overwrite="true" />
 
@@ -1281,6 +1264,7 @@
                                     <snapshotExpand>true</snapshotExpand>
                                     <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/x86_64/deb/control</controlDir>
+                                    <skipPOMs>false</skipPOMs>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_x86_64.zip</src>
@@ -1380,6 +1364,7 @@
                                     <snapshotExpand>true</snapshotExpand>
                                     <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/x86_64-nn/deb/control</controlDir>
+                                    <skipPOMs>false</skipPOMs>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_x86_64-nn.zip</src>
@@ -1474,6 +1459,7 @@
                                     <snapshotExpand>true</snapshotExpand>
                                     <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/aarch64/deb/control</controlDir>
+                                    <skipPOMs>false</skipPOMs>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_aarch64.zip</src>
@@ -1573,6 +1559,7 @@
                                     <snapshotExpand>true</snapshotExpand>
                                     <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/aarch64-nn/deb/control</controlDir>
+                                    <skipPOMs>false</skipPOMs>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_aarch64-nn.zip</src>
@@ -1695,6 +1682,7 @@
                                     <snapshotExpand>true</snapshotExpand>
                                     <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/docker-x86_64-nn/deb/control</controlDir>
+                                    <skipPOMs>false</skipPOMs>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_docker-x86_64-nn.zip</src>

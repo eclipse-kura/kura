@@ -1277,6 +1277,8 @@
                                 <configuration>
                                     <verbose>true</verbose>
                                     <deb>${basedir}/target/kura_${package.version}-${package.revision}_amd64.deb</deb>
+                                    <snapshotExpand>true</snapshotExpand>
+                                    <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/x86_64/deb/control</controlDir>
                                     <dataSet>
                                         <data>
@@ -1374,6 +1376,8 @@
                                 <configuration>
                                     <verbose>true</verbose>
                                     <deb>${basedir}/target/kura-nn_${package.version}-${package.revision}_amd64.deb</deb>
+                                    <snapshotExpand>true</snapshotExpand>
+                                    <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/x86_64-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
@@ -1466,6 +1470,8 @@
                                 <configuration>
                                     <verbose>true</verbose>
                                     <deb>${basedir}/target/kura_${package.version}-${package.revision}_arm64.deb</deb>
+                                    <snapshotExpand>true</snapshotExpand>
+                                    <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/aarch64/deb/control</controlDir>
                                     <dataSet>
                                         <data>
@@ -1563,6 +1569,8 @@
                                 <configuration>
                                     <verbose>true</verbose>
                                     <deb>${basedir}/target/kura-nn_${package.version}-${package.revision}_arm64.deb</deb>
+                                    <snapshotExpand>true</snapshotExpand>
+                                    <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/aarch64-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
@@ -1683,6 +1691,8 @@
                                 <configuration>
                                     <verbose>true</verbose>
                                     <deb>${basedir}/target/kura_${package.version}-${package.revision}_docker-x86_64-nn_installer.deb</deb>
+                                    <snapshotExpand>true</snapshotExpand>
+                                    <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/docker-x86_64-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>

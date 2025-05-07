@@ -1,8 +1,8 @@
 Package: [[package.name]]
-Version: [[project.version]]
+Version: [[version]]-[[package.revision]]
 Section: admin
 Priority: optional
-Depends: kura
+Depends: kura-core (>= 6.0.0~), kura-core(<< 7.0.0~)
 Architecture: [[deb.architecture]]
 Maintainer: Eclipse Kura Developers <kura-dev@eclipse.org>
 Description: [[summary]]

@@ -33,7 +33,7 @@
 
 	<artifactId>kura-target-definition.target</artifactId>
 	<packaging>eclipse-target-definition</packaging>
-	<name>Target Definition for Kura Enviroment</name>
+	<name>Target Definition for Eclipse Kura Environment</name>
 
 	<build>
 		<plugins>

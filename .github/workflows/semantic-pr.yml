@@ -7,6 +7,9 @@ on:
       - edited
       - synchronize
 
+permissions:
+  pull-requests: read
+
 jobs:
   call-workflow-in-public-repo:
     uses: eclipse-kura/.github/.github/workflows/_shared-pr-lint.yml@main

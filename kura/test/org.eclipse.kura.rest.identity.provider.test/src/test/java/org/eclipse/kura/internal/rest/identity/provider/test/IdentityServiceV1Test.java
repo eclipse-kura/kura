@@ -29,17 +29,15 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.identity.PasswordStrengthRequirements;
+import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.internal.rest.identity.provider.LegacyIdentityService;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
 import org.eclipse.kura.util.validation.ValidatorOptions;
@@ -53,7 +51,6 @@ import org.osgi.service.useradmin.UserAdmin;
 @SuppressWarnings("restriction")
 public class IdentityServiceV1Test {
 
-    private static final String KURA_WEB_CONSOLE_SERVICE_PID = "org.eclipse.kura.web.Console";
     private static final String USER_ROLE_NAME_PREFIX = "kura.user.";
     private static final String PERMISSION_ROLE_NAME_PREFIX = "kura.permission.";
 
@@ -64,7 +61,7 @@ public class IdentityServiceV1Test {
 
     private CryptoService cryptoService;
     private UserAdmin userAdmin;
-    private ConfigurationService configurationService;
+    private PasswordStrengthVerificationService passwordStrengthVerificationService;
 
     private Set<String> definedPermissions;
     private Set<UserDTO> userConfig;
@@ -191,21 +188,19 @@ public class IdentityServiceV1Test {
     private void givenIdentityService() {
         this.cryptoService = mock(CryptoService.class);
         this.userAdmin = mock(UserAdmin.class);
-        this.configurationService = mock(ConfigurationService.class);
-
-        ComponentConfiguration mockWebConsoleConfiguration = mock(ComponentConfiguration.class);
-        when(mockWebConsoleConfiguration.getConfigurationProperties()).thenReturn(defaultValidatorProperties());
+        this.passwordStrengthVerificationService = mock(PasswordStrengthVerificationService.class);
 
         try {
-            when(this.configurationService.getComponentConfiguration(KURA_WEB_CONSOLE_SERVICE_PID))
-                    .thenReturn(mockWebConsoleConfiguration);
+            when(this.passwordStrengthVerificationService.getPasswordStrengthRequirements())
+                    .thenReturn(defaultPasswordStrengthRequirements());
 
             when(this.cryptoService.sha256Hash(anyString())).thenReturn("sha256hash");
         } catch (KuraException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
             fail("fail to setup mocks");
         }
 
-        this.identityService = new LegacyIdentityService(this.cryptoService, this.userAdmin, this.configurationService);
+        this.identityService = new LegacyIdentityService(this.cryptoService, this.userAdmin,
+                this.passwordStrengthVerificationService);
 
     }
 
@@ -433,15 +428,8 @@ public class IdentityServiceV1Test {
         }
     }
 
-    private static Map<String, Object> defaultValidatorProperties() {
-        Map<String, Object> properties = new HashMap<>();
-
-        properties.put("new.password.min.length", 8);
-        properties.put("new.password.require.digits", false);
-        properties.put("new.password.require.special.characters", false);
-        properties.put("new.password.require.both.cases", false);
-
-        return properties;
+    private static PasswordStrengthRequirements defaultPasswordStrengthRequirements() {
+        return new PasswordStrengthRequirements(8, false, false, false);
     }
 
 }

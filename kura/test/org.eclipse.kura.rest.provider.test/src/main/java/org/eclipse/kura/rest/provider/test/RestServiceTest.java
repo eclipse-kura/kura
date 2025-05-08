@@ -83,6 +83,9 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 
 public class RestServiceTest extends AbstractRequestHandlerTest {
 
+    private static final String LOGIN_BANNER_SERVICE_PID = "org.eclipse.kura.identity.LoginBannerService";
+    private static final String PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID = "org.eclipse.kura.identity.PasswordStrengthVerificationService";
+
     public RestServiceTest() {
         super(new RestTransport("testservice"));
     }
@@ -262,8 +265,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldCreateSessionWithUsernameAndPassword() {
-        givenConfiguration("org.eclipse.kura.web.Console", //
-                "access.banner.enabled", false);
+        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
+                "pre.login.banner.enabled", false);
         givenService(new RequiresAssetsRole());
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();
@@ -441,7 +444,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectPassordChangeWithSamePassword() {
-        givenConfiguration("org.eclipse.kura.web.Console", //
+        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
                 "new.password.min.length", 1, //
                 "new.password.require.digits", false, //
                 "new.password.require.special.characters", false, //
@@ -462,7 +465,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldAllowResourceAccessAfterPasswordChange() {
-        givenConfiguration("org.eclipse.kura.web.Console", //
+        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
                 "new.password.min.length", 1, //
                 "new.password.require.digits", false, //
                 "new.password.require.special.characters", false, //
@@ -662,7 +665,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectPassordChangeWithTooShort() {
-        givenConfiguration("org.eclipse.kura.web.Console", //
+        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
                 "new.password.min.length", 4, //
                 "new.password.require.digits", false, //
                 "new.password.require.special.characters", false, //
@@ -683,7 +686,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectPassordChangeWithoutDigits() {
-        givenConfiguration("org.eclipse.kura.web.Console", //
+        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
                 "new.password.min.length", 4, //
                 "new.password.require.digits", true, //
                 "new.password.require.special.characters", false, //
@@ -704,7 +707,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectPassordChangeWithoutSpecialCharacters() {
-        givenConfiguration("org.eclipse.kura.web.Console", //
+        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
                 "new.password.min.length", 4, //
                 "new.password.require.digits", true, //
                 "new.password.require.special.characters", true, //
@@ -725,7 +728,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldRejectPassordChangeWithoutBothCases() {
-        givenConfiguration("org.eclipse.kura.web.Console", //
+        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
                 "new.password.min.length", 4, //
                 "new.password.require.digits", true, //
                 "new.password.require.special.characters", true, //
@@ -746,7 +749,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldAcceptPasswordThatFullfillsRequirements() {
-        givenConfiguration("org.eclipse.kura.web.Console", //
+        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
                 "new.password.min.length", 4, //
                 "new.password.require.digits", true, //
                 "new.password.require.special.characters", true, //
@@ -800,7 +803,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     public void shouldReturnCurrentAuthenticationMethodInfo() {
         givenHttpServiceClientCertAuthDisabled();
         givenService(new RequiresAssetsRole());
-        givenConfiguration("org.eclipse.kura.web.Console", //
+        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
                 "access.banner.enabled", false);
         givenNoBasicCredentials();
 
@@ -814,9 +817,9 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldReturnMessageIfLoginBannnerIsEnabled() {
         givenHttpServiceClientCertAuthDisabled();
-        givenConfiguration("org.eclipse.kura.web.Console", //
-                "access.banner.enabled", true, //
-                "access.banner.content", "foo");
+        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
+                "pre.login.banner.enabled", true, //
+                "pre.login.banner.content", "foo");
         givenNoBasicCredentials();
 
         whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/authenticationInfo", null);
@@ -828,8 +831,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldChangeSessionCookieRepeatingPasswordAuthentication() {
-        givenConfiguration("org.eclipse.kura.web.Console", //
-                "access.banner.enabled", false);
+        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
+                "pre.login.banner.enabled", false);
         givenService(new RequiresAssetsRole());
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();
@@ -849,12 +852,13 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldChangeSessionCookieAfterPasswordChange() {
-        givenConfiguration("org.eclipse.kura.web.Console", //
+        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
+                "pre.login.banner.enabled", false);
+        givenConfiguration(PASSWORD_STRENGTH_VERIFICATION_SERVICE_PID, //
                 "new.password.min.length", 1, //
                 "new.password.require.digits", false, //
                 "new.password.require.special.characters", false, //
-                "new.password.require.both.cases", false, //
-                "access.banner.enabled", false);
+                "new.password.require.both.cases", false);
         givenService(new RequiresAssetsRole());
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList(), true);
         givenNoBasicCredentials();
@@ -1012,8 +1016,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldNotLoginWithOldCookieAfterNewLogin() {
-        givenConfiguration("org.eclipse.kura.web.Console", //
-                "access.banner.enabled", false);
+        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
+                "pre.login.banner.enabled", false);
         givenService(new RequiresAssetsRole());
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();
@@ -1035,8 +1039,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldInvalidateSessionAfterFailedPasswordLogin() {
-        givenConfiguration("org.eclipse.kura.web.Console", //
-                "access.banner.enabled", false);
+        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
+                "pre.login.banner.enabled", false);
         givenService(new RequiresAssetsRole());
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();

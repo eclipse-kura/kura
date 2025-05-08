@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.eclipse.kura.core.configuration.ConfigurationChangeEvent;
 import org.eclipse.kura.web.client.messages.Messages;
@@ -43,16 +44,14 @@ import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.FilterBuilder;
 import org.eclipse.kura.web.client.util.PidTextBox;
-import org.eclipse.kura.web.client.util.request.Request;
-import org.eclipse.kura.web.client.util.request.RequestContext;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
-import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 import org.eclipse.kura.web.shared.model.GwtEventInfo;
+import org.eclipse.kura.web.shared.model.GwtPasswordStrenghtRequirements;
 import org.eclipse.kura.web.shared.model.GwtSecurityCapabilities;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtSupportedFeatures;
@@ -84,7 +83,6 @@ import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Strong;
 
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpHandler;
@@ -239,9 +237,9 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
     private final WiresPanelUi wiresBinder = GWT.create(WiresPanelUi.class);
     private final DriversAndAssetsUi driversAndTwinsBinder;
 
-    private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
-    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-    private final GwtSessionServiceAsync gwtSessionService = GWT.create(GwtSessionService.class);
+    private static final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
+    private static final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private static final GwtSessionServiceAsync gwtSessionService = GWT.create(GwtSessionService.class);
 
     private final KeyUpHandler searchBoxChangeHandler = event -> {
         TextBox searchBox = (TextBox) event.getSource();
@@ -265,8 +263,8 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
 
         @Override
         public void run() {
-            RequestQueue.submit(c -> EntryClassUi.this.gwtXSRFService.generateSecurityToken(
-                    c.callback(token -> EntryClassUi.this.gwtSessionService.getUserConfig(token, c.callback(config -> {
+            RequestQueue.submit(c -> EntryClassUi.gwtXSRFService.generateSecurityToken(
+                    c.callback(token -> EntryClassUi.gwtSessionService.getUserConfig(token, c.callback(config -> {
                         if (config == null) {
                             logout();
                             return;
@@ -282,8 +280,6 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
                     })))), false);
         }
     };
-
-    private static GwtConsoleUserOptions userOptions;
 
     public EntryClassUi(final GwtUserData gwtUserData, final GwtSecurityCapabilities securityCapabilities,
             final GwtSession session, final GwtSupportedFeatures supportedFeatures) {
@@ -707,9 +703,9 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
         });
     }
 
-    public void fetchUserOptions() {
-        RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(c.callback(token -> {
-            this.gwtSessionService.getUserOptions(token, c.callback(options -> userOptions = options));
+    public static void loadPasswordStrengthRequirements(final Consumer<GwtPasswordStrenghtRequirements> consumer) {
+        RequestQueue.submit(c -> gwtXSRFService.generateSecurityToken(c.callback(token -> {
+            gwtSessionService.getPasswordStrenghtRequirements(token, c.callback(consumer::accept));
         })));
     }
 
@@ -718,8 +714,8 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
             return;
         }
 
-        RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(c.callback(token -> this.gwtComponentService
-                .findComponentConfigurations(token, SERVICES_FILTER, c.callback(result -> {
+        RequestQueue.submit(c -> gwtXSRFService.generateSecurityToken(c.callback(
+                token -> gwtComponentService.findComponentConfigurations(token, SERVICES_FILTER, c.callback(result -> {
                     sortConfigurationsByName(result);
                     EntryClassUi.this.servicesMenu.clear();
                     for (GwtConfigComponent configComponent : result) {
@@ -786,8 +782,8 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
     }
 
     private void logout() {
-        RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(
-                c.callback(token -> this.gwtSessionService.logout(token, c.callback(ok -> Window.Location.reload())))));
+        RequestQueue.submit(c -> gwtXSRFService.generateSecurityToken(
+                c.callback(token -> gwtSessionService.logout(token, c.callback(ok -> Window.Location.reload())))));
     }
 
     private void setNewPassword(final String oldPassword, final String newPassword) {
@@ -839,9 +835,11 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
     }
 
     private void changePassword() {
-        final PasswordChangeModal passwordChangeModal = new PasswordChangeModal();
+        loadPasswordStrengthRequirements(passwordStrengthRequirements -> {
+            final PasswordChangeModal passwordChangeModal = new PasswordChangeModal();
 
-        passwordChangeModal.pickPassword(userOptions, this::setNewPassword);
+            passwordChangeModal.pickPassword(passwordStrengthRequirements, this::setNewPassword);
+        });
     }
 
     private void initServicesTree() {
@@ -858,7 +856,7 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
         this.factoriesButton.addClickHandler(event -> {
             // always empty the PID input field
             EntryClassUi.this.componentName.setValue("");
-            EntryClassUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+            EntryClassUi.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
                 @Override
                 public void onFailure(Throwable ex) {
@@ -867,24 +865,23 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
-                    EntryClassUi.this.gwtComponentService.findFactoryComponents(token,
-                            new AsyncCallback<List<String>>() {
+                    EntryClassUi.gwtComponentService.findFactoryComponents(token, new AsyncCallback<List<String>>() {
 
-                                @Override
-                                public void onFailure(Throwable ex) {
-                                    FailureHandler.handle(ex, EntryClassUi.class.getName());
-                                }
+                        @Override
+                        public void onFailure(Throwable ex) {
+                            FailureHandler.handle(ex, EntryClassUi.class.getName());
+                        }
 
-                                @Override
-                                public void onSuccess(final List<String> result) {
-                                    EntryClassUi.this.factoriesList.clear();
-                                    EntryClassUi.this.factoriesList.addItem(SELECT_COMPONENT);
-                                    for (final String servicePid : result) {
-                                        EntryClassUi.this.factoriesList.addItem(servicePid);
-                                    }
-                                    EntryClassUi.this.newFactoryComponentModal.show();
-                                }
-                            });
+                        @Override
+                        public void onSuccess(final List<String> result) {
+                            EntryClassUi.this.factoriesList.clear();
+                            EntryClassUi.this.factoriesList.addItem(SELECT_COMPONENT);
+                            for (final String servicePid : result) {
+                                EntryClassUi.this.factoriesList.addItem(servicePid);
+                            }
+                            EntryClassUi.this.newFactoryComponentModal.show();
+                        }
+                    });
                 }
             });
         });
@@ -912,24 +909,23 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
                 return;
             }
 
-            RequestQueue.submit(
-                    context -> EntryClassUi.this.gwtXSRFService.generateSecurityToken(context.callback(token -> {
+            RequestQueue.submit(context -> EntryClassUi.gwtXSRFService.generateSecurityToken(context.callback(token -> {
 
-                        EntryClassUi.this.newFactoryComponentModal.hide();
-                        EntryClassUi.this.gwtComponentService.createFactoryComponent(token, factoryPid, pid,
-                                context.callback(new AsyncCallback<Void>() {
+                EntryClassUi.this.newFactoryComponentModal.hide();
+                EntryClassUi.gwtComponentService.createFactoryComponent(token, factoryPid, pid,
+                        context.callback(new AsyncCallback<Void>() {
 
-                                    @Override
-                                    public void onFailure(Throwable ex) {
-                                        FailureHandler.showErrorMessage(MSGS.errorCreatingFactoryComponent());
-                                    }
+                            @Override
+                            public void onFailure(Throwable ex) {
+                                FailureHandler.showErrorMessage(MSGS.errorCreatingFactoryComponent());
+                            }
 
-                                    @Override
-                                    public void onSuccess(Void result) {
-                                        context.defer(2000, () -> fetchAvailableServices());
-                                    }
-                                }));
-                    })));
+                            @Override
+                            public void onSuccess(Void result) {
+                                context.defer(2000, () -> fetchAvailableServices());
+                            }
+                        }));
+            })));
         });
     }
 
@@ -1067,10 +1063,6 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
         waitModal.hide();
     }
 
-    public static GwtConsoleUserOptions getUserOptions() {
-        return new GwtConsoleUserOptions(userOptions);
-    }
-
     private void forceTabsCleaning() {
         if (this.servicesUi != null) {
             this.servicesUi.setDirty(false);
@@ -1139,7 +1131,6 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
         if (this.userData.checkPermission(KuraPermission.DEVICE)) {
             showStatusPanel();
         }
-        fetchUserOptions();
 
         Window.addWindowClosingHandler(e -> {
             if (isUiDirty()) {
@@ -1168,27 +1159,6 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
         this.statusBinder.setSession(EntryClassUi.this.currentSession);
         this.statusBinder.setParent(this);
         this.statusBinder.loadStatusData(false);
-    }
-
-    private class WrapperRequest implements Callback<Void, String>, Request {
-
-        private AsyncCallback<Void> wrapped;
-
-        @Override
-        public void onSuccess(Void result) {
-            this.wrapped.onSuccess(null);
-        }
-
-        @Override
-        public void onFailure(String reason) {
-            this.wrapped.onFailure(new RuntimeException(reason));
-        }
-
-        @Override
-        public void run(RequestContext context) {
-            this.wrapped = context.callback();
-        }
-
     }
 
     @Override

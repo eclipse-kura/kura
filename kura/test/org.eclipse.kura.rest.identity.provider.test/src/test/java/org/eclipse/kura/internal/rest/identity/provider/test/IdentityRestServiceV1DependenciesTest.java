@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -28,8 +28,8 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV1;
 import org.eclipse.kura.internal.rest.identity.provider.LegacyIdentityService;
 import org.junit.Test;
@@ -46,7 +46,7 @@ public class IdentityRestServiceV1DependenciesTest {
 
     private UserAdmin userAdminMock;
     private CryptoService cryptoServiceMock;
-    private ConfigurationService configurationServiceMock;
+    private PasswordStrengthVerificationService passwordStrengthVerificationServiceMock;
 
     private LegacyIdentityService legacyIdentityServiceMock;
     private RequestHandlerRegistry requestHandlerRegistryMock;
@@ -123,7 +123,7 @@ public class IdentityRestServiceV1DependenciesTest {
     }
 
     private void givenMockConfigurationService() {
-        this.configurationServiceMock = mock(ConfigurationService.class);
+        this.passwordStrengthVerificationServiceMock = mock(PasswordStrengthVerificationService.class);
     }
 
     private void givenUserAdminMock() {
@@ -171,7 +171,7 @@ public class IdentityRestServiceV1DependenciesTest {
 
     private void whenActivateWithDependencies() {
         try {
-            this.service.bindConfigurationService(this.configurationServiceMock);
+            this.service.bindPasswordStrengthVerificationService(passwordStrengthVerificationServiceMock);
             this.service.bindCryptoService(this.cryptoServiceMock);
             this.service.bindLegacyIdentityService(this.legacyIdentityServiceMock);
             this.service.bindRequestHandlerRegistry(this.requestHandlerRegistryMock);

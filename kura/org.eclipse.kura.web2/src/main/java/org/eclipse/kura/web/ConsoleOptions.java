@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,7 +27,6 @@ import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
-import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 
 public class ConsoleOptions {
 
@@ -47,55 +46,6 @@ public class ConsoleOptions {
                             "The session max inactivity interval in minutes. If no interaction with the Web UI is performed for the value of this parameter in minutes, a new login will be requested.") //
                     .build(), //
             Integer.class);
-
-    private final SelfConfiguringComponentProperty<Boolean> bannerEnabled = new SelfConfiguringComponentProperty<>(
-            new AdBuilder("access.banner.enabled", "Access Banner Enabled", Tscalar.BOOLEAN) //
-                    .setDefault("false") //
-                    .setDescription("Enables or disables the displaying of a customizable banner at user login.") //
-                    .build(), //
-            Boolean.class);
-
-    private final SelfConfiguringComponentProperty<String> bannerContent = new SelfConfiguringComponentProperty<>(
-            new AdBuilder("access.banner.content", "Access Banner Content", Tscalar.STRING) //
-                    .setDefault("Sample Banner Content") //
-                    .setDescription(
-                            "Access banner content. To be displayed at every user access, if the feature is enabled.|TextArea") //
-                    .build(), //
-            String.class);
-
-    private final SelfConfiguringComponentProperty<Integer> passwordMinLength = new SelfConfiguringComponentProperty<>(
-            new AdBuilder("new.password.min.length", "Minimum password length", Tscalar.INTEGER) //
-                    .setDefault("8") //
-                    .setMin("0") //
-                    .setDescription("The minimum length to be enforced for new passwords. Set to 0 to disable.") //
-                    .build(), //
-            Integer.class);
-
-    private final SelfConfiguringComponentProperty<Boolean> passwordRequireDigits = new SelfConfiguringComponentProperty<>(
-            new AdBuilder("new.password.require.digits", "Require digits in new password", Tscalar.BOOLEAN) //
-                    .setDefault("false") //
-                    .setDescription(
-                            "If set to true, new passwords will be accepted only if containing at least one digit.") //
-                    .build(), //
-            Boolean.class);
-
-    private final SelfConfiguringComponentProperty<Boolean> passwordRequireSpecialCharacters = new SelfConfiguringComponentProperty<>(
-            new AdBuilder("new.password.require.special.characters", "Require special characters in new password",
-                    Tscalar.BOOLEAN) //
-                            .setDefault("false") //
-                            .setDescription(
-                                    "If set to true, new passwords will be accepted only if containing at least one non alphanumeric character.") //
-                            .build(), //
-            Boolean.class);
-
-    private final SelfConfiguringComponentProperty<Boolean> passwordRequireBothCases = new SelfConfiguringComponentProperty<>(
-            new AdBuilder("new.password.require.both.cases",
-                    "Require uppercase and lowercase characters in new passwords", Tscalar.BOOLEAN) //
-                            .setDefault("false") //
-                            .setDescription(
-                                    "If set to true, new passwords will be accepted only if containing both uppercase and lowercase alphanumeric characters.") //
-                            .build(), //
-            Boolean.class);
 
     private final SelfConfiguringComponentProperty<Integer[]> allowedPorts = new SelfConfiguringComponentProperty<>(
             new AdBuilder("allowed.ports", "Allowed ports", Tscalar.INTEGER) //
@@ -152,14 +102,6 @@ public class ConsoleOptions {
         return this.sessionMaxInactivityInterval.get();
     }
 
-    public boolean isBannerEnabled() {
-        return this.bannerEnabled.get();
-    }
-
-    public String getBannerContent() {
-        return this.bannerContent.get();
-    }
-
     public Set<String> getEnabledAuthMethods() {
         return this.authenticationMethodProperties.entrySet().stream().filter(e -> e.getValue().get())
                 .map(Map.Entry::getKey).collect(Collectors.toSet());
@@ -203,26 +145,9 @@ public class ConsoleOptions {
         return property.get();
     }
 
-    public GwtConsoleUserOptions getUserOptions() {
-        final GwtConsoleUserOptions result = new GwtConsoleUserOptions();
-
-        result.setPasswordMinimumLength(this.passwordMinLength.get());
-        result.setPasswordRequireDigits(this.passwordRequireDigits.get());
-        result.setPasswordRequireSpecialChars(this.passwordRequireSpecialCharacters.get());
-        result.setPasswordRequireBothCases(this.passwordRequireBothCases.get());
-
-        return result;
-    }
-
     private void initProperties() {
         this.configurationProperties.add(this.appRoot);
         this.configurationProperties.add(this.sessionMaxInactivityInterval);
-        this.configurationProperties.add(this.bannerEnabled);
-        this.configurationProperties.add(this.bannerContent);
-        this.configurationProperties.add(this.passwordMinLength);
-        this.configurationProperties.add(this.passwordRequireDigits);
-        this.configurationProperties.add(this.passwordRequireSpecialCharacters);
-        this.configurationProperties.add(this.passwordRequireBothCases);
         this.configurationProperties.add(this.allowedPorts);
         this.configurationProperties.add(this.sslManagerServiceTarget);
 
@@ -276,9 +201,7 @@ public class ConsoleOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.allowedPorts, this.appRoot, this.authenticationMethodProperties, this.bannerContent,
-                this.bannerEnabled, this.config, this.configurationProperties, this.passwordMinLength,
-                this.passwordRequireBothCases, this.passwordRequireDigits, this.passwordRequireSpecialCharacters,
+        return Objects.hash(this.allowedPorts, this.appRoot, this.authenticationMethodProperties,
                 this.sessionMaxInactivityInterval, this.sslManagerServiceTarget);
     }
 
@@ -295,13 +218,6 @@ public class ConsoleOptions {
 
         return Objects.equals(this.appRoot.get(), other.appRoot.get())
                 && Objects.equals(this.sessionMaxInactivityInterval.get(), other.sessionMaxInactivityInterval.get())
-                && Objects.equals(this.bannerEnabled.get(), other.bannerEnabled.get())
-                && Objects.equals(this.bannerContent.get(), other.bannerContent.get())
-                && Objects.equals(this.passwordMinLength.get(), other.passwordMinLength.get())
-                && Objects.equals(this.passwordRequireDigits.get(), other.passwordRequireDigits.get())
-                && Objects.equals(this.passwordRequireSpecialCharacters.get(),
-                        other.passwordRequireSpecialCharacters.get())
-                && Objects.equals(this.passwordRequireBothCases.get(), other.passwordRequireBothCases.get())
                 && Arrays.equals(
                         this.allowedPorts.getOptional().isPresent() ? this.allowedPorts.get() : new Integer[] {},
                         other.allowedPorts.getOptional().isPresent() ? other.allowedPorts.get() : new Integer[] {})

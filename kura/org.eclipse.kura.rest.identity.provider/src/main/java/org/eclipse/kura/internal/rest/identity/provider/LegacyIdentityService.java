@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -25,9 +25,9 @@ import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.identity.PasswordStrengthRequirements;
+import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
 import org.eclipse.kura.util.useradmin.UserAdminHelper;
 import org.eclipse.kura.util.useradmin.UserAdminHelper.FallibleConsumer;
@@ -42,7 +42,6 @@ import org.osgi.service.useradmin.UserAdmin;
 public class LegacyIdentityService {
 
     private static final String IDENTITY = "Identity ";
-    private static final String KURA_WEB_CONSOLE_SERVICE_PID = "org.eclipse.kura.web.Console";
     private static final String PERMISSION_ROLE_NAME_PREFIX = "kura.permission.";
     private static final String USER_ROLE_NAME_PREFIX = "kura.user.";
 
@@ -50,13 +49,13 @@ public class LegacyIdentityService {
     private static final String PASSWORD_PROPERTY = "kura.password";
 
     private final UserAdminHelper userAdminHelper;
-    private final ConfigurationService configurationService;
+    private final PasswordStrengthVerificationService passwordStrengthVerificationService;
     private final CryptoService cryptoService;
 
     public LegacyIdentityService(CryptoService cryptoService, UserAdmin userAdmin,
-            ConfigurationService configurationService) {
+            PasswordStrengthVerificationService passwordStrengthVerificationService) {
 
-        this.configurationService = configurationService;
+        this.passwordStrengthVerificationService = passwordStrengthVerificationService;
         this.cryptoService = cryptoService;
 
         this.userAdminHelper = new UserAdminHelper(userAdmin, cryptoService);
@@ -249,10 +248,11 @@ public class LegacyIdentityService {
     }
 
     public ValidatorOptions getValidatorOptions() throws KuraException {
-        ComponentConfiguration consoleConfig = this.configurationService
-                .getComponentConfiguration(KURA_WEB_CONSOLE_SERVICE_PID);
 
-        return new ValidatorOptions(consoleConfig.getConfigurationProperties());
+        final PasswordStrengthRequirements requirements = this.passwordStrengthVerificationService
+                .getPasswordStrengthRequirements();
 
+        return new ValidatorOptions(requirements.getPasswordMinimumLength(), requirements.digitsRequired(),
+                requirements.bothCasesRequired(), requirements.specialCharactersRequired());
     }
 }

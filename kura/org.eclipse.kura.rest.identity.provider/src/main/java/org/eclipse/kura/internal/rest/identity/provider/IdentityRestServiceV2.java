@@ -39,6 +39,10 @@ import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PasswordStrenghtR
 import org.eclipse.kura.internal.rest.identity.provider.v2.dto.PermissionDTO;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
@@ -58,6 +62,9 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 @Path("identity/v2")
+@Component(immediate = true, property = {
+        "kura.service.pid=org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2",
+        "osgi.jakartars.resource=true" }, service = IdentityRestServiceV2.class)
 public class IdentityRestServiceV2 {
 
     private static final String NAME_REQUEST_FIELD = "name";
@@ -76,10 +83,12 @@ public class IdentityRestServiceV2 {
     private IdentityService identityService;
     private PasswordStrengthVerificationService passwordStrengthVerificationService;
 
+    @Reference
     public void bindUserAdmin(UserAdmin userAdmin) {
         userAdmin.createRole(KURA_PERMISSION_REST_ROLE, Role.GROUP);
     }
 
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
     public void bindRequestHandlerRegistry(RequestHandlerRegistry registry) {
         try {
             registry.registerRequestHandler(MQTT_APP_ID, this.requestHandler);
@@ -96,10 +105,12 @@ public class IdentityRestServiceV2 {
         }
     }
 
+    @Reference
     public void bindIdentityService(IdentityService identityService) {
         this.identityService = identityService;
     }
 
+    @Reference
     public void bindPasswordStrengthVerificationService(
             PasswordStrengthVerificationService passwordStrengthVerificationService) {
         this.passwordStrengthVerificationService = passwordStrengthVerificationService;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -36,7 +36,6 @@ import org.gwtbootstrap3.client.ui.PanelFooter;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.constants.HeadingSize;
 import org.gwtbootstrap3.client.ui.constants.InputType;
-import org.gwtbootstrap3.client.ui.form.validator.Validator;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -86,7 +85,6 @@ public class UserConfigUi extends Composite {
 
     private final ListDataProvider<AssignedPermission> dataProvider = new ListDataProvider<>();
     private final boolean hasPassword;
-    private final List<Validator<String>> passwordStrengthValidators;
 
     private SimplePager pager;
 
@@ -94,7 +92,6 @@ public class UserConfigUi extends Composite {
         this.listener = listener;
         this.userData = userData;
         this.hasPassword = userData.isPasswordAuthEnabled();
-        this.passwordStrengthValidators = GwtValidators.newPassword(EntryClassUi.getUserOptions());
         initWidget(uiBinder.createAndBindUi(this));
         initTable(userData, definedPermissions);
         initPasswordWidgets();
@@ -262,34 +259,38 @@ public class UserConfigUi extends Composite {
     }
 
     private void pickPassword() {
-        final Runnable onDismiss = () -> {
-            if (!this.hasPassword) {
-                this.passwordEnabled.setValue(false);
-                this.passwordDisabled.setValue(true);
-                this.userData.setPasswordAuthEnabled(false);
-                updatePasswordWidgetState();
-            }
-        };
 
-        this.picker.builder() //
-                .setTitle(MSGS.usersSetPassword()) //
-                .setMessage(MSGS.usersDefineNewPassword()) //
-                .setInputCustomizer(input -> input.setType(InputType.PASSWORD)) //
-                .setOnCancel(onDismiss) //
-                .setValidators(this.passwordStrengthValidators) //
-                .setOnPick(newPassword -> this.picker.builder() //
-                        .setTitle(MSGS.usersConfirmPassword()) //
-                        .setMessage(MSGS.usersRepeatPassword()) //
-                        .setInputCustomizer(input -> input.setType(InputType.PASSWORD)) //
-                        .setOnCancel(onDismiss) //
-                        .setValidators(Collections.singletonList(
-                                GwtValidators.predicate(confirm -> newPassword.equals(confirm),
-                                        MSGS.usersPasswordMismatch()))) //
-                        .setOnPick(p -> {
-                            this.userData.setNewPassword(Optional.of(p));
-                            this.listener.onUserDataChanged(this.userData);
-                        }).pick())
-                .pick();
+        EntryClassUi.loadPasswordStrengthRequirements(passwordStrengthRequirements -> {
+
+            final Runnable onDismiss = () -> {
+                if (!this.hasPassword) {
+                    this.passwordEnabled.setValue(false);
+                    this.passwordDisabled.setValue(true);
+                    this.userData.setPasswordAuthEnabled(false);
+                    updatePasswordWidgetState();
+                }
+            };
+
+            this.picker.builder() //
+                    .setTitle(MSGS.usersSetPassword()) //
+                    .setMessage(MSGS.usersDefineNewPassword()) //
+                    .setInputCustomizer(input -> input.setType(InputType.PASSWORD)) //
+                    .setOnCancel(onDismiss) //
+                    .setValidators(GwtValidators.newPassword(passwordStrengthRequirements)) //
+                    .setOnPick(newPassword -> this.picker.builder() //
+                            .setTitle(MSGS.usersConfirmPassword()) //
+                            .setMessage(MSGS.usersRepeatPassword()) //
+                            .setInputCustomizer(input -> input.setType(InputType.PASSWORD)) //
+                            .setOnCancel(onDismiss) //
+                            .setValidators(Collections.singletonList(GwtValidators
+                                    .predicate(confirm -> newPassword.equals(confirm), MSGS.usersPasswordMismatch()))) //
+                            .setOnPick(p -> {
+                                this.userData.setNewPassword(Optional.of(p));
+                                this.listener.onUserDataChanged(this.userData);
+                            }).pick())
+                    .pick();
+        });
+
     }
 
     public void updatePasswordWidgetState() {

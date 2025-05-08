@@ -19,8 +19,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
+import org.eclipse.kura.identity.LoginBannerService;
+import org.eclipse.kura.identity.PasswordStrengthRequirements;
+import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.internal.rest.auth.dto.AuthenticationInfoDTO;
 import org.eclipse.kura.internal.rest.auth.dto.AuthenticationResponseDTO;
 import org.eclipse.kura.internal.rest.auth.dto.IdentityInfoDTO;
@@ -67,13 +71,19 @@ public class SessionRestService {
     private final UserAdminHelper userAdminHelper;
     private final RestSessionHelper restSessionHelper;
     private final ConfigurationAdmin configAdmin;
+    private final PasswordStrengthVerificationService passwordStrengthVerificationService;
+    private final LoginBannerService loginBannerService;
     private RestServiceOptions options;
 
     public SessionRestService(final UserAdminHelper userAdminHelper, final RestSessionHelper restSessionHelper,
-            final ConfigurationAdmin configurationAdmin) {
+            final ConfigurationAdmin configurationAdmin,
+            final PasswordStrengthVerificationService passwordStrengthVerificationService,
+            final LoginBannerService loginBannerService) {
         this.userAdminHelper = userAdminHelper;
         this.restSessionHelper = restSessionHelper;
         this.configAdmin = configurationAdmin;
+        this.passwordStrengthVerificationService = passwordStrengthVerificationService;
+        this.loginBannerService = loginBannerService;
     }
 
     public void setOptions(final RestServiceOptions options) {
@@ -260,10 +270,7 @@ public class SessionRestService {
         final boolean isPasswordAuthEnabled = options.isPasswordAuthEnabled();
         final boolean isCertificateAuthenticationEnabled = options.isCertificateAuthEnabled();
 
-        final Map<String, Object> consoleConfig = ConfigurationAdminHelper
-                .loadConsoleConfigurationProperties(configAdmin);
-
-        final String message = ConfigurationAdminHelper.getLoginMessage(consoleConfig).orElse(null);
+        final String message = loginBannerService.getPreLoginBanner().orElse(null);
 
         if (!isCertificateAuthenticationEnabled) {
             return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, message);
@@ -283,8 +290,17 @@ public class SessionRestService {
     }
 
     private void validatePasswordStrength(final String newPassword) {
+        PasswordStrengthRequirements passwordStrengthRequirements;
+        try {
+            passwordStrengthRequirements = this.passwordStrengthVerificationService.getPasswordStrengthRequirements();
+        } catch (KuraException e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+
         final ValidatorOptions validationOptions = new ValidatorOptions(
-                ConfigurationAdminHelper.loadConsoleConfigurationProperties(configAdmin));
+                passwordStrengthRequirements.getPasswordMinimumLength(), passwordStrengthRequirements.digitsRequired(),
+                passwordStrengthRequirements.bothCasesRequired(),
+                passwordStrengthRequirements.specialCharactersRequired());
 
         final List<Validator<String>> validators = PasswordStrengthValidators.fromConfig(validationOptions);
 

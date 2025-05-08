@@ -1,18 +1,19 @@
 /*******************************************************************************
  * Copyright (c) 2020, 2025 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.security;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -90,6 +91,10 @@ public class SecurityPanelUi extends Composite {
     @UiField
     TabPane consolePanel;
     @UiField
+    TabPane passwordStrengthPanel;
+    @UiField
+    TabPane loginBannersPanel;
+    @UiField
     ThreatManagerTabUi threatManagerPanel;
     @UiField
     TamperDetectionTabUi tamperDetectionPanel;
@@ -106,6 +111,10 @@ public class SecurityPanelUi extends Composite {
     TabListItem httpService;
     @UiField
     TabListItem console;
+    @UiField
+    TabListItem passwordStrength;
+    @UiField
+    TabListItem loginBanners;
     @UiField
     TabListItem threatManager;
     @UiField
@@ -149,6 +158,8 @@ public class SecurityPanelUi extends Composite {
 
             this.httpService.setVisible(true);
             this.console.setVisible(true);
+            this.passwordStrength.setVisible(true);
+            this.loginBanners.setVisible(true);
             this.security.setVisible(capabilities.isSecurityServiceAvailable());
             this.threatManager.setVisible(capabilities.isThreatManagerAvailable());
 
@@ -165,6 +176,12 @@ public class SecurityPanelUi extends Composite {
                             }))));
             this.console.addClickHandler(addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.web.Console",
                     consolePanel, getConsoleOptionsValidator())));
+            this.passwordStrength.addClickHandler(addDirtyCheck(
+                    e -> this.loadServiceConfig("org.eclipse.kura.identity.PasswordStrengthVerificationService",
+                            passwordStrengthPanel, c -> Collections.emptyList())));
+            this.loginBanners.addClickHandler(
+                    addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.identity.LoginBannerService",
+                            loginBannersPanel, c -> Collections.emptyList())));
             this.threatManager.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.threatManagerPanel)));
             this.tamperDetection
                     .addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.tamperDetectionPanel, true)));
@@ -225,10 +242,12 @@ public class SecurityPanelUi extends Composite {
         boolean securityDirty = this.securityPanel.isDirty();
         boolean threatManagerDirty = this.threatManagerPanel.isDirty();
         boolean webConsoleDirty = isServicesUiDirty(this.consolePanel);
+        boolean passwordStrengthDirty = isServicesUiDirty(this.passwordStrengthPanel);
+        boolean loginBannersDirty = isServicesUiDirty(this.loginBannersPanel);
         boolean httpServiceDirty = isServicesUiDirty(this.httpServicePanel);
 
         return certListDirty || sslConfigDirty || keystoreConfigDirty || threatManagerDirty || securityDirty
-                || webConsoleDirty || httpServiceDirty;
+                || webConsoleDirty || passwordStrengthDirty || loginBannersDirty || httpServiceDirty;
     }
 
     public void setDirty(boolean b) {
@@ -239,6 +258,8 @@ public class SecurityPanelUi extends Composite {
         this.threatManagerPanel.setDirty(b);
         getServicesUi(this.httpServicePanel).ifPresent(u -> u.setDirty(b));
         getServicesUi(this.consolePanel).ifPresent(u -> u.setDirty(b));
+        getServicesUi(this.passwordStrengthPanel).ifPresent(u -> u.setDirty(b));
+        getServicesUi(this.loginBannersPanel).ifPresent(u -> u.setDirty(b));
     }
 
     private ClickHandler addDirtyCheck(final ClickHandler handler) {

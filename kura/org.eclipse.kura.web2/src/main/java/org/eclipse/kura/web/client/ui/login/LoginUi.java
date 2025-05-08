@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2019, 2025 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -24,7 +24,7 @@ import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
-import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
+import org.eclipse.kura.web.shared.model.GwtPasswordStrenghtRequirements;
 import org.eclipse.kura.web.shared.model.GwtLoginInfo;
 import org.eclipse.kura.web.shared.model.GwtPasswordAuthenticationResult;
 import org.eclipse.kura.web.shared.service.GwtLoginInfoService;
@@ -355,10 +355,10 @@ public class LoginUi extends Composite {
 
         }
 
-        private void getGwtConsoleUserOptions(final Consumer<GwtConsoleUserOptions> onSuccess,
+        private void getGwtConsoleUserOptions(final Consumer<GwtPasswordStrenghtRequirements> onSuccess,
                 final Consumer<Throwable> onFailure) {
             gwtXsrfService.generateSecurityToken(asyncCallback(
-                    token -> gwtSessionService.getUserOptions(token, asyncCallback(onSuccess, onFailure)), onFailure));
+                    token -> gwtSessionService.getPasswordStrenghtRequirements(token, asyncCallback(onSuccess, onFailure)), onFailure));
         }
 
         private void setNewPassword(final String oldPassword, final String newPassword, final Consumer<Void> onSuccess,

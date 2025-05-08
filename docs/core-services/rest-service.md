@@ -4,7 +4,7 @@ Kura provides a built-in REST Service based on the [osgi-jax-rs-connector](https
 
 By default, REST service providers register their services using the context path `/services`. The REST service provides the **BASIC** Authentication support and HTTPS client certificate authentication support.
 
-Starting from Kura 5.4.0, REST service provides built in session management support, the [Session REST APIs](doc:rest-session-api) can be used to establish a session. Using sessions is the recommended way for interacting with Kura REST APIs from a browser based application, for this use case it is also possible to disable the default session-less BASIC and certificate based authentication (see the **Basic Authentication Enabled** and **Enable Certificate Authentication Whitout Session Management** configuration parameters below).
+Starting from Kura 5.4.0, REST service provides built in session management support, the [Session REST APIs](doc:rest-session-api) can be used to establish a session. Using sessions is the recommended way for interacting with Kura REST APIs from a browser based application. To support this new mode, starting from Eclipse Kura 5.5.0 session-less BASIC and certificate based authentication are disabled by default (see the **Basic Authentication Enabled** and **Enable Certificate Authentication Whitout Session Management** configuration parameters below).
 
 REST API access is available on all HTTP ports defined in the [HTTP/HTTPS Configuration](doc:httphttps-configuration) section. By default this parameter is set to allow access from ports 443 and 4443 (standard HTTPS and certificate-based authentication ports).
 
@@ -33,9 +33,9 @@ The available configuration parameters are the following:
 
 * **Session Inactivity Interval (Seconds)**: The session inactivity interval, sessions will expire if no request is performed for the amount of time specified by this parameter in seconds. This parameter is ignored if Session Based Authentication Enabled is set to false. (Default: 900)
 
-* **Basic Authentication Enabled**: Allows to perform authentication by providing identity name and password as BASIC credentials in the request to any resource endpoint. Requires that the **Password Authentication Enabled parameter** is set to true. (Default: true)
+* **Basic Authentication Enabled**: Allows to perform authentication by providing identity name and password as BASIC credentials in the request to any resource endpoint. Requires that the **Password Authentication Enabled parameter** is set to true. (Default: false)
 
-* **Enable Certificate Authentication Without Session Management**: If set to true, calling `/services/session/v1/certificate` to create a session will not be necessary in order to perform certificate based authentication. Presenting a valid HTTPS client certificate and accessing resource endpoint directly is enough for authentication to succeed. Requires that the **Certificate Authentication Enabled** parameter is set to true. (Default: true)
+* **Enable Certificate Authentication Without Session Management**: If set to true, calling `/services/session/v1/certificate` to create a session will not be necessary in order to perform certificate based authentication. Presenting a valid HTTPS client certificate and accessing resource endpoint directly is enough for authentication to succeed. Requires that the **Certificate Authentication Enabled** parameter is set to true. (Default: false)
 
 ## Custom authentication methods
 

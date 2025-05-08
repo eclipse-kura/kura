@@ -61,13 +61,119 @@
         <!-- final name of the generated debian and rpm package -->
         <package.name>${artifactId}</package.name>
 
+        <!-- properties used for artifact upload on artifactory repository -->
+        <kura.repo.distribution>CHANGEME</kura.repo.distribution>
+        <kura.repo.module>CHANGEME</kura.repo.module>
+
         <!-- edit following fields and file deb/control/control -->
         <summary>Summary line (do not end this line with a dot, max 60 chars)</summary>
         <long.description>Here goes the long description of the packages, in this case this is an example addon for the Eclipse Kura Framework.</long.description>
     </properties>
 
+    <profiles>
+        <!-- Internal profile: FOR INTERNAL USE ONLY - active if -DreleaseBuild is *not* specified. -->
+        <profile>
+            <id>debugBuild</id>
+            <activation>
+                <property>
+                    <name>!releaseBuild</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
+                <package.snapshot>git${maven.build.timestamp}.${git.commit.id.abbrev}</package.snapshot>
+
+                <package.version>${release.version}~${package.snapshot}</package.version>
+                <package.revision>1</package.revision>
+            </properties>
+        </profile>
+        <!-- Internal profile: FOR INTERNAL USE ONLY - active if -DreleaseBuild *is* specified. -->
+        <profile>
+            <id>releaseBuild</id>
+            <activation>
+                <property>
+                    <name>releaseBuild</name>
+                </property>
+            </activation>
+            <properties>
+                <package.version>${release.version}</package.version>
+                <package.revision>1</package.revision>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <execution>
+                                <id>enforce-no-snapshots</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireReleaseVersion>
+                                            <message>No snapshots allowed for release builds!</message>
+                                        </requireReleaseVersion>
+                                    </rules>
+                                    <fail>true</fail>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
+            <!-- Responsible for removing the "-SNAPSHOT" from the project.version -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>regex-property</id>
+                        <goals>
+                            <goal>regex-property</goal>
+                        </goals>
+                        <configuration>
+                            <name>release.version</name>
+                            <value>${project.version}</value>
+                            <regex>-SNAPSHOT</regex>
+                            <replacement></replacement>
+                            <failIfNoMatch>false</failIfNoMatch>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Responsible for retrieving the short git commit (defaults to length 7)-->
+            <plugin>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
+                <version>9.0.1</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <injectAllReactorProjects>true</injectAllReactorProjects>
+                    <generateGitPropertiesFile>false</generateGitPropertiesFile>
+                    <skipPoms>false</skipPoms>
+                    <includeOnlyProperties>
+                        <includeOnlyProperty>^git.commit.id.abbrev$</includeOnlyProperty>
+                    </includeOnlyProperties>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>com.coderplus.maven.plugins</groupId>
                 <artifactId>copy-rename-maven-plugin</artifactId>
@@ -100,7 +206,9 @@
                         </goals>
                         <configuration>
                             <verbose>true</verbose>
-                            <deb>${basedir}/target/deb/${package.name}_${project.version}_${deb.architecture}.deb</deb>
+                            <deb>${basedir}/target/deb/${package.name}_${package.version}-${package.revision}_${deb.architecture}.deb</deb>
+                            <snapshotExpand>true</snapshotExpand>
+                            <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                             <controlDir>${project.basedir}/deb/control</controlDir>
                             <skipPOMs>false</skipPOMs>
                             <dataSet>
@@ -121,12 +229,12 @@
                                     </mapper>
                                 </data>
 
-                                <!-- 
-                                
+                                <!--
+
                                 If all the source file are managed in the same way, it is also
                                 possible to specify a 'directory' data type to include all the files
                                 present in the specify path
-                                
+
                                 <data>
                                     <src>${basedir}/target/input_files</src>
                                     <dst>${jar.name}_${project.version}.jar</dst>
@@ -139,7 +247,7 @@
                                         <filemode>600</filemode>
                                     </mapper>
                                 </data>
-                                
+
                                 -->
                             </dataSet>
                         </configuration>
@@ -168,6 +276,13 @@
                             <description>${long.description}</description>
                             <license>EPL 2.0 (https://www.eclipse.org/legal/epl-2.0/)</license>
 
+                            <projversion>${package.version}</projversion>
+                            <release>${package.revision}</release>
+
+                            <requires>
+                                <require>kura-core &gt;= 6.0.0~, kura-core &lt; 7.0.0~</require>
+                            </requires>
+
                             <mappings>
                                 <!-- Repeate the 'mapping' schema multiple time if you want to
                                 manage different files indipendentely, specifying for each one the
@@ -190,11 +305,11 @@
                                     </sources>
                                 </mapping>
 
-                                <!-- 
-                                
+                                <!--
+
                                 If all the source file are managed in the same way, it is also possible to specify the path to a
                                 directory to include all the files present in that
-                                
+
                                 <mapping>
                                     <directory>${addon.installation.dir}</directory>
                                     <filemode>600</filemode>
@@ -207,7 +322,7 @@
                                         </source>
                                     </sources>
                                 </mapping>
-                                
+
                                 -->
                             </mappings>
 

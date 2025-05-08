@@ -1149,6 +1149,11 @@
                     <artifactId>org.eclipse.kura.request.handler.jaxrs</artifactId>
                     <version>${org.eclipse.kura.request.handler.jaxrs.version}</version>
                 </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.kura.util.wire.test</artifactId>
+                    <version>${kura.version}</version>
+                </dependency>
             </dependencies>
         </location>
 

@@ -11,7 +11,7 @@
 #  Eurotech
 #
 Package: kura
-Version: [[project.version]]
+Version: [[version]]-[[package.revision]]
 Section: admin
 Priority: optional
 Depends: openjdk-17-jre-headless | temurin-17-jdk,

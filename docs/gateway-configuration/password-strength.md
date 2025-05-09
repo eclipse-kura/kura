@@ -1,8 +1,8 @@
 # Password Strength Configuration
 
-Kura allows to configure and enforce password strenght requirements that are applied to new passwords, for example when a user changes its password at first access.
+Kura allows to configure and enforce password strength requirements that are applied to new passwords, for example when a user changes its password at first access.
 
-The password strenght related settings can be configured in the **Security** -> **Password Strength** section of Kura web ui.
+The password strength related settings can be configured in the **Security** -> **Password Strength** section of Kura web ui.
 
 ![Password Strength Options](./images/password-strength.png)
 

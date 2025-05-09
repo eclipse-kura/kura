@@ -21,8 +21,9 @@
 	
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
-		<kura.skip.if.target.definition.profile>true</kura.skip.if.target.definition.profile>
+		<kura.target.definition.location>.</kura.target.definition.location>
 		<kura.skip.replace.target.file>true</kura.skip.replace.target.file>
+		<kura.skip.if.target.definition.build>true</kura.skip.if.target.definition.build>
 	</properties>
 
 	<parent>

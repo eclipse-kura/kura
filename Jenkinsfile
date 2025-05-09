@@ -79,16 +79,6 @@ spec:
             }
         }
 
-        stage('Build Kura target-definition') {
-            timeout(time: 1, unit: 'HOURS') {
-                dir('kura') {
-                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
-                        sh 'mvn -f kura/distrib/pom.xml clean install -Ptarget-definition'
-                    }
-                }
-            }
-        }
-
         stage('Build examples') {
             timeout(time: 1, unit: 'HOURS') {
                 dir("kura") {

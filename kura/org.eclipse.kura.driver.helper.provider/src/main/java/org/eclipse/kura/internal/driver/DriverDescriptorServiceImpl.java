@@ -51,7 +51,9 @@ public class DriverDescriptorServiceImpl implements DriverDescriptorService {
         final ServiceReference<Driver>[] refs = getDriverServiceReferences(filterString);
         try {
             for (final ServiceReference<Driver> driverServiceReference : refs) {
-                String factoryPid = driverServiceReference.getProperty(SERVICE_FACTORYPID).toString();
+                String factoryPid = driverServiceReference.getProperty(SERVICE_FACTORYPID) != null
+                        ? driverServiceReference.getProperty(SERVICE_FACTORYPID).toString()
+                        : null;
                 Driver driver = this.bundleContext.getService(driverServiceReference);
                 driverDescriptor = newDriverDescriptor(driverPid, factoryPid, driver);
             }
@@ -70,7 +72,9 @@ public class DriverDescriptorServiceImpl implements DriverDescriptorService {
         try {
             for (final ServiceReference<Driver> driverServiceReference : refs) {
                 String driverPid = driverServiceReference.getProperty(KURA_SERVICE_PID).toString();
-                String factoryPid = driverServiceReference.getProperty(SERVICE_FACTORYPID).toString();
+                String factoryPid = driverServiceReference.getProperty(SERVICE_FACTORYPID) != null
+                        ? driverServiceReference.getProperty(SERVICE_FACTORYPID).toString()
+                        : null;
                 Driver driver = this.bundleContext.getService(driverServiceReference);
                 driverDescriptors.add(newDriverDescriptor(driverPid, factoryPid, driver));
             }

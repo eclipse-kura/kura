@@ -101,7 +101,7 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
         this.configurations.clear();
         DriversAndAssetsRPC.loadDriverAndAssetInfo(result -> {
 
-            this.configurations.setChannelDescriptiors(result.getDriverDescriptors());
+            this.configurations.setChannelDescriptors(result.getDriverDescriptors());
 
             final Optional<GwtConfigComponent> baseChannelDescriptor = result.getBaseChannelDescriptor();
 
@@ -276,11 +276,14 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
     public void onSelectionChanged(DriverAssetInfo info) {
         if (info != null) {
             this.deleteButton.setEnabled(true);
-            this.newAssetButton.setEnabled(supportedFeatures.isAssetAvailable() && !info.isAsset() && info.isValid());
+            // this.newAssetButton.setEnabled(supportedFeatures.isAssetAvailable() && !info.isAsset() &&
+            // info.isValid()); commented for testing purpose
         } else {
             this.deleteButton.setEnabled(false);
-            this.newAssetButton.setEnabled(false);
+            // this.newAssetButton.setEnabled(false); commented for testing purpose
         }
+
+        this.newAssetButton.setEnabled(true); // for testing purpose
     }
 
 }

@@ -110,12 +110,8 @@ public class DriversAndAssetsListUi extends Composite {
 
             HasConfiguration hasConfiguration = this.configurations.getConfiguration(pid);
 
-            if (hasConfiguration == null) {
-                showWarning(selectedInstanceEntry.getPid(), MSGS.errorComponentConfigurationMissing(pid));
-            } else {
+            fillWithConfiguration(selectedInstanceEntry, pid, hasConfiguration);
 
-                fillWithConfiguration(selectedInstanceEntry, pid, hasConfiguration);
-            }
             this.configurationArea.setVisible(true);
         });
     }
@@ -224,6 +220,11 @@ public class DriversAndAssetsListUi extends Composite {
         final List<DriverAssetInfo> result = new ArrayList<>();
         final Map<String, List<DriverAssetInfo>> grouped = new HashMap<>();
 
+        for (Entry<String, GwtConfigComponent> channelDescriptorEntry : this.configurations.getChannelDescriptors()
+                .entrySet()) {
+            getAssetsForDriver(grouped, channelDescriptorEntry.getKey());
+        }
+
         final Collection<HasConfiguration> configs = this.configurations.getConfigurations();
 
         for (HasConfiguration config : configs) {
@@ -231,8 +232,6 @@ public class DriversAndAssetsListUi extends Composite {
 
             if (entry.isAsset()) {
                 getAssetsForDriver(grouped, entry.getDriverPid()).add(entry);
-            } else if (config.getConfiguration().isDriver()) {
-                getAssetsForDriver(grouped, entry.getPid());
             }
         }
 

@@ -258,7 +258,7 @@ public class WiresPanelUi extends Composite
     }
 
     private void loadStaticInformation(GwtWireComposerStaticInfo staticInfo) {
-        this.configurations.setChannelDescriptiors(staticInfo.getDriverDescriptors());
+        this.configurations.setChannelDescriptors(staticInfo.getDriverDescriptors());
         this.configurations.setBaseChannelDescriptor(staticInfo.getBaseChannelDescriptor());
         this.configurations.setComponentDefinitions(staticInfo.getComponentDefinitions());
         this.descriptors.setDescriptors(staticInfo.getWireComponentDescriptors());

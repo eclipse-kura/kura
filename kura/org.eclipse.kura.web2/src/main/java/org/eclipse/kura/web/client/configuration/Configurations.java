@@ -123,11 +123,15 @@ public class Configurations {
         }
     }
 
-    public void setChannelDescriptiors(List<GwtConfigComponent> descriptors) {
+    public void setChannelDescriptors(List<GwtConfigComponent> descriptors) {
         this.channelDescriptors.clear();
         for (GwtConfigComponent descriptor : descriptors) {
             this.channelDescriptors.put(descriptor.getComponentId(), descriptor);
         }
+    }
+
+    public Map<String, GwtConfigComponent> getChannelDescriptors() {
+        return this.channelDescriptors;
     }
 
     public GwtConfigComponent getChannelDescriptor(String pid) {

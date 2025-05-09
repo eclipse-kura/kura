@@ -16,37 +16,21 @@ The default value set is 15 minutes
 
 ## Access Banner Enabled
 
-For security reasons, it may be needed to display to the user a banner that describes the intended system use before authenticating.
+The web console support showing configurable access banners, see the [Login Banners](access-banner.md) section for more details.
 
-![Web Console Configuration Access Banner Content](./images/web-console-configuration-access-banner-content.png)
+!!! note
 
-Once enabled and configured, the Kura Web UI will display a banner before every access attempt, as depicted in the image below.
-
-![Web Console Configuration Access Banner Login](./images/web-console-configuration-access-banner-login.png)
+    In Kura 5.X, the access banner related settings were available in the **Security** -> **Web Console** section of Kura Web Console, starting from Kura 6 they have been moved to the **Security** -> **Login Banners** section.
 
 ## Password Management
 
-This section is related to the definition of required parameters that must be respected when defining a new password, for example when a user changes its password at first access.
+Kura allows to configure and enforce password strenght requirements that are applied to new passwords, for example when a user changes its password at first access.
 
-### Minimum password length
+See the [Password Strenght Configuration](password-strength.md) section for more details.
 
-The minimum length to be enforced for new passwords. Set to 0 to disable.
-The default value set is 8 characters
+!!! note
 
-### Require digits in new password
-
-If set to true, new passwords will be accepted only if containing at least one digit.
-The default value is false
-
-### Require special characters in new password
-
-If set to true, new passwords will be accepted only if containing at least one non alphanumeric character
-The default value is false
-
-### Require uppercase and lowercase characters in new passwords
-
-If set to true, new passwords will be accepted only if containing both uppercase and lowercase alphanumeric characters.
-The default value is false
+    In Kura 5.X, the password strength related settings were available in the **Security** -> **Web Console** section of Kura Web Console, starting from Kura 6 they have been moved to the **Security** -> **Password Strength** section.
 
 ## Allowed ports
 

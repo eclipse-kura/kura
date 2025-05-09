@@ -347,7 +347,7 @@ An object containing information about the enabled authentication methods.
 
   
   * **message**: `string` (**optional**)
-      Reports the content of the Login Banner, if configured on the device. A browser based application should display this message to the user before login if this property is set.
+      Reports the content of the Pre Login Banner, if configured on the device. A browser based application should display this message to the user before login if this property is set.
           This property will be missing if the login banner is not enabled.
 
   

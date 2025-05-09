@@ -26,7 +26,7 @@ The web console support showing configurable access banners, see the [Login Bann
 
 Kura allows to configure and enforce password strenght requirements that are applied to new passwords, for example when a user changes its password at first access.
 
-See the [Password Strenght Configuration](password-strength.md) section for more details.
+See the [Password Strength Configuration](password-strength.md) section for more details.
 
 !!! note
 

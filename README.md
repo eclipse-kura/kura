@@ -150,6 +150,12 @@ Build the examples (optional):
 mvn -f kura/examples/pom.xml clean install
 ```
 
+Build the Kura Target Definition, useful for development of addons (optional):
+
+```bash
+mvn -f kura/distrib/pom.xml clean install -Ptarget-definition
+```
+
 Build the target profiles:
 
 ```bash

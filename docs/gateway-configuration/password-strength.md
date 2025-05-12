@@ -18,7 +18,7 @@ The default value is false
 
 ### Require special characters in new password
 
-If set to true, new passwords will be accepted only if containing at least one non alphanumeric character
+If set to true, new passwords will be accepted only if containing at least one non alphanumeric character.
 The default value is false
 
 ### Require uppercase and lowercase characters in new passwords

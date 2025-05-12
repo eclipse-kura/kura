@@ -33,7 +33,6 @@
         <maven.dependency.plugin.version>3.1.1</maven.dependency.plugin.version>
         <jacoco.maven.plugin.version>0.8.12</jacoco.maven.plugin.version>
         <kura.workdir>${project.build.directory}/test-env</kura.workdir>
-        <skip.copy.target.definition>true</skip.copy.target.definition>
     </properties>
 
     <build>

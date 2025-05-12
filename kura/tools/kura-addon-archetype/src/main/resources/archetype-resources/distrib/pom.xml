@@ -36,7 +36,6 @@
     </organization>
 
     <properties>
-    	<skip.copy.target.definition>true</skip.copy.target.definition>
     	
         <!--
             With n being the start level, config.ini will be populated depending on which plugins directory the bundle is put:

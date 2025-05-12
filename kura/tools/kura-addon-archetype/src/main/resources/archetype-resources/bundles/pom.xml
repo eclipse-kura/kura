@@ -51,7 +51,6 @@
         <skip.artifact.signing>true</skip.artifact.signing>
         <keystore.type>JKS</keystore.type>
         <kura.target.definition.version>${project.version}</kura.target.definition.version>
-        <skip.copy.target.definition>false</skip.copy.target.definition>
     </properties>
 
     <build>
@@ -281,7 +280,6 @@
                                 <goal>copy</goal>
                             </goals>
                             <configuration>
-                                <skip>\${skip.copy.target.definition}</skip>
                                 <artifactItems>
                                     <artifactItem>
                                         <groupId>org.eclipse.kura</groupId>
@@ -327,6 +325,32 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jarsigner-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-local-target-definition</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>kura-target-definition.target</artifactId>
+                                    <version>\${kura.target.definition.version}</version>
+                                    <type>target</type>
+                                    <outputDirectory>\${project.basedir}/../target-definition</outputDirectory>
+                                    <destFileName>kura-target-definition.target</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

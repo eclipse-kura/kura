@@ -28,7 +28,6 @@
         <sonar.coverage.jacoco.xmlReportPaths>
             ${project.basedir}/../../tests/*/target/site/jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
-        <skip.copy.target.definition>true</skip.copy.target.definition>
     </properties>
 
     <artifactId>${artifactId}.bundle</artifactId>

@@ -144,13 +144,7 @@ Build the core components:
 mvn -f kura/pom.xml clean install
 ```
 
-Build the Kura Target Definition, useful for development of addons (optional):
-
-```bash
-mvn -f kura/distrib/pom.xml clean install -Ptarget-definition
-```
-
-Build the target profiles:
+Build the target profiles and the Eclipse Kura Target Definition:
 
 ```bash
 mvn -f kura/distrib/pom.xml clean install -DbuildAll
@@ -163,6 +157,12 @@ To list the available installer profiles, run:
 
 ```bash
 mvn -f kura/distrib/pom.xml help:all-profiles
+```
+
+Additionally you can build only the Eclipse Kura Target Definition, by running in the `distrib` folder:
+
+```bash
+mvn -f kura/distrib/pom.xml clean install -Ptarget-definition
 ```
 
 #### Build scripts

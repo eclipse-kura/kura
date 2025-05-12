@@ -142,7 +142,13 @@ Build the core components:
 
 ```bash
 mvn -f kura/pom.xml clean install
-```s
+```
+
+Build the Kura Target Definition, useful for development of addons (optional):
+
+```bash
+mvn -f kura/distrib/pom.xml clean install -Ptarget-definition
+```
 
 Build the target profiles:
 
@@ -151,18 +157,12 @@ mvn -f kura/distrib/pom.xml clean install -DbuildAll
 ```
 
 > [!TIP]
-- You can skip tests by adding `-Dmaven.test.skip=true` in the commands above and you can compile a specific target by specifying the profile (e.g. `-Paarch64`).
+You can skip tests by adding `-Dmaven.test.skip=true` in the commands above and you can compile a specific target by specifying the profile (e.g. `-Paarch64`).
 
-- To list the available installer profiles, run:
+To list the available installer profiles, run:
 
 ```bash
 mvn -f kura/distrib/pom.xml help:all-profiles
-```
-
-- To Build only the Kura Target Definition, useful for development of addons (optional):
-
-```bash
-mvn -f kura/distrib/pom.xml clean install -Ptarget-definition
 ```
 
 #### Build scripts

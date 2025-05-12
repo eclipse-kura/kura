@@ -165,7 +165,7 @@ To list the available installer profiles, run:
 mvn -f kura/distrib/pom.xml help:all-profiles
 ```
 
-From the distrib folder, you can build only the Eclipse Kura Target Definition, useful for the development of addons, by running:
+Additionally you can build only the Eclipse Kura Target Definition, by running in the `distrib` folder:
 
 ```bash
 mvn -f kura/distrib/pom.xml clean install -Ptarget-definition

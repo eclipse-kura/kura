@@ -268,32 +268,6 @@
                         </lifecycleMappingMetadata>
                     </configuration>
                 </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.6.0</version>
-                    <executions>
-                        <execution>
-                            <id>copy-local-target-definition</id>
-                            <phase>generate-resources</phase>
-                            <goals>
-                                <goal>copy</goal>
-                            </goals>
-                            <configuration>
-                                <artifactItems>
-                                    <artifactItem>
-                                        <groupId>org.eclipse.kura</groupId>
-                                        <artifactId>kura-target-definition.target</artifactId>
-                                        <version>${project.version}</version>
-                                        <type>target</type>
-                                        <outputDirectory>\${project.basedir}/../target-definition</outputDirectory>
-                                        <destFileName>kura-target-definition.target</destFileName>
-                                    </artifactItem>
-                                </artifactItems>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -334,6 +308,7 @@
                     <execution>
                         <id>copy-local-target-definition</id>
                         <phase>generate-resources</phase>
+                        <inherited>false</inherited>
                         <goals>
                             <goal>copy</goal>
                         </goals>

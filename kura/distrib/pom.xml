@@ -31,6 +31,7 @@
     <url>http://maven.apache.org</url>
     <properties>
         <tycho-version>4.0.11</tycho-version>
+        <jdeb-version>1.12</jdeb-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <kura.basedir>${project.basedir}</kura.basedir>
@@ -39,11 +40,19 @@
         <kura.skip.can>true</kura.skip.can>
         <kura.skip.web>false</kura.skip.web>
         <kura.skip.examples>true</kura.skip.examples>
+        
+        <kura.skip.replace.target.file>true</kura.skip.replace.target.file>
+        <kura.skip.if.target.definition.build>false</kura.skip.if.target.definition.build>
+        <kura.target.definition.location>kura-target-definition</kura.target.definition.location>
 
         <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
 
         <!-- used for RPM uninstallation -->
         <kura.install.link>/opt/eclipse/kura</kura.install.link>
+
+        <!-- properties used for repository upload on artifactory -->
+        <kura.repo.distribution>kura-6</kura.repo.distribution>
+        <kura.repo.module>base</kura.repo.module>
     </properties>
 
     <organization>
@@ -88,7 +97,55 @@
                 <version>2.2</version>
             </extension>
         </extensions>
+
         <plugins>
+
+            <!-- Responsible for removing the "-SNAPSHOT" from the project.version -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>regex-property</id>
+                        <goals>
+                            <goal>regex-property</goal>
+                        </goals>
+                        <configuration>
+                            <name>release.version</name>
+                            <value>${project.version}</value>
+                            <regex>-SNAPSHOT</regex>
+                            <replacement></replacement>
+                            <failIfNoMatch>false</failIfNoMatch>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Responsible for retrieving the short git commit (defaults to length 7)-->
+            <plugin>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
+                <version>9.0.1</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <injectAllReactorProjects>true</injectAllReactorProjects>
+                    <generateGitPropertiesFile>false</generateGitPropertiesFile>
+                    <skipPoms>false</skipPoms>
+                    <includeOnlyProperties>
+                        <includeOnlyProperty>^git.commit.id.abbrev$</includeOnlyProperty>
+                    </includeOnlyProperties>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
@@ -894,8 +951,8 @@
                                 </exec>
                                 <move file="RELEASE_INFO/${project.version}/p2-repo-common/pom_.xml" tofile="RELEASE_INFO/${project.version}/p2-repo-common/pom.xml" />
 
-                                <!-- Copy target-platform/p2-repo-equinoxpom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-equinox/pom.xml -->
-                                <copy file="${kura.basedir}/../../target-platform/p2-repo-equinoxpom.xml" tofile="RELEASE_INFO/${project.version}/p2-repo-equinox/pom.xml" overwrite="true" />
+                                <!-- Copy target-platform/p2-repo-equinox/pom.xml in distrib/RELEASE_INFO/${project.version}/p2-repo-equinox/pom.xml -->
+                                <copy file="${kura.basedir}/../../target-platform/p2-repo-equinox/pom.xml" tofile="RELEASE_INFO/${project.version}/p2-repo-equinox/pom.xml" overwrite="true" />
                                 <!-- replace artifactId -->
                                 <replace token="&lt;artifactId&gt;target-platform&lt;/artifactId&gt;" value="&lt;artifactId&gt;target-platform-previous&lt;/artifactId&gt;" dir="RELEASE_INFO/${project.version}/p2-repo-equinox">
                                     <include name="pom.xml" />
@@ -926,6 +983,7 @@
                                         <include name="*.deb" />
                                         <include name="*.dp" />
                                         <include name="*.zip" />
+                                        <include name="*.target" />
                                         <include name="kura_${project.version}_*.sh" />
                                         <include name="kura_${project.version}_*.dp" />
                                         <exclude name="kura_${project.version}_*.dp" />
@@ -937,6 +995,7 @@
                                         <include name="*.deb" />
                                         <include name="*.dp" />
                                         <include name="*.zip" />
+                                        <include name="*.target" />
                                         <include name="kura_${project.version}_*.sh" />
                                         <include name="kura_${project.version}_*.dp" />
                                         <exclude name="kura_${project.version}_*.dp" />
@@ -1097,6 +1156,60 @@
     </dependencies>
 
     <profiles>
+        <!-- Internal profile: FOR INTERNAL USE ONLY - active if -DreleaseBuild is *not* specified. -->
+        <profile>
+            <id>debugBuild</id>
+            <activation>
+                <property>
+                    <name>!releaseBuild</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
+                <package.snapshot>git${maven.build.timestamp}.${git.commit.id.abbrev}</package.snapshot>
+
+                <package.version>${release.version}~${package.snapshot}</package.version>
+                <package.revision>1</package.revision>
+            </properties>
+        </profile>
+        <!-- Internal profile: FOR INTERNAL USE ONLY - active if -DreleaseBuild *is* specified. -->
+        <profile>
+            <id>releaseBuild</id>
+            <activation>
+                <property>
+                    <name>releaseBuild</name>
+                </property>
+            </activation>
+            <properties>
+                <package.version>${release.version}</package.version>
+                <package.revision>1</package.revision>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <version>3.5.0</version>
+                        <executions>
+                            <execution>
+                                <id>enforce-no-snapshots</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireReleaseVersion>
+                                            <message>No snapshots allowed for release builds!</message>
+                                        </requireReleaseVersion>
+                                    </rules>
+                                    <fail>true</fail>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
 
         <!-- x86_64 -->
         <profile>
@@ -1139,6 +1252,7 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
+                                	<skip>${kura.skip.if.target.definition.build}</skip>
                                     <target>
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
@@ -1160,7 +1274,7 @@
                     <plugin>
                         <groupId>org.vafer</groupId>
                         <artifactId>jdeb</artifactId>
-                        <version>1.0</version>
+                        <version>${jdeb-version}</version>
                         <executions>
                             <execution>
                                 <id>x86_64-deb</id>
@@ -1169,9 +1283,13 @@
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
+                                	<skip>${kura.skip.if.target.definition.build}</skip>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_amd64.deb</deb>
+                                    <deb>${basedir}/target/kura_${package.version}-${package.revision}_amd64.deb</deb>
+                                    <snapshotExpand>true</snapshotExpand>
+                                    <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/x86_64/deb/control</controlDir>
+                                    <skipPOMs>false</skipPOMs>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_x86_64.zip</src>
@@ -1236,6 +1354,7 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
+                                	<skip>${kura.skip.if.target.definition.build}</skip>
                                     <target>
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
@@ -1257,7 +1376,7 @@
                     <plugin>
                         <groupId>org.vafer</groupId>
                         <artifactId>jdeb</artifactId>
-                        <version>1.0</version>
+                        <version>${jdeb-version}</version>
                         <executions>
                             <execution>
                                 <id>x86_64-nn-deb</id>
@@ -1266,9 +1385,13 @@
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
+                                	<skip>${kura.skip.if.target.definition.build}</skip>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura-nn_${project.version}_amd64.deb</deb>
+                                    <deb>${basedir}/target/kura-nn_${package.version}-${package.revision}_amd64.deb</deb>
+                                    <snapshotExpand>true</snapshotExpand>
+                                    <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/x86_64-nn/deb/control</controlDir>
+                                    <skipPOMs>false</skipPOMs>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_x86_64-nn.zip</src>
@@ -1328,6 +1451,7 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
+                                	<skip>${kura.skip.if.target.definition.build}</skip>
                                     <target>
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
@@ -1349,7 +1473,7 @@
                     <plugin>
                         <groupId>org.vafer</groupId>
                         <artifactId>jdeb</artifactId>
-                        <version>1.0</version>
+                        <version>${jdeb-version}</version>
                         <executions>
                             <execution>
                                 <id>aarch64-deb</id>
@@ -1358,9 +1482,13 @@
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
+                                	<skip>${kura.skip.if.target.definition.build}</skip>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_arm64.deb</deb>
+                                    <deb>${basedir}/target/kura_${package.version}-${package.revision}_arm64.deb</deb>
+                                    <snapshotExpand>true</snapshotExpand>
+                                    <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/aarch64/deb/control</controlDir>
+                                    <skipPOMs>false</skipPOMs>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_aarch64.zip</src>
@@ -1425,6 +1553,7 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
+                                	<skip>${kura.skip.if.target.definition.build}</skip>
                                     <target>
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
@@ -1446,7 +1575,7 @@
                     <plugin>
                         <groupId>org.vafer</groupId>
                         <artifactId>jdeb</artifactId>
-                        <version>1.0</version>
+                        <version>${jdeb-version}</version>
                         <executions>
                             <execution>
                                 <id>aarch64-nn-deb</id>
@@ -1455,9 +1584,13 @@
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
+                                	<skip>${kura.skip.if.target.definition.build}</skip>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura-nn_${project.version}_arm64.deb</deb>
+                                    <deb>${basedir}/target/kura-nn_${package.version}-${package.revision}_arm64.deb</deb>
+                                    <snapshotExpand>true</snapshotExpand>
+                                    <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/aarch64-nn/deb/control</controlDir>
+                                    <skipPOMs>false</skipPOMs>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_aarch64-nn.zip</src>
@@ -1518,6 +1651,7 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
+                                	<skip>${kura.skip.if.target.definition.build}</skip>
                                     <target>
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
@@ -1566,7 +1700,7 @@
                     <plugin>
                         <groupId>org.vafer</groupId>
                         <artifactId>jdeb</artifactId>
-                        <version>1.0</version>
+                        <version>${jdeb-version}</version>
                         <executions>
                             <execution>
                                 <id>docker-x86_64-nn-deb</id>
@@ -1575,9 +1709,13 @@
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
+                                	<skip>${kura.skip.if.target.definition.build}</skip>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_docker-x86_64-nn_installer.deb</deb>
+                                    <deb>${basedir}/target/kura_${package.version}-${package.revision}_docker-x86_64-nn_installer.deb</deb>
+                                    <snapshotExpand>true</snapshotExpand>
+                                    <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/docker-x86_64-nn/deb/control</controlDir>
+                                    <skipPOMs>false</skipPOMs>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_docker-x86_64-nn.zip</src>
@@ -1794,7 +1932,7 @@
                 </plugins>
             </build>
         </profile>
-
+        
         <profile>
             <id>can-dp</id>
             <build>
@@ -1826,6 +1964,91 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <profile>
+            <properties>
+                <kura.skip.replace.target.file>false</kura.skip.replace.target.file>
+            </properties>
+            <id>target-definition</id>
+            <activation>
+                <property>
+                    <name>buildAll</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>3.3.1</version>
+                        <executions>
+                            <execution>
+                                <id>filter-target-file</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <encoding>UTF-8</encoding>
+                                    <outputDirectory>
+                                        ${project.basedir}/kura-target-definition/</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>
+                                                ${project.basedir}/kura-target-definition/resources</directory>
+                                            <includes>
+                                                <include>
+                                                    kura-target-definition-template.target</include>
+                                            </includes>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>replace-target-file</id>
+                                <phase>generate-resources</phase>
+                                <configuration>
+                                    <skip>${kura.skip.replace.target.file}</skip>
+                                    <target>
+                                        <move
+                                            file="kura-target-definition/kura-target-definition-template.target"
+                                            tofile="kura-target-definition/kura-target-definition.target" />
+                                    </target>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>copy-target-file</id>
+                                <phase>generate-resources</phase>
+                                <configuration>
+                                    <target>
+                                        <copy
+                                            file="${kura.target.definition.location}/kura-target-definition.target"
+                                            tofile="${project.basedir}/target/kura-target-definition.target" />
+                                    </target>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <modules>
+                <module>kura-target-definition</module>
+            </modules>
         </profile>
 
     </profiles>

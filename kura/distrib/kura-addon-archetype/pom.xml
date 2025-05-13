@@ -20,7 +20,7 @@
 
     <parent>
         <groupId>org.eclipse.kura</groupId>
-        <artifactId>tools</artifactId>
+        <artifactId>distrib</artifactId>
         <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>

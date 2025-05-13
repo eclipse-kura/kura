@@ -129,7 +129,7 @@ You can follow the tutorial from the official [Maven](http://maven.apache.org/in
 Change to the new directory and clone the Eclipse Kura™ repo:
 
 ```bash
-git clone -b develop https://github.com/eclipse/kura.git
+git clone -b develop https://github.com/eclipse-kura/kura.git
 ```
 
 Move inside the newly created directory and build the target platform:

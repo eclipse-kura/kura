@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -39,14 +39,8 @@ public class ConfigurationAdminHelper {
     public static Map<String, Object> loadConfigurationProperties(final ConfigurationAdmin configurationAdmin,
             final String pid) {
 
-        return getConfiguration(configurationAdmin, pid)
-                .map(Configuration::getProperties).map(ConfigurationAdminHelper::dictionaryToMap)
-                .orElseGet(() -> new HashMap<>());
-    }
-
-    public static Map<String, Object> loadConsoleConfigurationProperties(final ConfigurationAdmin configurationAdmin) {
-
-        return loadConfigurationProperties(configurationAdmin, "org.eclipse.kura.web.Console");
+        return getConfiguration(configurationAdmin, pid).map(Configuration::getProperties)
+                .map(ConfigurationAdminHelper::dictionaryToMap).orElseGet(() -> new HashMap<>());
     }
 
     public static Map<String, Object> loadHttpServiceConfigurationProperties(
@@ -85,8 +79,7 @@ public class ConfigurationAdminHelper {
     private static Optional<Configuration> getConfiguration(final ConfigurationAdmin configurationAdmin,
             final String pid) {
         try {
-            return Optional
-                    .ofNullable(configurationAdmin.getConfiguration(pid, "?"));
+            return Optional.ofNullable(configurationAdmin.getConfiguration(pid, "?"));
         } catch (final IOException e) {
             logger.warn("Failed to retrieve configuration for {}", pid, e);
             return Optional.empty();

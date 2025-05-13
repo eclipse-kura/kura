@@ -423,6 +423,11 @@
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
+                                <id>org.eclipse.kura.core.identity</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
                                 <id>org.eclipse.kura.emulator</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>

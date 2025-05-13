@@ -16,8 +16,8 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.internal.rest.identity.provider.dto.PermissionDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserConfigDTO;
 import org.eclipse.kura.internal.rest.identity.provider.dto.UserDTO;
@@ -25,6 +25,11 @@ import org.eclipse.kura.internal.rest.identity.provider.dto.ValidatorOptionsDTO;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.eclipse.kura.util.validation.ValidatorOptions;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
@@ -44,6 +49,9 @@ import jakarta.ws.rs.core.Response.Status;
 
 @SuppressWarnings("restriction")
 @Path("identity/v1")
+@Component(immediate = true, property = {
+        "kura.service.pid=org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV1",
+        "osgi.jakartars.resource=true" }, service = IdentityRestServiceV1.class)
 public class IdentityRestServiceV1 {
 
     private static final Logger logger = LoggerFactory.getLogger(IdentityRestServiceV1.class);
@@ -61,21 +69,26 @@ public class IdentityRestServiceV1 {
 
     private CryptoService cryptoService;
     private UserAdmin userAdmin;
-    private ConfigurationService configurationService;
+    private PasswordStrengthVerificationService passwordStrengthVerificationService;
 
+    @Reference
     public void bindCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
 
-    public void bindConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = configurationService;
+    @Reference
+    public void bindPasswordStrengthVerificationService(
+            PasswordStrengthVerificationService passwordStrengthVerificationService) {
+        this.passwordStrengthVerificationService = passwordStrengthVerificationService;
     }
 
+    @Reference
     public void bindUserAdmin(UserAdmin userAdmin) {
         this.userAdmin = userAdmin;
         this.userAdmin.createRole(KURA_PERMISSION_REST_ROLE, Role.GROUP);
     }
 
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
     public void bindRequestHandlerRegistry(RequestHandlerRegistry registry) {
         try {
             registry.registerRequestHandler(MQTT_APP_ID, this.requestHandler);
@@ -93,15 +106,17 @@ public class IdentityRestServiceV1 {
     }
 
     // Added mainly for testing purposes. Currently the service is created by activate()
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL)
     public void bindLegacyIdentityService(LegacyIdentityService legacyIdentityService) {
         this.legacyIdentityService = legacyIdentityService;
     }
 
+    @Activate
     public void activate() {
         // create only if not externally set. Added mainly for testing purposes.
         if (this.legacyIdentityService == null) {
             this.legacyIdentityService = new LegacyIdentityService(this.cryptoService, this.userAdmin,
-                    this.configurationService);
+                    this.passwordStrengthVerificationService);
         }
     }
 

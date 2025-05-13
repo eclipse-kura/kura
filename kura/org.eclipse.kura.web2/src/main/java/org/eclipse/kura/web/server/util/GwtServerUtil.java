@@ -43,11 +43,13 @@ import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.driver.descriptor.DriverDescriptor;
 import org.eclipse.kura.driver.descriptor.DriverDescriptorService;
+import org.eclipse.kura.identity.LoginBannerService;
+import org.eclipse.kura.identity.PasswordStrengthRequirements;
+import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.rest.configuration.api.ComponentConfigurationList;
 import org.eclipse.kura.rest.configuration.api.DTOUtil;
 import org.eclipse.kura.util.service.ServiceUtil;
-import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -58,6 +60,7 @@ import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtPasswordStrenghtRequirements;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.eclipse.kura.web.shared.validator.PasswordStrengthValidators;
@@ -790,9 +793,30 @@ public final class GwtServerUtil {
         return gwtNetworkConfigList;
     }
 
+    public static GwtPasswordStrenghtRequirements getPasswordStrenghtRequirements() throws GwtKuraException {
+        return ServiceLocator.applyToServiceOptionally(PasswordStrengthVerificationService.class, s -> {
+
+            final PasswordStrengthRequirements r = s.getPasswordStrengthRequirements();
+
+            final GwtPasswordStrenghtRequirements result = new GwtPasswordStrenghtRequirements();
+
+            result.setPasswordMinimumLength(r.getPasswordMinimumLength());
+            result.setPasswordRequireBothCases(r.bothCasesRequired());
+            result.setPasswordRequireDigits(r.digitsRequired());
+            result.setPasswordRequireSpecialChars(r.specialCharactersRequired());
+
+            return result;
+        });
+    }
+
+    public static Optional<String> getPreLoginMessage() throws GwtKuraException {
+        return ServiceLocator.applyToServiceOptionally(LoginBannerService.class, LoginBannerService::getPreLoginBanner);
+    }
+
     public static void validateUserPassword(final String password) throws GwtKuraException {
+
         final List<Validator<String>> validators = PasswordStrengthValidators
-                .fromConfig(Console.getConsoleOptions().getUserOptions());
+                .fromConfig(getPasswordStrenghtRequirements());
 
         final List<String> errors = new ArrayList<>();
 

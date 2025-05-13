@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -348,6 +348,8 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     @Test
     public void shouldSetNeedPasswordChange() {
         givenUserAdminUsers("kura.user.foo");
+        givenPasswordStrenghtVerificationOptions("new.password.min.length", 8, "new.password.require.digits", false,
+                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
 
         whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
                 new PasswordConfiguration(true, true, Optional.of("adminadmin".toCharArray()), Optional.empty()))));
@@ -361,6 +363,8 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     public void shouldUnsetNeedPasswordChange() {
         givenUserAdminUsers("kura.user.foo");
         givenUserAdminProperty("kura.user.foo", "kura.need.password.change", "true");
+        givenPasswordStrenghtVerificationOptions("new.password.min.length", 8, "new.password.require.digits", false,
+                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
 
         whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
                 new PasswordConfiguration(false, true, Optional.of("adminadmin".toCharArray()), Optional.empty()))));
@@ -506,6 +510,8 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     @Test
     public void shouldAllow255CharsPassword() {
         givenUserAdminUsers("kura.user.foo");
+        givenPasswordStrenghtVerificationOptions("new.password.min.length", 8, "new.password.require.digits", false,
+                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
 
         whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
                 new PasswordConfiguration(false, true, Optional.of(repeat('a', 255)), Optional.empty()))));
@@ -516,6 +522,8 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     @Test
     public void shouldNotAllowTooLongPassword() {
         givenUserAdminUsers("kura.user.foo");
+        givenPasswordStrenghtVerificationOptions("new.password.min.length", 8, "new.password.require.digits", false,
+                "new.password.require.special.characters", false, "new.password.require.both.cases", false);
 
         whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
                 new PasswordConfiguration(false, true, Optional.of(repeat('a', 256)), Optional.empty()))));
@@ -525,7 +533,7 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
 
     @Test
     public void shouldNotAllowPasswordNotSatisfyingPasswordStrengthRequirements() {
-        givenConsoleOptions("new.password.min.length", 3, "new.password.require.digits", false,
+        givenPasswordStrenghtVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
                 "new.password.require.special.characters", false, "new.password.require.both.cases", false);
         givenUserAdminUsers("kura.user.foo");
 

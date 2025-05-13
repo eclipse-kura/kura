@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2020, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -18,6 +18,7 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.ConsoleOptions;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
+import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtLoginInfo;
 import org.eclipse.kura.web.shared.service.GwtLoginInfoService;
 import org.osgi.framework.BundleContext;
@@ -33,16 +34,10 @@ public class GwtLoginInfoServiceImpl extends OsgiRemoteServiceServlet implements
     private static final long serialVersionUID = 1L;
 
     @Override
-    public GwtLoginInfo getLoginInfo() {
+    public GwtLoginInfo getLoginInfo() throws GwtKuraException {
         final ConsoleOptions options = Console.getConsoleOptions();
 
-        final String bannerContent;
-
-        if (options.isBannerEnabled()) {
-            bannerContent = options.getBannerContent();
-        } else {
-            bannerContent = null;
-        }
+        final String bannerContent = GwtServerUtil.getPreLoginMessage().orElse(null);
 
         Integer clientAuthPort = null;
 

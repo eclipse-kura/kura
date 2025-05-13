@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -29,7 +29,6 @@ import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.shared.GwtSafeHtmlUtils;
-import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
@@ -1276,33 +1275,36 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     private void setPasswordValidation() {
 
-        final GwtConsoleUserOptions configUserOptions = EntryClassUi.getUserOptions();
+        EntryClassUi.loadPasswordStrengthRequirements(passwordStrengthRequirements -> {
 
-        if (getWirelessMode() != GwtWifiWirelessMode.netWifiWirelessModeAccessPoint) {
-            configUserOptions.allowAnyPassword();
-        }
+            if (getWirelessMode() != GwtWifiWirelessMode.netWifiWirelessModeAccessPoint) {
+                passwordStrengthRequirements.allowAnyPassword();
+            }
 
-        if (this.security != null && (this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA_MESSAGE)
-                || this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_MESSAGE)
-                || this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA3_MESSAGE)
-                || this.security.getSelectedItemText().contentEquals(WIFI_SECURITY_WPA_WPA2_MESSAGE)
-                || this.security.getSelectedItemText().contentEquals(WIFI_SECURITY_WPA2_WPA3_MESSAGE))) {
+            if (this.security != null && (this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA_MESSAGE)
+                    || this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA2_MESSAGE)
+                    || this.security.getSelectedItemText().equals(WIFI_SECURITY_WPA3_MESSAGE)
+                    || this.security.getSelectedItemText().contentEquals(WIFI_SECURITY_WPA_WPA2_MESSAGE)
+                    || this.security.getSelectedItemText().contentEquals(WIFI_SECURITY_WPA2_WPA3_MESSAGE))) {
 
-            this.password.setValidatorsFrom(configUserOptions);
-            configUserOptions.setPasswordMinimumLength(Math.min(configUserOptions.getPasswordMinimumLength(), 63));
+                this.password.setValidatorsFrom(passwordStrengthRequirements);
+                passwordStrengthRequirements.setPasswordMinimumLength(Math.min(passwordStrengthRequirements.getPasswordMinimumLength(), 63));
 
-            this.password.addValidator(GwtValidators.regex(REGEX_PASS_WPA, MSGS.netWifiWirelessInvalidWPAPassword()));
+                this.password
+                        .addValidator(GwtValidators.regex(REGEX_PASS_WPA, MSGS.netWifiWirelessInvalidWPAPassword()));
 
-        } else if (this.security != null && this.security.getSelectedItemText().equals(WIFI_SECURITY_WEP_MESSAGE)) {
+            } else if (this.security != null && this.security.getSelectedItemText().equals(WIFI_SECURITY_WEP_MESSAGE)) {
 
-            configUserOptions.setPasswordRequireSpecialChars(false);
-            configUserOptions.setPasswordMinimumLength(Math.min(configUserOptions.getPasswordMinimumLength(), 26));
-            this.password.setValidatorsFrom(configUserOptions);
-            this.password.addValidator(GwtValidators.regex(REGEX_PASS_WEP, MSGS.netWifiWirelessInvalidWEPPassword()));
-        } else {
-            configUserOptions.allowAnyPassword();
-            this.password.setValidatorsFrom(configUserOptions);
-        }
+                passwordStrengthRequirements.setPasswordRequireSpecialChars(false);
+                passwordStrengthRequirements.setPasswordMinimumLength(Math.min(passwordStrengthRequirements.getPasswordMinimumLength(), 26));
+                this.password.setValidatorsFrom(passwordStrengthRequirements);
+                this.password
+                        .addValidator(GwtValidators.regex(REGEX_PASS_WEP, MSGS.netWifiWirelessInvalidWEPPassword()));
+            } else {
+                passwordStrengthRequirements.allowAnyPassword();
+                this.password.setValidatorsFrom(passwordStrengthRequirements);
+            }
+        });
 
     }
 

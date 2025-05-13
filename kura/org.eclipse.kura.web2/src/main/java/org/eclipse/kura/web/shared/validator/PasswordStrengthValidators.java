@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,7 @@ package org.eclipse.kura.web.shared.validator;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
+import org.eclipse.kura.web.shared.model.GwtPasswordStrenghtRequirements;
 
 public class PasswordStrengthValidators {
 
@@ -27,11 +27,11 @@ public class PasswordStrengthValidators {
     private PasswordStrengthValidators() {
     }
 
-    public static List<Validator<String>> fromConfig(final GwtConsoleUserOptions userOptions) {
+    public static List<Validator<String>> fromConfig(final GwtPasswordStrenghtRequirements userOptions) {
         return fromConfig(userOptions, new DefaultMessages());
     }
 
-    public static List<Validator<String>> fromConfig(final GwtConsoleUserOptions userOptions, final Messages messages) {
+    public static List<Validator<String>> fromConfig(final GwtPasswordStrenghtRequirements userOptions, final Messages messages) {
         final List<Validator<String>> result = new ArrayList<>();
 
         final int minPasswordLength = userOptions.getPasswordMinimumLength();

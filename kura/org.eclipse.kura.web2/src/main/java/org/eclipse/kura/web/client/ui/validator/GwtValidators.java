@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
+import org.eclipse.kura.web.shared.model.GwtPasswordStrenghtRequirements;
 import org.eclipse.kura.web.shared.validator.NoWhitespaceCharactersValidator;
 import org.eclipse.kura.web.shared.validator.NotEmptyValidator;
 import org.eclipse.kura.web.shared.validator.NotInListValidator;
@@ -48,7 +48,7 @@ public class GwtValidators {
     private GwtValidators() {
     }
 
-    public static List<Validator<String>> newPassword(final GwtConsoleUserOptions userOptions) {
+    public static List<Validator<String>> newPassword(final GwtPasswordStrenghtRequirements userOptions) {
 
         final List<Validator<String>> defaultValidators = Arrays.asList(
                 stringLength(255, MSGS.pwdMaxLength()),

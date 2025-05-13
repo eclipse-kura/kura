@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,7 @@ import java.util.Optional;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.validator.GwtValidators;
-import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
+import org.eclipse.kura.web.shared.model.GwtPasswordStrenghtRequirements;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.Modal;
@@ -131,7 +131,7 @@ public class PasswordChangeModal extends Composite {
     }
 
     @SuppressWarnings("unchecked")
-    private void setUserOptions(final GwtConsoleUserOptions options) {
+    private void setUserOptions(final GwtPasswordStrenghtRequirements options) {
         this.newPassword.setValidators(new Validator<String>() {
 
             @Override
@@ -153,7 +153,7 @@ public class PasswordChangeModal extends Composite {
         });
     }
 
-    public void pickPassword(final GwtConsoleUserOptions options, final Callback callback) {
+    public void pickPassword(final GwtPasswordStrenghtRequirements options, final Callback callback) {
         this.oldPassword.setValue("");
         this.newPassword.setValue("");
         this.confirmNewPassword.setValue("");

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2019, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -14,7 +14,7 @@ package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
 
-public class GwtConsoleUserOptions extends GwtBaseModel implements Serializable {
+public class GwtPasswordStrenghtRequirements extends GwtBaseModel implements Serializable {
 
     private static final long serialVersionUID = 8697261888960678066L;
 
@@ -22,10 +22,10 @@ public class GwtConsoleUserOptions extends GwtBaseModel implements Serializable 
     @SuppressWarnings("unused")
     private GwtBundleInfo unused;
 
-    public GwtConsoleUserOptions() {
+    public GwtPasswordStrenghtRequirements() {
     }
 
-    public GwtConsoleUserOptions(final GwtConsoleUserOptions other) {
+    public GwtPasswordStrenghtRequirements(final GwtPasswordStrenghtRequirements other) {
         setPasswordMinimumLength(other.getPasswordMinimumLength());
         setPasswordRequireDigits(other.getPasswordRequireDigits());
         setPasswordRequireSpecialChars(other.getPasswordRequireSpecialChars());

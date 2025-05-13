@@ -14,7 +14,7 @@
         <link rel="prev" href="../ssl-configuration/">
       
       
-        <link rel="next" href="../gateway-administration-console-authentication/">
+        <link rel="next" href="../access-banner/">
       
       
       <link rel="icon" href="../../assets/favicon.png">
@@ -1121,48 +1121,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Password Management">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#minimum-password-length" class="md-nav__link">
-    <span class="md-ellipsis">
-      Minimum password length
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#require-digits-in-new-password" class="md-nav__link">
-    <span class="md-ellipsis">
-      Require digits in new password
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#require-special-characters-in-new-password" class="md-nav__link">
-    <span class="md-ellipsis">
-      Require special characters in new password
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#require-uppercase-and-lowercase-characters-in-new-passwords" class="md-nav__link">
-    <span class="md-ellipsis">
-      Require uppercase and lowercase characters in new passwords
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -1205,6 +1163,50 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../access-banner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Login Banners
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../password-strength/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Password Strength Configuration
+    
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -4677,48 +4679,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Password Management">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#minimum-password-length" class="md-nav__link">
-    <span class="md-ellipsis">
-      Minimum password length
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#require-digits-in-new-password" class="md-nav__link">
-    <span class="md-ellipsis">
-      Require digits in new password
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#require-special-characters-in-new-password" class="md-nav__link">
-    <span class="md-ellipsis">
-      Require special characters in new password
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#require-uppercase-and-lowercase-characters-in-new-passwords" class="md-nav__link">
-    <span class="md-ellipsis">
-      Require uppercase and lowercase characters in new passwords
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -4783,24 +4743,18 @@ The default value set is /admin/console</p>
 <p>The session max inactivity interval in minutes. If no interaction with the Web UI is performed for the value of this parameter in minutes, a new login will be requested.
 The default value set is 15 minutes</p>
 <h2 id="access-banner-enabled">Access Banner Enabled</h2>
-<p>For security reasons, it may be needed to display to the user a banner that describes the intended system use before authenticating.</p>
-<p><img alt="Web Console Configuration Access Banner Content" src="../images/web-console-configuration-access-banner-content.png" /></p>
-<p>Once enabled and configured, the Kura Web UI will display a banner before every access attempt, as depicted in the image below.</p>
-<p><img alt="Web Console Configuration Access Banner Login" src="../images/web-console-configuration-access-banner-login.png" /></p>
+<p>The web console support showing configurable access banners, see the <a href="../access-banner/">Login Banners</a> section for more details.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In Kura 5.X, the access banner related settings were available in the <strong>Security</strong> -&gt; <strong>Web Console</strong> section of Kura Web Console, starting from Kura 6 they have been moved to the <strong>Security</strong> -&gt; <strong>Login Banners</strong> section.</p>
+</div>
 <h2 id="password-management">Password Management</h2>
-<p>This section is related to the definition of required parameters that must be respected when defining a new password, for example when a user changes its password at first access.</p>
-<h3 id="minimum-password-length">Minimum password length</h3>
-<p>The minimum length to be enforced for new passwords. Set to 0 to disable.
-The default value set is 8 characters</p>
-<h3 id="require-digits-in-new-password">Require digits in new password</h3>
-<p>If set to true, new passwords will be accepted only if containing at least one digit.
-The default value is false</p>
-<h3 id="require-special-characters-in-new-password">Require special characters in new password</h3>
-<p>If set to true, new passwords will be accepted only if containing at least one non alphanumeric character
-The default value is false</p>
-<h3 id="require-uppercase-and-lowercase-characters-in-new-passwords">Require uppercase and lowercase characters in new passwords</h3>
-<p>If set to true, new passwords will be accepted only if containing both uppercase and lowercase alphanumeric characters.
-The default value is false</p>
+<p>Kura allows to configure and enforce password strenght requirements that are applied to new passwords, for example when a user changes its password at first access.</p>
+<p>See the <a href="../password-strength/">Password Strength Configuration</a> section for more details.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In Kura 5.X, the password strength related settings were available in the <strong>Security</strong> -&gt; <strong>Web Console</strong> section of Kura Web Console, starting from Kura 6 they have been moved to the <strong>Security</strong> -&gt; <strong>Password Strength</strong> section.</p>
+</div>
 <h2 id="allowed-ports">Allowed ports</h2>
 <p>By default, the Web Console access will only be allowed on ports 443 and 4443 (default https and certificate-based authentication ports). If set to an empty list, access will be allowed on all ports. It is needed for the end user to make sure that the allowed ports are open in HttpService and Firewall configuration.</p>
 <h2 id="authentication-method-password-enabled">Authentication Method "Password" Enabled</h2>

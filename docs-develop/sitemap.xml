@@ -276,6 +276,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/access-banner/</loc>
+         <lastmod>2025-05-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/authentication-and-authorization/</loc>
          <lastmod>2025-05-13</lastmod>
          <changefreq>daily</changefreq>
@@ -367,6 +372,11 @@
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/network-threat-manager/</loc>
+         <lastmod>2025-05-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/password-strength/</loc>
          <lastmod>2025-05-13</lastmod>
          <changefreq>daily</changefreq>
     </url>

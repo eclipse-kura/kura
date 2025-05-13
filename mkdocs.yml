@@ -34,6 +34,8 @@ nav:
       - Keys and Certificates: gateway-configuration/keys-and-certificates.md
       - SSL Configuration: gateway-configuration/ssl-configuration.md
       - Web Console Configuration: gateway-configuration/web-console-configuration.md
+      - Login Banners: gateway-configuration/access-banner.md
+      - Password Strength Configuration: gateway-configuration/password-strength.md
       - Gateway Administration Console Authentication: gateway-configuration/gateway-administration-console-authentication.md
       - Authentication and Authorization: gateway-configuration/authentication-and-authorization.md
     - Administration:

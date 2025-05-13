@@ -2061,6 +2061,7 @@
             </build>
             <modules>
                 <module>kura-target-definition</module>
+		<module>kura-addon-archetype</module>
             </modules>
         </profile>
 

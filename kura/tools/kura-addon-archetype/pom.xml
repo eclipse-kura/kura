@@ -13,7 +13,9 @@
      Eurotech
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -31,32 +33,6 @@
     </properties>
 
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>archetype-resources/tests/test-env/framework/kura.properties</include>
-                    <include>META-INF/maven/archetype-metadata.xml</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-                <excludes>
-                    <exclude>archetype-resources/tests/test-env/framework/kura.properties</exclude>
-                    <exclude>META-INF/maven/archetype-metadata.xml</exclude>
-                </excludes>
-            </resource>
-            <!-- process projects versions properties in target definition -->
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>archetype-resources/target-definition/__artifactId__.target</include>
-                </includes>
-            </resource>
-        </resources>
-
         <extensions>
             <extension>
                 <groupId>org.apache.maven.archetype</groupId>
@@ -64,6 +40,20 @@
                 <version>3.3.1</version>
             </extension>
         </extensions>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>archetype-resources/bundles/pom.xml</include>
+                </includes>
+            </resource>
+        </resources>
 
         <plugins>
             <plugin>
@@ -74,6 +64,7 @@
                     <includeEmptyDirs>true</includeEmptyDirs>
                     <!-- needed to include .gitignore -->
                     <useDefaultExcludes>false</useDefaultExcludes>
+                    <escapeString>\</escapeString>
                 </configuration>
             </plugin>
 
@@ -84,26 +75,6 @@
                     <!-- needed to include .gitignore -->
                     <useDefaultExcludes>false</useDefaultExcludes>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>properties-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>read-project-properties</goal>
-                        </goals>
-                        <configuration>
-                            <files>
-                                <file>${basedir}/../../../target-platform/config/kura.target-platform.build.properties</file>
-                                <file>${basedir}/../../distrib/config/kura.build.properties</file>
-                            </files>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
 
         </plugins>

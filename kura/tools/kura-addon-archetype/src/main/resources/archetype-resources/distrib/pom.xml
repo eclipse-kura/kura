@@ -36,6 +36,7 @@
     </organization>
 
     <properties>
+    	
         <!--
             With n being the start level, config.ini will be populated depending on which plugins directory the bundle is put:
             n => bundle.name:@n;

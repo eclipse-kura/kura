@@ -196,9 +196,9 @@
                     <configuration>
                         <target>
                             <artifact>
-                                <groupId>${groupId}</groupId>
-                                <artifactId>${artifactId}.target-definition</artifactId>
-                                <version>${target-definition-version}</version>
+                                <groupId>org.eclipse.kura</groupId>
+                                <version>${kura.target.definition.version}</version>
+                                <artifactId>kura-target-definition.target</artifactId>
                             </artifact>
                         </target>
                         <!--

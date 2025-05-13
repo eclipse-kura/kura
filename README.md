@@ -113,3 +113,5 @@ Or go to the `Ports` tab and press the `Open in Browser` icon corresponding to t
 ![Open in browser from ports](https://github.com/GregoryIvo/kura/assets/22748355/bf14f656-5fa4-4eaf-90d6-341e7374dfae)
 
 </div>
+
+Test

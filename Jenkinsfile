@@ -79,20 +79,9 @@ spec:
             }
         }
 
-        stage('Build examples') {
-            timeout(time: 1, unit: 'HOURS') {
-                dir("kura") {
-                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
-                        sh "mvn -f kura/examples/pom.xml clean install -Pcheck-exists-plugin"
-                    }
-                }
-            }
-        }
-
-
         stage('Generate test reports') {
             dir("kura") {
-                junit 'kura/test/*/target/surefire-reports/*.xml,kura/examples/test/*/target/surefire-reports/*.xml'
+                junit 'kura/test/*/target/surefire-reports/*.xml'
             }
         }
 

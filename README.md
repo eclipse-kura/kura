@@ -144,12 +144,6 @@ Build the core components:
 mvn -f kura/pom.xml clean install
 ```
 
-Build the examples (optional):
-
-```bash
-mvn -f kura/examples/pom.xml clean install
-```
-
 Build the target profiles and the Eclipse Kura Target Definition:
 
 ```bash
@@ -200,7 +194,7 @@ IDE Setups
 We currently support two setups for Eclipse Kura™ development:
 
 - [**Eclipse Kura™ Development Environment Setup**](https://eclipse-kura.github.io/kura/latest/java-application-development/development-environment-setup/): This is the full setup allowing you to contribute to the core Eclipse Kura™ project codebase. It will install all the IDE plugins and formatters to have a pleasant development experience and clone the Eclipse Kura™ source code on your workstation.
-- [**Add-on Development Environment Setup**](https://eclipse-kura.github.io/kura/latest/java-application-development/kura-workspace-setup/): This setup will allow you to develop applications or bundles running on Eclipse Kura™. It will install only the APIs and the examples and is best suited for developing Eclipse Kura™ add-ons.
+- [**Kura Addon Archetype**](https://eclipse-kura.github.io/kura/docs-develop/java-application-development/kura-addon-archetype/): The Kura Addon Archetype will allow you to develop applications or bundles running on Eclipse Kura™. It will install only the APIs and is best suited for developing Eclipse Kura™ add-ons.
 
 Contributing
 ------------

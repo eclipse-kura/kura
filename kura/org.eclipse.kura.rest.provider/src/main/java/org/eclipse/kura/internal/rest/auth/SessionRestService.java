@@ -270,10 +270,12 @@ public class SessionRestService {
         final boolean isPasswordAuthEnabled = options.isPasswordAuthEnabled();
         final boolean isCertificateAuthenticationEnabled = options.isCertificateAuthEnabled();
 
-        final String message = loginBannerService.getPreLoginBanner().orElse(null);
+        final String preLoginBannerMessage = loginBannerService.getPreLoginBanner().orElse(null);
+        final String postLoginBannerMessage = loginBannerService.getPostLoginBanner().orElse(null);
 
         if (!isCertificateAuthenticationEnabled) {
-            return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, message);
+            return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, preLoginBannerMessage,
+                    postLoginBannerMessage);
         }
 
         final Map<String, Object> httpServiceConfig = ConfigurationAdminHelper
@@ -282,13 +284,16 @@ public class SessionRestService {
         final Set<Integer> httpsClientAuthPorts = ConfigurationAdminHelper.getHttpsMutualAuthPorts(httpServiceConfig);
 
         if (!httpsClientAuthPorts.isEmpty()) {
-            return new AuthenticationInfoDTO(isPasswordAuthEnabled, true, httpsClientAuthPorts, message);
+            return new AuthenticationInfoDTO(isPasswordAuthEnabled, true, httpsClientAuthPorts, preLoginBannerMessage,
+                    postLoginBannerMessage);
         } else {
-            return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, message);
+            return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, preLoginBannerMessage,
+                    postLoginBannerMessage);
         }
 
     }
 
+    //
     private void validatePasswordStrength(final String newPassword) {
         PasswordStrengthRequirements passwordStrengthRequirements;
         try {

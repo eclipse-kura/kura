@@ -477,6 +477,9 @@ public class Console implements SelfConfiguringComponent {
 
         registerServlet("gwtLoginInfoService", LOGIN_MODULE_PATH + "/loginInfo", new GwtLoginInfoServiceImpl(),
                 resourceContextName);
+        registerServlet("gwtLoginInfoService", DENALI_MODULE_PATH + "/loginInfo", new GwtLoginInfoServiceImpl(),
+                resourceContextName);
+
         registerServlet("redirectServlet", "/", new RedirectServlet("/"::equals, this.appRoot), resourceContextName);
 
         registerServlet("notFoundAuthResourceServlet", AUTH_RESOURCE_PATH, new SendStatusServlet(404),

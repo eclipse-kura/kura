@@ -118,8 +118,8 @@ public class LoginUi extends Composite {
         this.accessBannerModal.setTitle(MSGS.warning());
         this.buttonAccessBannerModalOk.setText(MSGS.okButton());
 
-        if (loginInfo.getBannerContent() != null) {
-            LoginUi.this.accessBannerModalPannelBody.setText(loginInfo.getBannerContent());
+        if (loginInfo.getPreLoginBannerContent() != null) {
+            LoginUi.this.accessBannerModalPannelBody.setText(loginInfo.getPreLoginBannerContent());
             LoginUi.this.accessBannerModal.show();
         }
     }

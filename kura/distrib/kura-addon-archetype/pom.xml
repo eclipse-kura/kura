@@ -22,14 +22,13 @@
         <groupId>org.eclipse.kura</groupId>
         <artifactId>distrib</artifactId>
         <version>6.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>kura-addon-archetype</artifactId>
     <packaging>maven-archetype</packaging>
 
     <properties>
-        <kura_eth.basedir>${project.basedir}/../..</kura_eth.basedir>
+        <kura.basedir>${project.basedir}/..</kura.basedir>
     </properties>
 
     <build>

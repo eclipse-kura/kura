@@ -3,7 +3,7 @@
 The Kura Addon Archetype is a [Maven Archetype](https://maven.apache.org/guides/introduction/introduction-to-archetypes.html) that allows to create a development environment with the following features:
 
 - Maven-based build
-- Template project for creating DEB/RPM packages
+- Template project for creating DEB packages
 - Tycho-surefire based integration test template
 - Uses a remote P2 repository for the target platform
 
@@ -64,7 +64,7 @@ At the end of the procedure, the archetype will generate a subfolder in the work
 
 - **bundles**: the directory where developed bundles can be placed. After the first archetype execution, this directory contains a single project, named as `artifactId.bundle`
 
-- **distrib**: contains a project that builds an RPM and a DEB package that installs the JAR produced in `bundles` in Kura's plugins folder `/opt/eclipse/kura/plugins`. It is recommended to configure this project to customize the target package architecture and other parameters. The project code is commented with hints on the configurable options
+- **distrib**: contains a project that builds a DEB package that installs the JAR produced in `bundles` in Kura's plugins folder `/opt/eclipse/kura/plugins`. It is recommended to configure this project to customize the target package architecture and other parameters. The project code is commented with hints on the configurable options
 
 - **target-definition**: The `.target` file contained in the project is the way to specify the project dependencies as maven artifacts, Tycho will then wrap them as bundles and make them available in the target platform. Since only released artifacts are published on Maven central, it is recommeded to perform a local Kura build to have the SNAPSHOT versions available
 
@@ -81,24 +81,13 @@ mvn clean install
 The build will produce the following system packages in `distrib/target`:
 
 - DEB installer (`<artifactId>_<version>_<debian-architecture>.deb`)
-- RPM installer (`<artifactId>-<version>.<rpm.architecture>.rpm`)
 
 Installer properties like the architecture, organization name, package dependencies, and others can be configured in the `distrib` project.
 
 Depending on the system, the packages can be installed with:
 
 ```shell
-# debian
 apt install <artifactId>_<version>_<debian-architecture>.deb
-
-# fedora/redhat/centos/others
-dnf install <artifactId>-<version>.<rpm.architecture>.rpm
-```
-
-On some systems that use RPM package manager only signed packages are allowed (see [`rpm-maven-plugin`](https://www.mojohaus.org/rpm-maven-plugin/adv-params.html#Signatures) documentation on how to sign a package). **During development**, it is possible to bypass this control using:
-
-```shell
-rpm --define '_pkgverify_level digest' -i <artifactId>-<version>.<rpm.architecture>.rpm
 ```
 
 After having installed the package, restart kura with:
@@ -112,11 +101,7 @@ During startup Kura will scan the plugins folder to pick up the installed JARs a
 It is possible to remove the installed plugins with:
 
 ```shell
-# debian
 apt purge <artifactId> # or apt remove <artifactId>
-
-# fedora/redhat/centos/others
-dnf remove <artifactId>
 ```
 
 ### Debug builds and Release builds
@@ -174,11 +159,11 @@ On old Eclipse IDE installations it might be necessary to uninstall the Tycho co
 
 ## Architecture-specific development
 
-The Addon Archetype standard procedure allows to build generic debian and RPM installers not dependant on the architecture on which the bundle will be installed.
+The Addon Archetype standard procedure allows to build generic Debian installers not dependant on the architecture on which the bundle will be installed.
 
 However, it is possible to customise the files in the `distrib` folder to develop architecture-dependant installers: this might be necessary when a bundle contains native code (C/C++ libraries, jars that use JNI, etc.) or architecture-specific files (e.g. a systemd service file).
 
-In the following sections we will see how this can be accomplished for both the RPM and the DEB packages. These steps assume that architecture-specific jars are built in the form of fragments of the architecture-agnostic java code. The architecture-specific jars will then be copied in the `distrib` folder and included in the package.
+In the following sections we will see how this can be accomplished for the DEB packages. These steps assume that architecture-specific jars are built in the form of fragments of the architecture-agnostic java code. The architecture-specific jars will then be copied in the `distrib` folder and included in the package.
 
 ### Getting the source code
 
@@ -207,19 +192,16 @@ First of all it is possible to define some properties in the `distrib/pom.xml` f
 
 instead of
 <deb.architecture>all</deb.architecture>
-<rpm.architecture>noarch</rpm.architecture>
 use the following
 <deb.amd64.architecture>amd64</deb.amd64.architecture>
 <deb.arm64.architecture>arm64</deb.arm64.architecture>
-<rpm.x86_64.architecture>x86_64</rpm.x86_64.architecture>
-<rpm.aarch64.architecture>aarch64</rpm.aarch64.architecture>
 ```
 !!! tip
-    These properties are useful to define the architecture-specific jars and the architecture-specific debian and rpm architectures. The `addon.installation.dir` property is used to define the installation directory of the bundle in Kura. The `native.core.installation.dir` property is used to define the installation directory of the native code in Kura. It is important that the fragments are installed in a higher level directory than the main bundle, otherwise Kura will not be able to load the native code.
+    These properties are used to define the architecture-specific jars and the architecture-specific debian metadata. The `addon.installation.dir` property is used to define the installation directory of the bundle in Kura. The `native.core.installation.dir` property is used to define the installation directory of the native code in Kura. It is important that the fragments are installed in a higher level directory than the main bundle, otherwise Kura will not be able to load the native code.
 
     The `jar.name` property is used to define the name of the main bundle, while the `jar.aarch64.core` and `jar.x86_64.core` properties are used to define the names of the architecture-specific fragments.
 
-    Finally, the `deb.amd64.architecture`, `deb.arm64.architecture`, `rpm.x86_64.architecture` and `rpm.aarch64.architecture` properties are used to define the architecture-specific debian and rpm architectures.
+    Finally, the `deb.amd64.architecture` and `deb.arm64.architecture` properties are used to define the architecture-specific debian metadata.
 
 The plugin responsible to copy and rename the jars is the `copy-rename-maven-plugin`. The plugin is configured in the `distrib/pom.xml` file as follows:
 
@@ -277,7 +259,7 @@ To load also the architecture-specific jars, the plugin should be configured as 
 
 In this way, in the `input_files` folder all the necessary jars will be copied and renamed to the correct name. The `input_files` folder is used to store the files that will be included in the package.
 
-### Debian architecture dependant packages
+### Architecture dependant packages
 
 The `/distrib/deb/control/control` file contains the DEB package metadata. The standard file is configured as follows:
 
@@ -412,106 +394,4 @@ The final result will consist of two DEB packages, one for each architecture. Th
 ```
 <artifactId>_<version>_<deb.amd64.architecture>.deb
 <artifactId>_<version>_<deb.arm64.architecture>.deb
-```
-
-### RPM architecture dependant packages
-
-The RPM packages are generated in a similar way. The configuration of the packages is set in the plugin responsible of the packages generation, the `rpm-maven-plugin`. The plugin is, by default, configured in the `distrib/pom.xml` file as follows:
-
-```xml
-<execution>
-    <id>generate-rpm</id>
-    <phase>package</phase>
-    <goals>
-        <goal>rpm</goal>
-    </goals>
-    <configuration>
-        <name>${package.name}</name>
-        <needarch>${rpm.architecture}</needarch>
-        <group>Applications/System</group>
-        <targetOS>linux</targetOS>
-        <summary>${summary}</summary>
-        <description>${long.description}</description>
-        <license>EPL 2.0 (https://www.eclipse.org/legal/epl-2.0/)</license>
-
-        <mappings>
-            <mapping>
-                <directory>${addon.installation.dir}</directory>
-                <filemode>600</filemode>
-                <username>kurad</username>
-                <groupname>kurad</groupname>
-                <sources>
-                    <source>
-                        <location>${basedir}/target/${jar.name}_${project.version}.jar</location>
-                    </source>
-                </sources>
-            </mapping>
-        </mappings>
-
-        <requires>
-            <require>kura</require>
-        </requires>
-    </configuration>
-</execution>
-```
-
-The `needarch` field is the one responsible to specify the architecture of the package. The value is set in the `/distrib/pom.xml` file, by the property `<rpm.architecture>noarch</rpm.architecture>`. The value `noarch` means that the package can be installed on any architecture. This is the recommended value for packages that do not contain architecture-specific files.
-
-To build a package that contains architecture-specific files, it is necessary to separate the executions of the `rpm-maven-plugin` for the different architectures (namely, `aarch64` and `x86_64`). An example for the `x86_64` architecture is:
-
-```xml
-<execution>
-    <id>generate-x86_64-rpm</id>
-    <phase>package</phase>
-    <goals>
-        <goal>rpm</goal>
-    </goals>
-    <configuration>
-        <workarea>${basedir}/target/rpm/${rpm.x86_64.architecture}</workarea>
-        <name>${output.installer.name}</name>
-        <needarch>${rpm.x86_64.architecture}</needarch>
-        <group>Applications/System</group>
-        <targetOS>linux</targetOS>
-        <summary>${summary}</summary>
-        <description>${long.description}</description>
-        <license>EPL 2.0 (https://www.eclipse.org/legal/epl-2.0/)</license>
-
-        <mappings>
-            <mapping>
-                <directory>${addon.installation.dir}</directory>
-                <filemode>600</filemode>
-                <username>kurad</username>
-                <groupname>kurad</groupname>
-                <sources>
-                    <source>
-                        <location>${basedir}/target/input_files/${jar.name}_${project.version}.jar</location>
-                    </source>
-                </sources>
-            </mapping>
-            <mapping>
-                <directory>${native.core.installation.dir}</directory>
-                <filemode>600</filemode>
-                <username>kurad</username>
-                <groupname>kurad</groupname>
-                <sources>
-                    <source>
-                        <location>${basedir}/target/input_files/${jar.x86_64.core}_${project.version}.jar</location>
-                    </source>
-                </sources>
-            </mapping>
-        </mappings>
-
-        <requires>
-            <require>kura</require>
-        </requires>
-    </configuration>
-</execution>
-```
-
-A similar execution can be used for the `aarch64` architecture, just changing the `workarea`, `needarch`, `sources` and `location` fields to point to the correct architecture (and change the execution `id` if they're present at the same time). Also in the `<mappings>` section, the `directory` and `location` fields must be changed to point to the correct architecture-specific jars.
-
-With these executions two RPM installers will be generated, one for each architecture. They will be found in the `distrib/target/rpm/` folder with the following names:
-```
-<artifactId>-<version>.<rpm.x86_64.architecture>.rpm
-<artifactId>-<version>.<rpm.aarch64.architecture>.rpm
 ```

@@ -50,7 +50,6 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtEventInfo;
-import org.eclipse.kura.web.shared.model.GwtLoginInfo;
 import org.eclipse.kura.web.shared.model.GwtPasswordStrenghtRequirements;
 import org.eclipse.kura.web.shared.model.GwtSecurityCapabilities;
 import org.eclipse.kura.web.shared.model.GwtSession;
@@ -60,8 +59,6 @@ import org.eclipse.kura.web.shared.model.GwtUserData;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtLoginInfoService;
-import org.eclipse.kura.web.shared.service.GwtLoginInfoServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSessionService;
@@ -250,7 +247,6 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
     private static final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private static final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private static final GwtSessionServiceAsync gwtSessionService = GWT.create(GwtSessionService.class);
-    private static final GwtLoginInfoServiceAsync gwtLoginInfoService = GWT.create(GwtLoginInfoService.class);
 
     private final KeyUpHandler searchBoxChangeHandler = event -> {
         TextBox searchBox = (TextBox) event.getSource();
@@ -342,11 +338,10 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
         });
     }
 
-    private void initPostLoginBannerModal(final GwtLoginInfo result) {
+    private void initPostLoginBannerModal(final String postLoginBannerContent) {
         this.postLoginBannerModal.setTitle(MSGS.warning());
         this.buttonPostLoginBannerModalOk.setText(MSGS.okButton());
 
-        String postLoginBannerContent = result.getPostLoginBannerContent();
         if (postLoginBannerContent != null) {
             EntryClassUi.this.postLoginBannerModalPannelBody.setText(postLoginBannerContent);
             EntryClassUi.this.postLoginBannerModal.show();
@@ -1184,16 +1179,28 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
     @Override
     protected void onAttach() {
         super.onAttach();
-        gwtLoginInfoService.getLoginInfo(new AsyncCallback<GwtLoginInfo>() {
+
+        EntryClassUi.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
-            public void onSuccess(GwtLoginInfo result) {
-                initPostLoginBannerModal(result);
+            public void onFailure(Throwable ex) {
+                FailureHandler.handle(ex, EntryClassUi.class.getName());
             }
 
             @Override
-            public void onFailure(Throwable caught) {
-                // nothing to do
+            public void onSuccess(GwtXSRFToken token) {
+                gwtSessionService.getPostLoginBannerContent(token, new AsyncCallback<String>() {
+
+                    @Override
+                    public void onSuccess(String result) {
+                        initPostLoginBannerModal(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        // nothing to do
+                    }
+                });
             }
         });
 

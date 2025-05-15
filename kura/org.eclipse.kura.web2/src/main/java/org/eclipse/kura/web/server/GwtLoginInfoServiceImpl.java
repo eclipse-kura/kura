@@ -38,7 +38,6 @@ public class GwtLoginInfoServiceImpl extends OsgiRemoteServiceServlet implements
         final ConsoleOptions options = Console.getConsoleOptions();
 
         final String preLoginBannerContent = GwtServerUtil.getPreLoginMessage().orElse(null);
-        final String postLoginBannerContent = GwtServerUtil.getPostLoginMessage().orElse(null);
 
         Integer clientAuthPort = null;
 
@@ -65,8 +64,7 @@ public class GwtLoginInfoServiceImpl extends OsgiRemoteServiceServlet implements
             clientAuthPort = null;
         }
 
-        return new GwtLoginInfo(preLoginBannerContent, postLoginBannerContent, options.getEnabledAuthMethods(),
-                clientAuthPort);
+        return new GwtLoginInfo(preLoginBannerContent, options.getEnabledAuthMethods(), clientAuthPort);
     }
 
 }

@@ -22,27 +22,21 @@ public class GwtLoginInfo implements IsSerializable, Serializable {
     private static final long serialVersionUID = 4501114031863790538L;
 
     private String preLoginbannerContent;
-    private String postLoginbannerContent;
     private Set<String> enabledAuthMethods;
     private Integer certAuthPort;
 
     public GwtLoginInfo() {
     }
 
-    public GwtLoginInfo(final String preLoginbannerContent, final String postLoginbannerContent,
-            final Set<String> enabledAuthMethods, final Integer clientAuthPort) {
+    public GwtLoginInfo(final String preLoginbannerContent, final Set<String> enabledAuthMethods,
+            final Integer clientAuthPort) {
         this.preLoginbannerContent = preLoginbannerContent;
-        this.postLoginbannerContent = postLoginbannerContent;
         this.enabledAuthMethods = enabledAuthMethods;
         this.certAuthPort = clientAuthPort;
     }
 
     public String getPreLoginBannerContent() {
         return this.preLoginbannerContent;
-    }
-
-    public String getPostLoginBannerContent() {
-        return this.postLoginbannerContent;
     }
 
     public Set<String> getEnabledAuthMethods() {

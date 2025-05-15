@@ -176,4 +176,10 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
                 AuditContext.current().orElseThrow(() -> new GwtKuraException("Audit context is not available")));
         session.removeAttribute(Attributes.LOCKED.getValue());
     }
+
+    @Override
+    public String getPostLoginBannerContent(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        return GwtServerUtil.getPostLoginMessage().orElse(null);
+    }
 }

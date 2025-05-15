@@ -27,6 +27,7 @@ import org.eclipse.kura.identity.PasswordStrengthRequirements;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.internal.rest.auth.dto.AuthenticationInfoDTO;
 import org.eclipse.kura.internal.rest.auth.dto.AuthenticationResponseDTO;
+import org.eclipse.kura.internal.rest.auth.dto.BannerContentDTO;
 import org.eclipse.kura.internal.rest.auth.dto.IdentityInfoDTO;
 import org.eclipse.kura.internal.rest.auth.dto.UpdatePasswordDTO;
 import org.eclipse.kura.internal.rest.auth.dto.UsernamePasswordDTO;
@@ -271,11 +272,9 @@ public class SessionRestService {
         final boolean isCertificateAuthenticationEnabled = options.isCertificateAuthEnabled();
 
         final String preLoginBannerMessage = loginBannerService.getPreLoginBanner().orElse(null);
-        final String postLoginBannerMessage = loginBannerService.getPostLoginBanner().orElse(null);
 
         if (!isCertificateAuthenticationEnabled) {
-            return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, preLoginBannerMessage,
-                    postLoginBannerMessage);
+            return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, preLoginBannerMessage);
         }
 
         final Map<String, Object> httpServiceConfig = ConfigurationAdminHelper
@@ -284,13 +283,20 @@ public class SessionRestService {
         final Set<Integer> httpsClientAuthPorts = ConfigurationAdminHelper.getHttpsMutualAuthPorts(httpServiceConfig);
 
         if (!httpsClientAuthPorts.isEmpty()) {
-            return new AuthenticationInfoDTO(isPasswordAuthEnabled, true, httpsClientAuthPorts, preLoginBannerMessage,
-                    postLoginBannerMessage);
+            return new AuthenticationInfoDTO(isPasswordAuthEnabled, true, httpsClientAuthPorts, preLoginBannerMessage);
         } else {
-            return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, preLoginBannerMessage,
-                    postLoginBannerMessage);
+            return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, preLoginBannerMessage);
         }
 
+    }
+
+    @GET
+    @Path(SessionRestServiceConstants.POST_LOGIN_BANNER_CONTENT)
+    @Produces(MediaType.APPLICATION_JSON)
+    public BannerContentDTO getPostLoginBannerContent() {
+        final String postLoginBannerMessage = loginBannerService.getPostLoginBanner().orElse(null);
+
+        return new BannerContentDTO(postLoginBannerMessage);
     }
 
     //

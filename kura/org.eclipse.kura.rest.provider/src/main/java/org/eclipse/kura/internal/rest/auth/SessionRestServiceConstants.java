@@ -22,7 +22,6 @@ public class SessionRestServiceConstants {
     public static final String LOGOUT_PATH = "/logout";
     public static final String CURRENT_IDENTITY = "/currentIdentity";
     public static final String AUTHENTICATION_INFO = "/authenticationInfo";
-    public static final String POST_LOGIN_BANNER_CONTENT = "/postLoginBannerContent";
 
     private SessionRestServiceConstants() {
     }

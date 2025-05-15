@@ -27,7 +27,6 @@ import org.eclipse.kura.identity.PasswordStrengthRequirements;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.internal.rest.auth.dto.AuthenticationInfoDTO;
 import org.eclipse.kura.internal.rest.auth.dto.AuthenticationResponseDTO;
-import org.eclipse.kura.internal.rest.auth.dto.BannerContentDTO;
 import org.eclipse.kura.internal.rest.auth.dto.IdentityInfoDTO;
 import org.eclipse.kura.internal.rest.auth.dto.UpdatePasswordDTO;
 import org.eclipse.kura.internal.rest.auth.dto.UsernamePasswordDTO;
@@ -288,15 +287,6 @@ public class SessionRestService {
             return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, preLoginBannerMessage);
         }
 
-    }
-
-    @GET
-    @Path(SessionRestServiceConstants.POST_LOGIN_BANNER_CONTENT)
-    @Produces(MediaType.APPLICATION_JSON)
-    public BannerContentDTO getPostLoginBannerContent() {
-        final String postLoginBannerMessage = loginBannerService.getPostLoginBanner().orElse(null);
-
-        return new BannerContentDTO(postLoginBannerMessage);
     }
 
     //

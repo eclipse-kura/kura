@@ -114,7 +114,8 @@ public class SessionRestService {
             final HttpSession session = this.restSessionHelper.createNewAuthenticatedSession(request,
                     usernamePassword.getUsername());
 
-            final AuthenticationResponseDTO response = buildAuthenticationResponse(usernamePassword.getUsername());
+            final AuthenticationResponseDTO response = buildAuthenticationResponse(usernamePassword.getUsername(),
+                    this.loginBannerService.getPostLoginBanner());
 
             if (response.isPasswordChangeNeeded()) {
                 this.restSessionHelper.lockSession(session);
@@ -159,7 +160,7 @@ public class SessionRestService {
                         "Certificate authentication failed");
             }
 
-            return buildAuthenticationResponse(principal.get().getName());
+            return buildAuthenticationResponse(principal.get().getName(), this.loginBannerService.getPostLoginBanner());
         } catch (final Exception e) {
             invalidateCurrentSession(request);
             throw e;
@@ -317,8 +318,13 @@ public class SessionRestService {
         }
     }
 
-    private AuthenticationResponseDTO buildAuthenticationResponse(final String username) {
+    private AuthenticationResponseDTO buildAuthenticationResponse(final String username,
+            final Optional<String> message) {
         final boolean needsPasswordChange = this.userAdminHelper.isPasswordChangeRequired(username);
+
+        if (message.isPresent()) {
+            return new AuthenticationResponseDTO(needsPasswordChange, message.get());
+        }
 
         return new AuthenticationResponseDTO(needsPasswordChange);
     }

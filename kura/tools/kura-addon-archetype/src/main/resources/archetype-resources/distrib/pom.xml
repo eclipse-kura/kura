@@ -50,14 +50,10 @@
         <!--
             Available DEB architectures:
             all, amd64, arm64
-
-            Available RPM architectures:
-            noarch, x86_64, aarch64
         -->
         <deb.architecture>all</deb.architecture>
-        <rpm.architecture>noarch</rpm.architecture>
 
-        <!-- final name of the generated debian and rpm package -->
+        <!-- final name of the generated debian package -->
         <package.name>${artifactId}</package.name>
 
         <!-- properties used for artifact upload on artifactory repository -->

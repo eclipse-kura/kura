@@ -845,6 +845,37 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void shouldReturnPostLoginMessageIfPostLoginLoginBannnerIsEnabledAndClientCertAuthEnabled() {
+        givenHttpServiceClientCertAuthEnabled();
+        givenRestServiceClientCertAuth(true);
+        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
+                "post.login.banner.enabled", true, //
+                "post.login.banner.content", "foo");
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/authenticationInfo", null);
+
+        thenResponseCodeIs(200);
+        thenResponseBodyEqualsJson(
+                "{\"passwordAuthenticationEnabled\":true,\"certificateAuthenticationEnabled\":true,\"certificateAuthenticationPorts\":[8090],\"postLoginMessage\":\"foo\"}");
+    }
+
+    @Test
+    public void shouldReturnPostLoginMessageIfPostLoginLoginBannnerIsEnabledAndRestClientCertAuthDisabled() {
+        givenRestServiceClientCertAuth(false);
+        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
+                "post.login.banner.enabled", true, //
+                "post.login.banner.content", "foo");
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/authenticationInfo", null);
+
+        thenResponseCodeIs(200);
+        thenResponseBodyEqualsJson(
+                "{\"passwordAuthenticationEnabled\":true,\"certificateAuthenticationEnabled\":false,\"postLoginMessage\":\"foo\"}");
+    }
+
+    @Test
     public void shouldChangeSessionCookieRepeatingPasswordAuthentication() {
         givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
                 "pre.login.banner.enabled", false);
@@ -921,6 +952,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldChangeSessionCookieAuthenticatingWithPasswordAndThenWithCertificateOnDifferentPort() {
+        givenRestServiceClientCertAuth(true);
         givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
@@ -949,6 +981,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldChangeSessionCookieAuthenticatingWithCertificateAndThenWithPasswordOnDifferentPort() {
+        givenRestServiceClientCertAuth(true);
         givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
@@ -976,6 +1009,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldChangeSessionCookieAuthenticatingWithPasswordAndThenWithCertificateOnSamePort() {
+        givenRestServiceClientCertAuth(true);
         givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
@@ -1004,6 +1038,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldChangeSessionCookieAuthenticatingWithCertificateAndThenWithPasswordOnSamePort() {
+        givenRestServiceClientCertAuth(true);
         givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
         givenNoBasicCredentials();
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
@@ -1230,6 +1265,39 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
                     new Integer[] {});
 
             configurationService.updateConfiguration("org.eclipse.kura.http.server.manager.HttpService", properties);
+
+            RestTransport.waitPortOpen("localhost", 8080, 1, TimeUnit.MINUTES);
+
+        } catch (Exception e) {
+            fail("cannot set httpservice keystore pid");
+        }
+    }
+
+    private void givenHttpServiceClientCertAuthEnabled() {
+        try {
+            final ConfigurationService configurationService = ServiceUtil
+                    .trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+
+            final Map<String, Object> properties = Collections.singletonMap("https.client.auth.ports",
+                    new Integer[] { 8090 });
+
+            configurationService.updateConfiguration("org.eclipse.kura.http.server.manager.HttpService", properties);
+
+            RestTransport.waitPortOpen("localhost", 8080, 1, TimeUnit.MINUTES);
+
+        } catch (Exception e) {
+            fail("cannot set httpservice keystore pid");
+        }
+    }
+
+    private void givenRestServiceClientCertAuth(Boolean enabled) {
+        try {
+            final ConfigurationService configurationService = ServiceUtil
+                    .trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+
+            final Map<String, Object> properties = Collections.singletonMap("auth.certificate.enabled", enabled);
+
+            configurationService.updateConfiguration("org.eclipse.kura.internal.rest.provider.RestService", properties);
 
             RestTransport.waitPortOpen("localhost", 8080, 1, TimeUnit.MINUTES);
 

@@ -197,11 +197,11 @@ use the following
 <deb.arm64.architecture>arm64</deb.arm64.architecture>
 ```
 !!! tip
-    These properties are useful to define the architecture-specific jars and the architecture-specific debian and rpm architectures. The `addon.installation.dir` property is used to define the installation directory of the bundle in Kura. The `native.core.installation.dir` property is used to define the installation directory of the native code in Kura. It is important that the fragments are installed in a higher level directory than the main bundle, otherwise Kura will not be able to load the native code.
+    These properties are used to define the architecture-specific jars and the architecture-specific debian metadata. The `addon.installation.dir` property is used to define the installation directory of the bundle in Kura. The `native.core.installation.dir` property is used to define the installation directory of the native code in Kura. It is important that the fragments are installed in a higher level directory than the main bundle, otherwise Kura will not be able to load the native code.
 
     The `jar.name` property is used to define the name of the main bundle, while the `jar.aarch64.core` and `jar.x86_64.core` properties are used to define the names of the architecture-specific fragments.
 
-    Finally, the `deb.amd64.architecture` and `deb.arm64.architecture` properties are used to define the architecture-specific debian and rpm architectures.
+    Finally, the `deb.amd64.architecture` and `deb.arm64.architecture` properties are used to define the architecture-specific debian metadata.
 
 The plugin responsible to copy and rename the jars is the `copy-rename-maven-plugin`. The plugin is configured in the `distrib/pom.xml` file as follows:
 

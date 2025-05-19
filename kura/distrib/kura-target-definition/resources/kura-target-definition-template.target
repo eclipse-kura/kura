@@ -1088,6 +1088,16 @@
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.kura.core.testutil</artifactId>
+                    <version>${org.eclipse.kura.core.testutil.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.kura.json.marshaller.unmarshaller.provider</artifactId>
+                    <version>${org.eclipse.kura.json.marshaller.unmarshaller.provider.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
                     <artifactId>org.eclipse.kura.net.configuration</artifactId>
                     <version>${org.eclipse.kura.net.configuration.version}</version>
                 </dependency>
@@ -1128,6 +1138,11 @@
                     <groupId>org.eclipse.kura</groupId>
                     <artifactId>org.eclipse.kura.asset.provider</artifactId>
                     <version>${org.eclipse.kura.asset.provider.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.kura.deployment.agent</artifactId>
+                    <version>${org.eclipse.kura.deployment.agent.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>

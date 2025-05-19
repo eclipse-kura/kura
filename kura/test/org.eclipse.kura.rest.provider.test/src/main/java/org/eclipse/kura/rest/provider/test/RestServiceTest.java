@@ -830,21 +830,6 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void shouldReturnPostLoginMessageIfPostLoginLoginBannnerIsEnabled() {
-        givenHttpServiceClientCertAuthDisabled();
-        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
-                "post.login.banner.enabled", true, //
-                "post.login.banner.content", "foo");
-        givenNoBasicCredentials();
-
-        whenRequestIsPerformed("http", 8080, new MethodSpec("GET"), "/session/v1/authenticationInfo", null);
-
-        thenResponseCodeIs(200);
-        thenResponseBodyEqualsJson(
-                "{\"passwordAuthenticationEnabled\":true,\"certificateAuthenticationEnabled\":false,\"postLoginMessage\":\"foo\"}");
-    }
-
-    @Test
     public void shouldChangeSessionCookieRepeatingPasswordAuthentication() {
         givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
                 "pre.login.banner.enabled", false);

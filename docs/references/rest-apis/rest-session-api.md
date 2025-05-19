@@ -237,7 +237,8 @@ Represents the response for a successful authentication request.
 
 ```json
 {
-  "passwordChangeNeeded": true
+  "passwordChangeNeeded": true,
+  "message": "foo"
 }
 ```
 ### UsernamePassword

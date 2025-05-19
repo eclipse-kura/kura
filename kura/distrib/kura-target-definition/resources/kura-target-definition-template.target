@@ -1043,6 +1043,11 @@
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.kura.core.crypto</artifactId>
+                    <version>${org.eclipse.kura.core.crypto.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
                     <artifactId>org.eclipse.kura.core.configuration</artifactId>
                     <version>${org.eclipse.kura.core.configuration.version}</version>
                 </dependency>

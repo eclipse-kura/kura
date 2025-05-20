@@ -1043,6 +1043,11 @@
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.kura.core.crypto</artifactId>
+                    <version>${org.eclipse.kura.core.crypto.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
                     <artifactId>org.eclipse.kura.core.configuration</artifactId>
                     <version>${org.eclipse.kura.core.configuration.version}</version>
                 </dependency>
@@ -1080,6 +1085,16 @@
                     <groupId>org.eclipse.kura</groupId>
                     <artifactId>org.eclipse.kura.core.net</artifactId>
                     <version>${org.eclipse.kura.core.net.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.kura.core.testutil</artifactId>
+                    <version>${org.eclipse.kura.core.testutil.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.kura.json.marshaller.unmarshaller.provider</artifactId>
+                    <version>${org.eclipse.kura.json.marshaller.unmarshaller.provider.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
@@ -1123,6 +1138,11 @@
                     <groupId>org.eclipse.kura</groupId>
                     <artifactId>org.eclipse.kura.asset.provider</artifactId>
                     <version>${org.eclipse.kura.asset.provider.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.kura.deployment.agent</artifactId>
+                    <version>${org.eclipse.kura.deployment.agent.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>

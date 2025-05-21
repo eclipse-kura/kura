@@ -290,7 +290,6 @@ public class SessionRestService {
 
     }
 
-    //
     private void validatePasswordStrength(final String newPassword) {
         PasswordStrengthRequirements passwordStrengthRequirements;
         try {

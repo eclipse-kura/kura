@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -39,19 +39,19 @@ public class AuthenticationInfoDTO {
     }
 
     public boolean isPasswordAuthenticationEnabled() {
-        return passwordAuthenticationEnabled;
+        return this.passwordAuthenticationEnabled;
     }
 
     public boolean isCertificateAuthenticationEnabled() {
-        return certificateAuthenticationEnabled;
+        return this.certificateAuthenticationEnabled;
     }
 
     public List<Integer> getCertificateAuthenticationPorts() {
-        return certificateAuthenticationPorts;
+        return this.certificateAuthenticationPorts;
     }
 
     public String getMessage() {
-        return message;
+        return this.message;
     }
 
 }

@@ -266,7 +266,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldCreateSessionWithUsernameAndPassword() {
         givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
-                "pre.login.banner.enabled", false);
+                "pre.login.banner.enabled", false, //
+                "post.login.banner.enabled", false);
         givenService(new RequiresAssetsRole());
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();
@@ -326,6 +327,33 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
         thenRequestSucceeds();
         thenResponseHasCookie("JSESSIONID");
+    }
+
+    @Test
+    public void shouldCreateSessionWithCertificateAndReturnPostLoginMessage() {
+        givenRestServiceConfiguration(Collections.singletonMap("allowed.ports", new Integer[] { 8080, 9999 }));
+        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
+                "post.login.banner.enabled", true, //
+                "post.login.banner.content", "foo");
+        givenNoBasicCredentials();
+        givenIdentity("foo", Optional.empty(), Arrays.asList("rest.assets"));
+        givenService(new RequiresAssetsRole());
+        givenCA("clientCA");
+        givenCA("serverCA");
+        givenKeystoreService("clientKeystore");
+        givenCACertificateInKeystore("clientKeystore", "serverCA");
+        givenKeystoreService("serverKeystore");
+        givenCACertificateInKeystore("serverKeystore", "clientCA");
+        givenKeyPairInKeystore("clientKeystore", "clientCA", "foo");
+        givenKeyPairInKeystore("serverKeystore", "serverCA", "serverCert");
+        givenHttpServiceClientCertAuthEnabled("serverKeystore", 9999);
+        givenClientKeystore("clientKeystore");
+
+        whenRequestIsPerformed("https", 9999, new MethodSpec("POST"), "/session/v1/login/certificate", null);
+
+        thenRequestSucceeds();
+        thenResponseHasCookie("JSESSIONID");
+        thenResponseBodyEqualsJson("{\"passwordChangeNeeded\":false,\"message\":\"foo\"}");
     }
 
     @Test
@@ -830,9 +858,26 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void shouldReturnPostLoginMessageIfLoginBannnerIsEnabled() {
+        givenHttpServiceClientCertAuthDisabled();
+        givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
+                "post.login.banner.enabled", true, //
+                "post.login.banner.content", "foo");
+        givenService(new RequiresAssetsRole());
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenNoBasicCredentials();
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        thenRequestSucceeds();
+
+        thenResponseBodyEqualsJson("{\"passwordChangeNeeded\":false,\"message\":\"foo\"}");
+    }
+
+    @Test
     public void shouldChangeSessionCookieRepeatingPasswordAuthentication() {
         givenConfiguration(LOGIN_BANNER_SERVICE_PID, //
-                "pre.login.banner.enabled", false);
+                "pre.login.banner.enabled", false, //
+                "post.login.banner.enabled", false);
         givenService(new RequiresAssetsRole());
         givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
         givenNoBasicCredentials();

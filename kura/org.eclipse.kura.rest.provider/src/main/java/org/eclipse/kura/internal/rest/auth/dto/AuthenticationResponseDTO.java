@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,17 +15,23 @@ package org.eclipse.kura.internal.rest.auth.dto;
 public class AuthenticationResponseDTO {
 
     private final boolean passwordChangeNeeded;
+    private final String message;
 
     public AuthenticationResponseDTO(final boolean passwordChangeNeeded) {
         this.passwordChangeNeeded = passwordChangeNeeded;
+        this.message = null;
     }
 
     public AuthenticationResponseDTO(final boolean passwordChangeNeeded, final String message) {
         this.passwordChangeNeeded = passwordChangeNeeded;
+        this.message = message;
     }
 
     public boolean isPasswordChangeNeeded() {
-        return passwordChangeNeeded;
+        return this.passwordChangeNeeded;
     }
 
+    public String getMessage() {
+        return this.message;
+    }
 }

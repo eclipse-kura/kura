@@ -49,21 +49,6 @@ public class ConfigurationAdminHelper {
         return loadConfigurationProperties(configurationAdmin, "org.eclipse.kura.http.server.manager.HttpService");
     }
 
-    public static Optional<String> getLoginMessage(final Map<String, Object> properties) {
-        final Object messageEnabled = properties.get("access.banner.enabled");
-        final Object message = properties.get("access.banner.content");
-
-        if (!Boolean.TRUE.equals(messageEnabled)) {
-            return Optional.empty();
-        }
-
-        if (!(message instanceof String)) {
-            return Optional.empty();
-        }
-
-        return Optional.of((String) message);
-    }
-
     public static Set<Integer> getHttpsMutualAuthPorts(final Map<String, Object> properties) {
         final Object rawPortList = properties.get("https.client.auth.ports");
 

@@ -114,7 +114,8 @@ public class SessionRestService {
             final HttpSession session = this.restSessionHelper.createNewAuthenticatedSession(request,
                     usernamePassword.getUsername());
 
-            final AuthenticationResponseDTO response = buildAuthenticationResponse(usernamePassword.getUsername());
+            final AuthenticationResponseDTO response = buildAuthenticationResponse(usernamePassword.getUsername(),
+                    this.loginBannerService.getPostLoginBanner());
 
             if (response.isPasswordChangeNeeded()) {
                 this.restSessionHelper.lockSession(session);
@@ -159,7 +160,7 @@ public class SessionRestService {
                         "Certificate authentication failed");
             }
 
-            return buildAuthenticationResponse(principal.get().getName());
+            return buildAuthenticationResponse(principal.get().getName(), this.loginBannerService.getPostLoginBanner());
         } catch (final Exception e) {
             invalidateCurrentSession(request);
             throw e;
@@ -270,10 +271,10 @@ public class SessionRestService {
         final boolean isPasswordAuthEnabled = options.isPasswordAuthEnabled();
         final boolean isCertificateAuthenticationEnabled = options.isCertificateAuthEnabled();
 
-        final String message = loginBannerService.getPreLoginBanner().orElse(null);
+        final String preLoginBannerMessage = loginBannerService.getPreLoginBanner().orElse(null);
 
         if (!isCertificateAuthenticationEnabled) {
-            return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, message);
+            return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, preLoginBannerMessage);
         }
 
         final Map<String, Object> httpServiceConfig = ConfigurationAdminHelper
@@ -282,9 +283,9 @@ public class SessionRestService {
         final Set<Integer> httpsClientAuthPorts = ConfigurationAdminHelper.getHttpsMutualAuthPorts(httpServiceConfig);
 
         if (!httpsClientAuthPorts.isEmpty()) {
-            return new AuthenticationInfoDTO(isPasswordAuthEnabled, true, httpsClientAuthPorts, message);
+            return new AuthenticationInfoDTO(isPasswordAuthEnabled, true, httpsClientAuthPorts, preLoginBannerMessage);
         } else {
-            return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, message);
+            return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, preLoginBannerMessage);
         }
 
     }
@@ -316,8 +317,13 @@ public class SessionRestService {
         }
     }
 
-    private AuthenticationResponseDTO buildAuthenticationResponse(final String username) {
+    private AuthenticationResponseDTO buildAuthenticationResponse(final String username,
+            final Optional<String> message) {
         final boolean needsPasswordChange = this.userAdminHelper.isPasswordChangeRequired(username);
+
+        if (message.isPresent()) {
+            return new AuthenticationResponseDTO(needsPasswordChange, message.get());
+        }
 
         return new AuthenticationResponseDTO(needsPasswordChange);
     }

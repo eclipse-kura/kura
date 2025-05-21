@@ -217,10 +217,6 @@
                             </dependency>
                             <dependency>
                                 <type>p2-installable-unit</type>
-                                <artifactId>org.eclipse.equinox.wireadmin</artifactId>
-                            </dependency>
-                            <dependency>
-                                <type>p2-installable-unit</type>
                                 <artifactId>org.apache.activemq.artemis-mqtt-protocol</artifactId>
                             </dependency>
                             <dependency>
@@ -304,11 +300,6 @@
                             </bundle>
                             <bundle>
                                 <id>org.eclipse.equinox.util</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
-                                <id>org.eclipse.equinox.wireadmin</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
@@ -449,21 +440,6 @@
                             </bundle>
                             <bundle>
                                 <id>org.eclipse.kura.emulator.usb</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
-                                <id>org.eclipse.kura.wire.provider</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
-                                <id>org.eclipse.kura.wire.helper.provider</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
-                                <id>org.eclipse.kura.wire.component.provider</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
@@ -666,21 +642,6 @@
                                 </requirement>
                                 <requirement>
                                     <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.wire.provider</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.wire.helper.provider</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.wire.component.provider</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
@@ -811,8 +772,6 @@
         <kura.basedir>${project.basedir}/..</kura.basedir>
     </properties>
     <modules>
-        <module>org.eclipse.kura.asset.provider.test</module>
-        <module>org.eclipse.kura.asset.helper.provider.test</module>
         <module>org.eclipse.kura.configuration.change.manager.test</module>
         <module>org.eclipse.kura.core.certificates.test</module>
         <module>org.eclipse.kura.core.comm.test</module>
@@ -836,7 +795,6 @@
         <module>org.eclipse.kura.emulator.position.test</module>
         <module>org.eclipse.kura.emulator.watchdog.test</module>
         <module>org.eclipse.kura.event.publisher.test</module>
-        <module>org.eclipse.kura.internal.asset.cloudlet.test</module>
         <module>org.eclipse.kura.internal.ble.test</module>
         <module>org.eclipse.kura.internal.ble.eddystone.test</module>
         <module>org.eclipse.kura.internal.ble.ibeacon.test</module>
@@ -859,12 +817,6 @@
         <module>org.eclipse.kura.test</module>
         <module>org.eclipse.kura.util.test</module>
         <module>org.eclipse.kura.watchdog.criticaltest</module>
-        <module>org.eclipse.kura.wire.ai.component.provider.test</module>
-        <module>org.eclipse.kura.wire.component.provider.test</module>
-        <module>org.eclipse.kura.wire.h2db.component.provider.test</module>
-        <module>org.eclipse.kura.wire.db.component.provider.test</module>
-        <module>org.eclipse.kura.wire.script.tools.test</module>
-        <module>org.eclipse.kura.wire.provider.test</module>
         <module>org.eclipse.kura.json.marshaller.unmarshaller.provider.test</module>
         <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider.test</module>
         <module>org.eclipse.kura.http.server.manager.test</module>
@@ -875,7 +827,6 @@
         <module>org.eclipse.kura.rest.keystore.provider.test</module>
         <module>org.eclipse.kura.log.filesystem.provider.test</module>
         <module>org.eclipse.kura.rest.provider.test</module>
-        <module>org.eclipse.kura.rest.asset.provider.test</module>
         <module>org.eclipse.kura.rest.configuration.provider.test</module>
         <module>org.eclipse.kura.rest.network.configuration.provider.test</module>
         <module>org.eclipse.kura.rest.cloudconnection.provider.test</module>
@@ -888,7 +839,6 @@
         <module>org.eclipse.kura.rest.security.provider.test</module>
         <module>org.eclipse.kura.rest.service.listing.provider.test</module>
         <module>org.eclipse.kura.rest.system.provider.test</module>
-        <module>org.eclipse.kura.rest.wire.provider.test</module>
         <module>org.eclipse.kura.util.test.driver</module>
         <module>org.eclipse.kura.container.orchestration.provider.test</module>
         <module>org.eclipse.kura.container.provider.test</module>

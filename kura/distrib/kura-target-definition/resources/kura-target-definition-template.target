@@ -781,11 +781,6 @@
                     <artifactId>org.eclipse.equinox.util</artifactId>
                     <version>${org.eclipse.equinox.util.version}</version>
                 </dependency>
-                <dependency>
-                    <groupId>org.eclipse.platform</groupId>
-                    <artifactId>org.eclipse.equinox.wireadmin</artifactId>
-                    <version>${org.eclipse.equinox.wireadmin.version}</version>
-                </dependency>
 
                 <!-- Jetty -->
                 <dependency>
@@ -1136,11 +1131,6 @@
 
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
-                    <artifactId>org.eclipse.kura.asset.provider</artifactId>
-                    <version>${org.eclipse.kura.asset.provider.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.eclipse.kura</groupId>
                     <artifactId>org.eclipse.kura.deployment.agent</artifactId>
                     <version>${org.eclipse.kura.deployment.agent.version}</version>
                 </dependency>
@@ -1153,12 +1143,7 @@
                     <groupId>org.eclipse.kura</groupId>
                     <artifactId>org.eclipse.kura.util</artifactId>
                     <version>${org.eclipse.kura.util.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.eclipse.kura</groupId>
-                    <artifactId>org.eclipse.kura.wire.component.provider</artifactId>
-                    <version>${org.eclipse.kura.wire.component.provider.version}</version>
-                </dependency>
+                </dependency>y>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
                     <artifactId>org.eclipse.kura.driver.helper.provider</artifactId>

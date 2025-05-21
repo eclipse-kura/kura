@@ -443,21 +443,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.asset.provider</artifactId>
-                                    <version>${org.eclipse.kura.asset.provider.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.asset.cloudlet.provider</artifactId>
-                                    <version>${org.eclipse.kura.asset.cloudlet.provider.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.asset.helper.provider</artifactId>
-                                    <version>${org.eclipse.kura.asset.helper.provider.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.driver.helper.provider</artifactId>
                                     <version>${org.eclipse.kura.driver.helper.provider.version}</version>
                                 </artifactItem>
@@ -478,33 +463,8 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.wire.h2db.component.provider</artifactId>
-                                    <version>${org.eclipse.kura.wire.h2db.component.provider.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.wire.db.component.provider</artifactId>
-                                    <version>${org.eclipse.kura.wire.db.component.provider.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.wire.camel</artifactId>
                                     <version>${org.eclipse.kura.wire.camel.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.wire.component.provider</artifactId>
-                                    <version>${org.eclipse.kura.wire.component.provider.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.wire.helper.provider</artifactId>
-                                    <version>${org.eclipse.kura.wire.helper.provider.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.wire.provider</artifactId>
-                                    <version>${org.eclipse.kura.wire.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -553,11 +513,6 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.rest.asset.provider</artifactId>
-                                    <version>${org.eclipse.kura.rest.asset.provider.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.hook.file.move.provider</artifactId>
                                     <version>${org.eclipse.kura.hook.file.move.provider.version}</version>
                                 </artifactItem>
@@ -576,11 +531,6 @@
                                     <artifactId>org.eclipse.kura.xml.marshaller.unmarshaller.provider</artifactId>
                                     <version>${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}</version>
                                 </artifactItem>                     
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.wire.component.join.provider</artifactId>
-                                    <version>${org.eclipse.kura.wire.component.join.provider.version}</version>
-                                </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider</artifactId>
@@ -688,18 +638,8 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.rest.wire.provider</artifactId>
-                                    <version>${org.eclipse.kura.rest.wire.provider.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.container.orchestration.provider</artifactId>
                                     <version>${org.eclipse.kura.container.orchestration.provider.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.wire.ai.component.provider</artifactId>
-                                    <version>${org.eclipse.kura.wire.ai.component.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -789,9 +729,6 @@
                         <configuration>
                             <target>
                                 <move file="target/plugins/org.eclipse.kura.api.jar" tofile="target/plugins/org.eclipse.kura.api_${org.eclipse.kura.api.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.asset.provider.jar" tofile="target/plugins/org.eclipse.kura.asset.provider_${org.eclipse.kura.asset.provider.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.asset.cloudlet.provider.jar" tofile="target/plugins/org.eclipse.kura.asset.cloudlet.provider_${org.eclipse.kura.asset.cloudlet.provider.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.asset.helper.provider.jar" tofile="target/plugins/org.eclipse.kura.asset.helper.provider_${org.eclipse.kura.asset.helper.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.broker.artemis.core.jar" tofile="target/plugins/org.eclipse.kura.broker.artemis.core_${org.eclipse.kura.broker.artemis.core.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.broker.artemis.simple.mqtt.jar" tofile="target/plugins/org.eclipse.kura.broker.artemis.simple.mqtt_${org.eclipse.kura.broker.artemis.simple.mqtt.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.broker.artemis.xml.jar" tofile="target/plugins/org.eclipse.kura.broker.artemis.xml_${org.eclipse.kura.broker.artemis.xml.version}.jar" />
@@ -844,12 +781,7 @@
                                 <move file="target/plugins/org.eclipse.kura.emulator.position.jar" tofile="target/plugins/org.eclipse.kura.emulator.position_${org.eclipse.kura.emulator.position.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.emulator.usb.jar" tofile="target/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.emulator.watchdog.jar" tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.wire.h2db.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.h2db.component.provider_${org.eclipse.kura.wire.h2db.component.provider.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.wire.db.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.db.component.provider_${org.eclipse.kura.wire.db.component.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.camel.jar" tofile="target/plugins/org.eclipse.kura.wire.camel_${org.eclipse.kura.wire.camel.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.wire.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.wire.helper.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.helper.provider_${org.eclipse.kura.wire.helper.provider.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.wire.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.provider_${org.eclipse.kura.wire.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.opcua.provider.jar" tofile="target/plugins/org.eclipse.kura.driver.opcua.provider_${org.eclipse.kura.driver.opcua.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.s7plc.provider.jar" tofile="target/plugins/org.eclipse.kura.driver.s7plc.provider_${org.eclipse.kura.driver.s7plc.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.driver.ble.sensortag.provider.jar" tofile="target/plugins/org.eclipse.kura.driver.ble.sensortag.provider_${org.eclipse.kura.driver.ble.sensortag.provider.version}.jar" />
@@ -858,12 +790,10 @@
                                 <move file="target/plugins/org.eclipse.kura.driver.gpio.provider.jar" tofile="target/plugins/org.eclipse.kura.driver.gpio.provider_${org.eclipse.kura.driver.gpio.provider.version}.jar" />
                                 <move file="target/plugins/org.moka7.jar" tofile="target/plugins/org.moka7_${org.moka7.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.rest.asset.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.asset.provider_${org.eclipse.kura.rest.asset.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.hook.file.move.provider.jar" tofile="target/plugins/org.eclipse.kura.hook.file.move.provider_${org.eclipse.kura.hook.file.move.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.misc.cloudcat.jar" tofile="target/plugins/org.eclipse.kura.misc.cloudcat_${org.eclipse.kura.misc.cloudcat.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.json.marshaller.unmarshaller.provider.jar" tofile="target/plugins/org.eclipse.kura.json.marshaller.unmarshaller.provider_${org.eclipse.kura.json.marshaller.unmarshaller.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider.jar" tofile="target/plugins/org.eclipse.kura.xml.marshaller.unmarshaller.provider_${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.wire.component.join.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.component.join.provider_${org.eclipse.kura.wire.component.join.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.jar" tofile="target/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider_${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.cloudconnection.kapua.mqtt.provider.jar" tofile="target/plugins/org.eclipse.kura.cloudconnection.kapua.mqtt.provider_${org.eclipse.kura.cloudconnection.kapua.mqtt.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.http.server.manager.jar" tofile="target/plugins/org.eclipse.kura.http.server.manager_${org.eclipse.kura.http.server.manager.version}.jar" />
@@ -885,9 +815,7 @@
                                 <move file="target/plugins/org.eclipse.kura.rest.service.listing.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.service.listing.provider_${org.eclipse.kura.rest.service.listing.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.system.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.system.provider_${org.eclipse.kura.rest.system.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.request.handler.jaxrs.jar" tofile="target/plugins/org.eclipse.kura.request.handler.jaxrs_${org.eclipse.kura.request.handler.jaxrs.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.rest.wire.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.wire.provider_${org.eclipse.kura.rest.wire.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.container.orchestration.provider.jar" tofile="target/plugins/org.eclipse.kura.container.orchestration.provider_${org.eclipse.kura.container.orchestration.provider.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.wire.ai.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.ai.component.provider_${org.eclipse.kura.wire.ai.component.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.container.provider.jar" tofile="target/plugins/org.eclipse.kura.container.provider_${org.eclipse.kura.container.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.ai.triton.server.jar" tofile="target/plugins/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.configuration.change.manager.jar" tofile="target/plugins/org.eclipse.kura.configuration.change.manager_${org.eclipse.kura.configuration.change.manager.version}.jar" />
@@ -1902,20 +1830,8 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.wire.ai.component.provider</artifactId>
-                                            <version>${org.eclipse.kura.wire.ai.component.provider.version}</version>
-                                       <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
                                             <artifactId>org.eclipse.kura.ai.triton.server</artifactId>
                                             <version>${org.eclipse.kura.ai.triton.server.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.wire.script.tools</artifactId>
-                                            <version>${org.eclipse.kura.wire.script.tools.feature.version}</version>
                                             <type>dp</type>
                                         </artifactItem>
                                         <artifactItem>

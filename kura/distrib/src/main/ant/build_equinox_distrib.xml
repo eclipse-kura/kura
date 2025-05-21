@@ -207,9 +207,6 @@
 
         <!-- Rest bundles config -->
         <antcall target="rest-plugins" />
-    	
-        <!-- Asset bundles config -->
-        <antcall target="asset-plugins" />
 
         <!-- Added Artemis bundles configs -->
         <antcall target="artemis-plugins" />
@@ -220,8 +217,8 @@
         <!-- Marshalling bundles configs -->
         <antcall target="marshallers-plugins" />
 
-        <!-- Wires bundles config -->
-        <antcall target="wires-plugins" />
+        <!-- Driver bundles config -->
+        <antcall target="driver-plugins" />
 
         <!-- Miscellaneous bundles config -->
         <antcall target="misc-plugins" />
@@ -1044,12 +1041,6 @@ fi]]>
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.equinox.wireadmin" />
-            <param name="bundle.version" value="${org.eclipse.equinox.wireadmin.version}" />
-            <param name="start.level" value="3" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
             <param name="bundle.name" value="jetty-http" />
             <param name="bundle.version" value="${org.eclipse.jetty.version}" />
             <param name="start.level" value="5" />
@@ -1668,33 +1659,6 @@ fi]]>
         </antcall>
     </target>
 
-    <target name="asset-plugins">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.asset.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.asset.provider.version}" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.asset.cloudlet.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.asset.cloudlet.provider.version}" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.asset.helper.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.asset.helper.provider.version}" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.rest.asset.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.rest.asset.provider.version}" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-    </target>
-
     <target name="rest-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.rest.provider" />
@@ -1763,12 +1727,6 @@ fi]]>
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.rest.wire.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.rest.wire.provider.version}" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.request.handler.jaxrs" />
             <param name="bundle.version" value="${org.eclipse.kura.request.handler.jaxrs.version}" />
             <param name="start.level" value="4" />
@@ -1806,7 +1764,7 @@ fi]]>
         </antcall>
     </target>
 
-    <target name="wires-plugins">
+    <target name="driver-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.driver.helper.provider" />
             <param name="bundle.version" value="${org.eclipse.kura.driver.helper.provider.version}" />
@@ -1829,42 +1787,6 @@ fi]]>
             <param name="bundle.name" value="org.eclipse.kura.util" />
             <param name="bundle.version" value="${org.eclipse.kura.util.version}" />
             <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.wire.h2db.component.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.wire.h2db.component.provider.version}" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.wire.db.component.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.wire.db.component.provider.version}" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.wire.component.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.wire.component.provider.version}" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.wire.helper.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.wire.helper.provider.version}" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.wire.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.wire.provider.version}" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.wire.component.join.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.wire.component.join.provider.version}" />
-            <param name="start.level" value="5" />
             <param name="start" value="s" />
         </antcall>
     </target>

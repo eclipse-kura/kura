@@ -157,6 +157,18 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
         setAuthenticated(newSession, username);
     }
 
+    @Override
+    public String getPostLoginBannerContent(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+
+        getSessionUsername(session);
+
+        return GwtServerUtil.getPostLoginMessage().orElse(null);
+    }
+
     private String getSessionUsername(HttpSession session) throws GwtKuraException {
         if (session == null) {
             throw new GwtKuraException(GwtKuraErrorCode.UNAUTHENTICATED);
@@ -176,4 +188,5 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
                 AuditContext.current().orElseThrow(() -> new GwtKuraException("Audit context is not available")));
         session.removeAttribute(Attributes.LOCKED.getValue());
     }
+
 }

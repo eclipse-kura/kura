@@ -813,6 +813,11 @@ public final class GwtServerUtil {
         return ServiceLocator.applyToServiceOptionally(LoginBannerService.class, LoginBannerService::getPreLoginBanner);
     }
 
+    public static Optional<String> getPostLoginMessage() throws GwtKuraException {
+        return ServiceLocator.applyToServiceOptionally(LoginBannerService.class,
+                LoginBannerService::getPostLoginBanner);
+    }
+
     public static void validateUserPassword(final String password) throws GwtKuraException {
 
         final List<Validator<String>> validators = PasswordStrengthValidators

@@ -46,7 +46,6 @@ import org.eclipse.kura.web.client.util.FilterBuilder;
 import org.eclipse.kura.web.client.util.PidTextBox;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
-import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
@@ -209,6 +208,14 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
     @UiField
     Container dropdownContainerHeader;
 
+    // Post login modal
+    @UiField
+    Modal postLoginBannerModal;
+    @UiField
+    Button buttonPostLoginBannerModalOk;
+    @UiField
+    Strong postLoginBannerModalPannelBody;
+
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
 
@@ -329,6 +336,16 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
             this.errorMessage.setText(message);
             this.errorPopup.show();
         });
+    }
+
+    private void initPostLoginBannerModal(final String postLoginBannerContent) {
+        this.postLoginBannerModal.setTitle(MSGS.warning());
+        this.buttonPostLoginBannerModalOk.setText(MSGS.okButton());
+
+        if (postLoginBannerContent != null) {
+            EntryClassUi.this.postLoginBannerModalPannelBody.setText(postLoginBannerContent);
+            EntryClassUi.this.postLoginBannerModal.show();
+        }
     }
 
     public void setSelectedAnchorListItem(AnchorListItem selected) {
@@ -704,9 +721,8 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
     }
 
     public static void loadPasswordStrengthRequirements(final Consumer<GwtPasswordStrenghtRequirements> consumer) {
-        RequestQueue.submit(c -> gwtXSRFService.generateSecurityToken(c.callback(token -> {
-            gwtSessionService.getPasswordStrenghtRequirements(token, c.callback(consumer::accept));
-        })));
+        RequestQueue.submit(c -> gwtXSRFService.generateSecurityToken(c.callback(
+                token -> gwtSessionService.getPasswordStrenghtRequirements(token, c.callback(consumer::accept)))));
     }
 
     public void fetchAvailableServices() {
@@ -735,8 +751,8 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
     }
 
     private void initDropdownMenu() {
-        final ClickHandler logoutHandler = e -> confirmIfUiDirty(() -> logout());
-        final ClickHandler changePasswordHandler = e -> confirmIfUiDirty(() -> changePassword());
+        final ClickHandler logoutHandler = e -> confirmIfUiDirty(this::logout);
+        final ClickHandler changePasswordHandler = e -> confirmIfUiDirty(this::changePassword);
 
         this.logout.addClickHandler(logoutHandler);
         this.headerLogout.addClickHandler(logoutHandler);
@@ -788,18 +804,16 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
 
     private void setNewPassword(final String oldPassword, final String newPassword) {
 
-        RequestQueue.submit(c -> {
-            gwtXSRFService.generateSecurityToken(c.callback(token -> {
-                gwtSessionService.updatePassword(token, oldPassword, newPassword, c.callback(new AsyncCallback<Void>() {
+        RequestQueue.submit(c -> gwtXSRFService.generateSecurityToken(c.callback(token -> gwtSessionService
+                .updatePassword(token, oldPassword, newPassword, c.callback(new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable e) {
 
                         if (e instanceof GwtKuraException) {
-                            GwtKuraErrorCode errorCode = ((GwtKuraException) e).getCode();
                             final String message;
 
-                            switch (errorCode) {
+                            switch (((GwtKuraException) e).getCode()) {
                             case PASSWORD_CHANGE_SAME_PASSWORD: {
                                 message = MSGS.loginPasswordChangeSame();
                             }
@@ -828,9 +842,7 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
                     public void onSuccess(Void result) {
                         logout();
                     }
-                }));
-            }));
-        });
+                })))));
 
     }
 
@@ -1106,9 +1118,7 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
         this.userNameLarge.setText(this.userData.getUserNameEllipsed());
         this.userNameSmall.setText(this.userData.getUserNameEllipsed());
 
-        final EventService.Handler userAdminEventHandler = e -> {
-            this.userConfigReloadTimer.schedule(1000);
-        };
+        final EventService.Handler userAdminEventHandler = e -> this.userConfigReloadTimer.schedule(1000);
 
         EventService.subscribe(ForwardedEventTopic.ROLE_CHANGED, userAdminEventHandler);
         EventService.subscribe(ForwardedEventTopic.ROLE_CREATED, userAdminEventHandler);
@@ -1165,4 +1175,35 @@ public class EntryClassUi extends Composite implements ServicesUi.Listener {
     public void onConfigurationChanged() {
         fetchAvailableServices();
     }
+
+    @Override
+    protected void onAttach() {
+        super.onAttach();
+
+        EntryClassUi.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                FailureHandler.handle(ex, EntryClassUi.class.getName());
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                gwtSessionService.getPostLoginBannerContent(token, new AsyncCallback<String>() {
+
+                    @Override
+                    public void onSuccess(String result) {
+                        initPostLoginBannerModal(result);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable ex) {
+                        // nothing to do
+                    }
+                });
+            }
+        });
+
+    }
+
 }

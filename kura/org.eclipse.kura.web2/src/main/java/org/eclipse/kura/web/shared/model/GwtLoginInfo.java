@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,27 +19,24 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class GwtLoginInfo implements IsSerializable, Serializable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 4501114031863790538L;
 
-    private String bannerContent;
+    private String preLoginbannerContent;
     private Set<String> enabledAuthMethods;
     private Integer certAuthPort;
 
     public GwtLoginInfo() {
     }
 
-    public GwtLoginInfo(final String bannerContent, final Set<String> enabledAuthMethods,
+    public GwtLoginInfo(final String preLoginbannerContent, final Set<String> enabledAuthMethods,
             final Integer clientAuthPort) {
-        this.bannerContent = bannerContent;
+        this.preLoginbannerContent = preLoginbannerContent;
         this.enabledAuthMethods = enabledAuthMethods;
         this.certAuthPort = clientAuthPort;
     }
 
-    public String getBannerContent() {
-        return this.bannerContent;
+    public String getPreLoginBannerContent() {
+        return this.preLoginbannerContent;
     }
 
     public Set<String> getEnabledAuthMethods() {

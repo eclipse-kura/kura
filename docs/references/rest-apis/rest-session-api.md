@@ -232,7 +232,7 @@ Represents the response for a successful authentication request.
   * **passwordChangeNeeded**: `bool` 
       Determines whether a password change is required for the current identity.
   * **message**: `string`
-      A message that can be displayed to the user after they have logged in.
+      A message that can be displayed to the user after they have logged in. The field may be missing if it is not enabled.
   
 
 ```json

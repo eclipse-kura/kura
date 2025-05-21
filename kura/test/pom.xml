@@ -496,7 +496,7 @@
                                 <id>org.eclipse.kura.http.server.manager</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
-                            </bundle>>
+                            </bundle>
                             <bundle>
                                 <id>org.apache.felix.useradmin</id>
                                 <level>4</level>

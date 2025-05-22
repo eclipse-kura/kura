@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2023 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -101,24 +101,24 @@ public class WireGraphServiceImplTest {
         ComponentContext cc = mock(ComponentContext.class);
         BundleContext bc = mock(BundleContext.class);
         when(cc.getBundleContext()).thenReturn(bc);
-        
+
         ServiceReference<WireComponent> emitter = mock(ServiceReference.class);
         when(emitter.getProperty("kura.service.pid")).thenReturn(emitterPid);
         when(emitter.getProperty("service.pid")).thenReturn(emitterPid);
         ServiceReference<WireComponent> receiver = mock(ServiceReference.class);
         when(receiver.getProperty("kura.service.pid")).thenReturn(receiverPid);
         when(receiver.getProperty("service.pid")).thenReturn(receiverPid);
-        
+
         Collection<ServiceReference<WireComponent>> wireComponentServiceReferences = new ArrayList();
         wireComponentServiceReferences.add(emitter);
         wireComponentServiceReferences.add(receiver);
-        
+
         when(bc.getServiceReferences(WireComponent.class, null)).thenReturn(wireComponentServiceReferences);
 
         TestUtil.setFieldValue(wsi, "wireAdmin", wireAdmin);
 
         wsi.activate(cc, properties);
-        
+
         Wire wire = mock(Wire.class);
         Dictionary<String, Object> props = new Hashtable<>();
         props.put(Constants.WIRE_EMITTER_PORT_PROP_NAME.value(), 0);
@@ -126,9 +126,9 @@ public class WireGraphServiceImplTest {
         props.put(WireConstants.WIREADMIN_PRODUCER_PID, emitterPid);
         props.put(WireConstants.WIREADMIN_CONSUMER_PID, receiverPid);
         when(wire.getProperties()).thenReturn(props);
-        Wire[] wires = new Wire[] {wire};
+        Wire[] wires = new Wire[] { wire };
         when(wireAdmin.getWires(null)).thenReturn(wires);
-        
+
         wsi.createWires();
 
         verify(wireAdmin, times(2)).getWires(null);
@@ -184,8 +184,8 @@ public class WireGraphServiceImplTest {
         assertEquals(1, arguments.size());
 
         verify(configurationService, times(0)).deleteFactoryConfiguration(ArgumentMatchers.anyString(), eq(false));
-        verify(configurationService, times(2)).createFactoryConfiguration(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
-                ArgumentMatchers.anyMap(), eq(false));
+        verify(configurationService, times(2)).createFactoryConfiguration(ArgumentMatchers.anyString(),
+                ArgumentMatchers.anyString(), ArgumentMatchers.anyMap(), eq(false));
         verify(configurationService, times(1)).updateConfigurations(ArgumentMatchers.anyList(), eq(true));
 
         for (ComponentConfiguration componentConfiguration : arguments) {

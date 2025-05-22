@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
- *******************************************************************************/
+ ******************************************************************************/
 package org.eclipse.kura.util.test.driver;
 
 import java.util.ArrayList;

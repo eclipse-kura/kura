@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -92,7 +92,7 @@ public class TamperDetectionRemoteServiceTest extends AbstractRequestHandlerTest
 
             fixture.registerService(tamperDetectionService, TamperDetectionService.class, "moo");
 
-            assertEquals(404, transport.runRequest("/pid/boo", new MethodSpec("GET")).status);
+            assertEquals(404, transport.runRequest("/pid/boo", new MethodSpec("GET")).getStatus());
         }
     }
 
@@ -185,7 +185,7 @@ public class TamperDetectionRemoteServiceTest extends AbstractRequestHandlerTest
                     runRequestAndGetResponse("/pid/moo", new MethodSpec("GET"), new TypeToken<TamperStatusInfo>() {
                     }).isDeviceTampered);
 
-            assertEquals(1, transport.runRequest("/pid/moo/_reset", new MethodSpec("POST", "EXEC")).status / 200);
+            assertEquals(1, transport.runRequest("/pid/moo/_reset", new MethodSpec("POST", "EXEC")).getStatus() / 200);
 
             assertEquals(false,
                     runRequestAndGetResponse("/pid/moo", new MethodSpec("GET"), new TypeToken<TamperStatusInfo>() {
@@ -245,7 +245,7 @@ public class TamperDetectionRemoteServiceTest extends AbstractRequestHandlerTest
 
     private <T> T runRequestAndGetResponse(final String resource, final MethodSpec method,
             final TypeToken<T> responseType) {
-        final String response = this.transport.runRequest(resource, method).body
+        final String response = this.transport.runRequest(resource, method).getBody()
                 .orElseThrow(() -> new IllegalStateException("expected body"));
 
         final Gson gson = new Gson();

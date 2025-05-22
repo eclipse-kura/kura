@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -24,8 +24,8 @@ public interface Transport {
 
     public static class Response {
 
-        public final int status;
-        public final Optional<String> body;
+        private final int status;
+        private final Optional<String> body;
 
         public Response(int status, Optional<String> body) {
             this.status = status;
@@ -43,8 +43,8 @@ public interface Transport {
 
     public class MethodSpec {
 
-        public final String restMethod;
-        public final String requestHandlerMethod;
+        private final String restMethod;
+        private final String requestHandlerMethod;
 
         public MethodSpec(final String method) {
             this.requestHandlerMethod = method;

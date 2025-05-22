@@ -828,7 +828,6 @@
         <module>org.eclipse.kura.core.status.test</module>
         <module>org.eclipse.kura.core.system.test</module>
         <module>org.eclipse.kura.core.test</module>
-        <module>org.eclipse.kura.core.testutil</module>
         <module>org.eclipse.kura.core.util.test</module>
         <module>org.eclipse.kura.deployment.agent.test</module>
         <module>org.eclipse.kura.driver.block.test</module>
@@ -856,7 +855,6 @@
         <module>org.eclipse.kura.net.configuration.test</module>
         <module>org.eclipse.kura.protocol.modbus.test</module>
         <module>org.eclipse.kura.stress.test</module>
-        <module>org.eclipse.kura.test</module>
         <module>org.eclipse.kura.util.test</module>
         <module>org.eclipse.kura.watchdog.criticaltest</module>
         <module>org.eclipse.kura.wire.ai.component.provider.test</module>
@@ -889,7 +887,6 @@
         <module>org.eclipse.kura.rest.service.listing.provider.test</module>
         <module>org.eclipse.kura.rest.system.provider.test</module>
         <module>org.eclipse.kura.rest.wire.provider.test</module>
-        <module>org.eclipse.kura.util.test.driver</module>
         <module>org.eclipse.kura.container.orchestration.provider.test</module>
         <module>org.eclipse.kura.container.provider.test</module>
         <module>org.eclipse.kura.ai.triton.server.test</module>

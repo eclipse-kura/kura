@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -167,18 +167,18 @@ public class RemoteTargetTest {
 
     public class KuraTestCommandProvider implements CommandProvider {
 
-        public Object _test(CommandInterpreter intp) {
+        public Object test(CommandInterpreter intp) {
             String nextArgument = intp.nextArgument();
             RemoteTargetTest.this.testExtender.test(Long.parseLong(nextArgument));
             return null;
         }
 
-        public Object _testall(CommandInterpreter intp) {
+        public Object testall(CommandInterpreter intp) {
             RemoteTargetTest.this.testExtender.testAll();
             return null;
         }
 
-        public Object _helpTest(CommandInterpreter intp) {
+        public Object helpTest(CommandInterpreter intp) {
             String help = getHelp();
             System.out.println(help);
             return null;
@@ -199,7 +199,7 @@ public class RemoteTargetTest {
         // hijack the settings
         try {
             Configuration mqttConfig = this.configAdmin
-                    .getConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",  "?");
+                    .getConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport", "?");
             Dictionary<String, Object> mqttProps = mqttConfig.getProperties();
             mqttProps.put("broker-url", "mqtt://broker-sandbox.everyware-cloud.com:1883/");
             mqttProps.put("topic.context.account-name", "EDC-KURA-CI");

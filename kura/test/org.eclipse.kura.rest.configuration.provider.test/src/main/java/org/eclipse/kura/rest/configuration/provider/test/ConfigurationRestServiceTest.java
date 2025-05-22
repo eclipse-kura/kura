@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -257,7 +257,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         thenTestPropertyTypeIs(Json.value("INTEGER"));
         thenTestPropertyValueIs(Json.value(123));
     }
-    
+
     @Test
     public void testGetShortProperty() throws KuraException {
         givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.SHORT, (short) 123);
@@ -283,8 +283,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     @Test
     public void testReturnPlaceholderInsteadOfEncryptedPassword() throws KuraException {
         givenEncryptedPassword("foobar");
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD,
-                new Password(this.encryptedPassword));
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD, new Password(this.encryptedPassword));
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
@@ -296,8 +295,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     @Test
     public void testReturnNoValueForMissingPasswordProperty() throws KuraException {
         givenEncryptedPassword("foobar");
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD,
-                null);
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD, null);
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
@@ -307,11 +305,9 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testGetSnapshotReturnsUnencryptedPassword() throws KuraException {
-        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD,
-                new Password("foobar".toCharArray()));
+        givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD, new Password("foobar".toCharArray()));
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/snapshots/byId",
-                "{\"id\":1}");
+        whenRequestIsPerformed(new MethodSpec("POST"), "/snapshots/byId", "{\"id\":1}");
 
         thenRequestSucceeds();
         thenTestPropertyTypeIs(Json.value("PASSWORD"));
@@ -419,7 +415,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         thenTestPropertyTypeIs(Json.value("INTEGER"));
         thenTestPropertyValueIs(Json.array(1, 2, 3));
     }
-    
+
     @Test
     public void testGetShortArrayProperty() throws KuraException {
         givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.SHORT, new Short[] { 1, 2, 3 });
@@ -532,7 +528,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         thenRequestSucceeds();
         thenReceivedPropertiesForPidContains("foo", "testProp", 123);
     }
-    
+
     @Test
     public void testUpdateShortProperty() throws KuraException {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
@@ -631,7 +627,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         thenRequestSucceeds();
         thenReceivedPropertiesForPidContainsArray("foo", "testProp", new Integer[] { 1, 2, 3 });
     }
-    
+
     @Test
     public void testUpdateShortArrayProperty() throws KuraException {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
@@ -1123,13 +1119,10 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                 "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.parse(
-                "{\"pid\":\"foo\",\"definition\":{\"ad\":[{\"option\":[{\"value\":\"foo\"},"
-                        + "{\"label\":\"pass\",\"value\":\"baz\"}],\"id\":\"fooAdName\",\"type\":\"PASSWORD\","
-                        + "\"cardinality\":0,\"isRequired\":false}],\"id\":\"foo\"},"
-                        + "\"properties\":{\"testProp\":{\"value\":[\""
-                        + "placeholder"
-                        + "\"],\"type\":\"PASSWORD\"}}}"),
+        thenResponseElementIs(Json.parse("{\"pid\":\"foo\",\"definition\":{\"ad\":[{\"option\":[{\"value\":\"foo\"},"
+                + "{\"label\":\"pass\",\"value\":\"baz\"}],\"id\":\"fooAdName\",\"type\":\"PASSWORD\","
+                + "\"cardinality\":0,\"isRequired\":false}],\"id\":\"foo\"},"
+                + "\"properties\":{\"testProp\":{\"value\":[\"" + "placeholder" + "\"],\"type\":\"PASSWORD\"}}}"),
                 self().field("configs").arrayItem(0));
     }
 
@@ -1142,8 +1135,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                                 .withAd(adBuilder("fooAdName", Scalar.STRING) //
                                         .withOption(null, "foo") //
                                         .withOption("pass", "baz") //
-                                        .withDefault("default")
-                                        .build()) //
+                                        .withDefault("default").build()) //
                                 .build()) //
                 .withConfigurationProperties(
                         singletonMap("testProp", new Password[] { new Password(this.encryptedPassword) }))
@@ -1153,13 +1145,12 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
                 "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.parse(
-                "{\"pid\":\"foo\",\"definition\":{\"ad\":[{\"option\":[{\"value\":\"foo\"},"
+        thenResponseElementIs(
+                Json.parse("{\"pid\":\"foo\",\"definition\":{\"ad\":[{\"option\":[{\"value\":\"foo\"},"
                         + "{\"label\":\"pass\",\"value\":\"baz\"}],\"id\":\"fooAdName\",\"type\":\"STRING\","
                         + "\"cardinality\":0,\"defaultValue\":\"default\",\"isRequired\":false}]"
                         + ",\"id\":\"foo\"},\"properties\":{\"testProp\":{\"value\":[\""
-                        + new String(this.encryptedPassword)
-                        + "\"],\"type\":\"PASSWORD\"}}}"),
+                        + new String(this.encryptedPassword) + "\"],\"type\":\"PASSWORD\"}}}"),
                 self().field("configs").arrayItem(0));
     }
 
@@ -1210,17 +1201,15 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
             this.receivedConfigsByPid.put(i.getArgument(0, String.class), i.getArgument(1, Map.class));
             return (Void) null;
         };
-        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any());
-        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(
-                ArgumentMatchers.any(),
-                ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
+        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService)
+                .updateConfiguration(ArgumentMatchers.any(), ArgumentMatchers.any());
+        Mockito.doAnswer(configurationUpdateAnswer).when(configurationService)
+                .updateConfiguration(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyBoolean());
     }
 
     private void thenResponseElementIs(final JsonValue expected, final JsonProjection projection) {
         final JsonValue root = Json
-                .parse(expectResponse().body.orElseThrow(() -> new IllegalStateException("expected body")));
+                .parse(expectResponse().getBody().orElseThrow(() -> new IllegalStateException("expected body")));
         final JsonValue actual;
 
         try {
@@ -1235,7 +1224,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     private void thenResponseElementExists(final JsonProjection projection) {
         final JsonValue root = Json
-                .parse(expectResponse().body.orElseThrow(() -> new IllegalStateException("expected body")));
+                .parse(expectResponse().getBody().orElseThrow(() -> new IllegalStateException("expected body")));
 
         try {
             assertNotNull("response element " + projection + " is null", projection.apply(root));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -48,8 +48,9 @@ public abstract class AbstractRequestHandlerTest {
             this.transportType = TransportType.MQTT;
         } else if (this.transport instanceof RestTransport) {
             this.transportType = TransportType.REST;
-        } else
+        } else {
             throw new IllegalArgumentException("Transport type must be a REST transport or a MQTT transport");
+        }
 
         this.transport.init();
     }

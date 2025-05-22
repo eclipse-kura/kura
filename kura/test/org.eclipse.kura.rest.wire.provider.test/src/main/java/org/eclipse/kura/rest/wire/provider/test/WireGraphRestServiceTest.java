@@ -1242,7 +1242,7 @@ public class WireGraphRestServiceTest extends AbstractRequestHandlerTest {
 
     private void thenResponseElementIs(final JsonValue expected, final JsonProjection projection) {
         final JsonValue root = Json
-                .parse(expectResponse().body.orElseThrow(() -> new IllegalStateException("expected body")));
+                .parse(expectResponse().getBody().orElseThrow(() -> new IllegalStateException("expected body")));
 
         final JsonValue actual = applyProjection(root, projection);
 
@@ -1251,7 +1251,7 @@ public class WireGraphRestServiceTest extends AbstractRequestHandlerTest {
 
     private void thenResponseElementExists(final JsonProjection projection) {
         final JsonValue root = Json
-                .parse(expectResponse().body.orElseThrow(() -> new IllegalStateException("expected body")));
+                .parse(expectResponse().getBody().orElseThrow(() -> new IllegalStateException("expected body")));
 
         final JsonValue actual = applyProjection(root, projection);
 
@@ -1260,7 +1260,7 @@ public class WireGraphRestServiceTest extends AbstractRequestHandlerTest {
 
     private void thenResponseElementDoesNotExists(final JsonProjection projection) {
         final JsonValue root = Json
-                .parse(expectResponse().body.orElseThrow(() -> new IllegalStateException("expected body")));
+                .parse(expectResponse().getBody().orElseThrow(() -> new IllegalStateException("expected body")));
 
         final JsonValue actual = applyProjection(root, projection);
 

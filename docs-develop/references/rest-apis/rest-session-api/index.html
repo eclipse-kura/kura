@@ -5372,10 +5372,13 @@ Using this APIs and creating a session is the recommended way for interact with 
 <ul>
 <li><strong>passwordChangeNeeded</strong>: <code>bool</code> 
       Determines whether a password change is required for the current identity.</li>
+<li><strong>message</strong>: <code>string</code>
+      A message that can be displayed to the user after they have logged in. This field will not be present if the post login banner functionality is disabled.</li>
 </ul>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">&quot;passwordChangeNeeded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="p">}</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">&quot;passwordChangeNeeded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;foo&quot;</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">}</span>
 </code></pre></div>
 <h3 id="usernamepassword">UsernamePassword</h3>
 <p>Contains an username and password.</p>

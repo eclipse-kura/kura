@@ -231,12 +231,14 @@ Represents the response for a successful authentication request.
 
   * **passwordChangeNeeded**: `bool` 
       Determines whether a password change is required for the current identity.
-
+  * **message**: `string`
+      A message that can be displayed to the user after they have logged in. This field will not be present if the post login banner functionality is disabled.
   
 
 ```json
 {
-  "passwordChangeNeeded": true
+  "passwordChangeNeeded": true,
+  "message": "foo"
 }
 ```
 ### UsernamePassword

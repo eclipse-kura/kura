@@ -67,6 +67,93 @@ For Maven
 You can follow the tutorial from the official [Maven](http://maven.apache.org/install.html) site. Remember that you need to install the 3.9.x version.
 
 
+### VSCode setup
+
+#### Requirements
+
+**VSCode extensions**:
+
+- [Eclipse PDE support for VS Code](https://marketplace.visualstudio.com/items?itemName=yaozheng.vscode-pde)
+- [Language Support for Java by Red Hat](https://marketplace.visualstudio.com/items?itemName=redhat.java)
+- [Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug)
+- [Java Test Runner](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-test)
+
+**Kura metadata generator**: [https://github.com/eclipse-kura/metadata-generator](https://github.com/eclipse-kura/metadata-generator)
+
+Installation:
+
+```
+pip3 install https://github.com/eclipse-kura/metadata-generator/releases/download/0.2.0/metadata_generator-0.2.0-py3-none-any.whl
+```
+
+#### Instructions
+
+##### 1. Clone the Kura repository in a new folder (Eclipse IDE gets angry if it shares the sources with VSCode)
+
+```bash
+git clone git@github.com:eclipse/kura.git vscode-kura && cd vscode-kura
+```
+
+!!! note
+    The remainder of the commands in these instructions need to be run from the `vscode-kura` folder
+
+##### 2. Build the code [following the README](https://github.com/eclipse/kura#build-kura) or with:
+
+```bash
+mvn -f target-platform/pom.xml clean install -B
+```
+```bash
+mvn -f kura/pom.xml clean install -Dmaven.test.skip=true
+```
+
+##### 3. Run the Kura metadata generator tool
+
+Change the current working directory to the `kura` folder
+
+```bash
+cd kura/
+```
+
+and then run the tool with the following command
+
+```bash
+kura-gen --patch-target-platform -t target-definition/kura-equinox.target
+```
+
+##### 4. Open VSCode in the `kura` directory
+
+```bash
+code .
+```
+
+##### 5. Follow the on-screen instructions 
+
+VS Code prompts the user to install the recommended extensions when a workspace is opened for the first time. The list of recommended extensions can be reviewed with the `Extensions: Show Recommended Extensions` command. To correctly load the Kura project, you need to:
+
+- install recommended extensions
+- load the project
+- ... and you're done!
+
+#### Troubleshooting
+
+##### LSP Out of memory error:
+
+Looks like the JVM running the LSP server requires some additional RAM to parse through Kura. Add a `.vscode/settings.json` file in the root workspace directory containing the following:
+
+```json
+{
+    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx8G -Xms500m -Xlog:disable"
+}
+```
+
+##### VSCode build gets stuck:
+
+To fix this press: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> (<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> for Mac users) and run the _"Developer: Reload Window"_ command. If the issue is bad enough you'll also need to clean the LSP workspace cache with _"Java: Clean Java Language Server Workspace"_ and re-run the maven build.
+
+##### Maven build fails when VSCode is open in the same folder
+
+It looks like the VSCode LSP is interfering(?) with the Maven build when they're running on the same repo. I suggest to close VSCode when running the whole Kura build. If you build a single bundle (which is usually the use-case) it should be fine.
+
 ### Eclipse Oomph setup
 
 Download the latest Eclipse Installer appropriate for your platform from the [Eclipse Downloads page](https://www.eclipse.org/downloads/packages/installer) and start it.

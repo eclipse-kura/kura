@@ -7,13 +7,14 @@ The Eclipse Kura development environment may be installed on Windows, Linux, or 
 !!! info
     The local emulation of Eclipse Kura code is only supported in Linux and Mac, not in Windows.
 
-This document will cover the use of Eclipse Oomph installer which is the easiest way to install and configure the Eclipse IDE to start contributing to Eclipse Kura.
+Currently two development environments are supported: **Eclipse IDE** and **Visual Studio Code**. The Eclipse IDE is a fully-featured environment for developing Eclipse Kura, while Visual Studio Code is a lightweight alternative that can be used for development and debugging of Eclipse Kura bundles.
 
-The setup requires three basic steps:
+The choice of the IDE is up to the developer, but we recommend using Eclipse IDE for a full-featured development experience, Visual Studio Code for newcomers since the installation is easier and the IDE is more lightweight.
+
+Independently from the IDE you choose, the following steps are required to set up the development environment:
 
 1. Requirements installation
-2. Eclipse Oomph setup
-3. Eclipse Kura maven build
+2. IDE setup
 
 ## Requirements
 
@@ -67,28 +68,28 @@ For Maven
 You can follow the tutorial from the official [Maven](http://maven.apache.org/install.html) site. Remember that you need to install the 3.9.x version.
 
 
-### VSCode setup
+## IDE setup: Visual Studio Code
 
-#### Requirements
+### Requirements
 
-**VSCode extensions**:
+**VSCode extensions**: the following extensions will be automatically installed during the setup
 
 - [Eclipse PDE support for VS Code](https://marketplace.visualstudio.com/items?itemName=yaozheng.vscode-pde)
 - [Language Support for Java by Red Hat](https://marketplace.visualstudio.com/items?itemName=redhat.java)
 - [Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug)
 - [Java Test Runner](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-test)
 
-**Kura metadata generator**: [https://github.com/eclipse-kura/metadata-generator](https://github.com/eclipse-kura/metadata-generator)
-
-Installation:
+[**Kura metadata generator**](https://github.com/eclipse-kura/metadata-generator): this tool is used to generate the metadata required by VSCode to correctly load the Kura project. It is a Python tool that can be installed via `pip` with the following command:
 
 ```
 pip3 install https://github.com/eclipse-kura/metadata-generator/releases/download/0.2.0/metadata_generator-0.2.0-py3-none-any.whl
 ```
 
-#### Instructions
+The metadata generator needs to be run only once after cloning the Kura repository.
 
-##### 1. Clone the Kura repository in a new folder (Eclipse IDE gets angry if it shares the sources with VSCode)
+### Instructions
+
+#### 1. Clone the Kura repository in a new folder (Eclipse IDE gets angry if it shares the sources with VSCode)
 
 ```bash
 git clone git@github.com:eclipse/kura.git vscode-kura && cd vscode-kura
@@ -97,7 +98,7 @@ git clone git@github.com:eclipse/kura.git vscode-kura && cd vscode-kura
 !!! note
     The remainder of the commands in these instructions need to be run from the `vscode-kura` folder
 
-##### 2. Build the code [following the README](https://github.com/eclipse/kura#build-kura) or with:
+#### 2. Build the code [following the README](https://github.com/eclipse/kura#build-kura) or with:
 
 ```bash
 mvn -f target-platform/pom.xml clean install -B
@@ -106,7 +107,7 @@ mvn -f target-platform/pom.xml clean install -B
 mvn -f kura/pom.xml clean install -Dmaven.test.skip=true
 ```
 
-##### 3. Run the Kura metadata generator tool
+#### 3. Run the Kura metadata generator tool
 
 Change the current working directory to the `kura` folder
 
@@ -120,13 +121,13 @@ and then run the tool with the following command
 kura-gen --patch-target-platform -t target-definition/kura-equinox.target
 ```
 
-##### 4. Open VSCode in the `kura` directory
+#### 4. Open VSCode in the `kura` directory
 
 ```bash
 code .
 ```
 
-##### 5. Follow the on-screen instructions 
+#### 5. Follow the on-screen instructions 
 
 VS Code prompts the user to install the recommended extensions when a workspace is opened for the first time. The list of recommended extensions can be reviewed with the `Extensions: Show Recommended Extensions` command. To correctly load the Kura project, you need to:
 
@@ -134,9 +135,9 @@ VS Code prompts the user to install the recommended extensions when a workspace 
 - load the project
 - ... and you're done!
 
-#### Troubleshooting
+### Troubleshooting
 
-##### LSP Out of memory error:
+#### LSP Out of memory error:
 
 Looks like the JVM running the LSP server requires some additional RAM to parse through Kura. Add a `.vscode/settings.json` file in the root workspace directory containing the following:
 
@@ -146,15 +147,15 @@ Looks like the JVM running the LSP server requires some additional RAM to parse 
 }
 ```
 
-##### VSCode build gets stuck:
+#### VSCode build gets stuck:
 
 To fix this press: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> (<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> for Mac users) and run the _"Developer: Reload Window"_ command. If the issue is bad enough you'll also need to clean the LSP workspace cache with _"Java: Clean Java Language Server Workspace"_ and re-run the maven build.
 
-##### Maven build fails when VSCode is open in the same folder
+#### Maven build fails when VSCode is open in the same folder
 
 It looks like the VSCode LSP is interfering(?) with the Maven build when they're running on the same repo. I suggest to close VSCode when running the whole Kura build. If you build a single bundle (which is usually the use-case) it should be fine.
 
-### Eclipse Oomph setup
+## IDE setup: Eclipse Oomph Installer
 
 Download the latest Eclipse Installer appropriate for your platform from the [Eclipse Downloads page](https://www.eclipse.org/downloads/packages/installer) and start it.
 
@@ -230,45 +231,6 @@ When the tasks are completed, go to into the Package Explorer and Target Platfor
         1. Menu Help -> Install new software... -> Paste the [m2eclipse-tycho repository URL](https://github.com/tesla/m2eclipse-tycho/releases/download/latest/) in the `Work with:` text field -> expand the category and select the `Tycho Project Configurators Feature` and proceed with the installation.
         2. Then restart Eclipse. 
 
-### Eclipse Kura maven build
-
-Navigate to the `git` folder created within the Eclipse workspace (`~/iot-kura-workspace` in the example above) and build the target platform:
-
-```bash
-mvn -f target-platform/pom.xml clean install
-```
-
-Then build the core components:
-
-```bash
-mvn -f kura/pom.xml clean install
-```
-
-Build the target profiles:
-
-```bash
-mvn -f kura/distrib/pom.xml clean install -DbuildAll
-```
-
-!!! Note
-    You can skip tests by adding `-Dmaven.test.skip=true` in the commands above and you can compile a specific target by specifying the profile (e.g. `-Parm64`).
-
-#### Build scripts
-
-Alternatively you can use the build scripts available in the root directory.
-
-```bash
-./build-all.sh
-```
-
-or
-
-```bash
-./build-menu.sh
-```
-
-and select the profiles you want to build.
-
-### Kura examples
+## Kura examples
 
 To get inspirations and become familiar with the development in Eclipse Kura, some example bundles are available on the [kura-apps repository](https://github.com/eclipse-kura/kura-apps).

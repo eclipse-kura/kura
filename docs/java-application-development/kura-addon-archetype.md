@@ -14,7 +14,7 @@ mvn install:install-file \
 -Dfile=./kura-addon-archetype-<kura-version>.jar \
 -DgroupId=org.eclipse.kura \
 -DartifactId=kura-addon-archetype \
--Dversion="<kura-version>" \ 
+-Dversion="<kura-version>" \
 -Dpackaging=jar \
 -DgeneratePom=true
 ```
@@ -122,6 +122,57 @@ mvn clean install -Dpackage.revision=6 -DreleaseBuild
 ```
 
 ## IDE setup
+
+We currently officially support two IDEs for developing Kura Addons: **Eclipse IDE** and **Visual Studio Code**. The following sections describe how to set up the projects in these IDEs.
+
+### Importing Projects in Visual Studio Code
+
+#### Requirements
+
+**VSCode extensions**: the following extensions will be automatically installed during the setup
+
+- [Eclipse PDE support for VS Code](https://marketplace.visualstudio.com/items?itemName=yaozheng.vscode-pde)
+- [Language Support for Java by Red Hat](https://marketplace.visualstudio.com/items?itemName=redhat.java)
+- [Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug)
+- [Java Test Runner](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-test)
+
+[**Kura metadata generator**](https://github.com/eclipse-kura/metadata-generator): this tool is used to generate the metadata required by VSCode to correctly load the Kura project. It is a Python tool that can be installed via `pip` with the following command:
+
+```
+pip3 install https://github.com/eclipse-kura/metadata-generator/releases/download/0.2.0/metadata_generator-0.2.0-py3-none-any.whl
+```
+
+The metadata generator needs to be run only once after cloning the Kura repository.
+
+#### Instructions
+
+#### 1. Run the Kura metadata generator tool
+
+After building the project with maven as described in the previous section, the next step is to generate the metadata required by VSCode to correctly load the Kura project.
+
+Change the current working directory to the root of the add on archetype project (the one containing the `pom.xml` file) and run the metadata generator tool with the following command:
+
+```bash
+kura-gen
+```
+
+#### 2. Open VSCode
+
+```bash
+code .
+```
+
+#### 3. Follow the on-screen instructions
+
+VS Code prompts the user to install the recommended extensions when a workspace is opened for the first time. The list of recommended extensions can be reviewed with the `Extensions: Show Recommended Extensions` command.
+
+![](./images/vscode0.png)
+
+After all the recommended extensions are installed, the project will start building
+
+![](./images/vscode1.png)
+
+Finally, once the build completes, the workspace will be ready to use.
 
 ### Importing Projects in Eclipse IDE
 
@@ -307,7 +358,7 @@ The same file for the `amd64` architecture will just change the `Architecture` f
 
 Finally, the plugin responsible of generating the DEB package is the `jdeb` plugin. The default execution is configured in the `distrib/pom.xml` file as follows:
 
-```xml 
+```xml
 <plugin>
     <groupId>org.vafer</groupId>
     <artifactId>jdeb</artifactId>

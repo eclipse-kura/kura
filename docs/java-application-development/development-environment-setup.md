@@ -98,7 +98,7 @@ git clone git@github.com:eclipse/kura.git vscode-kura && cd vscode-kura
 !!! note
     The remainder of the commands in these instructions need to be run from the `vscode-kura` folder
 
-#### 2. Build the code [following the README](https://github.com/eclipse/kura#build-kura) or with:
+#### 2. Build the code [following the README](https://github.com/eclipse/kura#build-eclipse-kura) or with:
 
 ```bash
 mvn -f target-platform/pom.xml clean install -B

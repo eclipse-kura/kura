@@ -129,11 +129,15 @@ code .
 
 #### 5. Follow the on-screen instructions 
 
-VS Code prompts the user to install the recommended extensions when a workspace is opened for the first time. The list of recommended extensions can be reviewed with the `Extensions: Show Recommended Extensions` command. To correctly load the Kura project, you need to:
+VS Code prompts the user to install the recommended extensions when a workspace is opened for the first time. The list of recommended extensions can be reviewed with the `Extensions: Show Recommended Extensions` command. 
 
-- install recommended extensions
-- load the project
-- ... and you're done!
+![](./images/vscode0.png)
+
+After all the recommended extensions are installed, the project will start building
+
+![](./images/vscode1.png)
+
+Finally, once the build completes, the workspace will be ready to use.
 
 ### Troubleshooting
 

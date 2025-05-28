@@ -108,6 +108,11 @@
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.rest.provider</artifactId>
+                    <version>${org.eclipse.rest.provider.version}</version>
+                </dependency>  
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
                     <artifactId>jdk.dio.aarch64</artifactId>
                     <version>${jdk.dio.version}</version>
                 </dependency>

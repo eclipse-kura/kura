@@ -108,8 +108,8 @@
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
-                    <artifactId>org.eclipse.rest.provider</artifactId>
-                    <version>${org.eclipse.rest.provider.version}</version>
+                    <artifactId>org.eclipse.kura.rest.provider</artifactId>
+                    <version>${org.eclipse.kura.rest.provider.version}</version>
                 </dependency>  
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>

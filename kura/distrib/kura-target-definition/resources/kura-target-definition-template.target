@@ -1053,6 +1053,11 @@
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.kura.core.deployment</artifactId>
+                    <version>${org.eclipse.kura.core.deployment.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
                     <artifactId>org.eclipse.kura.cloud.base.provider</artifactId>
                     <version>${org.eclipse.kura.cloud.base.provider.version}</version>
                 </dependency>

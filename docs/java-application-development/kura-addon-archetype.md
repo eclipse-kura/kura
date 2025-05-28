@@ -139,10 +139,10 @@ We currently officially support two IDEs for developing Kura Addons: **Eclipse I
 [**Kura metadata generator**](https://github.com/eclipse-kura/metadata-generator): this tool is used to generate the metadata required by VSCode to correctly load the Kura project. It is a Python tool that can be installed via `pip` with the following command:
 
 ```
-pip3 install https://github.com/eclipse-kura/metadata-generator/releases/download/0.2.0/metadata_generator-0.2.0-py3-none-any.whl
+pip3 install https://github.com/eclipse-kura/metadata-generator/releases/download/<version>/metadata_generator-<version>-py3-none-any.whl
 ```
 
-The metadata generator needs to be run only once after cloning the Kura repository.
+See [latest release](https://github.com/eclipse-kura/metadata-generator/releases/latest) for updated installation instructions.
 
 #### Instructions
 

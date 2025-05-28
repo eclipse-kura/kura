@@ -148,17 +148,17 @@ public class NMSettingsConverter {
         Map<String, Variant<?>> settings = new HashMap<>();
 
         switch (Kura8021xEAP.fromString(eap)) {
-            case KURA_8021X_EAP_TTLS:
-                create8021xTunneledTls(props, deviceId, settings);
-                break;
-            case KURA_8021X_EAP_PEAP:
-                create8021xProtectedEap(props, deviceId, settings);
-                break;
-            case KURA_8021X_EAP_TLS:
-                create8021xTls(props, deviceId, settings);
-                break;
-            default:
-                throw new IllegalArgumentException(String.format("Security type 802-1x EAP \"%s\" is not supported.", eap));
+        case KURA_8021X_EAP_TTLS:
+            create8021xTunneledTls(props, deviceId, settings);
+            break;
+        case KURA_8021X_EAP_PEAP:
+            create8021xProtectedEap(props, deviceId, settings);
+            break;
+        case KURA_8021X_EAP_TLS:
+            create8021xTls(props, deviceId, settings);
+            break;
+        default:
+            throw new IllegalArgumentException(String.format("Security type 802-1x EAP \"%s\" is not supported.", eap));
         }
 
         if (!phase2.isPresent()) {
@@ -305,15 +305,29 @@ public class NMSettingsConverter {
 
             Optional<Integer> wanPriority = props.getOpt(Integer.class, "net.interface.%s.config.ip4.wan.priority",
                     deviceId);
-            if (wanPriority.isPresent()) {
-                Long supportedByNM = wanPriority.get().longValue();
-                settings.put("route-metric", new Variant<>(supportedByNM));
-            }
+            wanPriority.ifPresent(value -> setWanPriority(settings, value));
         } else {
             logger.warn("Unexpected ip status received: \"{}\". Ignoring", ip4Status);
         }
 
         return settings;
+    }
+
+    private static void setWanPriority(Map<String, Variant<?>> settings, Integer value) {
+        if (value < 0) {
+            if (value == -1) {
+                settings.put("route-metric", new Variant<>((long) -1));
+                settings.put("dns-priority", new Variant<>((long) 0));
+            } else {
+                logger.warn(
+                        "WAN priority cannot be negative. Only -1 is allowed to disable the feature. Ignoring route-metric and dns-priority settings.");
+            }
+        } else {
+            long routeMetric = value.longValue();
+            long dnsPriority = (value == 0) ? 1 : routeMetric;
+            settings.put("route-metric", new Variant<>(routeMetric));
+            settings.put("dns-priority", new Variant<>(dnsPriority));
+        }
     }
 
     public static Map<String, Variant<?>> buildIpv6Settings(NetworkProperties props, String deviceId,
@@ -395,7 +409,7 @@ public class NMSettingsConverter {
         Optional<Integer> wanPriority = props.getOpt(Integer.class, "net.interface.%s.config.ip6.wan.priority",
                 deviceId);
 
-        wanPriority.ifPresent(value -> settings.put("route-metric", new Variant<>(value.longValue())));
+        wanPriority.ifPresent(value -> setWanPriority(settings, value));
     }
 
     private static void configureIp6Lan(Map<String, Variant<?>> settings) {

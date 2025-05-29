@@ -9,7 +9,7 @@ The Eclipse Kura development environment may be installed on Windows, Linux, or 
 
 Currently two development environments are supported: **Eclipse IDE** and **Visual Studio Code**. The Eclipse IDE is a fully-featured environment for developing Eclipse Kura, while Visual Studio Code is a lightweight alternative that can be used for development and debugging of Eclipse Kura bundles.
 
-The choice of the IDE is up to the developer, but we recommend using Eclipse IDE for a full-featured development experience, Visual Studio Code for newcomers since the installation is easier and the IDE is more lightweight.
+The choice of the IDE is up to the developer, but we recommend using Eclipse IDE for a full-featured development experience and Visual Studio Code for newcomers since the installation is easier and the IDE is more lightweight.
 
 Independently from the IDE you choose, the following steps are required to set up the development environment:
 

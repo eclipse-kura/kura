@@ -258,7 +258,7 @@ public class NMSettingsConverterTest {
 
         thenNoExceptionOccurred();
         thenResultingMapContains("method", "auto");
-        thenResultingMapContains("route-metric", new Variant<>((long) 0).getValue());
+        thenResultingMapContains("route-metric", new Variant<>((long) 1).getValue());
         thenResultingMapContains("dns-priority", new Variant<>((long) 1).getValue());
     }
 
@@ -329,7 +329,7 @@ public class NMSettingsConverterTest {
     @Test
     public void buildIpv6SettingsShouldPopulateWanPriorityPropertyWithMinimalValues() {
         givenMapWith("net.interface.wlan0.config.dhcpClient6.enabled", true);
-        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv4StatusEnabledWAN");
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledWAN");
         givenMapWith("net.interface.wlan0.config.ip6.wan.priority", (int) 0);
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
@@ -337,7 +337,7 @@ public class NMSettingsConverterTest {
 
         thenNoExceptionOccurred();
         thenResultingMapContains("method", "auto");
-        thenResultingMapContains("route-metric", new Variant<>((long) 0).getValue());
+        thenResultingMapContains("route-metric", new Variant<>((long) 1).getValue());
         thenResultingMapContains("dns-priority", new Variant<>((long) 1).getValue());
     }
 

@@ -314,19 +314,18 @@ public class NMSettingsConverter {
     }
 
     private static void setWanPriority(Map<String, Variant<?>> settings, Integer value) {
-        if (value < 0) {
-            if (value == -1) {
-                settings.put("route-metric", new Variant<>((long) -1));
-                settings.put("dns-priority", new Variant<>((long) 0));
-            } else {
-                logger.warn(
-                        "WAN priority cannot be negative. Only -1 is allowed to disable the feature. Ignoring route-metric and dns-priority settings.");
-            }
+        if (value == -1) {
+            settings.put("route-metric", new Variant<>((long) -1));
+            settings.put("dns-priority", new Variant<>((long) 0));
+        } else if (value == 0) {
+            settings.put("route-metric", new Variant<>((long) 1));
+            settings.put("dns-priority", new Variant<>((long) 1));
+        } else if (value > 0) {
+            settings.put("route-metric", new Variant<>(value.longValue()));
+            settings.put("dns-priority", new Variant<>(value.longValue()));
         } else {
-            long routeMetric = value.longValue();
-            long dnsPriority = (value == 0) ? 1 : routeMetric;
-            settings.put("route-metric", new Variant<>(routeMetric));
-            settings.put("dns-priority", new Variant<>(dnsPriority));
+            logger.warn("WAN priority must be a positive integer or -1 to disable the feature. "
+                    + "Ignoring route-metric and dns-priority settings.");
         }
     }
 

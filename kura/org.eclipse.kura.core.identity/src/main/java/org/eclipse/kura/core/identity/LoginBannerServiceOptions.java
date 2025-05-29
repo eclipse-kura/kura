@@ -25,11 +25,11 @@ public @interface LoginBannerServiceOptions {
 
     @AttributeDefinition(name = "Pre Login Banner Enabled", //
             description = "If enabled, a customizable banner will be shown before user login.")
-    public boolean pre_login_banner_enabled() default false;
+    public boolean pre_login_banner_enabled() default true;
 
     @AttributeDefinition(name = "Pre Login Banner Content", //
             description = "The message to be shown in the pre login banner, if the feature is enabled.|TextArea")
-    public String pre_login_banner_content() default "Sample Banner Content";
+    public String pre_login_banner_content() default "WARNING: This is a secure system. The details of this login attempt have been recorded for future inspection by the system administrator. Log out now if you are not authorized to use this device.";
 
     @AttributeDefinition(name = "Post Login Banner Enabled", //
             description = "If enabled, a customizable banner will be shown after successful user login.")

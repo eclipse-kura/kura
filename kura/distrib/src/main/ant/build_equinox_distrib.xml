@@ -19,12 +19,6 @@
         <first id="bundle.file">
             <union>
                 <fileset dir="${project.build.directory}/plugins">
-                    <include name="${bundle.name}_${bundle.version}*.jar"/>
-                </fileset>
-                <fileset dir="../target-definition/common/source/plugins">
-                    <include name="${bundle.name}-${bundle.version}*.jar"/>
-                </fileset>
-                <fileset dir="${kura.osgi.repo}/plugins/">
                     <include name="${bundle.name}-${bundle.version}*.jar"/>
                 </fileset>
             </union>
@@ -135,7 +129,7 @@
 
 
         <condition property="kura.osgi.repo"
-            value="../../target-platform/p2-repo-equinox/target/source">
+            value="${project.build.directory}/">
             <or>
                 <not>
                     <isset property="kura.osgi" />

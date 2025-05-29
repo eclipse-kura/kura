@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+    SPDX-License-Identifier: EPL-2.0
+ 
+    Contributors:
+     Eurotech
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.eclipse.kura</groupId>
+    <artifactId>bom-test</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>BOM for the testing dependencies</name>
+
+    <properties>
+        <byte-buddy.version>1.12.18</byte-buddy.version>
+        <io.dropwizard.metrics.version>3.2.2</io.dropwizard.metrics.version>
+        <mockito-core.version>4.8.1</mockito-core.version>
+        <objenesis.version>3.3</objenesis.version>
+        <org.junit.version>4.12.0.v201504281640</org.junit.version>
+        <org.jvnet.mimepull.version>1.10.0</org.jvnet.mimepull.version>
+        <org.hamcrest.integration.version>1.1.0.v201303031500</org.hamcrest.integration.version>
+        <org.hamcrest.version>1.1.0.v20090501071000</org.hamcrest.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>org.junit</artifactId>
+                <version>${org.junit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>${io.dropwizard.metrics.version}</version>
+            </dependency>
+            <!-- exported in bom-target-platform
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>moquette-broker</artifactId>
+                <version>${moquette-broker.version}</version>
+            </dependency> -->
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>org.hamcrest</artifactId>
+                <version>${org.hamcrest.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>org.hamcrest.integration</artifactId>
+                <version>${org.hamcrest.integration.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>org.hamcrest.library</artifactId>
+                <version>${org.hamcrest.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>org.hamcrest.text</artifactId>
+                <version>${org.hamcrest.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>${byte-buddy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy-agent</artifactId>
+                <version>${byte-buddy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.objenesis</groupId>
+                <artifactId>objenesis</artifactId>
+                <version>${objenesis.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit</groupId>
+            <artifactId>org.junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+        </dependency>
+        <!-- exported in bom-target-platform
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>moquette-broker</artifactId>
+        </dependency> -->
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>org.hamcrest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>org.hamcrest.integration</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>org.hamcrest.library</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>org.hamcrest.text</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-agent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.objenesis</groupId>
+            <artifactId>objenesis</artifactId>
+        </dependency>
+    </dependencies>
+
+    <!--
+        TODO: bumps current maven versions in a properties file that can be read by other projects
+    -->
+    <!-- <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>write-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <outputFile>
+                                ${project.basedir}/../config/target-platform-test.properties
+                            </outputFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build> -->
+</project>

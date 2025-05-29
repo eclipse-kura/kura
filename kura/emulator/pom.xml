@@ -31,6 +31,7 @@
 	</properties>
 	
 	<modules>
+		<module>bom-emulator</module>
 		<module>org.eclipse.kura.emulator</module>
 		<module>org.eclipse.kura.emulator.gpio</module>
 		<module>org.eclipse.kura.emulator.clock</module>

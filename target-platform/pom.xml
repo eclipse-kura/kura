@@ -12,7 +12,8 @@
      Eurotech
      Red Hat Inc
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
@@ -21,6 +22,10 @@
     <version>6.0.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
+
+    <!-- 
+        TODO: define a plugin management section
+    -->
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -47,6 +52,13 @@
     </properties>
 
     <modules>
+        <module>bom-target-platform</module>
+        <module>bom-javax</module>
+        <module>bom-jakarta</module>
+        <module>bom-common</module>
+        <module>bom-equinox</module>
+        <module>bom-test</module>
+
         <module>org.apache.activemq.artemis</module>
         <module>org.eclipse.kura.camel.sun.misc</module>
         <module>org.eclipse.kura.sun.misc</module>
@@ -59,9 +71,6 @@
         <module>com.gwt.user</module>
         <module>moquette-broker</module>
         <module>log4j2-api-config</module>
-        <module>p2-repo-common</module>
-        <module>p2-repo-equinox</module>
-        <module>p2-repo-test-deps</module>
     </modules>
 
     <repositories>
@@ -102,7 +111,7 @@
             <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
-    
+
     <profiles>
         <profile>
             <id>can</id>
@@ -119,7 +128,7 @@
         <profile>
             <id>check-exists-plugin</id>
             <properties>
-            	<check.plugins.exist.remote>true</check.plugins.exist.remote>
+                <check.plugins.exist.remote>true</check.plugins.exist.remote>
             </properties>
         </profile>
     </profiles>

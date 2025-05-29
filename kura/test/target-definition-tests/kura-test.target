@@ -35,10 +35,15 @@
                     <version>1.0.0-SNAPSHOT</version>
                     <type>pom</type>
                 </dependency>
-                <!-- TODO: needed because of test-util project, do we move the project under tests? NO -->
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
                     <artifactId>bom-test</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                    <type>pom</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>kura-bom</artifactId>
                     <version>1.0.0-SNAPSHOT</version>
                     <type>pom</type>
                 </dependency>

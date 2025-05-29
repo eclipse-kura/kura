@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.eclipse.kura</groupId>
+    <artifactId>bom-emulator</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>BOM for Kura emulator projects</name>
+
+    <properties>
+        <org.eclipse.kura.emulator.version>2.0.0-SNAPSHOT</org.eclipse.kura.emulator.version>
+        <org.eclipse.kura.emulator.clock.version>2.0.0-SNAPSHOT</org.eclipse.kura.emulator.clock.version>
+        <org.eclipse.kura.emulator.gpio.version>2.0.0-SNAPSHOT</org.eclipse.kura.emulator.gpio.version>
+        <org.eclipse.kura.emulator.net.version>2.0.0-SNAPSHOT</org.eclipse.kura.emulator.net.version>
+        <org.eclipse.kura.emulator.position.version>2.0.0-SNAPSHOT</org.eclipse.kura.emulator.position.version>
+        <org.eclipse.kura.emulator.usb.version>2.0.0-SNAPSHOT</org.eclipse.kura.emulator.usb.version>
+        <org.eclipse.kura.emulator.watchdog.version>2.0.0-SNAPSHOT</org.eclipse.kura.emulator.watchdog.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.kura.emulator</artifactId>
+	            <version>${org.eclipse.kura.emulator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.kura.emulator.clock</artifactId>
+	            <version>${org.eclipse.kura.emulator.clock.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.kura.emulator.gpio</artifactId>
+	            <version>${org.eclipse.kura.emulator.gpio.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.kura.emulator.net</artifactId>
+	            <version>${org.eclipse.kura.emulator.net.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.kura.emulator.position</artifactId>
+	            <version>${org.eclipse.kura.emulator.position.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.kura.emulator.usb</artifactId>
+	            <version>${org.eclipse.kura.emulator.usb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.kura.emulator.watchdog</artifactId>
+	            <version>${org.eclipse.kura.emulator.watchdog.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.emulator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.emulator.clock</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.emulator.gpio</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.emulator.net</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.emulator.position</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.emulator.usb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.emulator.watchdog</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

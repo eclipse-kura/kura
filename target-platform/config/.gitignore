@@ -1,0 +1,7 @@
+# Ignore generated files
+target-platform.properties
+target-platform-common.properties
+target-platform-javax.properties
+target-platform-jakarta.properties
+target-platform-equinox.properties
+target-platform-test.properties

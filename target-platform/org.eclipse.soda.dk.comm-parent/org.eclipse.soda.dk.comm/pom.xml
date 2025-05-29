@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -31,11 +31,22 @@
     <name>Serial Device based on SODA DK comm</name>
     <description>An implementation of the serialdevice.api, based on SODA DK comm</description>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>bom-target-platform</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
 			<groupId>org.eclipse.platform</groupId>
-			<artifactId>org.eclipse.osgi</artifactId>
-			<version>3.12.50</version>
+            <artifactId>org.eclipse.osgi</artifactId>
 		</dependency>
     </dependencies>
 
@@ -102,7 +113,7 @@
         </plugins>
         <pluginManagement>
             <plugins>
-        		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>

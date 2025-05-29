@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright (c) 2017, 2024 Red Hat Inc
+  Copyright (c) 2017, 2025 Red Hat Inc
  
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,6 @@
         <groupId>org.eclipse.kura</groupId>
         <artifactId>target-platform</artifactId>
         <version>6.0.0-SNAPSHOT</version>
-        <relativePath>..</relativePath>
     </parent>
 
     <artifactId>org.apache.activemq.artemis</artifactId>
@@ -29,63 +28,74 @@
 
     <description>ActiveMQ Artemis dependencies for Eclipse Kura</description>
 
-    <properties>
-        <!--  keep this aligned with the value in: kura.target-platform.build.properties -->
-        <org.apache.activemq.artemis.upstream.version>2.6.4</org.apache.activemq.artemis.upstream.version>
-    </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>bom-target-platform</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>artemis-server</artifactId>
-            <version>${org.apache.activemq.artemis.upstream.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>artemis-commons</artifactId>
-            <version>${org.apache.activemq.artemis.upstream.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>artemis-core-client</artifactId>
-            <version>${org.apache.activemq.artemis.upstream.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>artemis-jms-client</artifactId>
-            <version>${org.apache.activemq.artemis.upstream.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>artemis-jms-server</artifactId>
-            <version>${org.apache.activemq.artemis.upstream.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>artemis-journal</artifactId>
-            <version>${org.apache.activemq.artemis.upstream.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>artemis-selector</artifactId>
-            <version>${org.apache.activemq.artemis.upstream.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>artemis-service-extensions</artifactId>
-            <version>${org.apache.activemq.artemis.upstream.version}</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>${properties-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>
+                                    ${project.basedir}/../config/kura.target-platform.build.properties</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>

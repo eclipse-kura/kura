@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+    SPDX-License-Identifier: EPL-2.0
+ 
+    Contributors:
+     Eurotech
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.eclipse.kura</groupId>
+    <artifactId>bom-target-platform</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>BOM for the projects in target-platform</name>
+
+    <!--
+        TODO: rename properties because it is not clear which ones are for kura wrappers and which ones are for external deps
+    -->
+    <properties>
+        <!-- Dependencies versions  -->
+        <org.eclipse.osgi.version>3.21.0</org.eclipse.osgi.version>
+        <gwt-servlet-jakarta.version>2.12.1</gwt-servlet-jakarta.version>
+        <io-moquette-broker.version>0.15</io-moquette-broker.version>
+        <org.apache.activemq.artemis.upstream.version>2.6.4</org.apache.activemq.artemis.upstream.version>
+        <libsocket-can-java.version>1.0.1</libsocket-can-java.version>
+        <javax.usb.api.version>1.0.2</javax.usb.api.version>
+        <usb4java.version>1.2.0</usb4java.version>
+
+        <!-- Exported project versions  -->
+        <com.codeminders.hidapi.version>2.0.0-SNAPSHOT</com.codeminders.hidapi.version>
+        <com.gwt.user.version>2.0.0-SNAPSHOT</com.gwt.user.version>
+        <jdk.dio.version>2.0.0-SNAPSHOT</jdk.dio.version>
+        <log4j2-api-config.version>2.0.0-SNAPSHOT</log4j2-api-config.version>
+        <kura-moquette-broker.version>1.0.0-SNAPSHOT</kura-moquette-broker.version>
+        <org.apache.activemq.artemis.version>3.0.0-SNAPSHOT</org.apache.activemq.artemis.version>
+        <org.eclipse.kura.camel.sun.misc.version>2.0.0-SNAPSHOT</org.eclipse.kura.camel.sun.misc.version>
+        <libsocket-can-osgi.version>2.0.0-SNAPSHOT</libsocket-can-osgi.version>
+        <org.eclipse.kura.sun.misc.version>2.0.0-SNAPSHOT</org.eclipse.kura.sun.misc.version>
+        <org.eclipse.soda.dk.comm.version>2.0.0-SNAPSHOT</org.eclipse.soda.dk.comm.version>
+        <org.moka7.version>2.0.0-SNAPSHOT</org.moka7.version>
+        <org.usb4java.version>2.0.0-SNAPSHOT</org.usb4java.version>
+        <usb4java-javax.version>2.0.0-SNAPSHOT</usb4java-javax.version>
+    </properties>
+
+    <!-- 
+        NOTE FOR ADDING NEW DEPENDENCIES
+        Dependencies listed in the <dependencyManagement> are all the dependencies that are needed by
+        the target platform build (like org.apache.activemq:artemis-server).
+
+        Dependencies listed in the <dependencies> section are the ones that can be used in the target
+        definition (like org.eclipse.kura:org.apache.activemq.artemis).
+    -->
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.eclipse.platform</groupId>
+                <artifactId>org.eclipse.osgi</artifactId>
+                <version>${org.eclipse.osgi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.gwtproject</groupId>
+                <artifactId>gwt-servlet-jakarta</artifactId>
+                <version>${gwt-servlet-jakarta.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.moquette</groupId>
+                <artifactId>moquette-broker</artifactId>
+                <version>${io-moquette-broker.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>artemis-server</artifactId>
+                <version>${org.apache.activemq.artemis.upstream.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>artemis-commons</artifactId>
+                <version>${org.apache.activemq.artemis.upstream.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>artemis-core-client</artifactId>
+                <version>${org.apache.activemq.artemis.upstream.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>artemis-jms-client</artifactId>
+                <version>${org.apache.activemq.artemis.upstream.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>artemis-jms-server</artifactId>
+                <version>${org.apache.activemq.artemis.upstream.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>artemis-journal</artifactId>
+                <version>${org.apache.activemq.artemis.upstream.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>artemis-selector</artifactId>
+                <version>${org.apache.activemq.artemis.upstream.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>artemis-service-extensions</artifactId>
+                <version>${org.apache.activemq.artemis.upstream.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>artemis-mqtt-protocol</artifactId>
+                <version>${org.apache.activemq.artemis.upstream.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>artemis-native</artifactId>
+                <version>${org.apache.activemq.artemis.upstream.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.eurotech</groupId>
+                <artifactId>libsocket-can-java</artifactId>
+                <version>${libsocket-can-java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.usb4java</groupId>
+                <artifactId>org.usb4java</artifactId>
+                <version>${usb4java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.usb4java</groupId>
+                <artifactId>org.usb4java.linux-arm</artifactId>
+                <version>${usb4java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.usb4java</groupId>
+                <artifactId>org.usb4java.linux-x86_64</artifactId>
+                <version>${usb4java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.usb</groupId>
+                <artifactId>usb-api</artifactId>
+                <version>${javax.usb.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>usb4java-javax</groupId>
+                <artifactId>org.usb4java.javax</artifactId>
+                <version>${usb4java.version}</version>
+            </dependency>
+            <!-- Kura projects -->
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>com.codeminders.hidapi</artifactId>
+                <version>${com.codeminders.hidapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>com.codeminders.hidapi.x86_64</artifactId>
+                <version>${com.codeminders.hidapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>com.codeminders.hidapi.aarch64</artifactId>
+                <version>${com.codeminders.hidapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>com.gwt.user</artifactId>
+                <version>${com.gwt.user.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>jdk.dio</artifactId>
+                <version>${jdk.dio.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>jdk.dio.aarch64</artifactId>
+                <version>${jdk.dio.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>jdk.dio.x86_64</artifactId>
+                <version>${jdk.dio.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>log4j2-api-config</artifactId>
+                <version>${log4j2-api-config.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>moquette-broker</artifactId>
+                <version>${kura-moquette-broker.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.apache.activemq.artemis</artifactId>
+                <version>${org.apache.activemq.artemis.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.kura.camel.sun.misc</artifactId>
+                <version>${org.eclipse.kura.camel.sun.misc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>libsocket-can-osgi</artifactId>
+                <version>${libsocket-can-osgi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.kura.sun.misc</artifactId>
+                <version>${org.eclipse.kura.sun.misc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.soda.dk.comm</artifactId>
+                <version>${org.eclipse.soda.dk.comm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.soda.dk.comm.x86_64</artifactId>
+                <version>${org.eclipse.soda.dk.comm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.soda.dk.comm.aarch64</artifactId>
+                <version>${org.eclipse.soda.dk.comm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.moka7</artifactId>
+                <version>${org.moka7.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.usb4java</artifactId>
+                <version>${org.usb4java.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>usb4java-javax</artifactId>
+                <version>${usb4java-javax.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>com.codeminders.hidapi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>com.codeminders.hidapi.x86_64</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>com.codeminders.hidapi.aarch64</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>com.gwt.user</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>jdk.dio</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>jdk.dio.aarch64</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>jdk.dio.x86_64</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>log4j2-api-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>moquette-broker</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.apache.activemq.artemis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.camel.sun.misc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>libsocket-can-osgi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.sun.misc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.soda.dk.comm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.soda.dk.comm.x86_64</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.soda.dk.comm.aarch64</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.moka7</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.usb4java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>usb4java-javax</artifactId>
+        </dependency>
+         <dependency> <!-- TODO: was exported in p2-repo-common -->
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>artemis-mqtt-protocol</artifactId>
+        </dependency>
+        <dependency> <!-- TODO: was exported in p2-repo-common -->
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>artemis-native</artifactId>
+        </dependency>
+        <dependency> <!-- TODO: was exported in p2-repo-test-deps -->
+            <groupId>io.moquette</groupId>
+            <artifactId>moquette-broker</artifactId>
+        </dependency>
+    </dependencies>
+
+    <!--
+        TODO: bumps current maven versions in a properties file that can be read by other projects
+    -->
+    <!-- <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>write-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <outputFile>
+                                ${project.basedir}/../config/target-platform.properties
+                            </outputFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build> -->
+</project>

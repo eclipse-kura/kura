@@ -1113,6 +1113,11 @@
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
+                    <artifactId>org.eclipse.kura.xml.marshaller.unmarshaller.provider</artifactId>
+                    <version>${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
                     <artifactId>org.eclipse.kura.net.configuration</artifactId>
                     <version>${org.eclipse.kura.net.configuration.version}</version>
                 </dependency>

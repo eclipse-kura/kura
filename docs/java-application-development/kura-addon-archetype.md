@@ -123,7 +123,7 @@ mvn clean install -Dpackage.revision=6 -DreleaseBuild
 
 ## IDE setup
 
-We currently officially support two IDEs for developing Kura Addons: **Eclipse IDE** and **Visual Studio Code**. The following sections describe how to set up the projects in these IDEs.
+We officially support two IDEs for developing Kura Addons: **Eclipse IDE** and **Visual Studio Code**. The following sections describe how to set up the projects in these IDEs.
 
 ### Importing Projects in Visual Studio Code
 

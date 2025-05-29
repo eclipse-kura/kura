@@ -30,3 +30,4 @@ template_xml: |2
 ignore:
   - target-platform/
   - kura/test/org.eclipse.kura.core.configuration.test/src/test/resources/
+  - suppressions.xml

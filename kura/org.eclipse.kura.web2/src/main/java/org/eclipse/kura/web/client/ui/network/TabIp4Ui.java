@@ -406,26 +406,31 @@ public class TabIp4Ui extends Composite implements NetworkTab {
             setDirty(true);
 
             String inputText = TabIp4Ui.this.priority.getText();
-            boolean isInvalidValue = false;
+            boolean isValidValue = false;
 
-            if (!Objects.isNull(inputText) && !inputText.trim().isEmpty()) {
-                try {
-                    if (Integer.parseInt(inputText) < -1) {
-                        isInvalidValue = true;
-                    }
-                } catch (NumberFormatException e) {
-                    isInvalidValue = true;
-                }
+            if (Objects.isNull(inputText) || inputText.trim().isEmpty()) {
+                isValidValue = false;
+            } else {
+                isValidValue = isValidIntegerInRange(inputText, -1, Integer.MAX_VALUE - 1);
             }
 
-            if (isInvalidValue) {
-                TabIp4Ui.this.groupPriority.setValidationState(ValidationState.ERROR);
-                TabIp4Ui.this.helpPriority.setText(MSGS.netIPv4InvalidPriority());
-            } else {
+            if (isValidValue) {
                 TabIp4Ui.this.groupPriority.setValidationState(ValidationState.NONE);
                 TabIp4Ui.this.helpPriority.setText("");
+            } else {
+                TabIp4Ui.this.groupPriority.setValidationState(ValidationState.ERROR);
+                TabIp4Ui.this.helpPriority.setText(MSGS.netIPv4InvalidPriority());
             }
         });
+    }
+
+    private boolean isValidIntegerInRange(String integerText, int min, int max) {
+        try {
+            int value = Integer.parseInt(integerText.trim());
+            return value >= min && value <= max;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     private void initDHCPLeaseField() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -329,23 +329,21 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         this.priority.addValueChangeHandler(valChangeEvent -> {
             setDirty(true);
 
-            String inputText = this.priority.getText();
+            String inputText = TabIp6Ui.this.priority.getText();
             boolean isValidValue = false;
 
-            if (inputText != null) {
-                if (inputText.trim().isEmpty()) {
-                    isValidValue = true;
-                } else {
-                    isValidValue = isValidIntegerInRange(inputText, -1, Integer.MAX_VALUE);
-                }
+            if (Objects.isNull(inputText) || inputText.trim().isEmpty()) {
+                isValidValue = false;
+            } else {
+                isValidValue = isValidIntegerInRange(inputText, -1, Integer.MAX_VALUE - 1);
             }
 
             if (isValidValue) {
-                this.groupPriority.setValidationState(ValidationState.NONE);
-                this.wrongInputPriority.setText("");
+                TabIp6Ui.this.groupPriority.setValidationState(ValidationState.NONE);
+                TabIp6Ui.this.wrongInputPriority.setText("");
             } else {
-                this.groupPriority.setValidationState(ValidationState.ERROR);
-                this.wrongInputPriority.setText(MSGS.netIPv6InvalidPriority());
+                TabIp6Ui.this.groupPriority.setValidationState(ValidationState.ERROR);
+                TabIp6Ui.this.wrongInputPriority.setText(MSGS.netIPv6InvalidPriority());
             }
         });
     }

@@ -21,7 +21,7 @@ Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 192.168.2.0     0.0.0.0         255.255.255.0   U     100    0        0 eth0
 ```
 
-The `metric` flag will correspond to the set **WAN Priority**. *NetworkManager* will always prioritize lower metric routes.
+The `metric` flag will correspond to the set **WAN Priority**. *NetworkManager* will always prioritize lower metric routes. The same behavior can be observed for IPv6 addresses. In this case use the `route -n -6` command.
 
 
 
@@ -66,3 +66,10 @@ To **disable** the connectivity check feature:
 - set `interval=0`; or
 - remove `uri`; or
 - set an empty URI, like `uri=`
+
+## DNS Priority
+
+The **WAN Priority** property determines which network interface is used as primary WAN interface. If a DNS server address is configured for the selected interface, it will be used as domain name resolver. 
+
+The list of available DNS addresses is written by NetworkManager in the `/etc/resolv.conf` file, where the first in the list take precedence. However, if NetworkManager is configured to use external tools to manage the DNS list (e.g. `dnsmasq` or `systemd-resolved`), the `/etc/resolv.conf` file is not used and the DNS are externally handled.
+Plese refer to the official NetworkManager [documentation](https://networkmanager.dev/docs/api/latest/settings-ipv4.html) for the `dns-priority` setting and [here](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/configuring_and_managing_networking/configuring-the-order-of-dns-servers_configuring-and-managing-networking#default-values-of-dns-priority-parameters_configuring-the-order-of-dns-servers) for an explanation about the external DNS tools.

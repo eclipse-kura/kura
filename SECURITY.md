@@ -23,5 +23,9 @@ The fixes are applied to the latest minor release available for the given major 
 
 ## Reporting a Vulnerability
 
-Please report vulnerabilities to the Eclipse Foundation Security Team at
-security@eclipse.org
+If you think you have found a vulnerability in <project> you can report it using one of the following ways:
+
+* [Report a Vulnerability](https://github.com/eclipse-kura/kura/security/advisories/new)
+* Contact the [Eclipse Foundation Security Team](mailto:security@eclipse-foundation.org)
+
+You can find more information about reporting and disclosure at the [Eclipse Foundation Security page](https://www.eclipse.org/security/).

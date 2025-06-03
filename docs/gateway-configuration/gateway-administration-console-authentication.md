@@ -26,12 +26,8 @@ Kura provides the following identities by default:
 | Name | Password | Permissions |
 | ---- | -------- | ----------- |
 | admin | admin | kura.admin |
-| appadmin | appadmin | kura.cloud.connection.admin, kura.packages.admin, kura.wires.admin |
-| netadmin | netadmin | kura.cloud.connection.admin, kura.device, kura.network.admin |
 
 It is possible to modify/remove the default identity configuration.
-
-
 
 ## Login
 

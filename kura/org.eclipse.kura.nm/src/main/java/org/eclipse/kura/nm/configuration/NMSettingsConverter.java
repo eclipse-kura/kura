@@ -317,9 +317,6 @@ public class NMSettingsConverter {
         if (value == -1) {
             settings.put("route-metric", new Variant<>((long) -1));
             settings.put("dns-priority", new Variant<>((long) 0));
-        } else if (value == 0) {
-            settings.put("route-metric", new Variant<>((long) 1));
-            settings.put("dns-priority", new Variant<>((long) 1));
         } else if (value > 0) {
             settings.put("route-metric", new Variant<>(value.longValue()));
             settings.put("dns-priority", new Variant<>(value.longValue()));

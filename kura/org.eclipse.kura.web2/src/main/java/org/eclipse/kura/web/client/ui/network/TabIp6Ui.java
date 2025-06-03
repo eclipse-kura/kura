@@ -330,17 +330,8 @@ public class TabIp6Ui extends Composite implements NetworkTab {
             setDirty(true);
 
             String inputText = this.priority.getText();
-            boolean isValidValue = false;
 
-            if (inputText != null) {
-                if (inputText.trim().isEmpty()) {
-                    isValidValue = true;
-                } else {
-                    isValidValue = isValidIntegerInRange(inputText, -1, Integer.MAX_VALUE);
-                }
-            }
-
-            if (isValidValue) {
+            if (isValidInput(inputText)) {
                 this.groupPriority.setValidationState(ValidationState.NONE);
                 this.wrongInputPriority.setText("");
             } else {
@@ -350,13 +341,21 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         });
     }
 
-    private boolean isValidIntegerInRange(String integerText, int min, int max) {
+    public boolean isValidInput(String inputText) {
+        if (inputText == null || inputText.trim().isEmpty()) {
+            return false;
+        }
+
         try {
-            int value = Integer.parseInt(integerText.trim());
-            return value >= min && value <= max;
+            int value = Integer.parseInt(inputText.trim());
+            if (value == -1 || (value > 0 && value < Integer.MAX_VALUE)) {
+                return true;
+            }
         } catch (NumberFormatException e) {
             return false;
         }
+
+        return false;
     }
 
     private void initIpField() {

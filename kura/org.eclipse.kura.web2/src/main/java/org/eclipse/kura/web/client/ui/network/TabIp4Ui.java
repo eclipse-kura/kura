@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.network;
 
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -406,26 +405,32 @@ public class TabIp4Ui extends Composite implements NetworkTab {
             setDirty(true);
 
             String inputText = TabIp4Ui.this.priority.getText();
-            boolean isInvalidValue = false;
 
-            if (!Objects.isNull(inputText) && !inputText.trim().isEmpty()) {
-                try {
-                    if (Integer.parseInt(inputText) < -1) {
-                        isInvalidValue = true;
-                    }
-                } catch (NumberFormatException e) {
-                    isInvalidValue = true;
-                }
-            }
-
-            if (isInvalidValue) {
-                TabIp4Ui.this.groupPriority.setValidationState(ValidationState.ERROR);
-                TabIp4Ui.this.helpPriority.setText(MSGS.netIPv4InvalidPriority());
-            } else {
+            if (isValidInput(inputText)) {
                 TabIp4Ui.this.groupPriority.setValidationState(ValidationState.NONE);
                 TabIp4Ui.this.helpPriority.setText("");
+            } else {
+                TabIp4Ui.this.groupPriority.setValidationState(ValidationState.ERROR);
+                TabIp4Ui.this.helpPriority.setText(MSGS.netIPv4InvalidPriority());
             }
         });
+    }
+
+    public boolean isValidInput(String inputText) {
+        if (inputText == null || inputText.trim().isEmpty()) {
+            return false;
+        }
+
+        try {
+            int value = Integer.parseInt(inputText.trim());
+            if (value == -1 || (value > 0 && value < Integer.MAX_VALUE)) {
+                return true;
+            }
+        } catch (NumberFormatException e) {
+            return false;
+        }
+
+        return false;
     }
 
     private void initDHCPLeaseField() {

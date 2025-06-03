@@ -687,6 +687,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#dns-priority" class="md-nav__link">
+    <span class="md-ellipsis">
+      DNS Priority
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4623,6 +4632,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#dns-priority" class="md-nav__link">
+    <span class="md-ellipsis">
+      DNS Priority
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4654,7 +4672,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="m">172</span>.17.0.0<span class="w">      </span><span class="m">0</span>.0.0.0<span class="w">         </span><span class="m">255</span>.255.0.0<span class="w">     </span>U<span class="w">     </span><span class="m">0</span><span class="w">      </span><span class="m">0</span><span class="w">        </span><span class="m">0</span><span class="w"> </span>docker0
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="m">192</span>.168.2.0<span class="w">     </span><span class="m">0</span>.0.0.0<span class="w">         </span><span class="m">255</span>.255.255.0<span class="w">   </span>U<span class="w">     </span><span class="m">100</span><span class="w">    </span><span class="m">0</span><span class="w">        </span><span class="m">0</span><span class="w"> </span>eth0
 </code></pre></div>
-<p>The <code>metric</code> flag will correspond to the set <strong>WAN Priority</strong>. <em>NetworkManager</em> will always prioritize lower metric routes.</p>
+<p>The <code>metric</code> flag will correspond to the set <strong>WAN Priority</strong>. <em>NetworkManager</em> will always prioritize lower metric routes. The same behavior can be observed for IPv6 addresses. In this case use the <code>route -n -6</code> command.</p>
 <h2 id="operating-modes">Operating modes</h2>
 <p>The <em>NetworkManager</em> failover mechanism can work at two different levels:</p>
 <ul>
@@ -4705,6 +4723,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>remove <code>uri</code>; or</li>
 <li>set an empty URI, like <code>uri=</code></li>
 </ul>
+<h2 id="dns-priority">DNS Priority</h2>
+<p>The <strong>WAN Priority</strong> property determines which network interface is used as primary WAN interface. If a DNS server address is configured for the selected interface, it will be used as domain name resolver. </p>
+<p>The list of available DNS addresses is written by NetworkManager in the <code>/etc/resolv.conf</code> file, where the first in the list take precedence. However, if NetworkManager is configured to use external tools to manage the DNS list (e.g. <code>dnsmasq</code> or <code>systemd-resolved</code>), the <code>/etc/resolv.conf</code> file is not used and the DNS are externally handled.
+Plese refer to the official NetworkManager <a href="https://networkmanager.dev/docs/api/latest/settings-ipv4.html">documentation</a> for the <code>dns-priority</code> setting and <a href="https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/configuring_and_managing_networking/configuring-the-order-of-dns-servers_configuring-and-managing-networking#default-values-of-dns-priority-parameters_configuring-the-order-of-dns-servers">here</a> for an explanation about the external DNS tools.</p>
 
 
 

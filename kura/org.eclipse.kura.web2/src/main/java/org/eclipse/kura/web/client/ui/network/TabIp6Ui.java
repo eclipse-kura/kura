@@ -329,33 +329,32 @@ public class TabIp6Ui extends Composite implements NetworkTab {
         this.priority.addValueChangeHandler(valChangeEvent -> {
             setDirty(true);
 
-            String inputText = this.priority.getText();
+            String inputText = TabIp6Ui.this.priority.getText();
+            boolean isValidValue = false;
 
-            if (isValidInput(inputText)) {
-                this.groupPriority.setValidationState(ValidationState.NONE);
-                this.wrongInputPriority.setText("");
+            if (Objects.isNull(inputText) || inputText.trim().isEmpty()) {
+                isValidValue = false;
             } else {
-                this.groupPriority.setValidationState(ValidationState.ERROR);
-                this.wrongInputPriority.setText(MSGS.netIPv6InvalidPriority());
+                isValidValue = isValidIntegerInRange(inputText, -1, Integer.MAX_VALUE - 1);
+            }
+
+            if (isValidValue) {
+                TabIp6Ui.this.groupPriority.setValidationState(ValidationState.NONE);
+                TabIp6Ui.this.wrongInputPriority.setText("");
+            } else {
+                TabIp6Ui.this.groupPriority.setValidationState(ValidationState.ERROR);
+                TabIp6Ui.this.wrongInputPriority.setText(MSGS.netIPv6InvalidPriority());
             }
         });
     }
 
-    public boolean isValidInput(String inputText) {
-        if (inputText == null || inputText.trim().isEmpty()) {
-            return false;
-        }
-
+    private boolean isValidIntegerInRange(String integerText, int min, int max) {
         try {
-            int value = Integer.parseInt(inputText.trim());
-            if (value == -1 || (value > 0 && value < Integer.MAX_VALUE)) {
-                return true;
-            }
+            int value = Integer.parseInt(integerText.trim());
+            return value >= min && value <= max;
         } catch (NumberFormatException e) {
             return false;
         }
-
-        return false;
     }
 
     private void initIpField() {

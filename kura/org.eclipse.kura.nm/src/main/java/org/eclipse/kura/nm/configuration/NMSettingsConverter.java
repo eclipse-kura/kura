@@ -317,9 +317,9 @@ public class NMSettingsConverter {
         if (value == -1) {
             settings.put("route-metric", new Variant<>((long) -1));
             settings.put("dns-priority", new Variant<>((long) 0));
-        } else if (value > 0) {
-            settings.put("route-metric", new Variant<>(value.longValue()));
-            settings.put("dns-priority", new Variant<>(value.longValue()));
+        } else if (value >= 0 && value < Integer.MAX_VALUE) {
+            settings.put("route-metric", new Variant<>(value.longValue() + 1));
+            settings.put("dns-priority", new Variant<>(value.longValue() + 1));
         } else {
             logger.warn("WAN priority must be a positive integer or -1 to disable the feature. "
                     + "Ignoring route-metric and dns-priority settings.");

@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.network;
 
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -405,8 +406,15 @@ public class TabIp4Ui extends Composite implements NetworkTab {
             setDirty(true);
 
             String inputText = TabIp4Ui.this.priority.getText();
+            boolean isValidValue = false;
 
-            if (isValidInput(inputText)) {
+            if (Objects.isNull(inputText) || inputText.trim().isEmpty()) {
+                isValidValue = false;
+            } else {
+                isValidValue = isValidIntegerInRange(inputText, -1, Integer.MAX_VALUE - 1);
+            }
+
+            if (isValidValue) {
                 TabIp4Ui.this.groupPriority.setValidationState(ValidationState.NONE);
                 TabIp4Ui.this.helpPriority.setText("");
             } else {
@@ -416,21 +424,13 @@ public class TabIp4Ui extends Composite implements NetworkTab {
         });
     }
 
-    public boolean isValidInput(String inputText) {
-        if (inputText == null || inputText.trim().isEmpty()) {
-            return false;
-        }
-
+    private boolean isValidIntegerInRange(String integerText, int min, int max) {
         try {
-            int value = Integer.parseInt(inputText.trim());
-            if (value == -1 || (value > 0 && value < Integer.MAX_VALUE)) {
-                return true;
-            }
+            int value = Integer.parseInt(integerText.trim());
+            return value >= min && value <= max;
         } catch (NumberFormatException e) {
             return false;
         }
-
-        return false;
     }
 
     private void initDHCPLeaseField() {

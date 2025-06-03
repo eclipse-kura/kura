@@ -228,8 +228,8 @@ public class NMSettingsConverterTest {
 
         thenNoExceptionOccurred();
         thenResultingMapContains("method", "auto");
-        thenResultingMapContains("route-metric", new Variant<>((long) 30).getValue());
-        thenResultingMapContains("dns-priority", new Variant<>((long) 30).getValue());
+        thenResultingMapContains("route-metric", new Variant<>((long) 31).getValue());
+        thenResultingMapContains("dns-priority", new Variant<>((long) 31).getValue());
     }
 
     @Test
@@ -248,10 +248,10 @@ public class NMSettingsConverterTest {
     }
 
     @Test
-    public void buildIpv4SettingsShouldPopulateWanPriorityPropertyWithMinimalValues() {
+    public void buildIpv4SettingsShouldPopulateWanPriorityPropertyWithMinValues() {
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
         givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
-        givenMapWith("net.interface.wlan0.config.ip4.wan.priority", (int) 1);
+        givenMapWith("net.interface.wlan0.config.ip4.wan.priority", (int) 0);
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
@@ -263,27 +263,25 @@ public class NMSettingsConverterTest {
     }
 
     @Test
-    public void buildIpv4SettingsShouldNotPopulateWanPriorityPropertyIfNegativeValues() {
+    public void buildIpv4SettingsShouldPopulateWanPriorityPropertyWithMaxValues() {
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
-        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledLAN");
-        givenMapWith("net.interface.wlan0.config.ip4.wan.priority", (int) -10);
+        givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenMapWith("net.interface.wlan0.config.ip4.wan.priority", (int) Integer.MAX_VALUE - 1);
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
 
         thenNoExceptionOccurred();
         thenResultingMapContains("method", "auto");
-        thenResultingMapContains("ignore-auto-dns", true);
-        thenResultingMapContains("ignore-auto-routes", true);
-        thenResultingMapNotContains("route-metric");
-        thenResultingMapNotContains("dns-priority");
+        thenResultingMapContains("route-metric", new Variant<>((long) Integer.MAX_VALUE).getValue());
+        thenResultingMapContains("dns-priority", new Variant<>((long) Integer.MAX_VALUE).getValue());
     }
 
     @Test
-    public void buildIpv4SettingsShouldNotPopulateWanPriorityPropertyIfZeroValue() {
+    public void buildIpv4SettingsShouldNotPopulateWanPriorityPropertyIfNegativeValues() {
         givenMapWith("net.interface.wlan0.config.dhcpClient4.enabled", true);
         givenMapWith("net.interface.wlan0.config.ip4.status", "netIPv4StatusEnabledLAN");
-        givenMapWith("net.interface.wlan0.config.ip4.wan.priority", (int) 0);
+        givenMapWith("net.interface.wlan0.config.ip4.wan.priority", (int) -10);
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildIpv4SettingsIsRunWith(this.networkProperties, "wlan0");
@@ -324,8 +322,8 @@ public class NMSettingsConverterTest {
 
         thenNoExceptionOccurred();
         thenResultingMapContains("method", "auto");
-        thenResultingMapContains("route-metric", new Variant<>((long) 30).getValue());
-        thenResultingMapContains("dns-priority", new Variant<>((long) 30).getValue());
+        thenResultingMapContains("route-metric", new Variant<>((long) 31).getValue());
+        thenResultingMapContains("dns-priority", new Variant<>((long) 31).getValue());
     }
 
     @Test
@@ -344,10 +342,10 @@ public class NMSettingsConverterTest {
     }
 
     @Test
-    public void buildIpv6SettingsShouldPopulateWanPriorityPropertyWithMinimalValues() {
+    public void buildIpv6SettingsShouldPopulateWanPriorityPropertyWithMinValues() {
         givenMapWith("net.interface.wlan0.config.dhcpClient6.enabled", true);
         givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledWAN");
-        givenMapWith("net.interface.wlan0.config.ip6.wan.priority", (int) 1);
+        givenMapWith("net.interface.wlan0.config.ip6.wan.priority", (int) 0);
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", nmVersion);
@@ -376,20 +374,18 @@ public class NMSettingsConverterTest {
     }
 
     @Test
-    public void buildIpv6SettingsShouldNotPopulateWanPriorityPropertyIfZeroValue() {
+    public void buildIpv6SettingsShouldPopulateWanPriorityPropertyWithMaxValues() {
         givenMapWith("net.interface.wlan0.config.dhcpClient6.enabled", true);
-        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv4StatusEnabledLAN");
-        givenMapWith("net.interface.wlan0.config.ip6.wan.priority", (int) 0);
+        givenMapWith("net.interface.wlan0.config.ip6.status", "netIPv6StatusEnabledWAN");
+        givenMapWith("net.interface.wlan0.config.ip6.wan.priority", (int) Integer.MAX_VALUE - 1);
         givenNetworkPropsCreatedWithTheMap(this.internetNetworkPropertiesInstanciationMap);
 
         whenBuildIpv6SettingsIsRunWith(this.networkProperties, "wlan0", nmVersion);
 
         thenNoExceptionOccurred();
         thenResultingMapContains("method", "auto");
-        thenResultingMapContains("ignore-auto-dns", true);
-        thenResultingMapContains("ignore-auto-routes", true);
-        thenResultingMapNotContains("route-metric");
-        thenResultingMapNotContains("dns-priority");
+        thenResultingMapContains("route-metric", new Variant<>((long) Integer.MAX_VALUE).getValue());
+        thenResultingMapContains("dns-priority", new Variant<>((long) Integer.MAX_VALUE).getValue());
     }
 
     @Test

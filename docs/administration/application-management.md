@@ -90,7 +90,7 @@ Dragging an application reference taken from the Eclipse Kura Marketplace to the
     Valid To: February 06, 2026
     Issuer: DigiCert Global G2 TLS RSA SHA256 2020 CA1, DigiCert Inc Write review of DigiCert
     Key Size: 4096 bit
-    Serial Number 069f20d91990a96a29221055be6ea137
+    Serial Number: 069f20d91990a96a29221055be6ea137
     ```
     
     If the bundle is not an official one and it is not hosted by Eclipse, retrieve the certificate with this command:

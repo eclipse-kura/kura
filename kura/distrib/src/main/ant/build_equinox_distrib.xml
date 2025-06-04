@@ -741,37 +741,37 @@ fi]]>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.apache.aries.spifly.dynamic.bundle" />
             <param name="bundle.version" value="${org.apache.aries.spifly.dynamic.bundle.version}" />
-            <param name="start.level" value="2" />
-            <param name="start" value="" />
+            <param name="start.level" value="1" />
+            <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="asm" />
             <param name="bundle.version" value="${org.ow2.asm.version}" />
-            <param name="start.level" value="2" />
+            <param name="start.level" value="1" />
             <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="asm-commons" />
             <param name="bundle.version" value="${org.ow2.asm.version}" />
-            <param name="start.level" value="2" />
+            <param name="start.level" value="1" />
             <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="asm-tree" />
             <param name="bundle.version" value="${org.ow2.asm.version}" />
-            <param name="start.level" value="2" />
+            <param name="start.level" value="1" />
             <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="asm-util" />
             <param name="bundle.version" value="${org.ow2.asm.version}" />
-            <param name="start.level" value="2" />
+            <param name="start.level" value="1" />
             <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="asm-analysis" />
             <param name="bundle.version" value="${org.ow2.asm.version}" />
-            <param name="start.level" value="2" />
+            <param name="start.level" value="1" />
             <param name="start" value="" />
         </antcall>
         <!--JAXB

@@ -19,23 +19,25 @@
         <first id="bundle.file">
             <union>
                 <fileset dir="${project.build.directory}/plugins">
-                    <include name="${bundle.name}_${bundle.version}*.jar"/>
+                    <include name="${bundle.name}_${bundle.version}*.jar" />
                 </fileset>
                 <fileset dir="../target-definition/common/source/plugins">
-                    <include name="${bundle.name}-${bundle.version}*.jar"/>
+                    <include name="${bundle.name}-${bundle.version}*.jar" />
                 </fileset>
                 <fileset dir="${kura.osgi.repo}/plugins/">
-                    <include name="${bundle.name}-${bundle.version}*.jar"/>
+                    <include name="${bundle.name}-${bundle.version}*.jar" />
                 </fileset>
             </union>
         </first>
         <fail message="${bundle.name} not found">
             <condition>
-                <equals arg1="${toString:bundle.file}" arg2=""/>
+                <equals arg1="${toString:bundle.file}" arg2="" />
             </condition>
         </fail>
-        <echo message="Installing ${toString:bundle.file}"/>
-        <copy tofile="${project.build.directory}/${build.output.name}/plugins/${start.level}${start}/${bundle.name}_${bundle.version}.jar" failonerror="true" overwrite="false" file="${toString:bundle.file}"/>
+        <echo message="Installing ${toString:bundle.file}" />
+        <copy
+            tofile="${project.build.directory}/${build.output.name}/plugins/${start.level}${start}/${bundle.name}_${bundle.version}.jar"
+            failonerror="true" overwrite="false" file="${toString:bundle.file}" />
     </target>
 
     <target name="dist-linux">
@@ -151,7 +153,8 @@
         </condition>
 
         <copy file="src/main/resources/${build.name}/snapshot_0.xml"
-            tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" failonerror="false" />
+            tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml"
+            failonerror="false" />
         <copy file="src/main/osgi/equinox/configuration/config.ini"
             tofile="${project.build.directory}/${build.output.name}/config.ini" />
 
@@ -162,11 +165,11 @@
             tofile="${project.build.directory}/${build.output.name}/cacerts.ks" />
 
         <copy
-                file="${kura.osgi.repo}/plugins/org.eclipse.osgi-${org.eclipse.osgi.version}.jar"
-                tofile="${project.build.directory}/${build.output.name}/${plugins.folder}/org.eclipse.osgi_${org.eclipse.osgi.version}.jar" />
+            file="${kura.osgi.repo}/plugins/org.eclipse.osgi-${org.eclipse.osgi.version}.jar"
+            tofile="${project.build.directory}/${build.output.name}/${plugins.folder}/org.eclipse.osgi_${org.eclipse.osgi.version}.jar" />
         <copy
-                file="${kura.osgi.repo}/plugins/org.eclipse.equinox.launcher-${org.eclipse.equinox.launcher.version}.jar"
-                tofile="${project.build.directory}/${build.output.name}/${plugins.folder}/org.eclipse.equinox.launcher_${org.eclipse.equinox.launcher.version}.jar" />
+            file="${kura.osgi.repo}/plugins/org.eclipse.equinox.launcher-${org.eclipse.equinox.launcher.version}.jar"
+            tofile="${project.build.directory}/${build.output.name}/${plugins.folder}/org.eclipse.equinox.launcher_${org.eclipse.equinox.launcher.version}.jar" />
 
         <!-- Populate config.ini with correct OSGi packages -->
         <antcall target="osgi-base-plugins" />
@@ -200,14 +203,14 @@
         <antcall target="linux.usb-plugins" />
         <antcall target="bluetooth-plugins" />
         <antcall target="linux.watchdog-plugins" />
-    	<antcall target="h2db-plugins" />
+        <antcall target="h2db-plugins" />
 
         <!-- Added Camel bundles configs -->
         <antcall target="camel-plugins" />
 
         <!-- Rest bundles config -->
         <antcall target="rest-plugins" />
-    	
+
         <!-- Asset bundles config -->
         <antcall target="asset-plugins" />
 
@@ -231,7 +234,7 @@
 
         <!-- Filesystem log provider bundle config -->
         <antcall target="filesystem-logprovider-plugins" />
-        
+
         <antcall target="container-orchestrator-plugins" />
 
         <antcall target="configuration.change.manager-plugins" />
@@ -415,7 +418,7 @@ fi]]>
         <replaceregexp
             file="${project.build.directory}/${build.output.name}/kura.service.nn"
             match="INSTALL_DIR" replace="${kura.install.dir}" />
-    	
+
         <zip destfile="${project.build.directory}/${build.output.name}.zip">
 
             <zipfileset
@@ -501,7 +504,7 @@ fi]]>
                 prefix="${build.output.name}/${install.folder}">
                 <include name="*" />
             </zipfileset>
-            
+
             <zipfileset file="src/main/resources/common/named/named.ca"
                 prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/named/named.rfc1912.zones"
@@ -571,7 +574,8 @@ fi]]>
 
     <target name="copy-jdk-dio-resources" unless="is.docker">
         <copy file="src/main/resources/${build.name}/jdk.dio.properties"
-            tofile="${project.build.directory}/${build.output.name}/jdk.dio.properties" failonerror="false" />
+            tofile="${project.build.directory}/${build.output.name}/jdk.dio.properties"
+            failonerror="false" />
         <copy file="src/main/resources/common/jdk.dio.policy"
             tofile="${project.build.directory}/${build.output.name}/jdk.dio.policy" />
     </target>
@@ -587,128 +591,128 @@ fi]]>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.service.cm" />
             <param name="bundle.version" value="${org.osgi.service.cm.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.service.component" />
             <param name="bundle.version" value="${org.osgi.service.component.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.service.coordinator" />
             <param name="bundle.version" value="${org.osgi.service.coordinator.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.service.device" />
             <param name="bundle.version" value="${org.osgi.service.device.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.service.event" />
             <param name="bundle.version" value="${org.osgi.service.event.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.service.log.stream" />
             <param name="bundle.version" value="${org.osgi.service.log.stream.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.service.metatype" />
             <param name="bundle.version" value="${org.osgi.service.metatype.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.service.prefs" />
             <param name="bundle.version" value="${org.osgi.service.prefs.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.service.provisioning" />
             <param name="bundle.version" value="${org.osgi.service.provisioning.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.service.upnp" />
             <param name="bundle.version" value="${org.osgi.service.upnp.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.service.useradmin" />
             <param name="bundle.version" value="${org.osgi.service.useradmin.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.service.wireadmin" />
             <param name="bundle.version" value="${org.osgi.service.wireadmin.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.util.function" />
             <param name="bundle.version" value="${org.osgi.util.function.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.util.measurement" />
             <param name="bundle.version" value="${org.osgi.util.measurement.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.util.position" />
             <param name="bundle.version" value="${org.osgi.util.position.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.util.promise" />
             <param name="bundle.version" value="${org.osgi.util.promise.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.util.pushstream" />
             <param name="bundle.version" value="${org.osgi.util.pushstream.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.osgi.util.xml" />
             <param name="bundle.version" value="${org.osgi.util.xml.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
-            <param name="upgrader" value="true"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
+            <param name="upgrader" value="true" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.apache.felix.http.servlet-api" />
@@ -719,20 +723,20 @@ fi]]>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.apache.felix.http.bridge" />
             <param name="bundle.version" value="${org.apache.felix.http.bridge.version}" />
-            <param name="start.level" value="5"/>
-            <param name="start" value="s"/>
+            <param name="start.level" value="5" />
+            <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.apache.felix.http.proxy" />
             <param name="bundle.version" value="${org.apache.felix.http.proxy.version}" />
-            <param name="start.level" value="5"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="5" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.apache.felix.http.wrappers" />
             <param name="bundle.version" value="${org.apache.felix.http.wrappers.version}" />
-            <param name="start.level" value="5"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="5" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.apache.aries.spifly.dynamic.bundle" />
@@ -770,135 +774,138 @@ fi]]>
             <param name="start.level" value="2" />
             <param name="start" value="" />
         </antcall>
-        <!--JAXB dependenices-->
+        <!--JAXB
+        dependenices-->
         <antcall target="install-plugin">
             <param name="bundle.name" value="jakarta.activation-api" />
             <param name="bundle.version" value="${jakarta.activation-api.javax.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="jakarta.xml.bind-api" />
             <param name="bundle.version" value="${jakarta.xml.bind-api.javax.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="2" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="jaxb-osgi" />
             <param name="bundle.version" value="${jaxb-osgi.javax.version}" />
-            <param name="start.level" value="2"/>
-            <param name="start" value="s"/>
+            <param name="start.level" value="2" />
+            <param name="start" value="s" />
         </antcall>
-        <!--Jersey dependencies-->
+        <!--Jersey
+        dependencies-->
         <antcall target="install-plugin">
             <param name="bundle.name" value="hk2-api" />
             <param name="bundle.version" value="${hk2.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="aopalliance-repackaged" />
             <param name="bundle.version" value="${hk2.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="hk2-locator" />
             <param name="bundle.version" value="${hk2.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="hk2-utils" />
             <param name="bundle.version" value="${hk2.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="jersey-hk2" />
             <param name="bundle.version" value="${jersey.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="jersey-container-servlet" />
             <param name="bundle.version" value="${jersey.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="jersey-container-servlet-core" />
             <param name="bundle.version" value="${jersey.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="jersey-client" />
             <param name="bundle.version" value="${jersey.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="jersey-common" />
             <param name="bundle.version" value="${jersey.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="jersey-server" />
             <param name="bundle.version" value="${jersey.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="jersey-entity-filtering" />
             <param name="bundle.version" value="${jersey.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="jersey-media-jaxb" />
             <param name="bundle.version" value="${jersey.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="jersey-media-sse" />
             <param name="bundle.version" value="${jersey.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="jersey-media-multipart" />
             <param name="bundle.version" value="${jersey.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="jakarta.inject-api" />
             <param name="bundle.version" value="${jakarta.inject-api.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="jakarta.validation-api" />
             <param name="bundle.version" value="${jakarta.validation-api.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="javassist" />
             <param name="bundle.version" value="${javassist.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="mimepull" />
             <param name="bundle.version" value="${mimepull.version}" />
-            <param name="start.level" value="3"/>
-            <param name="start" value=""/>
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
-        <!--END Jersey dependencies-->
+        <!--END
+        Jersey dependencies-->
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.equinox.cm" />
             <param name="bundle.version" value="${org.eclipse.equinox.cm.version}" />
@@ -1146,7 +1153,7 @@ fi]]>
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.name" value="log4j-slf4j-impl" />
+            <param name="bundle.name" value="log4j-slf4j2-impl" />
             <param name="bundle.version" value="${log4j.version}" />
             <param name="start.level" value="1" />
             <param name="start" value="s" />
@@ -1419,7 +1426,8 @@ fi]]>
     <target name="cloud.mqtt.kapua-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.cloudconnection.kapua.mqtt.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.cloudconnection.kapua.mqtt.provider.version}" />
+            <param name="bundle.version"
+                value="${org.eclipse.kura.cloudconnection.kapua.mqtt.provider.version}" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>
@@ -1427,8 +1435,10 @@ fi]]>
 
     <target name="cloud.mqtt.eclipseiot-plugins">
         <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}" />
+            <param name="bundle.name"
+                value="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider" />
+            <param name="bundle.version"
+                value="${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>
@@ -1436,8 +1446,10 @@ fi]]>
 
     <target name="cloud.mqtt.raw-plugins">
         <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}" />
+            <param name="bundle.name"
+                value="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider" />
+            <param name="bundle.version"
+                value="${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>
@@ -1704,13 +1716,15 @@ fi]]>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.rest.cloudconnection.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.rest.cloudconnection.provider.version}" />
+            <param name="bundle.version"
+                value="${org.eclipse.kura.rest.cloudconnection.provider.version}" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.rest.configuration.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.rest.configuration.provider.version}" />
+            <param name="bundle.version"
+                value="${org.eclipse.kura.rest.configuration.provider.version}" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>
@@ -1752,7 +1766,8 @@ fi]]>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.rest.service.listing.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.rest.service.listing.provider.version}" />
+            <param name="bundle.version"
+                value="${org.eclipse.kura.rest.service.listing.provider.version}" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>
@@ -1794,13 +1809,15 @@ fi]]>
     <target name="marshallers-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.json.marshaller.unmarshaller.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.json.marshaller.unmarshaller.provider.version}" />
+            <param name="bundle.version"
+                value="${org.eclipse.kura.json.marshaller.unmarshaller.provider.version}" />
             <param name="start.level" value="3" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.xml.marshaller.unmarshaller.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}" />
+            <param name="bundle.version"
+                value="${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}" />
             <param name="start.level" value="3" />
             <param name="start" value="s" />
         </antcall>
@@ -1833,13 +1850,15 @@ fi]]>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.wire.h2db.component.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.wire.h2db.component.provider.version}" />
+            <param name="bundle.version"
+                value="${org.eclipse.kura.wire.h2db.component.provider.version}" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.wire.db.component.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.wire.db.component.provider.version}" />
+            <param name="bundle.version"
+                value="${org.eclipse.kura.wire.db.component.provider.version}" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>
@@ -1863,7 +1882,8 @@ fi]]>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.wire.component.join.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.wire.component.join.provider.version}" />
+            <param name="bundle.version"
+                value="${org.eclipse.kura.wire.component.join.provider.version}" />
             <param name="start.level" value="5" />
             <param name="start" value="s" />
         </antcall>
@@ -2151,7 +2171,8 @@ fi]]>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.broker.artemis.simple.mqtt" />
-            <param name="bundle.version" value="${org.eclipse.kura.broker.artemis.simple.mqtt.version}" />
+            <param name="bundle.version"
+                value="${org.eclipse.kura.broker.artemis.simple.mqtt.version}" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>
@@ -2190,13 +2211,15 @@ fi]]>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.rest.network.status.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.rest.network.status.provider.version}" />
+            <param name="bundle.version"
+                value="${org.eclipse.kura.rest.network.status.provider.version}" />
             <param name="start.level" value="5" />
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.rest.network.configuration.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.rest.network.configuration.provider.version}" />
+            <param name="bundle.version"
+                value="${org.eclipse.kura.rest.network.configuration.provider.version}" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>
@@ -2207,7 +2230,7 @@ fi]]>
             <param name="start" value="s" />
         </antcall>
     </target>
-		
+
     <target name="event-publisher-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.event.publisher" />
@@ -2247,7 +2270,8 @@ fi]]>
     <target name="container-orchestrator-plugins" unless="is.docker">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.container.orchestration.provider" />
-            <param name="bundle.version" value="${org.eclipse.kura.container.orchestration.provider.version}" />
+            <param name="bundle.version"
+                value="${org.eclipse.kura.container.orchestration.provider.version}" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>
@@ -2262,7 +2286,8 @@ fi]]>
     <target name="configuration.change.manager-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.configuration.change.manager" />
-            <param name="bundle.version" value="${org.eclipse.kura.configuration.change.manager.version}" />
+            <param name="bundle.version"
+                value="${org.eclipse.kura.configuration.change.manager.version}" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>

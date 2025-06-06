@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
+import java.io.File;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +30,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.moquette.broker.Server;
+import io.moquette.broker.config.FileResourceLoader;
+import io.moquette.broker.config.IConfig;
+import io.moquette.broker.config.IResourceLoader;
+import io.moquette.broker.config.ResourceLoaderConfig;
 
 @RunWith(Suite.class)
 @SuiteClasses({ InventoryHandlerTest.class, CloudDeploymentHandlerTest.class, CommURITest.class,
@@ -44,6 +49,8 @@ public class AllCoreTests {
     private static ConfigurationService s_configService;
     private static DataService s_dataService;
     private static SystemService s_sysService;
+
+    static Server mqttBroker;
 
     public void setConfigService(ConfigurationService configService) {
         s_configService = configService;
@@ -77,7 +84,7 @@ public class AllCoreTests {
         s_logger.info("setUpClass...");
 
         // start Moquette
-        Server.main(new String[] {});
+        startMqttBroker();
 
         // Wait for OSGi dependencies
         s_logger.info("Setting Up The Testcase....");
@@ -143,11 +150,31 @@ public class AllCoreTests {
         }
     }
 
+    public static void startMqttBroker() throws Exception {
+        s_logger.error("Starting Moquette MQTT broker... with path: " + System.getProperty("moquette.path"));
+        IResourceLoader fileLoader = new FileResourceLoader();
+        IConfig classPathConfig = new ResourceLoaderConfig(fileLoader, "moquette.conf");
+
+        mqttBroker = new Server();
+        mqttBroker.startServer(classPathConfig);
+        s_logger.info("Moquette MQTT broker started");
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> stopBroker()));
+    }
+
+    public static void stopBroker() {
+        if (mqttBroker != null) {
+            mqttBroker.stopServer();
+        }
+        s_logger.info("Moquette MQTT broker stopped");
+    }
+
     @AfterClass
     public static void tearDownClass() throws Exception {
         s_logger.info("tearDownClass...");
         if (s_dataService != null && s_dataService.isConnected()) {
             s_dataService.disconnect(0);
         }
+        stopBroker();
     }
 }

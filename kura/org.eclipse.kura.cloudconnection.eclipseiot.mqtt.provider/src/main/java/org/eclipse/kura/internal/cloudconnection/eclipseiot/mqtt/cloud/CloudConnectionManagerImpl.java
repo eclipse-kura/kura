@@ -119,7 +119,7 @@ public class CloudConnectionManagerImpl
     private DataService dataService;
     private SystemService systemService;
     private SystemAdminService systemAdminService;
-    private NetworkService networkService;
+    private Optional<NetworkService> networkService;
     private Optional<PositionService> positionService = Optional.empty();
     private EventAdmin eventAdmin;
     private CertificatesService certificatesService;
@@ -206,16 +206,16 @@ public class CloudConnectionManagerImpl
     }
 
     public void setNetworkService(NetworkService networkService) {
-        this.networkService = networkService;
+        this.networkService = Optional.of(networkService);
     }
 
     public void unsetNetworkService(NetworkService networkService) {
-        if (this.networkService.equals(networkService)) {
-            this.networkService = null;
+        if (this.networkService.isPresent() && this.networkService.get().equals(networkService)) {
+            this.networkService = Optional.empty();
         }
     }
 
-    public NetworkService getNetworkService() {
+    public Optional<NetworkService> getNetworkService() {
         return this.networkService;
     }
 

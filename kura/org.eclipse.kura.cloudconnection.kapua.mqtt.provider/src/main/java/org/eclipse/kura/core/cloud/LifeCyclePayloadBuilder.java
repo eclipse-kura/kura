@@ -183,37 +183,36 @@ public class LifeCyclePayloadBuilder {
     public KuraDeviceProfile buildDeviceProfile() {
         SystemService systemService = this.cloudServiceImpl.getSystemService();
         SystemAdminService sysAdminService = this.cloudServiceImpl.getSystemAdminService();
-        NetworkService networkService = this.cloudServiceImpl.getNetworkService();
+        Optional<NetworkService> networkService = this.cloudServiceImpl.getNetworkService();
         Optional<PositionService> positionService = this.cloudServiceImpl.getPositionService();
 
         //
-        // get the network information
-        StringBuilder sbConnectionIp = null;
-        StringBuilder sbConnectionInterface = null;
-        try {
-            List<NetInterface<? extends NetInterfaceAddress>> nis = networkService.getActiveNetworkInterfaces();
-            if (!nis.isEmpty()) {
-                sbConnectionIp = new StringBuilder();
-                sbConnectionInterface = new StringBuilder();
-
-                for (NetInterface<? extends NetInterfaceAddress> ni : nis) {
-                    List<? extends NetInterfaceAddress> nias = ni.getNetInterfaceAddresses();
-                    if (nias != null && !nias.isEmpty()) {
-                        sbConnectionInterface.append(buildConnectionInterface(ni)).append(",");
-                        sbConnectionIp.append(buildConnectionIp(ni)).append(",");
+        // get the network information if available
+        StringBuilder sbConnectionIp = new StringBuilder();
+        StringBuilder sbConnectionInterface = new StringBuilder();
+        networkService.ifPresent(ns -> {
+            try {
+                List<NetInterface<? extends NetInterfaceAddress>> nis = ns.getActiveNetworkInterfaces();
+                if (!nis.isEmpty()) {
+                    for (NetInterface<? extends NetInterfaceAddress> ni : nis) {
+                        List<? extends NetInterfaceAddress> nias = ni.getNetInterfaceAddresses();
+                        if (nias != null && !nias.isEmpty()) {
+                            sbConnectionInterface.append(buildConnectionInterface(ni)).append(",");
+                            sbConnectionIp.append(buildConnectionIp(ni)).append(",");
+                        }
                     }
+
+                    // Remove trailing comma
+                    sbConnectionIp.deleteCharAt(sbConnectionIp.length() - 1);
+                    sbConnectionInterface.deleteCharAt(sbConnectionInterface.length() - 1);
                 }
-
-                // Remove trailing comma
-                sbConnectionIp.deleteCharAt(sbConnectionIp.length() - 1);
-                sbConnectionInterface.deleteCharAt(sbConnectionInterface.length() - 1);
+            } catch (Exception se) {
+                logger.warn("Error while getting ConnectionIP and ConnectionInterface", se);
             }
-        } catch (Exception se) {
-            logger.warn("Error while getting ConnetionIP and ConnectionInterface", se);
-        }
+        });
 
-        String connectionIp = sbConnectionIp != null ? sbConnectionIp.toString() : UNKNOWN;
-        String connectionInterface = sbConnectionInterface != null ? sbConnectionInterface.toString() : UNKNOWN;
+        String connectionIp = !sbConnectionIp.isEmpty() ? sbConnectionIp.toString() : UNKNOWN;
+        String connectionInterface = !sbConnectionInterface.isEmpty() ? sbConnectionInterface.toString() : UNKNOWN;
 
         //
         // get the position information

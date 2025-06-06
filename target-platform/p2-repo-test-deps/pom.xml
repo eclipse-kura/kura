@@ -63,11 +63,11 @@
                                     <artifactId>metrics-core</artifactId>
                                     <version>${io.dropwizard.metrics.version}</version>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
+                                <dependency>
+                                    <groupId>com.github.moquette-io.moquette</groupId>
                                     <artifactId>moquette-broker</artifactId>
                                     <version>${moquette-broker.version}</version>
-                                </artifactItem>
+                                </dependency>
                                 <artifactItem>
                                     <groupId>org.hamcrest</groupId>
                                     <artifactId>org.hamcrest</artifactId>

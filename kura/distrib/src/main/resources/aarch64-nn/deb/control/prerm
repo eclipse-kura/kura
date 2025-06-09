@@ -114,7 +114,22 @@ function preRemove {
 ##############################################
 
 # Fail if the first argument is 'upgrade' or 'failed-upgrade'
-if [ "$1" == "upgrade" ] || [ "$1" == "failed-upgrade" ]; then
+if [ "$1" == "upgrade" ]; then
+    echo ""
+    echo "#####################################################################"
+    echo "#                                                                   #"
+    echo "#  ERROR: KURA upgrade is NOT supported!                            #"
+    echo "#  Please uninstall the existing version before upgrading.          #"
+    echo "#                                                                   #"
+    echo "#  To prevent accidental upgrades, you can hold this package with:  #"
+    echo "#      sudo apt-mark hold kura                                      #"
+    echo "#                                                                   #"
+    echo "#####################################################################"
+    echo ""
+    exit 1
+fi
+
+if [ "$1" == "failed-upgrade" ]; then
     echo "This package cannot be upgraded. Please uninstall the existing version before installing a new one."
     exit 1
 fi

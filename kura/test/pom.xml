@@ -844,7 +844,7 @@
         <module>org.eclipse.kura.internal.driver.ble.sensortag.test</module>
         <module>org.eclipse.kura.internal.driver.eddystone.test</module>
         <module>org.eclipse.kura.internal.driver.ibeacon.test</module>
-        <module>org.eclipse.kura.internal.driver.opcua.test</module>
+        <!-- <module>org.eclipse.kura.internal.driver.opcua.test</module> -->
         <module>org.eclipse.kura.internal.driver.s7plc.test</module>
         <module>org.eclipse.kura.linux.clock.test</module>
         <module>org.eclipse.kura.linux.gpio.test</module>

@@ -119,7 +119,7 @@ public class CloudConnectionManagerImpl
     private DataService dataService;
     private SystemService systemService;
     private SystemAdminService systemAdminService;
-    private Optional<NetworkService> networkService;
+    private Optional<NetworkService> networkService = Optional.empty();
     private Optional<PositionService> positionService = Optional.empty();
     private EventAdmin eventAdmin;
     private CertificatesService certificatesService;

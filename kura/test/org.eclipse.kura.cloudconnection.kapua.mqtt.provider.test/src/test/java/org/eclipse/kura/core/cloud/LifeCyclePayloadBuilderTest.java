@@ -38,7 +38,7 @@ public class LifeCyclePayloadBuilderTest {
 
     private SystemService systemService;
     private SystemAdminService sysAdminService;
-    private NetworkService networkService;
+    private Optional<NetworkService> networkService;
     private Optional<PositionService> positionService;
     private CloudServiceImpl cloudServiceImpl;
     private LifeCyclePayloadBuilder lifeCyclePayloadBuilder;
@@ -119,8 +119,8 @@ public class LifeCyclePayloadBuilderTest {
 
     private void givenNetworkService(List<NetInterface<? extends NetInterfaceAddress>> netInterfaces)
             throws KuraException {
-        this.networkService = mock(NetworkService.class);
-        when(this.networkService.getActiveNetworkInterfaces()).thenReturn(netInterfaces);
+        this.networkService = Optional.of(mock(NetworkService.class));
+        when(this.networkService.get().getActiveNetworkInterfaces()).thenReturn(netInterfaces);
     }
 
     private void givenPositionService() {

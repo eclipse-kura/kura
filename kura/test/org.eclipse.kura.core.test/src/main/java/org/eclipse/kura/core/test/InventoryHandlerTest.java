@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,9 +18,9 @@ import java.net.URL;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.kura.cloud.CloudCallService;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.core.inventory.InventoryHandlerV1;
+import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.Test;
@@ -30,13 +30,17 @@ import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentException;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 
+import org.eclipse.kura.cloudconnection.CloudEndpoint;
+
 import junit.framework.TestCase;
 
 public class InventoryHandlerTest extends TestCase {
 
-    private static CountDownLatch dependencyLatch = new CountDownLatch(2);
-    private static CloudCallService cloudCallService;
+    private static CountDownLatch dependencyLatch = new CountDownLatch(3);
+    private static CloudEndpointPublisher cloudEndpointPublisher;
     private static DeploymentAdmin deploymentAdmin;
+    private static CloudEndpoint cloudEndpoint;
+    private static DataService dataService;
 
     private static final String REMOTE_BUNDLE_NAME = "org.eclipse.kura.demo.heater";
     private static final String LOCAL_DP_NAME = "org.eclipse.kura.test.helloworld";
@@ -76,15 +80,8 @@ public class InventoryHandlerTest extends TestCase {
         if (remoteDp != null) {
             remoteDp.uninstall();
         }
-    }
 
-    public void setCloudCallService(CloudCallService cloudCallService) {
-        InventoryHandlerTest.cloudCallService = cloudCallService;
-        dependencyLatch.countDown();
-    }
-
-    public void unsetCloudCallService(CloudCallService cloudCallService) {
-        InventoryHandlerTest.cloudCallService = null;
+        cloudEndpointPublisher = new CloudEndpointPublisher(cloudEndpoint, dataService);
     }
 
     public void setDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
@@ -96,13 +93,23 @@ public class InventoryHandlerTest extends TestCase {
         InventoryHandlerTest.deploymentAdmin = null;
     }
 
+    public void setCloudEndpoint(CloudEndpoint cloudEndpoint) {
+        this.cloudEndpoint = cloudEndpoint;
+        dependencyLatch.countDown();
+    }
+
+    public void setDataService(DataService dataService) {
+        this.dataService = dataService;
+        dependencyLatch.countDown();
+    }
+
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetPackages() throws Exception {
         StringBuilder sb = init();
         sb.append(InventoryHandlerV1.RESOURCE_DEPLOYMENT_PACKAGES);
 
-        KuraResponsePayload resp = cloudCallService.call(InventoryHandlerV1.APP_ID, sb.toString(), null, 5000);
+        KuraResponsePayload resp = cloudEndpointPublisher.call(InventoryHandlerV1.APP_ID, sb.toString(), null, 5000);
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 
         String body = new String(resp.getBody());
@@ -116,7 +123,7 @@ public class InventoryHandlerTest extends TestCase {
         StringBuilder sb = init();
         sb.append(InventoryHandlerV1.RESOURCE_BUNDLES);
 
-        KuraResponsePayload resp = cloudCallService.call(InventoryHandlerV1.APP_ID, sb.toString(), null, 5000);
+        KuraResponsePayload resp = cloudEndpointPublisher.call(InventoryHandlerV1.APP_ID, sb.toString(), null, 5000);
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 
         String body = new String(resp.getBody());
@@ -129,7 +136,7 @@ public class InventoryHandlerTest extends TestCase {
         StringBuilder sb = init();
         sb.append(InventoryHandlerV1.INVENTORY);
 
-        KuraResponsePayload resp = cloudCallService.call(InventoryHandlerV1.APP_ID, sb.toString(), null, 5000);
+        KuraResponsePayload resp = cloudEndpointPublisher.call(InventoryHandlerV1.APP_ID, sb.toString(), null, 5000);
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 
         String body = new String(resp.getBody());
@@ -144,7 +151,7 @@ public class InventoryHandlerTest extends TestCase {
         StringBuilder sb = init();
         sb.append(InventoryHandlerV1.RESOURCE_SYSTEM_PACKAGES);
 
-        KuraResponsePayload resp = cloudCallService.call(InventoryHandlerV1.APP_ID, sb.toString(), null, 5000);
+        KuraResponsePayload resp = cloudEndpointPublisher.call(InventoryHandlerV1.APP_ID, sb.toString(), null, 5000);
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 
         String body = new String(resp.getBody());
@@ -152,7 +159,7 @@ public class InventoryHandlerTest extends TestCase {
     }
 
     private StringBuilder init() throws IOException, DeploymentException {
-        assertTrue(cloudCallService.isConnected());
+        assertTrue(dataService.isConnected());
 
         DeploymentPackage dp = deploymentAdmin.getDeploymentPackage(LOCAL_DP_NAME);
         if (dp == null) {

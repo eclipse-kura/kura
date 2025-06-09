@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -25,8 +25,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.cloud.CloudCallService;
 import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -58,14 +58,15 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
     private static CountDownLatch dependencyLatch = new CountDownLatch(4);	// initialize with number of dependencies
     private static Object lock = new Object(); // initialize with number of dependencies
     private static ConfigurationService configService;
-    private static CloudCallService cloudCallService;
     private static SystemService systemService;
+    private static CloudEndpointPublisher cloudEndpointPublisher;
+    private static CloudEndpoint cloudEndpoint;
     private static DataService dataService;
 
     @SuppressWarnings("unused")
     private static ComponentContext componentContext;
 
-    private static Map<String, Object> s_properties;
+    private static Map<String, Object> properties;
 
     private static long updateTime = 0;
 
@@ -81,6 +82,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
             Thread.currentThread().interrupt();
             fail("OSGi dependencies unfulfilled");
         }
+        cloudEndpointPublisher = new CloudEndpointPublisher(cloudEndpoint, dataService);
     }
 
     public void setConfigurationService(ConfigurationService configurationService) {
@@ -88,13 +90,13 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         dependencyLatch.countDown();
     }
 
-    public void setCloudCallService(CloudCallService cloudCallService) {
-        ConfigurationServiceTest.cloudCallService = cloudCallService;
+    public void setSystemService(SystemService systemService) {
+        ConfigurationServiceTest.systemService = systemService;
         dependencyLatch.countDown();
     }
 
-    public void setSystemService(SystemService systemService) {
-        ConfigurationServiceTest.systemService = systemService;
+    public void setCloudEndpoint(CloudEndpoint cloudEndpoint) {
+        ConfigurationServiceTest.cloudEndpoint = cloudEndpoint;
         dependencyLatch.countDown();
     }
 
@@ -105,10 +107,6 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
 
     public void unsetConfigurationService(ConfigurationService configurationService) {
         ConfigurationServiceTest.configService = null;
-    }
-
-    public void unsetCloudCallService(CloudCallService cloudCallService) {
-        ConfigurationServiceTest.cloudCallService = null;
     }
 
     public void unsetSystemService(SystemService systemService) {
@@ -128,7 +126,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         s_logger.info("ConfigurationServiceTest.activate...");
         ConfigurationServiceTest.componentContext = componentContext;
-        s_properties = properties;
+        ConfigurationServiceTest.properties = properties;
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -143,7 +141,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
             System.err.println("\t\t" + entry.getKey() + " = " + entry.getValue());
         }
 
-        s_properties = properties;
+        ConfigurationServiceTest.properties = properties;
         updateTime = System.currentTimeMillis();
         synchronized (lock) {
             lock.notifyAll();
@@ -163,7 +161,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
 
         //
         // test the default properties
-        assertDefaultValues(s_properties);
+        assertDefaultValues(properties);
 
         //
         // take a snapshot
@@ -176,9 +174,9 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         //
         // test a positive update flow
         Hashtable<String, Object> props = new Hashtable<String, Object>();
-        Set<String> keys = s_properties.keySet();
+        Set<String> keys = properties.keySet();
         for (String key : keys) {
-            props.put(key, s_properties.get(key));
+            props.put(key, properties.get(key));
         }
         props.put("prop.string", "string_prop");
         props.put("prop.long", 9999L);
@@ -201,21 +199,21 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         assertTrue(waitForConfigurationUpdate(previousUpdateTime));
 
         s_logger.info("Asserting values...");
-        assertEquals("string_prop", s_properties.get("prop.string"));
-        assertEquals(9999L, s_properties.get("prop.long"));
-        assertEquals(99.99D, s_properties.get("prop.double"));
-        assertEquals(99.99F, s_properties.get("prop.float"));
-        assertEquals(99999, s_properties.get("prop.integer"));
-        assertEquals('9', s_properties.get("prop.character"));
-        assertEquals(false, s_properties.get("prop.boolean"));
-        assertEquals(s9, s_properties.get("prop.short"));
-        assertEquals(b9, s_properties.get("prop.byte"));
+        assertEquals("string_prop", properties.get("prop.string"));
+        assertEquals(9999L, properties.get("prop.long"));
+        assertEquals(99.99D, properties.get("prop.double"));
+        assertEquals(99.99F, properties.get("prop.float"));
+        assertEquals(99999, properties.get("prop.integer"));
+        assertEquals('9', properties.get("prop.character"));
+        assertEquals(false, properties.get("prop.boolean"));
+        assertEquals(s9, properties.get("prop.short"));
+        assertEquals(b9, properties.get("prop.byte"));
 
         // test a negative update flow
         props.clear();
-        keys = s_properties.keySet();
+        keys = properties.keySet();
         for (String key : keys) {
-            props.put(key, s_properties.get(key));
+            props.put(key, properties.get(key));
         }
         props.put("prop.long", "AAAA");
         try {
@@ -228,9 +226,9 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
 
         // test a negative update flow
         props.clear();
-        keys = s_properties.keySet();
+        keys = properties.keySet();
         for (String key : keys) {
-            props.put(key, s_properties.get(key));
+            props.put(key, properties.get(key));
         }
         props.remove("prop.string");
         try {
@@ -250,13 +248,13 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
 
         // Wait for a configuration update
         assertTrue(waitForConfigurationUpdate(previousUpdateTime));
-        assertDefaultValues(s_properties);
+        assertDefaultValues(properties);
     }
 
     private boolean waitForConnection() throws InterruptedException {
         int attempts = 10;
         while (attempts > 0) {
-            if (cloudCallService.isConnected()) {
+            if (dataService.isConnected()) {
                 return true;
             }
             Thread.sleep(1000);
@@ -281,8 +279,8 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         if (!dataService.isConnected()) {
             dataService.connect();
         }
-        assertTrue(cloudCallService.isConnected());
-        assertDefaultValues(s_properties);
+        assertTrue(dataService.isConnected());
+        assertDefaultValues(properties);
 
         s_logger.info("Starting testRemoteConfiguration");
 
@@ -294,7 +292,8 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         StringBuilder sb = new StringBuilder(CloudletTopic.Method.GET.toString()).append("/")
                 .append(CloudConfigurationHandler.RESOURCE_CONFIGURATIONS).append("/").append(pid);
 
-        KuraResponsePayload resp = cloudCallService.call(CloudConfigurationHandler.APP_ID, sb.toString(), null, 10000);
+        KuraResponsePayload resp = cloudEndpointPublisher.call(CloudConfigurationHandler.APP_ID, sb.toString(), null,
+                10000);
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
         assertNotNull(resp.getBody());
@@ -313,7 +312,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         sb = new StringBuilder(CloudletTopic.Method.EXEC.toString()).append("/")
                 .append(CloudConfigurationHandler.RESOURCE_SNAPSHOT);
 
-        resp = cloudCallService.call(CloudConfigurationHandler.APP_ID, sb.toString(), null, 10000);
+        resp = cloudEndpointPublisher.call(CloudConfigurationHandler.APP_ID, sb.toString(), null, 10000);
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
         assertNotNull(resp.getBody());
@@ -356,15 +355,15 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
 
         long previousUpdateTime = this.updateTime;
 
-        resp = cloudCallService.call(CloudConfigurationHandler.APP_ID, sb.toString(), payload, 10000);
+        resp = cloudEndpointPublisher.call(CloudConfigurationHandler.APP_ID, sb.toString(), payload, 10000);
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 
         assertTrue(waitForConfigurationUpdate(previousUpdateTime));
 
         s_logger.info("validating modified configuration");
-        s_logger.info("Checking these are equal: " + s_properties.get("prop.string") + " AND " + "modified_value");
-        assertEquals("modified_value", s_properties.get("prop.string"));
+        s_logger.info("Checking these are equal: " + properties.get("prop.string") + " AND " + "modified_value");
+        assertEquals("modified_value", properties.get("prop.string"));
 
         // reload the current configuration
         s_logger.info("reloading the current configuration");
@@ -372,7 +371,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         sb = new StringBuilder(CloudletTopic.Method.GET.toString()).append("/")
                 .append(CloudConfigurationHandler.RESOURCE_CONFIGURATIONS).append("/").append(pid);
 
-        resp = cloudCallService.call(CloudConfigurationHandler.APP_ID, sb.toString(), null, 10000);
+        resp = cloudEndpointPublisher.call(CloudConfigurationHandler.APP_ID, sb.toString(), null, 10000);
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
         assertNotNull(resp.getBody());
@@ -396,13 +395,13 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
 
         previousUpdateTime = System.currentTimeMillis();
 
-        resp = cloudCallService.call(CloudConfigurationHandler.APP_ID, sb.toString(), null, 10000);
+        resp = cloudEndpointPublisher.call(CloudConfigurationHandler.APP_ID, sb.toString(), null, 10000);
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 
         // Wait for everything to get stable
         assertTrue(waitForConfigurationUpdate(previousUpdateTime));
-        assertDefaultValues(s_properties);
+        assertDefaultValues(properties);
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })

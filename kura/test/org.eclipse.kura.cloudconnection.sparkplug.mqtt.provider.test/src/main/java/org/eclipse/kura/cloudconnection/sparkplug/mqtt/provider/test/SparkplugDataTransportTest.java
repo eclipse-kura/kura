@@ -1,15 +1,15 @@
 /*******************************************************************************
  * Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
- *******************************************************************************/
+ ******************************************************************************/
 package org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -267,8 +267,8 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
      * Given
      */
 
-    private void givenUpdated(String groupId, String nodeId, String primaryHostId, String serverUris,
-            String clientId, String username, int keepAlive, int connectionTimeoutSec) {
+    private void givenUpdated(String groupId, String nodeId, String primaryHostId, String serverUris, String clientId,
+            String username, int keepAlive, int connectionTimeoutSec) {
         Map<String, Object> properties = new HashMap<>();
         properties.put(SparkplugDataTransportOptions.KEY_GROUP_ID, groupId);
         properties.put(SparkplugDataTransportOptions.KEY_NODE_ID, nodeId);
@@ -333,8 +333,7 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
             long timestamp) throws MqttException {
         SparkplugBProtobufPayloadBuilder payloadBuilder = new SparkplugBProtobufPayloadBuilder();
         payloadBuilder.withMetric(SparkplugPayloads.NODE_CONTROL_REBIRTH_METRIC_NAME, isRebirthRequested,
-                DataType.Boolean,
-                timestamp);
+                DataType.Boolean, timestamp);
         payloadBuilder.withTimestamp(timestamp);
 
         client.publish(SparkplugTopics.getNodeCommandTopic(groupId, nodeId), payloadBuilder.build(), 0, false);
@@ -369,8 +368,8 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
     }
 
     private void thenListenerNotifiedOnMessageArrived(String topic) {
-        verify(this.listener, timeout(DEFAULT_TIMEOUT_MS).times(1)).onMessageArrived(eq(topic),
-                any(byte[].class), anyInt(), anyBoolean());
+        verify(this.listener, timeout(DEFAULT_TIMEOUT_MS).times(1)).onMessageArrived(eq(topic), any(byte[].class),
+                anyInt(), anyBoolean());
     }
 
     private void thenMessageDeliveredOnce(String expectedTopic, int expectedQos, boolean expectedRetained,

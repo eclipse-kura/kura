@@ -224,12 +224,14 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
 
     @Test
     public void shouldForwardSTATEandNCMDmessagesToListeners() throws Exception {
-        givenUpdated("g1", "n1", "", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
+        givenUpdated("g1", "n1", "h1", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
         givenConnected();
+        Thread.sleep(1000);
 
         whenPrimaryHostReportsState("h1", false, new Date().getTime());
         whenPrimaryHostRequestsRebirth("g1", "n1", false, new Date().getTime());
 
+//        Thread.sleep(10000);
         thenListenerNotifiedOnMessageArrived("spBv1.0/g1/NCMD/n1");
         thenListenerNotifiedOnMessageArrived("spBv1.0/STATE/h1");
     }

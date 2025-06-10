@@ -133,9 +133,10 @@ This project leverages the following third party content.
 * maven/mavencentral/org.jboss.logging/jboss-logging/3.3.2.Final, Apache-2.0, approved, CQ13843
 * maven/mavencentral/org.knowhowlab.osgi/monitoradmin/1.0.3, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.osgi/osgi.annotation/8.1.0, Apache-2.0, approved, #1985
-* maven/mavencentral/org.quartz-scheduler/quartz/2.3.2, Apache-2.0, approved, CQ22979
-* maven/mavencentral/org.slf4j/jcl-over-slf4j/1.7.36, Apache-2.0, approved, CQ12843
-* maven/mavencentral/org.slf4j/slf4j-api/1.7.36, MIT, approved, CQ13368
+* maven/mavencentral/org.quartz-scheduler/quartz/2.5.0, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/org.slf4j/jcl-over-slf4j/2.0.17, MIT AND Apache-2.0, approved, #11889
+* maven/mavencentral/org.slf4j/slf4j-api/2.0.17, MIT, approved, #5915
+* maven/mavencentral/org.slf4j/jul-to-slf4j/2.0.17, MIT, approved, #7698
 * maven/mavencentral/org.usb4java/libusb4java/1.2.0, MIT, approved, #3088
 * maven/mavencentral/org.usb4java/usb4java-javax/1.2.0, MIT, approved, #3090
 * maven/mavencentral/org.usb4java/usb4java/1.2.0, MIT, approved, #3089

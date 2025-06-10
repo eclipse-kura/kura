@@ -1,15 +1,15 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
- *******************************************************************************/
+ ******************************************************************************/
 package org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud;
 
 import static java.util.Objects.nonNull;
@@ -119,7 +119,7 @@ public class CloudConnectionManagerImpl
     private DataService dataService;
     private SystemService systemService;
     private SystemAdminService systemAdminService;
-    private NetworkService networkService;
+    private Optional<NetworkService> networkService = Optional.empty();
     private Optional<PositionService> positionService = Optional.empty();
     private EventAdmin eventAdmin;
     private CertificatesService certificatesService;
@@ -206,16 +206,16 @@ public class CloudConnectionManagerImpl
     }
 
     public void setNetworkService(NetworkService networkService) {
-        this.networkService = networkService;
+        this.networkService = Optional.of(networkService);
     }
 
     public void unsetNetworkService(NetworkService networkService) {
-        if (this.networkService.equals(networkService)) {
-            this.networkService = null;
+        if (this.networkService.isPresent() && this.networkService.get().equals(networkService)) {
+            this.networkService = Optional.empty();
         }
     }
 
-    public NetworkService getNetworkService() {
+    public Optional<NetworkService> getNetworkService() {
         return this.networkService;
     }
 

@@ -429,7 +429,7 @@ public class BirthMessagesTest {
                         out.write(object.toString().getBytes(StandardCharsets.UTF_8));
                     }
                 } catch (IOException ex) {
-                    //do nothing
+                    // do nothing
                 }
             }
         };

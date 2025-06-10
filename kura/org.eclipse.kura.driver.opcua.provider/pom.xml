@@ -32,6 +32,9 @@
         <kura.basedir>${project.basedir}/..</kura.basedir>
         <com.google.guava.version>32.1.1-jre</com.google.guava.version>
         <io.netty.version>4.1.121.Final</io.netty.version>
+        <jakarta.activation-api.javax.version>1.2.2</jakarta.activation-api.javax.version>
+        <jakarta.xml.bind-api.javax.version>2.3.3</jakarta.xml.bind-api.javax.version>
+        <jaxb-osgi.javax.version>2.3.9</jaxb-osgi.javax.version>
         <org.eclipse.milo.version>0.6.8</org.eclipse.milo.version>
         <com.digitalpetri.netty.netty-channel-fsm.version>0.8</com.digitalpetri.netty.netty-channel-fsm.version>
         <com.digitalpetri.fsm.strict-machine.version>0.6</com.digitalpetri.fsm.strict-machine.version>
@@ -163,6 +166,21 @@
                                     <groupId>org.bouncycastle</groupId>
                                     <artifactId>bcutil-jdk18on</artifactId>
                                     <version>${org.bouncycastle.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>jakarta.activation</groupId>
+                                    <artifactId>jakarta.activation-api</artifactId>
+                                    <version>${jakarta.activation-api.javax.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>jakarta.xml.bind</groupId>
+                                    <artifactId>jakarta.xml.bind-api</artifactId>
+                                    <version>${jakarta.xml.bind-api.javax.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.sun.xml.bind</groupId>
+                                    <artifactId>jaxb-osgi</artifactId>
+                                    <version>${jaxb-osgi.javax.version}</version>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

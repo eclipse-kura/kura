@@ -391,4 +391,14 @@ NETWORK_CONFIGURATION
             </esf:property>
         </esf:properties>
     </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="flooding.protection.enabled.ipv6" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="flooding.protection.enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
 </esf:configurations>

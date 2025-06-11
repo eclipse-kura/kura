@@ -26,19 +26,19 @@ public @interface PasswordStrengthVerificationServiceOptions {
     @AttributeDefinition(name = "Minimum password length", //
             min = "0", //
             description = "The minimum length to be enforced for new passwords. Set to 0 to disable.")
-    public int new_password_min_length() default 8;
+    public int new_password_min_length() default 12;
 
     @AttributeDefinition(name = "Require digits in new password", //
             description = "If set to true, new passwords will be accepted only if containing at least one digit.")
-    public boolean new_password_require_digits() default false;
+    public boolean new_password_require_digits() default true;
 
     @AttributeDefinition(name = "Require special characters in new password", //
             description = "If set to true, new passwords will be accepted only if containing at least one non alphanumeric character.")
-    public boolean new_password_require_special_characters() default false;
+    public boolean new_password_require_special_characters() default true;
 
     @AttributeDefinition(name = "Require uppercase and lowercase characters in new passwords", //
             description = "If set to true, new passwords will be accepted only if containing both"
                     + " uppercase and lowercase alphanumeric characters.")
-    public boolean new_password_require_both_cases() default false;
+    public boolean new_password_require_both_cases() default true;
 
 }

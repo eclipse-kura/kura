@@ -156,7 +156,7 @@
         <bnd.baseline.version>6.3.1</bnd.baseline.version>
         <exists-maven-plugin.version>0.0.3</exists-maven-plugin.version>
         <findbugs-maven-plugin.version>3.0.5</findbugs-maven-plugin.version>
-        <jacoco.version>0.8.8</jacoco.version>
+        <jacoco.version>0.8.13</jacoco.version>
         <lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
         <license-maven-plugin.version>2.2</license-maven-plugin.version>
         <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>

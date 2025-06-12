@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -145,7 +145,7 @@ public class IdentityV2EndpointsTest extends AbstractRequestHandlerTest {
         givenMockIdentityConfigurationExtension("test2.extension");
 
         givenPermissionConfiguration(this.testPermissionName);
-        givenPasswordConfiguration("abcdef1234567", true, false);
+        givenPasswordConfiguration("Abcdef1234567@", true, false);
         givenAdditionalConfigurations(TestComponentConfiguration.forPid("test.extension"),
                 TestComponentConfiguration.forPid("test2.extension"));
 

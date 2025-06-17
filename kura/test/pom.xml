@@ -867,7 +867,7 @@
         <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider.test</module>
         <module>org.eclipse.kura.http.server.manager.test</module>
         <module>org.eclipse.kura.network.threat.manager.test</module>
-        <module>org.eclipse.kura.core.tamper.detection.test</module>
+        <module>org.eclipse.kura.rest.tamper.detection.provider.test</module>
         <module>org.eclipse.kura.useradmin.store.test</module>
         <module>org.eclipse.kura.core.keystore.test</module>
         <module>org.eclipse.kura.rest.keystore.provider.test</module>

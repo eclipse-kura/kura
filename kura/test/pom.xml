@@ -112,7 +112,10 @@
                                 <goal>test</goal>
                             </goals>
                             <configuration>
-                                <argLine>${tycho.testArgLine}</argLine>
+                                <argLine>
+                                    ${tycho.testArgLine}
+                                    ${maven.surefire.testenv.args}
+                                </argLine>
                             </configuration>
                         </execution>
                     </executions>

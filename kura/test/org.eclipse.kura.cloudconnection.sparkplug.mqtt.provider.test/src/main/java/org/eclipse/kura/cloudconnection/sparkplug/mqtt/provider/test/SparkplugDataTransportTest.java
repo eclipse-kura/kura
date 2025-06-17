@@ -223,16 +223,23 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
     }
 
     @Test
-    public void shouldForwardSTATEandNCMDmessagesToListeners() throws Exception {
+    public void shouldForwardSTATEmessagesToListeners() throws Exception {
         givenUpdated("g1", "n1", "h1", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
         givenConnected();
-        Thread.sleep(1000);
 
         whenPrimaryHostReportsState("h1", false, new Date().getTime());
+
+        thenListenerNotifiedOnMessageArrived("spBv1.0/STATE/h1");
+    }
+
+    @Test
+    public void shouldForwardNCMDmessagesToListeners() throws Exception {
+        givenUpdated("g1", "n1", "", "tcp://localhost:1883", "test.device", "mqtt", 60, 30);
+        givenConnected();
+
         whenPrimaryHostRequestsRebirth("g1", "n1", false, new Date().getTime());
 
         thenListenerNotifiedOnMessageArrived("spBv1.0/g1/NCMD/n1");
-        thenListenerNotifiedOnMessageArrived("spBv1.0/STATE/h1");
     }
 
     @Test
@@ -282,7 +289,7 @@ public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
         sparkplugDataTransport.update(properties);
     }
 
-    private void givenConnected() throws KuraException, MqttException {
+    private void givenConnected() throws KuraException {
         sparkplugDataTransport.connect();
     }
 

@@ -86,6 +86,7 @@
             <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
         </repository>
         <repository>
+            <!-- moquette-broker -->
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>

@@ -1029,7 +1029,7 @@
                     <scope>test</scope>
                 </dependency>
                 <dependency>
-                    <groupId>org.eclipse.kura</groupId>
+                    <groupId>com.github.moquette-io.moquette</groupId>
                     <artifactId>moquette-broker</artifactId>
                     <version>${moquette-broker.version}</version>
                 </dependency>

@@ -519,23 +519,6 @@ fi]]>
 
     <!-- OSGi base configs -->
     <target name="osgi-base-plugins">
-        <!-- TODO: remove these deps once jakarta migration is complete -->
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="jaxb-osgi-4.0.2" />
-            <param name="start.level" value="2" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="jakarta.xml.bind-api-4.0.2" />
-            <param name="start.level" value="2" />
-            <param name="start" value="" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="jakarta.activation-api-2.1.2" />
-            <param name="start.level" value="2" />
-            <param name="start" value="" />
-        </antcall>
-        <!-- END TODO -->
         <antcall target="install-plugin">
             <param name="bundle.name" value="minimal-json" />
             <param name="start.level" value="6" />

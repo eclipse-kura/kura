@@ -323,7 +323,6 @@
                 <artifactId>org.apache.servicemix.bundles.spring-tx</artifactId>
                 <version>${spring.version}</version>
             </dependency>
-            <!-- END PREVIOUS TODO -->
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>osgi.annotation</artifactId>

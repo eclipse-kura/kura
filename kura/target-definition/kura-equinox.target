@@ -32,22 +32,6 @@
                     <version>6.0.0-SNAPSHOT</version>
                     <type>pom</type>
                 </dependency>
-                <!-- TODO: remove these deps once jakarta migration is complete -->
-                <dependency>
-                    <groupId>jakarta.activation</groupId>
-                    <artifactId>jakarta.activation-api</artifactId>
-                    <version>1.2.2</version>
-                </dependency>
-                <dependency>
-                    <groupId>jakarta.xml.bind</groupId>
-                    <artifactId>jakarta.xml.bind-api</artifactId>
-                    <version>2.3.3</version>
-                </dependency>
-                <dependency>
-                    <groupId>com.sun.xml.bind</groupId>
-                    <artifactId>jaxb-osgi</artifactId>
-                    <version>2.3.9</version>
-                </dependency>
             </dependencies>
 
             <repositories>

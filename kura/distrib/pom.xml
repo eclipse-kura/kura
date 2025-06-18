@@ -212,34 +212,6 @@
                             <excludeClassifiers>sources</excludeClassifiers>
                         </configuration>
                     </execution>
-                    <!-- TODO: remove these deps once jakarta migration is complete -->
-                    <execution>
-                        <id>get-javax-deps</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>jakarta.activation</groupId>
-                                    <artifactId>jakarta.activation-api</artifactId>
-                                    <version>1.2.2</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>jakarta.xml.bind</groupId>
-                                    <artifactId>jakarta.xml.bind-api</artifactId>
-                                    <version>2.3.3</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.sun.xml.bind</groupId>
-                                    <artifactId>jaxb-osgi</artifactId>
-                                    <version>2.3.9</version>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>get-can-bundle</id>
                         <phase>generate-resources</phase>

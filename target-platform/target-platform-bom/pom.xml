@@ -157,7 +157,6 @@
         <log4j2-api-config.version>2.0.0-SNAPSHOT</log4j2-api-config.version>
         <org.apache.activemq.artemis.version>3.0.0-SNAPSHOT</org.apache.activemq.artemis.version>
         <org.eclipse.kura.camel.sun.misc.version>2.0.0-SNAPSHOT</org.eclipse.kura.camel.sun.misc.version>
-        <libsocket-can-osgi.version>2.0.0-SNAPSHOT</libsocket-can-osgi.version>
         <org.eclipse.kura.sun.misc.version>2.0.0-SNAPSHOT</org.eclipse.kura.sun.misc.version>
         <org.eclipse.soda.dk.comm.version>2.0.0-SNAPSHOT</org.eclipse.soda.dk.comm.version>
         <org.moka7.version>2.0.0-SNAPSHOT</org.moka7.version>
@@ -1095,11 +1094,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
-                <artifactId>libsocket-can-osgi</artifactId>
-                <version>${libsocket-can-osgi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.sun.misc</artifactId>
                 <version>${org.eclipse.kura.sun.misc.version}</version>
             </dependency>
@@ -1873,10 +1867,6 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.camel.sun.misc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>libsocket-can-osgi</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>

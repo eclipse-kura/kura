@@ -103,7 +103,6 @@
         <org.eclipse.kura.net.configuration.version>2.0.0-SNAPSHOT</org.eclipse.kura.net.configuration.version>
         <org.eclipse.kura.network.threat.manager.version>2.0.0-SNAPSHOT</org.eclipse.kura.network.threat.manager.version>
         <org.eclipse.kura.nm.version>2.0.0-SNAPSHOT</org.eclipse.kura.nm.version>
-        <org.eclipse.kura.protocol.can.version>4.0.0-SNAPSHOT</org.eclipse.kura.protocol.can.version>
         <org.eclipse.kura.protocol.modbus.version>3.0.0-SNAPSHOT</org.eclipse.kura.protocol.modbus.version>
         <org.eclipse.kura.request.handler.jaxrs.version>2.0.0-SNAPSHOT</org.eclipse.kura.request.handler.jaxrs.version>
         <org.eclipse.kura.rest.asset.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.asset.provider.version>
@@ -534,11 +533,6 @@
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.nm</artifactId>
                 <version>${org.eclipse.kura.nm.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.protocol.can</artifactId>
-                <version>${org.eclipse.kura.protocol.can.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -1036,10 +1030,6 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.nm</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.protocol.can</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>

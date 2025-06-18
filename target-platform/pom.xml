@@ -57,7 +57,6 @@
         <module>org.moka7</module>
         <module>org.eclipse.soda.dk.comm-parent</module>
         <module>jdk.dio-parent</module>
-        <module>com.gwt.user</module>
         <module>log4j2-api-config</module>
     </modules>
 

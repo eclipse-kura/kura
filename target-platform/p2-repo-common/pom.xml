@@ -11,7 +11,9 @@
     Contributors:
      Eurotech
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.kura</groupId>
@@ -79,7 +81,8 @@
                                 </goals>
                                 <configuration>
                                     <tasks>
-                                        <move file="target/source/plugins/libsocket-can-osgi.jar" tofile="target/source/plugins/libsocket-can-osgi_${libsocket-can-osgi.version}.jar"/>
+                                        <move file="target/source/plugins/libsocket-can-osgi.jar"
+                                            tofile="target/source/plugins/libsocket-can-osgi_${libsocket-can-osgi.version}.jar" />
                                     </tasks>
                                 </configuration>
                             </execution>
@@ -559,15 +562,15 @@
                                     <version>${org.bouncycastle.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                  <groupId>org.bouncycastle</groupId>
-                                  <artifactId>bcutil-jdk18on</artifactId>
-                                  <version>${org.bouncycastle.version}</version>
+                                    <groupId>org.bouncycastle</groupId>
+                                    <artifactId>bcutil-jdk18on</artifactId>
+                                    <version>${org.bouncycastle.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.bouncycastle</groupId>
                                     <artifactId>bcpg-jdk18on</artifactId>
                                     <version>${org.bouncycastle.version}</version>
-                                  </artifactItem>
+                                </artifactItem>
                                 <artifactItem>
                                     <groupId>com.eurotech</groupId>
                                     <artifactId>gpsd4java</artifactId>
@@ -599,21 +602,6 @@
                                     <version>${com.eclipsesource.minimal-json.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>jakarta.activation</groupId>
-                                    <artifactId>jakarta.activation-api</artifactId>
-                                    <version>${jakarta.activation-api.javax.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>jakarta.xml.bind</groupId>
-                                    <artifactId>jakarta.xml.bind-api</artifactId>
-                                    <version>${jakarta.xml.bind-api.javax.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.sun.xml.bind</groupId>
-                                    <artifactId>jaxb-osgi</artifactId>
-                                    <version>${jaxb-osgi.javax.version}</version>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.dependencymanager</artifactId>
                                     <version>${org.apache.felix.dependencymanager.version}</version>
@@ -622,7 +610,8 @@
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.deploymentadmin</artifactId>
                                     <version>${org.apache.felix.deploymentadmin.version}</version>
-                                </artifactItem>>
+                                </artifactItem>
+                                >
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.http.servlet-api</artifactId>
@@ -748,7 +737,8 @@
                                     <artifactId>asm-analysis</artifactId>
                                     <version>${org.ow2.asm.version}</version>
                                 </artifactItem>
-                                <!--Jersey dependencies-->
+                                <!--Jersey
+                                dependencies-->
                                 <artifactItem>
                                     <groupId>org.glassfish.hk2</groupId>
                                     <artifactId>hk2-api</artifactId>
@@ -869,13 +859,13 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <delete dir="../../kura/target-definition/common/"/>
-                                <mkdir dir="../../kura/target-definition/common/repository"/>
+                                <delete dir="../../kura/target-definition/common/" />
+                                <mkdir dir="../../kura/target-definition/common/repository" />
                                 <copy todir="../../kura/target-definition/common/repository">
-                                    <fileset dir="${project.build.directory}/repository"/>
+                                    <fileset dir="${project.build.directory}/repository" />
                                 </copy>
                                 <copy todir="../../kura/target-definition/common/source">
-                                    <fileset dir="${project.build.directory}/source"/>
+                                    <fileset dir="${project.build.directory}/source" />
                                 </copy>
                             </tasks>
                         </configuration>

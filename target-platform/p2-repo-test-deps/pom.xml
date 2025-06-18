@@ -64,7 +64,7 @@
                                     <version>${io.dropwizard.metrics.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
+                                    <groupId>com.github.moquette-io.moquette</groupId>
                                     <artifactId>moquette-broker</artifactId>
                                     <version>${moquette-broker.version}</version>
                                 </artifactItem>

@@ -1,15 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
- *******************************************************************************/
+ ******************************************************************************/
 package org.eclipse.kura.core.test;
 
 import static org.junit.Assert.assertEquals;
@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.cloud.CloudCallService;
 import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
 import org.eclipse.kura.core.deployment.DeploymentPackageOptions;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
@@ -34,6 +35,7 @@ import org.eclipse.kura.core.inventory.resources.SystemBundles;
 import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
 import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
 import org.eclipse.kura.core.test.util.CoreTestXmlUtil;
+import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.test.annotation.TestTarget;
@@ -52,12 +54,15 @@ import junit.framework.TestCase;
 
 public class CloudDeploymentHandlerTest extends TestCase {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(CloudDeploymentHandlerTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(CloudDeploymentHandlerTest.class);
 
-    private static CountDownLatch s_dependencyLatch = new CountDownLatch(2);	// initialize with number of
+    private static CountDownLatch dependencyLatch = new CountDownLatch(3);	// initialize with number of
     // dependencies
-    private static CloudCallService s_cloudCallService;
-    private static DeploymentAdmin s_deploymentAdmin;
+    private static DeploymentAdmin deploymentAdmin;
+
+    private static CloudEndpointPublisher cloudEndpointPublisher;
+    private static CloudEndpoint cloudEndpoint;
+    private static DataService dataService;
 
     private static final String REMOTE_DP_NAME = "heater";
     private static final String REMOTE_DP_VERSION = "1.0.0";
@@ -87,7 +92,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
     public void setUp() throws DeploymentException {
         // Wait for OSGi dependencies
         try {
-            boolean ok = s_dependencyLatch.await(10, TimeUnit.SECONDS);
+            boolean ok = dependencyLatch.await(10, TimeUnit.SECONDS);
             if (!ok) {
                 fail("Dependencies not resolved!");
             }
@@ -96,44 +101,47 @@ public class CloudDeploymentHandlerTest extends TestCase {
             fail("OSGi dependencies unfulfilled");
         }
 
-        DeploymentPackage localDp = s_deploymentAdmin.getDeploymentPackage(LOCAL_BUNDLE_NAME);
+        DeploymentPackage localDp = deploymentAdmin.getDeploymentPackage(LOCAL_BUNDLE_NAME);
         if (localDp != null) {
             localDp.uninstall();
         }
 
-        DeploymentPackage remoteDp = s_deploymentAdmin.getDeploymentPackage(REMOTE_BUNDLE_NAME);
+        DeploymentPackage remoteDp = deploymentAdmin.getDeploymentPackage(REMOTE_BUNDLE_NAME);
         if (remoteDp != null) {
             remoteDp.uninstall();
         }
-    }
 
-    public void setCloudCallService(CloudCallService cloudCallService) {
-        CloudDeploymentHandlerTest.s_cloudCallService = cloudCallService;
-        s_dependencyLatch.countDown();
-    }
-
-    public void unsetCloudCallService(CloudCallService cloudCallService) {
-        CloudDeploymentHandlerTest.s_cloudCallService = null;
+        cloudEndpointPublisher = new CloudEndpointPublisher(cloudEndpoint, dataService);
     }
 
     public void setDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
-        CloudDeploymentHandlerTest.s_deploymentAdmin = deploymentAdmin;
-        s_dependencyLatch.countDown();
+        CloudDeploymentHandlerTest.deploymentAdmin = deploymentAdmin;
+        dependencyLatch.countDown();
     }
 
     public void unsetDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
-        CloudDeploymentHandlerTest.s_deploymentAdmin = null;
+        CloudDeploymentHandlerTest.deploymentAdmin = null;
+    }
+
+    public void setCloudEndpoint(CloudEndpoint cloudEndpoint) {
+        this.cloudEndpoint = cloudEndpoint;
+        dependencyLatch.countDown();
+    }
+
+    public void setDataService(DataService dataService) {
+        this.dataService = dataService;
+        dependencyLatch.countDown();
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testExecInstallDeploymentPackage() throws Exception {
-        assertTrue(s_cloudCallService.isConnected());
-        assertNull(s_deploymentAdmin.getDeploymentPackage(REMOTE_BUNDLE_NAME));
+        assertTrue(dataService.isConnected());
+        assertNull(deploymentAdmin.getDeploymentPackage(REMOTE_BUNDLE_NAME));
 
         StringBuilder sb = new StringBuilder(CloudletTopic.Method.EXEC.toString()).append("/")
                 .append(CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
-        s_logger.warn(sb.toString());
+        logger.warn(sb.toString());
 
         KuraPayload payload = new KuraPayload();
         payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI, DOWNLOAD_URI);
@@ -144,11 +152,11 @@ public class CloudDeploymentHandlerTest extends TestCase {
         payload.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
         payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_INSTALL, true);
 
-        KuraResponsePayload resp = s_cloudCallService.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), payload,
+        KuraResponsePayload resp = cloudEndpointPublisher.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), payload,
                 5000);
 
-        s_logger.warn("Response code: " + resp.getResponseCode());
-        s_logger.warn("Response message: " + resp.getExceptionMessage());
+        logger.warn("Response code: " + resp.getResponseCode());
+        logger.warn("Response message: " + resp.getExceptionMessage());
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
     }
 
@@ -157,19 +165,20 @@ public class CloudDeploymentHandlerTest extends TestCase {
     @Ignore
     public void testGetPackages() throws Exception {
 
-        assertTrue(s_cloudCallService.isConnected());
+        assertTrue(dataService.isConnected());
 
-        DeploymentPackage dp = s_deploymentAdmin.getDeploymentPackage(LOCAL_DP_NAME);
+        DeploymentPackage dp = deploymentAdmin.getDeploymentPackage(LOCAL_DP_NAME);
         if (dp == null) {
-            s_logger.warn("Getting dp");
+            logger.warn("Getting dp");
             InputStream is = getTestDpUrl().openStream();
-            dp = s_deploymentAdmin.installDeploymentPackage(is);
+            dp = deploymentAdmin.installDeploymentPackage(is);
         }
 
         StringBuilder sb = new StringBuilder(CloudletTopic.Method.GET.toString()).append("/")
                 .append(CloudDeploymentHandlerV2.RESOURCE_PACKAGES);
 
-        KuraResponsePayload resp = s_cloudCallService.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), null, 5000);
+        KuraResponsePayload resp = cloudEndpointPublisher.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), null,
+                5000);
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 
@@ -201,18 +210,19 @@ public class CloudDeploymentHandlerTest extends TestCase {
     @Test
     public void testGetBundles() throws Exception {
 
-        assertTrue(s_cloudCallService.isConnected());
+        assertTrue(dataService.isConnected());
 
-        DeploymentPackage dp = s_deploymentAdmin.getDeploymentPackage(LOCAL_DP_NAME);
+        DeploymentPackage dp = deploymentAdmin.getDeploymentPackage(LOCAL_DP_NAME);
         if (dp == null) {
             InputStream is = getTestDpUrl().openStream();
-            dp = s_deploymentAdmin.installDeploymentPackage(is);
+            dp = deploymentAdmin.installDeploymentPackage(is);
         }
 
         StringBuilder sb = new StringBuilder(CloudletTopic.Method.GET.toString()).append("/")
                 .append(CloudDeploymentHandlerV2.RESOURCE_BUNDLES);
 
-        KuraResponsePayload resp = s_cloudCallService.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), null, 5000);
+        KuraResponsePayload resp = cloudEndpointPublisher.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), null,
+                5000);
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 
@@ -225,7 +235,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
         SystemBundle bundle = null;
         if (bundles != null) {
             for (SystemBundle bundle2 : bundles) {
-                s_logger.warn("Bundle name: " + bundle2.getName());
+                logger.warn("Bundle name: " + bundle2.getName());
                 if (bundle2.getName().equals(LOCAL_BUNDLE_NAME)) {
                     bundle = bundle2;
                     break;
@@ -241,12 +251,12 @@ public class CloudDeploymentHandlerTest extends TestCase {
     @Test
     public void testExecStartStop() throws Exception {
 
-        assertTrue(s_cloudCallService.isConnected());
+        assertTrue(dataService.isConnected());
 
-        DeploymentPackage dp = s_deploymentAdmin.getDeploymentPackage(LOCAL_DP_NAME);
+        DeploymentPackage dp = deploymentAdmin.getDeploymentPackage(LOCAL_DP_NAME);
         if (dp == null) {
             InputStream is = getTestDpUrl().openStream();
-            dp = s_deploymentAdmin.installDeploymentPackage(is);
+            dp = deploymentAdmin.installDeploymentPackage(is);
         }
 
         Bundle bundle = dp.getBundle(LOCAL_BUNDLE_NAME);
@@ -262,7 +272,8 @@ public class CloudDeploymentHandlerTest extends TestCase {
         StringBuilder sb = new StringBuilder(CloudletTopic.Method.EXEC.toString()).append("/")
                 .append(CloudDeploymentHandlerV2.RESOURCE_STOP).append("/").append(bundle.getBundleId());
 
-        KuraResponsePayload resp = s_cloudCallService.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), null, 5000);
+        KuraResponsePayload resp = cloudEndpointPublisher.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), null,
+                5000);
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 
@@ -272,7 +283,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
         sb = new StringBuilder(CloudletTopic.Method.EXEC.toString()).append("/")
                 .append(CloudDeploymentHandlerV2.RESOURCE_START).append("/").append(bundle.getBundleId());
 
-        resp = s_cloudCallService.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), null, 5000);
+        resp = cloudEndpointPublisher.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), null, 5000);
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 
@@ -283,23 +294,23 @@ public class CloudDeploymentHandlerTest extends TestCase {
     @Test
     public void testExecUninstallDeploymentPackage() throws Exception {
 
-        assertTrue(s_cloudCallService.isConnected());
-        assertNull(s_deploymentAdmin.getDeploymentPackage(LOCAL_BUNDLE_NAME));
+        assertTrue(dataService.isConnected());
+        assertNull(deploymentAdmin.getDeploymentPackage(LOCAL_BUNDLE_NAME));
 
         InputStream is = getTestDpUrl().openStream();
-        s_deploymentAdmin.installDeploymentPackage(is);
+        deploymentAdmin.installDeploymentPackage(is);
 
         StringBuilder sb = new StringBuilder(CloudletTopic.Method.EXEC.toString()).append("/")
                 .append(CloudDeploymentHandlerV2.RESOURCE_UNINSTALL);
 
-        s_logger.warn("Uninstall topic: " + sb.toString());
+        logger.warn("Uninstall topic: " + sb.toString());
 
         KuraPayload payload = new KuraPayload();
         // payload.setBody("org.eclipse.kura.test.helloworld".getBytes("UTF-8"));
         payload.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, LOCAL_BUNDLE_NAME);
         payload.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, Long.parseLong("1111"));
 
-        KuraResponsePayload resp = s_cloudCallService.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), payload,
+        KuraResponsePayload resp = cloudEndpointPublisher.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), payload,
                 5000);
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
@@ -310,6 +321,6 @@ public class CloudDeploymentHandlerTest extends TestCase {
             countdown -= 1000;
         }
 
-        assertNull(s_deploymentAdmin.getDeploymentPackage(REMOTE_BUNDLE_NAME));
+        assertNull(deploymentAdmin.getDeploymentPackage(REMOTE_BUNDLE_NAME));
     }
 }

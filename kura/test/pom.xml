@@ -112,7 +112,10 @@
                                 <goal>test</goal>
                             </goals>
                             <configuration>
-                                <argLine>${tycho.testArgLine}</argLine>
+                                <argLine>
+                                    --add-opens=java.base/java.lang=ALL-UNNAMED
+                                    --add-opens=java.base/java.util=ALL-UNNAMED
+                                </argLine>
                             </configuration>
                         </execution>
                     </executions>
@@ -129,6 +132,7 @@
                         <argLine>
                             ${tycho.testArgLine}
                             ${tycho.surefire.testenv.args}
+                            -Dmoquette.path=${project.basedir}/src/main/resources/moquette/config
                         </argLine>
                         <!--                       <appArgLine>-consoleLog -console 5002 -noExit</appArgLine>-->
                         <dependencies>

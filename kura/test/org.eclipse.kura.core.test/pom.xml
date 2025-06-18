@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
-  
+    Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
-	SPDX-License-Identifier: EPL-2.0
-	
-	Contributors:
-	 Eurotech
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -28,7 +29,7 @@
 
     <properties>
         <kura.basedir>${project.basedir}/../..</kura.basedir>
-        <moquette.path>${project.basedir}/src/main/resources/moquette</moquette.path>
+        <moquette.path>${project.basedir}/src/main/resources/moquette/config</moquette.path>
         <moquette.vm.args>
             -server -XX:+HeapDumpOnOutOfMemoryError -Djava.awt.headless=true
             -Dmoquette.path=${moquette.path}
@@ -44,12 +45,13 @@
             -Dkura.configuration=file:${project.basedir}/src/main/resources/kura.properties
             -Ddpa.configuration=${project.basedir}/target/kura/dpa.properties
         </kura.vm.args>
-        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <build>
-    	<plugins>
-			<plugin>
+        <plugins>
+            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
@@ -75,11 +77,14 @@
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                     <testSuite>org.eclipse.kura.core.test</testSuite>
                     <testClass>org.eclipse.kura.core.test.AllCoreTests</testClass>
-                    <!-- <testClass>org.eclipse.kura.core.test.CloudDeploymentHandlerTest</testClass>
-                        <testClass>org.eclipse.kura.core.test.CloudServiceTest</testClass> <testClass>org.eclipse.kura.core.test.CommURITest</testClass>
+                    <!--
+                    <testClass>org.eclipse.kura.core.test.CloudDeploymentHandlerTest</testClass>
+                        <testClass>org.eclipse.kura.core.test.CloudServiceTest</testClass>
+                    <testClass>org.eclipse.kura.core.test.CommURITest</testClass>
                         <testClass>org.eclipse.kura.core.test.ComponentConfigurationImplTest</testClass>
                         <testClass>org.eclipse.kura.core.test.ConfigurationServiceTest</testClass>
-                        <testClass>org.eclipse.kura.core.test.NetUtilTest</testClass> <testClass>org.eclipse.kura.core.test.NetworkServiceTest</testClass>
+                        <testClass>org.eclipse.kura.core.test.NetUtilTest</testClass>
+                    <testClass>org.eclipse.kura.core.test.NetworkServiceTest</testClass>
                         <testClass>org.eclipse.kura.core.test.SystemAdminServiceTest</testClass>
                         <testClass>org.eclipse.kura.core.test.SystemServiceTest</testClass> -->
                     <!-- Don't run tests in parallel because it breaks them
@@ -104,13 +109,13 @@
                 </configuration>
             </plugin>
             <plugin>
-            	<groupId>org.apache.maven.plugins</groupId>
-            	<artifactId>maven-surefire-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>target-platform-configuration</artifactId>
             </plugin>
-		</plugins>
+        </plugins>
     </build>
 </project>

@@ -1,17 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
- *******************************************************************************/
+ ******************************************************************************/
 package org.eclipse.kura.core.test;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +30,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.moquette.broker.Server;
+import io.moquette.broker.config.FileResourceLoader;
+import io.moquette.broker.config.IConfig;
+import io.moquette.broker.config.IResourceLoader;
+import io.moquette.broker.config.ResourceLoaderConfig;
 
 @RunWith(Suite.class)
 @SuiteClasses({ InventoryHandlerTest.class, CloudDeploymentHandlerTest.class, CommURITest.class,
@@ -36,51 +41,53 @@ import io.moquette.broker.Server;
         NetworkServiceTest.class, SystemAdminServiceTest.class })
 public class AllCoreTests {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(AllCoreTests.class);
+    private static final Logger logger = LoggerFactory.getLogger(AllCoreTests.class);
 
     /** A latch to be initialized with the no of OSGi dependencies needed */
     private static CountDownLatch dependencyLatch = new CountDownLatch(3);
 
-    private static ConfigurationService s_configService;
-    private static DataService s_dataService;
-    private static SystemService s_sysService;
+    private static ConfigurationService configService;
+    private static DataService dataService;
+    private static SystemService sysService;
+
+    static Server mqttBroker;
 
     public void setConfigService(ConfigurationService configService) {
-        s_configService = configService;
+        AllCoreTests.configService = configService;
         dependencyLatch.countDown();
     }
 
     public void unsetConfigService(ConfigurationService configService) {
-        s_configService = configService;
+        AllCoreTests.configService = configService;
     }
 
     public void setDataService(DataService dataService) {
-        s_dataService = dataService;
+        AllCoreTests.dataService = dataService;
         dependencyLatch.countDown();
     }
 
     public void unsetDataService(DataService dataService) {
-        s_dataService = dataService;
+        AllCoreTests.dataService = dataService;
     }
 
     public void setSystemService(SystemService sysService) {
-        s_sysService = sysService;
+        AllCoreTests.sysService = sysService;
         dependencyLatch.countDown();
     }
 
     public void unsetSystemService(SystemService sysService) {
-        s_sysService = sysService;
+        AllCoreTests.sysService = sysService;
     }
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        s_logger.info("setUpClass...");
+        logger.info("setUpClass...");
 
         // start Moquette
-        Server.main(new String[] {});
+        startMqttBroker();
 
         // Wait for OSGi dependencies
-        s_logger.info("Setting Up The Testcase....");
+        logger.info("Setting Up The Testcase....");
         try {
             dependencyLatch.await(10, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
@@ -90,7 +97,7 @@ public class AllCoreTests {
 
         try {
             // update the settings
-            ComponentConfiguration mqttConfig = s_configService
+            ComponentConfiguration mqttConfig = configService
                     .getComponentConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport");
             Map<String, Object> mqttProps = mqttConfig.getConfigurationProperties();
 
@@ -99,7 +106,7 @@ public class AllCoreTests {
             // mqttProps.put("username", "guest");
             // mqttProps.put("password", "welcome");
 
-            s_logger.info("Changing cloud credentials...");
+            logger.info("Changing cloud credentials...");
             mqttProps.put("broker-url", "mqtt://localhost:1883/");
             mqttProps.put("topic.context.account-name", "ethdev");
             mqttProps.put("username", "");
@@ -109,7 +116,7 @@ public class AllCoreTests {
             // we need to compensate for it.
             String clientId = null;
             try {
-                clientId = s_sysService.getPrimaryMacAddress();
+                clientId = sysService.getPrimaryMacAddress();
             } catch (Throwable t) {
                 // ignore.
             }
@@ -117,15 +124,18 @@ public class AllCoreTests {
                 clientId = "cloudbees-kura";
             }
             mqttProps.put("client-id", clientId);
-            s_configService.updateConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",
-                    mqttProps);
+            configService.updateConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport", mqttProps);
 
-            ComponentConfiguration dataConfig = s_configService
+            ComponentConfiguration dataConfig = configService
                     .getComponentConfiguration("org.eclipse.kura.data.DataService");
             Map<String, Object> dataProps = dataConfig.getConfigurationProperties();
             dataProps.put("connect.auto-on-startup", false);
             dataProps.put("enable.rate.limit", false);
-            s_configService.updateConfiguration("org.eclipse.kura.data.DataService", dataProps);
+            configService.updateConfiguration("org.eclipse.kura.data.DataService", dataProps);
+
+            Map<String, Object> cloudProps = new HashMap<>();
+            cloudProps.put("topic.control-prefix", "EDC");
+            configService.updateConfiguration("org.eclipse.kura.cloud.CloudService", cloudProps);
 
             // waiting for the configuration to be applied
             try {
@@ -138,16 +148,36 @@ public class AllCoreTests {
         }
 
         // connect
-        if (!s_dataService.isConnected()) {
-            s_dataService.connect();
+        if (!dataService.isConnected()) {
+            dataService.connect();
         }
+    }
+
+    public static void startMqttBroker() throws Exception {
+        logger.error("Starting Moquette MQTT broker... with path: {}", System.getProperty("moquette.path"));
+        IResourceLoader fileLoader = new FileResourceLoader();
+        IConfig classPathConfig = new ResourceLoaderConfig(fileLoader, "moquette.conf");
+
+        mqttBroker = new Server();
+        mqttBroker.startServer(classPathConfig);
+        logger.info("Moquette MQTT broker started");
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> stopBroker()));
+    }
+
+    public static void stopBroker() {
+        if (mqttBroker != null) {
+            mqttBroker.stopServer();
+        }
+        logger.info("Moquette MQTT broker stopped");
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
-        s_logger.info("tearDownClass...");
-        if (s_dataService != null && s_dataService.isConnected()) {
-            s_dataService.disconnect(0);
+        logger.info("tearDownClass...");
+        if (dataService != null && dataService.isConnected()) {
+            dataService.disconnect(0);
         }
+        stopBroker();
     }
 }

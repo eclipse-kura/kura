@@ -308,8 +308,8 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.core.tamper.detection</artifactId>
-                                    <version>${org.eclipse.kura.core.tamper.detection.version}</version>
+                                    <artifactId>org.eclipse.kura.rest.tamper.detection.provider</artifactId>
+                                    <version>${org.eclipse.kura.rest.tamper.detection.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -811,7 +811,7 @@
                                 <move file="target/plugins/org.eclipse.kura.core.deployment.jar" tofile="target/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.identity.jar" tofile="target/plugins/org.eclipse.kura.core.identity_${org.eclipse.kura.core.identity.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.inventory.jar" tofile="target/plugins/org.eclipse.kura.core.inventory_${org.eclipse.kura.core.inventory.version}.jar" />
-                                <move file="target/plugins/org.eclipse.kura.core.tamper.detection.jar" tofile="target/plugins/org.eclipse.kura.core.tamper.detection_${org.eclipse.kura.core.tamper.detection.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.rest.tamper.detection.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.tamper.detection.provider_${org.eclipse.kura.rest.tamper.detection.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.net.jar" tofile="target/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.deployment.agent.jar" tofile="target/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.linux.clock.jar" tofile="target/plugins/org.eclipse.kura.linux.clock_${org.eclipse.kura.linux.clock.version}.jar" />

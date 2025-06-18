@@ -102,7 +102,7 @@
         <module>org.eclipse.kura.http.server.manager</module>
         <module>org.eclipse.kura.useradmin.store</module>
         <module>org.eclipse.kura.network.threat.manager</module>
-        <module>org.eclipse.kura.core.tamper.detection</module>
+        <module>org.eclipse.kura.rest.tamper.detection.provider</module>
         <module>org.eclipse.kura.log.filesystem.provider</module>
         <module>org.eclipse.kura.rest.cloudconnection.provider</module>
         <module>org.eclipse.kura.rest.configuration.provider</module>

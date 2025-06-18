@@ -193,7 +193,7 @@
         <antcall target="core.deployment-plugins" />
         <antcall target="core.identity-plugins" />
         <antcall target="core.inventory-plugins" />
-        <antcall target="core.tamper-plugins" />
+        <antcall target="rest.tamper-plugins" />
         <antcall target="core.net-plugins" />
         <antcall target="core.status-plugins" />
         <antcall target="deployment.agent-plugins" />
@@ -1509,10 +1509,10 @@ fi]]>
         </antcall>
     </target>
 
-    <target name="core.tamper-plugins">
+    <target name="rest.tamper-plugins">
         <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.core.tamper.detection" />
-            <param name="bundle.version" value="${org.eclipse.kura.core.tamper.detection.version}" />
+            <param name="bundle.name" value="org.eclipse.kura.rest.tamper.detection.provider" />
+            <param name="bundle.version" value="${org.eclipse.kura.rest.tamper.detection.provider.version}" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>

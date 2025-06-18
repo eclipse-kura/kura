@@ -142,6 +142,11 @@ public interface SystemService {
     public static final String KEY_WPA3_WIFI_SECURITY_ENABLE = "kura.wpa3.wifi.security.enable";
 
     /**
+     * @since 3.0
+     */
+    public static final String KEY_NETWORK_CONFIGURATION_TIMEOUT = "kura.network.configuration.timeout";
+
+    /**
      * @deprecated
      */
     @Deprecated
@@ -632,5 +637,13 @@ public interface SystemService {
      * @return true if the WPA3 WiFi Security is enabled
      */
     public boolean isWPA3WifiSecurityEnabled();
+
+    /**
+     * Returns the timeout in seconds used for applying a network configuration.
+     *
+     * @since 3.0
+     * @return the timeput value in seconds
+     */
+    public int getNetworkConfigurationTimeout();
 
 }

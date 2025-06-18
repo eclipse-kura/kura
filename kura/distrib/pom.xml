@@ -174,8 +174,7 @@
                         <configuration>
                             <files>
                                 <file>${kura.basedir}/config/kura.build.properties</file>
-                                <file>
-                                    ${kura.basedir}/../../target-platform/config/kura.target-platform.build.properties</file>
+                                <file>${kura.basedir}/../../target-platform/config/kura.target-platform.build.properties</file>
                             </files>
                         </configuration>
                     </execution>
@@ -482,8 +481,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.wire.h2db.component.provider</artifactId>
-                                    <version>
-                                        ${org.eclipse.kura.wire.h2db.component.provider.version}</version>
+                                    <version>${org.eclipse.kura.wire.h2db.component.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -510,11 +508,11 @@
                                     <artifactId>org.eclipse.kura.wire.provider</artifactId>
                                     <version>${org.eclipse.kura.wire.provider.version}</version>
                                 </artifactItem>
-                                <!-- <artifactItem>
+                                <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.driver.opcua.provider</artifactId>
                                     <version>${org.eclipse.kura.driver.opcua.provider.version}</version>
-                                </artifactItem> -->
+                                </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.driver.s7plc.provider</artifactId>
@@ -523,8 +521,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.driver.ble.sensortag.provider</artifactId>
-                                    <version>
-                                        ${org.eclipse.kura.driver.ble.sensortag.provider.version}</version>
+                                    <version>${org.eclipse.kura.driver.ble.sensortag.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -573,30 +570,23 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>
-                                        org.eclipse.kura.json.marshaller.unmarshaller.provider</artifactId>
-                                    <version>
-                                        ${org.eclipse.kura.json.marshaller.unmarshaller.provider.version}</version>
+                                    <artifactId>org.eclipse.kura.json.marshaller.unmarshaller.provider</artifactId>
+                                    <version>${org.eclipse.kura.json.marshaller.unmarshaller.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>
-                                        org.eclipse.kura.xml.marshaller.unmarshaller.provider</artifactId>
-                                    <version>
-                                        ${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}</version>
+                                    <artifactId>org.eclipse.kura.xml.marshaller.unmarshaller.provider</artifactId>
+                                    <version>${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.wire.component.join.provider</artifactId>
-                                    <version>
-                                        ${org.eclipse.kura.wire.component.join.provider.version}</version>
+                                    <version>${org.eclipse.kura.wire.component.join.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>
-                                        org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider</artifactId>
-                                    <version>
-                                        ${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}</version>
+                                    <artifactId>org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider</artifactId>
+                                    <version>${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -606,14 +596,12 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.cloudconnection.raw.mqtt.provider</artifactId>
-                                    <version>
-                                        ${org.eclipse.kura.cloudconnection.raw.mqtt.provider.version}</version>
+                                    <version>${org.eclipse.kura.cloudconnection.raw.mqtt.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.cloudconnection.kapua.mqtt.provider</artifactId>
-                                    <version>
-                                        ${org.eclipse.kura.cloudconnection.kapua.mqtt.provider.version}</version>
+                                    <version>${org.eclipse.kura.cloudconnection.kapua.mqtt.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -643,8 +631,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.rest.cloudconnection.provider</artifactId>
-                                    <version>
-                                        ${org.eclipse.kura.rest.cloudconnection.provider.version}</version>
+                                    <version>${org.eclipse.kura.rest.cloudconnection.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -654,8 +641,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.rest.network.configuration.provider</artifactId>
-                                    <version>
-                                        ${org.eclipse.kura.rest.network.configuration.provider.version}</version>
+                                    <version>${org.eclipse.kura.rest.network.configuration.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -690,8 +676,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.rest.service.listing.provider</artifactId>
-                                    <version>
-                                        ${org.eclipse.kura.rest.service.listing.provider.version}</version>
+                                    <version>${org.eclipse.kura.rest.service.listing.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -711,8 +696,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.container.orchestration.provider</artifactId>
-                                    <version>
-                                        ${org.eclipse.kura.container.orchestration.provider.version}</version>
+                                    <version>${org.eclipse.kura.container.orchestration.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -732,8 +716,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.configuration.change.manager</artifactId>
-                                    <version>
-                                        ${org.eclipse.kura.configuration.change.manager.version}</version>
+                                    <version>${org.eclipse.kura.configuration.change.manager.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -743,8 +726,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.rest.network.status.provider</artifactId>
-                                    <version>
-                                        ${org.eclipse.kura.rest.network.status.provider.version}</version>
+                                    <version>${org.eclipse.kura.rest.network.status.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>

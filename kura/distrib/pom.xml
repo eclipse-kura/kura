@@ -41,12 +41,6 @@
 
         <kura.skip.can>true</kura.skip.can>
 
-        <kura.skip.replace.target.file>true</kura.skip.replace.target.file>
-        <kura.skip.if.target.definition.build>false</kura.skip.if.target.definition.build>
-        <kura.target.definition.location>kura-target-definition</kura.target.definition.location>
-
-        <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
-
         <!-- used for RPM uninstallation -->
         <kura.install.link>/opt/eclipse/kura</kura.install.link>
 
@@ -532,7 +526,6 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>${kura.skip.if.target.definition.build}</skip>
                                     <target>
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
@@ -567,7 +560,6 @@
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>${kura.skip.if.target.definition.build}</skip>
                                     <verbose>true</verbose>
                                     <deb>
                                         ${basedir}/target/kura_${package.version}-${package.revision}_amd64.deb</deb>
@@ -641,7 +633,6 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>${kura.skip.if.target.definition.build}</skip>
                                     <target>
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
@@ -676,7 +667,6 @@
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>${kura.skip.if.target.definition.build}</skip>
                                     <verbose>true</verbose>
                                     <deb>
                                         ${basedir}/target/kura-nn_${package.version}-${package.revision}_amd64.deb</deb>
@@ -744,7 +734,6 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>${kura.skip.if.target.definition.build}</skip>
                                     <target>
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
@@ -779,7 +768,6 @@
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>${kura.skip.if.target.definition.build}</skip>
                                     <verbose>true</verbose>
                                     <deb>
                                         ${basedir}/target/kura_${package.version}-${package.revision}_arm64.deb</deb>
@@ -853,7 +841,6 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>${kura.skip.if.target.definition.build}</skip>
                                     <target>
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
@@ -888,7 +875,6 @@
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>${kura.skip.if.target.definition.build}</skip>
                                     <verbose>true</verbose>
                                     <deb>
                                         ${basedir}/target/kura-nn_${package.version}-${package.revision}_arm64.deb</deb>
@@ -957,7 +943,6 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>${kura.skip.if.target.definition.build}</skip>
                                     <target>
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
@@ -1021,7 +1006,6 @@
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
-                                    <skip>${kura.skip.if.target.definition.build}</skip>
                                     <verbose>true</verbose>
                                     <deb>
                                         ${basedir}/target/kura_${package.version}-${package.revision}_docker-x86_64-nn_installer.deb</deb>
@@ -1287,91 +1271,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-
-        <profile>
-            <properties>
-                <kura.skip.replace.target.file>false</kura.skip.replace.target.file>
-            </properties>
-            <id>target-definition</id>
-            <activation>
-                <property>
-                    <name>buildAll</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <version>3.3.1</version>
-                        <executions>
-                            <execution>
-                                <id>filter-target-file</id>
-                                <phase>initialize</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <encoding>UTF-8</encoding>
-                                    <outputDirectory>
-                                        ${project.basedir}/kura-target-definition/</outputDirectory>
-                                    <resources>
-                                        <resource>
-                                            <directory>
-                                                ${project.basedir}/kura-target-definition/resources</directory>
-                                            <includes>
-                                                <include>
-                                                    kura-target-definition-template.target</include>
-                                            </includes>
-                                            <filtering>true</filtering>
-                                        </resource>
-                                    </resources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <executions>
-                            <execution>
-                                <id>replace-target-file</id>
-                                <phase>generate-resources</phase>
-                                <configuration>
-                                    <skip>${kura.skip.replace.target.file}</skip>
-                                    <target>
-                                        <move
-                                            file="kura-target-definition/kura-target-definition-template.target"
-                                            tofile="kura-target-definition/kura-target-definition.target" />
-                                    </target>
-                                </configuration>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>copy-target-file</id>
-                                <phase>generate-resources</phase>
-                                <configuration>
-                                    <target>
-                                        <copy
-                                            file="${kura.target.definition.location}/kura-target-definition.target"
-                                            tofile="${project.basedir}/target/kura-target-definition.target" />
-                                    </target>
-                                </configuration>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-            <modules>
-                <module>kura-target-definition</module>
-            </modules>
         </profile>
 
     </profiles>

@@ -19,15 +19,29 @@
         <first id="bundle.file">
             <union>
                 <fileset dir="${project.build.directory}/plugins">
-                    <include name="${bundle.name}*.jar" />
+                    <filename regex="^${bundle.name}-([0-9.]+.*jar)$" />
                 </fileset>
             </union>
         </first>
+
         <fail message="${bundle.name} not found">
             <condition>
                 <equals arg1="${toString:bundle.file}" arg2="" />
             </condition>
         </fail>
+        <resourcecount property="plugin.match.count">
+            <fileset dir="${project.build.directory}/plugins">
+                <filename regex="^${bundle.name}-([0-9.]+.*jar)$" />
+            </fileset>
+        </resourcecount>
+        <fail message="Multiple versions (${plugin.match.count}) for ${bundle.name} found, expected exactly one">
+            <condition>
+                <not>
+                    <equals arg1="${plugin.match.count}" arg2="1" />
+                </not>
+            </condition>
+        </fail>
+
         <echo message="Installing ${toString:bundle.file}" />
         <copy
             toDir="${project.build.directory}/${build.output.name}/plugins/${start.level}${start}/"

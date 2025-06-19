@@ -209,7 +209,8 @@
                         <configuration>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
                             <excludeTypes>pom</excludeTypes>
-                            <excludeClassifiers>sources</excludeClassifiers>
+                            <excludeClassifiers>sources,linux-x86_64,linux-aarch_64,osx-x86_64,osx-aarch_64</excludeClassifiers>
+                            <excludeScopes>provided,runtime</excludeScopes>
                         </configuration>
                     </execution>
                     <execution>

@@ -108,6 +108,7 @@ public class NMDbusConnector {
 
     private boolean configurationEnforcementHandlerIsArmed = false;
     private ModemTaskManager modemTaskManager;
+    private int timeout = 30;
 
     private NMDbusConnector(DBusConnection dbusConnection) throws DBusException {
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
@@ -135,6 +136,7 @@ public class NMDbusConnector {
 
     public void setSystemService(SystemService systemService) {
         this.optionalSystemService = Optional.of(systemService);
+        this.timeout = systemService.getNetworkConfigurationTimeout();
     }
 
     protected boolean configurationEnforcementIsActive() {
@@ -552,7 +554,7 @@ public class NMDbusConnector {
                 connection, deviceId, interfaceName, deviceType, this.networkManager.getVersion());
 
         DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
-                NMDeviceState.NM_DEVICE_STATE_CONFIG);
+                NMDeviceState.NM_DEVICE_STATE_CONFIG, this.timeout);
 
         if (connection.isPresent()) {
             connection.get().Update(newConnectionSettings);
@@ -605,7 +607,7 @@ public class NMDbusConnector {
                 this.networkManager.setDeviceManaged(createdDevice, true);
             }
             DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, createdDevice.getObjectPath(),
-                    NMDeviceState.NM_DEVICE_STATE_ACTIVATED);
+                    NMDeviceState.NM_DEVICE_STATE_ACTIVATED, this.timeout);
             this.networkManager.activateConnection(createdConnection, createdDevice);
             dsLock.waitForSignal();
         } catch (DBusExecutionException | DBusException | TimeoutException e) {
@@ -653,7 +655,7 @@ public class NMDbusConnector {
         NMDeviceState deviceState = this.networkManager.getDeviceState(device);
         if (Boolean.TRUE.equals(NMDeviceState.isConnected(deviceState))) {
             DeviceStateLock dsLock = new DeviceStateLock(this.dbusConnection, device.getObjectPath(),
-                    NMDeviceState.NM_DEVICE_STATE_DISCONNECTED);
+                    NMDeviceState.NM_DEVICE_STATE_DISCONNECTED, this.timeout);
             device.Disconnect();
             dsLock.waitForSignal();
         }

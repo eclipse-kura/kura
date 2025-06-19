@@ -30,21 +30,23 @@ public class DeviceStateLock {
     private final CountDownLatch latch = new CountDownLatch(1);
     private final NMDeviceStateChangeHandler stateHandler;
     private final DBusConnection dbusConnection;
+    private final int timeout;
 
-    public DeviceStateLock(DBusConnection dbusConnection, String dbusPath, NMDeviceState expectedNmDeviceState)
-            throws DBusException {
+    public DeviceStateLock(DBusConnection dbusConnection, String dbusPath, NMDeviceState expectedNmDeviceState,
+            int timeout) throws DBusException {
         if (Objects.isNull(dbusPath) || dbusPath.isEmpty() || dbusPath.equals("/")) {
             throw new IllegalArgumentException(String.format("Illegal DBus path for DeviceStateLock \"%s\"", dbusPath));
         }
         this.dbusConnection = Objects.requireNonNull(dbusConnection);
         this.stateHandler = new NMDeviceStateChangeHandler(this.latch, dbusPath, expectedNmDeviceState);
+        this.timeout = timeout;
 
         this.dbusConnection.addSigHandler(Device.StateChanged.class, this.stateHandler);
     }
 
     public void waitForSignal() throws DBusException {
         try {
-            boolean countdownCompleted = this.latch.await(5, TimeUnit.SECONDS);
+            boolean countdownCompleted = this.latch.await(this.timeout, TimeUnit.SECONDS);
             if (!countdownCompleted) {
                 logger.warn("Timeout elapsed. Exiting anyway");
             }

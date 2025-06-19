@@ -55,6 +55,7 @@
         <kura.repo.module>base</kura.repo.module>
 
         <org.eclipse.equinox.launcher.version>1.6.900</org.eclipse.equinox.launcher.version>
+        <kura.version>${project.version}</kura.version>
     </properties>
 
     <distributionManagement>

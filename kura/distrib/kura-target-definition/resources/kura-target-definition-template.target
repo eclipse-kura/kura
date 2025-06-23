@@ -35,6 +35,10 @@
                     <id>central</id>
                     <url>https://repo1.maven.org/maven2/</url>
                 </repository>
+                <repository>
+                    <id>jitpack.io</id>
+                    <url>https://jitpack.io</url>
+                </repository>
             </repositories>
 
             <dependencies>
@@ -575,11 +579,6 @@
                     <version>${jakarta.xml.bind-api.version}</version>
                 </dependency>
                 <dependency>
-                    <groupId>jakarta.xml.bind</groupId>
-                    <artifactId>jakarta.xml.bind-api</artifactId>
-                    <version>${jakarta.xml.bind-api.javax.version}</version>
-                </dependency>
-                <dependency>
                     <groupId>jakarta.xml.ws</groupId>
                     <artifactId>jakarta.xml.ws-api</artifactId>
                     <version>${jakarta.xml.ws-api.version}</version>
@@ -598,29 +597,6 @@
                     <groupId>com.sun.xml.bind</groupId>
                     <artifactId>jaxb-osgi</artifactId>
                     <version>${jaxb-osgi.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>com.sun.xml.bind</groupId>
-                    <artifactId>jaxb-osgi</artifactId>
-                    <version>${jaxb-osgi.javax.version}</version>
-                </dependency>
-
-                <!-- Duplicate Jakarta packages to support javax imports -->
-
-                <dependency>
-                    <groupId>jakarta.xml.bind</groupId>
-                    <artifactId>jakarta.xml.bind-api</artifactId>
-                    <version>${jakarta.xml.bind-api.javax.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>jakarta.activation</groupId>
-                    <artifactId>jakarta.activation-api</artifactId>
-                    <version>${jakarta.activation-api.javax.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>com.sun.xml.bind</groupId>
-                    <artifactId>jaxb-osgi</artifactId>
-                    <version>${jaxb-osgi.javax.version}</version>
                 </dependency>
 
                 <!-- Equinox -->

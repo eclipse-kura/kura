@@ -421,13 +421,21 @@ public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet imple
             }
         });
 
-        final List<GwtConfigComponent> componentConfigurations = GwtComponentServiceInternal
-                .findComponentConfigurations(
-                        "(|(objectClass=" + Driver.class.getName() + ")(objectClass=" + Asset.class.getName() + "))");
+        final List<GwtConfigComponent> componentConfigurations = new ArrayList<>();
+
+        final List<GwtConfigComponent> driverConfigurations = GwtComponentServiceInternal
+                .findComponentConfigurations("(objectClass=" + Driver.class.getName() + ")");
+
+        driverConfigurations.forEach(c -> c.setIsDriver(true));
+        componentConfigurations.addAll(driverConfigurations);
 
         if (supportedFeatures.isAssetAvailable()) {
             result.setBaseChannelDescriptor(GwtWireAssetConstants.WIRE_ASSET_CHANNEL_DESCRIPTOR);
             componentDefinitions.add(GwtWireAssetConstants.WIRE_ASSET_OCD);
+
+            final List<GwtConfigComponent> assetConfigurations = GwtComponentServiceInternal
+                    .findComponentConfigurations("(objectClass=" + Asset.class.getName() + ")");
+            componentConfigurations.addAll(assetConfigurations);
         }
 
         result.setComponentDefinitions(componentDefinitions);

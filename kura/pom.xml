@@ -27,6 +27,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>kura-bom</module>
         <module>target-definition</module>
         <module>org.eclipse.kura.api</module>
         <module>org.eclipse.kura.asset.cloudlet.provider</module>
@@ -130,6 +131,7 @@
         <module>org.eclipse.kura.rest.network.status.provider</module>
         <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</module>
         <module>org.eclipse.kura.cloudconnection.kapua.mqtt.provider</module>
+        <module>org.eclipse.kura.web2</module>
         <module>emulator</module>
         <module>test-util</module>
         <module>tools</module>
@@ -206,37 +208,6 @@
 
     <profiles>
         <profile>
-            <id>default</id>
-            <activation>
-                <property>
-                    <name>!kura.osgi</name>
-                </property>
-            </activation>
-            <repositories>
-                <repository>
-                    <id>p2-repo-equinox</id>
-                    <layout>p2</layout>
-                    <url>file:///${kura.basedir}/target-definition/equinox/repository/</url>
-                </repository>
-            </repositories>
-        </profile>
-        <profile>
-            <id>equinox</id>
-            <activation>
-                <property>
-                    <name>kura.osgi</name>
-                    <value>equinox</value>
-                </property>
-            </activation>
-            <repositories>
-                <repository>
-                    <id>p2-repo-equinox</id>
-                    <layout>p2</layout>
-                    <url>file:///${kura.basedir}/target-definition/equinox/repository/</url>
-                </repository>
-            </repositories>
-        </profile>
-        <profile>
             <id>can</id>
             <activation>
                 <property>
@@ -292,23 +263,6 @@
                 <module>test</module>
             </modules>
         </profile>
-
-        <profile>
-            <id>web</id>
-            <properties>
-                <org.eclipse.kura.web.skip>false</org.eclipse.kura.web.skip>
-            </properties>
-            <activation>
-                <!-- deactivated if noweb property is selected -->
-                <property>
-                    <name>kura.skip.web</name>
-                    <value>!true</value>
-                </property>
-            </activation>
-            <modules>
-                <module>org.eclipse.kura.web2</module>
-            </modules>
-        </profile>
         <profile>
             <id>check-exists-plugin</id>
             <properties>
@@ -322,16 +276,6 @@
             <id>license-feature</id>
             <url>https://download.eclipse.org/cbi/updates/license/</url>
             <layout>p2</layout>
-        </repository>
-        <repository>
-            <id>p2-repo-common</id>
-            <layout>p2</layout>
-            <url>file:///${kura.basedir}/target-definition/common/repository/</url>
-        </repository>
-        <repository>
-            <id>p2-repo-test-deps</id>
-            <layout>p2</layout>
-            <url>file:///${kura.basedir}/target-definition/test-deps/repository/</url>
         </repository>
         <repository>
             <id>kura_addons</id>
@@ -422,25 +366,6 @@
                 <version>${maven-deploy-plugin.version}</version>
                 <configuration>
                     <skip>false</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>target-platform-configuration</artifactId>
-                <version>${tycho-version}</version>
-                <configuration>
-                    <environments>
-                        <environment>
-                            <os>win32</os>
-                            <ws>win32</ws>
-                            <arch>x86</arch>
-                        </environment>
-                        <environment>
-                            <os>linux</os>
-                            <ws>gtk</ws>
-                            <arch>x86</arch>
-                        </environment>
-                    </environments>
                 </configuration>
             </plugin>
             <plugin>
@@ -559,6 +484,32 @@
         </plugins>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>target-platform-configuration</artifactId>
+                    <version>${tycho-version}</version>
+                    <configuration>
+                        <environments>
+                            <environment>
+                                <os>win32</os>
+                                <ws>win32</ws>
+                                <arch>x86</arch>
+                            </environment>
+                            <environment>
+                                <os>linux</os>
+                                <ws>gtk</ws>
+                                <arch>x86</arch>
+                            </environment>
+                        </environments>
+                        <target>
+                            <artifact>
+                                <groupId>org.eclipse.kura</groupId>
+                                <artifactId>target-definition</artifactId>
+                                <version>6.0.0-SNAPSHOT</version>
+                            </artifact>
+                        </target>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
                     <artifactId>tycho-packaging-plugin</artifactId>

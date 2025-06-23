@@ -1,9 +1,61 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+
+-->
 <?pde version="3.8"?>
-<target name="Kura Target Platform Equinox" sequenceNumber="47">
+<target name="Kura Target Definition" sequenceNumber="47">
     <locations>
-        <location path="${project_loc}/common/repository/plugins" type="Profile" />
-        <location path="${project_loc}/equinox/repository/plugins" type="Profile" />
-        <location path="${project_loc}/test-deps/repository/plugins" type="Profile" />
+        <location includeDependencyDepth="direct" includeDependencyScopes="compile,test"
+            missingManifest="ignore" type="Maven">
+
+            <dependencies>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>target-platform-bom</artifactId>
+                    <version>6.0.0-SNAPSHOT</version>
+                    <type>pom</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>kura-bom</artifactId>
+                    <version>6.0.0-SNAPSHOT</version>
+                    <type>pom</type>
+                </dependency>
+            </dependencies>
+
+            <repositories>
+                <repository>
+                    <id>eurotech-kura</id>
+                    <url>https://raw.githubusercontent.com/eurotech/kura_addons/mvn-repo/</url>
+                </repository>
+                <repository>
+                    <id>eclipse-releases</id>
+                    <url>https://repo.eclipse.org/content/groups/releases/</url>
+                </repository>
+                <repository>
+                    <id>kura-releases</id>
+                    <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+                </repository>
+                <repository>
+                    <id>central</id>
+                    <url>https://repo1.maven.org/maven2/</url>
+                </repository>
+                <repository>
+                    <id>jitpack.io</id>
+                    <url>https://jitpack.io</url>
+                </repository>
+            </repositories>
+        </location>
     </locations>
 </target>

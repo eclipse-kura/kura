@@ -32,6 +32,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
 
+        <!-- Plugins versions -->
         <exists-maven-plugin.version>0.0.3</exists-maven-plugin.version>
         <lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
         <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
@@ -43,11 +44,10 @@
         <maven-deploy-plugin.version>2.8.1</maven-deploy-plugin.version>
         <maven-site-plugin.version>3.3</maven-site-plugin.version>
         <maven-surefire-plugin.version>2.7.2</maven-surefire-plugin.version>
-        <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
-        <tycho-p2-extras-plugin.version>4.0.11</tycho-p2-extras-plugin.version>
     </properties>
 
     <modules>
+        <module>target-platform-bom</module>
         <module>org.apache.activemq.artemis</module>
         <module>org.eclipse.kura.camel.sun.misc</module>
         <module>org.eclipse.kura.sun.misc</module>
@@ -59,9 +59,6 @@
         <module>jdk.dio-parent</module>
         <module>com.gwt.user</module>
         <module>log4j2-api-config</module>
-        <module>p2-repo-common</module>
-        <module>p2-repo-equinox</module>
-        <module>p2-repo-test-deps</module>
     </modules>
 
     <repositories>
@@ -89,6 +86,7 @@
             <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
         </repository>
         <repository>
+            <!-- moquette-broker -->
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>

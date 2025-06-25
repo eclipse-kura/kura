@@ -8,6 +8,9 @@ Since the network configuration shown on the screen may not be synchronized with
 !!! tip
     It is recommended that the **IPv4** or **IPv6** tab is configured first since it defines how the interface is going to be used.
 
+!!! note
+    When the **Apply** button is clicked, the network configuration is submitted and the configuration process starts. If some network interfaces are configured to connect, NetworkManager will setup and start the connection. The default timeout for the connection attempt is **30s**, but this can be changed with the `kura.network.configuration.timeout` property in the `kura_custom.properties` file.
+
 ## TCP/IP Configuration
 
 The **IPv4** and **IPv6** tabs contain the following configuration parameters:

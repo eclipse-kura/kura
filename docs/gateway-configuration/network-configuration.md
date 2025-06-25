@@ -93,10 +93,10 @@ The rules shown above create an *Overloaded* (i.e., many-to-one) NAT. This type 
 
 ## Network Linux Configuration
 
-When applying a new network configuration, Kura changes the configuration files of the Linux networking subsystem. Please read the following note before proceeding with manual changes of the Linux networking configuration.
+When applying a new network configuration, Kura configures NetworkManager and ModemManager to apply the desidered system configuration. Moreover, it changes some configuration files of the Linux networking subsystem. Please read the following note before proceeding with manual changes of the Linux networking configuration.
 
 !!! warning
-    It is **NOT** recommended performing manual editing of the Linux networking configuration files when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.
+    It is **NOT** recommended performing manual editing of the Linux networking configuration files or manually configuring  NetworkManager or ModemManager when the gateway configuration is being managed through Kura. Kura will be notified by NM/MM and it will roll-back the configuration.
 
 ## Network Configuration properties
 

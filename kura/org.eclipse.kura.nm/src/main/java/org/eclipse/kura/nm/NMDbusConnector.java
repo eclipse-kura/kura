@@ -371,7 +371,7 @@ public class NMDbusConnector {
         this.configurationTask = CompletableFuture.runAsync(task, this.executorService);
     }
 
-    private void cancelConfigurationTask() {
+    protected void cancelConfigurationTask() {
         if (this.configurationTask != null && !this.configurationTask.isDone()) {
             logger.warn("A previous configuration task is still running. Aborting current configuration task.");
             this.configurationTask.cancel(true);

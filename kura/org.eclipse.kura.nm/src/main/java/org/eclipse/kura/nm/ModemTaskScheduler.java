@@ -136,6 +136,9 @@ public class ModemTaskScheduler {
                     logger.warn("Could get modem since the NMDbusConnector is not available.");
                 }
                 if (modem.isPresent()) {
+                    if (this.nmDbusConnector.isPresent()) {
+                        this.nmDbusConnector.get().cancelConfigurationTask();
+                    }
                     modem.get().Reset();
                     logger.info("Modem reset successful for modem {} with path {}", this.deviceId,
                             this.device.getObjectPath());

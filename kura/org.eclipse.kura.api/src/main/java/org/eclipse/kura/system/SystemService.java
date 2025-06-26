@@ -642,7 +642,7 @@ public interface SystemService {
      * Returns the timeout in seconds used for applying a network configuration.
      *
      * @since 3.0
-     * @return the timeput value in seconds
+     * @return the timeout value in seconds
      */
     public int getNetworkConfigurationTimeout();
 

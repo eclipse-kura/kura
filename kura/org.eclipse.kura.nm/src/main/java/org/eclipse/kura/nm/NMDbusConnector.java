@@ -371,7 +371,7 @@ public class NMDbusConnector {
         this.configurationTask = CompletableFuture.runAsync(task, this.executorService);
     }
 
-    protected void cancelConfigurationTask() {
+    private void cancelConfigurationTask() {
         if (this.configurationTask != null && !this.configurationTask.isDone()) {
             logger.warn("A previous configuration task is still running. Aborting current configuration task.");
             this.configurationTask.cancel(true);
@@ -380,7 +380,6 @@ public class NMDbusConnector {
 
     public synchronized void apply(Map<String, Object> networkConfiguration) throws DBusException {
         logger.debug("Apply networkConfiguration");
-        cancelConfigurationTask();
         try {
             configurationEnforcementDisable();
             // Disable ModemTaskHandler since it is supposed to be a new configuration
@@ -399,7 +398,6 @@ public class NMDbusConnector {
             return;
         }
 
-        cancelConfigurationTask();
         try {
             configurationEnforcementDisable();
             doApply(this.cachedConfiguration);
@@ -418,7 +416,6 @@ public class NMDbusConnector {
             return;
         }
 
-        cancelConfigurationTask();
         try {
             configurationEnforcementDisable();
             doApply(deviceId, this.cachedConfiguration);
@@ -713,11 +710,6 @@ public class NMDbusConnector {
             this.configurationEnforcementHandler = new NMConfigurationEnforcementHandler(this);
             this.deviceAddedHandler = new NMDeviceAddedHandler(this);
         }
-
-        if (this.configurationEnforcementHandlerIsArmed.get()) {
-            logger.debug("Network configuration enforcement already enabled");
-            return;
-        }
         this.dbusConnection.addSigHandler(Device.StateChanged.class, this.configurationEnforcementHandler);
         this.dbusConnection.addSigHandler(NetworkManager.DeviceAdded.class, this.deviceAddedHandler);
         this.configurationEnforcementHandlerIsArmed.set(true);
@@ -727,10 +719,6 @@ public class NMDbusConnector {
 
     private void configurationEnforcementDisable() throws DBusException {
         if (Objects.nonNull(this.configurationEnforcementHandler) && Objects.nonNull(this.deviceAddedHandler)) {
-            if (!this.configurationEnforcementHandlerIsArmed.get()) {
-                logger.debug("Network configuration enforcement already disabled");
-                return;
-            }
             this.dbusConnection.removeSigHandler(Device.StateChanged.class, this.configurationEnforcementHandler);
             this.dbusConnection.removeSigHandler(NetworkManager.DeviceAdded.class, this.deviceAddedHandler);
         }

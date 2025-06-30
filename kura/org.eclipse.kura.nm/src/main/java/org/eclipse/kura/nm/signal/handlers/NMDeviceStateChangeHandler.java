@@ -40,8 +40,7 @@ public class NMDeviceStateChangeHandler implements DBusSigHandler<Device.StateCh
         NMDeviceState oldState = NMDeviceState.fromUInt32(s.getOldState());
         NMDeviceState newState = NMDeviceState.fromUInt32(s.getNewState());
 
-        logger.trace("NMDeviceStateChangeHandler: Device state change detected: {} -> {}, for {}", oldState, newState,
-                s.getPath());
+        logger.trace("Device state change detected: {} -> {}, for {}", oldState, newState, s.getPath());
         if (s.getPath().equals(this.path) && newState == this.expectedState) {
             logger.debug("Notify waiting thread");
             this.latch.countDown();

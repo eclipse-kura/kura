@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -39,8 +39,7 @@ public class NMConfigurationEnforcementHandler implements DBusSigHandler<Device.
         NMDeviceState newState = NMDeviceState.fromUInt32(s.getNewState());
         NMDeviceStateReason reason = NMDeviceStateReason.fromUInt32(s.getReason());
 
-        logger.debug(
-                "NMConfigurationEnforcementHandler: Device state change detected: {} -> {} (reason: {}), for device {}",
+        logger.debug("Device state change detected by configuration enforcer: {} -> {} (reason: {}), for device {}",
                 oldState, newState, reason, s.getPath());
 
         boolean deviceDisconnectedBecauseOfConfigurationEvent = oldState != NMDeviceState.NM_DEVICE_STATE_FAILED

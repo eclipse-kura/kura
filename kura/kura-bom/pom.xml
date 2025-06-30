@@ -24,6 +24,19 @@
     <packaging>pom</packaging>
     <name>Kura BOM</name>
 
+    <distributionManagement>
+        <repository>
+            <id>repo.eclipse.org</id>
+            <name>Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>repo.eclipse.org</id>
+            <name>Kura Repository - Snapshots</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <properties>
         <org.eclipse.kura.ai.triton.server.version>2.0.0-SNAPSHOT</org.eclipse.kura.ai.triton.server.version>
         <org.eclipse.kura.api.version>3.0.0-SNAPSHOT</org.eclipse.kura.api.version>

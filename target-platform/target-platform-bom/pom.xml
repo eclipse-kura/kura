@@ -23,6 +23,19 @@
     <packaging>pom</packaging>
     <name>Kura target platform BOM</name>
 
+    <distributionManagement>
+        <repository>
+            <id>repo.eclipse.org</id>
+            <name>Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>repo.eclipse.org</id>
+            <name>Kura Repository - Snapshots</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <properties>
         <!-- START common dependencies -->
         <apache-qpid-jms-client.version>0.45.0</apache-qpid-jms-client.version>

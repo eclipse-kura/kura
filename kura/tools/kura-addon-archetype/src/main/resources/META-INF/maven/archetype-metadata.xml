@@ -23,9 +23,15 @@
         <requiredProperty key="version">
             <defaultValue>1.0.0-SNAPSHOT</defaultValue>
         </requiredProperty>
+        <requiredProperty key="kuraVersion">
+            <defaultValue>${project.version}</defaultValue>
+        </requiredProperty>
     </requiredProperties>
 
     <fileSets>
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory>target-definition</directory>
+        </fileSet>
         <fileSet filtered="true" encoding="UTF-8">
             <directory>distrib</directory>
         </fileSet>

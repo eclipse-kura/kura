@@ -11,4 +11,3 @@ RemoteSystemsTempFiles
 .settings
 .vscode
 OSGI-INF
-target-definition

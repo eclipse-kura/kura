@@ -29,6 +29,15 @@
     <artifactId>${artifactId}.distrib</artifactId>
     <packaging>pom</packaging>
 
+    <!-- Insert your bundles as dependencies -->
+    <dependencies>
+        <dependency>
+            <groupId>${groupId}</groupId>
+            <artifactId>${artifactId}.bundle</artifactId>
+            <version>${version}</version>
+        </dependency>
+    </dependencies>
+
     <!-- Change this if your org is different -->
     <organization>
         <name>Eclipse Kura</name>
@@ -45,7 +54,7 @@
         <addon.installation.dir>/opt/eclipse/kura/plugins/6s</addon.installation.dir>
 
         <!-- name of the JAR produced in bundles/target -->
-        <jar.name>${artifactId}.bundle</jar.name>
+        <jar.name>${artifactId}.bundle-${version}.jar</jar.name>
 
         <!--
             Available DEB architectures:
@@ -146,7 +155,7 @@
                 </executions>
             </plugin>
 
-            <!-- Responsible for retrieving the short git commit (defaults to length 7)-->
+            <!-- Responsible for retrieving the short git commit (defaults to length 7) -->
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
                 <artifactId>git-commit-id-maven-plugin</artifactId>
@@ -169,20 +178,22 @@
                     </includeOnlyProperties>
                 </configuration>
             </plugin>
+            
+            <!-- Responsible for copying the dependencies into a known location -->
             <plugin>
-                <groupId>com.coderplus.maven.plugins</groupId>
-                <artifactId>copy-rename-maven-plugin</artifactId>
-                <version>1.0.1</version>
+                <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy-and-rename-jar</id>
-                        <phase>generate-sources</phase>
+                        <id>get-bundles-to-distrib</id>
+                        <phase>generate-resources</phase>
                         <goals>
-                            <goal>copy</goal>
+                            <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <sourceFile>${project.basedir}/../bundles/${jar.name}/target/${jar.name}-${project.version}.jar</sourceFile>
-                            <destinationFile>target/input_files/${jar.name}_${project.version}.jar</destinationFile>
+                            <excludeTypes>pom</excludeTypes>
+                            <excludeClassifiers>sources</excludeClassifiers>
+                            <excludeTransitive>true</excludeTransitive>
+                            <outputDirectory>${project.build.directory}/plugins</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -207,13 +218,14 @@
                             <controlDir>${project.basedir}/deb/control</controlDir>
                             <skipPOMs>false</skipPOMs>
                             <dataSet>
-                                <!-- Repeate the 'data' schema multiple time if you want to manage
+                                <!--
+                                Repeate the 'data' schema multiple time if you want to manage
                                 different files indipendentely, specifying for each one the mapper:
                                 it is usefull if different files require different prefix (aka:
-                                different destination location) or specific user, group and filemode -->
+                                different destination location) or specific user, group and filemode
+                                -->
                                 <data>
-                                    <src>${basedir}/target/input_files/${jar.name}_${project.version}.jar</src>
-                                    <dst>${jar.name}_${project.version}.jar</dst>
+                                    <src>${project.build.directory}/plugins/${jar.name}</src>
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>
@@ -225,14 +237,13 @@
                                 </data>
 
                                 <!--
-
                                 If all the source file are managed in the same way, it is also
                                 possible to specify a 'directory' data type to include all the files
                                 present in the specify path
-
+                                -->
+                                <!--
                                 <data>
-                                    <src>${basedir}/target/input_files</src>
-                                    <dst>${jar.name}_${project.version}.jar</dst>
+                                    <src>${project.build.directory}/plugins</src>
                                     <type>directory</type>
                                     <mapper>
                                         <type>perm</type>
@@ -242,7 +253,6 @@
                                         <filemode>600</filemode>
                                     </mapper>
                                 </data>
-
                                 -->
                             </dataSet>
                         </configuration>

@@ -80,26 +80,19 @@
 
         <copy file="src/main/resources/${build.name}/kura.properties"
             tofile="${project.build.directory}/${build.output.name}/kura.properties" />
-        <propertyfile
-            file="${project.build.directory}/${build.output.name}/kura.properties">
+        <propertyfile file="${project.build.directory}/${build.output.name}/kura.properties">
             <entry key="kura.version" value="KURA_${kura.version}" />
             <entry key="kura.home" value="${kura.install.dir}/${kura.symlink}" />
-            <entry key="kura.framework.config"
-                value="${kura.install.dir}/${kura.symlink}/${framework.config.folder}" />
-            <entry key="kura.user.config"
-                value="${kura.install.dir}/${kura.symlink}/${user.config.folder}" />
-            <entry key="kura.plugins"
-                value="${kura.install.dir}/${kura.symlink}/${plugins.folder}" />
-            <entry key="kura.packages"
-                value="${kura.install.dir}/${kura.symlink}/packages" />
+            <entry key="kura.framework.config" value="${kura.install.dir}/${kura.symlink}/${framework.config.folder}" />
+            <entry key="kura.user.config" value="${kura.install.dir}/${kura.symlink}/${user.config.folder}" />
+            <entry key="kura.plugins" value="${kura.install.dir}/${kura.symlink}/${plugins.folder}" />
+            <entry key="kura.packages" value="${kura.install.dir}/${kura.symlink}/packages" />
 
             <entry key="kura.marketplace.compatibility.version" value="KURA_${kura.version}" />
 
             <entry key="kura.data" value="${kura.install.dir}/${kura.symlink}/${data.folder}" />
-            <entry key="kura.snapshots"
-                value="${kura.install.dir}/${kura.symlink}/${snapshots.folder}" />
-            <entry key="kura.style.dir"
-                value="${kura.install.dir}/${kura.symlink}/${console.folder}/skin" />
+            <entry key="kura.snapshots" value="${kura.install.dir}/${kura.symlink}/${snapshots.folder}" />
+            <entry key="kura.style.dir" value="${kura.install.dir}/${kura.symlink}/${console.folder}/skin" />
 
             <entry key="version" value="${kura.version}" />
             <entry key="build.version" value="${buildNumber}" />

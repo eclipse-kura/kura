@@ -5,7 +5,6 @@ The Kura Addon Archetype is a [Maven Archetype](https://maven.apache.org/guides/
 - Maven-based build
 - Template project for creating DEB packages
 - Tycho-surefire based integration test template
-- Uses a remote P2 repository for the target platform
 
 The Kura Archetype JAR (`kura-addon-archetype-<kura-version>.jar`) is available in the released artifacts and can be installed in the local maven repository with the following command:
 
@@ -36,7 +35,11 @@ The command will start the generation of the archetype in interactive mode. Mave
 - **artifactId**: the Maven artifact id of the generated parent pom file and the name of the generated top level project folder, usually something like `org.eclipse.kura.myartifact`
 - **package**: the Java package to be used for the main bundle, usually something like `org.eclipse.kura.myartifact`
 
-Other parameters like **version** and **mainBundleVendor** can be changed by answering `n` after the `Confirm properties configuration` prompt, which appears after editing the properties above.
+The following optional parameters can be changed by answering `n` after the `Confirm properties configuration` prompt, which appears after editing the properties above:
+
+- **version**: the generated project's version. Defaults to *1.0.0-SNAPSHOT*
+- **mainBundleVendor**: the name of the vendor to use in the metadata. Defaults to *Eclipse Kura*
+- **kuraVersion**: the version of the Kura bill-of-materials, used to resolve dependencies. Defaults to *6.0.0[-SNAPSHOT]*
 
 A `.gitignore` file is automatically added with a default configuration. The `OSGI-INF` folder is omitted because it will be generated during tests at compile-time (this is necessary to make the PDE launcher work).
 
@@ -186,7 +189,7 @@ Note that if the workspace resides in the root of the project the parent POM fil
 
 #### Load target platform
 
-Open the _.target_ file in the _target-definition_ project and click on _Set as Active Target Platform_. Note that this will download the bundles from the Kura P2 repository and it may take a while to complete.
+Open the _.target_ file in the _target-definition_ project and click on _Set as Active Target Platform_. Note that this will download all the dependencies declared in the target platform it may take a while to complete.
 
 ![](./images/kura-addon-archetype/eclipse-ide-reload-platform.png)
 
@@ -214,11 +217,7 @@ The Addon Archetype standard procedure allows to build generic Debian installers
 
 However, it is possible to customise the files in the `distrib` folder to develop architecture-dependant installers: this might be necessary when a bundle contains native code (C/C++ libraries, jars that use JNI, etc.) or architecture-specific files (e.g. a systemd service file).
 
-In the following sections we will see how this can be accomplished for the DEB packages. These steps assume that architecture-specific jars are built in the form of fragments of the architecture-agnostic java code. The architecture-specific jars will then be copied in the `distrib` folder and included in the package.
-
-### Getting the source code
-
-The first modification is the copy and rename of the source code target files generated under the `bundles` project. Given the following bundles structure:
+In the following sections we will see how this can be accomplished for the DEB packages. These steps assume that architecture-specific jars are built in the form of fragments of the architecture-agnostic java code. The architecture-specific jars will then be copied in the `distrib` folder and included in the package. For example, given the following bundles structure:
 
 ```
 org.eclipse.kura.myartifact
@@ -228,89 +227,19 @@ org.eclipse.kura.myartifact
 │   ├── org.eclipse.kura.myartifact.bundle.x86_64
 ....
 ```
-The `org.eclipse.kura.myartifact.bundle` folder contains the agnostic code, while the `org.eclipse.kura.myartifact.bundle.aarch64` and `org.eclipse.kura.myartifact.bundle.x86_64` fragments contain the architecture-specific code. The `distrib` folder will be modified to include the architecture-specific jars in the generated package.
 
-First of all it is possible to define some properties in the `distrib/pom.xml` file:
+The `org.eclipse.kura.myartifact.bundle` folder contains the agnostic code, while the `org.eclipse.kura.myartifact.bundle.aarch64` and `org.eclipse.kura.myartifact.bundle.x86_64` fragments contain the architecture-specific code.
 
-```xml
-<addon.installation.dir>/opt/eclipse/kura/plugins/6s</addon.installation.dir>
-<native.core.installation.dir>/opt/eclipse/kura/plugins/5</native.core.installation.dir>
-...
-<jar.name>org.eclipse.kura.myartifact.bundle</jar.name>
-<jar.aarch64.core>org.eclipse.kura.myartifact.bundle.aarch64</jar.aarch64.core>
-<jar.x86_64.core>org.eclipse.kura.myartifact.bundle.x86_64</jar.x86_64.core>
-...
+The objective is to produce two debian packages, one for each of the supported architectures. It is possible to modify the `pom.xml` in `distrib` to produce the correct metadata for the installers (see section below). Each debian package will install the main bundle and the relative fragment that matches the target environment. For example, the *aarch64* deb package will install:
 
-instead of
-<deb.architecture>all</deb.architecture>
-use the following
-<deb.amd64.architecture>amd64</deb.amd64.architecture>
-<deb.arm64.architecture>arm64</deb.arm64.architecture>
 ```
-!!! tip
-    These properties are used to define the architecture-specific jars and the architecture-specific debian metadata. The `addon.installation.dir` property is used to define the installation directory of the bundle in Kura. The `native.core.installation.dir` property is used to define the installation directory of the native code in Kura. It is important that the fragments are installed in a higher level directory than the main bundle, otherwise Kura will not be able to load the native code.
-
-    The `jar.name` property is used to define the name of the main bundle, while the `jar.aarch64.core` and `jar.x86_64.core` properties are used to define the names of the architecture-specific fragments.
-
-    Finally, the `deb.amd64.architecture` and `deb.arm64.architecture` properties are used to define the architecture-specific debian metadata.
-
-The plugin responsible to copy and rename the jars is the `copy-rename-maven-plugin`. The plugin is configured in the `distrib/pom.xml` file as follows:
-
-```xml
-<execution>
-    <id>copy-and-rename-jar</id>
-    <phase>generate-sources</phase>
-    <goals>
-        <goal>copy</goal>
-    </goals>
-    <configuration>
-        <sourceFile>${project.basedir}/../bundles/${jar.name}/target/${jar.name}-${project.version}.jar</sourceFile>
-        <destinationFile>target/${jar.name}_${project.version}.jar</destinationFile>
-    </configuration>
-</execution>
+/opt/eclipse/kura/plugins/<start-level>s/org.eclipse.kura.myartifact.bundle-<version>.jar
+/opt/eclipse/kura/plugins/<start-level>/org.eclipse.kura.myartifact.bundle.aarch64-<version>.jar
 ```
 
-To load also the architecture-specific jars, the plugin should be configured as follows:
+Note that the fragment `org.eclipse.kura.myartifact.bundle.aarch64-<version>.jar` is put in a plugins folder that is not ending with `s` since fragments can never be started as they don't have their own lifecycle.
 
-```xml
-<execution>
-    <id>copy-and-rename-source-jar</id>
-    <phase>generate-sources</phase>
-    <goals>
-        <goal>copy</goal>
-    </goals>
-    <configuration>
-        <sourceFile>${project.basedir}/../bundles/${jar.name}/target/${jar.name}-${project.version}.jar</sourceFile>
-        <destinationFile>target/${jar.name}_${project.version}.jar</destinationFile>
-    </configuration>
-</execution>
-<execution>
-    <id>copy-and-rename-aarch64-architecture-jar</id>
-    <phase>generate-sources</phase>
-    <goals>
-        <goal>copy</goal>
-    </goals>
-    <configuration>
-        <sourceFile>${project.basedir}/../bundles/${jar.aarch64.core}/target/${jar.aarch64.core}-${project.version}.jar</sourceFile>
-        <destinationFile>target/input_files/${jar.aarch64.core}_${project.version}.jar</destinationFile>
-    </configuration>
-</execution>
-<execution>
-    <id>copy-and-rename-x86_64-architecture-jar</id>
-    <phase>generate-sources</phase>
-    <goals>
-        <goal>copy</goal>
-    </goals>
-    <configuration>
-        <sourceFile>${project.basedir}/../bundles/${jar.x86_64.core}/target/${jar.x86_64.core}-${project.version}.jar</sourceFile>
-        <destinationFile>target/input_files/${jar.x86_64.core}_${project.version}.jar</destinationFile>
-    </configuration>
-</execution>
-```
-
-In this way, in the `input_files` folder all the necessary jars will be copied and renamed to the correct name. The `input_files` folder is used to store the files that will be included in the package.
-
-### Architecture dependant packages
+### Create architecture dependant installers
 
 The `/distrib/deb/control/control` file contains the DEB package metadata. The standard file is configured as follows:
 
@@ -337,7 +266,7 @@ distrib
 │   ├── amd64
 │   ├── arm64
 ```
-Each `control` file must be created in the `distrib/deb/<arch>/` folder. These folders could contain also the `postinst` and `postrm` files, used to execute commands after the installation and before the removal of the package. The content of these files is not relevant for this example, but they can be used to execute commands that are necessary for the correct installation of the package.
+Each `control` file must be created in the `distrib/deb/<arch>/` folder. These folders can also contain the `postinst` and `postrm` files, used to execute commands after the installation and before the removal of the package. The content of these files is not relevant for this example, but they can be used to execute commands that are necessary for the correct installation of the package.
 
 An example of `control` file for the `arm64` architecture is:
 
@@ -351,51 +280,12 @@ Architecture: [[deb.arm64.architecture]]
 Maintainer: Eclipse Kura Developers <kura-dev@eclipse.org>
 Description: [[summary]]
   [[long.description]]
-Homepage: https://eclipse-kura.github.io/kura/ (add correct link to documentation here)
+Homepage: https://eclipse-kura.github.io/kura/
 ```
 
 The same file for the `amd64` architecture will just change the `Architecture` field to `[[deb.amd64.architecture]]`.
 
-Finally, the plugin responsible of generating the DEB package is the `jdeb` plugin. The default execution is configured in the `distrib/pom.xml` file as follows:
-
-```xml
-<plugin>
-    <groupId>org.vafer</groupId>
-    <artifactId>jdeb</artifactId>
-    <version>1.12</version>
-    <executions>
-        <execution>
-            <id>generate-deb</id>
-            <phase>package</phase>
-            <goals>
-                <goal>jdeb</goal>
-            </goals>
-            <configuration>
-                <verbose>true</verbose>
-                <deb>${basedir}/target/${package.name}_${project.version}_${deb.architecture}.deb</deb>
-                <controlDir>${project.basedir}/deb/control</controlDir>
-                <skipPOMs>false</skipPOMs>
-                <dataSet>
-                    <data>
-                        <src>${basedir}/target/${jar.name}_${project.version}.jar</src>
-                        <dst>${jar.name}_${project.version}.jar</dst>
-                        <type>file</type>
-                        <mapper>
-                            <type>perm</type>
-                            <prefix>${addon.installation.dir}</prefix>
-                            <user>kurad</user>
-                            <group>kurad</group>
-                            <filemode>600</filemode>
-                        </mapper>
-                    </data>
-                </dataSet>
-            </configuration>
-        </execution>
-    </executions>
-</plugin>
-```
-
-To build the architecture-dependant installers, the execution must change to:
+Finally, the plugin responsible of generating the DEB package is the `jdeb` plugin. To build the architecture-dependant installers, the execution must change to:
 
 ```xml
 <execution>
@@ -411,8 +301,8 @@ To build the architecture-dependant installers, the execution must change to:
         <skipPOMs>false</skipPOMs>
         <dataSet>
             <data>
-                <src>${basedir}/target/input_files/${jar.name}_${project.version}.jar</src>
-                <dst>${jar.name}_${project.version}.jar</dst>
+                <src>${basedir}/target/plugins/${jar.name}-${project.version}.jar</src>
+                <dst>${jar.name}-${project.version}.jar</dst>
                 <type>file</type>
                 <mapper>
                     <type>perm</type>
@@ -423,8 +313,8 @@ To build the architecture-dependant installers, the execution must change to:
                 </mapper>
             </data>
             <data>
-                <src>${basedir}/target/input_files/${jar.aarch64.core}_${project.version}.jar</src>
-                <dst>${jar.aarch64.core}_${project.version}.jar</dst>
+                <src>${basedir}/target/plugins/${jar.aarch64.core}-${project.version}.jar</src>
+                <dst>${jar.aarch64.core}-${project.version}.jar</dst>
                 <type>file</type>
                 <mapper>
                     <type>perm</type>
@@ -439,9 +329,10 @@ To build the architecture-dependant installers, the execution must change to:
 </execution>
 ```
 
-A similar execution can be used for the `amd64` architecture, just changing the `deb` and `controlDir` fields to point to the correct architecture (and change the execution `id` if they're present at the same time). Also in the <dataSet> section, the `src` and `dst` fields must be changed to point to the correct architecture-specific jars.
+A similar execution can be used for the `amd64` architecture, just changing the `deb` and `controlDir` fields to point to the correct architecture (and change the execution `id` if they're present at the same time). Also in the `<dataSet>` section, the `src` and `dst` fields must be changed to point to the correct architecture-specific jars.
 
-The final result will consist of two DEB packages, one for each architecture. They will be found in the `distrib/target/deb/` folder with the following names:
+The final result will consist of two installers, one for each architecture. They will be found in the `distrib/target/deb/` folder with the following names:
+
 ```
 <artifactId>_<version>_<deb.amd64.architecture>.deb
 <artifactId>_<version>_<deb.arm64.architecture>.deb

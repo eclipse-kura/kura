@@ -29,6 +29,8 @@
         <deb.provides></deb.provides>
         <deb.recommendations></deb.recommendations>
         <deb.architecture>arm64</deb.architecture>
+        <target.device>generic</target.device>
+        <kura.os.version>debian</kura.os.version>
     </properties>
 
    <build>
@@ -69,14 +71,14 @@
                                 <property name="project.version" value="${project.version}" />
                                 <property name="project.build.profile" value="${project.build.profile}" />
                                 <property name="project.build.directory" value="${project.build.directory}" />
-                                <property name="build.name" value="${target.device}_${kura.os.version}" />
-                                <property name="target.device" value="generic" />
+                                <property name="target.device" value="${target.device}" />
                                 <property name="native.tag" value="${arch}"/>
-                                <property name="kura.os.version" value="debian" />
+                                <property name="kura.os.version" value="${kura.os.version}" />
+                                <property name="build.name" value="${target.device}_${kura.os.version}" />
                                 <property name="kura.arch" value="${arch}"/>
                                 <property name="kura.mem.size" value="1024m" />
                                 <property name="kura.install.dir" value="/opt/eclipse" />
-                                <ant antfile="${basedir}/../src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
+                                <ant antfile="${basedir}/../src/main/ant/build_equinox_distrib.xml" target="dist-core" />
                             </target>
                         </configuration>
                     </execution>
@@ -98,11 +100,11 @@
                             <deb>${basedir}/target/${deb.name}_${package.version}-${package.revision}_${deb.architecture}.deb</deb>
                             <snapshotExpand>true</snapshotExpand>
                             <snapshotTemplate>${package.snapshot}</snapshotTemplate>
-                            <controlDir>${project.basedir}/../src/main/resources/deb/control</controlDir>
+                            <controlDir>${project.basedir}/../src/main/resources/common/deb/control</controlDir>
                             <skipPOMs>false</skipPOMs>
                             <dataSet>
                                 <data>
-                                    <src>${basedir}/target/kura_${project.version}_${build.name}.zip</src>
+                                    <src>${basedir}/target/kura_${project.version}_${target.device}_${kura.os.version}.zip</src>
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>

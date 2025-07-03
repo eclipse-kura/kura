@@ -368,19 +368,12 @@
                                 </pluginExecution>
                                 <pluginExecution>
                                     <pluginExecutionFilter>
-                                        <groupId>
-                                            org.apache.maven.plugins
-                                        </groupId>
-                                        <artifactId>
-                                            maven-dependency-plugin
+                                        <groupId>org.apache.maven.plugins</groupId>
+                                        <artifactId>maven-dependency-plugin
                                         </artifactId>
-                                        <versionRange>
-                                            [1.0,)
-                                        </versionRange>
+                                        <versionRange>[1.0,)</versionRange>
                                         <goals>
-                                            <goal>
-                                                copy
-                                            </goal>
+                                            <goal>copy</goal>
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
@@ -389,19 +382,12 @@
                                 </pluginExecution>
                                 <pluginExecution>
                                     <pluginExecutionFilter>
-                                        <groupId>
-                                            org.apache.maven.plugins
-                                        </groupId>
-                                        <artifactId>
-                                            maven-antrun-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [1.0,)
+                                        <groupId>org.apache.maven.plugins</groupId>
+                                        <artifactId>maven-antrun-plugin</artifactId>
+                                        <versionRange>[1.0,)
                                         </versionRange>
                                         <goals>
-                                            <goal>
-                                                run
-                                            </goal>
+                                            <goal>run</goal>
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
@@ -410,15 +396,9 @@
                                 </pluginExecution>
                                 <pluginExecution>
                                     <pluginExecutionFilter>
-                                        <groupId>
-                                            org.codehaus.mojo
-                                        </groupId>
-                                        <artifactId>
-                                            build-helper-maven-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [1.9,)
-                                        </versionRange>
+                                        <groupId>org.codehaus.mojo</groupId>
+                                        <artifactId>build-helper-maven-plugin</artifactId>
+                                        <versionRange>[1.9,)</versionRange>
                                         <goals>
                                             <goal>regex-property</goal>
                                         </goals>
@@ -637,10 +617,8 @@
                                     <target>
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
-                                        <property name="project.build.profile"
-                                            value="${project.build.profile}" />
-                                        <property name="project.build.directory"
-                                            value="${project.build.directory}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
                                         <property name="build.name" value="x86_64-nn" />
                                         <property name="target.device" value="x86_64-nn" />
                                         <property name="native.tag" value="x86_64" />

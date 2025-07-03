@@ -78,6 +78,8 @@
                                 <property name="kura.arch" value="${arch}"/>
                                 <property name="kura.mem.size" value="1024m" />
                                 <property name="kura.install.dir" value="/opt/eclipse" />
+                                <property name="kura.basedir" value="${kura.basedir}" />
+
                                 <ant antfile="${basedir}/../src/main/ant/build_equinox_distrib.xml" target="dist-core" />
                             </target>
                         </configuration>

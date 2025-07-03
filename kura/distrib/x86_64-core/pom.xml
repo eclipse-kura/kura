@@ -21,6 +21,7 @@
 
     <properties>
         <kura.basedir>../</kura.basedir>
+        <arch>x86_64</arch>
         <deb.name>kura-core</deb.name>
         <deb.dependencies>
             setserial, zip, gzip, unzip, procps, usbutils, socat, gawk, sed, inetutils-telnet, polkit | policykit-1, ssh | openssh, openssl, busybox, cron, logrotate, libpam-modules, python3, openjdk-17-jre-headless | temurin-17-jdk, dos2unix, libtirpc3
@@ -77,6 +78,8 @@
                                 <property name="kura.arch" value="${arch}"/>
                                 <property name="kura.mem.size" value="1024m" />
                                 <property name="kura.install.dir" value="/opt/eclipse" />
+                                <property name="kura.basedir" value="${kura.basedir}" />
+
                                 <ant antfile="${basedir}/../src/main/ant/build_equinox_distrib.xml" target="dist-core" />
                             </target>
                         </configuration>
@@ -102,6 +105,7 @@
                             <controlDir>${project.basedir}/../src/main/resources/common/deb/control</controlDir>
                             <skipPOMs>false</skipPOMs>
                             <dataSet>
+                                <data>
                                     <src>${basedir}/target/kura_${project.version}_${target.device}_${kura.os.version}.zip</src>
                                     <type>file</type>
                                     <mapper>

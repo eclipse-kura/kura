@@ -13,7 +13,7 @@
      Red Hat Inc
 
 -->
-<project name="build_equinox_distrib" default="dist-linux" basedir="../../../">
+<project name="build_equinox_distrib" default="dist-linux" basedir="${kura.basedir}/../../">
 
     <target name="install-plugin">
         <first id="bundle.file">
@@ -78,7 +78,7 @@
 
         <echo message="Building Kura Distribution for ${build.output.name}..." />
 
-        <copy file="../src/main/resources/common/kura.properties"
+        <copy file="${kura.basedir}/src/main/resources/common/kura.properties"
             tofile="${project.build.directory}/${build.output.name}/kura.properties" />
         <propertyfile file="${project.build.directory}/${build.output.name}/kura.properties">
             <entry key="kura.version" value="KURA_${kura.version}" />
@@ -121,16 +121,16 @@
             <contains string="${build.name}" substring="docker" />
         </condition>
 
-        <copy file="../src/main/resources/common/snapshot_0.xml"
+        <copy file="${kura.basedir}/src/main/resources/common/snapshot_0.xml"
             tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml"
             failonerror="false" />
-        <copy file="../src/main/osgi/equinox/configuration/config.ini"
+        <copy file="${kura.basedir}/src/main/osgi/equinox/configuration/config.ini"
             tofile="${project.build.directory}/${build.output.name}/config.ini" />
 
         <!-- Copy jdk.dio files -->
         <antcall target="copy-jdk-dio-resources" />
 
-        <copy file="../src/main/resources/common/cacerts.ks"
+        <copy file="${kura.basedir}/src/main/resources/common/cacerts.ks"
             tofile="${project.build.directory}/${build.output.name}/cacerts.ks" />
 
         <copy toDir="${project.build.directory}/${build.output.name}/${plugins.folder}/">
@@ -158,7 +158,6 @@
         <antcall target="core.certificates-plugins" />
         <antcall target="core.cloud-plugins" />
         <antcall target="cloud.mqtt.kapua-plugins" />
-        <antcall target="cloud.mqtt.eclipseiot-plugins" />
         <antcall target="cloud.mqtt.raw-plugins" />
         <antcall target="core.comm-plugins" />
         <antcall target="core.configuration-plugins" />
@@ -200,22 +199,22 @@
         </propertyfile>
 
         <!-- Create the Kura start scripts -->
-        <loadfile property="kura.script.start" srcFile="../src/main/resources/common/scripts/start_kura.sh" />
+        <loadfile property="kura.script.start" srcFile="${kura.basedir}/src/main/resources/common/scripts/start_kura.sh" />
         <echo file="${project.build.directory}/${build.output.name}/start_kura.sh" append="false">${kura.script.start}</echo>
         
-        <loadfile property="kura.script.start.debug" srcFile="../src/main/resources/common/scripts/start_kura_debug.sh" />
+        <loadfile property="kura.script.start.debug" srcFile="${kura.basedir}/src/main/resources/common/scripts/start_kura_debug.sh" />
         <echo file="${project.build.directory}/${build.output.name}/start_kura_debug.sh" append="false">${kura.script.start.debug}</echo>
 
-        <loadfile property="kura.script.start.background" srcFile="../src/main/resources/common/scripts/start_kura_background.sh" />
+        <loadfile property="kura.script.start.background" srcFile="${kura.basedir}/src/main/resources/common/scripts/start_kura_background.sh" />
         <echo file="${project.build.directory}/${build.output.name}/start_kura_background.sh" append="false">${kura.script.start.background}</echo>
 
         <!-- Populate parameters -->
-        <copy file="../src/main/resources/common/kura_install.sh"
+        <copy file="${kura.basedir}/src/main/resources/common/kura_install.sh"
             tofile="${project.build.directory}/${build.output.name}/kura_install.sh" />
-        <copy file="../src/main/resources/common/kura.service"
+        <copy file="${kura.basedir}/src/main/resources/common/kura.service"
             tofile="${project.build.directory}/${build.output.name}/kura.service"
             failonerror="false" />
-        <copy file="../src/main/resources/common/kura.service.nn"
+        <copy file="${kura.basedir}/src/main/resources/common/kura.service.nn"
             tofile="${project.build.directory}/${build.output.name}/kura.service.nn"
             failonerror="false" />
         <replaceregexp
@@ -250,16 +249,16 @@
                 file="${project.build.directory}/${build.output.name}/cacerts.ks"
                 prefix="${build.output.name}/${security.folder}/" />
 
-            <zipfileset file="../src/main/resources/common/kura_custom.properties"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/kura_custom.properties"
                 prefix="${build.output.name}/${user.config.folder}/" />
 
-            <zipfileset file="../src/main/resources/common/favicon/favicon-16x16.png"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/favicon/favicon-16x16.png"
                 prefix="${build.output.name}/${console.folder}/skin/" />
-            <zipfileset file="../src/main/resources/common/favicon/favicon-32x32.png"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/favicon/favicon-32x32.png"
                 prefix="${build.output.name}/${console.folder}/skin/" />
-            <zipfileset file="../src/main/resources/common/favicon/favicon-96x96.png"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/favicon/favicon-96x96.png"
                 prefix="${build.output.name}/${console.folder}/skin/" />
-            <zipfileset file="../src/main/resources/common/favicon/favicon.ico"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/favicon/favicon.ico"
                 prefix="${build.output.name}/${console.folder}/skin/" />
 
             <zipfileset
@@ -267,7 +266,7 @@
                 prefix="${build.output.name}/${install.folder}/" filemode="700" />
 
             <zipfileset
-                file="../src/main/resources/common/manage_kura_users.sh"
+                file="${kura.basedir}/src/main/resources/common/manage_kura_users.sh"
                 prefix="${build.output.name}/${install.folder}/" filemode="700" />
 
             <zipfileset
@@ -277,45 +276,45 @@
                 file="${project.build.directory}/${build.output.name}/kura.service.nn"
                 prefix="${build.output.name}/${install.folder}" />
 
-            <zipfileset file="../src/main/resources/common/kura-tmpfiles.conf"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/kura-tmpfiles.conf"
                 prefix="${build.output.name}/${install.folder}" />
 
-            <zipfileset file="../src/main/resources/common/kura.logrotate"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/kura.logrotate"
                 prefix="${build.output.name}/${install.folder}" />
 
-            <zipfileset file="../src/main/resources/common/network_tools.py"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/network_tools.py"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="../src/main/resources/common/customize_iptables.py"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/customize_iptables.py"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="../src/main/resources/common/customize_kura_properties.py"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/customize_kura_properties.py"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="../src/main/resources/common/customize_snapshot.py"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/customize_snapshot.py"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="../src/main/resources/common/comment_interfaces_file.py"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/comment_interfaces_file.py"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="../src/main/resources/common/customize-installation.sh"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/customize-installation.sh"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset dir="../src/main/resources/common/jdk-dio-properties"
+            <zipfileset dir="${kura.basedir}/src/main/resources/common/jdk-dio-properties"
                 prefix="${build.output.name}/${install.folder}">
                 <include name="*" />
             </zipfileset>
-            <zipfileset dir="../src/main/resources/common/iptables"
+            <zipfileset dir="${kura.basedir}/src/main/resources/common/iptables"
                 prefix="${build.output.name}/${install.folder}">
                 <include name="*" />
             </zipfileset>
-            <zipfileset dir="../src/main/resources/common/snapshots"
+            <zipfileset dir="${kura.basedir}/src/main/resources/common/snapshots"
                 prefix="${build.output.name}/${install.folder}">
                 <include name="*" />
             </zipfileset>
 
-            <zipfileset file="../src/main/resources/common/named/named.ca"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/named/named.ca"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="../src/main/resources/common/named/named.rfc1912.zones"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/named/named.rfc1912.zones"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="../src/main/resources/common/named/usr.sbin.named"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/named/usr.sbin.named"
                 prefix="${build.output.name}/${install.folder}" />
 
-            <zipfileset file="../src/main/resources/common/dnsmasq"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/dnsmasq"
                 prefix="${build.output.name}/${install.folder}" />
 
             <zipfileset
@@ -331,7 +330,7 @@
                 fullpath="${build.output.name}/${binary.folder}/start_kura_background.sh"
                 filemode="777" />
             <zipfileset
-                file="../src/main/resources/common/gen_config_ini.sh"
+                file="${kura.basedir}/src/main/resources/common/gen_config_ini.sh"
                 fullpath="${build.output.name}/${binary.folder}/gen_config_ini.sh"
                 filemode="777" />
 
@@ -339,7 +338,7 @@
                 prefix="${build.output.name}/${framework.config.folder}/" />
             <zipfileset file="notice.html" prefix="${build.output.name}/" />
             <zipfileset file="epl-v10.html" prefix="${build.output.name}/" />
-            <zipfileset file="../src/main/resources/log4j.xml"
+            <zipfileset file="${kura.basedir}/src/main/resources/log4j.xml"
                 prefix="${build.output.name}/${log4j.folder}/" />
             <zipfileset
                 file="${project.build.directory}/${build.output.name}/kura.properties"
@@ -367,7 +366,7 @@
         <!-- Get version information for the bundles/files in this build -->
         <echo
             message="Gathering version information for the bundles/files in ${build.name}" />
-        <exec executable="../src/main/sh/get_build_versions.sh">
+        <exec executable="${kura.basedir}/src/main/sh/get_build_versions.sh">
             <arg value="${project.build.directory}" />
             <arg value="${build.output.name}.zip" />
             <arg value="kura_${project.version}_${build.name}.catalog" />
@@ -457,7 +456,7 @@
         <!-- Copy jdk.dio files -->
         <antcall target="copy-jdk-dio-resources" />
 
-        <copy file="../src/main/resources/common/cacerts.ks"
+        <copy file="${kura.basedir}/src/main/resources/common/cacerts.ks"
             tofile="${project.build.directory}/${build.output.name}/cacerts.ks" />
 
         <copy toDir="${project.build.directory}/${build.output.name}/${plugins.folder}/">
@@ -844,10 +843,10 @@ fi]]>
     </target>
 
     <target name="copy-jdk-dio-resources" unless="is.docker">
-        <copy file="../src/main/resources/${build.name}/jdk.dio.properties"
+        <copy file="${kura.basedir}/src/main/resources/${build.name}/jdk.dio.properties"
             tofile="${project.build.directory}/${build.output.name}/jdk.dio.properties"
             failonerror="false" />
-        <copy file="../src/main/resources/common/jdk.dio.policy"
+        <copy file="${kura.basedir}/src/main/resources/common/jdk.dio.policy"
             tofile="${project.build.directory}/${build.output.name}/jdk.dio.policy" />
     </target>
 

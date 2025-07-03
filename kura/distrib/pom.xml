@@ -535,20 +535,18 @@
                                     <target>
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
-                                        <property name="project.build.profile"
-                                            value="${project.build.profile}" />
-                                        <property name="project.build.directory"
-                                            value="${project.build.directory}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
                                         <property name="build.name" value="x86_64" />
                                         <property name="target.device" value="x86_64" />
                                         <property name="native.tag" value="x86_64" />
                                         <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="x86_64" />
-                                        <property name="kura.mem.size" value="512m" />
+                                        <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <ant
-                                            antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
-                                            target="dist-linux" />
+                                        <property name="kura.basedir" value="${kura.basedir}" />
+
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
                             </execution>
@@ -567,16 +565,14 @@
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>
-                                        ${basedir}/target/kura_${package.version}-${package.revision}_amd64.deb</deb>
+                                    <deb>${basedir}/target/kura_${package.version}-${package.revision}_amd64.deb</deb>
                                     <snapshotExpand>true</snapshotExpand>
                                     <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/x86_64/deb/control</controlDir>
                                     <skipPOMs>false</skipPOMs>
                                     <dataSet>
                                         <data>
-                                            <src>
-                                                ${basedir}/target/kura_${project.version}_x86_64.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_x86_64.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -584,8 +580,7 @@
                                             </mapper>
                                         </data>
                                         <data>
-                                            <src>
-                                                ${project.basedir}/src/main/resources/common/99-kura-nm.conf</src>
+                                            <src>${project.basedir}/src/main/resources/common/99-kura-nm.conf</src>
                                             <dst>/etc/NetworkManager/conf.d/99-kura-nm.conf</dst>
                                             <type>file</type>
                                         </data>
@@ -651,11 +646,11 @@
                                         <property name="native.tag" value="x86_64" />
                                         <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="x86_64" />
-                                        <property name="kura.mem.size" value="512m" />
+                                        <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <ant
-                                            antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
-                                            target="dist-linux" />
+                                        <property name="kura.basedir" value="${kura.basedir}" />
+
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
                             </execution>
@@ -674,16 +669,14 @@
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>
-                                        ${basedir}/target/kura-nn_${package.version}-${package.revision}_amd64.deb</deb>
+                                    <deb>${basedir}/target/kura-nn_${package.version}-${package.revision}_amd64.deb</deb>
                                     <snapshotExpand>true</snapshotExpand>
                                     <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/x86_64-nn/deb/control</controlDir>
                                     <skipPOMs>false</skipPOMs>
                                     <dataSet>
                                         <data>
-                                            <src>
-                                                ${basedir}/target/kura_${project.version}_x86_64-nn.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_x86_64-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -743,20 +736,18 @@
                                     <target>
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
-                                        <property name="project.build.profile"
-                                            value="${project.build.profile}" />
-                                        <property name="project.build.directory"
-                                            value="${project.build.directory}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
                                         <property name="build.name" value="aarch64" />
                                         <property name="target.device" value="aarch64" />
                                         <property name="native.tag" value="aarch64" />
                                         <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="aarch64" />
-                                        <property name="kura.mem.size" value="512m" />
+                                        <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <ant
-                                            antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
-                                            target="dist-linux" />
+                                        <property name="kura.basedir" value="${kura.basedir}" />
+
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
                             </execution>
@@ -775,16 +766,14 @@
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>
-                                        ${basedir}/target/kura_${package.version}-${package.revision}_arm64.deb</deb>
+                                    <deb>${basedir}/target/kura_${package.version}-${package.revision}_arm64.deb</deb>
                                     <snapshotExpand>true</snapshotExpand>
                                     <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/aarch64/deb/control</controlDir>
                                     <skipPOMs>false</skipPOMs>
                                     <dataSet>
                                         <data>
-                                            <src>
-                                                ${basedir}/target/kura_${project.version}_aarch64.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_aarch64.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -792,8 +781,7 @@
                                             </mapper>
                                         </data>
                                         <data>
-                                            <src>
-                                                ${project.basedir}/src/main/resources/common/99-kura-nm.conf</src>
+                                            <src>${project.basedir}/src/main/resources/common/99-kura-nm.conf</src>
                                             <dst>/etc/NetworkManager/conf.d/99-kura-nm.conf</dst>
                                             <type>file</type>
                                         </data>
@@ -850,20 +838,18 @@
                                     <target>
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
-                                        <property name="project.build.profile"
-                                            value="${project.build.profile}" />
-                                        <property name="project.build.directory"
-                                            value="${project.build.directory}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
                                         <property name="build.name" value="aarch64-nn" />
                                         <property name="target.device" value="aarch64-nn" />
                                         <property name="native.tag" value="aarch64" />
                                         <property name="kura.os.version" value="debian" />
                                         <property name="kura.arch" value="aarch64" />
-                                        <property name="kura.mem.size" value="512m" />
+                                        <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <ant
-                                            antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
-                                            target="dist-linux" />
+                                        <property name="kura.basedir" value="${kura.basedir}" />
+
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
                             </execution>
@@ -882,16 +868,14 @@
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>
-                                        ${basedir}/target/kura-nn_${package.version}-${package.revision}_arm64.deb</deb>
+                                    <deb>${basedir}/target/kura-nn_${package.version}-${package.revision}_arm64.deb</deb>
                                     <snapshotExpand>true</snapshotExpand>
                                     <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                                     <controlDir>${basedir}/src/main/resources/aarch64-nn/deb/control</controlDir>
                                     <skipPOMs>false</skipPOMs>
                                     <dataSet>
                                         <data>
-                                            <src>
-                                                ${basedir}/target/kura_${project.version}_aarch64-nn.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_aarch64-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -952,10 +936,8 @@
                                     <target>
                                         <property name="buildNumber" value="buildNumber" />
                                         <property name="project.version" value="${project.version}" />
-                                        <property name="project.build.profile"
-                                            value="${project.build.profile}" />
-                                        <property name="project.build.directory"
-                                            value="${project.build.directory}" />
+                                        <property name="project.build.profile" value="${project.build.profile}" />
+                                        <property name="project.build.directory" value="${project.build.directory}" />
                                         <property name="build.name" value="docker-x86_64-nn" />
                                         <property name="target.device" value="docker-x86_64-nn" />
                                         <property name="native.tag" value="x86_64" />
@@ -963,9 +945,9 @@
                                         <property name="kura.arch" value="x86_64" />
                                         <property name="kura.mem.size" value="1024m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
-                                        <ant
-                                            antfile="${basedir}/src/main/ant/build_equinox_distrib.xml"
-                                            target="dist-linux" />
+                                        <property name="kura.basedir" value="${kura.basedir}" />
+
+                                        <ant antfile="${basedir}/src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
                                     </target>
                                 </configuration>
                             </execution>
@@ -984,10 +966,8 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <copy todir="${project.build.directory}"
-                                            file="${project.basedir}/src/main/resources/docker-x86_64-nn/Dockerfile" />
-                                        <exec executable="docker" dir="${project.build.directory}"
-                                            failonerror="true">
+                                        <copy todir="${project.build.directory}" file="${project.basedir}/src/main/resources/docker-x86_64-nn/Dockerfile" />
+                                        <exec executable="docker" dir="${project.build.directory}" failonerror="true">
                                             <arg value="build" />
                                             <arg value="-t" />
                                             <arg value="base-kura-docker:${project.version}" />
@@ -1013,17 +993,14 @@
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>
-                                        ${basedir}/target/kura_${package.version}-${package.revision}_docker-x86_64-nn_installer.deb</deb>
+                                    <deb>${basedir}/target/kura_${package.version}-${package.revision}_docker-x86_64-nn_installer.deb</deb>
                                     <snapshotExpand>true</snapshotExpand>
                                     <snapshotTemplate>${package.snapshot}</snapshotTemplate>
-                                    <controlDir>
-                                        ${basedir}/src/main/resources/docker-x86_64-nn/deb/control</controlDir>
+                                    <controlDir>${basedir}/src/main/resources/docker-x86_64-nn/deb/control</controlDir>
                                     <skipPOMs>false</skipPOMs>
                                     <dataSet>
                                         <data>
-                                            <src>
-                                                ${basedir}/target/kura_${project.version}_docker-x86_64-nn.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_docker-x86_64-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1064,8 +1041,7 @@
                                 <phase>package</phase>
                                 <configuration>
                                     <executable>docker</executable>
-                                    <workingDirectory>
-                                        ${project.basedir}/src/main/resources/docker-ubi8-x86_64-nn</workingDirectory>
+                                    <workingDirectory>${project.basedir}/src/main/resources/docker-ubi8-x86_64-nn</workingDirectory>
                                     <arguments>
                                         <argument>build</argument>
                                         <argument>--build-arg</argument>
@@ -1112,8 +1088,7 @@
                                 <phase>package</phase>
                                 <configuration>
                                     <executable>docker</executable>
-                                    <workingDirectory>
-                                        ${project.basedir}/src/main/resources/docker-alpine-x86_64-nn</workingDirectory>
+                                    <workingDirectory>${project.basedir}/src/main/resources/docker-alpine-x86_64-nn</workingDirectory>
                                     <arguments>
                                         <argument>build</argument>
                                         <argument>--build-arg</argument>

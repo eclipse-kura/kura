@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -426,8 +426,8 @@ public class NMConfigurationServiceImpl implements SelfConfiguringComponent {
         }
 
         try {
-            this.nmDbusConnector.apply(networkProperties);
-        } catch (DBusExecutionException | DBusException e) {
+            this.nmDbusConnector.asyncApply(networkProperties);
+        } catch (DBusExecutionException e) {
             logger.error("Couldn't apply network configuration settings due to: ", e);
         }
     }

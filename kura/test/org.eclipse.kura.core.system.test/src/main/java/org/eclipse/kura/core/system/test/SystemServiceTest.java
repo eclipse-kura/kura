@@ -319,4 +319,10 @@ public class SystemServiceTest {
         assertFalse(systemService.isWPA3WifiSecurityEnabled());
     }
 
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void shouldGetDefaultNetworkConfigurationTimeoutProperty() {
+        assertEquals(30, systemService.getNetworkConfigurationTimeout());
+    }
+
 }

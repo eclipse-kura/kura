@@ -5079,6 +5079,10 @@ Since the network configuration shown on the screen may not be synchronized with
 <p class="admonition-title">Tip</p>
 <p>It is recommended that the <strong>IPv4</strong> or <strong>IPv6</strong> tab is configured first since it defines how the interface is going to be used.</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When the <strong>Apply</strong> button is clicked, the network configuration is submitted and the configuration process starts. If some network interfaces are configured to connect, NetworkManager will setup and start the connection. The default timeout for the connection attempt is <strong>30s</strong>, but this can be changed with the <code>kura.network.configuration.timeout</code> property in the <code>kura_custom.properties</code> file.</p>
+</div>
 <h2 id="tcpip-configuration">TCP/IP Configuration</h2>
 <p>The <strong>IPv4</strong> and <strong>IPv6</strong> tabs contain the following configuration parameters:</p>
 <ul>
@@ -5180,10 +5184,10 @@ Since the network configuration shown on the screen may not be synchronized with
 <p>The rules shown above create an <em>Overloaded</em> (i.e., many-to-one) NAT. This type of network address translation maps multiple IP addresses on the LAN side to a single IP address on the WAN side, allowing internet access from hosts on a local network via a gateway (WAN) interface. Note that for NAT rules to be added, it is insufficient to enable NATing through the <strong>DHCPv4 &amp; NAT</strong> tab of the LAN interface; there must also be another interface designated as WAN.</p>
 <p><img alt="Network Configuration DHCP and NAT" src="../images/network-configuration-dhcp-nat.png" /></p>
 <h2 id="network-linux-configuration">Network Linux Configuration</h2>
-<p>When applying a new network configuration, Kura changes the configuration files of the Linux networking subsystem. Please read the following note before proceeding with manual changes of the Linux networking configuration.</p>
+<p>When applying a new network configuration, Kura configures NetworkManager and ModemManager to apply the desidered system configuration. Moreover, it changes some configuration files of the Linux networking subsystem. Please read the following note before proceeding with manual changes of the Linux networking configuration.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>It is <strong>NOT</strong> recommended performing manual editing of the Linux networking configuration files when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.</p>
+<p>It is <strong>NOT</strong> recommended performing manual editing of the Linux networking configuration files or manually configuring  NetworkManager or ModemManager when the gateway configuration is being managed through Kura. Kura will be notified by NM/MM and it will roll-back the configuration.</p>
 </div>
 <h2 id="network-configuration-properties">Network Configuration properties</h2>
 <p>The Network configuration can be modified using the Kura Gateway Administration Console, as described above, the <a href="doc:configuration-service">Configuration Service</a> or appling a proper <a href="doc:snapshot-management">snapshot</a>.</p>

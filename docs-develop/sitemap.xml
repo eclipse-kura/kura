@@ -2,742 +2,742 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/administration/application-management/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/administration/directory-layout/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/administration/remote-management-kapua/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/administration/snapshot-management/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/administration/system-component-inventory/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/cloud-api/app-dev-guide/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/cloud-api/built-in-cloud/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/cloud-api/cloud-conn-dev-guide/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/cloud-api/overview/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/cloud-api/user-guide/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/cloud-platform/kura-aws-cloud/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/cloud-platform/kura-azure/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/cloud-platform/kura-ec-cloud/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/cloud-platform/kura-hono/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/cloud-platform/kura-kapua/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/cloud-platform/kura-sparkplug/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/cloud-platform/raw-cloud-connection/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/cloud-platform/apache-camel-integration/kura-camel-app/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/cloud-platform/apache-camel-integration/kura-camel-cloud/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/cloud-platform/apache-camel-integration/kura-camel/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/connect-field-devices/IO-apis/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/connect-field-devices/asset-implemetation/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/connect-field-devices/asset-v1-mqtt-namespace/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/connect-field-devices/driver-and-assets/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/connect-field-devices/driver-implemetation/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/connect-field-devices/eddystone-driver/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/connect-field-devices/field-protocols/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/connect-field-devices/gpio-driver/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/connect-field-devices/ibeacon-driver/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/connect-field-devices/opcua-driver/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/connect-field-devices/s7-driver/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/connect-field-devices/sensehat-driver/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/connect-field-devices/sensortag-driver/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/connect-field-devices/xdk-driver/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/active-mq-artemis-broker/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/clock-service/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/command-service/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/configuration-service/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/container-orchestration-image-auth/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/container-orchestration-provider-apis/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/container-orchestration-provider-authenticated-registries/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/container-orchestration-provider-usage/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/container-orchestration-provider/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/deployment-service/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/device-configuration-changes/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/h2db-service/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/introduction/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/network-status-rest-v1/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/nvidia-triton-server-inference-engine/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/position-service/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/rest-service/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/simple-artemis-mqtt-broker/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/sqlite-db-service/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/core-services/watchdog-service/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/access-banner/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/authentication-and-authorization/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/cellular-configuration/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/cloud-connections/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/cloud-service-configuration/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/data-service-configuration/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/data-transport-service-configuration/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/device-information/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/ethernet-configuration/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/firewall-configuration/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/gateway-administration-console-authentication/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/gateway-administration-console/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/gateway-status/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/keys-and-certificates/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/keystores-management/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/network-advanced/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/network-configuration/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/network-failover/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/network-hardware/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/network-threat-manager/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/password-strength/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/ssl-configuration/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/vlan-configuration/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/web-console-configuration/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/wifi-configuration-8021x/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/gateway-configuration/wifi-configuration/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/getting-started/docker-quick-start/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/getting-started/install-kura/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/getting-started/nvidia-jetson-orin-quick-start/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/getting-started/raspberry-pi-raspberryos-quick-start/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/getting-started/raspberry-pi-ubuntu-20-quick-start/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/getting-started/zima-board-quick-start/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/configurable-application/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/connected-application/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/contributing/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/deploy-and-debug-applications/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/development-environment-setup/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/hello-world-application/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/how-to-manage-network-settings/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/how-to-serial-ports/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/how-to-use-beacon-apis/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/how-to-use-bt-le-apis/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/how-to-use-can-bus/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/how-to-use-dummy-signature-service/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/how-to-use-gpio/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/how-to-use-modbus/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/how-to-use-watchdog/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/kura-addon-archetype/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/ram-usage-considerations/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/java-application-development/remote-debugging-on-target-platform/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/assets-as-wire-components/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/introduction/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/wire-graph-service-configuration-format/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/wire-service-references/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/wire-service-rest-v1/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/wires-mqtt-namespace/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/multiport-wire-components/join-component/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/multiport-wire-components/mathematical-components-example/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/multiport-wire-components/multiport-wire-components/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/script-components/graalvm-conditional-component/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/script-components/graalvm-filter-component/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/script-components/introduction/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/script-components/nashorn-conditional-component/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/script-components/nashorn-script-filter/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/single-port-wire-components/ai-wire-component/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/single-port-wire-components/db-store-and-filter/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/single-port-wire-components/fifo-component/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/usage-examples/eddystone-driver-application/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/usage-examples/gpio-driver-application/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/usage-examples/ibeacon-driver-application/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/usage-examples/opcua-application/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/kura-wires/usage-examples/ti-sensortag-application/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/quality-assurance/intro/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/quality-assurance/system-testing/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/quality-assurance/unit-testing/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/javadoc/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/mqtt-namespace/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/rest-apis/rest-cloudconnection-api/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/rest-apis/rest-command-api/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/rest-apis/rest-configuration-service-v1/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/rest-apis/rest-configuration-service-v2/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/rest-apis/rest-deploy-api/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/rest-apis/rest-identity-api-v1/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/rest-apis/rest-identity-api-v2/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/rest-apis/rest-inventory-api/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/rest-apis/rest-network-configuration-api/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/rest-apis/rest-position-api/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/rest-apis/rest-security-api-v1/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/rest-apis/rest-security-api-v2/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/rest-apis/rest-service-listing-api/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/rest-apis/rest-session-api/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/references/rest-apis/rest-system-api/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/tutorials/AD-EdgeAI/</loc>
-         <lastmod>2025-06-23</lastmod>
+         <lastmod>2025-07-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>

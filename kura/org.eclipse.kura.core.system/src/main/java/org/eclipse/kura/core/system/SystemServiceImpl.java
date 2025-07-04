@@ -936,30 +936,12 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public int getKuraSnapshotsCount() {
-        int iMaxCount = 10;
-        final Optional<String> maxCount = getProperty(KEY_KURA_SNAPSHOTS_COUNT);
-        if (maxCount.isPresent() && maxCount.get().trim().length() > 0) {
-            try {
-                iMaxCount = Integer.parseInt(maxCount.get());
-            } catch (NumberFormatException nfe) {
-                logger.error("Error - Invalid kura.snapshots.count setting. Using default.", nfe);
-            }
-        }
-        return iMaxCount;
+        return getIntegerPropertyValue(KEY_KURA_SNAPSHOTS_COUNT, 10);
     }
 
     @Override
     public int getKuraWifiTopChannel() {
-        final Optional<String> topWifiChannel = getProperty(KEY_KURA_WIFI_TOP_CHANNEL);
-        if (topWifiChannel.isPresent() && topWifiChannel.get().trim().length() > 0) {
-            return Integer.parseInt(topWifiChannel.get());
-        }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("The last wifi channel is not defined for this system - setting fake value.");
-        }
-
-        return Integer.MAX_VALUE;
+        return getIntegerPropertyValue(KEY_KURA_WIFI_TOP_CHANNEL, Integer.MAX_VALUE);
     }
 
     @Override
@@ -974,23 +956,12 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public int getFileCommandZipMaxUploadSize() {
-        final Optional<String> commandMaxUpload = getProperty(KEY_FILE_COMMAND_ZIP_MAX_SIZE);
-        if (commandMaxUpload.isPresent() && commandMaxUpload.get().trim().length() > 0) {
-            return Integer.parseInt(commandMaxUpload.get());
-        }
-        logger.warn("Maximum command line upload size not available. Set default to 100 MB");
-        return 100;
+        return getIntegerPropertyValue(KEY_FILE_COMMAND_ZIP_MAX_SIZE, 100);
     }
 
     @Override
     public int getFileCommandZipMaxUploadNumber() {
-        final Optional<String> commandMaxFilesUpload = getProperty(KEY_FILE_COMMAND_ZIP_MAX_NUMBER);
-        if (commandMaxFilesUpload.isPresent() && commandMaxFilesUpload.get().trim().length() > 0) {
-            return Integer.parseInt(commandMaxFilesUpload.get());
-        }
-        logger.warn(
-                "Missing the parameter that specifies the maximum number of files uploadable using the command servlet. Set default to 1024 files");
-        return 1024;
+        return getIntegerPropertyValue(KEY_FILE_COMMAND_ZIP_MAX_NUMBER, 1024);
     }
 
     @Override
@@ -1540,6 +1511,24 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         }
 
         return false;
+    }
+
+    @Override
+    public int getNetworkConfigurationTimeout() {
+        return getIntegerPropertyValue(KEY_NETWORK_CONFIGURATION_TIMEOUT, 30);
+    }
+
+    private int getIntegerPropertyValue(String propertyName, int defaultValue) {
+        final Optional<String> propertyValue = getProperty(propertyName);
+        if (propertyValue.isPresent() && !propertyValue.get().trim().isEmpty()) {
+            try {
+                return Integer.parseInt(propertyValue.get());
+            } catch (NumberFormatException e) {
+                logger.error("Cannot parse integer value for property {}: {}. Set it to default {}.", propertyName,
+                        propertyValue.get(), defaultValue, e);
+            }
+        }
+        return defaultValue;
     }
 
 }

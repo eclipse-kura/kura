@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -140,6 +140,11 @@ public interface SystemService {
      * @since 3.0
      */
     public static final String KEY_WPA3_WIFI_SECURITY_ENABLE = "kura.wpa3.wifi.security.enable";
+
+    /**
+     * @since 3.0
+     */
+    public static final String KEY_NETWORK_CONFIGURATION_TIMEOUT = "kura.network.configuration.timeout";
 
     /**
      * @deprecated
@@ -632,5 +637,13 @@ public interface SystemService {
      * @return true if the WPA3 WiFi Security is enabled
      */
     public boolean isWPA3WifiSecurityEnabled();
+
+    /**
+     * Returns the timeout in seconds used for applying a network configuration.
+     *
+     * @since 3.0
+     * @return the timeout value in seconds
+     */
+    public int getNetworkConfigurationTimeout();
 
 }

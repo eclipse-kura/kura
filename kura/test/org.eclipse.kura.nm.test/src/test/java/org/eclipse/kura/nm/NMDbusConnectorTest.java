@@ -1077,7 +1077,7 @@ public class NMDbusConnectorTest {
     @Test
     public void shouldApplyWPA3WiFiConfigurationIfWPA3IsSupported() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
-        givenSystemService(true);
+        givenSystemService(true, 30);
         givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
                 true, false, false);
         givenMockedDeviceList();
@@ -1094,7 +1094,7 @@ public class NMDbusConnectorTest {
     @Test
     public void shouldNotApplyWPA3WiFiConfigurationIfWPA3IsNotSupported() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
-        givenSystemService(false);
+        givenSystemService(false, 30);
         givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
                 true, false, false);
         givenMockedDeviceList();
@@ -1111,7 +1111,7 @@ public class NMDbusConnectorTest {
     @Test
     public void shouldApplyWPA2WPA3WiFiConfigurationIfWPA3IsSupported() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
-        givenSystemService(true);
+        givenSystemService(true, 30);
         givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
                 true, false, false);
         givenMockedDeviceList();
@@ -1128,7 +1128,7 @@ public class NMDbusConnectorTest {
     @Test
     public void shouldNotApplyWPA2WPA3WiFiConfigurationIfWPA3IsNotSupported() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
-        givenSystemService(false);
+        givenSystemService(false, 30);
         givenMockedDevice("wlan0", "wlan0", NMDeviceType.NM_DEVICE_TYPE_WIFI, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
                 true, false, false);
         givenMockedDeviceList();
@@ -1159,7 +1159,7 @@ public class NMDbusConnectorTest {
     }
 
     @Test
-    public void shouldStartModemTaskHanlderWithModemInterface() throws DBusException, IOException {
+    public void shouldStartModemTaskHandlerWithModemInterface() throws DBusException, IOException {
         givenBasicMockedDbusConnector();
         givenNMActivationFailed();
         givenMockedDevice("1-6", "wwan0", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_FAILED, true,
@@ -1177,6 +1177,33 @@ public class NMDbusConnectorTest {
 
         thenNoExceptionIsThrown();
         thenModemTaskHandlerIsActive(true, "1-6");
+    }
+
+    @Test
+    public void asyncApplyShouldWorkWithEnabledModem() throws DBusException, IOException {
+        givenBasicMockedDbusConnector();
+        givenMockedDevice("1-5", "ttyACM17", NMDeviceType.NM_DEVICE_TYPE_MODEM, NMDeviceState.NM_DEVICE_STATE_ACTIVATED,
+                true, false, false);
+        givenMockedDeviceList();
+        givenSystemService(false, 10);
+
+        givenNetworkConfigMapWith("net.interfaces", "1-5,");
+        givenNetworkConfigMapWith("net.interface.1-5.config.ip4.status", "netIPv4StatusEnabledWAN");
+        givenNetworkConfigMapWith("net.interface.1-5.config.dhcpClient4.enabled", true);
+        givenNetworkConfigMapWith("net.interface.1-5.config.apn", "myAwesomeAPN");
+        givenNetworkConfigMapWith("net.interface.1-5.config.gpsEnabled", false);
+        givenNetworkConfigMapWith("net.interface.1-5.config.resetTimeout", 0);
+        givenNetworkConfigMapWith("net.interface.1-5.config.persist", false);
+        givenNetworkConfigMapWith("net.interface.1-5.config.holdoff", 15);
+        givenNetworkConfigMapWith("net.interface.1-5.config.maxFail", 3);
+
+        whenAsyncApplyIsCalledWith(this.netConfig);
+        whenWaitForSeconds(20);
+
+        thenNoExceptionIsThrown();
+        thenConnectionUpdateIsCalledFor("ttyACM17");
+        thenActivateConnectionIsCalledFor("ttyACM17");
+        thenLocationSetupWasCalledOnceWith(EnumSet.of(MMModemLocationSource.MM_MODEM_LOCATION_SOURCE_NONE), false);
     }
 
     /*
@@ -1582,9 +1609,10 @@ public class NMDbusConnectorTest {
         clearInvocations(this.mockConnection);
     }
 
-    private void givenSystemService(boolean isWPASupported) {
+    private void givenSystemService(boolean isWPASupported, int configurationTimeout) {
         SystemService mockSystemService = mock(SystemService.class);
         when(mockSystemService.isWPA3WifiSecurityEnabled()).thenReturn(isWPASupported);
+        when(mockSystemService.getNetworkConfigurationTimeout()).thenReturn(configurationTimeout);
 
         this.instanceNMDbusConnector.setSystemService(mockSystemService);
     }
@@ -1656,6 +1684,16 @@ public class NMDbusConnectorTest {
         }
     }
 
+    private void whenAsyncApplyIsCalledWith(Map<String, Object> networkConfig) {
+        try {
+            this.instanceNMDbusConnector.asyncApply(networkConfig);
+        } catch (NoSuchElementException e) {
+            this.hasNoSuchElementExceptionThrown = true;
+        } catch (NullPointerException e) {
+            this.hasNullPointerExceptionThrown = true;
+        }
+    }
+
     private void whenApplySingleIsCalledWith(String deviceId) {
         try {
             this.instanceNMDbusConnector.apply(deviceId);
@@ -1716,6 +1754,14 @@ public class NMDbusConnectorTest {
 
         } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void whenWaitForSeconds(int seconds) {
+        try {
+            Thread.sleep(seconds * 1000L);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

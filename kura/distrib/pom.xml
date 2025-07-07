@@ -265,28 +265,48 @@
                         <goals>
                             <goal>run</goal>
                         </goals>
-                        <configuration>
+                       <configuration>
                             <target>
+                                <resourcecount property="files.count">
+                                    <fileset dir="${basedir}/target">
+                                        <include name="*.deb"/>
+                                        <include name="*.dp"/>
+                                        <include name="*.zip"/>
+                                        <include name="*.target"/>
+                                        <include name="kura_${project.version}_*.sh"/>
+                                        <include name="kura_${project.version}_*.dp"/>
+                                    </fileset>
+                                </resourcecount>
+
+                                <antcall target="do-checksums-md5" />
+                                <antcall target="do-checksums-sha1" />
+                            </target>
+                                
+                            <target name="do-checksums-md5" if="files.count">
                                 <checksum algorithm="md5">
-                                    <fileset dir="${basedir}/target/">
-                                        <include name="*.deb" />
-                                        <include name="*.dp" />
-                                        <include name="*.zip" />
-                                        <include name="*.target" />
-                                        <include name="kura_${project.version}_*.sh" />
-                                        <include name="kura_${project.version}_*.dp" />
+                                    <fileset dir="${basedir}/target">
+                                        <include name="*.deb"/>
+                                        <include name="*.dp"/>
+                                        <include name="*.zip"/>
+                                        <include name="*.target"/>
+                                        <include name="kura_${project.version}_*.sh"/>
+                                        <include name="kura_${project.version}_*.dp"/>
+
                                         <exclude name="kura_${project.version}_*.dp" />
                                         <exclude name="kura_${project.version}_*.zip" />
                                     </fileset>
                                 </checksum>
+                            </target>
+                            <target name="do-checksums-sha1" if="files.count">
                                 <checksum algorithm="SHA-1">
-                                    <fileset dir="${basedir}/target/">
-                                        <include name="*.deb" />
-                                        <include name="*.dp" />
-                                        <include name="*.zip" />
-                                        <include name="*.target" />
-                                        <include name="kura_${project.version}_*.sh" />
-                                        <include name="kura_${project.version}_*.dp" />
+                                    <fileset dir="${basedir}/target">
+                                        <include name="*.deb"/>
+                                        <include name="*.dp"/>
+                                        <include name="*.zip"/>
+                                        <include name="*.target"/>
+                                        <include name="kura_${project.version}_*.sh"/>
+                                        <include name="kura_${project.version}_*.dp"/>
+
                                         <exclude name="kura_${project.version}_*.dp" />
                                         <exclude name="kura_${project.version}_*.zip" />
                                     </fileset>
@@ -326,19 +346,11 @@
                             <pluginExecutions>
                                 <pluginExecution>
                                     <pluginExecutionFilter>
-                                        <groupId>
-                                            org.codehaus.mojo
-                                        </groupId>
-                                        <artifactId>
-                                            properties-maven-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [1.2.1,)
-                                        </versionRange>
+                                        <groupId>org.codehaus.mojo</groupId>
+                                        <artifactId>properties-maven-plugin</artifactId>
+                                        <versionRange>[1.2.1,)</versionRange>
                                         <goals>
-                                            <goal>
-                                                read-project-properties
-                                            </goal>
+                                            <goal>read-project-properties</goal>
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
@@ -347,19 +359,11 @@
                                 </pluginExecution>
                                 <pluginExecution>
                                     <pluginExecutionFilter>
-                                        <groupId>
-                                            org.codehaus.mojo
-                                        </groupId>
-                                        <artifactId>
-                                            buildnumber-maven-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [1.0,)
-                                        </versionRange>
+                                        <groupId>org.codehaus.mojo</groupId>
+                                        <artifactId>buildnumber-maven-plugin</artifactId>
+                                        <versionRange>[1.0,)</versionRange>
                                         <goals>
-                                            <goal>
-                                                create-timestamp
-                                            </goal>
+                                            <goal>create-timestamp</goal>
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
@@ -384,8 +388,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.apache.maven.plugins</groupId>
                                         <artifactId>maven-antrun-plugin</artifactId>
-                                        <versionRange>[1.0,)
-                                        </versionRange>
+                                        <versionRange>[1.0,)</versionRange>
                                         <goals>
                                             <goal>run</goal>
                                         </goals>

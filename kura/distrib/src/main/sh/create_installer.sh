@@ -31,7 +31,7 @@ fi
 cd $TARGET_DIR
 tar czvf $KURA_ZIP_FILE_NAME.tar.gz $KURA_ZIP_FILE_NAME
 
-sed "s|^INSTALL_DIR=.*|INSTALL_DIR=${INSTALL_DIR}|" $TARGET_DIR/../src/main/sh/$EXTRACT_NAME > tmp_file
+sed "s|^INSTALL_DIR=.*|INSTALL_DIR=${INSTALL_DIR}|" $TARGET_DIR/../../src/main/sh/$EXTRACT_NAME > tmp_file
 cat tmp_file $KURA_ZIP_FILE_NAME.tar.gz > $OUTPUT_NAME
 chmod +x $OUTPUT_NAME
 

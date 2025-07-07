@@ -52,7 +52,7 @@ spec:
         stage('Build target-platform') {
             timeout(time: 1, unit: 'HOURS') {
                 dir("kura") {
-                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
+                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6', options: [artifactsPublisher(disabled: true)]) {
                         sh "mvn -f target-platform/pom.xml clean install -Pno-mirror -Pcheck-exists-plugin"
                     }
                 }
@@ -62,7 +62,7 @@ spec:
         stage('Build core') {
             timeout(time: 2, unit: 'HOURS') {
                 dir("kura") {
-                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
+                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6', options: [artifactsPublisher(disabled: true)]) {
                         sh "mvn -f kura/pom.xml -Dsurefire.rerunFailingTestsCount=3 clean install -Pcheck-exists-plugin"
                     }
                 }
@@ -72,16 +72,10 @@ spec:
         stage('Build distrib') {
             timeout(time: 1, unit: 'HOURS') {
                 dir("kura") {
-                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
+                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6', options: [artifactsPublisher(disabled: true)]) {
                         sh "mvn -f kura/distrib/pom.xml clean install -DbuildAll"
                     }
                 }
-            }
-        }
-
-        stage('Archive .deb artifacts') {
-            dir("kura") {
-                archiveArtifacts artifacts: 'kura/distrib/target/*.deb', excludes: '**/*.jar', onlyIfSuccessful: true
             }
         }
 
@@ -91,12 +85,16 @@ spec:
             }
         }
 
-
+        stage('Archive .deb artifacts') {
+            dir("kura") {
+                archiveArtifacts artifacts: 'kura/distrib/target/*.deb', onlyIfSuccessful: true
+            }
+        }
 
         stage('Sonar') {
             timeout(time: 2, unit: 'HOURS') {
                 dir("kura") {
-                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
+                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6', options: [artifactsPublisher(disabled: true)]) {
                         withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONARCLOUD_TOKEN')]) {
                             withSonarQubeEnv {
                                 sh '''

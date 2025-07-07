@@ -27,7 +27,7 @@ spec:
 
         properties([
             disableConcurrentBuilds(abortPrevious: true),
-            buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '2', daysToKeepStr: '', numToKeepStr: '5')),
+            buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '1', daysToKeepStr: '', numToKeepStr: '3')),
             gitLabConnection('gitlab.eclipse.org'),
             [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
             [$class: 'JobLocalConfiguration', changeReasonComment: '']
@@ -79,17 +79,19 @@ spec:
             }
         }
 
+        stage('Archive .deb artifacts') {
+            dir("kura") {
+                archiveArtifacts artifacts: 'kura/distrib/target/*.deb', excludes: '**/*.jar', onlyIfSuccessful: true
+            }
+        }
+
         stage('Generate test reports') {
             dir("kura") {
                 junit 'kura/test/*/target/surefire-reports/*.xml'
             }
         }
 
-        stage('Archive .deb artifacts') {
-            dir("kura") {
-                archiveArtifacts artifacts: 'kura/distrib/target/*.deb', onlyIfSuccessful: true
-            }
-        }
+
 
         stage('Sonar') {
             timeout(time: 2, unit: 'HOURS') {

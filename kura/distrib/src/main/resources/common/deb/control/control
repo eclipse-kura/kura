@@ -19,7 +19,7 @@ Depends: openjdk-17-jre-headless | temurin-17-jdk,
  polkit | policykit-1, ssh | openssh, openssl, busybox, openvpn,
  bluez | bluez5, bluez-hcidump | bluez5-noinst-tools,
  chrony, chronyc | chrony, cron | cronie, logrotate, gpsd, python3
-Architecture: [[arch]]
+Architecture: [[deb.architecture]]
 Maintainer: Eclipse Kura Developers <kura-dev@eclipse.org>
 Homepage: https://eclipse-kura.github.io/kura/
 Description: Open-source IoT edge framework based on Java/OSGi

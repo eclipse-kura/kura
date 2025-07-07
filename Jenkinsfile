@@ -27,7 +27,7 @@ spec:
 
         properties([
             disableConcurrentBuilds(abortPrevious: true),
-            buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '2', daysToKeepStr: '', numToKeepStr: '5')),
+            buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '1', daysToKeepStr: '', numToKeepStr: '3')),
             gitLabConnection('gitlab.eclipse.org'),
             [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
             [$class: 'JobLocalConfiguration', changeReasonComment: '']
@@ -52,7 +52,7 @@ spec:
         stage('Build target-platform') {
             timeout(time: 1, unit: 'HOURS') {
                 dir("kura") {
-                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
+                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6', options: [artifactsPublisher(disabled: true)]) {
                         sh "mvn -f target-platform/pom.xml clean install -Pno-mirror -Pcheck-exists-plugin"
                     }
                 }
@@ -62,7 +62,7 @@ spec:
         stage('Build core') {
             timeout(time: 2, unit: 'HOURS') {
                 dir("kura") {
-                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
+                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6', options: [artifactsPublisher(disabled: true)]) {
                         sh "mvn -f kura/pom.xml -Dsurefire.rerunFailingTestsCount=3 clean install -Pcheck-exists-plugin"
                     }
                 }
@@ -72,7 +72,7 @@ spec:
         stage('Build distrib') {
             timeout(time: 1, unit: 'HOURS') {
                 dir("kura") {
-                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
+                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6', options: [artifactsPublisher(disabled: true)]) {
                         sh "mvn -f kura/distrib/pom.xml clean install -DbuildAll"
                     }
                 }
@@ -94,7 +94,7 @@ spec:
         stage('Sonar') {
             timeout(time: 2, unit: 'HOURS') {
                 dir("kura") {
-                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
+                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6', options: [artifactsPublisher(disabled: true)]) {
                         withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONARCLOUD_TOKEN')]) {
                             withSonarQubeEnv {
                                 sh '''

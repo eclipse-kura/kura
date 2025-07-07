@@ -3661,18 +3661,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#getting-the-source-code" class="md-nav__link">
+  <a href="#create-architecture-dependant-installers" class="md-nav__link">
     <span class="md-ellipsis">
-      Getting the source code
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#architecture-dependant-packages" class="md-nav__link">
-    <span class="md-ellipsis">
-      Architecture dependant packages
+      Create architecture dependant installers
     </span>
   </a>
   
@@ -4917,18 +4908,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#getting-the-source-code" class="md-nav__link">
+  <a href="#create-architecture-dependant-installers" class="md-nav__link">
     <span class="md-ellipsis">
-      Getting the source code
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#architecture-dependant-packages" class="md-nav__link">
-    <span class="md-ellipsis">
-      Architecture dependant packages
+      Create architecture dependant installers
     </span>
   </a>
   
@@ -4961,7 +4943,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>Maven-based build</li>
 <li>Template project for creating DEB packages</li>
 <li>Tycho-surefire based integration test template</li>
-<li>Uses a remote P2 repository for the target platform</li>
 </ul>
 <p>The Kura Archetype JAR (<code>kura-addon-archetype-&lt;kura-version&gt;.jar</code>) is available in the released artifacts and can be installed in the local maven repository with the following command:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mvn<span class="w"> </span>install:install-file<span class="w"> </span><span class="se">\</span>
@@ -4985,7 +4966,12 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><strong>artifactId</strong>: the Maven artifact id of the generated parent pom file and the name of the generated top level project folder, usually something like <code>org.eclipse.kura.myartifact</code></li>
 <li><strong>package</strong>: the Java package to be used for the main bundle, usually something like <code>org.eclipse.kura.myartifact</code></li>
 </ul>
-<p>Other parameters like <strong>version</strong> and <strong>mainBundleVendor</strong> can be changed by answering <code>n</code> after the <code>Confirm properties configuration</code> prompt, which appears after editing the properties above.</p>
+<p>The following optional parameters can be changed by answering <code>n</code> after the <code>Confirm properties configuration</code> prompt, which appears after editing the properties above:</p>
+<ul>
+<li><strong>version</strong>: the generated project's version. Defaults to <em>1.0.0-SNAPSHOT</em></li>
+<li><strong>mainBundleVendor</strong>: the name of the vendor to use in the metadata. Defaults to <em>Eclipse Kura</em></li>
+<li><strong>kuraVersion</strong>: the version of the Kura bill-of-materials, used to resolve dependencies. Defaults to <em>6.0.0[-SNAPSHOT]</em></li>
+</ul>
 <p>A <code>.gitignore</code> file is automatically added with a default configuration. The <code>OSGI-INF</code> folder is omitted because it will be generated during tests at compile-time (this is necessary to make the PDE launcher work).</p>
 <h3 id="add-the-generated-sources-to-git">Add the generated sources to <code>git</code></h3>
 <p>The project <em>requires</em> source control management via <code>git</code> to correctly build. To add the project to <code>git</code> run the following:</p>
@@ -5078,7 +5064,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><img alt="" src="../images/kura-addon-archetype/eclipse-import-maven-projects-2.png" /></p>
 <p>Note that if the workspace resides in the root of the project the parent POM file cannot be selected.</p>
 <h4 id="load-target-platform">Load target platform</h4>
-<p>Open the <em>.target</em> file in the <em>target-definition</em> project and click on <em>Set as Active Target Platform</em>. Note that this will download the bundles from the Kura P2 repository and it may take a while to complete.</p>
+<p>Open the <em>.target</em> file in the <em>target-definition</em> project and click on <em>Set as Active Target Platform</em>. Note that this will download all the dependencies declared in the target platform it may take a while to complete.</p>
 <p><img alt="" src="../images/kura-addon-archetype/eclipse-ide-reload-platform.png" /></p>
 <p>Eclipse IDE should rebuild the workspace automatically and show no errors. If errors appear, see next section.</p>
 <h4 id="optional-ide-errors-resolution">(Optional) IDE errors resolution</h4>
@@ -5092,203 +5078,100 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h2 id="architecture-specific-development">Architecture-specific development</h2>
 <p>The Addon Archetype standard procedure allows to build generic Debian installers not dependant on the architecture on which the bundle will be installed.</p>
 <p>However, it is possible to customise the files in the <code>distrib</code> folder to develop architecture-dependant installers: this might be necessary when a bundle contains native code (C/C++ libraries, jars that use JNI, etc.) or architecture-specific files (e.g. a systemd service file).</p>
-<p>In the following sections we will see how this can be accomplished for the DEB packages. These steps assume that architecture-specific jars are built in the form of fragments of the architecture-agnostic java code. The architecture-specific jars will then be copied in the <code>distrib</code> folder and included in the package.</p>
-<h3 id="getting-the-source-code">Getting the source code</h3>
-<p>The first modification is the copy and rename of the source code target files generated under the <code>bundles</code> project. Given the following bundles structure:</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>org.eclipse.kura.myartifact
+<p>In the following sections we will see how this can be accomplished for the DEB packages. These steps assume that architecture-specific jars are built in the form of fragments of the architecture-agnostic java code. The architecture-specific jars will then be copied in the <code>distrib</code> folder and included in the package. For example, given the following bundles structure:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>org.eclipse.kura.myartifact
 <a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>├── bundles
 <a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>│   ├── org.eclipse.kura.myartifact.bundle
 <a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>│   ├── org.eclipse.kura.myartifact.bundle.aarch64
 <a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>│   ├── org.eclipse.kura.myartifact.bundle.x86_64
 <a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>....
 </code></pre></div>
-The <code>org.eclipse.kura.myartifact.bundle</code> folder contains the agnostic code, while the <code>org.eclipse.kura.myartifact.bundle.aarch64</code> and <code>org.eclipse.kura.myartifact.bundle.x86_64</code> fragments contain the architecture-specific code. The <code>distrib</code> folder will be modified to include the architecture-specific jars in the generated package.</p>
-<p>First of all it is possible to define some properties in the <code>distrib/pom.xml</code> file:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nt">&lt;addon.installation.dir&gt;</span>/opt/eclipse/kura/plugins/6s<span class="nt">&lt;/addon.installation.dir&gt;</span>
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nt">&lt;native.core.installation.dir&gt;</span>/opt/eclipse/kura/plugins/5<span class="nt">&lt;/native.core.installation.dir&gt;</span>
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>...
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="nt">&lt;jar.name&gt;</span>org.eclipse.kura.myartifact.bundle<span class="nt">&lt;/jar.name&gt;</span>
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="nt">&lt;jar.aarch64.core&gt;</span>org.eclipse.kura.myartifact.bundle.aarch64<span class="nt">&lt;/jar.aarch64.core&gt;</span>
-<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="nt">&lt;jar.x86_64.core&gt;</span>org.eclipse.kura.myartifact.bundle.x86_64<span class="nt">&lt;/jar.x86_64.core&gt;</span>
-<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>...
-<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>
-<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>instead<span class="w"> </span>of
-<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="nt">&lt;deb.architecture&gt;</span>all<span class="nt">&lt;/deb.architecture&gt;</span>
-<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>use<span class="w"> </span>the<span class="w"> </span>following
-<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="nt">&lt;deb.amd64.architecture&gt;</span>amd64<span class="nt">&lt;/deb.amd64.architecture&gt;</span>
-<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="nt">&lt;deb.arm64.architecture&gt;</span>arm64<span class="nt">&lt;/deb.arm64.architecture&gt;</span>
+<p>The <code>org.eclipse.kura.myartifact.bundle</code> folder contains the agnostic code, while the <code>org.eclipse.kura.myartifact.bundle.aarch64</code> and <code>org.eclipse.kura.myartifact.bundle.x86_64</code> fragments contain the architecture-specific code.</p>
+<p>The objective is to produce two debian packages, one for each of the supported architectures. It is possible to modify the <code>pom.xml</code> in <code>distrib</code> to produce the correct metadata for the installers (see section below). Each debian package will install the main bundle and the relative fragment that matches the target environment. For example, the <em>aarch64</em> deb package will install:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>/opt/eclipse/kura/plugins/&lt;start-level&gt;s/org.eclipse.kura.myartifact.bundle-&lt;version&gt;.jar
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>/opt/eclipse/kura/plugins/&lt;start-level&gt;/org.eclipse.kura.myartifact.bundle.aarch64-&lt;version&gt;.jar
 </code></pre></div>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>These properties are used to define the architecture-specific jars and the architecture-specific debian metadata. The <code>addon.installation.dir</code> property is used to define the installation directory of the bundle in Kura. The <code>native.core.installation.dir</code> property is used to define the installation directory of the native code in Kura. It is important that the fragments are installed in a higher level directory than the main bundle, otherwise Kura will not be able to load the native code.</p>
-<p>The <code>jar.name</code> property is used to define the name of the main bundle, while the <code>jar.aarch64.core</code> and <code>jar.x86_64.core</code> properties are used to define the names of the architecture-specific fragments.</p>
-<p>Finally, the <code>deb.amd64.architecture</code> and <code>deb.arm64.architecture</code> properties are used to define the architecture-specific debian metadata.</p>
-</div>
-<p>The plugin responsible to copy and rename the jars is the <code>copy-rename-maven-plugin</code>. The plugin is configured in the <code>distrib/pom.xml</code> file as follows:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nt">&lt;execution&gt;</span>
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">    </span><span class="nt">&lt;id&gt;</span>copy-and-rename-jar<span class="nt">&lt;/id&gt;</span>
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">    </span><span class="nt">&lt;phase&gt;</span>generate-sources<span class="nt">&lt;/phase&gt;</span>
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">    </span><span class="nt">&lt;goals&gt;</span>
-<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">        </span><span class="nt">&lt;goal&gt;</span>copy<span class="nt">&lt;/goal&gt;</span>
-<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">    </span><span class="nt">&lt;/goals&gt;</span>
-<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">    </span><span class="nt">&lt;configuration&gt;</span>
-<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="w">        </span><span class="nt">&lt;sourceFile&gt;</span>${project.basedir}/../bundles/${jar.name}/target/${jar.name}-${project.version}.jar<span class="nt">&lt;/sourceFile&gt;</span>
-<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">        </span><span class="nt">&lt;destinationFile&gt;</span>target/${jar.name}_${project.version}.jar<span class="nt">&lt;/destinationFile&gt;</span>
-<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="w">    </span><span class="nt">&lt;/configuration&gt;</span>
-<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="nt">&lt;/execution&gt;</span>
-</code></pre></div>
-<p>To load also the architecture-specific jars, the plugin should be configured as follows:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nt">&lt;execution&gt;</span>
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">    </span><span class="nt">&lt;id&gt;</span>copy-and-rename-source-jar<span class="nt">&lt;/id&gt;</span>
-<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">    </span><span class="nt">&lt;phase&gt;</span>generate-sources<span class="nt">&lt;/phase&gt;</span>
-<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">    </span><span class="nt">&lt;goals&gt;</span>
-<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">        </span><span class="nt">&lt;goal&gt;</span>copy<span class="nt">&lt;/goal&gt;</span>
-<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">    </span><span class="nt">&lt;/goals&gt;</span>
-<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="w">    </span><span class="nt">&lt;configuration&gt;</span>
-<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="w">        </span><span class="nt">&lt;sourceFile&gt;</span>${project.basedir}/../bundles/${jar.name}/target/${jar.name}-${project.version}.jar<span class="nt">&lt;/sourceFile&gt;</span>
-<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="w">        </span><span class="nt">&lt;destinationFile&gt;</span>target/${jar.name}_${project.version}.jar<span class="nt">&lt;/destinationFile&gt;</span>
-<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="w">    </span><span class="nt">&lt;/configuration&gt;</span>
-<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="nt">&lt;/execution&gt;</span>
-<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="nt">&lt;execution&gt;</span>
-<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a><span class="w">    </span><span class="nt">&lt;id&gt;</span>copy-and-rename-aarch64-architecture-jar<span class="nt">&lt;/id&gt;</span>
-<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="w">    </span><span class="nt">&lt;phase&gt;</span>generate-sources<span class="nt">&lt;/phase&gt;</span>
-<a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a><span class="w">    </span><span class="nt">&lt;goals&gt;</span>
-<a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a><span class="w">        </span><span class="nt">&lt;goal&gt;</span>copy<span class="nt">&lt;/goal&gt;</span>
-<a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a><span class="w">    </span><span class="nt">&lt;/goals&gt;</span>
-<a id="__codelineno-16-18" name="__codelineno-16-18" href="#__codelineno-16-18"></a><span class="w">    </span><span class="nt">&lt;configuration&gt;</span>
-<a id="__codelineno-16-19" name="__codelineno-16-19" href="#__codelineno-16-19"></a><span class="w">        </span><span class="nt">&lt;sourceFile&gt;</span>${project.basedir}/../bundles/${jar.aarch64.core}/target/${jar.aarch64.core}-${project.version}.jar<span class="nt">&lt;/sourceFile&gt;</span>
-<a id="__codelineno-16-20" name="__codelineno-16-20" href="#__codelineno-16-20"></a><span class="w">        </span><span class="nt">&lt;destinationFile&gt;</span>target/input_files/${jar.aarch64.core}_${project.version}.jar<span class="nt">&lt;/destinationFile&gt;</span>
-<a id="__codelineno-16-21" name="__codelineno-16-21" href="#__codelineno-16-21"></a><span class="w">    </span><span class="nt">&lt;/configuration&gt;</span>
-<a id="__codelineno-16-22" name="__codelineno-16-22" href="#__codelineno-16-22"></a><span class="nt">&lt;/execution&gt;</span>
-<a id="__codelineno-16-23" name="__codelineno-16-23" href="#__codelineno-16-23"></a><span class="nt">&lt;execution&gt;</span>
-<a id="__codelineno-16-24" name="__codelineno-16-24" href="#__codelineno-16-24"></a><span class="w">    </span><span class="nt">&lt;id&gt;</span>copy-and-rename-x86_64-architecture-jar<span class="nt">&lt;/id&gt;</span>
-<a id="__codelineno-16-25" name="__codelineno-16-25" href="#__codelineno-16-25"></a><span class="w">    </span><span class="nt">&lt;phase&gt;</span>generate-sources<span class="nt">&lt;/phase&gt;</span>
-<a id="__codelineno-16-26" name="__codelineno-16-26" href="#__codelineno-16-26"></a><span class="w">    </span><span class="nt">&lt;goals&gt;</span>
-<a id="__codelineno-16-27" name="__codelineno-16-27" href="#__codelineno-16-27"></a><span class="w">        </span><span class="nt">&lt;goal&gt;</span>copy<span class="nt">&lt;/goal&gt;</span>
-<a id="__codelineno-16-28" name="__codelineno-16-28" href="#__codelineno-16-28"></a><span class="w">    </span><span class="nt">&lt;/goals&gt;</span>
-<a id="__codelineno-16-29" name="__codelineno-16-29" href="#__codelineno-16-29"></a><span class="w">    </span><span class="nt">&lt;configuration&gt;</span>
-<a id="__codelineno-16-30" name="__codelineno-16-30" href="#__codelineno-16-30"></a><span class="w">        </span><span class="nt">&lt;sourceFile&gt;</span>${project.basedir}/../bundles/${jar.x86_64.core}/target/${jar.x86_64.core}-${project.version}.jar<span class="nt">&lt;/sourceFile&gt;</span>
-<a id="__codelineno-16-31" name="__codelineno-16-31" href="#__codelineno-16-31"></a><span class="w">        </span><span class="nt">&lt;destinationFile&gt;</span>target/input_files/${jar.x86_64.core}_${project.version}.jar<span class="nt">&lt;/destinationFile&gt;</span>
-<a id="__codelineno-16-32" name="__codelineno-16-32" href="#__codelineno-16-32"></a><span class="w">    </span><span class="nt">&lt;/configuration&gt;</span>
-<a id="__codelineno-16-33" name="__codelineno-16-33" href="#__codelineno-16-33"></a><span class="nt">&lt;/execution&gt;</span>
-</code></pre></div>
-<p>In this way, in the <code>input_files</code> folder all the necessary jars will be copied and renamed to the correct name. The <code>input_files</code> folder is used to store the files that will be included in the package.</p>
-<h3 id="architecture-dependant-packages">Architecture dependant packages</h3>
+<p>Note that the fragment <code>org.eclipse.kura.myartifact.bundle.aarch64-&lt;version&gt;.jar</code> is put in a plugins folder that is not ending with <code>s</code> since fragments can never be started as they don't have their own lifecycle.</p>
+<h3 id="create-architecture-dependant-installers">Create architecture dependant installers</h3>
 <p>The <code>/distrib/deb/control/control</code> file contains the DEB package metadata. The standard file is configured as follows:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>Package: [[package.name]]
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>Version: [[project.version]]
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>Section: admin
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>Priority: optional
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>Depends: kura
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>Architecture: [[deb.architecture]]
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>Maintainer: Eclipse Kura Developers &lt;kura-dev@eclipse.org&gt;
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>Description: [[summary]]
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>  [[long.description]]
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>Homepage: https://eclipse-kura.github.io/kura/ (add correct link to documentation here)
+</code></pre></div>
+<p>The Architecture field is the one responsible to specify the architecture of the package. The value is set in the <code>/distrib/pom.xml</code> file, by the property <code>&lt;deb.architecture&gt;all&lt;/deb.architecture&gt;</code>. The value <code>all</code> means that the package can be installed on any architecture. This is the recommended value for packages that do not contain architecture-specific files.</p>
+<p>To build a package that contains architecture-specific files, it is necessary to separate the control files of the different architectures (namely, <code>aarch64</code> and <code>amd64</code>). To do so, create two directories in the <code>distrib/deb/</code> folder with this structure:</p>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>distrib
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>├── deb
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>│   ├── amd64
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>│   ├── arm64
+</code></pre></div>
+Each <code>control</code> file must be created in the <code>distrib/deb/&lt;arch&gt;/</code> folder. These folders can also contain the <code>postinst</code> and <code>postrm</code> files, used to execute commands after the installation and before the removal of the package. The content of these files is not relevant for this example, but they can be used to execute commands that are necessary for the correct installation of the package.</p>
+<p>An example of <code>control</code> file for the <code>arm64</code> architecture is:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>Package: [[package.name]]
 <a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>Version: [[project.version]]
 <a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>Section: admin
 <a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>Priority: optional
 <a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>Depends: kura
-<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>Architecture: [[deb.architecture]]
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>Architecture: [[deb.arm64.architecture]]
 <a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>Maintainer: Eclipse Kura Developers &lt;kura-dev@eclipse.org&gt;
 <a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>Description: [[summary]]
 <a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>  [[long.description]]
-<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>Homepage: https://eclipse-kura.github.io/kura/ (add correct link to documentation here)
-</code></pre></div>
-<p>The Architecture field is the one responsible to specify the architecture of the package. The value is set in the <code>/distrib/pom.xml</code> file, by the property <code>&lt;deb.architecture&gt;all&lt;/deb.architecture&gt;</code>. The value <code>all</code> means that the package can be installed on any architecture. This is the recommended value for packages that do not contain architecture-specific files.</p>
-<p>To build a package that contains architecture-specific files, it is necessary to separate the control files of the different architectures (namely, <code>aarch64</code> and <code>amd64</code>). To do so, create two directories in the <code>distrib/deb/</code> folder with this structure:</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>distrib
-<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>├── deb
-<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>│   ├── amd64
-<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>│   ├── arm64
-</code></pre></div>
-Each <code>control</code> file must be created in the <code>distrib/deb/&lt;arch&gt;/</code> folder. These folders could contain also the <code>postinst</code> and <code>postrm</code> files, used to execute commands after the installation and before the removal of the package. The content of these files is not relevant for this example, but they can be used to execute commands that are necessary for the correct installation of the package.</p>
-<p>An example of <code>control</code> file for the <code>arm64</code> architecture is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>Package: [[package.name]]
-<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>Version: [[project.version]]
-<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>Section: admin
-<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>Priority: optional
-<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>Depends: kura
-<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>Architecture: [[deb.arm64.architecture]]
-<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>Maintainer: Eclipse Kura Developers &lt;kura-dev@eclipse.org&gt;
-<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>Description: [[summary]]
-<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>  [[long.description]]
-<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>Homepage: https://eclipse-kura.github.io/kura/ (add correct link to documentation here)
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>Homepage: https://eclipse-kura.github.io/kura/
 </code></pre></div>
 <p>The same file for the <code>amd64</code> architecture will just change the <code>Architecture</code> field to <code>[[deb.amd64.architecture]]</code>.</p>
-<p>Finally, the plugin responsible of generating the DEB package is the <code>jdeb</code> plugin. The default execution is configured in the <code>distrib/pom.xml</code> file as follows:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nt">&lt;plugin&gt;</span>
-<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.vafer<span class="nt">&lt;/groupId&gt;</span>
-<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>jdeb<span class="nt">&lt;/artifactId&gt;</span>
-<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="w">    </span><span class="nt">&lt;version&gt;</span>1.12<span class="nt">&lt;/version&gt;</span>
-<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="w">    </span><span class="nt">&lt;executions&gt;</span>
-<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="w">        </span><span class="nt">&lt;execution&gt;</span>
-<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="w">            </span><span class="nt">&lt;id&gt;</span>generate-deb<span class="nt">&lt;/id&gt;</span>
-<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="w">            </span><span class="nt">&lt;phase&gt;</span>package<span class="nt">&lt;/phase&gt;</span>
-<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="w">            </span><span class="nt">&lt;goals&gt;</span>
-<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a><span class="w">                </span><span class="nt">&lt;goal&gt;</span>jdeb<span class="nt">&lt;/goal&gt;</span>
-<a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a><span class="w">            </span><span class="nt">&lt;/goals&gt;</span>
-<a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a><span class="w">            </span><span class="nt">&lt;configuration&gt;</span>
-<a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a><span class="w">                </span><span class="nt">&lt;verbose&gt;</span>true<span class="nt">&lt;/verbose&gt;</span>
-<a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a><span class="w">                </span><span class="nt">&lt;deb&gt;</span>${basedir}/target/${package.name}_${project.version}_${deb.architecture}.deb<span class="nt">&lt;/deb&gt;</span>
-<a id="__codelineno-20-15" name="__codelineno-20-15" href="#__codelineno-20-15"></a><span class="w">                </span><span class="nt">&lt;controlDir&gt;</span>${project.basedir}/deb/control<span class="nt">&lt;/controlDir&gt;</span>
-<a id="__codelineno-20-16" name="__codelineno-20-16" href="#__codelineno-20-16"></a><span class="w">                </span><span class="nt">&lt;skipPOMs&gt;</span>false<span class="nt">&lt;/skipPOMs&gt;</span>
-<a id="__codelineno-20-17" name="__codelineno-20-17" href="#__codelineno-20-17"></a><span class="w">                </span><span class="nt">&lt;dataSet&gt;</span>
-<a id="__codelineno-20-18" name="__codelineno-20-18" href="#__codelineno-20-18"></a><span class="w">                    </span><span class="nt">&lt;data&gt;</span>
-<a id="__codelineno-20-19" name="__codelineno-20-19" href="#__codelineno-20-19"></a><span class="w">                        </span><span class="nt">&lt;src&gt;</span>${basedir}/target/${jar.name}_${project.version}.jar<span class="nt">&lt;/src&gt;</span>
-<a id="__codelineno-20-20" name="__codelineno-20-20" href="#__codelineno-20-20"></a><span class="w">                        </span><span class="nt">&lt;dst&gt;</span>${jar.name}_${project.version}.jar<span class="nt">&lt;/dst&gt;</span>
-<a id="__codelineno-20-21" name="__codelineno-20-21" href="#__codelineno-20-21"></a><span class="w">                        </span><span class="nt">&lt;type&gt;</span>file<span class="nt">&lt;/type&gt;</span>
-<a id="__codelineno-20-22" name="__codelineno-20-22" href="#__codelineno-20-22"></a><span class="w">                        </span><span class="nt">&lt;mapper&gt;</span>
-<a id="__codelineno-20-23" name="__codelineno-20-23" href="#__codelineno-20-23"></a><span class="w">                            </span><span class="nt">&lt;type&gt;</span>perm<span class="nt">&lt;/type&gt;</span>
-<a id="__codelineno-20-24" name="__codelineno-20-24" href="#__codelineno-20-24"></a><span class="w">                            </span><span class="nt">&lt;prefix&gt;</span>${addon.installation.dir}<span class="nt">&lt;/prefix&gt;</span>
-<a id="__codelineno-20-25" name="__codelineno-20-25" href="#__codelineno-20-25"></a><span class="w">                            </span><span class="nt">&lt;user&gt;</span>kurad<span class="nt">&lt;/user&gt;</span>
-<a id="__codelineno-20-26" name="__codelineno-20-26" href="#__codelineno-20-26"></a><span class="w">                            </span><span class="nt">&lt;group&gt;</span>kurad<span class="nt">&lt;/group&gt;</span>
-<a id="__codelineno-20-27" name="__codelineno-20-27" href="#__codelineno-20-27"></a><span class="w">                            </span><span class="nt">&lt;filemode&gt;</span>600<span class="nt">&lt;/filemode&gt;</span>
-<a id="__codelineno-20-28" name="__codelineno-20-28" href="#__codelineno-20-28"></a><span class="w">                        </span><span class="nt">&lt;/mapper&gt;</span>
-<a id="__codelineno-20-29" name="__codelineno-20-29" href="#__codelineno-20-29"></a><span class="w">                    </span><span class="nt">&lt;/data&gt;</span>
-<a id="__codelineno-20-30" name="__codelineno-20-30" href="#__codelineno-20-30"></a><span class="w">                </span><span class="nt">&lt;/dataSet&gt;</span>
-<a id="__codelineno-20-31" name="__codelineno-20-31" href="#__codelineno-20-31"></a><span class="w">            </span><span class="nt">&lt;/configuration&gt;</span>
-<a id="__codelineno-20-32" name="__codelineno-20-32" href="#__codelineno-20-32"></a><span class="w">        </span><span class="nt">&lt;/execution&gt;</span>
-<a id="__codelineno-20-33" name="__codelineno-20-33" href="#__codelineno-20-33"></a><span class="w">    </span><span class="nt">&lt;/executions&gt;</span>
-<a id="__codelineno-20-34" name="__codelineno-20-34" href="#__codelineno-20-34"></a><span class="nt">&lt;/plugin&gt;</span>
+<p>Finally, the plugin responsible of generating the DEB package is the <code>jdeb</code> plugin. To build the architecture-dependant installers, the execution must change to:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="nt">&lt;execution&gt;</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">    </span><span class="nt">&lt;id&gt;</span>generate-arm64-deb<span class="nt">&lt;/id&gt;</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">    </span><span class="nt">&lt;phase&gt;</span>package<span class="nt">&lt;/phase&gt;</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">    </span><span class="nt">&lt;goals&gt;</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="w">        </span><span class="nt">&lt;goal&gt;</span>jdeb<span class="nt">&lt;/goal&gt;</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="w">    </span><span class="nt">&lt;/goals&gt;</span>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="w">    </span><span class="nt">&lt;configuration&gt;</span>
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="w">        </span><span class="nt">&lt;verbose&gt;</span>true<span class="nt">&lt;/verbose&gt;</span>
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="w">        </span><span class="nt">&lt;deb&gt;</span>${basedir}/target/deb/${output.installer.name}_${project.version}_${deb.arm64.architecture}.deb<span class="nt">&lt;/deb&gt;</span>
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="w">        </span><span class="nt">&lt;controlDir&gt;</span>${project.basedir}/deb/arm64<span class="nt">&lt;/controlDir&gt;</span>
+<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a><span class="w">        </span><span class="nt">&lt;skipPOMs&gt;</span>false<span class="nt">&lt;/skipPOMs&gt;</span>
+<a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a><span class="w">        </span><span class="nt">&lt;dataSet&gt;</span>
+<a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a><span class="w">            </span><span class="nt">&lt;data&gt;</span>
+<a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a><span class="w">                </span><span class="nt">&lt;src&gt;</span>${basedir}/target/plugins/${jar.name}-${project.version}.jar<span class="nt">&lt;/src&gt;</span>
+<a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a><span class="w">                </span><span class="nt">&lt;dst&gt;</span>${jar.name}-${project.version}.jar<span class="nt">&lt;/dst&gt;</span>
+<a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a><span class="w">                </span><span class="nt">&lt;type&gt;</span>file<span class="nt">&lt;/type&gt;</span>
+<a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a><span class="w">                </span><span class="nt">&lt;mapper&gt;</span>
+<a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a><span class="w">                    </span><span class="nt">&lt;type&gt;</span>perm<span class="nt">&lt;/type&gt;</span>
+<a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a><span class="w">                    </span><span class="nt">&lt;prefix&gt;</span>${addon.installation.dir}<span class="nt">&lt;/prefix&gt;</span>
+<a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a><span class="w">                    </span><span class="nt">&lt;user&gt;</span>kurad<span class="nt">&lt;/user&gt;</span>
+<a id="__codelineno-18-21" name="__codelineno-18-21" href="#__codelineno-18-21"></a><span class="w">                    </span><span class="nt">&lt;group&gt;</span>kurad<span class="nt">&lt;/group&gt;</span>
+<a id="__codelineno-18-22" name="__codelineno-18-22" href="#__codelineno-18-22"></a><span class="w">                    </span><span class="nt">&lt;filemode&gt;</span>600<span class="nt">&lt;/filemode&gt;</span>
+<a id="__codelineno-18-23" name="__codelineno-18-23" href="#__codelineno-18-23"></a><span class="w">                </span><span class="nt">&lt;/mapper&gt;</span>
+<a id="__codelineno-18-24" name="__codelineno-18-24" href="#__codelineno-18-24"></a><span class="w">            </span><span class="nt">&lt;/data&gt;</span>
+<a id="__codelineno-18-25" name="__codelineno-18-25" href="#__codelineno-18-25"></a><span class="w">            </span><span class="nt">&lt;data&gt;</span>
+<a id="__codelineno-18-26" name="__codelineno-18-26" href="#__codelineno-18-26"></a><span class="w">                </span><span class="nt">&lt;src&gt;</span>${basedir}/target/plugins/${jar.aarch64.core}-${project.version}.jar<span class="nt">&lt;/src&gt;</span>
+<a id="__codelineno-18-27" name="__codelineno-18-27" href="#__codelineno-18-27"></a><span class="w">                </span><span class="nt">&lt;dst&gt;</span>${jar.aarch64.core}-${project.version}.jar<span class="nt">&lt;/dst&gt;</span>
+<a id="__codelineno-18-28" name="__codelineno-18-28" href="#__codelineno-18-28"></a><span class="w">                </span><span class="nt">&lt;type&gt;</span>file<span class="nt">&lt;/type&gt;</span>
+<a id="__codelineno-18-29" name="__codelineno-18-29" href="#__codelineno-18-29"></a><span class="w">                </span><span class="nt">&lt;mapper&gt;</span>
+<a id="__codelineno-18-30" name="__codelineno-18-30" href="#__codelineno-18-30"></a><span class="w">                    </span><span class="nt">&lt;type&gt;</span>perm<span class="nt">&lt;/type&gt;</span>
+<a id="__codelineno-18-31" name="__codelineno-18-31" href="#__codelineno-18-31"></a><span class="w">                    </span><span class="nt">&lt;prefix&gt;</span>${native.core.installation.dir}<span class="nt">&lt;/prefix&gt;</span>
+<a id="__codelineno-18-32" name="__codelineno-18-32" href="#__codelineno-18-32"></a><span class="w">                    </span><span class="nt">&lt;user&gt;</span>kurad<span class="nt">&lt;/user&gt;</span>
+<a id="__codelineno-18-33" name="__codelineno-18-33" href="#__codelineno-18-33"></a><span class="w">                    </span><span class="nt">&lt;group&gt;</span>kurad<span class="nt">&lt;/group&gt;</span>
+<a id="__codelineno-18-34" name="__codelineno-18-34" href="#__codelineno-18-34"></a><span class="w">                    </span><span class="nt">&lt;filemode&gt;</span>600<span class="nt">&lt;/filemode&gt;</span>
+<a id="__codelineno-18-35" name="__codelineno-18-35" href="#__codelineno-18-35"></a><span class="w">                </span><span class="nt">&lt;/mapper&gt;</span>
+<a id="__codelineno-18-36" name="__codelineno-18-36" href="#__codelineno-18-36"></a><span class="w">            </span><span class="nt">&lt;/data&gt;</span>
+<a id="__codelineno-18-37" name="__codelineno-18-37" href="#__codelineno-18-37"></a><span class="w">        </span><span class="nt">&lt;/dataSet&gt;</span>
+<a id="__codelineno-18-38" name="__codelineno-18-38" href="#__codelineno-18-38"></a><span class="w">    </span><span class="nt">&lt;/configuration&gt;</span>
+<a id="__codelineno-18-39" name="__codelineno-18-39" href="#__codelineno-18-39"></a><span class="nt">&lt;/execution&gt;</span>
 </code></pre></div>
-<p>To build the architecture-dependant installers, the execution must change to:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="nt">&lt;execution&gt;</span>
-<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="w">    </span><span class="nt">&lt;id&gt;</span>generate-arm64-deb<span class="nt">&lt;/id&gt;</span>
-<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="w">    </span><span class="nt">&lt;phase&gt;</span>package<span class="nt">&lt;/phase&gt;</span>
-<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="w">    </span><span class="nt">&lt;goals&gt;</span>
-<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="w">        </span><span class="nt">&lt;goal&gt;</span>jdeb<span class="nt">&lt;/goal&gt;</span>
-<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="w">    </span><span class="nt">&lt;/goals&gt;</span>
-<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="w">    </span><span class="nt">&lt;configuration&gt;</span>
-<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a><span class="w">        </span><span class="nt">&lt;verbose&gt;</span>true<span class="nt">&lt;/verbose&gt;</span>
-<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a><span class="w">        </span><span class="nt">&lt;deb&gt;</span>${basedir}/target/deb/${output.installer.name}_${project.version}_${deb.arm64.architecture}.deb<span class="nt">&lt;/deb&gt;</span>
-<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a><span class="w">        </span><span class="nt">&lt;controlDir&gt;</span>${project.basedir}/deb/arm64<span class="nt">&lt;/controlDir&gt;</span>
-<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="w">        </span><span class="nt">&lt;skipPOMs&gt;</span>false<span class="nt">&lt;/skipPOMs&gt;</span>
-<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a><span class="w">        </span><span class="nt">&lt;dataSet&gt;</span>
-<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a><span class="w">            </span><span class="nt">&lt;data&gt;</span>
-<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a><span class="w">                </span><span class="nt">&lt;src&gt;</span>${basedir}/target/input_files/${jar.name}_${project.version}.jar<span class="nt">&lt;/src&gt;</span>
-<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a><span class="w">                </span><span class="nt">&lt;dst&gt;</span>${jar.name}_${project.version}.jar<span class="nt">&lt;/dst&gt;</span>
-<a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a><span class="w">                </span><span class="nt">&lt;type&gt;</span>file<span class="nt">&lt;/type&gt;</span>
-<a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a><span class="w">                </span><span class="nt">&lt;mapper&gt;</span>
-<a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a><span class="w">                    </span><span class="nt">&lt;type&gt;</span>perm<span class="nt">&lt;/type&gt;</span>
-<a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a><span class="w">                    </span><span class="nt">&lt;prefix&gt;</span>${addon.installation.dir}<span class="nt">&lt;/prefix&gt;</span>
-<a id="__codelineno-21-20" name="__codelineno-21-20" href="#__codelineno-21-20"></a><span class="w">                    </span><span class="nt">&lt;user&gt;</span>kurad<span class="nt">&lt;/user&gt;</span>
-<a id="__codelineno-21-21" name="__codelineno-21-21" href="#__codelineno-21-21"></a><span class="w">                    </span><span class="nt">&lt;group&gt;</span>kurad<span class="nt">&lt;/group&gt;</span>
-<a id="__codelineno-21-22" name="__codelineno-21-22" href="#__codelineno-21-22"></a><span class="w">                    </span><span class="nt">&lt;filemode&gt;</span>600<span class="nt">&lt;/filemode&gt;</span>
-<a id="__codelineno-21-23" name="__codelineno-21-23" href="#__codelineno-21-23"></a><span class="w">                </span><span class="nt">&lt;/mapper&gt;</span>
-<a id="__codelineno-21-24" name="__codelineno-21-24" href="#__codelineno-21-24"></a><span class="w">            </span><span class="nt">&lt;/data&gt;</span>
-<a id="__codelineno-21-25" name="__codelineno-21-25" href="#__codelineno-21-25"></a><span class="w">            </span><span class="nt">&lt;data&gt;</span>
-<a id="__codelineno-21-26" name="__codelineno-21-26" href="#__codelineno-21-26"></a><span class="w">                </span><span class="nt">&lt;src&gt;</span>${basedir}/target/input_files/${jar.aarch64.core}_${project.version}.jar<span class="nt">&lt;/src&gt;</span>
-<a id="__codelineno-21-27" name="__codelineno-21-27" href="#__codelineno-21-27"></a><span class="w">                </span><span class="nt">&lt;dst&gt;</span>${jar.aarch64.core}_${project.version}.jar<span class="nt">&lt;/dst&gt;</span>
-<a id="__codelineno-21-28" name="__codelineno-21-28" href="#__codelineno-21-28"></a><span class="w">                </span><span class="nt">&lt;type&gt;</span>file<span class="nt">&lt;/type&gt;</span>
-<a id="__codelineno-21-29" name="__codelineno-21-29" href="#__codelineno-21-29"></a><span class="w">                </span><span class="nt">&lt;mapper&gt;</span>
-<a id="__codelineno-21-30" name="__codelineno-21-30" href="#__codelineno-21-30"></a><span class="w">                    </span><span class="nt">&lt;type&gt;</span>perm<span class="nt">&lt;/type&gt;</span>
-<a id="__codelineno-21-31" name="__codelineno-21-31" href="#__codelineno-21-31"></a><span class="w">                    </span><span class="nt">&lt;prefix&gt;</span>${native.core.installation.dir}<span class="nt">&lt;/prefix&gt;</span>
-<a id="__codelineno-21-32" name="__codelineno-21-32" href="#__codelineno-21-32"></a><span class="w">                    </span><span class="nt">&lt;user&gt;</span>kurad<span class="nt">&lt;/user&gt;</span>
-<a id="__codelineno-21-33" name="__codelineno-21-33" href="#__codelineno-21-33"></a><span class="w">                    </span><span class="nt">&lt;group&gt;</span>kurad<span class="nt">&lt;/group&gt;</span>
-<a id="__codelineno-21-34" name="__codelineno-21-34" href="#__codelineno-21-34"></a><span class="w">                    </span><span class="nt">&lt;filemode&gt;</span>600<span class="nt">&lt;/filemode&gt;</span>
-<a id="__codelineno-21-35" name="__codelineno-21-35" href="#__codelineno-21-35"></a><span class="w">                </span><span class="nt">&lt;/mapper&gt;</span>
-<a id="__codelineno-21-36" name="__codelineno-21-36" href="#__codelineno-21-36"></a><span class="w">            </span><span class="nt">&lt;/data&gt;</span>
-<a id="__codelineno-21-37" name="__codelineno-21-37" href="#__codelineno-21-37"></a><span class="w">        </span><span class="nt">&lt;/dataSet&gt;</span>
-<a id="__codelineno-21-38" name="__codelineno-21-38" href="#__codelineno-21-38"></a><span class="w">    </span><span class="nt">&lt;/configuration&gt;</span>
-<a id="__codelineno-21-39" name="__codelineno-21-39" href="#__codelineno-21-39"></a><span class="nt">&lt;/execution&gt;</span>
+<p>A similar execution can be used for the <code>amd64</code> architecture, just changing the <code>deb</code> and <code>controlDir</code> fields to point to the correct architecture (and change the execution <code>id</code> if they're present at the same time). Also in the <code>&lt;dataSet&gt;</code> section, the <code>src</code> and <code>dst</code> fields must be changed to point to the correct architecture-specific jars.</p>
+<p>The final result will consist of two installers, one for each architecture. They will be found in the <code>distrib/target/deb/</code> folder with the following names:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>&lt;artifactId&gt;_&lt;version&gt;_&lt;deb.amd64.architecture&gt;.deb
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>&lt;artifactId&gt;_&lt;version&gt;_&lt;deb.arm64.architecture&gt;.deb
 </code></pre></div>
-<p>A similar execution can be used for the <code>amd64</code> architecture, just changing the <code>deb</code> and <code>controlDir</code> fields to point to the correct architecture (and change the execution <code>id</code> if they're present at the same time). Also in the <dataSet> section, the <code>src</code> and <code>dst</code> fields must be changed to point to the correct architecture-specific jars.</p>
-<p>The final result will consist of two DEB packages, one for each architecture. They will be found in the <code>distrib/target/deb/</code> folder with the following names:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>&lt;artifactId&gt;_&lt;version&gt;_&lt;deb.amd64.architecture&gt;.deb
-<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>&lt;artifactId&gt;_&lt;version&gt;_&lt;deb.arm64.architecture&gt;.deb
-</code></pre></div></p>
 
 
 

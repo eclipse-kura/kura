@@ -10,7 +10,7 @@
 # Contributors:
 #  Eurotech
 #
-Package: kura-nn
+Package: kura-core
 Version: [[version]]-[[package.revision]]
 Section: admin
 Priority: optional

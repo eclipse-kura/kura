@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+
+-->
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>${groupId}</groupId>
+        <artifactId>${artifactId}.parent</artifactId>
+        <version>${version}</version>
+        <relativePath>../bundles/pom.xml</relativePath>
+    </parent>
+
+    <groupId>${groupId}</groupId>
+    <artifactId>${artifactId}-target-definition</artifactId>
+    <version>${version}</version>
+    <packaging>eclipse-target-definition</packaging>
+    <name>Target definition for ${artifactId}</name>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-maven-plugin</artifactId>
+                <extensions>true</extensions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -37,6 +37,7 @@
     </build>
 
     <modules>
+        <module>target-definition</module>
         <module>bundles</module>
         <module>distrib</module>
         <module>tests</module>

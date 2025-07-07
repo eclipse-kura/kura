@@ -19,12 +19,12 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>\${groupId}</groupId>
-    <artifactId>\${artifactId}.parent</artifactId>
-    <version>\${version}</version>
+    <groupId>${groupId}</groupId>
+    <artifactId>${artifactId}.parent</artifactId>
+    <version>${version}</version>
     <packaging>pom</packaging>
 
-    <name>Parent POM for \${artifactId}</name>
+    <name>Parent POM for ${artifactId}</name>
 
     <pluginRepositories>
         <pluginRepository>
@@ -37,20 +37,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <tycho-version>4.0.11</tycho-version>
         <bnd-version>7.1.0</bnd-version>
-        <maven-resources-version>3.1.0</maven-resources-version>
-        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-        <maven-deploy-version>2.8.2</maven-deploy-version>
-        <antrun-version>1.8</antrun-version>
-        <exists-version>0.0.6</exists-version>
-        <eclipse.jarsigner.version>1.1.5</eclipse.jarsigner.version>
         <maven.jarsigner.plugin.version>1.4</maven.jarsigner.plugin.version>
-        <target-definition-version>\${project.version}</target-definition-version>
-        <kura-workdir>\${project.build.directory}/kura</kura-workdir>
-        <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
-        <lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
         <skip.artifact.signing>true</skip.artifact.signing>
         <keystore.type>JKS</keystore.type>
-        <kura.target.definition.version>${project.version}</kura.target.definition.version>
     </properties>
 
     <build>
@@ -59,7 +48,7 @@
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
                     <artifactId>tycho-compiler-plugin</artifactId>
-                    <version>\${tycho-version}</version>
+                    <version>${tycho-version}</version>
                     <configuration>
                         <source>17</source>
                         <target>17</target>
@@ -72,20 +61,20 @@
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
                     <artifactId>tycho-maven-plugin</artifactId>
-                    <version>\${tycho-version}</version>
+                    <version>${tycho-version}</version>
                     <extensions>true</extensions>
                 </plugin>
 
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
                     <artifactId>target-platform-configuration</artifactId>
-                    <version>\${tycho-version}</version>
+                    <version>${tycho-version}</version>
                     <configuration>
                         <target>
                             <artifact>
-                                <groupId>org.eclipse.kura</groupId>
-                                <artifactId>kura-target-definition.target</artifactId>
-                                <version>\${kura.target.definition.version}</version>
+                                <groupId>${groupId}</groupId>
+                                <artifactId>${artifactId}-target-definition</artifactId>
+                                <version>${version}</version>
                             </artifact>
                         </target>
                     </configuration>
@@ -94,7 +83,7 @@
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
                     <artifactId>tycho-packaging-plugin</artifactId>
-                    <version>\${tycho-version}</version>
+                    <version>${tycho-version}</version>
                     <configuration>
                         <strictVersions>true</strictVersions>
                         <deriveHeaderFromSource>false</deriveHeaderFromSource>
@@ -104,7 +93,7 @@
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
                     <artifactId>tycho-source-plugin</artifactId>
-                    <version>\${tycho-version}</version>
+                    <version>${tycho-version}</version>
                     <executions>
                         <execution>
                             <id>plugin-source</id>
@@ -118,7 +107,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-antrun-plugin</artifactId>
-                    <version>\${antrun-version}</version>
+                    <version>1.8</version>
                 </plugin>
 
                 <plugin>
@@ -126,7 +115,7 @@
                     Incremental builds as well -->
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-maven-plugin</artifactId>
-                    <version>\${bnd-version}</version>
+                    <version>${bnd-version}</version>
                     <executions>
                         <execution>
                             <goals>
@@ -142,7 +131,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jarsigner-plugin</artifactId>
-                    <version>\${maven.jarsigner.plugin.version}</version>
+                    <version>${maven.jarsigner.plugin.version}</version>
                     <executions>
                         <execution>
                             <id>sign</id>
@@ -152,12 +141,12 @@
                         </execution>
                     </executions>
                     <configuration>
-                        <skip>\${skip.artifact.signing}</skip>
-                        <storetype>\${keystore.type}</storetype>
-                        <keystore>\${addon.keystore.path}</keystore>
-                        <alias>\${addon.key.alias}</alias>
-                        <storepass>\${addon.keystore.password}</storepass>
-                        <keypass>\${addon.key.password}</keypass>
+                        <skip>${skip.artifact.signing}</skip>
+                        <storetype>${keystore.type}</storetype>
+                        <keystore>${addon.keystore.path}</keystore>
+                        <alias>${addon.key.alias}</alias>
+                        <storepass>${addon.keystore.password}</storepass>
+                        <keypass>${addon.key.password}</keypass>
                         <arguments>
                             <argument>-tsa</argument>
                             <argument>http://timestamp.digicert.com</argument>
@@ -175,7 +164,7 @@
                 <plugin>
                     <groupId>org.eclipse.cbi.maven.plugins</groupId>
                     <artifactId>eclipse-jarsigner-plugin</artifactId>
-                    <version>\${eclipse.jarsigner.version}</version>
+                    <version>1.1.5</version>
                     <executions>
                         <execution>
                             <id>sign</id>
@@ -193,20 +182,20 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>\${maven-deploy-version}</version>
+                    <version>2.8.2</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.honton.chas</groupId>
                     <artifactId>exists-maven-plugin</artifactId>
-                    <version>\${exists-version}</version>
+                    <version>0.0.6</version>
                     <executions>
                         <execution>
                             <goals>
                                 <goal>remote</goal>
                             </goals>
                             <configuration>
-                                <artifact>\${project.artifactId}-\${project.version}.jar</artifact>
+                                <artifact>${project.artifactId}-${project.version}.jar</artifact>
                                 <skipIfSnapshot>true</skipIfSnapshot>
                                 <failIfExists>true</failIfExists>
                             </configuration>
@@ -217,7 +206,7 @@
                 <plugin>
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-baseline-maven-plugin</artifactId>
-                    <version>\${bnd-version}</version>
+                    <version>${bnd-version}</version>
                     <configuration>
                         <failOnMissing>false</failOnMissing>
                     </configuration>
@@ -236,7 +225,7 @@
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
-                    <version>\${lifecycle.mapping.version}</version>
+                    <version>1.0.0</version>
                     <configuration>
                         <lifecycleMappingFilters>
                             <lifecycleMappingFilter>
@@ -300,33 +289,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jarsigner-plugin</artifactId>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.6.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-local-target-definition</id>
-                        <phase>generate-resources</phase>
-                        <inherited>false</inherited>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>kura-target-definition.target</artifactId>
-                                    <version>\${kura.target.definition.version}</version>
-                                    <type>target</type>
-                                    <outputDirectory>\${project.basedir}/../target-definition</outputDirectory>
-                                    <destFileName>kura-target-definition.target</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
@@ -350,9 +312,36 @@
             <name>Eclipse Kura Repository - Snapshots</name>
             <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
         </repository>
+        <repository>
+            <id>kura-addons</id>
+            <name>Kura Addons Maven Repository</name>
+            <url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
+        </repository>
+        <repository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <!-- moquette-broker -->
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
+    <distributionManagement>
+        <repository>
+            <id>repo.eclipse.org</id>
+            <name>Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>repo.eclipse.org</id>
+            <name>Kura Repository - Snapshots</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <modules>
-        <module>\${artifactId}.bundle</module>
+        <module>${artifactId}.bundle</module>
     </modules>
 </project>

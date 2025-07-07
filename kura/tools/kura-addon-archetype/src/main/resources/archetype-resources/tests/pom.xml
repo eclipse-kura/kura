@@ -29,11 +29,29 @@
     <packaging>pom</packaging>
 
     <properties>
-        <maven.resources.plugin.version>3.1.0</maven.resources.plugin.version>
-        <maven.dependency.plugin.version>3.1.1</maven.dependency.plugin.version>
-        <jacoco.maven.plugin.version>0.8.12</jacoco.maven.plugin.version>
         <kura.workdir>${project.build.directory}/test-env</kura.workdir>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>4.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>4.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <pluginManagement>
@@ -120,7 +138,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>${jacoco.maven.plugin.version}</version>
+                    <version>0.8.12</version>
                     <executions>
                         <execution>
                             <goals>
@@ -174,7 +192,7 @@
                 
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>${maven-surefire-plugin.version}</version>
+                    <version>2.22.2</version>
                     <executions>
                         <execution>
                             <id>default-test</id>
@@ -196,9 +214,9 @@
                     <configuration>
                         <target>
                             <artifact>
-                                <groupId>org.eclipse.kura</groupId>
-                                <version>${kura.target.definition.version}</version>
-                                <artifactId>kura-target-definition.target</artifactId>
+                                <groupId>${groupId}</groupId>
+                                <artifactId>${artifactId}-target-definition</artifactId>
+                                <version>${version}</version>
                             </artifact>
                         </target>
                         <!--

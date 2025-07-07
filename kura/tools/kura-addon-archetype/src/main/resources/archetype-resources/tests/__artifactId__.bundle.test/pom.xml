@@ -51,10 +51,6 @@
             
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <testSourceDirectory>${basedir}/src/test/java/</testSourceDirectory>
-                    <testClassesDirectory>${project.build.directory}/classes/</testClassesDirectory>
-                </configuration>
             </plugin>
 
             <plugin>

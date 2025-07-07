@@ -28,11 +28,26 @@
     <artifactId>kura-addon-archetype</artifactId>
     <packaging>maven-archetype</packaging>
 
-    <properties>
-        <kura_eth.basedir>${project.basedir}/../..</kura_eth.basedir>
-    </properties>
-
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>archetype-resources/test/test-env/framework/kura.properties</include>
+                    <include>META-INF/maven/archetype-metadata.xml</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>archetype-resources/test/test-env/framework/kura.properties</exclude>
+                    <exclude>META-INF/maven/archetype-metadata.xml</exclude>
+                </excludes>
+            </resource>
+        </resources>
+
         <extensions>
             <extension>
                 <groupId>org.apache.maven.archetype</groupId>
@@ -40,20 +55,6 @@
                 <version>3.3.1</version>
             </extension>
         </extensions>
-
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>false</filtering>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>archetype-resources/bundles/pom.xml</include>
-                </includes>
-            </resource>
-        </resources>
 
         <plugins>
             <plugin>
@@ -64,7 +65,6 @@
                     <includeEmptyDirs>true</includeEmptyDirs>
                     <!-- needed to include .gitignore -->
                     <useDefaultExcludes>false</useDefaultExcludes>
-                    <escapeString>\</escapeString>
                 </configuration>
             </plugin>
 

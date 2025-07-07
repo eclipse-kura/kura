@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?>
+<!--
+
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+
+-->
+<target name="${artifactId} Target Definition" sequenceNumber="75">
+    <locations>
+        <location includeDependencyDepth="direct" includeDependencyScopes="compile,test"
+            missingManifest="ignore" type="Maven">
+
+            <dependencies>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>target-platform-bom</artifactId>
+                    <version>${kuraVersion}</version>
+                    <type>pom</type>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.kura</groupId>
+                    <artifactId>kura-bom</artifactId>
+                    <version>${kuraVersion}</version>
+                    <type>pom</type>
+                </dependency>
+            </dependencies>
+
+            <repositories>
+                <repository>
+                    <id>kura-releases</id>
+                    <name>Eclipse Kura Repository - Releases</name>
+                    <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+                </repository>
+                <repository>
+                    <id>kura-snapshots</id>
+                    <name>Eclipse Kura Repository - Snapshots</name>
+                    <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+                </repository>
+                <repository>
+                    <id>kura-addons</id>
+                    <name>Kura Addons Maven Repository</name>
+                    <url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
+                </repository>
+                <repository>
+                    <id>central</id>
+                    <url>https://repo1.maven.org/maven2/</url>
+                </repository>
+                <repository>
+                    <!-- moquette-broker -->
+                    <id>jitpack.io</id>
+                    <url>https://jitpack.io</url>
+                </repository>
+            </repositories>
+        </location>
+    </locations>
+</target>

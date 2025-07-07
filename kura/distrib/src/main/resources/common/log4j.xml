@@ -11,7 +11,7 @@
 	
 	Contributors:
      Eurotech
-     
+
 -->
 <Configuration status="warn" strict="true" name="KuraConfig" monitorInterval="30">
     <Properties>

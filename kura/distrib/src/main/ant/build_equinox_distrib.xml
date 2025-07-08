@@ -350,7 +350,7 @@
                 prefix="${build.output.name}/${framework.config.folder}/" />
             <zipfileset file="notice.html" prefix="${build.output.name}/" />
             <zipfileset file="epl-v10.html" prefix="${build.output.name}/" />
-            <zipfileset file="${kura.basedir}/src/main/resources/log4j.xml"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/log4j.xml"
                 prefix="${build.output.name}/${log4j.folder}/" />
             <zipfileset
                 file="${project.build.directory}/${build.output.name}/kura.properties"
@@ -817,7 +817,7 @@ fi]]>
                 prefix="${build.output.name}/${framework.config.folder}/" />
             <zipfileset file="notice.html" prefix="${build.output.name}/" />
             <zipfileset file="epl-v10.html" prefix="${build.output.name}/" />
-            <zipfileset file="${kura.basedir}/src/main/resources/${build.name}/log4j.xml"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/log4j.xml"
                 prefix="${build.output.name}/${log4j.folder}/" />
             <zipfileset
                 file="${project.build.directory}/${build.output.name}/kura.properties"

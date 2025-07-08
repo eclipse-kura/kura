@@ -80,6 +80,7 @@
 
         <copy file="${kura.basedir}/src/main/resources/common/kura.properties"
             tofile="${project.build.directory}/${build.output.name}/kura.properties" />
+
         <propertyfile file="${project.build.directory}/${build.output.name}/kura.properties">
             <entry key="kura.version" value="KURA_${kura.version}" />
             <entry key="kura.home" value="${kura.install.dir}/${kura.symlink}" />
@@ -98,6 +99,7 @@
             <entry key="build.version" value="${buildNumber}" />
             <entry key="build.number" value="${build.name}-${buildNumber}" />
         </propertyfile>
+
         <replace
             file="${project.build.directory}/${build.output.name}/kura.properties"
             token="{kura.install.dir}" value="${kura.install.dir}" />
@@ -113,12 +115,6 @@
                 </not>
                 <equals arg1="${kura.osgi}" arg2="equinox" />
             </or>
-        </condition>
-        <condition property="is.nn">
-            <contains string="${build.name}" substring="-nn" />
-        </condition>
-        <condition property="is.docker">
-            <contains string="${build.name}" substring="docker" />
         </condition>
 
         <copy file="${kura.basedir}/src/main/resources/common/snapshot_0.xml"

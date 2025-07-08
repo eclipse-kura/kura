@@ -19,7 +19,8 @@ if [ -z "$KURA_RUNNING" ] ; then
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
         -XX:ErrorFile=/var/log/kura-error.log \
         -XX:+IgnoreUnrecognizedVMOptions \
-        --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED \
+        --add-opens java.base/java.lang=ALL-UNNAMED \
+        --add-opens java.base/java.util=ALL-UNNAMED \
         --add-modules=ALL-SYSTEM \
         -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=*:8000,suspend=n \
         -Dkura.os.version=${kura.os.version} \
@@ -31,6 +32,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.custom.configuration=file:${DIR}/user/kura_custom.properties \
         -Ddpa.configuration=${DIR}/packages/dpa.properties \
         -Dlog4j.configurationFile=file:${DIR}/log4j/log4j.xml \
+        -Djava.util.logging.config.file=${DIR}/framework/logging.properties \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \

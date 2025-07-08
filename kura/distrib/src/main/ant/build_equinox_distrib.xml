@@ -199,13 +199,25 @@
         </propertyfile>
 
         <!-- Create the Kura start scripts -->
-        <loadfile property="kura.script.start" srcFile="${kura.basedir}/src/main/resources/common/scripts/start_kura.sh" />
+        <loadfile property="kura.script.start" srcFile="${kura.basedir}/src/main/resources/common/scripts/start_kura.sh">
+            <filterchain>
+                <expandproperties/>
+            </filterchain>
+        </loadfile>
         <echo file="${project.build.directory}/${build.output.name}/start_kura.sh" append="false">${kura.script.start}</echo>
         
-        <loadfile property="kura.script.start.debug" srcFile="${kura.basedir}/src/main/resources/common/scripts/start_kura_debug.sh" />
+        <loadfile property="kura.script.start.debug" srcFile="${kura.basedir}/src/main/resources/common/scripts/start_kura_debug.sh">
+            <filterchain>
+                <expandproperties/>
+            </filterchain>
+        </loadfile>
         <echo file="${project.build.directory}/${build.output.name}/start_kura_debug.sh" append="false">${kura.script.start.debug}</echo>
 
-        <loadfile property="kura.script.start.background" srcFile="${kura.basedir}/src/main/resources/common/scripts/start_kura_background.sh" />
+        <loadfile property="kura.script.start.background" srcFile="${kura.basedir}/src/main/resources/common/scripts/start_kura_background.sh">
+            <filterchain>
+                <expandproperties/>
+            </filterchain>
+        </loadfile>
         <echo file="${project.build.directory}/${build.output.name}/start_kura_background.sh" append="false">${kura.script.start.background}</echo>
 
         <!-- Populate parameters -->

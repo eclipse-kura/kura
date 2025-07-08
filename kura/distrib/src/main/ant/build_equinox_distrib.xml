@@ -357,6 +357,8 @@
             <zipfileset
                 file="${project.build.directory}/${build.output.name}/kura.properties"
                 prefix="${build.output.name}/${framework.config.folder}/" />
+            <zipfileset file="${kura.basedir}/src/main/resources/common/logging.properties"
+                prefix="${build.output.name}/${framework.config.folder}/" />
 
             <zipfileset dir="${project.build.directory}/${build.output.name}/plugins"
                 prefix="${build.output.name}/${plugins.folder}">
@@ -578,6 +580,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.custom.configuration=file:${DIR}/user/kura_custom.properties \
         -Ddpa.configuration=${DIR}/packages/dpa.properties \
         -Dlog4j.configurationFile=file:${DIR}/log4j/log4j.xml \
+        -Djava.util.logging.config.file=${DIR}/framework/logging.properties \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
@@ -624,6 +627,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.custom.configuration=file:${DIR}/user/kura_custom.properties \
         -Ddpa.configuration=${DIR}/packages/dpa.properties \
         -Dlog4j.configurationFile=file:${DIR}/log4j/log4j.xml \
+        -Djava.util.logging.config.file=${DIR}/framework/logging.properties \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
@@ -668,6 +672,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.custom.configuration=file:${DIR}/user/kura_custom.properties \
         -Ddpa.configuration=${DIR}/packages/dpa.properties \
         -Dlog4j.configurationFile=file:${DIR}/log4j/log4j.xml \
+        -Djava.util.logging.config.file=${DIR}/framework/logging.properties \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
@@ -825,6 +830,8 @@ fi]]>
                 prefix="${build.output.name}/${log4j.folder}/" />
             <zipfileset
                 file="${project.build.directory}/${build.output.name}/kura.properties"
+                prefix="${build.output.name}/${framework.config.folder}/" />
+            <zipfileset file="${kura.basedir}/src/main/resources/common/logging.properties"
                 prefix="${build.output.name}/${framework.config.folder}/" />
 
             <zipfileset dir="${project.build.directory}/${build.output.name}/plugins"

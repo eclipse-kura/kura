@@ -74,6 +74,7 @@ spec:
                 dir("kura") {
                     withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6', options: [artifactsPublisher(disabled: true)]) {
                         sh "mvn -f kura/distrib/pom.xml clean install"
+		    }
                 }
             }
         }

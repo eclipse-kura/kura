@@ -186,6 +186,8 @@
         <antcall target="configuration.change.manager-plugins" />
         <antcall target="event-publisher-plugins" />
         <antcall target="gpio-plugins" />
+        <antcall target="util-plugins" />
+        <antcall target="localization-plugins" />
 
         <!-- Conditional entries. Check for jar presence, and invoke relevant ant
             target -->
@@ -530,6 +532,8 @@
         <antcall target="event-publisher-plugins" />
         <antcall target="web2-plugins" />
         <antcall target="gpio-plugins" />
+        <antcall target="util-plugins" />
+        <antcall target="localization-plugins" />
 
         <!-- Conditional entries. Check for jar presence, and invoke relevant ant
             target -->
@@ -1026,8 +1030,7 @@ fi]]>
             <param name="start.level" value="1" />
             <param name="start" value="" />
         </antcall>
-        <!--Jersey
-        dependencies-->
+        <!--Jersey dependencies-->
         <antcall target="install-plugin">
             <param name="bundle.name" value="hk2-api" />
             <param name="start.level" value="3" />
@@ -1118,8 +1121,7 @@ fi]]>
             <param name="start.level" value="3" />
             <param name="start" value="" />
         </antcall>
-        <!--END
-        Jersey dependencies-->
+        <!--END Jersey dependencies-->
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.equinox.cm" />
             <param name="start.level" value="1" />
@@ -1905,12 +1907,7 @@ fi]]>
         </antcall>
     </target>
 
-    <target name="wires-plugins">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.driver.helper.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
+    <target name="localization-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.localization" />
             <param name="start.level" value="4" />
@@ -1921,8 +1918,19 @@ fi]]>
             <param name="start.level" value="6" />
             <param name="start" value="" />
         </antcall>
+    </target>
+
+    <target name="util-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.util" />
+            <param name="start.level" value="4" />
+            <param name="start" value="s" />
+        </antcall>
+    </target>
+
+    <target name="wires-plugins">
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="org.eclipse.kura.driver.helper.provider" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>

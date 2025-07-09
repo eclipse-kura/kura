@@ -172,7 +172,6 @@
         <antcall target="linux.watchdog-plugins" />
         <antcall target="h2db-plugins" />
         <antcall target="rest-plugins" />
-        <antcall target="asset-plugins" />
         <antcall target="deployment-hooks-plugins" />
         <antcall target="marshallers-plugins" />
         <antcall target="misc-plugins" />

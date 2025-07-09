@@ -516,7 +516,7 @@
         <antcall target="rest-plugins" />
         <antcall target="rest-command" />
         <antcall target="rest-position" />
-        <antcall target="rest-wire">
+        <antcall target="rest-wire" />
         <antcall target="asset-plugins" />
         <antcall target="artemis-plugins" />
         <antcall target="deployment-hooks-plugins" />

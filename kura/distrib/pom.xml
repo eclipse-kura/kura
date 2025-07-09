@@ -41,9 +41,11 @@
         <module>x86_64-core</module>
         <module>x86_64-nn</module>
 
+        <!-- Disabled: waiting for the refactor using Eclipse infrastructure
         <module>docker-base</module>
         <module>docker-alpine</module>
         <module>docker-ubi8</module>
+        -->
     </modules>
     
     <properties>

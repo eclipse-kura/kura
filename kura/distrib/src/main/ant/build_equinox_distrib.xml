@@ -1241,11 +1241,6 @@ fi]]>
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.equinox.wireadmin" />
-            <param name="start.level" value="3" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
             <param name="bundle.name" value="jetty-http" />
             <param name="start.level" value="5" />
             <param name="start" value="" />
@@ -1938,6 +1933,11 @@ fi]]>
     </target>
 
     <target name="wires-plugins">
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="org.eclipse.equinox.wireadmin" />
+            <param name="start.level" value="3" />
+            <param name="start" value="s" />
+        </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.driver.helper.provider" />
             <param name="start.level" value="4" />

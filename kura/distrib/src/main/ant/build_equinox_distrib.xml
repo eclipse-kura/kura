@@ -514,6 +514,9 @@
         <antcall target="h2db-plugins" />
         <antcall target="camel-plugins" />
         <antcall target="rest-plugins" />
+        <antcall target="rest-command">
+        <antcall target="rest-position">
+        <antcall target="rest-wire">
         <antcall target="asset-plugins" />
         <antcall target="artemis-plugins" />
         <antcall target="deployment-hooks-plugins" />
@@ -1808,6 +1811,30 @@ fi]]>
         </antcall>
     </target>
 
+    <target name="rest-command">
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="org.eclipse.kura.rest.command.provider" />
+            <param name="start.level" value="4" />
+            <param name="start" value="s" />
+        </antcall>
+    </target>
+
+    <target name="rest-position">
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="org.eclipse.kura.rest.position.provider" />
+            <param name="start.level" value="4" />
+            <param name="start" value="s" />
+        </antcall>
+    </target>
+
+    <target name="rest-wire">
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="org.eclipse.kura.rest.wire.provider" />
+            <param name="start.level" value="4" />
+            <param name="start" value="s" />
+        </antcall>
+    </target>
+
     <target name="rest-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.rest.provider" />
@@ -1830,17 +1857,7 @@ fi]]>
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.rest.command.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.rest.packages.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.rest.position.provider" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>
@@ -1861,11 +1878,6 @@ fi]]>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.rest.system.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.rest.wire.provider" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>

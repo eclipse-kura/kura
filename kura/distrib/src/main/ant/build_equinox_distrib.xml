@@ -529,7 +529,7 @@
         <antcall target="rest-command" />
         <antcall target="rest-plugins" />
         <antcall target="rest-position" />
-        <antcall target="rest-tamper-plugins" />
+        <antcall target="rest.tamper-plugins" />
         <antcall target="rest-wire" />
         <antcall target="util-plugins" />
         <antcall target="web2-plugins" />

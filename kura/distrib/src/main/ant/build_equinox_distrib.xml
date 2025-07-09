@@ -514,8 +514,8 @@
         <antcall target="h2db-plugins" />
         <antcall target="camel-plugins" />
         <antcall target="rest-plugins" />
-        <antcall target="rest-command">
-        <antcall target="rest-position">
+        <antcall target="rest-command" />
+        <antcall target="rest-position" />
         <antcall target="rest-wire">
         <antcall target="asset-plugins" />
         <antcall target="artemis-plugins" />

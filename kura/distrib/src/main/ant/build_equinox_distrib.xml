@@ -149,12 +149,13 @@
 
         <!-- Populate config.ini with correct Kura bundles -->
         <antcall target="api-plugins" />
-        <antcall target="core-plugins" />
-        <antcall target="core.system-plugins" />
-        <antcall target="core.certificates-plugins" />
-        <antcall target="core.cloud-plugins" />
         <antcall target="cloud.mqtt.kapua-plugins" />
         <antcall target="cloud.mqtt.raw-plugins" />
+        <antcall target="configuration.change.manager-plugins" />
+        <antcall target="container-orchestrator-plugins" />
+        <antcall target="core-plugins" />
+        <antcall target="core.certificates-plugins" />
+        <antcall target="core.cloud-plugins" />
         <antcall target="core.comm-plugins" />
         <antcall target="core.configuration-plugins" />
         <antcall target="core.crypto-plugins" />
@@ -163,25 +164,25 @@
         <antcall target="core.inventory-plugins" />
         <antcall target="core.net-plugins" />
         <antcall target="core.status-plugins" />
+        <antcall target="core.system-plugins" />
         <antcall target="deployment.agent-plugins" />
+        <antcall target="deployment-hooks-plugins" />
+        <antcall target="event-publisher-plugins" />
+        <antcall target="filesystem-logprovider-plugins" />
+        <antcall target="gpio-plugins" />
+        <antcall target="h2db-plugins" />
+        <antcall target="keystore-management-plugins" />
         <antcall target="linux.clock-plugins" />
         <antcall target="linux.command-plugins" />
         <antcall target="linux.position-plugins" />
         <antcall target="linux.usb-plugins" />
         <antcall target="linux.watchdog-plugins" />
-        <antcall target="h2db-plugins" />
-        <antcall target="rest-plugins" />
-        <antcall target="deployment-hooks-plugins" />
+        <antcall target="localization-plugins" />
         <antcall target="marshallers-plugins" />
         <antcall target="misc-plugins" />
-        <antcall target="keystore-management-plugins" />
-        <antcall target="filesystem-logprovider-plugins" />
-        <antcall target="container-orchestrator-plugins" />
-        <antcall target="configuration.change.manager-plugins" />
-        <antcall target="event-publisher-plugins" />
-        <antcall target="gpio-plugins" />
+        <antcall target="netty-plugins" />
+        <antcall target="rest-plugins" />
         <antcall target="util-plugins" />
-        <antcall target="localization-plugins" />
 
         <!-- Conditional entries. Check for jar presence, and invoke relevant ant
             target -->
@@ -487,51 +488,52 @@
 
         <!-- Populate config.ini with correct Kura bundles -->
         <antcall target="api-plugins" />
+        <antcall target="artemis-plugins" />
+        <antcall target="asset-plugins" />
+        <antcall target="bluetooth-plugins" />
+        <antcall target="camel-plugins" />
+        <antcall target="cloud.mqtt.eclipseiot-plugins" />
+        <antcall target="cloud.mqtt.kapua-plugins" />
+        <antcall target="cloud.mqtt.raw-plugins" />
+        <antcall target="configuration.change.manager-plugins" />
+        <antcall target="container-orchestrator-plugins" />
         <antcall target="core-plugins" />
-        <antcall target="core.system-plugins" />
         <antcall target="core.certificates-plugins" />
         <antcall target="core.cloud-plugins" />
-        <antcall target="cloud.mqtt.kapua-plugins" />
-        <antcall target="cloud.mqtt.eclipseiot-plugins" />
-        <antcall target="cloud.mqtt.raw-plugins" />
         <antcall target="core.comm-plugins" />
         <antcall target="core.configuration-plugins" />
         <antcall target="core.crypto-plugins" />
         <antcall target="core.deployment-plugins" />
         <antcall target="core.identity-plugins" />
         <antcall target="core.inventory-plugins" />
-        <antcall target="rest.tamper-plugins" />
         <antcall target="core.net-plugins" />
         <antcall target="core.status-plugins" />
+        <antcall target="core.system-plugins" />
         <antcall target="deployment.agent-plugins" />
+        <antcall target="deployment-hooks-plugins" />
+        <antcall target="event-publisher-plugins" />
+        <antcall target="filesystem-logprovider-plugins" />
+        <antcall target="gpio-plugins" />
+        <antcall target="gpsd4java-plugins" />
+        <antcall target="h2db-plugins" />
+        <antcall target="keystore-management-plugins" />
         <antcall target="linux.clock-plugins" />
         <antcall target="linux.command-plugins" />
         <antcall target="linux.position-plugins" />
         <antcall target="linux.usb-plugins" />
-        <antcall target="bluetooth-plugins" />
         <antcall target="linux.watchdog-plugins" />
-        <antcall target="h2db-plugins" />
-        <antcall target="camel-plugins" />
-        <antcall target="rest-plugins" />
-        <antcall target="rest-command" />
-        <antcall target="rest-position" />
-        <antcall target="rest-wire" />
-        <antcall target="asset-plugins" />
-        <antcall target="artemis-plugins" />
-        <antcall target="deployment-hooks-plugins" />
-        <antcall target="marshallers-plugins" />
-        <antcall target="wires-plugins" />
-        <antcall target="misc-plugins" />
-        <antcall target="keystore-management-plugins" />
-        <antcall target="filesystem-logprovider-plugins" />
-        <antcall target="container-orchestrator-plugins" />
-        <antcall target="configuration.change.manager-plugins" />
-        <antcall target="event-publisher-plugins" />
-        <antcall target="web2-plugins" />
-        <antcall target="gpio-plugins" />
-        <antcall target="util-plugins" />
         <antcall target="localization-plugins" />
-        <antcall target="gpsd4java-plugins" />
+        <antcall target="marshallers-plugins" />
+        <antcall target="misc-plugins" />
+        <antcall target="netty-plugins" />
+        <antcall target="rest-command" />
+        <antcall target="rest-plugins" />
+        <antcall target="rest-position" />
+        <antcall target="rest-tamper-plugins" />
+        <antcall target="rest-wire" />
+        <antcall target="util-plugins" />
+        <antcall target="web2-plugins" />
+        <antcall target="wires-plugins" />
 
         <!-- Conditional entries. Check for jar presence, and invoke relevant ant
             target -->
@@ -2082,8 +2084,7 @@ fi]]>
         </antcall>
     </target>
 
-    <!-- Artemis config targets -->
-    <target name="artemis-plugins">
+    <target name="netty-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="netty-buffer" />
             <param name="start.level" value="3" />
@@ -2149,6 +2150,10 @@ fi]]>
             <param name="start.level" value="3" />
             <param name="start" value="" />
         </antcall>
+    </target>
+
+    <!-- Artemis config targets -->
+    <target name="artemis-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="artemis-mqtt-protocol" />
             <param name="start.level" value="3" />

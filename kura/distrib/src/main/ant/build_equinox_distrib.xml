@@ -291,40 +291,26 @@
             <zipfileset file="${kura.basedir}/src/main/resources/common/kura.logrotate"
                 prefix="${build.output.name}/${install.folder}" />
 
-            <zipfileset file="${kura.basedir}/src/main/resources/common/network_tools.py"
-                prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="${kura.basedir}/src/main/resources/common/customize_iptables.py"
-                prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="${kura.basedir}/src/main/resources/common/customize_kura_properties.py"
                 prefix="${build.output.name}/${install.folder}" />
+
             <zipfileset file="${kura.basedir}/src/main/resources/common/customize_snapshot.py"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="${kura.basedir}/src/main/resources/common/comment_interfaces_file.py"
-                prefix="${build.output.name}/${install.folder}" />
+
             <zipfileset file="${kura.basedir}/src/main/resources/common/customize-installation.sh"
                 prefix="${build.output.name}/${install.folder}" />
+
             <zipfileset dir="${kura.basedir}/src/main/resources/common/jdk-dio-properties"
                 prefix="${build.output.name}/${install.folder}">
+
                 <include name="*" />
+
             </zipfileset>
-            <zipfileset dir="${kura.basedir}/src/main/resources/common/iptables"
-                prefix="${build.output.name}/${install.folder}">
-                <include name="*" />
-            </zipfileset>
+
             <zipfileset dir="${kura.basedir}/src/main/resources/common/snapshots"
                 prefix="${build.output.name}/${install.folder}">
                 <include name="*" />
             </zipfileset>
-
-            <zipfileset file="${kura.basedir}/src/main/resources/common/named/named.ca"
-                prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="${kura.basedir}/src/main/resources/common/named/named.rfc1912.zones"
-                prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="${kura.basedir}/src/main/resources/common/named/usr.sbin.named"
-                prefix="${build.output.name}/${install.folder}" />
-
-            <zipfileset file="${kura.basedir}/src/main/resources/common/dnsmasq"
-                prefix="${build.output.name}/${install.folder}" />
 
             <zipfileset
                 file="${project.build.directory}/${build.output.name}/start_kura.sh"

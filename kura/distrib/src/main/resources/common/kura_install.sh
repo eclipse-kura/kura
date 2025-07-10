@@ -26,7 +26,6 @@ backup_files() {
     done
 }
 
-IS_NETWORKING_PROFILE=false
 INSTALL_DIR=/opt/eclipse
 
 # create known kura install location
@@ -57,7 +56,7 @@ cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/ma
 chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i -nn
 
-bash "${INSTALL_DIR}/kura/install/customize-installation.sh" ${IS_NETWORKING_PROFILE}
+bash "${INSTALL_DIR}/kura/install/customize-installation.sh" false
 
 # copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml

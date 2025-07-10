@@ -276,50 +276,19 @@
                         <goals>
                             <goal>run</goal>
                         </goals>
-                       <configuration>
-                            <target>
-                                <resourcecount property="files.count">
+                        <configuration>
+                            <failOnError>false</failOnError>
+                            <target name="checksum">
+                                <checksum algorithm="MD5">
                                     <fileset dir="${basedir}/target">
                                         <include name="*.deb"/>
                                         <include name="*.dp"/>
-                                        <include name="*.zip"/>
-                                        <include name="*.target"/>
-                                        <include name="kura_${project.version}_*.sh"/>
-                                        <include name="kura_${project.version}_*.dp"/>
-                                    </fileset>
-                                </resourcecount>
-
-                                <antcall target="do-checksums-md5" />
-                                <antcall target="do-checksums-sha1" />
-                            </target>
-                                
-                            <target name="do-checksums-md5" if="files.count">
-                                <checksum algorithm="md5">
-                                    <fileset dir="${basedir}/target">
-                                        <include name="*.deb"/>
-                                        <include name="*.dp"/>
-                                        <include name="*.zip"/>
-                                        <include name="*.target"/>
-                                        <include name="kura_${project.version}_*.sh"/>
-                                        <include name="kura_${project.version}_*.dp"/>
-
-                                        <exclude name="kura_${project.version}_*.dp" />
-                                        <exclude name="kura_${project.version}_*.zip" />
                                     </fileset>
                                 </checksum>
-                            </target>
-                            <target name="do-checksums-sha1" if="files.count">
                                 <checksum algorithm="SHA-1">
                                     <fileset dir="${basedir}/target">
                                         <include name="*.deb"/>
                                         <include name="*.dp"/>
-                                        <include name="*.zip"/>
-                                        <include name="*.target"/>
-                                        <include name="kura_${project.version}_*.sh"/>
-                                        <include name="kura_${project.version}_*.dp"/>
-
-                                        <exclude name="kura_${project.version}_*.dp" />
-                                        <exclude name="kura_${project.version}_*.zip" />
                                     </fileset>
                                 </checksum>
                             </target>
@@ -328,6 +297,7 @@
                 </executions>
             </plugin>
         </plugins>
+
         <pluginManagement>
             <plugins>
                 <plugin>

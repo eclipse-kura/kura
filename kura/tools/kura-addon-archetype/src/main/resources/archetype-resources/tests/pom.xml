@@ -187,6 +187,18 @@
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </defaultStartLevel>
+                        <bundleStartLevel>
+                            <bundle>
+                                <id>org.apache.logging.log4j.slf4j2.impl</id>
+                                <level>2</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.apache.aries.spifly.dynamic.bundle</id>
+                                <level>2</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                        </bundleStartLevel>
                     </configuration>
                 </plugin>
                 

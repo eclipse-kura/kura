@@ -173,8 +173,6 @@
         <antcall target="h2db-plugins" />
         <antcall target="keystore-management-plugins" />
         <antcall target="linux.clock-plugins" />
-        <antcall target="linux.command-plugins" />
-        <antcall target="linux.position-plugins" />
         <antcall target="linux.usb-plugins" />
         <antcall target="linux.watchdog-plugins" />
         <antcall target="localization-plugins" />

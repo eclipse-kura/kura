@@ -131,7 +131,6 @@
         <module>org.eclipse.kura.rest.network.status.provider</module>
         <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</module>
         <module>org.eclipse.kura.cloudconnection.kapua.mqtt.provider</module>
-        <module>org.eclipse.kura.web2</module>
         <module>emulator</module>
         <module>test-util</module>
         <module>tools</module>

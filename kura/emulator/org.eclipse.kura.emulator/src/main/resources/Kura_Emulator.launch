@@ -50,7 +50,6 @@
         <setEntry value="com.google.guava.failureaccess@default:default"/>
         <setEntry value="com.google.guava@default:default"/>
         <setEntry value="com.google.protobuf@default:default"/>
-        <setEntry value="com.gwt.user@default:default"/>
         <setEntry value="com.h2database@default:default"/>
         <setEntry value="com.zaxxer.HikariCP@default:default"/>
         <setEntry value="io.netty.buffer@default:default"/>

@@ -33,6 +33,8 @@
         <kura.basedir>${project.basedir}/..</kura.basedir>
         <sonar.coverage.jacoco.xmlReportPaths>
             ${project.basedir}/../test/*/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <docker-java.version>3.5.3</docker-java.version>
+        <jackson.version>2.19.1</jackson.version>
     </properties>
 
     <build>
@@ -61,22 +63,22 @@
                                 <artifactItem>
                                     <groupId>com.github.docker-java</groupId>
                                     <artifactId>docker-java</artifactId>
-                                    <version>3.5.3</version>
+                                    <version>${docker-java.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.github.docker-java</groupId>
                                     <artifactId>docker-java-core</artifactId>
-                                    <version>3.5.3</version>
+                                    <version>${docker-java.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.github.docker-java</groupId>
                                     <artifactId>docker-java-api</artifactId>
-                                    <version>3.5.3</version>
+                                    <version>${docker-java.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.github.docker-java</groupId>
                                     <artifactId>docker-java-transport</artifactId>
-                                    <version>3.5.3</version>
+                                    <version>${docker-java.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>commons-io</groupId>
@@ -96,17 +98,17 @@
                                 <artifactItem>
                                     <groupId>com.fasterxml.jackson.core</groupId>
                                     <artifactId>jackson-databind</artifactId>
-                                    <version>2.19.1</version>
+                                    <version>${jackson.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.fasterxml.jackson.core</groupId>
                                     <artifactId>jackson-core</artifactId>
-                                    <version>2.19.1</version>
+                                    <version>${jackson.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.fasterxml.jackson.core</groupId>
                                     <artifactId>jackson-annotations</artifactId>
-                                    <version>2.19.1</version>
+                                    <version>${jackson.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.github.docker-java</groupId>

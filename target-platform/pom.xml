@@ -131,13 +131,6 @@
             <plugin>
                 <groupId>org.cyclonedx</groupId>
                 <artifactId>cyclonedx-maven-plugin</artifactId>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.eclipse.tycho</groupId>
-                        <artifactId>tycho-sbom</artifactId>
-                        <version>4.0.11</version>
-                    </dependency>
-                </dependencies>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -148,6 +141,7 @@
                 </executions>
                 <configuration>
                     <verbose>true</verbose>
+                    <projectType>framework</projectType>
                 </configuration>
             </plugin>
             <plugin>

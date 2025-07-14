@@ -66,7 +66,8 @@
                         <configuration>
                             <outputDirectory>${project.basedir}/lib</outputDirectory>
                             <excludeClassifiers>
-                                sources,osx-x86_64,osx-x86,osx-aarch_64,windows-x86,windows-x86_64,linux-x86</excludeClassifiers>
+                                sources,osx-x86_64,osx-x86,osx-aarch_64,windows-x86,windows-x86_64,linux-x86
+                            </excludeClassifiers>
                             <excludeTransitive>true</excludeTransitive>
                             <stripVersion>true</stripVersion>
                         </configuration>

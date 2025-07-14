@@ -162,7 +162,6 @@
         <antcall target="core.deployment-plugins" />
         <antcall target="core.identity-plugins" />
         <antcall target="core.inventory-plugins" />
-        <antcall target="core.net-plugins" />
         <antcall target="core.status-plugins" />
         <antcall target="core.system-plugins" />
         <antcall target="deployment.agent-plugins" />

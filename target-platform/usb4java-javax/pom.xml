@@ -31,12 +31,11 @@
         <plugins>
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>${maven-clean-plugin.version}</version>
                 <configuration>
                     <verbose>true</verbose>
                     <filesets>
                         <fileset>
-                            <directory>lib/**</directory>
+                            <directory>lib/</directory>
                             <followSymlinks>false</followSymlinks>
                         </fileset>
                     </filesets>

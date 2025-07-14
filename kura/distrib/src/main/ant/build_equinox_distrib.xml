@@ -181,6 +181,7 @@
         <antcall target="netty-plugins" />
         <antcall target="rest-plugins" />
         <antcall target="util-plugins" />
+        <antcall target="http.server.manager-plugin" />
 
         <!-- Conditional entries. Check for jar presence, and invoke relevant ant
             target -->
@@ -289,9 +290,14 @@
             <zipfileset file="${kura.basedir}/src/main/resources/common/kura.logrotate"
                 prefix="${build.output.name}/${install.folder}" />
 
+            <!-- TO BE REMOVED AFTER OLD KURA PROFILES REMOVAL -->
+            <zipfileset file="${kura.basedir}/src/main/resources/common/network_tools.py"
+                prefix="${build.output.name}/${install.folder}" />
+
             <zipfileset file="${kura.basedir}/src/main/resources/common/customize_kura_properties.py"
                 prefix="${build.output.name}/${install.folder}" />
 
+            <!-- TO BE REMOVED AFTER OLD KURA PROFILES REMOVAL -->
             <zipfileset file="${kura.basedir}/src/main/resources/common/customize_snapshot.py"
                 prefix="${build.output.name}/${install.folder}" />
 
@@ -517,6 +523,7 @@
         <antcall target="rest-wire" />
         <antcall target="util-plugins" />
         <antcall target="web2-plugins" />
+        <antcall target="http.server.manager-plugin" />
         <antcall target="wires-plugins" />
 
         <!-- Conditional entries. Check for jar presence, and invoke relevant ant
@@ -1732,6 +1739,9 @@ fi]]>
             <param name="start.level" value="6" />
             <param name="start" value="s" />
         </antcall>
+    </target>
+
+    <target name="http.server.manager-plugin">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.http.server.manager" />
             <param name="start.level" value="5" />

@@ -94,7 +94,9 @@
                             about_files=${project.basedir}/about_files/
                         </Include-Resource>
                         <Export-Package>
-                            org.usb4java.*;version="1.2.0"
+                            org.usb4java.linux-x86_64;version="1.2.0",
+                            org.usb4java;uses:="org.apache.commons.lang3.builder,org.apache.commons.lang3.tuple";version="1.2.0",
+                            org.usb4java.linux-arm;version="1.2.0"
                         </Export-Package>
                         <Require-Capability>
                             osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"

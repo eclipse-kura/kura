@@ -122,6 +122,25 @@
             <artifactId>target-platform-bom</artifactId>
             <version>6.0.0-SNAPSHOT</version>
             <type>pom</type>
+            <exclusions>
+                <!-- exclude Kura's usb4java transitive deps -->
+                <exclusion>
+                    <groupId>javax.usb</groupId>
+                    <artifactId>usb-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.usb4java</groupId>
+                    <artifactId>usb4java-javax</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.usb4java</groupId>
+                    <artifactId>usb4java</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.usb4java</groupId>
+                    <artifactId>libusb4java</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>

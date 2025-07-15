@@ -142,6 +142,7 @@
                 <configuration>
                     <verbose>true</verbose>
                     <projectType>framework</projectType>
+                    <includeProvidedScope>false</includeProvidedScope>
                 </configuration>
             </plugin>
             <plugin>

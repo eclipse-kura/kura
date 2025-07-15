@@ -36,6 +36,7 @@
 			<groupId>org.eclipse.platform</groupId>
 			<artifactId>org.eclipse.osgi</artifactId>
 			<version>3.12.50</version>
+            <scope>provided</scope>
 		</dependency>
     </dependencies>
 

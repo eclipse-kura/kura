@@ -62,7 +62,6 @@
         <org.eclipse.kura.container.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.container.provider.version>
         <org.eclipse.kura.core.version>2.0.0-SNAPSHOT</org.eclipse.kura.core.version>
         <org.eclipse.kura.core.certificates.version>2.0.0-SNAPSHOT</org.eclipse.kura.core.certificates.version>
-        <org.eclipse.kura.core.cloud.command.version>1.0.0-SNAPSHOT</org.eclipse.kura.core.cloud.command.version>
         <org.eclipse.kura.core.cloud.factory.version>2.0.0-SNAPSHOT</org.eclipse.kura.core.cloud.factory.version>
         <org.eclipse.kura.core.comm.version>2.0.0-SNAPSHOT</org.eclipse.kura.core.comm.version>
         <org.eclipse.kura.core.configuration.version>3.0.0-SNAPSHOT</org.eclipse.kura.core.configuration.version>
@@ -99,7 +98,6 @@
         <org.eclipse.kura.http.server.manager.version>2.0.0-SNAPSHOT</org.eclipse.kura.http.server.manager.version>
         <org.eclipse.kura.json.marshaller.unmarshaller.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.json.marshaller.unmarshaller.provider.version>
         <org.eclipse.kura.linux.clock.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.clock.version>
-        <org.eclipse.kura.linux.command.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.command.version>
         <org.eclipse.kura.linux.gpio.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.gpio.version>
         <org.eclipse.kura.linux.net.version>3.0.0-SNAPSHOT</org.eclipse.kura.linux.net.version>
         <org.eclipse.kura.linux.position.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.position.version>
@@ -120,7 +118,6 @@
         <org.eclipse.kura.request.handler.jaxrs.version>2.0.0-SNAPSHOT</org.eclipse.kura.request.handler.jaxrs.version>
         <org.eclipse.kura.rest.asset.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.asset.provider.version>
         <org.eclipse.kura.rest.cloudconnection.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.cloudconnection.provider.version>
-        <org.eclipse.kura.rest.command.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.command.provider.version>
         <org.eclipse.kura.rest.configuration.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.configuration.provider.version>
         <org.eclipse.kura.rest.identity.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.identity.provider.version>
         <org.eclipse.kura.rest.inventory.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.inventory.provider.version>
@@ -275,11 +272,6 @@
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.core.certificates</artifactId>
                 <version>${org.eclipse.kura.core.certificates.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.core.cloud.command</artifactId>
-                <version>${org.eclipse.kura.core.cloud.command.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -463,11 +455,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.linux.command</artifactId>
-                <version>${org.eclipse.kura.linux.command.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.linux.gpio</artifactId>
                 <version>${org.eclipse.kura.linux.gpio.version}</version>
             </dependency>
@@ -565,11 +552,6 @@
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.rest.cloudconnection.provider</artifactId>
                 <version>${org.eclipse.kura.rest.cloudconnection.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.rest.command.provider</artifactId>
-                <version>${org.eclipse.kura.rest.command.provider.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -824,10 +806,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.core.cloud.command</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.core.cloud.factory</artifactId>
         </dependency>
         <dependency>
@@ -972,10 +950,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.linux.command</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.linux.gpio</artifactId>
         </dependency>
         <dependency>
@@ -1053,10 +1027,6 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.rest.cloudconnection.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.rest.command.provider</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>

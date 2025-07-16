@@ -73,8 +73,8 @@ spec:
             timeout(time: 1, unit: 'HOURS') {
                 dir("kura") {
                     withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6', options: [artifactsPublisher(disabled: true)]) {
-                        sh "mvn -f kura/distrib/pom.xml clean install -DbuildAll"
-                    }
+                        sh "mvn -f kura/distrib/pom.xml clean install"
+		    }
                 }
             }
         }
@@ -87,7 +87,7 @@ spec:
 
         stage('Archive .deb artifacts') {
             dir("kura") {
-                archiveArtifacts artifacts: 'kura/distrib/target/*.deb', onlyIfSuccessful: true
+                archiveArtifacts artifacts: 'kura/distrib/*/target/*.deb', onlyIfSuccessful: true
             }
         }
 

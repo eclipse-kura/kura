@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+#  Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
 #
 #  This program and the accompanying materials are made
 #  available under the terms of the Eclipse Public License 2.0
@@ -31,7 +31,7 @@ fi
 cd $TARGET_DIR
 tar czvf $KURA_ZIP_FILE_NAME.tar.gz $KURA_ZIP_FILE_NAME
 
-sed "s|^INSTALL_DIR=.*|INSTALL_DIR=${INSTALL_DIR}|" $TARGET_DIR/../src/main/sh/$EXTRACT_NAME > tmp_file
+sed "s|^INSTALL_DIR=.*|INSTALL_DIR=${INSTALL_DIR}|" $TARGET_DIR/../../src/main/sh/$EXTRACT_NAME > tmp_file
 cat tmp_file $KURA_ZIP_FILE_NAME.tar.gz > $OUTPUT_NAME
 chmod +x $OUTPUT_NAME
 

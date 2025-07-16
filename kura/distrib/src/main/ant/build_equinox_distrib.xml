@@ -13,7 +13,7 @@
      Red Hat Inc
 
 -->
-<project name="build_equinox_distrib" default="dist-linux" basedir="../../../">
+<project name="build_equinox_distrib" default="dist-linux" basedir="${kura.basedir}/../../">
 
     <target name="install-plugin">
         <first id="bundle.file">
@@ -48,6 +48,330 @@
             failonerror="true" overwrite="false" file="${toString:bundle.file}" />
     </target>
 
+    <target name="dist-core">
+
+        <property name="build.output.name" value="kura_${project.version}_${build.name}" />
+        <property name="kura.symlink" value="kura" />
+        <property name="install.folder" value="install" />
+        <property name="plugins.folder" value="plugins" />
+        <property name="data.folder" value="data" />
+        <property name="framework.config.folder" value="framework" />
+        <property name="user.config.folder" value="user" />
+        <property name="binary.folder" value="bin" />
+        <property name="snapshots.folder" value="${user.config.folder}/snapshots" />
+        <property name="security.folder" value="${user.config.folder}/security" />
+        <property name="console.folder" value="console" />
+        <property name="log4j.folder" value="log4j" />
+
+        <mkdir dir="${project.build.directory}/${build.output.name}/plugins/1" />
+        <mkdir dir="${project.build.directory}/${build.output.name}/plugins/1s" />
+        <mkdir dir="${project.build.directory}/${build.output.name}/plugins/2" />
+        <mkdir dir="${project.build.directory}/${build.output.name}/plugins/2s" />
+        <mkdir dir="${project.build.directory}/${build.output.name}/plugins/3" />
+        <mkdir dir="${project.build.directory}/${build.output.name}/plugins/3s" />
+        <mkdir dir="${project.build.directory}/${build.output.name}/plugins/4" />
+        <mkdir dir="${project.build.directory}/${build.output.name}/plugins/4s" />
+        <mkdir dir="${project.build.directory}/${build.output.name}/plugins/5" />
+        <mkdir dir="${project.build.directory}/${build.output.name}/plugins/5s" />
+        <mkdir dir="${project.build.directory}/${build.output.name}/plugins/6" />
+        <mkdir dir="${project.build.directory}/${build.output.name}/plugins/6s" />
+
+        <echo message="Building Kura Distribution for ${build.output.name}..." />
+
+        <copy file="${kura.basedir}/src/main/resources/common/kura.properties"
+            tofile="${project.build.directory}/${build.output.name}/kura.properties" />
+
+        <propertyfile file="${project.build.directory}/${build.output.name}/kura.properties">
+            <entry key="kura.version" value="KURA_${kura.version}" />
+            <entry key="kura.home" value="${kura.install.dir}/${kura.symlink}" />
+            <entry key="kura.framework.config" value="${kura.install.dir}/${kura.symlink}/${framework.config.folder}" />
+            <entry key="kura.user.config" value="${kura.install.dir}/${kura.symlink}/${user.config.folder}" />
+            <entry key="kura.plugins" value="${kura.install.dir}/${kura.symlink}/${plugins.folder}" />
+            <entry key="kura.packages" value="${kura.install.dir}/${kura.symlink}/packages" />
+
+            <entry key="kura.marketplace.compatibility.version" value="KURA_${kura.version}" />
+
+            <entry key="kura.data" value="${kura.install.dir}/${kura.symlink}/${data.folder}" />
+            <entry key="kura.snapshots" value="${kura.install.dir}/${kura.symlink}/${snapshots.folder}" />
+            <entry key="kura.style.dir" value="${kura.install.dir}/${kura.symlink}/${console.folder}/skin" />
+
+            <entry key="version" value="${kura.version}" />
+            <entry key="build.version" value="${buildNumber}" />
+            <entry key="build.number" value="${build.name}-${buildNumber}" />
+        </propertyfile>
+
+        <replace
+            file="${project.build.directory}/${build.output.name}/kura.properties"
+            token="{kura.install.dir}" value="${kura.install.dir}" />
+        <replace
+            file="${project.build.directory}/${build.output.name}/kura.properties"
+            token="{kura.symlink}" value="${kura.symlink}" />
+
+        <condition property="kura.osgi.repo"
+            value="${project.build.directory}">
+            <or>
+                <not>
+                    <isset property="kura.osgi" />
+                </not>
+                <equals arg1="${kura.osgi}" arg2="equinox" />
+            </or>
+        </condition>
+
+        <copy file="${kura.basedir}/src/main/resources/common/snapshot_0.xml"
+            tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml"
+            failonerror="false" />
+        <copy file="${kura.basedir}/src/main/osgi/equinox/configuration/config.ini"
+            tofile="${project.build.directory}/${build.output.name}/config.ini" />
+
+        <!-- Copy jdk.dio files -->
+        <antcall target="copy-jdk-dio-resources" />
+
+        <copy file="${kura.basedir}/src/main/resources/common/cacerts.ks"
+            tofile="${project.build.directory}/${build.output.name}/cacerts.ks" />
+
+        <copy toDir="${project.build.directory}/${build.output.name}/${plugins.folder}/">
+            <fileset dir="${kura.osgi.repo}/plugins/">
+                <include name="org.eclipse.osgi-*.jar" />
+            </fileset>
+        </copy>
+        <copy toDir="${project.build.directory}/${build.output.name}/${plugins.folder}/">
+            <fileset dir="${kura.osgi.repo}/plugins/">
+                <include name="org.eclipse.equinox.launcher-*.jar" />
+            </fileset>
+        </copy>
+
+        <!-- Populate config.ini with correct OSGi packages -->
+        <antcall target="osgi-base-plugins" />
+
+        <!-- Populate config.ini with correct versions -->
+        <replace file="${project.build.directory}/${build.output.name}/config.ini"
+            token="{kura.build.version}" value="${kura.build.version}" />
+
+        <!-- Populate config.ini with correct Kura bundles -->
+        <antcall target="api-plugins" />
+        <antcall target="cloud.mqtt.kapua-plugins" />
+        <antcall target="cloud.mqtt.raw-plugins" />
+        <antcall target="configuration.change.manager-plugins" />
+        <antcall target="container-orchestrator-plugins" />
+        <antcall target="core-plugins" />
+        <antcall target="core.certificates-plugins" />
+        <antcall target="core.cloud-plugins" />
+        <antcall target="core.comm-plugins" />
+        <antcall target="core.configuration-plugins" />
+        <antcall target="core.crypto-plugins" />
+        <antcall target="core.deployment-plugins" />
+        <antcall target="core.identity-plugins" />
+        <antcall target="core.inventory-plugins" />
+        <antcall target="core.status-plugins" />
+        <antcall target="core.system-plugins" />
+        <antcall target="deployment.agent-plugins" />
+        <antcall target="deployment-hooks-plugins" />
+        <antcall target="event-publisher-plugins" />
+        <antcall target="filesystem-logprovider-plugins" />
+        <antcall target="gpio-plugins" />
+        <antcall target="h2db-plugins" />
+        <antcall target="keystore-management-plugins" />
+        <antcall target="linux.clock-plugins" />
+        <antcall target="linux.usb-plugins" />
+        <antcall target="linux.watchdog-plugins" />
+        <antcall target="localization-plugins" />
+        <antcall target="marshallers-plugins" />
+        <antcall target="misc-plugins" />
+        <antcall target="netty-plugins" />
+        <antcall target="rest-plugins" />
+        <antcall target="util-plugins" />
+        <antcall target="http.server.manager-plugin" />
+
+        <!-- Conditional entries. Check for jar presence, and invoke relevant ant
+            target -->
+        
+        <antcall target="emulator-gpio-plugins" />
+
+        <propertyfile
+            file="${project.build.directory}/${build.output.name}/dpa.properties">
+            <entry key="kura"
+                value="file:${kura.install.dir}/${kura.symlink}/packages/${build.output.name}.dp" />
+        </propertyfile>
+
+        <!-- Create the Kura start scripts -->
+        <loadfile property="kura.script.start" srcFile="${kura.basedir}/src/main/resources/common/scripts/start_kura.sh">
+            <filterchain>
+                <expandproperties/>
+            </filterchain>
+        </loadfile>
+        <echo file="${project.build.directory}/${build.output.name}/start_kura.sh" append="false">${kura.script.start}</echo>
+        
+        <loadfile property="kura.script.start.debug" srcFile="${kura.basedir}/src/main/resources/common/scripts/start_kura_debug.sh">
+            <filterchain>
+                <expandproperties/>
+            </filterchain>
+        </loadfile>
+        <echo file="${project.build.directory}/${build.output.name}/start_kura_debug.sh" append="false">${kura.script.start.debug}</echo>
+
+        <loadfile property="kura.script.start.background" srcFile="${kura.basedir}/src/main/resources/common/scripts/start_kura_background.sh">
+            <filterchain>
+                <expandproperties/>
+            </filterchain>
+        </loadfile>
+        <echo file="${project.build.directory}/${build.output.name}/start_kura_background.sh" append="false">${kura.script.start.background}</echo>
+
+        <!-- Populate parameters -->
+        <copy file="${kura.basedir}/src/main/resources/common/kura_install.sh"
+            tofile="${project.build.directory}/${build.output.name}/kura_install.sh" />
+        <copy file="${kura.basedir}/src/main/resources/common/kura.service"
+            tofile="${project.build.directory}/${build.output.name}/kura.service"
+            failonerror="false" />
+        <copy file="${kura.basedir}/src/main/resources/common/kura.service.nn"
+            tofile="${project.build.directory}/${build.output.name}/kura.service.nn"
+            failonerror="false" />
+        <replaceregexp
+            file="${project.build.directory}/${build.output.name}/kura_install.sh"
+            match="INSTALL_DIR=.*" replace="INSTALL_DIR=${kura.install.dir}" />
+        <replaceregexp
+            file="${project.build.directory}/${build.output.name}/kura.service"
+            match="INSTALL_DIR" replace="${kura.install.dir}" />
+        <replaceregexp
+            file="${project.build.directory}/${build.output.name}/kura.service.nn"
+            match="INSTALL_DIR" replace="${kura.install.dir}" />
+
+        <zip destfile="${project.build.directory}/${build.output.name}.zip">
+
+            <zipfileset
+                file="${project.build.directory}/${build.output.name}/snapshot_0.xml"
+                prefix="${build.output.name}/${snapshots.folder}/" />
+
+            <zipfileset
+                file="${project.build.directory}/${build.output.name}/config.ini"
+                prefix="${build.output.name}/${framework.config.folder}/" />
+
+            <zipfileset
+                file="${project.build.directory}/${build.output.name}/jdk.dio.policy"
+                prefix="${build.output.name}/${framework.config.folder}/" />
+
+            <zipfileset
+                file="${project.build.directory}/${build.output.name}/jdk.dio.properties"
+                prefix="${build.output.name}/${framework.config.folder}/" />
+
+            <zipfileset
+                file="${project.build.directory}/${build.output.name}/cacerts.ks"
+                prefix="${build.output.name}/${security.folder}/" />
+
+            <zipfileset file="${kura.basedir}/src/main/resources/common/kura_custom.properties"
+                prefix="${build.output.name}/${user.config.folder}/" />
+
+            <zipfileset file="${kura.basedir}/src/main/resources/common/favicon/favicon-16x16.png"
+                prefix="${build.output.name}/${console.folder}/skin/" />
+            <zipfileset file="${kura.basedir}/src/main/resources/common/favicon/favicon-32x32.png"
+                prefix="${build.output.name}/${console.folder}/skin/" />
+            <zipfileset file="${kura.basedir}/src/main/resources/common/favicon/favicon-96x96.png"
+                prefix="${build.output.name}/${console.folder}/skin/" />
+            <zipfileset file="${kura.basedir}/src/main/resources/common/favicon/favicon.ico"
+                prefix="${build.output.name}/${console.folder}/skin/" />
+
+            <zipfileset
+                file="${project.build.directory}/${build.output.name}/kura_install.sh"
+                prefix="${build.output.name}/${install.folder}/" filemode="700" />
+
+            <zipfileset
+                file="${kura.basedir}/src/main/resources/common/manage_kura_users.sh"
+                prefix="${build.output.name}/${install.folder}/" filemode="700" />
+
+            <zipfileset
+                file="${project.build.directory}/${build.output.name}/kura.service"
+                prefix="${build.output.name}/${install.folder}" />
+            <zipfileset
+                file="${project.build.directory}/${build.output.name}/kura.service.nn"
+                prefix="${build.output.name}/${install.folder}" />
+
+            <zipfileset file="${kura.basedir}/src/main/resources/common/kura-tmpfiles.conf"
+                prefix="${build.output.name}/${install.folder}" />
+
+            <zipfileset file="${kura.basedir}/src/main/resources/common/kura.logrotate"
+                prefix="${build.output.name}/${install.folder}" />
+
+            <!-- TO BE REMOVED AFTER OLD KURA PROFILES REMOVAL -->
+            <zipfileset file="${kura.basedir}/src/main/resources/common/network_tools.py"
+                prefix="${build.output.name}/${install.folder}" />
+
+            <zipfileset file="${kura.basedir}/src/main/resources/common/customize_kura_properties.py"
+                prefix="${build.output.name}/${install.folder}" />
+
+            <!-- TO BE REMOVED AFTER OLD KURA PROFILES REMOVAL -->
+            <zipfileset file="${kura.basedir}/src/main/resources/common/customize_snapshot.py"
+                prefix="${build.output.name}/${install.folder}" />
+
+            <zipfileset file="${kura.basedir}/src/main/resources/common/customize-installation.sh"
+                prefix="${build.output.name}/${install.folder}" />
+
+            <zipfileset dir="${kura.basedir}/src/main/resources/common/jdk-dio-properties"
+                prefix="${build.output.name}/${install.folder}">
+
+                <include name="*" />
+
+            </zipfileset>
+
+            <zipfileset dir="${kura.basedir}/src/main/resources/common/snapshots"
+                prefix="${build.output.name}/${install.folder}">
+                <include name="*" />
+            </zipfileset>
+
+            <zipfileset
+                file="${project.build.directory}/${build.output.name}/start_kura.sh"
+                fullpath="${build.output.name}/${binary.folder}/start_kura.sh"
+                filemode="777" />
+            <zipfileset
+                file="${project.build.directory}/${build.output.name}/start_kura_debug.sh"
+                fullpath="${build.output.name}/${binary.folder}/start_kura_debug.sh"
+                filemode="777" />
+            <zipfileset
+                file="${project.build.directory}/${build.output.name}/start_kura_background.sh"
+                fullpath="${build.output.name}/${binary.folder}/start_kura_background.sh"
+                filemode="777" />
+            <zipfileset
+                file="${kura.basedir}/src/main/resources/common/gen_config_ini.sh"
+                fullpath="${build.output.name}/${binary.folder}/gen_config_ini.sh"
+                filemode="777" />
+
+            <zipfileset file="RELEASE_NOTES.txt"
+                prefix="${build.output.name}/${framework.config.folder}/" />
+            <zipfileset file="notice.html" prefix="${build.output.name}/" />
+            <zipfileset file="epl-v10.html" prefix="${build.output.name}/" />
+            <zipfileset file="${kura.basedir}/src/main/resources/common/log4j.xml"
+                prefix="${build.output.name}/${log4j.folder}/" />
+            <zipfileset
+                file="${project.build.directory}/${build.output.name}/kura.properties"
+                prefix="${build.output.name}/${framework.config.folder}/" />
+
+            <zipfileset dir="${project.build.directory}/${build.output.name}/plugins"
+                prefix="${build.output.name}/${plugins.folder}">
+
+            </zipfileset>
+
+        </zip>
+
+        <echo message="Building Kura Distribution for ${build.name}-jars..." />
+
+        <!-- Create installer script -->
+        <echo message="Creating Installer for ${build.name} ${kura.install.dir}" />
+        <exec executable="${project.build.directory}/../../src/main/sh/create_installer.sh">
+            <arg value="${project.build.directory}" />
+            <arg value="${build.output.name}.zip" />
+            <arg value="kura_${project.version}_${build.name}_installer.sh" />
+            <arg value="${build.name}" />
+            <arg value="${kura.install.dir}" />
+        </exec>
+
+        <!-- Get version information for the bundles/files in this build -->
+        <echo
+            message="Gathering version information for the bundles/files in ${build.name}" />
+        <exec executable="${kura.basedir}/src/main/sh/get_build_versions.sh">
+            <arg value="${project.build.directory}" />
+            <arg value="${build.output.name}.zip" />
+            <arg value="kura_${project.version}_${build.name}.catalog" />
+            <arg value="${build.name}" />
+        </exec>
+    </target>
+
     <target name="dist-linux">
 
         <property name="build.output.name" value="kura_${project.version}_${build.name}" />
@@ -78,28 +402,21 @@
 
         <echo message="Building Kura Distribution for ${build.output.name}..." />
 
-        <copy file="src/main/resources/${build.name}/kura.properties"
+        <copy file="${kura.basedir}/src/main/resources/${build.name}/kura.properties"
             tofile="${project.build.directory}/${build.output.name}/kura.properties" />
-        <propertyfile
-            file="${project.build.directory}/${build.output.name}/kura.properties">
+        <propertyfile file="${project.build.directory}/${build.output.name}/kura.properties">
             <entry key="kura.version" value="KURA_${kura.version}" />
             <entry key="kura.home" value="${kura.install.dir}/${kura.symlink}" />
-            <entry key="kura.framework.config"
-                value="${kura.install.dir}/${kura.symlink}/${framework.config.folder}" />
-            <entry key="kura.user.config"
-                value="${kura.install.dir}/${kura.symlink}/${user.config.folder}" />
-            <entry key="kura.plugins"
-                value="${kura.install.dir}/${kura.symlink}/${plugins.folder}" />
-            <entry key="kura.packages"
-                value="${kura.install.dir}/${kura.symlink}/packages" />
+            <entry key="kura.framework.config" value="${kura.install.dir}/${kura.symlink}/${framework.config.folder}" />
+            <entry key="kura.user.config" value="${kura.install.dir}/${kura.symlink}/${user.config.folder}" />
+            <entry key="kura.plugins" value="${kura.install.dir}/${kura.symlink}/${plugins.folder}" />
+            <entry key="kura.packages" value="${kura.install.dir}/${kura.symlink}/packages" />
 
             <entry key="kura.marketplace.compatibility.version" value="KURA_${kura.version}" />
 
             <entry key="kura.data" value="${kura.install.dir}/${kura.symlink}/${data.folder}" />
-            <entry key="kura.snapshots"
-                value="${kura.install.dir}/${kura.symlink}/${snapshots.folder}" />
-            <entry key="kura.style.dir"
-                value="${kura.install.dir}/${kura.symlink}/${console.folder}/skin" />
+            <entry key="kura.snapshots" value="${kura.install.dir}/${kura.symlink}/${snapshots.folder}" />
+            <entry key="kura.style.dir" value="${kura.install.dir}/${kura.symlink}/${console.folder}/skin" />
 
             <entry key="version" value="${kura.version}" />
             <entry key="build.version" value="${buildNumber}" />
@@ -128,16 +445,16 @@
             <contains string="${build.name}" substring="docker" />
         </condition>
 
-        <copy file="src/main/resources/${build.name}/snapshot_0.xml"
+        <copy file="${kura.basedir}/src/main/resources/${build.name}/snapshot_0.xml"
             tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml"
             failonerror="false" />
-        <copy file="src/main/osgi/equinox/configuration/config.ini"
+        <copy file="${kura.basedir}/src/main/osgi/equinox/configuration/config.ini"
             tofile="${project.build.directory}/${build.output.name}/config.ini" />
 
         <!-- Copy jdk.dio files -->
         <antcall target="copy-jdk-dio-resources" />
 
-        <copy file="src/main/resources/common/cacerts.ks"
+        <copy file="${kura.basedir}/src/main/resources/common/cacerts.ks"
             tofile="${project.build.directory}/${build.output.name}/cacerts.ks" />
 
         <copy toDir="${project.build.directory}/${build.output.name}/${plugins.folder}/">
@@ -160,44 +477,52 @@
 
         <!-- Populate config.ini with correct Kura bundles -->
         <antcall target="api-plugins" />
+        <antcall target="artemis-plugins" />
+        <antcall target="asset-plugins" />
+        <antcall target="bluetooth-plugins" />
+        <antcall target="camel-plugins" />
+        <antcall target="cloud.mqtt.eclipseiot-plugins" />
+        <antcall target="cloud.mqtt.kapua-plugins" />
+        <antcall target="cloud.mqtt.raw-plugins" />
+        <antcall target="configuration.change.manager-plugins" />
+        <antcall target="container-orchestrator-plugins" />
         <antcall target="core-plugins" />
-        <antcall target="core.system-plugins" />
         <antcall target="core.certificates-plugins" />
         <antcall target="core.cloud-plugins" />
-        <antcall target="cloud.mqtt.kapua-plugins" />
-        <antcall target="cloud.mqtt.eclipseiot-plugins" />
-        <antcall target="cloud.mqtt.raw-plugins" />
         <antcall target="core.comm-plugins" />
         <antcall target="core.configuration-plugins" />
         <antcall target="core.crypto-plugins" />
         <antcall target="core.deployment-plugins" />
         <antcall target="core.identity-plugins" />
         <antcall target="core.inventory-plugins" />
-        <antcall target="rest.tamper-plugins" />
         <antcall target="core.net-plugins" />
         <antcall target="core.status-plugins" />
+        <antcall target="core.system-plugins" />
         <antcall target="deployment.agent-plugins" />
+        <antcall target="deployment-hooks-plugins" />
+        <antcall target="event-publisher-plugins" />
+        <antcall target="filesystem-logprovider-plugins" />
+        <antcall target="gpio-plugins" />
+        <antcall target="gpsd4java-plugins" />
+        <antcall target="h2db-plugins" />
+        <antcall target="keystore-management-plugins" />
         <antcall target="linux.clock-plugins" />
         <antcall target="linux.command-plugins" />
         <antcall target="linux.position-plugins" />
         <antcall target="linux.usb-plugins" />
-        <antcall target="bluetooth-plugins" />
         <antcall target="linux.watchdog-plugins" />
-        <antcall target="h2db-plugins" />
-        <antcall target="camel-plugins" />
-        <antcall target="rest-plugins" />
-        <antcall target="asset-plugins" />
-        <antcall target="artemis-plugins" />
-        <antcall target="deployment-hooks-plugins" />
+        <antcall target="localization-plugins" />
         <antcall target="marshallers-plugins" />
-        <antcall target="wires-plugins" />
         <antcall target="misc-plugins" />
-        <antcall target="keystore-management-plugins" />
-        <antcall target="filesystem-logprovider-plugins" />
-        <antcall target="container-orchestrator-plugins" />
-        <antcall target="configuration.change.manager-plugins" />
-        <antcall target="event-publisher-plugins" />
-        <antcall target="gpio-plugins" />
+        <antcall target="netty-plugins" />
+        <antcall target="rest-command" />
+        <antcall target="rest-plugins" />
+        <antcall target="rest-position" />
+        <antcall target="rest.tamper-plugins" />
+        <antcall target="rest-wire" />
+        <antcall target="util-plugins" />
+        <antcall target="http.server.manager-plugin" />
+        <antcall target="wires-plugins" />
 
         <!-- Conditional entries. Check for jar presence, and invoke relevant ant
             target -->
@@ -207,8 +532,7 @@
 
         <propertyfile
             file="${project.build.directory}/${build.output.name}/dpa.properties">
-            <entry key="kura"
-                value="file:${kura.install.dir}/${kura.symlink}/packages/${build.output.name}.dp" />
+            <entry key="kura" value="file:${kura.install.dir}/${kura.symlink}/packages/${build.output.name}.dp" />
         </propertyfile>
 
         <!-- Create the Kura start scripts -->
@@ -351,12 +675,12 @@ fi]]>
         </echo>
 
         <!-- Populate parameters -->
-        <copy file="src/main/resources/${build.name}/kura_install.sh"
+        <copy file="${kura.basedir}/src/main/resources/${build.name}/kura_install.sh"
             tofile="${project.build.directory}/${build.output.name}/kura_install.sh" />
-        <copy file="src/main/resources/common/kura.service"
+        <copy file="${kura.basedir}/src/main/resources/common/kura.service"
             tofile="${project.build.directory}/${build.output.name}/kura.service"
             failonerror="false" />
-        <copy file="src/main/resources/common/kura.service.nn"
+        <copy file="${kura.basedir}/src/main/resources/common/kura.service.nn"
             tofile="${project.build.directory}/${build.output.name}/kura.service.nn"
             failonerror="false" />
         <replaceregexp
@@ -391,16 +715,16 @@ fi]]>
                 file="${project.build.directory}/${build.output.name}/cacerts.ks"
                 prefix="${build.output.name}/${security.folder}/" />
 
-            <zipfileset file="src/main/resources/common/kura_custom.properties"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/kura_custom.properties"
                 prefix="${build.output.name}/${user.config.folder}/" />
 
-            <zipfileset file="src/main/resources/common/favicon/favicon-16x16.png"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/favicon/favicon-16x16.png"
                 prefix="${build.output.name}/${console.folder}/skin/" />
-            <zipfileset file="src/main/resources/common/favicon/favicon-32x32.png"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/favicon/favicon-32x32.png"
                 prefix="${build.output.name}/${console.folder}/skin/" />
-            <zipfileset file="src/main/resources/common/favicon/favicon-96x96.png"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/favicon/favicon-96x96.png"
                 prefix="${build.output.name}/${console.folder}/skin/" />
-            <zipfileset file="src/main/resources/common/favicon/favicon.ico"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/favicon/favicon.ico"
                 prefix="${build.output.name}/${console.folder}/skin/" />
 
             <zipfileset
@@ -408,7 +732,7 @@ fi]]>
                 prefix="${build.output.name}/${install.folder}/" filemode="700" />
 
             <zipfileset
-                file="src/main/resources/common/manage_kura_users.sh"
+                file="${kura.basedir}/src/main/resources/common/manage_kura_users.sh"
                 prefix="${build.output.name}/${install.folder}/" filemode="700" />
 
             <zipfileset
@@ -417,52 +741,52 @@ fi]]>
             <zipfileset
                 file="${project.build.directory}/${build.output.name}/kura.service.nn"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/${build.name}/firewall.service"
+            <zipfileset file="${kura.basedir}/src/main/resources/${build.name}/firewall.service"
                 prefix="${build.output.name}/${install.folder}" filemode="700" />
-            <zipfileset file="src/main/resources/${build.name}/firewall.init"
+            <zipfileset file="${kura.basedir}/src/main/resources/${build.name}/firewall.init"
                 prefix="${build.output.name}/${install.folder}" filemode="700" />
-            <zipfileset file="src/main/resources/${build.name}/iptables.init"
+            <zipfileset file="${kura.basedir}/src/main/resources/${build.name}/iptables.init"
                 prefix="${build.output.name}/${install.folder}" filemode="700" />
 
-            <zipfileset file="src/main/resources/common/kura-tmpfiles.conf"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/kura-tmpfiles.conf"
                 prefix="${build.output.name}/${install.folder}" />
 
-            <zipfileset file="src/main/resources/${build.name}/kura.logrotate"
+            <zipfileset file="${kura.basedir}/src/main/resources/${build.name}/kura.logrotate"
                 prefix="${build.output.name}/${install.folder}" />
 
-            <zipfileset file="src/main/resources/common/network_tools.py"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/network_tools.py"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/customize_iptables.py"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/customize_iptables.py"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/customize_kura_properties.py"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/customize_kura_properties.py"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/customize_snapshot.py"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/customize_snapshot.py"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/comment_interfaces_file.py"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/comment_interfaces_file.py"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/customize-installation.sh"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/customize-installation.sh"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset dir="src/main/resources/common/jdk-dio-properties"
+            <zipfileset dir="${kura.basedir}/src/main/resources/common/jdk-dio-properties"
                 prefix="${build.output.name}/${install.folder}">
                 <include name="*" />
             </zipfileset>
-            <zipfileset dir="src/main/resources/common/iptables"
+            <zipfileset dir="${kura.basedir}/src/main/resources/common/iptables"
                 prefix="${build.output.name}/${install.folder}">
                 <include name="*" />
             </zipfileset>
-            <zipfileset dir="src/main/resources/common/snapshots"
+            <zipfileset dir="${kura.basedir}/src/main/resources/common/snapshots"
                 prefix="${build.output.name}/${install.folder}">
                 <include name="*" />
             </zipfileset>
 
-            <zipfileset file="src/main/resources/common/named/named.ca"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/named/named.ca"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/named/named.rfc1912.zones"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/named/named.rfc1912.zones"
                 prefix="${build.output.name}/${install.folder}" />
-            <zipfileset file="src/main/resources/common/named/usr.sbin.named"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/named/usr.sbin.named"
                 prefix="${build.output.name}/${install.folder}" />
 
-            <zipfileset file="src/main/resources/common/dnsmasq"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/dnsmasq"
                 prefix="${build.output.name}/${install.folder}" />
 
             <zipfileset
@@ -478,7 +802,7 @@ fi]]>
                 fullpath="${build.output.name}/${binary.folder}/start_kura_background.sh"
                 filemode="777" />
             <zipfileset
-                file="src/main/resources/common/gen_config_ini.sh"
+                file="${kura.basedir}/src/main/resources/common/gen_config_ini.sh"
                 fullpath="${build.output.name}/${binary.folder}/gen_config_ini.sh"
                 filemode="777" />
 
@@ -486,7 +810,7 @@ fi]]>
                 prefix="${build.output.name}/${framework.config.folder}/" />
             <zipfileset file="notice.html" prefix="${build.output.name}/" />
             <zipfileset file="epl-v10.html" prefix="${build.output.name}/" />
-            <zipfileset file="src/main/resources/${build.name}/log4j.xml"
+            <zipfileset file="${kura.basedir}/src/main/resources/common/log4j.xml"
                 prefix="${build.output.name}/${log4j.folder}/" />
             <zipfileset
                 file="${project.build.directory}/${build.output.name}/kura.properties"
@@ -503,7 +827,7 @@ fi]]>
 
         <!-- Create installer script -->
         <echo message="Creating Installer for ${build.name}  ${kura.install.dir}" />
-        <exec executable="${project.build.directory}/../src/main/sh/create_installer.sh">
+        <exec executable="${project.build.directory}/../../src/main/sh/create_installer.sh">
             <arg value="${project.build.directory}" />
             <arg value="${build.output.name}.zip" />
             <arg value="kura_${project.version}_${build.name}_installer.sh" />
@@ -514,7 +838,7 @@ fi]]>
         <!-- Get version information for the bundles/files in this build -->
         <echo
             message="Gathering version information for the bundles/files in ${build.name}" />
-        <exec executable="src/main/sh/get_build_versions.sh">
+        <exec executable="${kura.basedir}/src/main/sh/get_build_versions.sh">
             <arg value="${project.build.directory}" />
             <arg value="${build.output.name}.zip" />
             <arg value="kura_${project.version}_${build.name}.catalog" />
@@ -523,10 +847,10 @@ fi]]>
     </target>
 
     <target name="copy-jdk-dio-resources" unless="is.docker">
-        <copy file="src/main/resources/${build.name}/jdk.dio.properties"
+        <copy file="${kura.basedir}/src/main/resources/${build.name}/jdk.dio.properties"
             tofile="${project.build.directory}/${build.output.name}/jdk.dio.properties"
             failonerror="false" />
-        <copy file="src/main/resources/common/jdk.dio.policy"
+        <copy file="${kura.basedir}/src/main/resources/common/jdk.dio.policy"
             tofile="${project.build.directory}/${build.output.name}/jdk.dio.policy" />
     </target>
 
@@ -695,8 +1019,7 @@ fi]]>
             <param name="start.level" value="1" />
             <param name="start" value="" />
         </antcall>
-        <!--Jersey
-        dependencies-->
+        <!--Jersey dependencies-->
         <antcall target="install-plugin">
             <param name="bundle.name" value="hk2-api" />
             <param name="start.level" value="3" />
@@ -787,8 +1110,7 @@ fi]]>
             <param name="start.level" value="3" />
             <param name="start" value="" />
         </antcall>
-        <!--END
-        Jersey dependencies-->
+        <!--END Jersey dependencies-->
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.equinox.cm" />
             <param name="start.level" value="1" />
@@ -906,11 +1228,6 @@ fi]]>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.apache.felix.deploymentadmin" />
-            <param name="start.level" value="3" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.equinox.wireadmin" />
             <param name="start.level" value="3" />
             <param name="start" value="s" />
         </antcall>
@@ -1150,11 +1467,6 @@ fi]]>
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.name" value="gpsd4java" />
-            <param name="start.level" value="3" />
-            <param name="start" value="" />
-        </antcall>
-        <antcall target="install-plugin">
             <param name="bundle.name" value="org.apache.servicemix.bundles.c3p0" />
             <param name="start.level" value="3" />
             <param name="start" value="" />
@@ -1171,6 +1483,13 @@ fi]]>
         </antcall>
     </target>
 
+    <target name="gpsd4java-plugins">
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="gpsd4java" />
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
+        </antcall>
+    </target>
 
     <!-- Kura config targets -->
     <target name="api-plugins">
@@ -1178,6 +1497,16 @@ fi]]>
             <param name="bundle.name" value="org.eclipse.kura.api" />
             <param name="start.level" value="3" />
             <param name="start" value="s" />
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="guava" />
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="failureaccess" />
+            <param name="start.level" value="3" />
+            <param name="start" value="" />
         </antcall>
     </target>
 
@@ -1452,6 +1781,30 @@ fi]]>
         </antcall>
     </target>
 
+    <target name="rest-command">
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="org.eclipse.kura.rest.command.provider" />
+            <param name="start.level" value="4" />
+            <param name="start" value="s" />
+        </antcall>
+    </target>
+
+    <target name="rest-position">
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="org.eclipse.kura.rest.position.provider" />
+            <param name="start.level" value="4" />
+            <param name="start" value="s" />
+        </antcall>
+    </target>
+
+    <target name="rest-wire">
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="org.eclipse.kura.rest.wire.provider" />
+            <param name="start.level" value="4" />
+            <param name="start" value="s" />
+        </antcall>
+    </target>
+
     <target name="rest-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.rest.provider" />
@@ -1474,17 +1827,7 @@ fi]]>
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.rest.command.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.rest.packages.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.rest.position.provider" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>
@@ -1505,11 +1848,6 @@ fi]]>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.rest.system.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.rest.wire.provider" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>
@@ -1546,12 +1884,7 @@ fi]]>
         </antcall>
     </target>
 
-    <target name="wires-plugins">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.driver.helper.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
+    <target name="localization-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.localization" />
             <param name="start.level" value="4" />
@@ -1562,8 +1895,24 @@ fi]]>
             <param name="start.level" value="6" />
             <param name="start" value="" />
         </antcall>
+    </target>
+
+    <target name="util-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.util" />
+            <param name="start.level" value="4" />
+            <param name="start" value="s" />
+        </antcall>
+    </target>
+
+    <target name="wires-plugins">
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="org.eclipse.equinox.wireadmin" />
+            <param name="start.level" value="3" />
+            <param name="start" value="s" />
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="org.eclipse.kura.driver.helper.provider" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>
@@ -1706,19 +2055,7 @@ fi]]>
         </antcall>
     </target>
 
-    <!-- Artemis config targets -->
-    <target name="artemis-plugins">
-
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="failureaccess" />
-            <param name="start.level" value="3" />
-            <param name="start" value="" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="guava" />
-            <param name="start.level" value="3" />
-            <param name="start" value="" />
-        </antcall>
+    <target name="netty-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="netty-buffer" />
             <param name="start.level" value="3" />
@@ -1784,6 +2121,10 @@ fi]]>
             <param name="start.level" value="3" />
             <param name="start" value="" />
         </antcall>
+    </target>
+
+    <!-- Artemis config targets -->
+    <target name="artemis-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="artemis-mqtt-protocol" />
             <param name="start.level" value="3" />

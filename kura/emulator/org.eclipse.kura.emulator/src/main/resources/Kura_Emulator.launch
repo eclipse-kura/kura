@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Copyright (c) 2014, 2025 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+     Red Hat Inc
+
+-->
 <launchConfiguration type="org.eclipse.pde.ui.EquinoxLauncher">
     <booleanAttribute key="append.args" value="true"/>
     <booleanAttribute key="automaticAdd" value="false"/>
@@ -35,7 +50,6 @@
         <setEntry value="com.google.guava.failureaccess@default:default"/>
         <setEntry value="com.google.guava@default:default"/>
         <setEntry value="com.google.protobuf@default:default"/>
-        <setEntry value="com.gwt.user@default:default"/>
         <setEntry value="com.h2database@default:default"/>
         <setEntry value="com.zaxxer.HikariCP@default:default"/>
         <setEntry value="io.netty.buffer@default:default"/>
@@ -159,7 +173,6 @@
         <setEntry value="org.eclipse.kura.rest.provider@default:default"/>
         <setEntry value="org.eclipse.kura.useradmin.store@default:default"/>
         <setEntry value="org.eclipse.kura.util@default:default"/>
-        <setEntry value="org.eclipse.kura.web2@default:default"/>
         <setEntry value="org.eclipse.kura.wire.component.join.provider@default:default"/>
         <setEntry value="org.eclipse.kura.wire.component.provider@default:default"/>
         <setEntry value="org.eclipse.kura.wire.db.component.provider@default:default"/>

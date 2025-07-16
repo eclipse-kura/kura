@@ -165,7 +165,6 @@
         <usb4java.version>1.2.0</usb4java.version>
         <!-- END target platform dependencies -->
         <com.codeminders.hidapi.version>2.0.0-SNAPSHOT</com.codeminders.hidapi.version>
-        <com.gwt.user.version>2.0.0-SNAPSHOT</com.gwt.user.version>
         <jdk.dio.version>2.0.0-SNAPSHOT</jdk.dio.version>
         <log4j2-api-config.version>2.0.0-SNAPSHOT</log4j2-api-config.version>
         <org.apache.activemq.artemis.version>3.0.0-SNAPSHOT</org.apache.activemq.artemis.version>
@@ -1072,11 +1071,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
-                <artifactId>com.gwt.user</artifactId>
-                <version>${com.gwt.user.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
                 <artifactId>jdk.dio</artifactId>
                 <version>${jdk.dio.version}</version>
             </dependency>
@@ -1852,10 +1846,6 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>com.codeminders.hidapi.aarch64</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>com.gwt.user</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>

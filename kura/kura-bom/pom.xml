@@ -137,7 +137,6 @@
         <org.eclipse.kura.stress.version>2.0.0-SNAPSHOT</org.eclipse.kura.stress.version>
         <org.eclipse.kura.useradmin.store.version>2.0.0-SNAPSHOT</org.eclipse.kura.useradmin.store.version>
         <org.eclipse.kura.util.version>2.0.0-SNAPSHOT</org.eclipse.kura.util.version>
-        <org.eclipse.kura.web2.version>3.0.0-SNAPSHOT</org.eclipse.kura.web2.version>
         <org.eclipse.kura.wire.ai.component.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.wire.ai.component.provider.version>
         <org.eclipse.kura.wire.camel.version>2.0.0-SNAPSHOT</org.eclipse.kura.wire.camel.version>
         <org.eclipse.kura.wire.component.join.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.wire.component.join.provider.version>
@@ -654,11 +653,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.web2</artifactId>
-                <version>${org.eclipse.kura.web2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.wire.ai.component.provider</artifactId>
                 <version>${org.eclipse.kura.wire.ai.component.provider.version}</version>
             </dependency>
@@ -1127,10 +1121,6 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.util</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.web2</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>

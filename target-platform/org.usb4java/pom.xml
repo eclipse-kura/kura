@@ -24,18 +24,36 @@
             <groupId>org.usb4java</groupId>
             <artifactId>usb4java</artifactId>
             <version>${usb4java.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.usb4java</groupId>
             <artifactId>libusb4java</artifactId>
             <version>${usb4java.version}</version>
             <classifier>linux-arm</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.usb4java</groupId>
             <artifactId>libusb4java</artifactId>
             <version>${usb4java.version}</version>
             <classifier>linux-x86_64</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

@@ -1699,7 +1699,7 @@ fi]]>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.http.server.manager" />
             <param name="start.level" value="5" />
-            <param name="start" value="" />
+            <param name="start" value="s" />
         </antcall>
     </target>
 

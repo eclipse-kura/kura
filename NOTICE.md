@@ -142,9 +142,6 @@ This project leverages the following third party content.
 * maven/mavencentral/org.usb4java/usb4java/1.2.0, MIT, approved, #3089
 * maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.c3p0/0.9.5.5_1, Apache-2.0, approved, #3761
 * maven/mavencentral/com.zaxxer/HikariCP/2.7.9, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/org.gwtproject/gwt-servlet-jakarta/2.12.1, Apache-2.0, approved, #18538
-* maven/mavencentral/org.gwtproject/gwt-user/2.12.1, Apache-2.0 AND CC0-1.0, approved, #18539
-* maven/mavencentral/org.gwtbootstrap3/gwtbootstrap3/1.0.1, Apache-2.0 AND MIT AND OFL-1.1, approved, #2020
 * maven/mavencentral/org.xerial/sqlite-jdbc/3.42.0.0, Apache-2.0 AND BSD-2-Clause AND ISC AND Artistic-2.0, approved, #9089
 * maven/mavencentral/org.graalvm.js/js/21.3.9, UPL-1.0 AND (UPL-1.0 AND GPL-2.0-only WITH Classpath-exception-2.0) AND BSD-3-Clause AND MPL-2.0, approved, #6714
 * maven/mavencentral/org.graalvm.js/js-scriptengine/21.3.9, UPL-1.0, approved, #6715

@@ -135,7 +135,7 @@
                             ${tycho.surefire.testenv.args}
                             -Dmoquette.path=${project.basedir}/src/main/resources/moquette/config
                         </argLine>
-                        <!--                       <appArgLine>-consoleLog -console 5002 -noExit</appArgLine>-->
+                        <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine>-->
                         <dependencies>
                             <dependency>
                                 <type>p2-installable-unit</type>
@@ -657,11 +657,6 @@
                                 </requirement>
                                 <requirement>
                                     <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.core.cloud.command</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.core.cloud.factory</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
@@ -823,7 +818,6 @@
         <module>org.eclipse.kura.core.certificates.test</module>
         <module>org.eclipse.kura.core.comm.test</module>
         <module>org.eclipse.kura.core.configuration.test</module>
-        <module>org.eclipse.kura.core.cloud.command.test</module>
         <module>org.eclipse.kura.core.cloud.factory.test</module>
         <module>org.eclipse.kura.core.crypto.test</module>
         <module>org.eclipse.kura.core.deployment.test</module>
@@ -883,7 +877,6 @@
         <module>org.eclipse.kura.rest.configuration.provider.test</module>
         <module>org.eclipse.kura.rest.network.configuration.provider.test</module>
         <module>org.eclipse.kura.rest.cloudconnection.provider.test</module>
-        <module>org.eclipse.kura.rest.command.provider.test</module>
         <module>org.eclipse.kura.rest.identity.provider.test</module>
         <module>org.eclipse.kura.rest.inventory.provider.test</module>
         <module>org.eclipse.kura.rest.network.status.provider.test</module>

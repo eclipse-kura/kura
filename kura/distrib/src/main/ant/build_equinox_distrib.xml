@@ -507,7 +507,6 @@
         <antcall target="h2db-plugins" />
         <antcall target="keystore-management-plugins" />
         <antcall target="linux.clock-plugins" />
-        <antcall target="linux.command-plugins" />
         <antcall target="linux.position-plugins" />
         <antcall target="linux.usb-plugins" />
         <antcall target="linux.watchdog-plugins" />
@@ -515,7 +514,6 @@
         <antcall target="marshallers-plugins" />
         <antcall target="misc-plugins" />
         <antcall target="netty-plugins" />
-        <antcall target="rest-command" />
         <antcall target="rest-plugins" />
         <antcall target="rest-position" />
         <antcall target="rest.tamper-plugins" />
@@ -1541,11 +1539,6 @@ fi]]>
             <param name="start" value="s" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.core.cloud.command" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.core.cloud.factory" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
@@ -1658,14 +1651,6 @@ fi]]>
     <target name="linux.clock-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.linux.clock" />
-            <param name="start.level" value="4" />
-            <param name="start" value="" />
-        </antcall>
-    </target>
-
-    <target name="linux.command-plugins">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.linux.command" />
             <param name="start.level" value="4" />
             <param name="start" value="" />
         </antcall>
@@ -1784,14 +1769,6 @@ fi]]>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.rest.asset.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-    </target>
-
-    <target name="rest-command">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.rest.command.provider" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>

@@ -43,7 +43,6 @@
         <module>org.eclipse.kura.core.certificates</module>
         <module>org.eclipse.kura.core.keystore</module>
         <module>org.eclipse.kura.cloud.base.provider</module>
-        <module>org.eclipse.kura.core.cloud.command</module>
         <module>org.eclipse.kura.core.cloud.factory</module>
         <module>org.eclipse.kura.core.comm</module>
         <module>org.eclipse.kura.core.configuration</module>
@@ -69,7 +68,6 @@
         <module>org.eclipse.kura.ble.ibeacon.provider</module>
         <module>org.eclipse.kura.ble.eddystone.provider</module>
         <module>org.eclipse.kura.linux.clock</module>
-        <module>org.eclipse.kura.linux.command</module>
         <module>org.eclipse.kura.linux.gpio</module>
         <module>org.eclipse.kura.linux.net</module>
         <module>org.eclipse.kura.linux.position</module>
@@ -110,7 +108,6 @@
         <module>org.eclipse.kura.rest.network.configuration.provider</module>
         <module>org.eclipse.kura.rest.identity.provider</module>
         <module>org.eclipse.kura.rest.inventory.provider</module>
-        <module>org.eclipse.kura.rest.command.provider</module>
         <module>org.eclipse.kura.rest.packages.provider</module>
         <module>org.eclipse.kura.rest.position.provider</module>
         <module>org.eclipse.kura.rest.keystore.provider</module>

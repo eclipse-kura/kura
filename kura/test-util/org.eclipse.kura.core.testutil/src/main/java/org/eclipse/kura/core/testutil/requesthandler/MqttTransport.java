@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,8 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.core.testutil.requesthandler;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -26,7 +26,6 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.data.util.MqttTopicUtil;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
-import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.data.transport.listener.DataTransportListener;
@@ -36,17 +35,20 @@ import org.eclipse.kura.message.KuraPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.moquette.broker.Server;
+import io.moquette.broker.config.FluentConfig;
+import io.moquette.broker.config.IConfig;
+
 public class MqttTransport implements Transport {
 
     private static final Logger logger = LoggerFactory.getLogger(MqttTransport.class);
 
     private static final String MQTT_DATA_TRANSPORT_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
-    private static final String SIMPLE_ARTEMIS_BROKER_SERVICE_PID = "org.eclipse.kura.broker.artemis.simple.mqtt.BrokerInstance";
 
     private static final String DEFAULT_CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
     private static final String DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
 
-    private CryptoService cryptoService;
+    private static Server mqttBroker;
 
     private DataTransportInspector observerInspector;
 
@@ -68,11 +70,12 @@ public class MqttTransport implements Transport {
         }
 
         try {
+            startMoquetteBroker();
+
             final ConfigurationService configurationService = ServiceUtil
                     .trackService(ConfigurationService.class, Optional.empty()).get(1, TimeUnit.MINUTES);
             final DataTransportService mqttDataTransport = ServiceUtil
                     .trackService(DataTransportService.class, Optional.empty()).get(1, TimeUnit.MINUTES);
-            cryptoService = ServiceUtil.trackService(CryptoService.class, Optional.empty()).get(1, TimeUnit.MINUTES);
             jsonMarshaller = ServiceUtil
                     .trackService(Marshaller.class,
                             Optional.of("(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)"))
@@ -82,18 +85,16 @@ public class MqttTransport implements Transport {
                             Optional.of("(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)"))
                     .get(1, TimeUnit.MINUTES);
 
-            final Map<String, Object> brokerProperties = new HashMap<>();
-
-            brokerProperties.put("enabled", true);
-            brokerProperties.put("password", new String(cryptoService.encryptAes("foo".toCharArray())));
-
             ServiceUtil.updateComponentConfiguration(configurationService, DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID,
                     getConfigForLocalBroker("test")).get(30, TimeUnit.SECONDS);
-            ServiceUtil.updateComponentConfiguration(configurationService, SIMPLE_ARTEMIS_BROKER_SERVICE_PID,
-                    brokerProperties).get(30, TimeUnit.SECONDS);
 
-            final Map<String, Object> cloudServiceProperties = Collections.singletonMap("payload.encoding",
-                    "simple-json");
+            final Map<String, Object> cloudServiceProperties = new HashMap<>();
+            cloudServiceProperties.put("payload.encoding", "simple-json");
+            /*
+             * Set a control topic without $ as prefix: some brokers do not allow access to topics starting with $ (like
+             * moquette, mosquitto)
+             */
+            cloudServiceProperties.put("topic.control-prefix", "EDC");
 
             ServiceUtil.updateComponentConfiguration(configurationService, DEFAULT_CLOUD_SERVICE_PID,
                     cloudServiceProperties).get(30, TimeUnit.SECONDS);
@@ -105,18 +106,15 @@ public class MqttTransport implements Transport {
             final DataTransportInspector underTestInspector = new DataTransportInspector(mqttDataTransport, false);
 
             final CompletableFuture<Void> underTestConnected = underTestInspector.connected();
-
             mqttDataTransport.connect();
-
             underTestConnected.get(1, TimeUnit.MINUTES);
 
             final CompletableFuture<Void> observerConnected = observerInspector.connected();
-
             observer.connect();
-
             observerConnected.get(1, TimeUnit.MINUTES);
 
         } catch (final Exception e) {
+            stopMoquetteBroker();
             throw new RuntimeException(e);
         }
     }
@@ -136,7 +134,7 @@ public class MqttTransport implements Transport {
             }
 
             final KuraPayload response = observerInspector.runRequest(adaptResource(resource, method), requestPayload)
-                    .get(1, TimeUnit.MINUTES);
+                    .get(10, TimeUnit.SECONDS);
 
             final int status = (int) (long) response.getMetric("response.code");
             final Optional<String> body = Optional.ofNullable(response.getBody())
@@ -159,9 +157,32 @@ public class MqttTransport implements Transport {
         properties.put("username", "mqtt");
         properties.put("client-id", clientId);
         properties.put("topic.context.account-name", "mqtt");
-        properties.put("password", new String(cryptoService.encryptAes("foo".toCharArray())));
 
         return properties;
+    }
+
+    private static void startMoquetteBroker() throws IOException {
+        if (mqttBroker != null) {
+            logger.info("Moquette broker already running");
+            return;
+        }
+
+        IConfig brokerConfig = new FluentConfig().port(1883).host("0.0.0.0").disablePersistence().build();
+        brokerConfig.setProperty(IConfig.NETTY_MAX_BYTES_PROPERTY_NAME, "16777216");
+
+        mqttBroker = new Server();
+        mqttBroker.startServer(brokerConfig);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(MqttTransport::stopMoquetteBroker));
+        logger.info("Moquette broker started");
+    }
+
+    private static void stopMoquetteBroker() {
+        if (mqttBroker != null) {
+            mqttBroker.stopServer();
+            mqttBroker = null;
+            logger.info("Moquette broker stopped");
+        }
     }
 
     private class DataTransportInspector {
@@ -280,12 +301,12 @@ public class MqttTransport implements Transport {
 
             final byte[] data = jsonMarshaller.marshal(request).getBytes(StandardCharsets.UTF_8);
 
-            final String topic = "$EDC/mqtt/test/" + appId + "/" + resource;
+            final String topic = "EDC/mqtt/test/" + appId + "/" + resource;
 
             final CompletableFuture<byte[]> message = new CompletableFuture<>();
 
             this.messageLookup = Optional
-                    .of(new MessageLookup(message, "$EDC/mqtt/test/" + appId + "/REPLY/" + requestId));
+                    .of(new MessageLookup(message, "EDC/mqtt/test/" + appId + "/REPLY/" + requestId));
 
             dataTransportService.publish(topic, data, 0, false);
 

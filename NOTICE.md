@@ -53,9 +53,7 @@ This project leverages the following third party content.
 * maven/mavencentral/com.sun.xml.bind/jaxb-osgi/2.3.3, BSD-3-Clause, approved, ee4j.jaxb-impl
 * maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.core.jobs/0.10.0-3c97afeac, EPL-2.0, approved, eclipse.platform
 * maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.equinox.preferences/0.10.0-3c97afeac, EPL-2.0, approved, #7856
-* maven/mavencentral/commons-beanutils/commons-beanutils/1.11.0, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/commons-codec/commons-codec/1.18.0, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #19214
-* maven/mavencentral/commons-collections/commons-collections/3.2.2, Apache-2.0, approved, CQ10385
+* maven/mavencentral/commons-codec/commons-codec/1.16.1, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #9157
 * maven/mavencentral/org.apache.commons/commons-fileupload2-core/2.0.0-M2, Apache-2.0, approved, #15738
 * maven/mavencentral/org.apache.commons/commons-fileupload2-jakarta-servlet5/2.0.0-M2, Apache-2.0, approved, #15737
 * maven/mavencentral/commons-io/commons-io/2.19.0, Apache-2.0, approved, #20657
@@ -86,9 +84,7 @@ This project leverages the following third party content.
 * maven/mavencentral/jakarta.xml.bind/jakarta.xml.bind-api/2.3.3, BSD-3-Clause, approved, ee4j.jaxb
 * maven/mavencentral/jakarta.xml.soap/jakarta.xml.soap-api/1.4.2, , approved, eclipse
 * maven/mavencentral/jakarta.xml.ws/jakarta.xml.ws-api/2.3.3, , approved, eclipse
-* maven/mavencentral/net.java.dev.jna/jna/5.17.0, Apache-2.0 AND LGPL-2.1-or-later, approved, #20112
-* maven/mavencentral/org.apache.activemq/artemis-mqtt-protocol/2.6.4, Apache-2.0, approved, #3086
-* maven/mavencentral/org.apache.activemq/artemis-native/2.6.4, Apache-2.0, approved, CQ19010
+* maven/mavencentral/net.java.dev.jna/jna/5.8.0, Apache-2.0 OR LGPL-2.1-or-later, approved, CQ23217
 * maven/mavencentral/org.apache.camel/camel-amqp/2.25.3, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.camel/camel-core-osgi/2.25.3, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.camel/camel-core/2.25.3, Apache-2.0, approved, clearlydefined
@@ -102,11 +98,9 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.felix/org.apache.felix.dependencymanager/3.0.0, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.felix/org.apache.felix.deploymentadmin/0.9.5, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.geronimo.specs/geronimo-jms_2.0_spec/1.0-alpha-2, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/org.apache.geronimo.specs/geronimo-json_1.0_spec/1.0-alpha-1, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/org.apache.geronimo.specs/geronimo-jta_1.1_spec/1.1.1, Apache-2.0, approved, CQ2334
-* maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.5, Apache-2.0 AND MPL-2.0, approved, #21346
-* maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.3.4, Apache-2.0, approved, #16866
 * maven/mavencentral/org.apache.httpcomponents.core5/httpcore5-h2/5.3.4, Apache-2.0, approved, #16867
+* maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.0.3, Apache-2.0 and MIT, approved, CQ23948
+* maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.0.2, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.logging.log4j/log4j-api/2.23.1, Apache-2.0, approved, #13368
 * maven/mavencentral/org.apache.logging.log4j/log4j-core/2.23.1, Apache-2.0 AND (Apache-2.0 AND LGPL-2.0-or-later), approved, #14737
 * maven/mavencentral/org.apache.logging.log4j/log4j-slf4j-impl/2.23.1, Apache-2.0, approved, #14736
@@ -128,7 +122,6 @@ This project leverages the following third party content.
 * maven/mavencentral/org.eclipse.milo/stack-client/0.6.8, EPL-2.0, approved, iot.milo
 * maven/mavencentral/org.eclipse.milo/stack-core/0.6.8, EPL-2.0, approved, iot.milo
 * maven/mavencentral/org.glassfish.hk2/osgi-resource-locator/1.0.3, CDDL-1.0, approved, CQ10889
-* maven/mavencentral/org.jboss.logging/jboss-logging/3.3.2.Final, Apache-2.0, approved, CQ13843
 * maven/mavencentral/org.knowhowlab.osgi/monitoradmin/1.0.3, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.osgi/osgi.annotation/8.1.0, Apache-2.0, approved, #1985
 * maven/mavencentral/org.quartz-scheduler/quartz/2.5.0, Apache-2.0, approved, clearlydefined

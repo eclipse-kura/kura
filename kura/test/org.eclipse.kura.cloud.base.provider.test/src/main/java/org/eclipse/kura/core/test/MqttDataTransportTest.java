@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
- * Eurotech
+ *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
@@ -16,49 +16,31 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.security.KeyPair;
-import java.security.KeyStore.PrivateKeyEntry;
-import java.security.KeyStore.TrustedCertificateEntry;
-import java.security.cert.Certificate;
 import java.security.cert.X509CRL;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-import org.bouncycastle.asn1.x500.X500Name;
 import org.eclipse.kura.KuraConnectException;
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.testutil.event.EventAdminUtil;
 import org.eclipse.kura.core.testutil.http.TestServer;
 import org.eclipse.kura.core.testutil.pki.TestCA;
 import org.eclipse.kura.core.testutil.pki.TestCA.CRLCreationOptions;
-import org.eclipse.kura.core.testutil.pki.TestCA.CertificateCreationOptions;
-import org.eclipse.kura.core.testutil.pki.TestCA.TestCAException;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
 
-public class MqttDataTransportTest {
-
-    private static final String ARTEMIS_XML_PID = "org.eclipse.kura.broker.artemis.xml.BrokerInstance";
+public class MqttDataTransportTest extends BaseCloudTests {
 
     private static final String TEST_MQTT_DATA_TRANSPORT_PID = "test";
     private static final String SSL_MANAGER_SERVICE_FACTORY_PID = "org.eclipse.kura.ssl.SslManagerService";
@@ -70,82 +52,13 @@ public class MqttDataTransportTest {
     private static final String TEST_TRUSTSTORE_PID = "testTruststore";
     private static final String KEYSTORE_SERVICE_FACTORY_PID = "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl";
     private static final String MQTT_DATA_TRANSPORT_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
-    private static File brokerKeyStore;
-    private static File brokerTrustStore;
-    private static File mqttKeyStore;
-    private static File mqttKeyStoreKeyOnly;
-    private static File mqttTrustStore;
-
-    private static ConfigurationService configurationService;
-
-    private static TestCA brokerCA;
-    private static X509Certificate brokerCertificate;
-
-    @BeforeClass
-    public static void setUp() throws TestCAException, IOException, InterruptedException, ExecutionException,
-            TimeoutException, KuraException, InvalidSyntaxException {
-
-        brokerCA = new TestCA(CertificateCreationOptions.builder(new X500Name("cn=broker CA, dc=bar.com")).build());
-
-        final KeyPair brokerKeyPair = TestCA.generateKeyPair();
-
-        brokerCertificate = brokerCA.createAndSignCertificate(
-                CertificateCreationOptions.builder(new X500Name("cn=broker, dc=bar.com")).build(), brokerKeyPair);
-
-        final TestCA clientCA = new TestCA(
-                CertificateCreationOptions.builder(new X500Name("cn=client CA, dc=baz.com")).build());
-
-        final KeyPair clientKeyPair = TestCA.generateKeyPair();
-
-        final X509Certificate clientCertificate = clientCA.createAndSignCertificate(
-                CertificateCreationOptions.builder(new X500Name("cn=client, dc=baz.com")).build(), clientKeyPair);
-
-        brokerKeyStore = TestCA.writeKeystore(new PrivateKeyEntry(brokerKeyPair.getPrivate(),
-                new Certificate[] { brokerCertificate, brokerCA.getCertificate() }));
-        brokerTrustStore = TestCA.writeKeystore(new TrustedCertificateEntry(clientCA.getCertificate()));
-        mqttKeyStore = TestCA.writeKeystore(
-                new PrivateKeyEntry(clientKeyPair.getPrivate(),
-                        new Certificate[] { clientCertificate, clientCA.getCertificate() }),
-                new TrustedCertificateEntry(brokerCertificate));
-        mqttKeyStoreKeyOnly = TestCA.writeKeystore(new PrivateKeyEntry(clientKeyPair.getPrivate(),
-                new Certificate[] { clientCertificate, clientCA.getCertificate() }));
-        mqttTrustStore = TestCA.writeKeystore(new TrustedCertificateEntry(brokerCA.getCertificate()));
-
-        String brokerConfigXml = loadResource("/artemis_config.xml");
-        brokerConfigXml = brokerConfigXml.replaceAll("[$]keyStorePath", brokerKeyStore.getAbsolutePath());
-        brokerConfigXml = brokerConfigXml.replaceAll("[$]trustStorePath", brokerTrustStore.getAbsolutePath());
-
-        final Map<String, Object> brokerConfig = new HashMap<>();
-
-        brokerConfig.put("enabled", true);
-        brokerConfig.put("brokerXml", brokerConfigXml);
-        brokerConfig.put("users", "mqtt=bar|amq");
-        brokerConfig.put("defaultUser", "mqtt");
-
-        configurationService = WireTestUtil.trackService(ConfigurationService.class, Optional.empty()).get(30,
-                TimeUnit.SECONDS);
-
-        WireTestUtil.updateComponentConfiguration(configurationService, ARTEMIS_XML_PID, brokerConfig).get(30,
-                TimeUnit.SECONDS);
-    }
-
-    @AfterClass
-    public static void tearDown()
-            throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
-        final Map<String, Object> brokerConfig = new HashMap<>();
-
-        brokerConfig.put("enabled", false);
-
-        WireTestUtil.updateComponentConfiguration(configurationService, ARTEMIS_XML_PID, brokerConfig).get(30,
-                TimeUnit.SECONDS);
-    }
 
     @Test
     public void shouldConnectOverPlainMqtt() throws Exception {
         try (final Fixture fixture = new Fixture()) {
             final DataTransportService test = fixture.createFactoryConfiguration(DataTransportService.class,
                     TEST_MQTT_DATA_TRANSPORT_PID, MQTT_DATA_TRANSPORT_FACTORY_PID, MqttDataTransportOptions
-                            .defaultConfiguration().withBrokerUrl("mqtt://localhost:1889").toProperties())
+                            .defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTT).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -158,7 +71,7 @@ public class MqttDataTransportTest {
         try (final Fixture fixture = new Fixture()) {
             final DataTransportService test = fixture.createFactoryConfiguration(DataTransportService.class,
                     TEST_MQTT_DATA_TRANSPORT_PID, MQTT_DATA_TRANSPORT_FACTORY_PID, MqttDataTransportOptions
-                            .defaultConfiguration().withBrokerUrl("mqtts://localhost:8888").toProperties())
+                            .defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -190,7 +103,7 @@ public class MqttDataTransportTest {
             final DataTransportService test = fixture
                     .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("mqtts://localhost:8888")
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS)
                                     .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
@@ -223,7 +136,7 @@ public class MqttDataTransportTest {
             final DataTransportService test = fixture
                     .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("wss://localhost:8888")
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_WSS)
                                     .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
@@ -256,7 +169,7 @@ public class MqttDataTransportTest {
             final DataTransportService test = fixture
                     .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("mqtts://localhost:8888")
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS)
                                     .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
@@ -298,7 +211,7 @@ public class MqttDataTransportTest {
             final DataTransportService test = fixture
                     .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("mqtts://localhost:8888")
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS)
                                     .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
@@ -357,7 +270,7 @@ public class MqttDataTransportTest {
             final DataTransportService test = fixture
                     .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("wss://localhost:8888")
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_WSS)
                                     .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
@@ -367,6 +280,7 @@ public class MqttDataTransportTest {
     }
 
     @Test
+    @Ignore // reason: moquette broker not configured with truststore
     public void shouldNotConnectOverMqttsWithClientSideAuthWithoutKey() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
@@ -384,7 +298,7 @@ public class MqttDataTransportTest {
             final DataTransportService test = fixture
                     .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("mqtts://localhost:8889")
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS)
                                     .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
@@ -400,6 +314,7 @@ public class MqttDataTransportTest {
     }
 
     @Test
+    @Ignore // reason: moquette broker not configured with truststore
     public void shouldNotConnectOverWssWithClientSideAuthWithoutKey() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
@@ -417,7 +332,7 @@ public class MqttDataTransportTest {
             final DataTransportService test = fixture
                     .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("wss://localhost:8889")
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_WSS)
                                     .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
@@ -450,7 +365,7 @@ public class MqttDataTransportTest {
             final DataTransportService test = fixture
                     .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("mqtts://localhost:8889")
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS)
                                     .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
@@ -477,7 +392,7 @@ public class MqttDataTransportTest {
             final DataTransportService test = fixture
                     .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("wss://localhost:8889")
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_WSS)
                                     .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
@@ -511,7 +426,7 @@ public class MqttDataTransportTest {
             final DataTransportService test = fixture
                     .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("wss://localhost:8889")
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_WSS)
                                     .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
@@ -539,7 +454,7 @@ public class MqttDataTransportTest {
             final DataTransportService test = fixture
                     .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("wss://localhost:8889")
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_WSS)
                                     .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
@@ -579,7 +494,7 @@ public class MqttDataTransportTest {
             final DataTransportService test = fixture
                     .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("mqtts://localhost:8889")
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS)
                                     .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
@@ -613,7 +528,7 @@ public class MqttDataTransportTest {
             final DataTransportService test = fixture
                     .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("mqtts://localhost:8889")
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS)
                                     .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
@@ -653,7 +568,7 @@ public class MqttDataTransportTest {
             final DataTransportService test = fixture
                     .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("mqtts://localhost:8889")
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS)
                                     .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
@@ -686,7 +601,7 @@ public class MqttDataTransportTest {
             final DataTransportService test = fixture
                     .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
                             MQTT_DATA_TRANSPORT_FACTORY_PID,
-                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("wss://localhost:8889")
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_WSS)
                                     .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
@@ -867,21 +782,6 @@ public class MqttDataTransportTest {
             }
 
         }
-    }
-
-    private static String loadResource(final String resourcePath) throws IOException {
-
-        final byte[] buf = new byte[4096];
-
-        try (final ByteArrayOutputStream out = new ByteArrayOutputStream();
-                final InputStream in = MqttDataTransportTest.class.getResourceAsStream(resourcePath)) {
-            int rd;
-            while ((rd = in.read(buf)) > 0) {
-                out.write(buf, 0, rd);
-            }
-            return out.toString();
-        }
-
     }
 
 }

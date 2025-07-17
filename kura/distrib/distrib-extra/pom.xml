@@ -54,11 +54,6 @@
                                 <outputDirectory>${project.build.directory}/pkg/plugins/3</outputDirectory>
                                 <skip>${exclude.other.plugins}</skip>
                                 <includeArtifactIds>
-                                    <!-- artemis-plugins -->
-                                    commons-collections, artemis-native,
-                                    geronimo-jta_1.1_spec, jboss-logging, commons-beanutils,
-                                    geronimo-json_1.0_spec, geronimo-jms_2.0_spec,
-                                    org.apache.activemq.artemis,
                                     <!-- camel-plugins -->
                                     org.eclipse.kura.camel.sun.misc
                                 </includeArtifactIds>
@@ -74,8 +69,6 @@
                                 <outputDirectory>${project.build.directory}/pkg/plugins/3s</outputDirectory>
                                 <skip>${exclude.other.plugins}</skip>
                                 <includeArtifactIds>
-                                    <!-- artemis-plugins -->
-                                    artemis-mqtt-protocol,
                                     <!-- camel-plugins -->
                                      proton-j, camel-stream,
                                     org.apache.servicemix.bundles.spring-tx,
@@ -85,21 +78,6 @@
                                     camel-core-osgi, camel-core,
                                     org.apache.servicemix.bundles.spring-core,
                                     org.apache.servicemix.bundles.spring-jms
-                                </includeArtifactIds>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>other-plugins-4</id>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>copy-dependencies</goal>
-                            </goals>
-                            <configuration>
-                                <outputDirectory>${project.build.directory}/pkg/plugins/4</outputDirectory>
-                                <skip>${exclude.other.plugins}</skip>
-                                <includeArtifactIds>
-                                    <!-- artemis-plugins -->
-                                    org.eclipse.kura.broker.artemis.core
                                 </includeArtifactIds>
                             </configuration>
                         </execution>
@@ -115,9 +93,6 @@
                                 <includeArtifactIds>
                                     <!-- rest.tamper-plugins -->
                                     org.eclipse.kura.rest.tamper.detection.provider,
-                                    <!-- artemis-plugins -->
-                                    org.eclipse.kura.broker.artemis.simple.mqtt,
-                                    org.eclipse.kura.broker.artemis.xml,
                                     <!-- camel-plugins -->
                                     camel-amqp, org.eclipse.kura.camel, camel-jms
                                 </includeArtifactIds>

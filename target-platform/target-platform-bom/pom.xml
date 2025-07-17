@@ -66,8 +66,6 @@
         <com.google.gson.version>2.9.0</com.google.gson.version>
         <com.google.protobuf.version>4.30.2</com.google.protobuf.version>
         <com.h2database.h2.version>2.1.214</com.h2database.h2.version>
-        <commons-beanutils.version>1.11.0</commons-beanutils.version>
-        <commons-collections.version>3.2.2</commons-collections.version>
         <commons-csv.version>1.4</commons-csv.version>
         <commons-exec.version>1.3</commons-exec.version>
         <commons-fileupload.version>2.0.0-M4</commons-fileupload.version>
@@ -93,16 +91,12 @@
         <org.apache.felix.http.servlet-api.version>3.0.0</org.apache.felix.http.servlet-api.version>
         <org.apache.felix.http.wrappers.version>1.1.2</org.apache.felix.http.wrappers.version>
         <org.apache.felix.useradmin.version>1.0.4.k1</org.apache.felix.useradmin.version>
-        <org.apache.geronimo.specs.jms.version>1.0-alpha-2</org.apache.geronimo.specs.jms.version>
-        <org.apache.geronimo.specs.json.version>1.0-alpha-1</org.apache.geronimo.specs.json.version>
-        <org.apache.geronimo.specs.jta.version>1.1.1</org.apache.geronimo.specs.jta.version>
         <org.apache.servicemix.bundles.c3p0.version>0.9.5.5_1</org.apache.servicemix.bundles.c3p0.version>
         <org.bouncycastle.version>1.78.1</org.bouncycastle.version>
         <org.eclipse.jetty.version>12.0.14</org.eclipse.jetty.version>
         <org.eclipse.osgi-technology.rest.version>1.2.3</org.eclipse.osgi-technology.rest.version>
         <org.eclipse.paho.client.mqttv3.version>1.2.1</org.eclipse.paho.client.mqttv3.version>
         <org.hamcrest.core.version>1.3.0.v201303031735</org.hamcrest.core.version>
-        <org.jboss.logging.version>3.3.2.Final</org.jboss.logging.version>
         <org.knowhowlab.osgi.monitoradmin.version>1.0.3</org.knowhowlab.osgi.monitoradmin.version>
         <org.osgi.service.component.annotations.version>1.5.1</org.osgi.service.component.annotations.version>
         <org.osgi.service.http.whiteboard.version>1.1.1</org.osgi.service.http.whiteboard.version>
@@ -116,6 +110,9 @@
         <slf4j.version>2.0.17</slf4j.version>
         <spring.version>4.3.20.RELEASE_1</spring.version>
         <!-- END common dependencies -->
+        <!-- START Artemis and Camel common dependencies -->
+        <org.apache.geronimo.specs.jms.version>1.0-alpha-2</org.apache.geronimo.specs.jms.version>
+        <!-- END Artemis and Camel common dependencies -->
         <!-- START Jakarta dependencies -->
         <jakarta.activation-api.version>2.1.2</jakarta.activation-api.version>
         <jakarta.annotation-api.version>2.1.1</jakarta.annotation-api.version>
@@ -181,13 +178,11 @@
         <org.hamcrest.version>1.1.0.v20090501071000</org.hamcrest.version>
         <!-- END test dependencies -->
         <!-- START target platform dependencies -->
-        <org.apache.activemq.artemis.upstream.version>2.6.4</org.apache.activemq.artemis.upstream.version>
         <usb4java.version>1.2.0</usb4java.version>
         <!-- END target platform dependencies -->
         <com.codeminders.hidapi.version>2.0.0-SNAPSHOT</com.codeminders.hidapi.version>
         <jdk.dio.version>2.0.0-SNAPSHOT</jdk.dio.version>
         <log4j2-api-config.version>2.0.0-SNAPSHOT</log4j2-api-config.version>
-        <org.apache.activemq.artemis.version>3.0.0-SNAPSHOT</org.apache.activemq.artemis.version>
         <org.eclipse.kura.camel.sun.misc.version>2.0.0-SNAPSHOT</org.eclipse.kura.camel.sun.misc.version>
         <org.eclipse.kura.sun.misc.version>2.0.0-SNAPSHOT</org.eclipse.kura.sun.misc.version>
         <org.eclipse.soda.dk.comm.version>2.0.0-SNAPSHOT</org.eclipse.soda.dk.comm.version>
@@ -438,36 +433,6 @@
                 <groupId>io.netty</groupId>
                 <artifactId>netty-transport-native-unix-common</artifactId>
                 <version>${io.netty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.logging</groupId>
-                <artifactId>jboss-logging</artifactId>
-                <version>${org.jboss.logging.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-beanutils</groupId>
-                <artifactId>commons-beanutils</artifactId>
-                <version>${commons-beanutils.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-collections</groupId>
-                <artifactId>commons-collections</artifactId>
-                <version>${commons-collections.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.specs</groupId>
-                <artifactId>geronimo-json_1.0_spec</artifactId>
-                <version>${org.apache.geronimo.specs.json.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.specs</groupId>
-                <artifactId>geronimo-jms_2.0_spec</artifactId>
-                <version>${org.apache.geronimo.specs.jms.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.specs</groupId>
-                <artifactId>geronimo-jta_1.1_spec</artifactId>
-                <version>${org.apache.geronimo.specs.jta.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.hk2</groupId>
@@ -745,6 +710,13 @@
                 <version>${org.osgi.service.metatype.annotations.version}</version>
             </dependency>
             <!-- END common dependencies -->
+            <!-- START Artemis and Camel common dependencies -->
+            <dependency>
+                <groupId>org.apache.geronimo.specs</groupId>
+                <artifactId>geronimo-jms_2.0_spec</artifactId>
+                <version>${org.apache.geronimo.specs.jms.version}</version>
+            </dependency>
+            <!-- END Artemis and Camel common dependencies -->
             <!-- START Jakarta dependencies -->
             <dependency>
                 <groupId>jakarta.inject</groupId>
@@ -1051,18 +1023,6 @@
                 <version>${objenesis.version}</version>
             </dependency>
             <!-- END test dependencies -->
-            <!-- START target platform dependencies -->
-            <dependency>
-                <groupId>org.apache.activemq</groupId>
-                <artifactId>artemis-mqtt-protocol</artifactId>
-                <version>${org.apache.activemq.artemis.upstream.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.activemq</groupId>
-                <artifactId>artemis-native</artifactId>
-                <version>${org.apache.activemq.artemis.upstream.version}</version>
-            </dependency>
-            <!-- END target platform dependencies -->
             <!-- START Kura target platform BOM -->
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -1098,11 +1058,6 @@
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>log4j2-api-config</artifactId>
                 <version>${log4j2-api-config.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.apache.activemq.artemis</artifactId>
-                <version>${org.apache.activemq.artemis.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -1346,30 +1301,6 @@
             <artifactId>netty-transport-native-unix-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jboss.logging</groupId>
-            <artifactId>jboss-logging</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-beanutils</groupId>
-            <artifactId>commons-beanutils</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-json_1.0_spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-jms_2.0_spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-jta_1.1_spec</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.glassfish.hk2</groupId>
             <artifactId>osgi-resource-locator</artifactId>
         </dependency>
@@ -1590,6 +1521,12 @@
             <artifactId>org.osgi.service.metatype.annotations</artifactId>
         </dependency>
         <!-- END common dependencies -->
+        <!-- START Artemis and Camel common dependencies -->
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-jms_2.0_spec</artifactId>
+        </dependency>
+        <!-- END Artemis and Camel common dependencies -->
         <!-- START Jakarta dependencies -->
         <dependency>
             <groupId>jakarta.inject</groupId>
@@ -1878,10 +1815,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.apache.activemq.artemis</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.camel.sun.misc</artifactId>
         </dependency>
         <dependency>
@@ -1911,14 +1844,6 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>usb4java-javax</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>artemis-mqtt-protocol</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>artemis-native</artifactId>
         </dependency>
         <!-- END Kura target platform BOM -->
     </dependencies>

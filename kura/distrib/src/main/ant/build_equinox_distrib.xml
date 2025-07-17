@@ -174,7 +174,6 @@
         <antcall target="linux.clock-plugins" />
         <antcall target="linux.usb-plugins" />
         <antcall target="linux.watchdog-plugins" />
-        <antcall target="localization-plugins" />
         <antcall target="marshallers-plugins" />
         <antcall target="misc-plugins" />
         <antcall target="netty-plugins" />
@@ -478,7 +477,6 @@
         <!-- Populate config.ini with correct Kura bundles -->
         <antcall target="api-plugins" />
         <antcall target="artemis-plugins" />
-        <antcall target="asset-plugins" />
         <antcall target="bluetooth-plugins" />
         <antcall target="camel-plugins" />
         <antcall target="cloud.mqtt.eclipseiot-plugins" />
@@ -510,17 +508,15 @@
         <antcall target="linux.position-plugins" />
         <antcall target="linux.usb-plugins" />
         <antcall target="linux.watchdog-plugins" />
-        <antcall target="localization-plugins" />
         <antcall target="marshallers-plugins" />
         <antcall target="misc-plugins" />
         <antcall target="netty-plugins" />
         <antcall target="rest-plugins" />
         <antcall target="rest-position" />
         <antcall target="rest.tamper-plugins" />
-        <antcall target="rest-wire" />
         <antcall target="util-plugins" />
         <antcall target="http.server.manager-plugin" />
-        <antcall target="wires-plugins" />
+        <antcall target="driver-plugins" />
 
         <!-- Conditional entries. Check for jar presence, and invoke relevant ant
             target -->
@@ -1751,40 +1747,9 @@ fi]]>
         </antcall>
     </target>
 
-    <target name="asset-plugins">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.asset.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.asset.cloudlet.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.asset.helper.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.rest.asset.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-    </target>
-
     <target name="rest-position">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.rest.position.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-    </target>
-
-    <target name="rest-wire">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.rest.wire.provider" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>
@@ -1869,19 +1834,6 @@ fi]]>
         </antcall>
     </target>
 
-    <target name="localization-plugins">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.localization" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.localization.resources" />
-            <param name="start.level" value="6" />
-            <param name="start" value="" />
-        </antcall>
-    </target>
-
     <target name="util-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.util" />
@@ -1890,45 +1842,10 @@ fi]]>
         </antcall>
     </target>
 
-    <target name="wires-plugins">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.equinox.wireadmin" />
-            <param name="start.level" value="3" />
-            <param name="start" value="s" />
-        </antcall>
+    <target name="driver-plugins">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.driver.helper.provider" />
             <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.wire.h2db.component.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.wire.db.component.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.wire.component.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.wire.helper.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.wire.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.wire.component.join.provider" />
-            <param name="start.level" value="5" />
             <param name="start" value="s" />
         </antcall>
     </target>

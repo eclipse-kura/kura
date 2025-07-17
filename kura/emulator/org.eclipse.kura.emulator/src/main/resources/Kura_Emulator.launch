@@ -105,7 +105,6 @@
         <setEntry value="org.eclipse.equinox.io@default:default"/>
         <setEntry value="org.eclipse.equinox.metatype@default:default"/>
         <setEntry value="org.eclipse.equinox.util@default:default"/>
-        <setEntry value="org.eclipse.equinox.wireadmin@default:default"/>
         <setEntry value="org.eclipse.jetty.continuation@default:default"/>
         <setEntry value="org.eclipse.jetty.http@default:default"/>
         <setEntry value="org.eclipse.jetty.io@default:default"/>
@@ -129,9 +128,6 @@
     </setAttribute>
     <setAttribute key="selected_workspace_bundles">
         <setEntry value="org.eclipse.kura.api@default:default"/>
-        <setEntry value="org.eclipse.kura.asset.cloudlet.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.asset.helper.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.asset.provider@default:default"/>
         <setEntry value="org.eclipse.kura.broker.artemis.core@default:default"/>
         <setEntry value="org.eclipse.kura.broker.artemis.simple.mqtt@default:default"/>
         <setEntry value="org.eclipse.kura.broker.artemis.xml@default:default"/>
@@ -164,22 +160,12 @@
         <setEntry value="org.eclipse.kura.http.server.manager@default:default"/>
         <setEntry value="org.eclipse.kura.json.marshaller.unmarshaller.provider@default:default"/>
         <setEntry value="org.eclipse.kura.linux.bluetooth@default:default"/>
-        <setEntry value="org.eclipse.kura.localization.resources@default:false"/>
-        <setEntry value="org.eclipse.kura.localization@default:default"/>
         <setEntry value="org.eclipse.kura.net.configuration@default:default"/>
         <setEntry value="org.eclipse.kura.request.handler.jaxrs@default:default"/>
-        <setEntry value="org.eclipse.kura.rest.asset.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.configuration.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.provider@default:default"/>
         <setEntry value="org.eclipse.kura.useradmin.store@default:default"/>
         <setEntry value="org.eclipse.kura.util@default:default"/>
-        <setEntry value="org.eclipse.kura.wire.component.join.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.wire.component.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.wire.db.component.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.wire.h2db.component.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.wire.helper.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.wire.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.wire.script.filter.provider@default:default"/>
         <setEntry value="org.eclipse.kura.xml.marshaller.unmarshaller.provider@2:default"/>
     </setAttribute>
     <booleanAttribute key="show_selected_only" value="false"/>

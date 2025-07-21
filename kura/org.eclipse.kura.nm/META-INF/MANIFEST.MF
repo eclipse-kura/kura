@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.eclipse.kura.nm;singleton:=true
 Bundle-Version: 2.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Comment: originally we importeed also org.eclipse.kura.linux.position.options;version="[2.0,3.0)";resolution:=optional, org.eclipse.kura.linux.position.provider;version="[2.0,3.0)";resolution:=optional
 Import-Package: jakarta.xml.bind;version="4.0.0",
  org.apache.commons.io;version="2.4.0",
  org.apache.commons.lang3.tuple;version="3.12.0",
@@ -29,8 +30,6 @@ Import-Package: jakarta.xml.bind;version="4.0.0",
  org.eclipse.kura.linux.net.dns;version="[1.1,2.0)",
  org.eclipse.kura.linux.net.iptables;version="[1.0,2.0)",
  org.eclipse.kura.linux.net.util;version="[1.0,2.0)",
- org.eclipse.kura.linux.position.options;version="[1.0,2.0)";resolution:=optional,
- org.eclipse.kura.linux.position.provider;version="[1.1,2.0)";resolution:=optional,
  org.eclipse.kura.net;version="[2.4,3.0)",
  org.eclipse.kura.net.configuration;version="[1.1,2.0)",
  org.eclipse.kura.net.dhcp;version="[1.2,2.0)",
@@ -73,5 +72,6 @@ Bundle-ClassPath: .,
  lib/jnr-ffi-2.2.11.jar,
  lib/jnr-posix-3.1.15.jar,
  lib/jnr-unixsocket-0.38.17.jar,
- lib/jnr-x86asm-1.0.2.jar
+ lib/jnr-x86asm-1.0.2.jar,
+ lib/org.eclipse.kura.linux.position-2.0.0-SNAPSHOT.jar
 Bundle-ActivationPolicy: lazy

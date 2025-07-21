@@ -12,3 +12,4 @@ lib/jnr-ffi-2.2.11.jar
 lib/jnr-posix-3.1.15.jar
 lib/jnr-unixsocket-0.38.17.jar
 lib/jnr-x86asm-1.0.2.jar
+lib/org.eclipse.kura.linux.position-2.0.0-SNAPSHOT.jar

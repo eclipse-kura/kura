@@ -55,3 +55,7 @@ Kura comes with the following services:
     * Offers modular and visual data flow programming tool to define data collection and processing pipelines at the edge by simply selecting components from a palette and wiring them together. This way users can, for example, configure an Asset, periodically acquire data from its channels, store them in the gateway, filter or aggregate them using powerful SQL queries, and send the results to the Cloud. The Eclipse Kura Marketplace is a repository from which additional Wires components can be installed into your Kura runtime with a simple drag-and-drop.
 
 ![Wires](./intro/images/wires.png)
+
+This documentation illustrates the core concepts and components of Kura core. More Kura addons resources are available at the following locations:
+
+- [Eclipse Kura™ Apache ActiveMQ Artemis MQTT broker addon](https://eclipse-kura.github.io/kura-artemis)

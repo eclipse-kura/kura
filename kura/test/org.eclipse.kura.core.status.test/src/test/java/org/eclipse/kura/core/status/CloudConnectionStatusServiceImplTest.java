@@ -12,15 +12,25 @@
  *******************************************************************************/
 package org.eclipse.kura.core.status;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 
+import org.eclipse.kura.core.status.runnables.BlinkStatusRunnable;
+import org.eclipse.kura.core.status.runnables.HeartbeatStatusRunnable;
+import org.eclipse.kura.core.status.runnables.LogStatusRunnable;
+import org.eclipse.kura.core.status.runnables.OnOffStatusRunnable;
+import org.eclipse.kura.core.status.runnables.StatusRunnable;
 import org.eclipse.kura.core.testutil.TestUtil;
-
+import org.eclipse.kura.gpio.GPIOService;
 import org.eclipse.kura.status.CloudConnectionStatusComponent;
 import org.eclipse.kura.status.CloudConnectionStatusEnum;
 import org.eclipse.kura.status.CloudConnectionStatusService;
@@ -197,11 +207,50 @@ public class CloudConnectionStatusServiceImplTest {
 
             // Check if currentStatus is set correctly
             assertEquals(selectedStatus, getStatus(service));
+
+            // Check if the log statusRunnable is correctly selected
+            checkLogStatusRunnables(service);
         }
     }
 
     @Test
     public void testRegisterStatusesGpio() throws NoSuchFieldException {
+        CloudConnectionStatusEnum[] statuses = { CloudConnectionStatusEnum.OFF, CloudConnectionStatusEnum.FAST_BLINKING,
+                CloudConnectionStatusEnum.SLOW_BLINKING, CloudConnectionStatusEnum.HEARTBEAT,
+                CloudConnectionStatusEnum.ON };
+
+        for (CloudConnectionStatusEnum selectedStatus : statuses) {
+            // Prepare mock component with max priority with selected status
+            CloudConnectionStatusComponent mockComponent = createMockComponent(
+                    CloudConnectionStatusService.PRIORITY_MAX, selectedStatus);
+
+            // Create service
+            CloudConnectionStatusServiceImpl service = initCloudConnectionStatusService("ccs:led:44");
+            GPIOService gpioService = mock(GPIOService.class);
+            service.setGPIOService(gpioService);
+
+            ComponentContext componentContext = mock(ComponentContext.class);
+            service.activate(componentContext);
+
+            // Make sure mockComponent is initially not in componentRegistry
+            assertFalse(isInComponentRegistry(service, mockComponent));
+
+            // Register component
+            service.register(mockComponent);
+
+            // Check if mockComponent is now in componentRegistry
+            assertTrue(isInComponentRegistry(service, mockComponent));
+
+            // Check if currentStatus is set correctly
+            assertEquals(selectedStatus, getStatus(service));
+
+            // Check if the gpio statusRunnable is correctly selected
+            checkLedStatusRunnables(service);
+        }
+    }
+
+    @Test
+    public void testRegisterStatusesGpioWithoutGPIOService() throws NoSuchFieldException {
         CloudConnectionStatusEnum[] statuses = { CloudConnectionStatusEnum.OFF, CloudConnectionStatusEnum.FAST_BLINKING,
                 CloudConnectionStatusEnum.SLOW_BLINKING, CloudConnectionStatusEnum.HEARTBEAT,
                 CloudConnectionStatusEnum.ON };
@@ -228,6 +277,9 @@ public class CloudConnectionStatusServiceImplTest {
 
             // Check if currentStatus is set correctly
             assertEquals(selectedStatus, getStatus(service));
+
+            // Check if the log statusRunnable is correctly selected
+            checkLogStatusRunnables(service);
         }
     }
 
@@ -342,5 +394,19 @@ public class CloudConnectionStatusServiceImplTest {
 
     CloudConnectionStatusEnum getStatus(CloudConnectionStatusServiceImpl service) throws NoSuchFieldException {
         return (CloudConnectionStatusEnum) TestUtil.getFieldValue(service, "currentStatus");
+    }
+
+    private StatusRunnable getStatusRunnable(CloudConnectionStatusServiceImpl service) throws NoSuchFieldException {
+        return (StatusRunnable) TestUtil.getFieldValue(service, "statusRunnable");
+    }
+
+    private void checkLedStatusRunnables(CloudConnectionStatusServiceImpl service) throws NoSuchFieldException {
+        assertTrue(getStatusRunnable(service) instanceof OnOffStatusRunnable
+                || getStatusRunnable(service) instanceof BlinkStatusRunnable
+                || getStatusRunnable(service) instanceof HeartbeatStatusRunnable);
+    }
+
+    private void checkLogStatusRunnables(CloudConnectionStatusServiceImpl service) throws NoSuchFieldException {
+        assertTrue(getStatusRunnable(service) instanceof LogStatusRunnable);
     }
 }

@@ -16,7 +16,7 @@
     <url>usb4java.org/</url>
 
     <properties>
-        <usb4java.version>1.2.0</usb4java.version>
+        <usb4java.version>1.3.0</usb4java.version>
     </properties>
 
     <dependencies>
@@ -29,13 +29,13 @@
             <groupId>org.usb4java</groupId>
             <artifactId>libusb4java</artifactId>
             <version>${usb4java.version}</version>
-            <classifier>linux-arm</classifier>
+            <classifier>linux-aarch64</classifier>
         </dependency>
         <dependency>
             <groupId>org.usb4java</groupId>
             <artifactId>libusb4java</artifactId>
             <version>${usb4java.version}</version>
-            <classifier>linux-x86_64</classifier>
+            <classifier>linux-x86-64</classifier>
         </dependency>
     </dependencies>
 
@@ -66,7 +66,7 @@
                         <configuration>
                             <outputDirectory>${project.basedir}/lib</outputDirectory>
                             <excludeClassifiers>
-                                sources,osx-x86_64,osx-x86,osx-aarch_64,windows-x86,windows-x86_64,linux-x86
+                                sources,osx-x86_64,osx-x86,osx-aarch_64,windows-x86,windows-x86_64,linux-x86,linux-arm
                             </excludeClassifiers>
                             <excludeTransitive>true</excludeTransitive>
                             <stripVersion>true</stripVersion>
@@ -87,16 +87,16 @@
                         <Bundle-Name>${project.name}</Bundle-Name>
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Bundle-ClassPath>
-                            .,libusb4java-linux-arm.jar,libusb4java-linux-x86_64.jar,usb4java.jar</Bundle-ClassPath>
+                            .,libusb4java-linux-aarch64.jar,libusb4java-linux-x86-64.jar,usb4java.jar</Bundle-ClassPath>
                         <Include-Resource>
                             ${project.basedir}/lib,
                             ${project.basedir}/about.html,
                             about_files=${project.basedir}/about_files/
                         </Include-Resource>
                         <Export-Package>
-                            org.usb4java.linux-x86_64;version="1.2.0",
-                            org.usb4java;uses:="org.apache.commons.lang3.builder,org.apache.commons.lang3.tuple";version="1.2.0",
-                            org.usb4java.linux-arm;version="1.2.0"
+                            org.usb4java.linux-aarch64;version="${usb4java.version}",
+                            org.usb4java.linux-x86-64;version="${usb4java.version}",
+                            org.usb4java;uses:="org.apache.commons.lang3.builder,org.apache.commons.lang3.tuple";version="${usb4java.version}"
                         </Export-Package>
                         <Require-Capability>
                             osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"

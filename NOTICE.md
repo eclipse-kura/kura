@@ -137,9 +137,9 @@ This project leverages the following third party content.
 * maven/mavencentral/org.slf4j/jcl-over-slf4j/2.0.17, MIT AND Apache-2.0, approved, #11889
 * maven/mavencentral/org.slf4j/slf4j-api/2.0.17, MIT, approved, #5915
 * maven/mavencentral/org.slf4j/jul-to-slf4j/2.0.17, MIT, approved, #7698
-* maven/mavencentral/org.usb4java/libusb4java/1.2.0, MIT, approved, #3088
-* maven/mavencentral/org.usb4java/usb4java-javax/1.2.0, MIT, approved, #3090
-* maven/mavencentral/org.usb4java/usb4java/1.2.0, MIT, approved, #3089
+* maven/mavencentral/org.usb4java/libusb4java/1.3.0, MIT, approved, #3087
+* maven/mavencentral/org.usb4java/usb4java-javax/1.3.0, MIT, approved, #22528
+* maven/mavencentral/org.usb4java/usb4java/1.3.0, MIT, approved, clearlydefined
 * maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.c3p0/0.9.5.5_1, Apache-2.0, approved, #3761
 * maven/mavencentral/com.zaxxer/HikariCP/2.7.9, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.xerial/sqlite-jdbc/3.42.0.0, Apache-2.0 AND BSD-2-Clause AND ISC AND Artistic-2.0, approved, #9089

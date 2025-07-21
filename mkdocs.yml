@@ -55,8 +55,6 @@ nav:
       - Position Service: core-services/position-service.md
       - REST Service: core-services/rest-service.md
       - Watchdog Service: core-services/watchdog-service.md
-      - Simple Artemis MQTT Broker: core-services/simple-artemis-mqtt-broker.md
-      - ActiveMQ Artemis MQTT Broker: core-services/active-mq-artemis-broker.md
       - Container Orchestration:
         - Container Orchestration Provider: core-services/container-orchestration-provider.md
         - Container Orchestration Provider APIs: core-services/container-orchestration-provider-apis.md

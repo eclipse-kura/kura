@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@ package org.eclipse.kura.core.status;
 
 import java.io.File;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,7 +41,7 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
     private static final Logger logger = LoggerFactory.getLogger(CloudConnectionStatusServiceImpl.class);
 
     private SystemService systemService;
-    private GPIOService gpioService;
+    private Optional<GPIOService> gpioService = Optional.empty();
 
     private final ExecutorService notificationExecutor;
     private Future<?> notificationWorker;
@@ -75,11 +76,11 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
     }
 
     public void setGPIOService(GPIOService gpioService) {
-        this.gpioService = gpioService;
+        this.gpioService = Optional.of(gpioService);
     }
 
     public void unsetGPIOService(GPIOService gpioService) {
-        this.gpioService = null;
+        this.gpioService = Optional.empty();
     }
 
     // ----------------------------------------------------------------
@@ -230,9 +231,12 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
     }
 
     private StatusRunnable getGpioStatusWorker(CloudConnectionStatusEnum status) {
+        if (!this.gpioService.isPresent()) {
+            return null;
+        }
         int gpioLed = (Integer) this.properties.get("led");
         boolean inverted = (Boolean) this.properties.get("inverted");
-        LedManager gpioLedManager = new GpioLedManager(this.gpioService, gpioLed, inverted);
+        LedManager gpioLedManager = new GpioLedManager(this.gpioService.get(), gpioLed, inverted);
 
         return createLedRunnable(status, gpioLedManager);
     }

@@ -507,7 +507,6 @@
         <antcall target="h2db-plugins" />
         <antcall target="keystore-management-plugins" />
         <antcall target="linux.clock-plugins" />
-        <antcall target="linux.position-plugins" />
         <antcall target="linux.usb-plugins" />
         <antcall target="linux.watchdog-plugins" />
         <antcall target="localization-plugins" />
@@ -1656,14 +1655,6 @@ fi]]>
         </antcall>
     </target>
 
-    <target name="linux.position-plugins">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.linux.position" />
-            <param name="start.level" value="4" />
-            <param name="start" value="" />
-        </antcall>
-    </target>
-
     <target name="linux.usb-plugins" unless="is.docker">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.linux.usb.${native.tag}" />
@@ -1769,14 +1760,6 @@ fi]]>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.rest.asset.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-    </target>
-
-    <target name="rest-position">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.rest.position.provider" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>

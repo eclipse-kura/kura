@@ -40,9 +40,6 @@
     <properties>
         <org.eclipse.kura.ai.triton.server.version>2.0.0-SNAPSHOT</org.eclipse.kura.ai.triton.server.version>
         <org.eclipse.kura.api.version>3.0.0-SNAPSHOT</org.eclipse.kura.api.version>
-        <org.eclipse.kura.asset.cloudlet.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.asset.cloudlet.provider.version>
-        <org.eclipse.kura.asset.helper.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.asset.helper.provider.version>
-        <org.eclipse.kura.asset.provider.version>3.0.0-SNAPSHOT</org.eclipse.kura.asset.provider.version>
         <org.eclipse.kura.ble.eddystone.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.ble.eddystone.provider.version>
         <org.eclipse.kura.ble.ibeacon.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.ble.ibeacon.provider.version>
         <org.eclipse.kura.ble.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.ble.provider.version>
@@ -106,8 +103,6 @@
         <org.eclipse.kura.linux.usb.aarch64.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.usb.aarch64.version>
         <org.eclipse.kura.linux.usb.x86_64.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.usb.x86_64.version>
         <org.eclipse.kura.linux.watchdog.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.watchdog.version>
-        <org.eclipse.kura.localization.version>2.0.0-SNAPSHOT</org.eclipse.kura.localization.version>
-        <org.eclipse.kura.localization.resources.version>2.0.0-SNAPSHOT</org.eclipse.kura.localization.resources.version>
         <org.eclipse.kura.log.filesystem.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.log.filesystem.provider.version>
         <org.eclipse.kura.misc.cloudcat.version>2.0.0-SNAPSHOT</org.eclipse.kura.misc.cloudcat.version>
         <org.eclipse.kura.net.admin.firewall.version>2.0.0-SNAPSHOT</org.eclipse.kura.net.admin.firewall.version>
@@ -116,7 +111,6 @@
         <org.eclipse.kura.nm.version>2.0.0-SNAPSHOT</org.eclipse.kura.nm.version>
         <org.eclipse.kura.protocol.modbus.version>3.0.0-SNAPSHOT</org.eclipse.kura.protocol.modbus.version>
         <org.eclipse.kura.request.handler.jaxrs.version>2.0.0-SNAPSHOT</org.eclipse.kura.request.handler.jaxrs.version>
-        <org.eclipse.kura.rest.asset.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.asset.provider.version>
         <org.eclipse.kura.rest.cloudconnection.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.cloudconnection.provider.version>
         <org.eclipse.kura.rest.configuration.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.configuration.provider.version>
         <org.eclipse.kura.rest.identity.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.identity.provider.version>
@@ -130,25 +124,15 @@
         <org.eclipse.kura.rest.security.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.security.provider.version>
         <org.eclipse.kura.rest.service.listing.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.service.listing.provider.version>
         <org.eclipse.kura.rest.system.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.system.provider.version>
-        <org.eclipse.kura.rest.wire.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.wire.provider.version>
         <org.eclipse.kura.stress.version>2.0.0-SNAPSHOT</org.eclipse.kura.stress.version>
         <org.eclipse.kura.useradmin.store.version>2.0.0-SNAPSHOT</org.eclipse.kura.useradmin.store.version>
         <org.eclipse.kura.util.version>2.0.0-SNAPSHOT</org.eclipse.kura.util.version>
-        <org.eclipse.kura.wire.ai.component.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.wire.ai.component.provider.version>
         <org.eclipse.kura.wire.camel.version>2.0.0-SNAPSHOT</org.eclipse.kura.wire.camel.version>
-        <org.eclipse.kura.wire.component.join.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.wire.component.join.provider.version>
-        <org.eclipse.kura.wire.component.provider.version>3.0.0-SNAPSHOT</org.eclipse.kura.wire.component.provider.version>
-        <org.eclipse.kura.wire.db.component.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.wire.db.component.provider.version>
-        <org.eclipse.kura.wire.h2db.component.provider.version>3.0.0-SNAPSHOT</org.eclipse.kura.wire.h2db.component.provider.version>
-        <org.eclipse.kura.wire.helper.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.wire.helper.provider.version>
-        <org.eclipse.kura.wire.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.wire.provider.version>
-        <org.eclipse.kura.wire.script.tools.version>2.0.0-SNAPSHOT</org.eclipse.kura.wire.script.tools.version>
         <org.eclipse.kura.xml.marshaller.unmarshaller.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.xml.marshaller.unmarshaller.provider.version>
         <!-- test-util -->
         <org.eclipse.kura.core.testutil.version>6.0.0-SNAPSHOT</org.eclipse.kura.core.testutil.version>
         <org.eclipse.kura.test.version>6.0.0-SNAPSHOT</org.eclipse.kura.test.version>
         <org.eclipse.kura.util.test.driver.version>6.0.0-SNAPSHOT</org.eclipse.kura.util.test.driver.version>
-        <org.eclipse.kura.util.wire.test.version>6.0.0-SNAPSHOT</org.eclipse.kura.util.wire.test.version>
     </properties>
 
     <dependencyManagement>
@@ -162,21 +146,6 @@
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.api</artifactId>
                 <version>${org.eclipse.kura.api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.asset.cloudlet.provider</artifactId>
-                <version>${org.eclipse.kura.asset.cloudlet.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.asset.helper.provider</artifactId>
-                <version>${org.eclipse.kura.asset.helper.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.asset.provider</artifactId>
-                <version>${org.eclipse.kura.asset.provider.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -495,16 +464,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.localization</artifactId>
-                <version>${org.eclipse.kura.localization.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.localization.resources</artifactId>
-                <version>${org.eclipse.kura.localization.resources.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.log.filesystem.provider</artifactId>
                 <version>${org.eclipse.kura.log.filesystem.provider.version}</version>
             </dependency>
@@ -542,11 +501,6 @@
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.request.handler.jaxrs</artifactId>
                 <version>${org.eclipse.kura.request.handler.jaxrs.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.rest.asset.provider</artifactId>
-                <version>${org.eclipse.kura.rest.asset.provider.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -615,11 +569,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.rest.wire.provider</artifactId>
-                <version>${org.eclipse.kura.rest.wire.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.stress</artifactId>
                 <version>${org.eclipse.kura.stress.version}</version>
             </dependency>
@@ -635,48 +584,8 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.wire.ai.component.provider</artifactId>
-                <version>${org.eclipse.kura.wire.ai.component.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.wire.camel</artifactId>
                 <version>${org.eclipse.kura.wire.camel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.wire.component.join.provider</artifactId>
-                <version>${org.eclipse.kura.wire.component.join.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.wire.component.provider</artifactId>
-                <version>${org.eclipse.kura.wire.component.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.wire.db.component.provider</artifactId>
-                <version>${org.eclipse.kura.wire.db.component.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.wire.h2db.component.provider</artifactId>
-                <version>${org.eclipse.kura.wire.h2db.component.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.wire.helper.provider</artifactId>
-                <version>${org.eclipse.kura.wire.helper.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.wire.provider</artifactId>
-                <version>${org.eclipse.kura.wire.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.wire.script.tools</artifactId>
-                <version>${org.eclipse.kura.wire.script.tools.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -699,11 +608,6 @@
                 <artifactId>org.eclipse.kura.util.test.driver</artifactId>
                 <version>${org.eclipse.kura.util.test.driver.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.util.wire.test</artifactId>
-                <version>${org.eclipse.kura.util.wire.test.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -715,18 +619,6 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.asset.cloudlet.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.asset.helper.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.asset.provider</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
@@ -982,14 +874,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.localization</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.localization.resources</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.log.filesystem.provider</artifactId>
         </dependency>
         <dependency>
@@ -1019,10 +903,6 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.request.handler.jaxrs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.rest.asset.provider</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
@@ -1078,10 +958,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.rest.wire.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.stress</artifactId>
         </dependency>
         <dependency>
@@ -1094,39 +970,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.wire.ai.component.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.wire.camel</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.wire.component.join.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.wire.component.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.wire.db.component.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.wire.h2db.component.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.wire.helper.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.wire.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.wire.script.tools</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
@@ -1144,10 +988,6 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.util.test.driver</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.util.wire.test</artifactId>
         </dependency>
     </dependencies>
     

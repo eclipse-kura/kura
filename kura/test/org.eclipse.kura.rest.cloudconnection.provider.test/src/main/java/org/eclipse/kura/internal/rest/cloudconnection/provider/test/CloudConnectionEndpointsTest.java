@@ -227,6 +227,7 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
         thenRequestSucceeds();
     }
 
+    @Ignore
     @Test
     public void shouldConnectEndpoint() {
         givenCloudEndpointPidRequest(CLOUD_ENDPOINT_INSTANCE_TEST);

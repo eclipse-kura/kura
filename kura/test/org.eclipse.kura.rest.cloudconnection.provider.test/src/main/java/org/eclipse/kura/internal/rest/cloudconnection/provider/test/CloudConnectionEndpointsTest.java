@@ -1,15 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
- *******************************************************************************/
+ ******************************************************************************/
 package org.eclipse.kura.internal.rest.cloudconnection.provider.test;
 
 import static org.junit.Assert.fail;
@@ -42,7 +42,6 @@ import org.eclipse.kura.rest.configuration.api.PidAndFactoryPid;
 import org.eclipse.kura.rest.configuration.api.PidSet;
 import org.eclipse.kura.rest.configuration.api.UpdateComponentConfigurationRequest;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -233,7 +232,6 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
         thenRequestSucceeds();
     }
 
-    @Ignore
     @Test
     public void shouldConnectEndpoint() {
         givenCloudEndpointPidRequest(CLOUD_ENDPOINT_INSTANCE_TEST);

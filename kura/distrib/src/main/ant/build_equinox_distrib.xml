@@ -168,7 +168,6 @@
         <antcall target="deployment-hooks-plugins" />
         <antcall target="event-publisher-plugins" />
         <antcall target="filesystem-logprovider-plugins" />
-        <antcall target="gpio-plugins" />
         <antcall target="h2db-plugins" />
         <antcall target="keystore-management-plugins" />
         <antcall target="linux.clock-plugins" />
@@ -181,12 +180,7 @@
         <antcall target="rest-plugins" />
         <antcall target="util-plugins" />
         <antcall target="http.server.manager-plugin" />
-
-        <!-- Conditional entries. Check for jar presence, and invoke relevant ant
-            target -->
         
-        <antcall target="emulator-gpio-plugins" />
-
         <propertyfile
             file="${project.build.directory}/${build.output.name}/dpa.properties">
             <entry key="kura"

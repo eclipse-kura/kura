@@ -30,9 +30,6 @@
         <module>kura-bom</module>
         <module>target-definition</module>
         <module>org.eclipse.kura.api</module>
-        <module>org.eclipse.kura.asset.cloudlet.provider</module>
-        <module>org.eclipse.kura.asset.provider</module>
-        <module>org.eclipse.kura.asset.helper.provider</module>
         <module>org.eclipse.kura.broker.artemis.core</module>
         <module>org.eclipse.kura.broker.artemis.simple.mqtt</module>
         <module>org.eclipse.kura.broker.artemis.xml</module>
@@ -74,8 +71,6 @@
         <module>org.eclipse.kura.linux.usb.x86_64</module>
         <module>org.eclipse.kura.linux.usb.aarch64</module>
         <module>org.eclipse.kura.linux.watchdog</module>
-        <module>org.eclipse.kura.localization</module>
-        <module>org.eclipse.kura.localization.resources</module>
         <module>org.eclipse.kura.net.configuration</module>
         <module>org.eclipse.kura.nm</module>
         <module>org.eclipse.kura.net.admin.firewall</module>
@@ -83,17 +78,10 @@
         <module>org.eclipse.kura.stress</module>
         <module>org.eclipse.kura.util</module>
         <module>org.eclipse.kura.wire.camel</module>
-        <module>org.eclipse.kura.wire.db.component.provider</module>
-        <module>org.eclipse.kura.wire.h2db.component.provider</module>
-        <module>org.eclipse.kura.wire.component.provider</module>
-        <module>org.eclipse.kura.wire.helper.provider</module>
-        <module>org.eclipse.kura.wire.provider</module>
         <module>org.eclipse.kura.rest.provider</module>
-        <module>org.eclipse.kura.rest.asset.provider</module>
         <module>org.eclipse.kura.misc.cloudcat</module>
         <module>org.eclipse.kura.json.marshaller.unmarshaller.provider</module>
         <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider</module>
-        <module>org.eclipse.kura.wire.component.join.provider</module>
         <module>org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider</module>
         <module>org.eclipse.kura.cloudconnection.raw.mqtt.provider</module>
         <module>org.eclipse.kura.linux.systemd.provider</module>
@@ -113,14 +101,11 @@
         <module>org.eclipse.kura.rest.service.listing.provider</module>
         <module>org.eclipse.kura.rest.system.provider</module>
         <module>org.eclipse.kura.request.handler.jaxrs</module>
-        <module>org.eclipse.kura.rest.wire.provider</module>
         <module>org.eclipse.kura.container.orchestration.provider</module>
         <module>org.eclipse.kura.ai.triton.server</module>
-        <module>org.eclipse.kura.wire.ai.component.provider</module>
         <module>org.eclipse.kura.container.provider</module>
         <module>org.eclipse.kura.event.publisher</module>
         <module>org.eclipse.kura.configuration.change.manager</module>
-        <module>org.eclipse.kura.wire.script.tools</module>
         <module>org.eclipse.kura.db.sqlite.provider</module>
         <module>org.eclipse.kura.db.h2db.provider</module>
         <module>org.eclipse.kura.rest.network.status.provider</module>

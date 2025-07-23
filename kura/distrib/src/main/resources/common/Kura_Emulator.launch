@@ -114,7 +114,6 @@
         <setEntry value="org.eclipse.equinox.io@default:default"/>
         <setEntry value="org.eclipse.equinox.metatype@default:default"/>
         <setEntry value="org.eclipse.equinox.util@default:default"/>
-        <setEntry value="org.eclipse.equinox.wireadmin@default:default"/>
         <setEntry value="org.eclipse.jetty.continuation@default:default"/>
         <setEntry value="org.eclipse.jetty.http@default:default"/>
         <setEntry value="org.eclipse.jetty.io@default:default"/>
@@ -124,9 +123,6 @@
         <setEntry value="org.eclipse.jetty.util.ajax@default:default"/>
         <setEntry value="org.eclipse.jetty.util@default:default"/>
         <setEntry value="org.eclipse.kura.api@default:default"/>
-        <setEntry value="org.eclipse.kura.asset.cloudlet.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.asset.helper.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.asset.provider@default:default"/>
         <setEntry value="org.eclipse.kura.cloudconnection.raw.mqtt.provider@default:default"/>
         <setEntry value="org.eclipse.kura.container.orchestration.provider@default:default"/>
         <setEntry value="org.eclipse.kura.container.provider@default:default"/>
@@ -163,11 +159,8 @@
         <setEntry value="org.eclipse.kura.jetty.customizer@default:false"/>
         <setEntry value="org.eclipse.kura.json.marshaller.unmarshaller.provider@default:default"/>
         <setEntry value="org.eclipse.kura.linux.bluetooth@default:default"/>
-        <setEntry value="org.eclipse.kura.localization.resources@default:false"/>
-        <setEntry value="org.eclipse.kura.localization@default:default"/>
         <setEntry value="org.eclipse.kura.net.configuration@default:default"/>
         <setEntry value="org.eclipse.kura.request.handler.jaxrs@default:default"/>
-        <setEntry value="org.eclipse.kura.rest.asset.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.cloudconnection.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.configuration.provider@default:default"/>
         <setEntry value="org.eclipse.kura.rest.network.configuration.provider@default:default"/>
@@ -179,12 +172,6 @@
         <setEntry value="org.eclipse.kura.sun.misc@default:false"/>
         <setEntry value="org.eclipse.kura.useradmin.store@default:default"/>
         <setEntry value="org.eclipse.kura.util@default:default"/>
-        <setEntry value="org.eclipse.kura.wire.component.join.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.wire.component.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.wire.db.component.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.wire.h2db.component.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.wire.helper.provider@default:default"/>
-        <setEntry value="org.eclipse.kura.wire.provider@default:default"/>
         <setEntry value="org.eclipse.kura.xml.marshaller.unmarshaller.provider@2:default"/>
         <setEntry value="org.eclipse.osgi.services@default:default"/>
         <setEntry value="org.eclipse.osgi.util@default:default"/>

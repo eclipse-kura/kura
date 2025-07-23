@@ -495,7 +495,6 @@
         <antcall target="event-publisher-plugins" />
         <antcall target="filesystem-logprovider-plugins" />
         <antcall target="gpio-plugins" />
-        <antcall target="gpsd4java-plugins" />
         <antcall target="h2db-plugins" />
         <antcall target="keystore-management-plugins" />
         <antcall target="linux.clock-plugins" />
@@ -505,7 +504,6 @@
         <antcall target="misc-plugins" />
         <antcall target="netty-plugins" />
         <antcall target="rest-plugins" />
-        <antcall target="rest-position" />
         <antcall target="rest.tamper-plugins" />
         <antcall target="util-plugins" />
         <antcall target="http.server.manager-plugin" />
@@ -1465,14 +1463,6 @@ fi]]>
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="quartz" />
-            <param name="start.level" value="3" />
-            <param name="start" value="" />
-        </antcall>
-    </target>
-
-    <target name="gpsd4java-plugins">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="gpsd4java" />
             <param name="start.level" value="3" />
             <param name="start" value="" />
         </antcall>

@@ -270,9 +270,15 @@
             https://github.com/bndtools/bnd/issues/1755
         -->
         <repository>
-            <id>repo.eclipse.org</id>
+            <id>repo.eclipse.org.releases</id>
             <name>Eclipse Kura Repository - Releases</name>
             <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+
+        <repository>
+            <id>repo.eclipse.org.snapshot</id>
+            <name>Eclipse Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
         </repository>
     </repositories>
 

@@ -176,7 +176,6 @@
                             -Ddpa.configuration=${kura.workdir}/data/dpa.properties
                             -Dkura.data=${kura.workdir}/data
                             -Dkura.snapshots=${kura.workdir}/user/snapshots
-                            -Dorg.eclipse.equinox.http.jetty.customizer.class=org.eclipse.kura.jetty.customizer.KuraJettyCustomizer
                             -Dlog4j.configurationFile=file:${kura.workdir}/log4j/log4j.xml
                         </argLine>
                         <!--

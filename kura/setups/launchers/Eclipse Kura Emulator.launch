@@ -134,7 +134,6 @@
 <setEntry value="org.eclipse.kura.emulator.clock@default:default"/>
 <setEntry value="org.eclipse.kura.emulator.gpio@default:default"/>
 <setEntry value="org.eclipse.kura.emulator.net@default:default"/>
-<setEntry value="org.eclipse.kura.emulator.position@default:default"/>
 <setEntry value="org.eclipse.kura.emulator.usb@default:default"/>
 <setEntry value="org.eclipse.kura.emulator.watchdog@default:default"/>
 <setEntry value="org.eclipse.kura.emulator@default:true"/>

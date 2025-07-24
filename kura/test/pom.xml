@@ -239,10 +239,6 @@
                             </dependency>
                             <dependency>
                                 <type>p2-installable-unit</type>
-                                <artifactId>org.eclipse.kura.emulator.position</artifactId>
-                            </dependency>
-                            <dependency>
-                                <type>p2-installable-unit</type>
                                 <artifactId>org.apache.logging.log4j.slf4j2.impl</artifactId>
                             </dependency>
                             <dependency>
@@ -505,11 +501,6 @@
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
-                                <id>org.eclipse.kura.emulator.position</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
                                 <id>org.eclipse.kura.cloud.base.provider</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
@@ -723,11 +714,6 @@
                                 </requirement>
                                 <requirement>
                                     <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.emulator.position</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.db.h2db.provider</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
@@ -791,7 +777,6 @@
         <module>org.eclipse.kura.deployment.agent.test</module>
         <module>org.eclipse.kura.driver.block.test</module>
         <module>org.eclipse.kura.driver.helper.test</module>
-        <module>org.eclipse.kura.emulator.position.test</module>
         <module>org.eclipse.kura.emulator.watchdog.test</module>
         <module>org.eclipse.kura.event.publisher.test</module>
         <module>org.eclipse.kura.internal.ble.test</module>

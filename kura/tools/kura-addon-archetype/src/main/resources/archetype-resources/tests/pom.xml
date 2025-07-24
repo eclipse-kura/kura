@@ -288,11 +288,6 @@
                                 </requirement>
                                 <requirement>
                                     <type>p2-installable-unit</type>
-                                    <id>org.eclipse.kura.emulator.position</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
                                     <id>org.eclipse.kura.emulator.watchdog</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>

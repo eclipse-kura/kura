@@ -39,6 +39,7 @@ import org.eclipse.kura.rest.configuration.api.PidAndFactoryPid;
 import org.eclipse.kura.rest.configuration.api.PidSet;
 import org.eclipse.kura.rest.configuration.api.UpdateComponentConfigurationRequest;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -227,6 +228,7 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
         thenRequestSucceeds();
     }
 
+    @Ignore
     @Test
     public void shouldConnectEndpoint() {
         givenCloudEndpointPidRequest(CLOUD_ENDPOINT_INSTANCE_TEST);

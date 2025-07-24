@@ -97,7 +97,6 @@
         <org.eclipse.kura.linux.clock.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.clock.version>
         <org.eclipse.kura.linux.gpio.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.gpio.version>
         <org.eclipse.kura.linux.net.version>3.0.0-SNAPSHOT</org.eclipse.kura.linux.net.version>
-        <org.eclipse.kura.linux.position.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.position.version>
         <org.eclipse.kura.linux.systemd.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.systemd.provider.version>
         <org.eclipse.kura.linux.usb.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.usb.version>
         <org.eclipse.kura.linux.usb.aarch64.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.usb.aarch64.version>
@@ -119,7 +118,6 @@
         <org.eclipse.kura.rest.network.configuration.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.network.configuration.provider.version>
         <org.eclipse.kura.rest.network.status.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.network.status.provider.version>
         <org.eclipse.kura.rest.packages.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.packages.provider.version>
-        <org.eclipse.kura.rest.position.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.position.provider.version>
         <org.eclipse.kura.rest.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.provider.version>
         <org.eclipse.kura.rest.security.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.security.provider.version>
         <org.eclipse.kura.rest.service.listing.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.service.listing.provider.version>
@@ -434,11 +432,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.linux.position</artifactId>
-                <version>${org.eclipse.kura.linux.position.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.linux.systemd.provider</artifactId>
                 <version>${org.eclipse.kura.linux.systemd.provider.version}</version>
             </dependency>
@@ -541,11 +534,6 @@
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.rest.packages.provider</artifactId>
                 <version>${org.eclipse.kura.rest.packages.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.rest.position.provider</artifactId>
-                <version>${org.eclipse.kura.rest.position.provider.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -850,10 +838,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.linux.position</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.linux.systemd.provider</artifactId>
         </dependency>
         <dependency>
@@ -935,10 +919,6 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.rest.packages.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.rest.position.provider</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>

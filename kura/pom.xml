@@ -67,7 +67,6 @@
         <module>org.eclipse.kura.linux.clock</module>
         <module>org.eclipse.kura.linux.gpio</module>
         <module>org.eclipse.kura.linux.net</module>
-        <module>org.eclipse.kura.linux.position</module>
         <module>org.eclipse.kura.linux.usb</module>
         <module>org.eclipse.kura.linux.usb.x86_64</module>
         <module>org.eclipse.kura.linux.usb.aarch64</module>
@@ -97,7 +96,6 @@
         <module>org.eclipse.kura.rest.identity.provider</module>
         <module>org.eclipse.kura.rest.inventory.provider</module>
         <module>org.eclipse.kura.rest.packages.provider</module>
-        <module>org.eclipse.kura.rest.position.provider</module>
         <module>org.eclipse.kura.rest.keystore.provider</module>
         <module>org.eclipse.kura.rest.security.provider</module>
         <module>org.eclipse.kura.rest.service.listing.provider</module>

@@ -805,7 +805,6 @@
         <module>org.eclipse.kura.linux.clock.test</module>
         <module>org.eclipse.kura.linux.gpio.test</module>
         <module>org.eclipse.kura.linux.net.test</module>
-        <module>org.eclipse.kura.linux.position.test</module>
         <module>org.eclipse.kura.linux.usb.test</module>
         <module>org.eclipse.kura.linux.watchdog.test</module>
         <module>org.eclipse.kura.net.admin.firewall.test</module>
@@ -832,7 +831,6 @@
         <module>org.eclipse.kura.rest.inventory.provider.test</module>
         <module>org.eclipse.kura.rest.network.status.provider.test</module>
         <module>org.eclipse.kura.rest.packages.provider.test</module>
-        <module>org.eclipse.kura.rest.position.provider.test</module>
         <module>org.eclipse.kura.rest.security.provider.test</module>
         <module>org.eclipse.kura.rest.service.listing.provider.test</module>
         <module>org.eclipse.kura.rest.system.provider.test</module>

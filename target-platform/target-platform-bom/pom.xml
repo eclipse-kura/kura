@@ -42,7 +42,6 @@
         <apache-qpid-proton-j.version>0.33.2</apache-qpid-proton-j.version>
         <bluez-dbus-osgi.version>0.1.4</bluez-dbus-osgi.version>
         <com.eclipsesource.minimal-json.version>0.9.5</com.eclipsesource.minimal-json.version>
-        <com.eurotech.gpsd4java.version>1.0.0</com.eurotech.gpsd4java.version>
         <com.google.gson.version>2.9.0</com.google.gson.version>
         <com.google.protobuf.version>4.30.2</com.google.protobuf.version>
         <com.h2database.h2.version>2.1.214</com.h2database.h2.version>
@@ -488,11 +487,6 @@
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcpg-jdk18on</artifactId>
                 <version>${org.bouncycastle.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.eurotech</groupId>
-                <artifactId>gpsd4java</artifactId>
-                <version>${com.eurotech.gpsd4java.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
@@ -1390,10 +1384,6 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpg-jdk18on</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.eurotech</groupId>
-            <artifactId>gpsd4java</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>

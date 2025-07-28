@@ -106,6 +106,7 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.geronimo.specs/geronimo-jta_1.1_spec/1.1.1, Apache-2.0, approved, CQ2334
 * maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.5, Apache-2.0 AND MPL-2.0, approved, #21346
 * maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.3.4, Apache-2.0, approved, #16866
+* maven/mavencentral/org.apache.httpcomponents.core5/httpcore5-h2/5.3.4, Apache-2.0, approved, #16867
 * maven/mavencentral/org.apache.logging.log4j/log4j-api/2.23.1, Apache-2.0, approved, #13368
 * maven/mavencentral/org.apache.logging.log4j/log4j-core/2.23.1, Apache-2.0 AND (Apache-2.0 AND LGPL-2.0-or-later), approved, #14737
 * maven/mavencentral/org.apache.logging.log4j/log4j-slf4j-impl/2.23.1, Apache-2.0, approved, #14736

@@ -116,6 +116,11 @@
                                     <version>5.3.4</version>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>org.apache.httpcomponents.core5</groupId>
+                                    <artifactId>httpcore5-h2</artifactId>
+                                    <version>5.3.4</version>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>net.java.dev.jna</groupId>
                                     <artifactId>jna</artifactId>
                                     <version>5.17.0</version>

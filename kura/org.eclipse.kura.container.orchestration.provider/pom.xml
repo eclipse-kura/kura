@@ -37,133 +37,107 @@
         <jackson.version>2.19.1</jackson.version>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java</artifactId>
+            <version>${docker-java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-core</artifactId>
+            <version>${docker-java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-api</artifactId>
+            <version>${docker-java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-transport</artifactId>
+            <version>${docker-java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.27.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-transport-httpclient5</artifactId>
+            <version>3.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.core5</groupId>
+            <artifactId>httpcore5</artifactId>
+            <version>5.3.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.core5</groupId>
+            <artifactId>httpcore5-h2</artifactId>
+            <version>5.3.4</version>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.17.0</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.18.0</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-packaging-plugin</artifactId>
-                <version>${tycho-version}</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jarsigner-plugin</artifactId>
-                <version>1.4</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <outputDirectory>${project.basedir}/lib</outputDirectory>
-                            <stripVersion>true</stripVersion>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.github.docker-java</groupId>
-                                    <artifactId>docker-java</artifactId>
-                                    <version>${docker-java.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.github.docker-java</groupId>
-                                    <artifactId>docker-java-core</artifactId>
-                                    <version>${docker-java.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.github.docker-java</groupId>
-                                    <artifactId>docker-java-api</artifactId>
-                                    <version>${docker-java.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.github.docker-java</groupId>
-                                    <artifactId>docker-java-transport</artifactId>
-                                    <version>${docker-java.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.commons</groupId>
-                                    <artifactId>commons-compress</artifactId>
-                                    <version>1.27.1</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.fasterxml.jackson.core</groupId>
-                                    <artifactId>jackson-databind</artifactId>
-                                    <version>${jackson.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.fasterxml.jackson.core</groupId>
-                                    <artifactId>jackson-core</artifactId>
-                                    <version>${jackson.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.fasterxml.jackson.core</groupId>
-                                    <artifactId>jackson-annotations</artifactId>
-                                    <version>${jackson.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.github.docker-java</groupId>
-                                    <artifactId>docker-java-transport-httpclient5</artifactId>
-                                    <version>3.5.3</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.httpcomponents.client5</groupId>
-                                    <artifactId>httpclient5</artifactId>
-                                    <version>5.5</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.httpcomponents.core5</groupId>
-                                    <artifactId>httpcore5</artifactId>
-                                    <version>5.3.4</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.apache.httpcomponents.core5</groupId>
-                                    <artifactId>httpcore5-h2</artifactId>
-                                    <version>5.3.4</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>net.java.dev.jna</groupId>
-                                    <artifactId>jna</artifactId>
-                                    <version>5.17.0</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>commons-codec</groupId>
-                                    <artifactId>commons-codec</artifactId>
-                                    <version>1.18.0</version>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>3.1.0</version>
                 <configuration>
+                    <verbose>true</verbose>
                     <filesets>
                         <fileset>
-                            <directory>lib</directory>
+                            <directory>lib/</directory>
+                            <followSymlinks>false</followSymlinks>
                         </fileset>
                     </filesets>
                 </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.8</version>
+                <version>3.8.1</version>
                 <executions>
                     <execution>
-                        <id>get-container-orchestration-bundles</id>
-                        <phase>generate-resources</phase>
+                        <id>copy-dependencies</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
-                            <excludeTypes>pom</excludeTypes>
-                            <excludeClassifiers>
-                                sources,linux-x86_64,linux-aarch_64,osx-x86_64,osx-aarch_64</excludeClassifiers>
+                            <outputDirectory>${project.basedir}/lib</outputDirectory>
+                            <excludeTransitive>true</excludeTransitive>
+                            <stripVersion>true</stripVersion>
                         </configuration>
                     </execution>
                 </executions>

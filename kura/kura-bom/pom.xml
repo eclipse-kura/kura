@@ -87,6 +87,7 @@
         <org.eclipse.kura.emulator.clock.version>2.0.0-SNAPSHOT</org.eclipse.kura.emulator.clock.version>
         <org.eclipse.kura.emulator.gpio.version>2.0.0-SNAPSHOT</org.eclipse.kura.emulator.gpio.version>
         <org.eclipse.kura.emulator.net.version>2.0.0-SNAPSHOT</org.eclipse.kura.emulator.net.version>
+        <org.eclipse.kura.emulator.position.version>2.0.0-SNAPSHOT</org.eclipse.kura.emulator.position.version>
         <org.eclipse.kura.emulator.usb.version>2.0.0-SNAPSHOT</org.eclipse.kura.emulator.usb.version>
         <org.eclipse.kura.emulator.watchdog.version>2.0.0-SNAPSHOT</org.eclipse.kura.emulator.watchdog.version>
         <org.eclipse.kura.event.publisher.version>2.0.0-SNAPSHOT</org.eclipse.kura.event.publisher.version>
@@ -378,6 +379,11 @@
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.emulator.net</artifactId>
 	            <version>${org.eclipse.kura.emulator.net.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.kura.emulator.position</artifactId>
+	            <version>${org.eclipse.kura.emulator.position.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -789,6 +795,10 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.emulator.net</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.emulator.position</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>

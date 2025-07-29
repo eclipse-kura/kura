@@ -363,37 +363,37 @@
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.emulator</artifactId>
-	            <version>${org.eclipse.kura.emulator.version}</version>
+                <version>${org.eclipse.kura.emulator.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.emulator.clock</artifactId>
-	            <version>${org.eclipse.kura.emulator.clock.version}</version>
+                <version>${org.eclipse.kura.emulator.clock.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.emulator.gpio</artifactId>
-	            <version>${org.eclipse.kura.emulator.gpio.version}</version>
+                <version>${org.eclipse.kura.emulator.gpio.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.emulator.net</artifactId>
-	            <version>${org.eclipse.kura.emulator.net.version}</version>
+                <version>${org.eclipse.kura.emulator.net.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.emulator.position</artifactId>
-	            <version>${org.eclipse.kura.emulator.position.version}</version>
+                <version>${org.eclipse.kura.emulator.position.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.emulator.usb</artifactId>
-	            <version>${org.eclipse.kura.emulator.usb.version}</version>
+                <version>${org.eclipse.kura.emulator.usb.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.emulator.watchdog</artifactId>
-	            <version>${org.eclipse.kura.emulator.watchdog.version}</version>
+                <version>${org.eclipse.kura.emulator.watchdog.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -970,5 +970,5 @@
             <artifactId>org.eclipse.kura.util.test.driver</artifactId>
         </dependency>
     </dependencies>
-    
+
 </project>

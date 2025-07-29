@@ -36,7 +36,7 @@
         <module>aarch64</module>
         <module>aarch64-core</module>
         <module>aarch64-nn</module>
-        
+
         <module>x86_64</module>
         <module>x86_64-core</module>
         <module>x86_64-nn</module>
@@ -47,7 +47,7 @@
         <module>docker-ubi8</module>
         -->
     </modules>
-    
+
     <properties>
         <tycho-version>4.0.11</tycho-version>
         <jdeb-version>1.12</jdeb-version>
@@ -245,7 +245,8 @@
                         <configuration>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
                             <excludeTypes>pom</excludeTypes>
-                            <excludeClassifiers>sources,linux-x86_64,linux-aarch_64,osx-x86_64,osx-aarch_64</excludeClassifiers>
+                            <excludeClassifiers>
+                                sources,linux-x86_64,linux-aarch_64,osx-x86_64,osx-aarch_64</excludeClassifiers>
                         </configuration>
                     </execution>
                     <execution>
@@ -300,14 +301,14 @@
                             <target name="checksum">
                                 <checksum algorithm="MD5">
                                     <fileset dir="${basedir}/target">
-                                        <include name="*.deb"/>
-                                        <include name="*.dp"/>
+                                        <include name="*.deb" />
+                                        <include name="*.dp" />
                                     </fileset>
                                 </checksum>
                                 <checksum algorithm="SHA-1">
                                     <fileset dir="${basedir}/target">
-                                        <include name="*.deb"/>
-                                        <include name="*.dp"/>
+                                        <include name="*.deb" />
+                                        <include name="*.dp" />
                                     </fileset>
                                 </checksum>
                             </target>
@@ -330,7 +331,8 @@
                         <deriveHeaderFromSource>false</deriveHeaderFromSource>
                     </configuration>
                 </plugin>
-                <!--This plugin's configuration is used to store Eclipse m2e settings
+                <!--This
+                plugin's configuration is used to store Eclipse m2e settings
                     only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
@@ -507,26 +509,8 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.driver.eddystone</artifactId>
-                                            <version>${org.eclipse.kura.driver.eddystone.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.driver.ibeacon</artifactId>
-                                            <version>${org.eclipse.kura.driver.ibeacon.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
                                             <artifactId>org.eclipse.kura.driver.gpio</artifactId>
                                             <version>${org.eclipse.kura.driver.gpio.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.driver.ble.xdk</artifactId>
-                                            <version>${org.eclipse.kura.driver.ble.xdk.version}</version>
                                             <type>dp</type>
                                         </artifactItem>
                                         <artifactItem>
@@ -543,14 +527,18 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</artifactId>
-                                            <version>${org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.feature.version}</version>
+                                            <artifactId>
+                                                org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</artifactId>
+                                            <version>
+                                                ${org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.feature.version}</version>
                                             <type>dp</type>
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.cloudconnection.raw.mqtt.provider</artifactId>
-                                            <version>${org.eclipse.kura.cloudconnection.raw.mqtt.provider.feature.version}</version>
+                                            <artifactId>
+                                                org.eclipse.kura.cloudconnection.raw.mqtt.provider</artifactId>
+                                            <version>
+                                                ${org.eclipse.kura.cloudconnection.raw.mqtt.provider.feature.version}</version>
                                             <type>dp</type>
                                         </artifactItem>
                                     </artifactItems>

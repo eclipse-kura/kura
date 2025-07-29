@@ -129,7 +129,7 @@
                         <failIfNoTests>false</failIfNoTests>
                         <providerHint>junit4</providerHint>
                         <useUnlimitedThreads>false</useUnlimitedThreads>
-                        
+
                         <argLine>
                             ${tycho.testArgLine}
                             ${tycho.surefire.testenv.args}
@@ -794,12 +794,6 @@
         <module>org.eclipse.kura.emulator.position.test</module>
         <module>org.eclipse.kura.emulator.watchdog.test</module>
         <module>org.eclipse.kura.event.publisher.test</module>
-        <module>org.eclipse.kura.internal.ble.test</module>
-        <module>org.eclipse.kura.internal.ble.eddystone.test</module>
-        <module>org.eclipse.kura.internal.ble.ibeacon.test</module>
-        <module>org.eclipse.kura.internal.driver.ble.sensortag.test</module>
-        <module>org.eclipse.kura.internal.driver.eddystone.test</module>
-        <module>org.eclipse.kura.internal.driver.ibeacon.test</module>
         <module>org.eclipse.kura.internal.driver.opcua.test</module>
         <module>org.eclipse.kura.internal.driver.s7plc.test</module>
         <module>org.eclipse.kura.linux.clock.test</module>

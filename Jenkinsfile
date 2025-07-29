@@ -74,7 +74,7 @@ node {
 
     stage('Archive .deb artifacts') {
         dir("kura") {
-            archiveArtifacts artifacts: 'kura/distrib/*/target/*.deb', onlyIfSuccessful: true
+            archiveArtifacts artifacts: 'kura/distrib/**/target/*.deb', onlyIfSuccessful: true
         }
     }
 

@@ -263,7 +263,6 @@ This project leverages the following third party content.
 * org.hamcrest.core 1.1, New BSD License, approved, CQ7842
 * org.apache.felix.useradmin_1.0.4.k1, Apache-2.0, approved, CQ23078
 * com.codeminders.hidapi 1.1, New BSD License, approved, CQ7833
-* com.eurotech.gpsd4java_1.0.0, Apache-2.0, approved, CQ23923
 * org.moka7 1.0.2, EPL-1.0, approved, CQ12777
 * org.eclipse.paho.client.mqttv3 1.2.1.k2, EPL-1.0, approved, eclipse.platform
 

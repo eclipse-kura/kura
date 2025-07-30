@@ -127,6 +127,7 @@
         <org.eclipse.kura.util.version>2.0.0-SNAPSHOT</org.eclipse.kura.util.version>
         <org.eclipse.kura.wire.camel.version>2.0.0-SNAPSHOT</org.eclipse.kura.wire.camel.version>
         <org.eclipse.kura.xml.marshaller.unmarshaller.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.xml.marshaller.unmarshaller.provider.version>
+        <org.eclipse.kura.jul.to.slf4j.configuration.version>1.0.0-SNAPSHOT</org.eclipse.kura.jul.to.slf4j.configuration.version>
         <!-- test-util -->
         <org.eclipse.kura.core.testutil.version>6.0.0-SNAPSHOT</org.eclipse.kura.core.testutil.version>
         <org.eclipse.kura.test.version>6.0.0-SNAPSHOT</org.eclipse.kura.test.version>
@@ -580,6 +581,11 @@
                 <artifactId>org.eclipse.kura.xml.marshaller.unmarshaller.provider</artifactId>
                 <version>${org.eclipse.kura.xml.marshaller.unmarshaller.provider.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.kura.jul.to.slf4j.configuration</artifactId>
+                <version>${org.eclipse.kura.jul.to.slf4j.configuration.version}</version>
+            </dependency>
             <!-- test-util -->
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -955,6 +961,10 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.xml.marshaller.unmarshaller.provider</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.jul.to.slf4j.configuration</artifactId>
         </dependency>
         <!-- test-util -->
         <dependency>

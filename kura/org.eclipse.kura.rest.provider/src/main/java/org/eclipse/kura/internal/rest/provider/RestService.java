@@ -56,7 +56,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseFilter;
@@ -68,11 +67,6 @@ import jakarta.ws.rs.ext.MessageBodyWriter;
 public class RestService implements ConfigurableComponent {
 
     private static final String KURA_DEFAULT_JAKARTARS_WHITEBOARD_NAME = "KuraDefaultJakartarsWhiteboard";
-
-    static {
-        SLF4JBridgeHandler.removeHandlersForRootLogger();
-        SLF4JBridgeHandler.install();
-    }
 
     private static final Logger logger = LoggerFactory.getLogger(RestService.class);
 

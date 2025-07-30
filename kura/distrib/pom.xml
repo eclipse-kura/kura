@@ -439,7 +439,7 @@
                                     jcl-over-slf4j, log4j-api, log4j-core,
                                     org.eclipse.equinox.metatype, org.eclipse.equinox.util,
                                     org.eclipse.equinox.registry, slf4j-api, org.eclipse.equinox.io,
-                                    jul-to-slf4j, org.apache.felix.scr
+                                    jul-to-slf4j, org.apache.felix.scr, org.eclipse.kura.jul.to.slf4j.configuration
                                 </includeArtifactIds>
                             </configuration>
                         </execution>

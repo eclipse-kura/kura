@@ -67,7 +67,6 @@
         <module>org.eclipse.kura.linux.clock</module>
         <module>org.eclipse.kura.linux.gpio</module>
         <module>org.eclipse.kura.linux.net</module>
-        <module>org.eclipse.kura.linux.position</module>
         <module>org.eclipse.kura.linux.usb</module>
         <module>org.eclipse.kura.linux.usb.x86_64</module>
         <module>org.eclipse.kura.linux.usb.aarch64</module>
@@ -97,7 +96,6 @@
         <module>org.eclipse.kura.rest.identity.provider</module>
         <module>org.eclipse.kura.rest.inventory.provider</module>
         <module>org.eclipse.kura.rest.packages.provider</module>
-        <module>org.eclipse.kura.rest.position.provider</module>
         <module>org.eclipse.kura.rest.keystore.provider</module>
         <module>org.eclipse.kura.rest.security.provider</module>
         <module>org.eclipse.kura.rest.service.listing.provider</module>
@@ -113,6 +111,7 @@
         <module>org.eclipse.kura.rest.network.status.provider</module>
         <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</module>
         <module>org.eclipse.kura.cloudconnection.kapua.mqtt.provider</module>
+        <module>org.eclipse.kura.jul.to.slf4j.configuration</module>
         <module>emulator</module>
         <module>test-util</module>
         <module>tools</module>
@@ -272,9 +271,15 @@
             https://github.com/bndtools/bnd/issues/1755
         -->
         <repository>
-            <id>repo.eclipse.org</id>
+            <id>repo.eclipse.org.releases</id>
             <name>Eclipse Kura Repository - Releases</name>
             <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+
+        <repository>
+            <id>repo.eclipse.org.snapshot</id>
+            <name>Eclipse Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
         </repository>
     </repositories>
 

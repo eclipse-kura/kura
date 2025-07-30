@@ -495,18 +495,15 @@
         <antcall target="event-publisher-plugins" />
         <antcall target="filesystem-logprovider-plugins" />
         <antcall target="gpio-plugins" />
-        <antcall target="gpsd4java-plugins" />
         <antcall target="h2db-plugins" />
         <antcall target="keystore-management-plugins" />
         <antcall target="linux.clock-plugins" />
-        <antcall target="linux.position-plugins" />
         <antcall target="linux.usb-plugins" />
         <antcall target="linux.watchdog-plugins" />
         <antcall target="marshallers-plugins" />
         <antcall target="misc-plugins" />
         <antcall target="netty-plugins" />
         <antcall target="rest-plugins" />
-        <antcall target="rest-position" />
         <antcall target="rest.tamper-plugins" />
         <antcall target="util-plugins" />
         <antcall target="http.server.manager-plugin" />
@@ -1282,7 +1279,12 @@ fi]]>
         <antcall target="install-plugin">
             <param name="bundle.name" value="jul-to-slf4j" />
             <param name="start.level" value="1" />
-            <param name="start" value="s" />
+            <param name="start" value="" />
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="org.eclipse.kura.jul.to.slf4j.configuration" />
+            <param name="start.level" value="1" />
+            <param name="start" value="s" />            
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="log4j2-api-config" />
@@ -1471,14 +1473,6 @@ fi]]>
         </antcall>
     </target>
 
-    <target name="gpsd4java-plugins">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="gpsd4java" />
-            <param name="start.level" value="3" />
-            <param name="start" value="" />
-        </antcall>
-    </target>
-
     <!-- Kura config targets -->
     <target name="api-plugins">
         <antcall target="install-plugin">
@@ -1646,14 +1640,6 @@ fi]]>
         </antcall>
     </target>
 
-    <target name="linux.position-plugins">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.linux.position" />
-            <param name="start.level" value="4" />
-            <param name="start" value="" />
-        </antcall>
-    </target>
-
     <target name="linux.usb-plugins" unless="is.docker">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.linux.usb.${native.tag}" />
@@ -1736,14 +1722,6 @@ fi]]>
     <target name="emulator.watchdog-plugins" if="is.docker">
         <antcall target="install-plugin">
             <param name="bundle.name" value="org.eclipse.kura.emulator.watchdog" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-    </target>
-
-    <target name="rest-position">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.rest.position.provider" />
             <param name="start.level" value="4" />
             <param name="start" value="s" />
         </antcall>

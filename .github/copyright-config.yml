@@ -31,3 +31,4 @@ ignore:
   - target-platform/
   - kura/test/org.eclipse.kura.core.configuration.test/src/test/resources/
   - suppressions.xml
+  - /kura/emulator/org.eclipse.kura.emulator.position/src/main/resources/*.gpx

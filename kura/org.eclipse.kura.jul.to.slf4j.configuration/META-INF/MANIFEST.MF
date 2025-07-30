@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Kura Configurator for jul-to-slf4j
+Bundle-SymbolicName: org.eclipse.kura.jul.to.slf4j.configuration;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Bundle-License: Eclipse Public License v2.0
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: org.eclipse.kura.jul.to.slf4j.configuration.Activator
+Import-Package: org.osgi.framework;version="1.10.0",
+ org.slf4j.bridge;version="1.7.21"

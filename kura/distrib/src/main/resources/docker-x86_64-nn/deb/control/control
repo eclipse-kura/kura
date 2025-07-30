@@ -15,8 +15,7 @@ Version: [[version]]-[[package.revision]]
 Section: admin
 Priority: optional
 Depends: dos2unix, unzip,
- telnet, bluez-hcidump,
- bluez, chrony,
+ telnet, chrony,
  openjdk-17-jre-headless | temurin-17-jdk,
  cron
 Architecture: amd64

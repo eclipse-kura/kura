@@ -71,7 +71,6 @@
         <org.eclipse.kura.db.h2db.provider.version>1.0.0-SNAPSHOT</org.eclipse.kura.db.h2db.provider.version>
         <org.eclipse.kura.db.sqlite.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.db.sqlite.provider.version>
         <org.eclipse.kura.deployment.agent.version>2.0.0-SNAPSHOT</org.eclipse.kura.deployment.agent.version>
-        <org.eclipse.kura.driver.ble.sensortag.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.ble.sensortag.provider.version>
         <org.eclipse.kura.driver.block.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.block.version>
         <org.eclipse.kura.driver.gpio.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.gpio.provider.version>
         <org.eclipse.kura.driver.helper.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.helper.provider.version>
@@ -296,11 +295,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.driver.ble.sensortag.provider</artifactId>
-                <version>${org.eclipse.kura.driver.ble.sensortag.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.driver.block</artifactId>
                 <version>${org.eclipse.kura.driver.block.version}</version>
             </dependency>
@@ -327,37 +321,37 @@
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.emulator</artifactId>
-                <version>${org.eclipse.kura.emulator.version}</version>
+	            <version>${org.eclipse.kura.emulator.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.emulator.clock</artifactId>
-                <version>${org.eclipse.kura.emulator.clock.version}</version>
+	            <version>${org.eclipse.kura.emulator.clock.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.emulator.gpio</artifactId>
-                <version>${org.eclipse.kura.emulator.gpio.version}</version>
+	            <version>${org.eclipse.kura.emulator.gpio.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.emulator.net</artifactId>
-                <version>${org.eclipse.kura.emulator.net.version}</version>
+	            <version>${org.eclipse.kura.emulator.net.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.emulator.position</artifactId>
-                <version>${org.eclipse.kura.emulator.position.version}</version>
+	            <version>${org.eclipse.kura.emulator.position.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.emulator.usb</artifactId>
-                <version>${org.eclipse.kura.emulator.usb.version}</version>
+	            <version>${org.eclipse.kura.emulator.usb.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.emulator.watchdog</artifactId>
-                <version>${org.eclipse.kura.emulator.watchdog.version}</version>
+	            <version>${org.eclipse.kura.emulator.watchdog.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -698,10 +692,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.driver.ble.sensortag.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.driver.block</artifactId>
         </dependency>
         <dependency>
@@ -910,5 +900,5 @@
             <artifactId>org.eclipse.kura.util.test.driver</artifactId>
         </dependency>
     </dependencies>
-
+    
 </project>

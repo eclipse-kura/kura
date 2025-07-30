@@ -129,7 +129,7 @@
                         <failIfNoTests>false</failIfNoTests>
                         <providerHint>junit4</providerHint>
                         <useUnlimitedThreads>false</useUnlimitedThreads>
-
+                        
                         <argLine>
                             ${tycho.testArgLine}
                             ${tycho.surefire.testenv.args}

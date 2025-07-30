@@ -1278,7 +1278,12 @@ fi]]>
         <antcall target="install-plugin">
             <param name="bundle.name" value="jul-to-slf4j" />
             <param name="start.level" value="1" />
-            <param name="start" value="s" />
+            <param name="start" value="" />
+        </antcall>
+        <antcall target="install-plugin">
+            <param name="bundle.name" value="org.eclipse.kura.jul.to.slf4j.configuration" />
+            <param name="start.level" value="1" />
+            <param name="start" value="s" />            
         </antcall>
         <antcall target="install-plugin">
             <param name="bundle.name" value="log4j2-api-config" />

@@ -11,6 +11,7 @@
 
     Contributors:
      Eurotech
+
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -18,24 +19,16 @@
 
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
-		<artifactId>kura</artifactId>
+		<artifactId>emulator</artifactId>
 		<version>6.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>emulator</artifactId>
-	<packaging>pom</packaging>
+	<artifactId>org.eclipse.kura.emulator.position</artifactId>
+	<version>2.0.0-SNAPSHOT</version>
+	<packaging>eclipse-plugin</packaging>
 
 	<properties>
-		<kura.basedir>${project.basedir}/..</kura.basedir>
+		<kura.basedir>${project.basedir}/../..</kura.basedir>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../../test/org.eclipse.kura.emulator.position.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
-	
-	<modules>
-		<module>org.eclipse.kura.emulator</module>
-		<module>org.eclipse.kura.emulator.gpio</module>
-		<module>org.eclipse.kura.emulator.clock</module>
-		<module>org.eclipse.kura.emulator.net</module>
-		<module>org.eclipse.kura.emulator.position</module>
-		<module>org.eclipse.kura.emulator.usb</module>
-		<module>org.eclipse.kura.emulator.watchdog</module>
-	</modules>
 </project>

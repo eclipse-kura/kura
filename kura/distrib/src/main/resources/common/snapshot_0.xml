@@ -190,33 +190,6 @@
             </esf:property>
         </esf:properties>
     </esf:configuration>
-    <esf:configuration pid="org.eclipse.kura.position.PositionService">
-        <esf:properties>
-            <esf:property name="port" array="false" encrypted="false" type="String">
-                <esf:value>1-3.2</esf:value>
-            </esf:property>
-            <esf:property name="enabled" array="false" encrypted="false" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property name="parity" array="false" encrypted="false" type="Integer">
-                <esf:value>0</esf:value>
-            </esf:property>
-            <esf:property name="stopBits" array="false" encrypted="false" type="Integer">
-                <esf:value>1</esf:value>
-            </esf:property>
-            <esf:property name="baudRate" array="false" encrypted="false" type="Integer">
-                <esf:value>115200</esf:value>
-            </esf:property>
-            <esf:property name="service.pid" array="false" encrypted="false" type="String">
-                <esf:value>org.eclipse.kura.position.PositionService</esf:value>
-            </esf:property>
-            <esf:property name="bitsPerWord" array="false" encrypted="false" type="Integer">
-                <esf:value>8</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="provider" type="String">
-                <esf:value>gpsd</esf:value>
-            </esf:property>
-        </esf:properties>
     </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.cloud.CloudService">
         <esf:properties>
@@ -299,7 +272,7 @@
                 <esf:value>[{"name":"kura.user.admin","credentials":{"kura.password":"jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg="},"properties":{"kura.need.password.change":"true"}}]</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="groups.config" type="String">
-                <esf:value>[{"name":"kura.permission.kura.admin","basicMembers":["kura.user.admin"]},{"name":"kura.permission.kura.cloud.connection.admin"},{"name":"kura.permission.kura.device"},{"name":"kura.permission.kura.maintenance"},{"name":"kura.permission.kura.network.admin"},{"name":"kura.permission.kura.packages.admin"},{"name":"kura.permission.kura.wires.admin"},{"name":"kura.permission.rest.assets"},{"name":"kura.permission.rest.cloudconnection"},{"name":"kura.permission.rest.command"},{"name":"kura.permission.rest.configuration"},{"name":"kura.permission.rest.deploy"},{"name":"kura.permission.rest.identity"},{"name":"kura.permission.rest.inventory"},{"name":"kura.permission.rest.keystores"},{"name":"kura.permission.rest.network.configuration"},{"name":"kura.permission.rest.network.status"},{"name":"kura.permission.rest.security"},{"name":"kura.permission.rest.system"},{"name":"kura.permission.rest.tamper.detection"},{"name":"kura.permission.rest.wires.admin"}]</esf:value>
+                <esf:value>[{"name":"kura.permission.kura.admin","basicMembers":["kura.user.admin"]},{"name":"kura.permission.kura.cloud.connection.admin"},{"name":"kura.permission.kura.device"},{"name":"kura.permission.kura.maintenance"},{"name":"kura.permission.kura.network.admin"},{"name":"kura.permission.kura.packages.admin"},{"name":"kura.permission.kura.wires.admin"},{"name":"kura.permission.rest.assets"},{"name":"kura.permission.rest.cloudconnection"},{"name":"kura.permission.rest.command"},{"name":"kura.permission.rest.configuration"},{"name":"kura.permission.rest.deploy"},{"name":"kura.permission.rest.identity"},{"name":"kura.permission.rest.inventory"},{"name":"kura.permission.rest.keystores"},{"name":"kura.permission.rest.network.configuration"},{"name":"kura.permission.rest.network.status"},{"name":"kura.permission.rest.position"},{"name":"kura.permission.rest.security"},{"name":"kura.permission.rest.system"},{"name":"kura.permission.rest.tamper.detection"},{"name":"kura.permission.rest.wires.admin"}]</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

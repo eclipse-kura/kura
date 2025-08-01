@@ -113,8 +113,6 @@
                                 <outputDirectory>${project.build.directory}/pkg/plugins/4s</outputDirectory>
                                 <skip>${exclude.other.plugins}</skip>
                                 <includeArtifactIds>
-                                    <!-- driver-plugins -->
-                                     org.eclipse.kura.driver.helper.provider,
                                     <!-- bluetooth-plugins -->
                                     org.eclipse.kura.ble.provider,
                                     org.eclipse.kura.ble.eddystone.provider,

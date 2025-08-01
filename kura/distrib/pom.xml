@@ -575,6 +575,8 @@
                             <configuration>
                                 <outputDirectory>${project.build.directory}/pkg/plugins/4s</outputDirectory>
                                 <includeArtifactIds>
+                                    <!-- driver-plugins -->
+                                    org.eclipse.kura.driver.helper.provider,
                                     <!-- core.certificates-plugins -->
                                     org.eclipse.kura.core.certificates,
                                     <!-- util-plugins -->

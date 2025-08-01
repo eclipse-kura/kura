@@ -113,10 +113,6 @@
                                 <outputDirectory>${project.build.directory}/pkg/plugins/4s</outputDirectory>
                                 <skip>${exclude.other.plugins}</skip>
                                 <includeArtifactIds>
-                                    <!-- bluetooth-plugins -->
-                                    org.eclipse.kura.ble.provider,
-                                    org.eclipse.kura.ble.eddystone.provider,
-                                    org.eclipse.kura.ble.ibeacon.provider,
                                     <!-- rest.tamper-plugins -->
                                     org.eclipse.kura.rest.tamper.detection.provider,
                                     <!-- artemis-plugins -->

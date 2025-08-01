@@ -88,8 +88,8 @@
         <deb.name>kura-core</deb.name>
         <deb.dependencies>
             setserial, zip, gzip, unzip, procps, usbutils, socat, gawk, sed, inetutils-telnet,
-            polkit | policykit-1, ssh | openssh, openssl, busybox, cron, logrotate, libpam-modules,
-            python3, openjdk-17-jre-headless | temurin-17-jdk, dos2unix, libtirpc3, chrony
+            polkit | policykit-1, ssh | openssh, openssl, busybox, logrotate, libpam-modules,
+            python3, gpsd, openjdk-17-jre-headless | temurin-17-jdk, dos2unix, libtirpc3, chrony, chronyc | chrony, cron | cronie,
         </deb.dependencies>
         <deb.recommendations></deb.recommendations>
         <deb.provides></deb.provides>
@@ -494,7 +494,7 @@
                                 <outputDirectory>${project.build.directory}/pkg/plugins/3</outputDirectory>
                                 <includeArtifactIds>
                                     <!-- osgi-base-plugins -->
-                                    bluez-dbus-osgi, bcutil-jdk18on,
+                                    bcutil-jdk18on,
                                     jakarta.validation-api, hk2-locator, bcpg-jdk18on,
                                     com.codeminders.hidapi.${native.tag}, hk2-utils,
                                     org.apache.servicemix.bundles.c3p0, jersey-media-multipart,

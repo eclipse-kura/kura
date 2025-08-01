@@ -1,7 +1,7 @@
 [Unit]
 Description=Kura
-Wants=NetworkManager.service ModemManager.service dbus.service
-After=NetworkManager.service ModemManager.service dbus.service
+Wants=dbus.service
+After=dbus.service
 
 [Service]
 User=kurad
@@ -14,7 +14,7 @@ Restart=on-failure
 RestartSec=5
 SuccessExitStatus=143
 KillMode=process
-AmbientCapabilities=cap_net_admin cap_net_raw cap_dac_override cap_dac_read_search cap_net_bind_service cap_sys_boot cap_kill cap_sys_module cap_sys_time cap_sys_tty_config cap_syslog
+AmbientCapabilities=cap_dac_override cap_dac_read_search cap_net_bind_service cap_sys_boot cap_kill cap_sys_module cap_sys_time cap_sys_tty_config cap_syslog
 
 [Install]
 WantedBy=multi-user.target

@@ -76,8 +76,7 @@ ResultAny=yes" >/etc/polkit-1/localauthority/50-local.d/54-fi.w1.wpa_supplicant1
             subject.user == \"kurad\" &&
             (action.lookup(\"unit\") == \"named.service\" ||
             action.lookup(\"unit\") == \"chrony.service\" ||
-            action.lookup(\"unit\") == \"chronyd.service\" ||
-            action.lookup(\"unit\") == \"bluetooth.service\")) {
+            action.lookup(\"unit\") == \"chronyd.service\" )) {
             return polkit.Result.YES;
         }
         if (action.id == \"org.freedesktop.systemd1.manage-unit-files\" &&
@@ -106,8 +105,7 @@ ResultAny=yes" >/etc/polkit-1/localauthority/50-local.d/54-fi.w1.wpa_supplicant1
             echo "polkit.addRule(function(action, subject) {
 if (action.id == \"org.freedesktop.systemd1.manage-units\" &&
     subject.user == \"kurad\" &&
-    (action.lookup(\"unit\") == \"bluetooth.service\" ||
-    action.lookup(\"unit\") == \"chrony.service\" ||
+    (action.lookup(\"unit\") == \"chrony.service\" ||
     action.lookup(\"unit\") == \"chronyd.service\" )) {
     return polkit.Result.YES;
 }
@@ -128,28 +126,6 @@ if ((action.id == \"org.freedesktop.login1.reboot-multiple-sessions\" ||
     # modify pam policy
     if [ -f /etc/pam.d/su ]; then
         sed -i '/^auth       sufficient pam_rootok.so/a auth       [success=ignore default=1] pam_succeed_if.so user = kura\nauth       sufficient                 pam_succeed_if.so use_uid user = kurad' /etc/pam.d/su
-    fi
-
-    # grant kurad user the privileges to manage ble via dbus
-    grep -lR kurad /etc/dbus-1/system.d/bluetooth.conf
-    if [ $? != 0 ]; then
-        cp /etc/dbus-1/system.d/bluetooth.conf /etc/dbus-1/system.d/bluetooth.conf.save
-        awk 'done != 1 && /^<\/busconfig>/ {
-            print "  <policy user=\"kurad\">"
-            print "    <allow own=\"org.bluez\"/>"
-            print "    <allow send_destination=\"org.bluez\"/>"
-            print "    <allow send_interface=\"org.bluez.Agent1\"/>"
-            print "    <allow send_interface=\"org.bluez.MediaEndpoint1\"/>"
-            print "    <allow send_interface=\"org.bluez.MediaPlayer1\"/>"
-            print "    <allow send_interface=\"org.bluez.Profile1\"/>"
-            print "    <allow send_interface=\"org.bluez.GattCharacteristic1\"/>"
-            print "    <allow send_interface=\"org.bluez.GattDescriptor1\"/>"
-            print "    <allow send_interface=\"org.bluez.LEAdvertisement1\"/>"
-            print "    <allow send_interface=\"org.freedesktop.DBus.ObjectManager\"/>"
-            print "    <allow send_interface=\"org.freedesktop.DBus.Properties\"/>"
-            print "  </policy>\n"
-            done = 1
-        } 1' /etc/dbus-1/system.d/bluetooth.conf >tempfile && mv tempfile /etc/dbus-1/system.d/bluetooth.conf
     fi
 
     # grant kurad user the privileges to manage wpa supplicant via dbus
@@ -207,7 +183,6 @@ function delete_users {
     fi
 
     # recover old configs
-    mv /etc/dbus-1/system.d/bluetooth.conf.save /etc/dbus-1/system.d/bluetooth.conf
     mv /etc/dbus-1/system.d/wpa_supplicant.conf.save /etc/dbus-1/system.d/wpa_supplicant.conf
 }
 

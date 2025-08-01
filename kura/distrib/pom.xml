@@ -507,26 +507,8 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.driver.eddystone</artifactId>
-                                            <version>${org.eclipse.kura.driver.eddystone.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.driver.ibeacon</artifactId>
-                                            <version>${org.eclipse.kura.driver.ibeacon.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
                                             <artifactId>org.eclipse.kura.driver.gpio</artifactId>
                                             <version>${org.eclipse.kura.driver.gpio.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.driver.ble.xdk</artifactId>
-                                            <version>${org.eclipse.kura.driver.ble.xdk.version}</version>
                                             <type>dp</type>
                                         </artifactItem>
                                         <artifactItem>

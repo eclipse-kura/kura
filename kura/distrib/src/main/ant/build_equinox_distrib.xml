@@ -472,7 +472,6 @@
         <!-- Populate config.ini with correct Kura bundles -->
         <antcall target="api-plugins" />
         <antcall target="artemis-plugins" />
-        <antcall target="bluetooth-plugins" />
         <antcall target="camel-plugins" />
         <antcall target="cloud.mqtt.eclipseiot-plugins" />
         <antcall target="cloud.mqtt.kapua-plugins" />
@@ -1418,11 +1417,6 @@ fi]]>
             <param name="start" value="" />
         </antcall>
         <antcall target="install-plugin">
-            <param name="bundle.name" value="bluez-dbus-osgi" />
-            <param name="start.level" value="3" />
-            <param name="start" value="" />
-        </antcall>
-        <antcall target="install-plugin">
             <param name="bundle.name" value="jakarta.activation-api" />
             <param name="start.level" value="2" />
             <param name="start" value="" />
@@ -1651,24 +1645,6 @@ fi]]>
             <param name="bundle.name" value="org.eclipse.kura.linux.usb" />
             <param name="start.level" value="4" />
             <param name="start" value="" />
-        </antcall>
-    </target>
-
-    <target name="bluetooth-plugins">
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.ble.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.ble.ibeacon.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
-        </antcall>
-        <antcall target="install-plugin">
-            <param name="bundle.name" value="org.eclipse.kura.ble.eddystone.provider" />
-            <param name="start.level" value="4" />
-            <param name="start" value="s" />
         </antcall>
     </target>
 

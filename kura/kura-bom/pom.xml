@@ -40,9 +40,6 @@
     <properties>
         <org.eclipse.kura.ai.triton.server.version>2.0.0-SNAPSHOT</org.eclipse.kura.ai.triton.server.version>
         <org.eclipse.kura.api.version>3.0.0-SNAPSHOT</org.eclipse.kura.api.version>
-        <org.eclipse.kura.ble.eddystone.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.ble.eddystone.provider.version>
-        <org.eclipse.kura.ble.ibeacon.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.ble.ibeacon.provider.version>
-        <org.eclipse.kura.ble.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.ble.provider.version>
         <org.eclipse.kura.broker.artemis.core.version>2.0.0-SNAPSHOT</org.eclipse.kura.broker.artemis.core.version>
         <org.eclipse.kura.broker.artemis.simple.mqtt.version>2.0.0-SNAPSHOT</org.eclipse.kura.broker.artemis.simple.mqtt.version>
         <org.eclipse.kura.broker.artemis.xml.version>2.0.0-SNAPSHOT</org.eclipse.kura.broker.artemis.xml.version>
@@ -74,13 +71,9 @@
         <org.eclipse.kura.db.h2db.provider.version>1.0.0-SNAPSHOT</org.eclipse.kura.db.h2db.provider.version>
         <org.eclipse.kura.db.sqlite.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.db.sqlite.provider.version>
         <org.eclipse.kura.deployment.agent.version>2.0.0-SNAPSHOT</org.eclipse.kura.deployment.agent.version>
-        <org.eclipse.kura.driver.ble.sensortag.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.ble.sensortag.provider.version>
-        <org.eclipse.kura.driver.ble.xdk.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.ble.xdk.version>
         <org.eclipse.kura.driver.block.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.block.version>
-        <org.eclipse.kura.driver.eddystone.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.eddystone.provider.version>
         <org.eclipse.kura.driver.gpio.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.gpio.provider.version>
         <org.eclipse.kura.driver.helper.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.helper.provider.version>
-        <org.eclipse.kura.driver.ibeacon.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.ibeacon.provider.version>
         <org.eclipse.kura.driver.opcua.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.opcua.provider.version>
         <org.eclipse.kura.driver.s7plc.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.s7plc.provider.version>
         <org.eclipse.kura.emulator.version>2.0.0-SNAPSHOT</org.eclipse.kura.emulator.version>
@@ -145,21 +138,6 @@
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.api</artifactId>
                 <version>${org.eclipse.kura.api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.ble.eddystone.provider</artifactId>
-                <version>${org.eclipse.kura.ble.eddystone.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.ble.ibeacon.provider</artifactId>
-                <version>${org.eclipse.kura.ble.ibeacon.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.ble.provider</artifactId>
-                <version>${org.eclipse.kura.ble.provider.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -318,23 +296,8 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.driver.ble.sensortag.provider</artifactId>
-                <version>${org.eclipse.kura.driver.ble.sensortag.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.driver.ble.xdk</artifactId>
-                <version>${org.eclipse.kura.driver.ble.xdk.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.driver.block</artifactId>
                 <version>${org.eclipse.kura.driver.block.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.driver.eddystone.provider</artifactId>
-                <version>${org.eclipse.kura.driver.eddystone.provider.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -345,11 +308,6 @@
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.driver.helper.provider</artifactId>
                 <version>${org.eclipse.kura.driver.helper.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.driver.ibeacon.provider</artifactId>
-                <version>${org.eclipse.kura.driver.ibeacon.provider.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -616,18 +574,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.ble.eddystone.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.ble.ibeacon.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.ble.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.broker.artemis.core</artifactId>
         </dependency>
         <dependency>
@@ -752,19 +698,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.driver.ble.sensortag.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.driver.ble.xdk</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.driver.block</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.driver.eddystone.provider</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
@@ -773,10 +707,6 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.driver.helper.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.driver.ibeacon.provider</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>

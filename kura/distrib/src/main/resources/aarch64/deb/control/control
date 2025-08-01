@@ -17,7 +17,6 @@ Priority: optional
 Depends: openjdk-17-jre-headless | temurin-17-jdk,
  setserial, zip, gzip, unzip, procps, usbutils, socat, gawk, sed, inetutils-telnet,
  polkit | policykit-1, ssh | openssh, openssl, busybox, openvpn,
- bluez | bluez5, bluez-hcidump | bluez5-noinst-tools,
  chrony, chronyc | chrony, cron | cronie,
  network-manager | networkmanager, bind9 | bind, dnsmasq | isc-dhcp-server, isc-dhcp-client | dhcpcd, iw, iptables, modemmanager,
  logrotate, gpsd, python3

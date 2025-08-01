@@ -179,6 +179,7 @@
         <antcall target="rest-plugins" />
         <antcall target="util-plugins" />
         <antcall target="http.server.manager-plugin" />
+        <antcall target="driver-plugins" />
         
         <propertyfile
             file="${project.build.directory}/${build.output.name}/dpa.properties">

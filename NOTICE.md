@@ -36,14 +36,14 @@ This project leverages the following third party content.
 ### Maven Dependencies
 
 * maven/mavencentral/com.eclipsesource.minimal-json/minimal-json/0.9.5, MIT, approved, CQ10061
-* maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.10.3, Apache-2.0, approved, CQ21280
-* maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.10.3, Apache-2.0, approved, CQ21186
-* maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.10.3, Apache-2.0, approved, CQ21187
-* maven/mavencentral/com.github.docker-java/docker-java-api/3.2.12, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/com.github.docker-java/docker-java-core/3.2.12, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/com.github.docker-java/docker-java-transport-httpclient5/3.2.12, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/com.github.docker-java/docker-java-transport/3.2.12, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/com.github.docker-java/docker-java/3.2.12, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.19.1, Apache-2.0, approved, #21911
+* maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.19.1, Apache-2.0 AND MIT, approved, #21916
+* maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.19.1, Apache-2.0, approved, #21909
+* maven/mavencentral/com.github.docker-java/docker-java-api/3.5.3, Apache-2.0, approved, #22668
+* maven/mavencentral/com.github.docker-java/docker-java-core/3.5.3, Apache-2.0, approved, #22665
+* maven/mavencentral/com.github.docker-java/docker-java-transport-httpclient5/3.5.3, Apache-2.0, approved, #22669
+* maven/mavencentral/com.github.docker-java/docker-java-transport/3.5.3, Apache-2.0, approved, #22667
+* maven/mavencentral/com.github.docker-java/docker-java/3.5.3, Apache-2.0, approved, #22666
 * maven/mavencentral/com.github.rodionmoiseev.c10n/c10n-core/1.2, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/com.google.code.gson/gson/2.9.0, Apache-2.0, approved, CQ24148
 * maven/mavencentral/com.google.guava/guava/32.1.1-jre, Apache-2.0, approved, clearlydefined
@@ -54,13 +54,11 @@ This project leverages the following third party content.
 * maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.core.jobs/0.10.0-3c97afeac, EPL-2.0, approved, eclipse.platform
 * maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.equinox.preferences/0.10.0-3c97afeac, EPL-2.0, approved, #7856
 * maven/mavencentral/commons-beanutils/commons-beanutils/1.11.0, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/commons-codec/commons-codec/1.16.1, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #9157
+* maven/mavencentral/commons-codec/commons-codec/1.18.0, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #19214
 * maven/mavencentral/commons-collections/commons-collections/3.2.2, Apache-2.0, approved, CQ10385
 * maven/mavencentral/org.apache.commons/commons-fileupload2-core/2.0.0-M2, Apache-2.0, approved, #15738
 * maven/mavencentral/org.apache.commons/commons-fileupload2-jakarta-servlet5/2.0.0-M2, Apache-2.0, approved, #15737
-* maven/mavencentral/commons-io/commons-io/2.11.0, Apache-2.0, approved, CQ23745
-* maven/mavencentral/commons-io/commons-io/2.15.1, Apache-2.0, approved, #11244
-* maven/mavencentral/commons-lang/commons-lang/2.6, Apache-2.0, approved, CQ6183
+* maven/mavencentral/commons-io/commons-io/2.19.0, Apache-2.0, approved, #20657
 * maven/mavencentral/commons-net/commons-net/3.8.0, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/io.grpc/grpc-api/1.56.1, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/io.grpc/grpc-context/1.56.1, Apache-2.0, approved, clearlydefined
@@ -88,7 +86,7 @@ This project leverages the following third party content.
 * maven/mavencentral/jakarta.xml.bind/jakarta.xml.bind-api/2.3.3, BSD-3-Clause, approved, ee4j.jaxb
 * maven/mavencentral/jakarta.xml.soap/jakarta.xml.soap-api/1.4.2, , approved, eclipse
 * maven/mavencentral/jakarta.xml.ws/jakarta.xml.ws-api/2.3.3, , approved, eclipse
-* maven/mavencentral/net.java.dev.jna/jna/5.8.0, Apache-2.0 OR LGPL-2.1-or-later, approved, CQ23217
+* maven/mavencentral/net.java.dev.jna/jna/5.17.0, Apache-2.0 AND LGPL-2.1-or-later, approved, #20112
 * maven/mavencentral/org.apache.activemq/artemis-mqtt-protocol/2.6.4, Apache-2.0, approved, #3086
 * maven/mavencentral/org.apache.activemq/artemis-native/2.6.4, Apache-2.0, approved, CQ19010
 * maven/mavencentral/org.apache.camel/camel-amqp/2.25.3, Apache-2.0, approved, clearlydefined
@@ -97,17 +95,17 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.camel/camel-jms/2.25.3, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.camel/camel-script/2.25.3, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.camel/camel-stream/2.25.3, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/org.apache.commons/commons-compress/1.26.1, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #13288
+* maven/mavencentral/org.apache.commons/commons-compress/1.27.1, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #17651
 * maven/mavencentral/org.apache.commons/commons-csv/1.4, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.commons/commons-exec/1.3, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/org.apache.commons/commons-lang3/3.12.0, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/org.apache.commons/commons-lang3/3.17.0, Apache-2.0, approved, #16044
 * maven/mavencentral/org.apache.felix/org.apache.felix.dependencymanager/3.0.0, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.felix/org.apache.felix.deploymentadmin/0.9.5, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.geronimo.specs/geronimo-jms_2.0_spec/1.0-alpha-2, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.geronimo.specs/geronimo-json_1.0_spec/1.0-alpha-1, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.geronimo.specs/geronimo-jta_1.1_spec/1.1.1, Apache-2.0, approved, CQ2334
-* maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.0.3, Apache-2.0 and MIT, approved, CQ23948
-* maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.0.2, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.5, Apache-2.0 AND MPL-2.0, approved, #21346
+* maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.3.4, Apache-2.0, approved, #16866
 * maven/mavencentral/org.apache.logging.log4j/log4j-api/2.23.1, Apache-2.0, approved, #13368
 * maven/mavencentral/org.apache.logging.log4j/log4j-core/2.23.1, Apache-2.0 AND (Apache-2.0 AND LGPL-2.0-or-later), approved, #14737
 * maven/mavencentral/org.apache.logging.log4j/log4j-slf4j-impl/2.23.1, Apache-2.0, approved, #14736

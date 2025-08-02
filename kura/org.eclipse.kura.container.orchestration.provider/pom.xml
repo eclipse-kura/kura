@@ -136,6 +136,13 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.basedir}/lib</outputDirectory>
+                            <includeArtifactIds>
+                                docker-java, docker-java-core, docker-java-api,
+                                docker-java-transport, docker-java-transport-httpclient5,
+                                httpclient5, httpcore5, httpcore5-h2, jna, commons-codec,
+                                jackson-databind, jackson-core, jackson-annotations,
+                                commons-compress
+                            </includeArtifactIds>
                             <excludeTransitive>true</excludeTransitive>
                             <stripVersion>true</stripVersion>
                         </configuration>

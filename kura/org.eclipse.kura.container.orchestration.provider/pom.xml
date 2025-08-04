@@ -143,7 +143,6 @@
                                 jackson-databind, jackson-core, jackson-annotations,
                                 commons-compress
                             </includeArtifactIds>
-                            <excludeTransitive>true</excludeTransitive>
                             <stripVersion>true</stripVersion>
                         </configuration>
                     </execution>

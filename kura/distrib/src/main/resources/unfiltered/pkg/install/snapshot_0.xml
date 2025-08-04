@@ -14,8 +14,6 @@
 
 -->
 <esf:configurations xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0" xmlns:esf="http://eurotech.com/esf/2.0">
-FIREWALL_CONFIGURATION
-NETWORK_CONFIGURATION
     <esf:configuration pid="org.eclipse.kura.watchdog.WatchdogService">
         <esf:properties>
             <esf:property name="enabled" array="false" encrypted="false" type="Boolean">
@@ -192,7 +190,6 @@ NETWORK_CONFIGURATION
             </esf:property>
         </esf:properties>
     </esf:configuration>
-    </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.cloud.CloudService">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="topic.control-prefix" type="String">
@@ -361,16 +358,6 @@ NETWORK_CONFIGURATION
             </esf:property>
             <esf:property array="false" encrypted="false" name="service.pid" type="String">
                 <esf:value>org.eclipse.kura.internal.rest.provider.RestService</esf:value>
-            </esf:property>
-        </esf:properties>
-    </esf:configuration>
-    <esf:configuration pid="org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator">
-        <esf:properties>
-            <esf:property array="false" encrypted="false" name="flooding.protection.enabled.ipv6" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="flooding.protection.enabled" type="Boolean">
-                <esf:value>true</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

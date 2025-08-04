@@ -96,6 +96,7 @@ node {
                                     -Dsonar.java.binaries='target/' \
                                     -Dsonar.core.codeCoveragePlugin=jacoco \
                                     -Dsonar.projectKey=org.eclipse.kura:kura \
+                                    -Dsonar.scanner.connectTimeout=15 \
                                     -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*,org.eclipse.kura.nm/src/main/java/fi/w1/**/*
                             '''
                         }

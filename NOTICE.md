@@ -44,7 +44,6 @@ This project leverages the following third party content.
 * maven/mavencentral/com.github.docker-java/docker-java-transport-httpclient5/3.2.12, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/com.github.docker-java/docker-java-transport/3.2.12, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/com.github.docker-java/docker-java/3.2.12, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/com.github.hypfvieh/bluez-dbus-osgi/0.1.4, MIT, approved, clearlydefined
 * maven/mavencentral/com.github.rodionmoiseev.c10n/c10n-core/1.2, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/com.google.code.gson/gson/2.9.0, Apache-2.0, approved, CQ24148
 * maven/mavencentral/com.google.guava/guava/32.1.1-jre, Apache-2.0, approved, clearlydefined
@@ -263,7 +262,6 @@ This project leverages the following third party content.
 * org.hamcrest.core 1.1, New BSD License, approved, CQ7842
 * org.apache.felix.useradmin_1.0.4.k1, Apache-2.0, approved, CQ23078
 * com.codeminders.hidapi 1.1, New BSD License, approved, CQ7833
-* com.eurotech.gpsd4java_1.0.0, Apache-2.0, approved, CQ23923
 * org.moka7 1.0.2, EPL-1.0, approved, CQ12777
 * org.eclipse.paho.client.mqttv3 1.2.1.k2, EPL-1.0, approved, eclipse.platform
 

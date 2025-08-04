@@ -13,7 +13,8 @@
      Eurotech
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -24,110 +25,32 @@
     </parent>
 
     <artifactId>x86_64-core</artifactId>
-    <name>x86_64-core</name>
 
     <packaging>pom</packaging>
 
     <properties>
         <kura.basedir>../</kura.basedir>
-        <arch>x86_64</arch>
+        <kura.arch>x86_64</kura.arch>
+        <target.device>${kura.arch}</target.device>
+        <arch>${kura.arch}</arch>
         <deb.name>kura-core</deb.name>
-        <deb.dependencies>
-            setserial, zip, gzip, unzip, procps, usbutils, socat, gawk, sed, inetutils-telnet, polkit | policykit-1, ssh | openssh, openssl, busybox, cron, logrotate, libpam-modules, python3, openjdk-17-jre-headless | temurin-17-jdk, dos2unix, libtirpc3, chrony
-        </deb.dependencies>
-        <deb.recommendations></deb.recommendations>
         <deb.provides></deb.provides>
         <deb.architecture>amd64</deb.architecture>
-        <target.device>generic</target.device>
-        <kura.os.version>debian</kura.os.version>
+        <skip.resource.copy>false</skip.resource.copy>
     </properties>
 
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>create-timestamp</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <artifactId>maven-dependency-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                        <id>x86_64-core-jars</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <property name="buildNumber" value="buildNumber" />
-                                <property name="project.version" value="${project.version}" />
-                                <property name="project.build.profile" value="${project.build.profile}" />
-                                <property name="project.build.directory" value="${project.build.directory}" />
-                                <property name="target.device" value="${target.device}" />
-                                <property name="native.tag" value="${arch}"/>
-                                <property name="kura.os.version" value="${kura.os.version}" />
-                                <property name="build.name" value="${target.device}_${kura.os.version}" />
-                                <property name="kura.arch" value="${arch}"/>
-                                <property name="kura.mem.size" value="1024m" />
-                                <property name="kura.install.dir" value="/opt/eclipse" />
-                                <property name="kura.basedir" value="${kura.basedir}" />
-
-                                <ant antfile="${basedir}/../src/main/ant/build_equinox_distrib.xml" target="dist-core" />
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
+                <artifactId>maven-resources-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.vafer</groupId>
                 <artifactId>jdeb</artifactId>
-                <version>${jdeb-version}</version>
-                <executions>
-                    <execution>
-                        <id>x86_64-core-deb</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jdeb</goal>
-                        </goals>
-                        <configuration>
-                            <verbose>true</verbose>
-                            <deb>${basedir}/target/${deb.name}_${package.version}-${package.revision}_${deb.architecture}.deb</deb>
-                            <snapshotExpand>true</snapshotExpand>
-                            <snapshotTemplate>${package.snapshot}</snapshotTemplate>
-                            <controlDir>${project.basedir}/../src/main/resources/common/deb/control</controlDir>
-                            <skipPOMs>false</skipPOMs>
-                            <dataSet>
-                                <data>
-                                    <src>${basedir}/target/kura_${project.version}_${target.device}_${kura.os.version}.zip</src>
-                                    <type>file</type>
-                                    <mapper>
-                                        <type>perm</type>
-                                        <prefix>/tmp</prefix>
-                                    </mapper>
-                                </data>
-                            </dataSet>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
-
 </project>

@@ -140,7 +140,6 @@
 <setEntry value="org.eclipse.kura.emulator@default:true"/>
 <setEntry value="org.eclipse.kura.http.server.manager@default:default"/>
 <setEntry value="org.eclipse.kura.json.marshaller.unmarshaller.provider@default:default"/>
-<setEntry value="org.eclipse.kura.linux.bluetooth@default:default"/>
 <setEntry value="org.eclipse.kura.localization.resources@default:false"/>
 <setEntry value="org.eclipse.kura.localization@default:default"/>
 <setEntry value="org.eclipse.kura.rest.provider@default:default"/>

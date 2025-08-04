@@ -32,7 +32,7 @@
         <kura.basedir>../</kura.basedir>
     </properties>
 
-   <build>
+    <build>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -63,7 +63,7 @@
                         <phase>package</phase>
                         <configuration>
                             <executable>docker</executable>
-                            <workingDirectory>${project.basedir}/../src/main/resources/docker-alpine-x86_64-nn</workingDirectory>
+                            <workingDirectory>${project.basedir}/../src/main/resources/unfiltered</workingDirectory>
                             <arguments>
                                 <argument>build</argument>
                                 <argument>--build-arg</argument>

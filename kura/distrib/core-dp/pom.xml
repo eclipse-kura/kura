@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>distrib</artifactId>
+        <groupId>org.eclipse.kura</groupId>
+        <version>6.0.0-SNAPSHOT</version>
+        <relativePath>..</relativePath>
+    </parent>
+
+    <artifactId>core-dp</artifactId>
+
+    <packaging>pom</packaging>
+
+    <properties>
+        <kura.basedir>../</kura.basedir>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>core-dp</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>
+                                org.eclipse.kura.protocol.modbus,
+                                org.eclipse.kura.driver.opcua,
+                                org.eclipse.kura.driver.s7plc,
+                                org.eclipse.kura.driver.eddystone,
+                                org.eclipse.kura.driver.ibeacon,
+                                org.eclipse.kura.driver.gpio,
+                                org.eclipse.kura.driver.ble.xdk,
+                                org.eclipse.kura.ai.triton.server,
+                                org.eclipse.kura.db.sqlite.provider,
+                                org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider,
+                                org.eclipse.kura.cloudconnection.raw.mqtt.provider
+                            </includeArtifactIds>
+                            <includeTypes>dp</includeTypes>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

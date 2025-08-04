@@ -13,7 +13,8 @@
      Eurotech
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -24,66 +25,38 @@
     </parent>
 
     <artifactId>docker-base</artifactId>
-    <name>docker-base</name>
 
     <packaging>pom</packaging>
 
     <properties>
         <kura.basedir>../</kura.basedir>
+        <device.name>docker-container-instance</device.name>
+        <kura.primary.network.interface># kura.primary.network.interface=eth0</kura.primary.network.interface>
+        <os.distribution>docker</os.distribution>
+        <os.distribution.version>20.04</os.distribution.version>
+        <kura.serialNumber.provider></kura.serialNumber.provider>
+        <kura.serialNumber>${device.name}</kura.serialNumber>
+        <exclude.linux.plugins>true</exclude.linux.plugins>
+        <kura.arch>x86_64</kura.arch>
+        <target.device>docker-x86_64-nn</target.device>
+        <build.name>${target.device}</build.name>
+        <deb.name>kura</deb.name>
+        <deb.provides>kura-core (= ${release.version})</deb.provides>
+        <deb.architecture>amd64</deb.architecture>
+        <skip.resource.copy>false</skip.resource.copy>
     </properties>
 
-   <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
+    <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>create-timestamp</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <artifactId>maven-dependency-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                        <id>docker-x86_64-nn-jars</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <property name="buildNumber" value="buildNumber" />
-                                <property name="project.version" value="${project.version}" />
-                                <property name="project.build.profile" value="${project.build.profile}" />
-                                <property name="project.build.directory" value="${project.build.directory}" />
-                                <property name="build.name" value="docker-x86_64-nn" />
-                                <property name="target.device" value="docker-x86_64-nn" />
-                                <property name="native.tag" value="x86_64" />
-                                <property name="kura.os.version" value="linux" />
-                                <property name="kura.arch" value="x86_64" />
-                                <property name="kura.mem.size" value="1024m" />
-                                <property name="kura.install.dir" value="/opt/eclipse" />
-                                <property name="kura.basedir" value="${kura.basedir}" />
-
-                                <ant antfile="${basedir}/../src/main/ant/build_equinox_distrib.xml" target="dist-linux" />
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
+                <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.vafer</groupId>
+                <artifactId>jdeb</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -98,8 +71,8 @@
                         </goals>
                         <configuration>
                             <target>
-                                <copy todir="${project.build.directory}" file="${project.basedir}/../src/main/resources/docker-x86_64-nn/Dockerfile" />
-                                <exec executable="docker" dir="${project.build.directory}" failonerror="true">
+                                <exec executable="docker" dir="${project.build.directory}"
+                                    failonerror="true">
                                     <arg value="build" />
                                     <arg value="-t" />
                                     <arg value="base-kura-docker:${project.version}" />
@@ -113,33 +86,36 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.vafer</groupId>
-                <artifactId>jdeb</artifactId>
-                <version>${jdeb-version}</version>
+                <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>docker-x86_64-nn-deb</id>
-                        <phase>package</phase>
+                        <id>emulator-plugins-4s</id>
+                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>jdeb</goal>
+                            <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
-                            <verbose>true</verbose>
-                            <deb>${basedir}/target/kura_${package.version}-${package.revision}_docker-x86_64-nn_installer.deb</deb>
-                            <snapshotExpand>true</snapshotExpand>
-                            <snapshotTemplate>${package.snapshot}</snapshotTemplate>
-                            <controlDir>${basedir}/../src/main/resources/docker-x86_64-nn/deb/control</controlDir>
-                            <skipPOMs>false</skipPOMs>
-                            <dataSet>
-                                <data>
-                                    <src>${basedir}/target/kura_${project.version}_docker-x86_64-nn.zip</src>
-                                    <type>file</type>
-                                    <mapper>
-                                        <type>perm</type>
-                                        <prefix>/tmp</prefix>
-                                    </mapper>
-                                </data>
-                            </dataSet>
+                            <outputDirectory>${project.build.directory}/pkg/plugins/4s</outputDirectory>
+                            <includeArtifactIds>
+                                <!-- emulator.watchdog-plugins --> 
+                                org.eclipse.kura.emulator.watchdog,
+                                <!-- emulator.usb-plugins -->
+                                org.eclipse.kura.emulator.usb
+                            </includeArtifactIds>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>emulator-plugins-5s</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/pkg/plugins/5s</outputDirectory>
+                            <includeArtifactIds>
+                                <!-- emulator-gpio-plugins --> 
+                                org.eclipse.kura.emulator.gpio
+                            </includeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>distrib</artifactId>
+        <groupId>org.eclipse.kura</groupId>
+        <version>6.0.0-SNAPSHOT</version>
+        <relativePath>..</relativePath>
+    </parent>
+
+    <artifactId>distrib-extra</artifactId>
+
+    <packaging>pom</packaging>
+
+    <properties>
+        <deb.provides>kura-core (= ${package.version})</deb.provides>
+    </properties>
+
+    <modules>
+        <module>aarch64-nn</module>
+        <module>x86_64-nn</module>
+        <module>distrib-nm</module>
+    </modules>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>other-plugins-3</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/3</outputDirectory>
+                                <skip>${exclude.other.plugins}</skip>
+                                <includeArtifactIds>
+                                    <!-- artemis-plugins -->
+                                    commons-collections, artemis-native,
+                                    geronimo-jta_1.1_spec, jboss-logging, commons-beanutils,
+                                    geronimo-json_1.0_spec, geronimo-jms_2.0_spec,
+                                    org.apache.activemq.artemis,
+                                    <!-- camel-plugins -->
+                                    org.eclipse.kura.camel.sun.misc
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>other-plugins-3s</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/3s</outputDirectory>
+                                <skip>${exclude.other.plugins}</skip>
+                                <includeArtifactIds>
+                                    <!-- artemis-plugins -->
+                                    artemis-mqtt-protocol,
+                                    <!-- camel-plugins -->
+                                     proton-j, camel-stream,
+                                    org.apache.servicemix.bundles.spring-tx,
+                                    org.apache.servicemix.bundles.spring-expression,
+                                    qpid-jms-client, org.apache.servicemix.bundles.spring-beans,
+                                    org.apache.servicemix.bundles.spring-context, camel-script,
+                                    camel-core-osgi, camel-core,
+                                    org.apache.servicemix.bundles.spring-core,
+                                    org.apache.servicemix.bundles.spring-jms
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>other-plugins-4</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/4</outputDirectory>
+                                <skip>${exclude.other.plugins}</skip>
+                                <includeArtifactIds>
+                                    <!-- artemis-plugins -->
+                                    org.eclipse.kura.broker.artemis.core
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>other-plugins-4s</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/4s</outputDirectory>
+                                <skip>${exclude.other.plugins}</skip>
+                                <includeArtifactIds>
+                                    <!-- rest.tamper-plugins -->
+                                    org.eclipse.kura.rest.tamper.detection.provider,
+                                    <!-- artemis-plugins -->
+                                    org.eclipse.kura.broker.artemis.simple.mqtt,
+                                    org.eclipse.kura.broker.artemis.xml,
+                                    <!-- camel-plugins -->
+                                    camel-amqp, org.eclipse.kura.camel, camel-jms
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>other-plugins-5s</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/5s</outputDirectory>
+                                <skip>${exclude.other.plugins}</skip>
+                                <includeArtifactIds>
+                                    <!-- camel-plugins -->
+                                    org.eclipse.kura.camel.xml,
+                                    org.eclipse.kura.camel.cloud.factory,
+                                    org.eclipse.kura.wire.camel
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

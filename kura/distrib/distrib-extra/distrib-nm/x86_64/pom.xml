@@ -18,13 +18,13 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>distrib</artifactId>
+        <artifactId>distrib-nm</artifactId>
         <groupId>org.eclipse.kura</groupId>
         <version>6.0.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
-    <artifactId>x86_64-core</artifactId>
+    <artifactId>x86_64</artifactId>
 
     <packaging>pom</packaging>
 
@@ -32,9 +32,7 @@
         <kura.basedir>../</kura.basedir>
         <kura.arch>x86_64</kura.arch>
         <target.device>${kura.arch}</target.device>
-        <arch>${kura.arch}</arch>
-        <deb.name>kura-core</deb.name>
-        <deb.provides></deb.provides>
+        <deb.name>kura</deb.name>
         <deb.architecture>amd64</deb.architecture>
         <skip.resource.copy>false</skip.resource.copy>
     </properties>

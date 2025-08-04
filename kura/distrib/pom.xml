@@ -33,13 +33,9 @@
     <url>https://eclipse.dev/kura/</url>
 
     <modules>
-        <module>aarch64</module>
         <module>aarch64-core</module>
-        <module>aarch64-nn</module>
-        
-        <module>x86_64</module>
         <module>x86_64-core</module>
-        <module>x86_64-nn</module>
+        <module>distrib-extra</module>
 
         <!-- Disabled: waiting for the refactor using Eclipse infrastructure
         <module>docker-base</module>
@@ -47,10 +43,10 @@
         <module>docker-ubi8</module>
         -->
     </modules>
-    
+
     <properties>
         <tycho-version>4.0.11</tycho-version>
-        <jdeb-version>1.12</jdeb-version>
+        <jdeb-version>1.14</jdeb-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <kura.basedir>${project.basedir}</kura.basedir>
@@ -58,15 +54,53 @@
 
         <kura.skip.can>true</kura.skip.can>
 
-        <!-- used for RPM uninstallation -->
-        <kura.install.link>/opt/eclipse/kura</kura.install.link>
+        <kura.install.dir>/opt/eclipse</kura.install.dir>
+        <kura.symlink>kura</kura.symlink>
 
         <!-- properties used for repository upload on artifactory -->
         <kura.repo.distribution>kura-6</kura.repo.distribution>
         <kura.repo.module>base</kura.repo.module>
 
         <org.eclipse.equinox.launcher.version>1.6.900</org.eclipse.equinox.launcher.version>
-        <kura.version>${project.version}</kura.version>
+
+        <kura.version>KURA_${project.version}</kura.version>
+        <kura.marketplace.compatibility.version>${kura.version}</kura.marketplace.compatibility.version>
+        <kura.home>${kura.install.dir}/${kura.symlink}</kura.home>
+        <kura.framework.config>${kura.home}/framework</kura.framework.config>
+        <kura.user.config>${kura.home}/user</kura.user.config>
+        <kura.plugins>${kura.home}/plugins</kura.plugins>
+        <kura.packages>${kura.home}/packages</kura.packages>
+        <kura.data>${kura.home}/data</kura.data>
+        <kura.snapshots>${kura.home}/snapshots</kura.snapshots>
+        <kura.style.dir>${kura.home}/console.skin</kura.style.dir>
+
+        <kura.project>generic-${project.name}</kura.project>
+        <kura.have.net.admin>false</kura.have.net.admin>
+
+        <skip.resource.copy>true</skip.resource.copy>
+
+        <device.name>device_name</device.name>
+        <os.distribution>Linux</os.distribution>
+        <os.distribution.version>N/A</os.distribution.version>
+        <kura.primary.network.interface>kura.primary.network.interface=eth0</kura.primary.network.interface>
+        <kura.serialNumber.provider>cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2</kura.serialNumber.provider>
+        <kura.serialNumber></kura.serialNumber>
+        <deb.name>kura-core</deb.name>
+        <deb.dependencies>
+            setserial, zip, gzip, unzip, procps, usbutils, socat, gawk, sed, inetutils-telnet,
+            polkit | policykit-1, ssh | openssh, openssl, busybox, logrotate, libpam-modules,
+            python3, gpsd, openjdk-17-jre-headless | temurin-17-jdk, dos2unix, libtirpc3, chrony, chronyc | chrony, cron | cronie,
+        </deb.dependencies>
+        <deb.recommendations></deb.recommendations>
+        <deb.provides></deb.provides>
+        <deb.architecture>unset</deb.architecture>
+        <kura.mem.size>1024m</kura.mem.size>
+        <kura.os.version>debian</kura.os.version>
+        <buildNumber>buildNumber</buildNumber>
+        <build.name>generic_debian</build.name>
+        <target.device>generic</target.device>
+        <kura.os.version>debian</kura.os.version>
+        <native.tag>${kura.arch}</native.tag>
     </properties>
 
     <distributionManagement>
@@ -151,6 +185,7 @@
     </dependencies>
 
     <build>
+
         <extensions>
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
@@ -233,43 +268,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.8</version>
-                <executions>
-                    <execution>
-                        <id>get-kura-bundles</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
-                            <excludeTypes>pom</excludeTypes>
-                            <excludeClassifiers>sources,linux-x86_64,linux-aarch_64,osx-x86_64,osx-aarch_64</excludeClassifiers>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>get-can-bundle</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${kura.skip.can}</skip>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.protocol.can</artifactId>
-                                    <version>${org.eclipse.kura.protocol.can.version}</version>
-                                </artifactItem>
-                            </artifactItems>
-                            <stripVersion>true</stripVersion>
-                            <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
@@ -300,14 +298,14 @@
                             <target name="checksum">
                                 <checksum algorithm="MD5">
                                     <fileset dir="${basedir}/target">
-                                        <include name="*.deb"/>
-                                        <include name="*.dp"/>
+                                        <include name="*.deb" />
+                                        <include name="*.dp" />
                                     </fileset>
                                 </checksum>
                                 <checksum algorithm="SHA-1">
                                     <fileset dir="${basedir}/target">
-                                        <include name="*.deb"/>
-                                        <include name="*.dp"/>
+                                        <include name="*.deb" />
+                                        <include name="*.dp" />
                                     </fileset>
                                 </checksum>
                             </target>
@@ -320,17 +318,576 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.eclipse.tycho</groupId>
-                    <artifactId>tycho-packaging-plugin</artifactId>
-                    <version>${tycho-version}</version>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>copy-common-resources</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <resources>
+                                    <resource>
+                                        <directory>../../../../src/main/resources/filtered</directory>
+                                        <filtering>true</filtering>
+                                    </resource>
+                                    <resource>
+                                        <directory>../../../src/main/resources/filtered</directory>
+                                        <filtering>true</filtering>
+                                    </resource>
+                                    <resource>
+                                        <directory>../../src/main/resources/filtered</directory>
+                                        <filtering>true</filtering>
+                                    </resource>
+                                    <resource>
+                                        <directory>../src/main/resources/filtered</directory>
+                                        <filtering>true</filtering>
+                                    </resource>
+                                    <resource>
+                                        <directory>../../../../src/main/resources/unfiltered</directory>
+                                        <filtering>false</filtering>
+                                    </resource>
+                                    <resource>
+                                        <directory>../../../src/main/resources/unfiltered</directory>
+                                        <filtering>false</filtering>
+                                    </resource>
+                                    <resource>
+                                        <directory>../../src/main/resources/unfiltered</directory>
+                                        <filtering>false</filtering>
+                                    </resource>
+                                    <resource>
+                                        <directory>../src/main/resources/unfiltered</directory>
+                                        <filtering>false</filtering>
+                                    </resource>
+                                </resources>
+                                <overwrite>true</overwrite>
+                                <skip>${skip.resource.copy}</skip>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>copy-project-resources</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <resources>
+                                    <resource>
+                                        <directory>src/main/resources/filtered</directory>
+                                        <filtering>true</filtering>
+                                    </resource>
+                                    <resource>
+                                        <directory>src/main/resources/unfiltered</directory>
+                                        <filtering>false</filtering>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>
+                    </executions>
                     <configuration>
-                        <strictVersions>true</strictVersions>
-                        <format>${kura.build.version}</format>
-                        <skipPomGeneration>true</skipPomGeneration>
-                        <deriveHeaderFromSource>false</deriveHeaderFromSource>
+                        <overwrite>true</overwrite>
+                        <outputDirectory>${project.build.directory}</outputDirectory>
+                        <escapeString>\</escapeString>
                     </configuration>
                 </plugin>
-                <!--This plugin's configuration is used to store Eclipse m2e settings
+                <plugin>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>core-launcher</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins</outputDirectory>
+                                <includeArtifactIds>
+                                    org.eclipse.osgi,
+                                    org.eclipse.equinox.launcher
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>core-plugins-1</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/1</outputDirectory>
+                                <includeArtifactIds>
+                                    <!-- osgi-base-plugins -->
+                                    asm, org.eclipse.equinox.console, asm-tree,
+                                    asm-util, log4j2-api-config, asm-analysis, asm-commons
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>core-plugins-1s</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/1s</outputDirectory>
+                                <includeArtifactIds>
+                                    <!-- osgi-base-plugins -->
+                                    org.apache.aries.spifly.dynamic.bundle,
+                                    log4j-slf4j2-impl, org.eclipse.equinox.common,
+                                    org.eclipse.equinox.cm, org.eclipse.equinox.event,
+                                    jcl-over-slf4j, log4j-api, log4j-core,
+                                    org.eclipse.equinox.metatype, org.eclipse.equinox.util,
+                                    org.eclipse.equinox.registry, slf4j-api, org.eclipse.equinox.io,
+                                    jul-to-slf4j, org.apache.felix.scr, org.eclipse.kura.jul.to.slf4j.configuration
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>core-plugins-2</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/2</outputDirectory>
+                                <includeArtifactIds>
+                                    <!-- osgi-base-plugins -->
+                                    jakarta.xml.bind-api, jakarta.xml.soap-api,
+                                    org.osgi.util.function, org.osgi.service.prefs,
+                                    jakarta.annotation-api, org.osgi.service.event,
+                                    org.osgi.service.coordinator, org.osgi.service.device,
+                                    org.osgi.util.measurement, jakarta.xml.ws-api,
+                                    org.osgi.service.metatype, jakarta.activation-api,
+                                    org.osgi.service.component, org.osgi.service.log.stream,
+                                    org.osgi.util.pushstream, org.eclipse.kura.sun.misc,
+                                    org.osgi.service.wireadmin, org.osgi.util.promise,
+                                    org.osgi.util.xml, org.osgi.service.upnp,
+                                    org.osgi.service.provisioning, org.osgi.service.cm,
+                                    org.osgi.util.position, org.osgi.service.useradmin
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>core-plugins-2s</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/2s</outputDirectory>
+                                <includeArtifactIds>
+                                    <!-- osgi-base-plugins -->
+                                    osgi-resource-locator,
+                                    org.osgi.service.http.whiteboard, org.osgi.service.servlet,
+                                    org.eclipse.osgi.util, jaxb-osgi
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>core-plugins-3</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/3</outputDirectory>
+                                <includeArtifactIds>
+                                    <!-- osgi-base-plugins -->
+                                    bcutil-jdk18on,
+                                    jakarta.validation-api, hk2-locator, bcpg-jdk18on,
+                                    com.codeminders.hidapi.${native.tag}, hk2-utils,
+                                    org.apache.servicemix.bundles.c3p0, jersey-media-multipart,
+                                    HikariCP, quartz, jersey-hk2, jdk.dio, jersey-common,
+                                    jersey-server, jakarta.inject-api, bctls-jdk18on,
+                                    jersey-container-servlet, mimepull,
+                                    org.eclipse.soda.dk.comm.${native.tag}, jersey-client, hk2-api,
+                                    javassist, jersey-media-sse, protobuf-java, bcpkix-jdk18on,
+                                    jersey-entity-filtering, jdk.dio.${native.tag},
+                                    jersey-media-jaxb, commons-csv, gson, aopalliance-repackaged,
+                                    bcprov-jdk18on, jersey-container-servlet-core, 
+                                    <!-- netty-plugins --> 
+                                    netty-common, netty-codec-http, netty-codec, netty-transport, netty-buffer,
+                                    netty-transport-classes-epoll, netty-resolver, netty-handler,
+                                    netty-transport-classes-kqueue, netty-transport-native-epoll,
+                                    netty-codec-mqtt, netty-transport-native-kqueue,
+                                    netty-transport-native-unix-common, 
+                                    <!-- api-plugins -->
+                                     failureaccess, guava
+                                </includeArtifactIds>
+                                <excludeClassifiers>
+                                    sources,linux-x86_64,linux-aarch_64,osx-x86_64,osx-aarch_64
+                                </excludeClassifiers>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>core-plugins-3s</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/3s</outputDirectory>
+                                <includeArtifactIds>
+                                    <!-- core.crypto-plugins -->
+                                     org.eclipse.kura.core.crypto, 
+                                    <!-- api-plugins -->
+                                    org.eclipse.kura.api,
+                                    <!-- osgi-base-plugins -->
+                                    org.eclipse.kura.useradmin.store,
+                                    org.eclipse.soda.dk.comm, commons-fileupload2-jakarta-servlet5,
+                                    org.apache.felix.deploymentadmin, org.apache.felix.useradmin,
+                                    org.apache.felix.dependencymanager, commons-net, h2,
+                                    commons-fileupload2-core, com.codeminders.hidapi, commons-io,
+                                    monitoradmin,
+                                    <!-- marshallers-plugins -->
+                                    org.eclipse.kura.xml.marshaller.unmarshaller.provider,
+                                    org.eclipse.kura.json.marshaller.unmarshaller.provider
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>core-plugins-4</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/4</outputDirectory>
+                                <includeArtifactIds>
+                                    <!-- core.status-plugins -->
+                                     org.eclipse.kura.core.status,
+                                    <!-- h2db-plugins -->
+                                     org.eclipse.kura.db.h2db.provider, 
+                                    <!-- linux.clock-plugins -->
+                                     org.eclipse.kura.linux.clock,
+                                    <!-- rest-plugins -->
+                                    org.eclipse.kura.request.handler.jaxrs
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>core-plugins-4s</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/4s</outputDirectory>
+                                <includeArtifactIds>
+                                    <!-- driver-plugins -->
+                                    org.eclipse.kura.driver.helper.provider,
+                                    <!-- core.certificates-plugins -->
+                                    org.eclipse.kura.core.certificates,
+                                    <!-- util-plugins -->
+                                    org.eclipse.kura.util,
+                                    <!-- configuration.change.manager-plugins -->
+                                    org.eclipse.kura.configuration.change.manager,
+                                    <!-- cloud.mqtt.raw-plugins -->
+                                    org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider,
+                                    <!-- cloud.mqtt.kapua-plugins -->
+                                    org.eclipse.kura.cloudconnection.kapua.mqtt.provider,
+                                    <!-- filesystem-logprovider-plugins -->
+                                    org.eclipse.kura.log.filesystem.provider,
+                                    <!-- rest-plugins -->
+                                    org.eclipse.kura.rest.keystore.provider,
+                                    org.eclipse.kura.rest.inventory.provider,
+                                    org.eclipse.kura.rest.configuration.provider,
+                                    org.eclipse.kura.rest.system.provider,
+                                    org.eclipse.kura.rest.provider,
+                                    org.eclipse.kura.rest.security.provider,
+                                    org.eclipse.kura.rest.packages.provider,
+                                    org.eclipse.kura.rest.identity.provider,
+                                    org.eclipse.kura.rest.service.listing.provider,
+                                    org.eclipse.kura.rest.cloudconnection.provider,
+                                    <!-- deployment-hooks-plugins -->
+                                    org.eclipse.kura.hook.file.move.provider,
+                                    <!-- core.identity-plugins -->
+                                    org.eclipse.kura.core.identity, 
+                                    <!-- core-plugins -->
+                                    org.eclipse.kura.core, 
+                                    <!-- misc-plugins -->
+                                    org.eclipse.kura.misc.cloudcat,
+                                    <!-- core.deployment-plugins -->
+                                    org.eclipse.kura.core.deployment,
+                                    <!-- keystore-management-plugins -->
+                                    org.eclipse.kura.core.keystore,
+                                    <!-- osgi-base-plugins --> 
+                                    commons-lang3, usb4java-javax,
+                                    org.usb4java,
+                                    <!-- core.system-plugins -->
+                                    org.eclipse.kura.core.system,
+                                    <!-- core.cloud-plugins -->
+                                    org.eclipse.kura.core.cloud.factory,
+                                    org.eclipse.kura.cloud.base.provider,
+                                    <!-- core.configuration-plugins -->
+                                    org.eclipse.kura.core.configuration,
+                                    <!-- core.inventory-plugins -->
+                                    org.eclipse.kura.core.inventory, 
+                                    <!-- core.comm-plugins -->
+                                    org.eclipse.kura.core.comm
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>core-plugins-5</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/5</outputDirectory>
+                                <includeArtifactIds>
+                                    <!-- osgi-base-plugins -->
+                                    org.apache.felix.gogo.shell, jetty-security,
+                                    org.apache.felix.http.proxy, org.apache.felix.http.wrappers,
+                                    jetty-server, jetty-util, jetty-http,
+                                    org.eclipse.osgitech.rest.sse, org.apache.felix.gogo.command,
+                                    org.apache.felix.gogo.runtime, jetty-session, jetty-io,
+                                    org.apache.felix.http.servlet-api
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>core-plugins-5s</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/5s</outputDirectory>
+                                <includeArtifactIds>
+                                    <!-- deployment.agent-plugins -->
+                                    org.eclipse.kura.deployment.agent,
+                                    <!-- http.server.manager-plugin -->
+                                    org.eclipse.kura.http.server.manager,
+                                    <!-- osgi-base-plugins -->
+                                    org.eclipse.osgitech.rest, jakarta.ws.rs-api,
+                                    jetty-ee10-servlet, org.apache.felix.http.bridge,
+                                    org.osgi.service.jakartars,
+                                    org.eclipse.osgitech.rest.servlet.whiteboard
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>core-plugins-6</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/6</outputDirectory>
+                                <includeArtifactIds>
+                                    <!-- event-publisher-plugins -->
+                                    org.eclipse.kura.event.publisher,
+                                    <!-- osgi-base-plugins -->
+                                    minimal-json, commons-exec
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+
+                        <!-- Linux Plugins -->
+                        <execution>
+                            <id>linux-plugins-4</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/4</outputDirectory>
+                                <skip>${exclude.linux.plugins}</skip>
+                                <includeArtifactIds>
+                                    <!-- linux.watchdog-plugins --> 
+                                    org.eclipse.kura.linux.watchdog,
+                                    <!-- linux.usb-plugins -->
+                                    org.eclipse.kura.linux.usb,
+                                    org.eclipse.kura.linux.usb.${native.tag}
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>linux-plugins-4s</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/4s</outputDirectory>
+                                <skip>${exclude.linux.plugins}</skip>
+                                <includeArtifactIds>
+                                    <!-- container-orchestrator-plugins -->
+                                    org.eclipse.kura.container.provider,
+                                    org.eclipse.kura.container.orchestration.provider
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>linux-plugins-5s</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/5s</outputDirectory>
+                                <skip>${exclude.linux.plugins}</skip>
+                                <includeArtifactIds>
+                                    <!-- gpio-plugins -->
+                                    org.eclipse.kura.linux.gpio
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.vafer</groupId>
+                    <artifactId>jdeb</artifactId>
+                    <version>${jdeb-version}</version>
+                    <executions>
+                        <execution>
+                            <id>deb</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jdeb</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <verbose>true</verbose>
+                        <deb>
+                            ${project.build.directory}/${deb.name}_${package.version}-${package.revision}_${deb.architecture}.deb</deb>
+                        <snapshotExpand>true</snapshotExpand>
+                        <snapshotTemplate>${package.snapshot}</snapshotTemplate>
+                        <controlDir>${project.build.directory}/deb/control</controlDir>
+                        <skipPOMs>false</skipPOMs>
+                        <dataSet>
+                            <data>
+                                <type>template</type>
+                                <paths>
+                                    <path>${kura.install.dir}</path>
+                                    <path>${kura.install.dir}/${kura.symlink}</path>
+                                    <path>${kura.install.dir}/${kura.symlink}/.data</path>
+                                </paths>
+                                <mapper>
+                                    <type>perm</type>
+                                    <user>root</user>
+                                    <group>root</group>
+                                    <filemode>600</filemode>
+                                </mapper>
+                            </data>
+                            <data>
+                                <type>template</type>
+                                <conffile>true</conffile>
+                                <paths>
+                                    <path>${kura.install.dir}/${kura.symlink}/data</path>
+                                    <path>${kura.install.dir}/${kura.symlink}/packages</path>
+                                </paths>
+                                <mapper>
+                                    <type>perm</type>
+                                    <user>root</user>
+                                    <group>root</group>
+                                    <filemode>600</filemode>
+                                </mapper>
+                            </data>
+                            <data>
+                                <src>${project.build.directory}/pkg/bin/</src>
+                                <type>directory</type>
+                                <mapper>
+                                    <type>perm</type>
+                                    <prefix>${kura.install.dir}/${kura.symlink}/bin</prefix>
+                                    <user>root</user>
+                                    <group>root</group>
+                                    <filemode>700</filemode>
+                                </mapper>
+                            </data>
+                            <data>
+                                <src>${project.build.directory}/pkg/framework/</src>
+                                <type>directory</type>
+                                <mapper>
+                                    <type>perm</type>
+                                    <prefix>${kura.install.dir}/${kura.symlink}/framework</prefix>
+                                    <user>root</user>
+                                    <group>root</group>
+                                    <filemode>600</filemode>
+                                </mapper>
+                            </data>
+                            <data>
+                                <src>${project.build.directory}/pkg/plugins/</src>
+                                <type>directory</type>
+                                <mapper>
+                                    <type>perm</type>
+                                    <prefix>${kura.install.dir}/${kura.symlink}/plugins</prefix>
+                                    <user>root</user>
+                                    <group>root</group>
+                                    <filemode>600</filemode>
+                                </mapper>
+                            </data>
+                            <data>
+                                <src>${project.build.directory}/pkg/user/</src>
+                                <type>directory</type>
+                                <conffile>true</conffile>
+                                <mapper>
+                                    <type>perm</type>
+                                    <prefix>${kura.install.dir}/${kura.symlink}/user</prefix>
+                                    <user>root</user>
+                                    <group>root</group>
+                                    <filemode>600</filemode>
+                                </mapper>
+                            </data>
+                            <data>
+                                <src>${project.build.directory}/pkg/log4j/</src>
+                                <type>directory</type>
+                                <conffile>true</conffile>
+                                <mapper>
+                                    <type>perm</type>
+                                    <prefix>${kura.install.dir}/${kura.symlink}/log4j</prefix>
+                                    <user>root</user>
+                                    <group>root</group>
+                                    <filemode>600</filemode>
+                                </mapper>
+                            </data>
+                            <data>
+                                <src>${project.build.directory}/pkg/install/</src>
+                                <type>directory</type>
+                                <mapper>
+                                    <type>perm</type>
+                                    <prefix>${kura.install.dir}/${kura.symlink}/install</prefix>
+                                    <user>root</user>
+                                    <group>root</group>
+                                    <filemode>600</filemode>
+                                </mapper>
+                            </data>
+                            <data>
+                                <src>${project.build.directory}/pkg/console/</src>
+                                <type>directory</type>
+                                <conffile>true</conffile>
+                                <mapper>
+                                    <type>perm</type>
+                                    <prefix>${kura.install.dir}/${kura.symlink}/console</prefix>
+                                    <user>root</user>
+                                    <group>root</group>
+                                    <filemode>600</filemode>
+                                </mapper>
+                            </data>
+                            <data>
+                                <type>template</type>
+                                <conffile>true</conffile>
+                                <paths>
+                                    <path>${kura.install.dir}/${kura.symlink}/data</path>
+                                    <path>${kura.install.dir}/${kura.symlink}/packages</path>
+                                </paths>
+                                <mapper>
+                                    <type>perm</type>
+                                    <user>root</user>
+                                    <group>root</group>
+                                    <filemode>600</filemode>
+                                </mapper>
+                            </data>
+                        </dataSet>
+                    </configuration>
+                </plugin>
+                <!--This
+                plugin's configuration is used to store Eclipse m2e settings
                     only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
@@ -473,110 +1030,10 @@
         <!-- TODO: this will be removed, DPs are deprecated -->
         <profile>
             <id>core-dp</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>core-dp</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <configuration>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura</groupId>
-                                            <artifactId>org.eclipse.kura.protocol.modbus</artifactId>
-                                            <version>${org.eclipse.kura.protocol.modbus.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.driver.opcua</artifactId>
-                                            <version>${org.eclipse.kura.driver.opcua.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.driver.s7plc</artifactId>
-                                            <version>${org.eclipse.kura.driver.s7plc.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.driver.gpio</artifactId>
-                                            <version>${org.eclipse.kura.driver.gpio.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.ai.triton.server</artifactId>
-                                            <version>${org.eclipse.kura.ai.triton.server.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.db.sqlite.provider</artifactId>
-                                            <version>${org.eclipse.kura.db.sqlite.feature.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</artifactId>
-                                            <version>${org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.feature.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura.feature</groupId>
-                                            <artifactId>org.eclipse.kura.cloudconnection.raw.mqtt.provider</artifactId>
-                                            <version>${org.eclipse.kura.cloudconnection.raw.mqtt.provider.feature.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                    </artifactItems>
-                                    <outputDirectory>${project.build.directory}</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
+            <modules>
+                <module>core-dp</module>
+            </modules>
         </profile>
-
-        <profile>
-            <id>can-dp</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>can-dp</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <configuration>
-                                    <skip>${kura.skip.can}</skip>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>org.eclipse.kura</groupId>
-                                            <artifactId>org.eclipse.kura.protocol.can</artifactId>
-                                            <version>${org.eclipse.kura.protocol.can.version}</version>
-                                            <type>dp</type>
-                                        </artifactItem>
-                                    </artifactItems>
-                                    <outputDirectory>${project.build.directory}</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
     </profiles>
+
 </project>

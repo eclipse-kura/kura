@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Copyright (c) 2025 Eurotech and/or its affiliates and others
-  
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
+
     SPDX-License-Identifier: EPL-2.0
- 
+
     Contributors:
      Eurotech
 -->
@@ -35,6 +35,28 @@
             <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.cyclonedx</groupId>
+                <artifactId>cyclonedx-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>makeAggregateBom</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <verbose>true</verbose>
+                    <projectType>framework</projectType>
+                    <includeProvidedScope>false</includeProvidedScope>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <properties>
         <!-- START common dependencies -->
@@ -1772,46 +1794,57 @@
         <dependency>
             <groupId>org.junit</groupId>
             <artifactId>org.junit</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.moquette-io.moquette</groupId>
             <artifactId>moquette-broker</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>org.hamcrest</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>org.hamcrest.integration</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>org.hamcrest.library</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>org.hamcrest.text</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy-agent</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.objenesis</groupId>
             <artifactId>objenesis</artifactId>
+            <scope>test</scope>
         </dependency>
         <!-- END test dependencies -->
         <!-- START Kura target platform BOM -->

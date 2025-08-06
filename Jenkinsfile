@@ -82,23 +82,26 @@ node {
         timeout(time: 2, unit: 'HOURS') {
             dir("kura") {
                 withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6', options: [artifactsPublisher(disabled: true)]) {
-                    withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONARCLOUD_TOKEN')]) {
-                        withSonarQubeEnv {
-                            sh '''
-                                mvn -f kura/pom.xml sonar:sonar \
-                                    -Dmaven.test.failure.ignore=true \
-                                    -Dsonar.organization=eclipse \
-                                    -Dsonar.host.url=${SONAR_HOST_URL} \
-                                    -Dsonar.token=${SONARCLOUD_TOKEN} \
-                                    -Dsonar.branch.name=${BRANCH_NAME} \
-                                    -Dsonar.branch.target=${CHANGE_TARGET} \
-                                    -Dsonar.java.source=8 \
-                                    -Dsonar.java.binaries='target/' \
-                                    -Dsonar.core.codeCoveragePlugin=jacoco \
-                                    -Dsonar.projectKey=org.eclipse.kura:kura \
-                                    -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*,org.eclipse.kura.nm/src/main/java/fi/w1/**/*
-                            '''
+                    withSonarQubeEnv(credentialsId: 'sonarcloud-token') {
+                        // Check if on primary branch
+                        def analysisParameters = ""
+                        if (env.CHANGE_ID) {
+                            analysisParameters = "-Dsonar.pullrequest.branch=${env.CHANGE_BRANCH} -Dsonar.pullrequest.base=${env.CHANGE_TARGET} -Dsonar.pullrequest.key=${env.CHANGE_ID}"
+                        } else {
+                            analysisParameters = "-Dsonar.branch.name=${env.BRANCH_NAME}"
                         }
+
+                        sh """
+                            mvn -f kura/pom.xml sonar:sonar \
+                                -Dmaven.test.failure.ignore=true \
+                                -Dsonar.organization=eclipse \
+                                -Dsonar.host.url=${SONAR_HOST_URL} \
+                                -Dsonar.java.binaries='target/' \
+                                ${analysisParameters} \
+                                -Dsonar.core.codeCoveragePlugin=jacoco \
+                                -Dsonar.projectKey=org.eclipse.kura:kura \
+                                -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*,org.eclipse.kura.nm/src/main/java/fi/w1/**/*
+                        """
                     }
                 }
             }

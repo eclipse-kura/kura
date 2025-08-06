@@ -37,7 +37,64 @@
             network-manager | networkmanager, bind9 | bind, dnsmasq | isc-dhcp-server, isc-dhcp-client | dhcpcd, iw, iptables, modemmanager,
             logrotate, gpsd, python3
         </deb.dependencies>
+        <kura-networking.version>3.0.0-SNAPSHOT</kura-networking.version>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.core.net</artifactId>
+            <version>${kura-networking.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.linux.net</artifactId>
+            <version>${kura-networking.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.linux.systemd.provider</artifactId>
+            <version>${kura-networking.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.net.admin.firewall</artifactId>
+            <version>${kura-networking.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.net.configuration</artifactId>
+            <version>${kura-networking.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.network.threat.manager</artifactId>
+            <version>${kura-networking.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.nm</artifactId>
+            <version>${kura-networking.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.rest.network.configuration.provider</artifactId>
+            <version>${kura-networking.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.rest.network.status.provider</artifactId>
+            <version>${kura-networking.version}</version>
+        </dependency>
+    </dependencies>
 
     <modules>
         <module>aarch64</module>

@@ -61,7 +61,6 @@
         <org.eclipse.kura.core.identity.version>2.0.0-SNAPSHOT</org.eclipse.kura.core.identity.version>
         <org.eclipse.kura.core.inventory.version>2.0.0-SNAPSHOT</org.eclipse.kura.core.inventory.version>
         <org.eclipse.kura.core.keystore.version>2.0.0-SNAPSHOT</org.eclipse.kura.core.keystore.version>
-        <org.eclipse.kura.core.net.version>2.0.0-SNAPSHOT</org.eclipse.kura.core.net.version>
         <org.eclipse.kura.core.status.version>2.0.0-SNAPSHOT</org.eclipse.kura.core.status.version>
         <org.eclipse.kura.core.system.version>2.0.0-SNAPSHOT</org.eclipse.kura.core.system.version>
         <org.eclipse.kura.rest.tamper.detection.provider.version>1.0.0-SNAPSHOT</org.eclipse.kura.rest.tamper.detection.provider.version>
@@ -86,18 +85,12 @@
         <org.eclipse.kura.json.marshaller.unmarshaller.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.json.marshaller.unmarshaller.provider.version>
         <org.eclipse.kura.linux.clock.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.clock.version>
         <org.eclipse.kura.linux.gpio.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.gpio.version>
-        <org.eclipse.kura.linux.net.version>3.0.0-SNAPSHOT</org.eclipse.kura.linux.net.version>
-        <org.eclipse.kura.linux.systemd.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.systemd.provider.version>
         <org.eclipse.kura.linux.usb.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.usb.version>
         <org.eclipse.kura.linux.usb.aarch64.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.usb.aarch64.version>
         <org.eclipse.kura.linux.usb.x86_64.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.usb.x86_64.version>
         <org.eclipse.kura.linux.watchdog.version>2.0.0-SNAPSHOT</org.eclipse.kura.linux.watchdog.version>
         <org.eclipse.kura.log.filesystem.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.log.filesystem.provider.version>
         <org.eclipse.kura.misc.cloudcat.version>2.0.0-SNAPSHOT</org.eclipse.kura.misc.cloudcat.version>
-        <org.eclipse.kura.net.admin.firewall.version>2.0.0-SNAPSHOT</org.eclipse.kura.net.admin.firewall.version>
-        <org.eclipse.kura.net.configuration.version>2.0.0-SNAPSHOT</org.eclipse.kura.net.configuration.version>
-        <org.eclipse.kura.network.threat.manager.version>2.0.0-SNAPSHOT</org.eclipse.kura.network.threat.manager.version>
-        <org.eclipse.kura.nm.version>2.0.0-SNAPSHOT</org.eclipse.kura.nm.version>
         <org.eclipse.kura.protocol.modbus.version>3.0.0-SNAPSHOT</org.eclipse.kura.protocol.modbus.version>
         <org.eclipse.kura.request.handler.jaxrs.version>2.0.0-SNAPSHOT</org.eclipse.kura.request.handler.jaxrs.version>
         <org.eclipse.kura.rest.cloudconnection.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.cloudconnection.provider.version>
@@ -105,8 +98,6 @@
         <org.eclipse.kura.rest.identity.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.identity.provider.version>
         <org.eclipse.kura.rest.inventory.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.inventory.provider.version>
         <org.eclipse.kura.rest.keystore.provider.version>1.0.0-SNAPSHOT</org.eclipse.kura.rest.keystore.provider.version>
-        <org.eclipse.kura.rest.network.configuration.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.network.configuration.provider.version>
-        <org.eclipse.kura.rest.network.status.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.network.status.provider.version>
         <org.eclipse.kura.rest.packages.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.packages.provider.version>
         <org.eclipse.kura.rest.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.provider.version>
         <org.eclipse.kura.rest.security.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.rest.security.provider.version>
@@ -241,11 +232,7 @@
                 <artifactId>org.eclipse.kura.core.keystore</artifactId>
                 <version>${org.eclipse.kura.core.keystore.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.core.net</artifactId>
-                <version>${org.eclipse.kura.core.net.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.core.status</artifactId>
@@ -368,16 +355,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.linux.net</artifactId>
-                <version>${org.eclipse.kura.linux.net.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.linux.systemd.provider</artifactId>
-                <version>${org.eclipse.kura.linux.systemd.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.linux.usb</artifactId>
                 <version>${org.eclipse.kura.linux.usb.version}</version>
             </dependency>
@@ -405,26 +382,6 @@
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.misc.cloudcat</artifactId>
                 <version>${org.eclipse.kura.misc.cloudcat.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.net.admin.firewall</artifactId>
-                <version>${org.eclipse.kura.net.admin.firewall.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.net.configuration</artifactId>
-                <version>${org.eclipse.kura.net.configuration.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.network.threat.manager</artifactId>
-                <version>${org.eclipse.kura.network.threat.manager.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.nm</artifactId>
-                <version>${org.eclipse.kura.nm.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -460,16 +417,6 @@
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.rest.keystore.provider</artifactId>
                 <version>${org.eclipse.kura.rest.keystore.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.rest.network.configuration.provider</artifactId>
-                <version>${org.eclipse.kura.rest.network.configuration.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.rest.network.status.provider</artifactId>
-                <version>${org.eclipse.kura.rest.network.status.provider.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -640,10 +587,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.core.net</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.core.status</artifactId>
         </dependency>
         <dependency>
@@ -740,14 +683,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.linux.net</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.linux.systemd.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.linux.usb</artifactId>
         </dependency>
         <dependency>
@@ -769,22 +704,6 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.misc.cloudcat</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.net.admin.firewall</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.net.configuration</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.network.threat.manager</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.nm</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
@@ -813,14 +732,6 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.rest.keystore.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.rest.network.configuration.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.rest.network.status.provider</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>

@@ -1,12 +1,19 @@
 name: Target Platform SBOM upload
 
 on:
+  schedule:
+    # At 00:00 on Saturday
+    - cron: "0 0 * * 6"
   workflow_dispatch:
     inputs:
         target_branch:
           type: string
           default: 'develop'
           required: true
+  workflow_run:
+    workflows: ["Release Notes automation"]
+    types:
+      - completed
 
 # Product specific settings
 env:
@@ -20,6 +27,7 @@ permissions:
 jobs:
   generate-sbom:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     outputs:
       project-version: ${{ steps.version.outputs.PROJECT_VERSION }} # required for DependencyTrack upload
     steps:
@@ -27,7 +35,14 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-          ref: ${{ github.event.inputs.target_branch }}
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.event.inputs.target_branch || github.ref_name }}
+
+      - name: Debug branch information
+        run: |
+          echo "=== Debug Branch Information ==="
+          echo "Event name: ${{ github.event_name }}"
+          echo "Current branch (git): $(git branch --show-current)"
+          echo "==============================="
 
       - name: Setup Java SDK
         uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4.7.0

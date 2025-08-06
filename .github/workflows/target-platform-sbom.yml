@@ -1,0 +1,99 @@
+name: Target Platform SBOM upload
+
+on:
+  schedule:
+    # At 00:00 on Saturday
+    - cron: "0 0 * * 6"
+  workflow_dispatch:
+    inputs:
+        target_branch:
+          type: string
+          default: 'develop'
+          required: true
+  workflow_run:
+    workflows: ["Release Notes automation"]
+    types:
+      - completed
+
+# Product specific settings
+env:
+  JAVA_VERSION: '17' # java version used by the product
+  JAVA_DISTRO: 'temurin' # java distro used by the product
+  PRODUCT_PATH: 'target-platform/target-platform-bom' # path within project repository for SBOM source
+  WORKFLOW_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+  INPUT_TARGET_BRANCH: ${{ github.event.inputs.target_branch }}
+  EVENT_NAME: ${{ github.event_name }}
+  GITHUB_REF_NAME: ${{ github.ref_name }}
+
+permissions:
+  contents: read
+
+jobs:
+  generate-sbom:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      project-version: ${{ steps.version.outputs.PROJECT_VERSION }} # required for DependencyTrack upload
+    steps:
+      - name: Set checkout ref
+        id: set-checkout-ref
+        shell: bash
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_run" ]]; then
+            echo "CHECKOUT_REF=$WORKFLOW_HEAD_BRANCH" >> $GITHUB_ENV
+          elif [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "CHECKOUT_REF=$INPUT_TARGET_BRANCH" >> $GITHUB_ENV
+          else
+            echo "CHECKOUT_REF=$GITHUB_REF_NAME" >> $GITHUB_ENV
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          ref: ${{ env.CHECKOUT_REF }}
+
+      - name: Debug branch information
+        run: |
+          echo "=== Debug Branch Information ==="
+          echo "Event name: $EVENT_NAME"
+          echo "Current branch (git): $(git branch --show-current)"
+          echo "==============================="
+
+      - name: Setup Java SDK
+        uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4.7.0
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRO }}
+
+      - name: Generate sbom
+        run: |
+          mvn -f target-platform/pom.xml clean install
+
+      - name: Extract product version
+        id: version
+        shell: bash
+        run: |
+          VERSION="$(jq -r '.metadata.component.version' < ./${{ env.PRODUCT_PATH }}/target/bom.json)"
+
+          # Substitute "-SNAPSHOT" suffix with "@dev" if present
+          VERSION="${VERSION/-SNAPSHOT/@dev}"
+
+          echo "PROJECT_VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Product version: $VERSION"
+
+      - name: Upload sbom
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: target-platform-sbom
+          path: ${{ env.PRODUCT_PATH }}/target/bom.json
+
+  store-sbom-data:
+    needs: ['generate-sbom']
+    uses: eclipse-csi/workflows/.github/workflows/store-sbom-data.yml@main
+    with:
+      projectName: 'kura-target-platform'
+      projectVersion: ${{ needs.generate-sbom.outputs.project-version }}
+      bomArtifact: 'target-platform-sbom'
+      bomFilename: 'bom.json'
+      parentProject: '100d803b-679b-40c2-8e73-101e0bf363ba'

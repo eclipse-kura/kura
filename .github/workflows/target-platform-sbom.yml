@@ -20,6 +20,10 @@ env:
   JAVA_VERSION: '17' # java version used by the product
   JAVA_DISTRO: 'temurin' # java distro used by the product
   PRODUCT_PATH: 'target-platform/target-platform-bom' # path within project repository for SBOM source
+  WORKFLOW_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+  INPUT_TARGET_BRANCH: ${{ github.event.inputs.target_branch }}
+  EVENT_NAME: ${{ github.event_name }}
+  GITHUB_REF_NAME: ${{ github.ref_name }}
 
 permissions:
   contents: read
@@ -35,12 +39,12 @@ jobs:
         id: set-checkout-ref
         shell: bash
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
-            echo "CHECKOUT_REF=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_ENV
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "CHECKOUT_REF=${{ github.event.inputs.target_branch }}" >> $GITHUB_ENV
+          if [[ "$EVENT_NAME" == "workflow_run" ]]; then
+            echo "CHECKOUT_REF=$WORKFLOW_HEAD_BRANCH" >> $GITHUB_ENV
+          elif [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "CHECKOUT_REF=$INPUT_TARGET_BRANCH" >> $GITHUB_ENV
           else
-            echo "CHECKOUT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
+            echo "CHECKOUT_REF=$GITHUB_REF_NAME" >> $GITHUB_ENV
           fi
 
       - name: Checkout repository
@@ -52,7 +56,7 @@ jobs:
       - name: Debug branch information
         run: |
           echo "=== Debug Branch Information ==="
-          echo "Event name: ${{ github.event_name }}"
+          echo "Event name: $EVENT_NAME"
           echo "Current branch (git): $(git branch --show-current)"
           echo "==============================="
 

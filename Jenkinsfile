@@ -93,7 +93,7 @@ node {
 
                         sh """
                             mvn -f kura/pom.xml sonar:sonar \
-                                -Dsonar.ws.timeout=600 \
+                                -Dsonar.scanner.connectTimeout=60 \
                                 -Dsonar.verbose=true \
                                 -Dmaven.test.failure.ignore=true \
                                 -Dsonar.organization=eclipse \

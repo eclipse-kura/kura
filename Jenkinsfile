@@ -93,6 +93,8 @@ node {
 
                         sh """
                             mvn -f kura/pom.xml sonar:sonar \
+                                -Dsonar.ws.timeout=600 \
+                                -Dsonar.verbose=true \
                                 -Dmaven.test.failure.ignore=true \
                                 -Dsonar.organization=eclipse \
                                 -Dsonar.host.url=${SONAR_HOST_URL} \

@@ -3,18 +3,20 @@ description: Merge a pull request when N committers post a comment with the comm
 
 on:
   issue_comment:
-    types: [created, edited]
+    types: [created, edited, deleted]
 
 permissions:
   contents: write
   pull-requests: write
-  issues: read
+  issues: write
 
 env:
   quorum: 3
 
 jobs:
   force_merge:
+    # This job only runs for pull request comments
+    if: ${{ github.event.issue.pull_request }}
     runs-on: ubuntu-latest
 
     steps:
@@ -29,11 +31,10 @@ jobs:
               repo: context.repo.repo
             })
 
-            const isPR = issue.data.pull_request != null
             const isClosed = issue.data.closed_at != null
             const isDraft = issue.data.draft
 
-            return isPR && !isClosed && !isDraft
+            return !isClosed && !isDraft
 
       - name: Count votes
         id: count-votes
@@ -47,10 +48,22 @@ jobs:
               repo: context.repo.repo
             })
 
+            // Debug: Print all commenters and their associations
+            console.log("=== All Comments Debug ===");
+            for(const comment of comments.data) {
+              console.log(`User: ${comment.user.login}`);
+              console.log(`Association: ${comment.author_association}`);
+              console.log(`Body: "${comment.body}"`);
+              console.log(`Body trimmed: "${comment.body ? comment.body.trim() : 'null'}"`);
+              console.log(`Has voting rights: ${comment.author_association === 'MEMBER' || comment.author_association === 'OWNER'}`);
+              console.log(`Has casted vote: ${comment.body && comment.body.trim() === '/force-merge'}`);
+              console.log("---");
+            }
+
             const votes = new Map();
             for(const comment of comments.data) {
               const hasVotingRights = comment.author_association === 'MEMBER' || comment.author_association === 'OWNER'
-              const hasCastedVote = comment.body === '/force-merge'
+              const hasCastedVote = comment.body && comment.body.trim() === '/force-merge'
 
               if(hasVotingRights && hasCastedVote) {
                 votes.set(comment.user.login, comment.author_association);

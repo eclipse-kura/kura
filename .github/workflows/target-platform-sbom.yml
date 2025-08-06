@@ -31,11 +31,23 @@ jobs:
     outputs:
       project-version: ${{ steps.version.outputs.PROJECT_VERSION }} # required for DependencyTrack upload
     steps:
+      - name: Set checkout ref
+        id: set-checkout-ref
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            echo "CHECKOUT_REF=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_ENV
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "CHECKOUT_REF=${{ github.event.inputs.target_branch }}" >> $GITHUB_ENV
+          else
+            echo "CHECKOUT_REF=${{ github.ref_name }}" >> $GITHUB_ENV
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.event.inputs.target_branch || github.ref_name }}
+          ref: ${{ env.CHECKOUT_REF }}
 
       - name: Debug branch information
         run: |

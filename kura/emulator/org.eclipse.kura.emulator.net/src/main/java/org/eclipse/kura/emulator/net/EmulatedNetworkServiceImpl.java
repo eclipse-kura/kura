@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -97,7 +97,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
 
     @Override
     public NetInterfaceState getState(String interfaceName) {
-        // Returned unknown state for the emulataed network service.
+        // Returned unknown state for the emulated network service.
         return NetInterfaceState.UNKNOWN;
     }
 
@@ -114,7 +114,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                 interfaceNames.add(jnInterface.getName());
             }
         } catch (SocketException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.IO_ERROR, e);
         }
 
         return interfaceNames;
@@ -186,7 +186,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                 interfaces.add(ethInterface);
             }
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.IO_ERROR, e);
         }
         return interfaces;
     }
@@ -276,7 +276,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                 }
             }
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.IO_ERROR, e);
         }
         return interfaces;
     }

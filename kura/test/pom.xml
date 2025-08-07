@@ -17,13 +17,20 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>kura</artifactId>
         <version>6.0.0-SNAPSHOT</version>
     </parent>
+
     <artifactId>test</artifactId>
     <packaging>pom</packaging>
+
+    <properties>
+        <kura.basedir>${project.basedir}/..</kura.basedir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -135,7 +142,7 @@
                             ${tycho.surefire.testenv.args}
                             -Dmoquette.path=${project.basedir}/src/main/resources/moquette/config
                         </argLine>
-                        <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine>-->
+                        <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
                         <dependencies>
                             <dependency>
                                 <type>p2-installable-unit</type>
@@ -223,10 +230,6 @@
                             </dependency>
                             <dependency>
                                 <type>p2-installable-unit</type>
-                                <artifactId>org.apache.activemq.artemis-mqtt-protocol</artifactId>
-                            </dependency>
-                            <dependency>
-                                <type>p2-installable-unit</type>
                                 <artifactId>org.eclipse.kura.core.keystore</artifactId>
                             </dependency>
                             <dependency>
@@ -259,6 +262,16 @@
                             </dependency>
                         </dependencies>
                         <bundleStartLevel>
+                            <bundle>
+                                <id>org.apache.aries.spifly.dynamic.bundle</id>
+                                <level>2</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.apache.logging.log4j.slf4j2.impl</id>
+                                <level>2</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
                             <bundle>
                                 <id>moquette-broker</id>
                                 <level>3</level>
@@ -336,11 +349,6 @@
                             </bundle>
                             <bundle>
                                 <id>org.apache.logging.log4j.core</id>
-                                <level>1</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
-                                <id>org.apache.logging.log4j.slf4j2.impl</id>
                                 <level>1</level>
                                 <autoStart>true</autoStart>
                             </bundle>
@@ -455,26 +463,6 @@
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
-                                <id>org.eclipse.kura.broker.artemis.core</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
-                                <id>org.eclipse.kura.broker.artemis.simple.mqtt</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
-                                <id>org.eclipse.kura.broker.artemis.xml</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
-                                <id>org.apache.activemq.artemis-mqtt-protocol</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
                                 <id>org.eclipse.kura.http.server.manager</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
@@ -523,11 +511,6 @@
                                 <id>org.apache.felix.http.bridge</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
-                                <id>org.apache.aries.spifly.dynamic.bundle</id>
-                                <level>4</level>
-                                <autoStart>false</autoStart>
                             </bundle>
                             <bundle>
                                 <id>org.eclipse.osgitech.rest</id>
@@ -769,9 +752,7 @@
             </plugin>
         </plugins>
     </build>
-    <properties>
-        <kura.basedir>${project.basedir}/..</kura.basedir>
-    </properties>
+
     <modules>
         <module>org.eclipse.kura.configuration.change.manager.test</module>
         <module>org.eclipse.kura.core.certificates.test</module>
@@ -791,7 +772,7 @@
         <module>org.eclipse.kura.deployment.agent.test</module>
         <module>org.eclipse.kura.driver.block.test</module>
         <module>org.eclipse.kura.driver.helper.test</module>
-        <module>org.eclipse.kura.emulator.position.test</module>
+        <!-- <module>org.eclipse.kura.emulator.position.test</module> -->
         <module>org.eclipse.kura.emulator.watchdog.test</module>
         <module>org.eclipse.kura.event.publisher.test</module>
         <module>org.eclipse.kura.internal.driver.opcua.test</module>

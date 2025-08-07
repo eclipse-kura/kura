@@ -513,7 +513,9 @@
                                     netty-codec-mqtt, netty-transport-native-kqueue,
                                     netty-transport-native-unix-common, 
                                     <!-- api-plugins -->
-                                     failureaccess, guava
+                                    failureaccess, guava,
+                                    <!-- artemis and camel common plugins -->
+                                    geronimo-jms_2.0_spec
                                 </includeArtifactIds>
                                 <excludeClassifiers>
                                     sources,linux-x86_64,linux-aarch_64,osx-x86_64,osx-aarch_64

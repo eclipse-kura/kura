@@ -26,7 +26,5 @@ Import-Package: com.eclipsesource.json;version="0.9.5",
  org.slf4j;version="1.7.25"
 Service-Component: OSGI-INF/*.xml
 Require-Bundle: org.eclipse.kura.http.server.manager;bundle-version="1.1.0",
- org.eclipse.kura.broker.artemis.core;bundle-version="1.2.0",
- org.eclipse.kura.broker.artemis.simple.mqtt;bundle-version="1.1.0",
  org.eclipse.kura.api,
  org.eclipse.kura.rest.service.listing.provider

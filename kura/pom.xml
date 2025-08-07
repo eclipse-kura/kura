@@ -30,9 +30,6 @@
         <module>kura-bom</module>
         <module>target-definition</module>
         <module>org.eclipse.kura.api</module>
-        <module>org.eclipse.kura.broker.artemis.core</module>
-        <module>org.eclipse.kura.broker.artemis.simple.mqtt</module>
-        <module>org.eclipse.kura.broker.artemis.xml</module>
         <module>org.eclipse.kura.camel</module>
         <module>org.eclipse.kura.camel.cloud.factory</module>
         <module>org.eclipse.kura.camel.xml</module>

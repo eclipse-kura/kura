@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2018, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -20,6 +20,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -56,8 +57,8 @@ import org.eclipse.kura.system.ExtendedProperties;
 import org.eclipse.kura.system.ExtendedPropertyGroup;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.test.annotation.TestTarget;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.osgi.framework.FrameworkUtil;
@@ -70,7 +71,10 @@ import org.slf4j.LoggerFactory;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 
-@Ignore
+import io.moquette.broker.Server;
+import io.moquette.broker.config.FluentConfig;
+import io.moquette.broker.config.IConfig;
+
 public class CloudServiceTest {
 
     private static final String MODEM_RSSI = "modem_rssi";
@@ -84,7 +88,6 @@ public class CloudServiceTest {
     private static final String FOO_IMSI1 = "fooImsi1";
     private static final String FOO_IMEI1 = "fooImei1";
     private static final String MQTT_DATA_TRANSPORT_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
-    private static final String SIMPLE_ARTEMIS_BROKER_SERVICE_PID = "org.eclipse.kura.broker.artemis.simple.mqtt.BrokerInstance";
     private static final String DEFAULT_CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
     private static final String DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
     private static final Logger logger = LoggerFactory.getLogger(CloudServiceTest.class);
@@ -100,9 +103,12 @@ public class CloudServiceTest {
     private static EventAdmin eventAdmin;
     private static NetworkStatusService networkStatusService;
 
+    private static final Server mqttBroker = new Server();
+
     @BeforeClass
     public static void setup()
-            throws KuraException, InterruptedException, ExecutionException, TimeoutException, InvalidSyntaxException {
+            throws KuraException, InterruptedException, ExecutionException, TimeoutException, InvalidSyntaxException,
+            IOException {
         try {
             dependencyLatch.await(10, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
@@ -112,17 +118,18 @@ public class CloudServiceTest {
         Map<String, Object> updatedProp = new HashMap<>();
         updatedProp.put("client-id", "test");
 
-        final Map<String, Object> brokerProperties = new HashMap<>();
-
-        brokerProperties.put("enabled", true);
-        brokerProperties.put("password", new String(cryptoService.encryptAes("foo".toCharArray())));
+        startMoquetteBroker();
 
         updateComponentConfiguration(cfgSvc, DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID, updatedProp).get(30,
                 TimeUnit.SECONDS);
-        updateComponentConfiguration(cfgSvc, SIMPLE_ARTEMIS_BROKER_SERVICE_PID, brokerProperties).get(30,
-                TimeUnit.SECONDS);
 
-        final Map<String, Object> cloudServiceProperties = Collections.singletonMap("payload.encoding", "simple-json");
+        final Map<String, Object> cloudServiceProperties = new HashMap<>();
+        cloudServiceProperties.put("payload.encoding", "simple-json");
+        /*
+         * Set a control topic without $ as prefix: some brokers do not allow access to topics starting with $ (like
+         * moquette, mosquitto)
+         */
+        cloudServiceProperties.put("topic.control-prefix", "EDC");
 
         updateComponentConfiguration(cfgSvc, DEFAULT_CLOUD_SERVICE_PID, cloudServiceProperties).get(30,
                 TimeUnit.SECONDS);
@@ -139,6 +146,19 @@ public class CloudServiceTest {
 
         underTestInspector = new DataTransportInspector(mqttDataTransport);
 
+    }
+
+    @AfterClass
+    public static void cleanup() {
+        mqttBroker.stopServer();
+    }
+
+    private static void startMoquetteBroker() throws IOException {
+        IConfig brokerConfig = new FluentConfig().port(1883).host("0.0.0.0").disablePersistence().build();
+
+        mqttBroker.startServer(brokerConfig);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(mqttBroker::stopServer));
     }
 
     public void bindCfgSvc(ConfigurationService cfgSvc) {
@@ -353,7 +373,7 @@ public class CloudServiceTest {
 
             Mockito.when(tamperDetectionService.getTamperStatus()).thenReturn(tamperStatus);
 
-            final CompletableFuture<byte[]> message = observerInspector.nextMessage("$EDC/mqtt/underTest/MQTT/BIRTH");
+            final CompletableFuture<byte[]> message = observerInspector.nextMessage("EDC/mqtt/underTest/MQTT/BIRTH");
             eventAdmin.postEvent(new TamperEvent("foo", tamperStatus));
 
             metrics = getMetrics(message.get(35, TimeUnit.SECONDS));
@@ -405,7 +425,7 @@ public class CloudServiceTest {
         updateComponentConfiguration(cfgSvc, DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID,
                 getConfigForLocalBroker("underTest")).get(1, TimeUnit.MINUTES);
 
-        final CompletableFuture<byte[]> message = observerInspector.nextMessage("$EDC/mqtt/underTest/MQTT/BIRTH");
+        final CompletableFuture<byte[]> message = observerInspector.nextMessage("EDC/mqtt/underTest/MQTT/BIRTH");
 
         for (int i = 0; i < 3; i++) {
             try {

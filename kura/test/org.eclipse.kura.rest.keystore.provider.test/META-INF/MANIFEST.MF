@@ -29,6 +29,4 @@ Import-Package: com.eclipsesource.json;version="0.9.5",
  org.slf4j;version="1.6.4"
 Fragment-Host: org.eclipse.kura.rest.keystore.provider
 Require-Bundle: org.eclipse.kura.http.server.manager;bundle-version="1.4.0",
- org.junit,
- org.eclipse.kura.broker.artemis.core;bundle-version="1.5.0",
- org.eclipse.kura.broker.artemis.simple.mqtt;bundle-version="1.4.0"
+ org.junit

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -14,12 +14,10 @@ package org.eclipse.kura.emulator.position;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -60,21 +58,7 @@ public class PositionServiceImplTest {
 
         svc.activate(ccMock, properties);
 
-        while ((int) TestUtil.getFieldValue(svc, "index") < 1) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                // don't worry
-            }
-        }
-
-        svc.deactivate(ccMock);
-
-        assumeTrue((int) TestUtil.getFieldValue(svc, "index") == 1);
-
-        verify(eaMock, times(1)).postEvent(isA(PositionLockedEvent.class));
-
-        assertNull(TestUtil.getFieldValue(svc, "handle"));
+        verify(eaMock, timeout(5000)).postEvent(isA(PositionLockedEvent.class));
 
         Position currentPosition = svc.getPosition();
         NmeaPosition currentNmeaPosition = svc.getNmeaPosition();

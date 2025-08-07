@@ -1,34 +1,28 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudClientListener;
-import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.test.annotation.TestTarget;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import junit.framework.TestCase;
-
-public class CloudServiceTest extends TestCase implements CloudClientListener {
-
-    private static CountDownLatch dependencyLatch = new CountDownLatch(1); // initialize with number of dependencies
-    private static CloudService cloudService;
+public class CloudServiceTest extends BaseCloudTests implements CloudClientListener {
 
     private int publishedMsgId;
     private boolean publishPublished;
@@ -39,23 +33,6 @@ public class CloudServiceTest extends TestCase implements CloudClientListener {
     private boolean controlPublished;
     private boolean controlConfirmed;
     private boolean controlArrived;
-
-    @Override
-    @BeforeClass
-    public void setUp() {
-        // Wait for OSGi dependencies
-        try {
-            dependencyLatch.await(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            fail("OSGi dependencies unfulfilled");
-        }
-    }
-
-    public void setCloudService(CloudService cloudService) {
-        CloudServiceTest.cloudService = cloudService;
-        dependencyLatch.countDown();
-    }
 
     @Test
     public void testDummy() {

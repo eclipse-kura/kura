@@ -48,16 +48,21 @@ jobs:
               repo: context.repo.repo
             })
 
-            // Debug: Print all commenters and their associations
-            console.log("=== All Comments Debug ===");
-            for(const comment of comments.data) {
-              console.log(`User: ${comment.user.login}`);
-              console.log(`Association: ${comment.author_association}`);
-              console.log(`Body: "${comment.body}"`);
-              console.log(`Body trimmed: "${comment.body ? comment.body.trim() : 'null'}"`);
-              console.log(`Has voting rights: ${comment.author_association === 'MEMBER' || comment.author_association === 'OWNER'}`);
-              console.log(`Has casted vote: ${comment.body && comment.body.trim() === '/force-merge'}`);
-              console.log("---");
+            // Check if debug mode is enabled by any comment containing "/debug-force-merge"
+            const debugEnabled = comments.data.some(comment =>
+              comment.body && comment.body.includes('/debug-force-merge')
+            );
+
+            // Debug: Print all commenters and their associations (only if debug enabled)
+            if (debugEnabled) {
+              console.log("=== All Comments Debug ===");
+              for(const comment of comments.data) {
+                console.log(`User: ${comment.user.login}`);
+                console.log(`Association: ${comment.author_association}`);
+                console.log(`Has voting rights: ${comment.author_association === 'MEMBER' || comment.author_association === 'OWNER'}`);
+                console.log(`Has casted vote: ${comment.body && comment.body.trim() === '/force-merge'}`);
+                console.log("---");
+              }
             }
 
             const votes = new Map();
@@ -97,7 +102,6 @@ jobs:
                 labelsToAdd.push("force-merge-votes-" + votes)
             }
 
-            console.log(labelsToAdd) // Debug
             const result = github.rest.issues.setLabels({
               issue_number: context.issue.number,
               owner: context.repo.owner,

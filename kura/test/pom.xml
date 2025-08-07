@@ -671,11 +671,6 @@
                                 </requirement>
                                 <requirement>
                                     <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.core.net</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.deployment.agent</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>

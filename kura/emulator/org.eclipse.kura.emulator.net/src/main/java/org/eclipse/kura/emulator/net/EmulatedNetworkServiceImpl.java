@@ -21,8 +21,6 @@ import java.util.Optional;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.net.EthernetInterfaceImpl;
-import org.eclipse.kura.core.net.NetInterfaceAddressImpl;
 import org.eclipse.kura.emulator.Emulator;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
@@ -105,7 +103,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
 
     @Override
     public List<String> getAllNetworkInterfaceNames() throws KuraException {
-        List<String> interfaceNames = new ArrayList<String>();
+        List<String> interfaceNames = new ArrayList<>();
 
         java.net.NetworkInterface jnInterface = null;
         Enumeration<java.net.NetworkInterface> interfaces = null;
@@ -128,7 +126,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
         IPAddress netAddress = null;
         NetInterfaceAddressImpl addressImpl = null;
         List<NetInterfaceAddress> addresses = null;
-        List<NetInterface<? extends NetInterfaceAddress>> interfaces = new ArrayList<NetInterface<? extends NetInterfaceAddress>>();
+        List<NetInterface<? extends NetInterfaceAddress>> interfaces = new ArrayList<>();
 
         EthernetInterfaceImpl ethInterface = null;
         java.net.NetworkInterface jnInterface = null;
@@ -158,8 +156,8 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                     isP2p = jnInterface.isPointToPoint();
                     multi = jnInterface.supportsMulticast();
                 } catch (Exception e) {
-                    logger.warn("Exception while getting information for interface " + jnInterface.getName() + ": "
-                            + e.getMessage());
+                    logger.warn("Exception while getting information for interface {}:{}", jnInterface.getName(),
+                            e.getMessage());
                 }
                 ethInterface.setHardwareAddress(hwAddr);
                 ethInterface.setLinkUp(isUp);
@@ -169,7 +167,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                 ethInterface.setSupportsMulticast(multi);
                 ethInterface.setUp(isUp);
 
-                addresses = new ArrayList<NetInterfaceAddress>();
+                addresses = new ArrayList<>();
                 jnInterfaceAddresses = jnInterface.getInterfaceAddresses();
                 for (java.net.InterfaceAddress jnInterfaceAddress : jnInterfaceAddresses) {
 
@@ -209,7 +207,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
         IPAddress netAddress = null;
         NetInterfaceAddressImpl addressImpl = null;
         List<NetInterfaceAddress> addresses = null;
-        List<NetInterface<? extends NetInterfaceAddress>> interfaces = new ArrayList<NetInterface<? extends NetInterfaceAddress>>();
+        List<NetInterface<? extends NetInterfaceAddress>> interfaces = new ArrayList<>();
 
         EthernetInterfaceImpl ethInterface = null;
         java.net.NetworkInterface jnInterface = null;
@@ -255,7 +253,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                         ethInterface.setSupportsMulticast(multi);
                         ethInterface.setUp(isUp);
 
-                        addresses = new ArrayList<NetInterfaceAddress>();
+                        addresses = new ArrayList<>();
                         jnInterfaceAddresses = jnInterface.getInterfaceAddresses();
                         for (java.net.InterfaceAddress jnInterfaceAddress : jnInterfaceAddresses) {
 

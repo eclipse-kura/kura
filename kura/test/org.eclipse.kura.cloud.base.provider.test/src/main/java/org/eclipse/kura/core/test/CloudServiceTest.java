@@ -34,11 +34,6 @@ public class CloudServiceTest extends BaseCloudTests implements CloudClientListe
     private boolean controlConfirmed;
     private boolean controlArrived;
 
-    @Test
-    public void testDummy() {
-        assertTrue(true);
-    }
-
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testServiceExists() {

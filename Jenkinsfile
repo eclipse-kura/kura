@@ -25,6 +25,7 @@ node {
     stage('Preparation') {
         dir("kura") {
             checkout scm
+            echo "ciao"
             sh "touch /tmp/isJenkins.txt"
         }
     }

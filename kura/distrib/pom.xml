@@ -516,6 +516,8 @@
                                     netty-handler-proxy,
                                     <!-- api-plugins -->
                                     failureaccess, guava,
+                                    <!-- Jackson core -->
+                                    jackson-databind, jackson-annotations, jackson-core,
                                     <!-- artemis and camel common plugins -->
                                     geronimo-jms_2.0_spec
                                 </includeArtifactIds>

@@ -109,6 +109,7 @@
         <quartz.version>2.5.0</quartz.version>
         <slf4j.version>2.0.17</slf4j.version>
         <spring.version>4.3.20.RELEASE_1</spring.version>
+        <jackson.core.version>2.19.2</jackson.core.version>
         <!-- END common dependencies -->
         <!-- START Artemis and Camel common dependencies -->
         <org.apache.geronimo.specs.jms.version>1.0-alpha-2</org.apache.geronimo.specs.jms.version>
@@ -718,6 +719,21 @@
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.service.metatype.annotations</artifactId>
                 <version>${org.osgi.service.metatype.annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.core.version}</version>
             </dependency>
             <!-- END common dependencies -->
             <!-- START Artemis and Camel common dependencies -->
@@ -1537,6 +1553,18 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.service.metatype.annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
         </dependency>
         <!-- END common dependencies -->
         <!-- START Artemis and Camel common dependencies -->

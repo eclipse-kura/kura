@@ -19,6 +19,12 @@
     -->
     <licenses>
         <license>
+            <name>Eclipse Public License - v 2.0</name>
+            <url>https://www.eclipse.org/legal/epl-2.0/</url>
+            <distribution>repo</distribution>
+            <comments>Eclipse Kura bundle wrapper</comments>
+        </license>
+        <license>
             <name>Eclipse Public License v1.0</name>
             <url>https://www.eclipse.org/legal/epl-v10.html</url>
             <distribution>repo</distribution>
@@ -28,7 +34,7 @@
             <name>GNU Lesser General Public License v3.0</name>
             <url>https://www.gnu.org/licenses/lgpl-3.0.html</url>
             <distribution>repo</distribution>
-            <comments>Original Moka7 dual license option</comments>
+            <comments>Moka7 S7 PLC communication library under LGPL-3.0</comments>
         </license>
     </licenses>
 

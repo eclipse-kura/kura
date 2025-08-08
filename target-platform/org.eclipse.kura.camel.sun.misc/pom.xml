@@ -32,6 +32,15 @@
 	
 	<name>Camel :: Core :: Import sun.misc</name>
 
+	<licenses>
+		<license>
+			<name>Eclipse Public License - v 2.0</name>
+			<url>https://www.eclipse.org/legal/epl-2.0/</url>
+			<distribution>repo</distribution>
+			<comments>Eclipse Kura Camel fragment for sun.misc imports</comments>
+		</license>
+	</licenses>
+
 	<build>
 		<plugins>
 			<plugin>

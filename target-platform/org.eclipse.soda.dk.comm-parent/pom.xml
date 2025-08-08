@@ -29,6 +29,12 @@
 
     <licenses>
         <license>
+            <name>Eclipse Public License - v 2.0</name>
+            <url>https://www.eclipse.org/legal/epl-2.0/</url>
+            <distribution>repo</distribution>
+            <comments>Eclipse Kura bundle wrapper</comments>
+        </license>
+        <license>
             <name>Eclipse Public License v1.0</name>
             <url>https://www.eclipse.org/legal/epl-v10.html</url>
             <distribution>repo</distribution>

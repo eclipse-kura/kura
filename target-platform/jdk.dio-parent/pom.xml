@@ -27,6 +27,12 @@
     
     <licenses>
         <license>
+            <name>Eclipse Public License - v 2.0</name>
+            <url>https://www.eclipse.org/legal/epl-2.0/</url>
+            <distribution>repo</distribution>
+            <comments>Eclipse Kura bundle wrapper</comments>
+        </license>
+        <license>
             <name>GNU General Public License v2.0 w/Classpath exception</name>
             <url>https://openjdk.java.net/legal/gplv2+ce.html</url>
             <distribution>repo</distribution>

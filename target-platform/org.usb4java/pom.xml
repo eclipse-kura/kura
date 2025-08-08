@@ -15,6 +15,21 @@
     <description>usb4java libraries using libusb</description>
     <url>usb4java.org/</url>
 
+    <licenses>
+        <license>
+            <name>Eclipse Public License - v 2.0</name>
+            <url>https://www.eclipse.org/legal/epl-2.0/</url>
+            <distribution>repo</distribution>
+            <comments>Eclipse Kura bundle wrapper</comments>
+        </license>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/license/mit/</url>
+            <distribution>repo</distribution>
+            <comments>usb4java libraries are licensed under MIT</comments>
+        </license>
+    </licenses>
+
     <properties>
         <usb4java.version>1.3.0</usb4java.version>
     </properties>

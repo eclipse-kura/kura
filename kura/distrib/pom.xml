@@ -860,18 +860,6 @@
                                 </mapper>
                             </data>
                             <data>
-                                <src>${project.build.directory}/pkg/console/</src>
-                                <type>directory</type>
-                                <conffile>true</conffile>
-                                <mapper>
-                                    <type>perm</type>
-                                    <prefix>${kura.install.dir}/${kura.symlink}/console</prefix>
-                                    <user>root</user>
-                                    <group>root</group>
-                                    <filemode>600</filemode>
-                                </mapper>
-                            </data>
-                            <data>
                                 <type>template</type>
                                 <conffile>true</conffile>
                                 <paths>

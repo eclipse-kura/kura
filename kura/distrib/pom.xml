@@ -511,9 +511,13 @@
                                     netty-transport-classes-epoll, netty-resolver, netty-handler,
                                     netty-transport-classes-kqueue, netty-transport-native-epoll,
                                     netty-codec-mqtt, netty-transport-native-kqueue,
-                                    netty-transport-native-unix-common, 
+                                    netty-transport-native-unix-common,
+                                    netty-codec-socks,
+                                    netty-handler-proxy,
                                     <!-- api-plugins -->
                                     failureaccess, guava,
+                                    <!-- Jackson core -->
+                                    jackson-databind, jackson-annotations, jackson-core,
                                     <!-- artemis and camel common plugins -->
                                     geronimo-jms_2.0_spec
                                 </includeArtifactIds>

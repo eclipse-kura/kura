@@ -79,6 +79,8 @@ This project leverages the following third party content.
 * maven/mavencentral/io.netty/netty-transport-native-kqueue/4.1.121.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
 * maven/mavencentral/io.netty/netty-transport-native-unix-common/4.1.121.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
 * maven/mavencentral/io.netty/netty-transport/4.1.121.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty/netty-codec-socks/4.1.121.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+* maven/mavencentral/io.netty/netty-handler-proxy/4.1.121.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
 * maven/mavencentral/io.perfmark/perfmark-api/0.26.0, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/jakarta.activation/jakarta.activation-api/1.2.2, EPL-2.0 OR BSD-3-Clause OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jaf
 * maven/mavencentral/jakarta.xml.bind/jakarta.xml.bind-api/2.3.3, BSD-3-Clause, approved, ee4j.jaxb
@@ -241,6 +243,9 @@ This project leverages the following third party content.
 * maven/mavencentral/org.osgi/org.osgi.util.promise/1.3.0, Apache-2.0, approved, #5266
 * maven/mavencentral/org.osgi/org.osgi.util.pushstream/1.1.0, Apache-2.0, approved, #6026
 * maven/mavencentral/org.osgi/org.osgi.util.xml/1.0.2, Apache-2.0, approved, #15377
+* maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.19.2, Apache-2.0, approved, #21909
+* maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.19.2, Apache-2.0, approved, #21911
+* maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.19.2, Apache-2.0 AND MIT, approved, #21916
 
 ### Additional Dependencies
 

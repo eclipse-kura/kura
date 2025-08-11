@@ -34,7 +34,7 @@
         <sonar.coverage.jacoco.xmlReportPaths>
             ${project.basedir}/../test/*/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <docker-java.version>3.5.3</docker-java.version>
-        <jackson.version>2.19.1</jackson.version>
+        <httpcore5.version>5.3.4</httpcore5.version>
     </properties>
 
     <dependencies>
@@ -59,29 +59,9 @@
             <version>${docker-java.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>1.27.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java-transport-httpclient5</artifactId>
-            <version>3.5.3</version>
+            <version>${docker-java.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
@@ -91,17 +71,22 @@
         <dependency>
             <groupId>org.apache.httpcomponents.core5</groupId>
             <artifactId>httpcore5</artifactId>
-            <version>5.3.4</version>
+            <version>${httpcore5.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents.core5</groupId>
             <artifactId>httpcore5-h2</artifactId>
-            <version>5.3.4</version>
+            <version>${httpcore5.version}</version>
         </dependency>
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>
             <version>5.17.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.27.1</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
@@ -139,9 +124,8 @@
                             <includeArtifactIds>
                                 docker-java, docker-java-core, docker-java-api,
                                 docker-java-transport, docker-java-transport-httpclient5,
-                                httpclient5, httpcore5, httpcore5-h2, jna, commons-codec,
-                                jackson-databind, jackson-core, jackson-annotations,
-                                commons-compress
+                                httpclient5, httpcore5, httpcore5-h2, jna,
+                                commons-codec, commons-compress
                             </includeArtifactIds>
                             <stripVersion>true</stripVersion>
                         </configuration>

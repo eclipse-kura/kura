@@ -125,16 +125,7 @@
 
     <repositories>
         <repository>
-            <id>kura_releases</id>
-            <name>Kura Releases Repository</name>
-            <url>https://repo.eclipse.org/content/repositories/kura/</url>
-            <snapshots>
-                <enabled>false</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>kura_addons</id>
+            <id>kura-addons</id>
             <name>Eclipse Kura Addons Maven Repository</name>
             <url>https://raw.github.com/eurotech/kura_addons/mvn-repo/
             </url>
@@ -142,6 +133,20 @@
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
             </snapshots>
+        </repository>
+        <repository>
+            <id>eclipse-releases</id>
+            <url>https://repo.eclipse.org/content/groups/releases/</url>
+        </repository>
+        <repository>
+            <id>kura-releases</id>
+            <name>Eclipse Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+        <repository>
+            <id>kura-snapshots</id>
+            <name>Eclipse Kura Repository - Snapshots</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
         </repository>
         <repository>
             <!-- moquette-broker -->

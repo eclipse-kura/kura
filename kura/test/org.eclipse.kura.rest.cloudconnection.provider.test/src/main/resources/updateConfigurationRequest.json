@@ -5,7 +5,7 @@
             "properties": {
                 "broker-url": {
                     "type": "STRING",
-                    "value": "mqtt://mqtt.eclipseprojects.io:1883"
+                    "value": "mqtt://test.mosquitto.org:1883"
                 },
                 "topic.context.account-name": {
                     "type": "STRING",
@@ -13,11 +13,11 @@
                 },
                 "username": {
                     "type": "STRING",
-                    "value": "username"
+                    "value": ""
                 },
                 "password": {
                     "type": "PASSWORD",
-                    "value": "Placeholder"
+                    "value": ""
                 },
                 "client-id": {
                     "type": "STRING",

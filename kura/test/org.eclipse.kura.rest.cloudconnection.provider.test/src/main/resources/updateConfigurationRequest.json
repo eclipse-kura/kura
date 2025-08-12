@@ -13,11 +13,11 @@
                 },
                 "username": {
                     "type": "STRING",
-                    "value": "username"
+                    "value": "mqtt"
                 },
                 "password": {
                     "type": "PASSWORD",
-                    "value": "Placeholder"
+                    "value": ""
                 },
                 "client-id": {
                     "type": "STRING",

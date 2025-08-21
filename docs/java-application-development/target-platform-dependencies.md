@@ -16,7 +16,7 @@ Dependencies are usually required by multiple bundles. Instead of embedding the 
 
 The set of external target platform bundles is built in the [Kura Target Platform project](https://github.com/eclipse-kura/kura/tree/develop/target-platform) and embedded in the final installation through the [Kura distrib project](https://github.com/eclipse-kura/kura/tree/develop/kura/distrib).
 
-The Kura target platform artifacts that are not core Kura components must not be assumed to be stable across Kura versions. Read the following box.
+The Kura target platform artifacts that are not core Kura components must not be assumed to be stable across Kura versions. Read the following box before consuming them in your project.
 
 !!! tip "Target platform stability"
     The artifacts that are distributed in Eclipse Kura through its target platform **are not API**. This means that, although a custom component could leverage these dependencies (like `guava`), it is not guaranteed that the next Kura version will maintain compatibility with the installed dependencies. For instance, a dependency `example` in version `1.2.3` can be available in Kura 5.6.0, but be missing or with a major version bump (like `2.0.0`, making the old APIs break) in the next Kura release.

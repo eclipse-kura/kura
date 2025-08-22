@@ -127,6 +127,7 @@ nav:
       - References: kura-wires/wire-service-references.md
     - Java Application Development:
       - Kura Development Environment Setup: java-application-development/development-environment-setup.md
+      - Target platform dependencies: java-application-development/target-platform-dependencies.md
       - Kura Addon Archetype: java-application-development/kura-addon-archetype.md
       - Hello World Application: java-application-development/hello-world-application.md
       - Deploy and Debug Applications: java-application-development/deploy-and-debug-applications.md

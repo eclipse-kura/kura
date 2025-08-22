@@ -15,7 +15,7 @@ Advanced software frameworks, which abstract and isolate the developer from the 
 
 Eclipse Kura is an Eclipse IoT project that provides a platform for building IoT gateways. It is a smart application container that enables remote management of such gateways and provides a wide range of APIs for allowing you to write and deploy your own IoT application.
 
-Kura runs on top of the Java Virtual Machine (JVM) and leverages OSGi, a dynamic component system for Java, to simplify the process of writing reusable software building blocks. Kura APIs offer  easy access to the underlying hardware including serial ports, GPS, watchdog, USB, GPIOs, I2C, etc. It also offer OSGI bundle to simplify the management of network configurations, the communication with IoT servers, and the remote management of the gateway.
+Kura runs on top of the Java Virtual Machine (JVM) and leverages OSGi, a dynamic component system for Java, to simplify the process of writing reusable software building blocks. Kura APIs offer easy access to the underlying hardware including serial ports, GPS, watchdog, USB, GPIOs, I2C, etc. It also offer OSGI bundle to simplify the management of network configurations, the communication with IoT servers, and the remote management of the gateway.
 
 Kura components are designed as configurable OSGi Declarative Service exposing service API and raising events. While several Kura components are in pure Java, others are invoked through JNI and have a dependency on the Linux operating system.
 

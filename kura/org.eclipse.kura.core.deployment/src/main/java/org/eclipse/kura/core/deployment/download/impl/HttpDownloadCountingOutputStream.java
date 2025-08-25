@@ -196,7 +196,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 
     }
 
-    private void checkIsHttpProtocol(URLConnection urlConnection) throws IOException, KuraConnectException {
+    private void checkIsHttpProtocol(URLConnection urlConnection) throws KuraConnectException {
 
         if (!(urlConnection instanceof HttpURLConnection)) { // includes HttpsURLConnection check
             postProgressEvent(this.options.getClientId(), getByteCount(), this.totalBytes, DownloadStatus.FAILED,

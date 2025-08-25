@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -306,7 +306,11 @@ public class NetworkConfigurationServiceCommon {
 
         tocd.addAD(builder(String.format(PREFIX + "%s.config.wifi.infra.ignoreSSID", ifaceName),
                 NetworkConfigurationPropertyNames.CONFIG_WIFI_INFRA_IGNORE_SSID, Tscalar.BOOLEAN)
-                .withDefault(String.valueOf(NetworkConfigurationConstants.DEFAULT_WIFI_IGNORE_SSID_VALUE)).build());
+                        .withDefault(String.valueOf(NetworkConfigurationConstants.DEFAULT_WIFI_IGNORE_SSID_VALUE))
+                        .build());
+
+        tocd.addAD(builder(String.format(PREFIX + "%s.config.802-1x.password", ifaceName),
+                NetworkConfigurationPropertyNames.CONFIG_802_1X_PASSWORD, Tscalar.PASSWORD).build());
     }
 
     private static void getWifiCommonDefinition(Tocd tocd, String ifaceName) {

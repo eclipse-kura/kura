@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
@@ -61,6 +62,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 @Path("/configuration/v2")
 public class ConfigurationRestService {
@@ -491,10 +493,19 @@ public class ConfigurationRestService {
         id.validate();
 
         try {
+            if (!this.configurationService.getSnapshots().contains(id.getId())) {
+                throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND);
+            }
+
             List<ComponentConfiguration> configs = this.configurationService.getSnapshot(id.getId());
 
             return DTOUtil.toComponentConfigurationList(configs, this.cryptoService, false);
         } catch (KuraException e) {
+            if (e.getCode() == KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.NOT_FOUND,
+                        "The requested snapshot cannot be found.");
+            }
+
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
     }

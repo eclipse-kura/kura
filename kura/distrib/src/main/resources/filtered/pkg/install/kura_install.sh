@@ -28,9 +28,6 @@ backup_files() {
 
 INSTALL_DIR=${kura.install.dir}
 
-# create known kura install location
-ln -sf \${INSTALL_DIR}/kura_* \${INSTALL_DIR}/kura
-
 # set up kura init
 cp \${INSTALL_DIR}/kura/install/kura.service /lib/systemd/system/kura.service
 systemctl daemon-reload

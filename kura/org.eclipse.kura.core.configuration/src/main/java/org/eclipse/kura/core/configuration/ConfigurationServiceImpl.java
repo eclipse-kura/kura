@@ -1011,14 +1011,37 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND);
         }
 
-        File tempSnapshotFile;
-        try {
-            tempSnapshotFile = File.createTempFile(fSnapshot.getName(), null, new File(fSnapshot.getParent()));
-            tempSnapshotFile.deleteOnExit();
-        } catch (IOException ex) {
-            throw new KuraIOException(ex);
-        }
+        File tempSnapshotFile = getTempSnapshotFile(fSnapshot);
 
+        storeSnapshotData(conf, fSnapshot, tempSnapshotFile);
+
+        finalizeSnapshotWrite(fSnapshot, tempSnapshotFile);
+
+    }
+
+    private void finalizeSnapshotWrite(File fSnapshot, File tempSnapshotFile) throws KuraIOException {
+        try {
+            // Consolidate snapshot writing
+            Files.move(tempSnapshotFile.toPath(), fSnapshot.toPath(), StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.ATOMIC_MOVE);
+
+            Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rw-------");
+            Files.setPosixFilePermissions(fSnapshot.toPath(), perms);
+        } catch (UnsupportedOperationException e1) {
+            // POSIX permissions not supported on this file system, log and continue
+            logger.warn("Unable to set POSIX file permissions for snapshot file: {}", fSnapshot.getAbsolutePath(), e1);
+        } catch (IOException e) {
+            try {
+                Files.delete(tempSnapshotFile.toPath());
+            } catch (IOException e1) {
+                throw new KuraIOException(e1);
+            }
+            throw new KuraIOException(e);
+        }
+    }
+
+    private void storeSnapshotData(XmlComponentConfigurations conf, File fSnapshot, File tempSnapshotFile)
+            throws KuraException {
         // Write the temporary snapshot
         try (FileOutputStream fos = new FileOutputStream(tempSnapshotFile);
                 OutputStream encryptedStream = this.cryptoService.aesEncryptingStream(fos)) {
@@ -1034,30 +1057,17 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         } catch (IOException e) {
             throw new KuraIOException(e);
         }
+    }
 
+    private File getTempSnapshotFile(File fSnapshot) throws KuraIOException {
+        File tempSnapshotFile;
         try {
-            // Consolidate snapshot writing
-            Files.move(tempSnapshotFile.toPath(), fSnapshot.toPath(), StandardCopyOption.REPLACE_EXISTING,
-                    StandardCopyOption.ATOMIC_MOVE);
-            
-            // Set file permissions to owner read/write only (600)
-            try {
-                Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rw-------");
-                Files.setPosixFilePermissions(fSnapshot.toPath(), perms);
-            } catch (UnsupportedOperationException e1) {
-                // POSIX permissions not supported on this file system, log and continue
-                logger.warn("Unable to set POSIX file permissions for snapshot file: {}", fSnapshot.getAbsolutePath(), e1);
-            }
-
-        } catch (IOException e) {
-            try {
-                Files.delete(tempSnapshotFile.toPath());
-            } catch (IOException e1) {
-                throw new KuraIOException(e1);
-            }
-            throw new KuraIOException(e);
+            tempSnapshotFile = File.createTempFile(fSnapshot.getName(), null, new File(fSnapshot.getParent()));
+            tempSnapshotFile.deleteOnExit();
+        } catch (IOException ex) {
+            throw new KuraIOException(ex);
         }
-
+        return tempSnapshotFile;
     }
 
     private ComponentConfiguration getConfigurableComponentConfiguration(String pid) {

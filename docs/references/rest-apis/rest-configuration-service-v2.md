@@ -289,7 +289,7 @@ This page describes the CONF-V2 request handler and `configuration/v2` rest APIs
         * [GenericFailureReport](#genericfailurereport)
 
         !!! note
-            In Kura 5.6.0 and before, if the requested snapshot does not exist an empty configuration list is returned with status code 200 
+            In Kura 5.6.0 and before, if the requested snapshot does not exist, an empty configuration list is returned with status code 200 
 
     * **500**
       * **description** : An unexpected internal error occurred.

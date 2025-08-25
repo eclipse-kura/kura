@@ -27,11 +27,6 @@ fi
 
 mkdir -p ${INSTALL_DIR}/kura/data
 
-# setup /etc/sysconfig folder for iptables configuration file
-if [ ! -d /etc/sysconfig ]; then
-    mkdir /etc/sysconfig
-fi
-
 #set up users and grant permissions to them
 cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh

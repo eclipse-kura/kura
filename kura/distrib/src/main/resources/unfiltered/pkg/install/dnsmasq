@@ -1,3 +1,0 @@
-ENABLED=1
-CONFIG_DIR=/etc/dnsmasq.d,*.conf
-DNSMASQ_EXCEPT="lo"

@@ -35,7 +35,6 @@
     <modules>
         <module>aarch64-core</module>
         <module>x86_64-core</module>
-        <module>distrib-extra</module>
 
         <!-- Disabled: waiting for the refactor using Eclipse infrastructure
         <module>docker-base</module>

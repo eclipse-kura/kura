@@ -70,7 +70,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 
         this.executor = Executors.newSingleThreadExecutor();
 
-        this.future = this.executor.submit(this::donwloadTask);
+        this.future = this.executor.submit(this::downloadTask);
 
         try {
             this.future.get();
@@ -82,7 +82,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
         }
     }
 
-    private Void donwloadTask() throws KuraException {
+    private Void downloadTask() throws KuraException {
         boolean shouldAuthenticate = false;
         try {
             shouldAuthenticate = HttpDownloadCountingOutputStream.this.options.getUsername() != null

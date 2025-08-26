@@ -45,6 +45,7 @@ public interface PasswordStrengthVerificationService {
      *            the name of the identity
      * @param password
      *            the password to be verified.
+     * @since 3.0
      * @throws KuraException
      *             if the password does not satisfy the current password
      *             strength requirements.
@@ -55,7 +56,6 @@ public interface PasswordStrengthVerificationService {
      * Returns the password strength requirements that the framework should enforce
      * for new passwords.
      * 
-     * @since 3.0
      * @return the password strength requirements.
      * @throws KuraException
      *             if a failure occurs while retrieving the password

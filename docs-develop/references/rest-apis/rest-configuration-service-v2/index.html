@@ -4289,6 +4289,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
         
           <li class="md-nav__item">
+  <a href="#getsnapshotsbyid" class="md-nav__link">
+    <span class="md-ellipsis">
+      GET/snapshots/byId
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#execsnapshotsbyid_rollback" class="md-nav__link">
     <span class="md-ellipsis">
       EXEC/snapshots/byId/_rollback
@@ -5008,6 +5017,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
         
           <li class="md-nav__item">
+  <a href="#getsnapshotsbyid" class="md-nav__link">
+    <span class="md-ellipsis">
+      GET/snapshots/byId
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#execsnapshotsbyid_rollback" class="md-nav__link">
     <span class="md-ellipsis">
       EXEC/snapshots/byId/_rollback
@@ -5223,6 +5241,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><a href="#putconfigurablecomponentsconfigurations_update">PUT/configurableComponents/configurations/_update</a></li>
 <li><a href="#execsnapshots_write">EXEC/snapshots/_write</a></li>
 <li><a href="#execsnapshots_rollback">EXEC/snapshots/_rollback</a></li>
+<li><a href="#getsnapshotsbyid">GET/snapshots/byId</a></li>
 <li><a href="#execsnapshotsbyid_rollback">EXEC/snapshots/byId/_rollback</a></li>
 </ul>
 </li>
@@ -5453,7 +5472,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h4 id="getconfigurablecomponentsconfigurations">GET/configurableComponents/configurations</h4>
 <ul>
 <li><strong>REST API path</strong> : <code>/services/configuration/v2/configurableComponents/configurations</code></li>
-<li><strong>description</strong> : Returns all of component configurations available on the system. This request will return the <code>pid</code>, <code>ocd</code> and <code>properties</code>.</li>
+<li><strong>description</strong> : Returns all of component configurations available on the system. This request will return the <code>pid</code>, <code>ocd</code> and <code>properties</code>. For password properties, the <code>placeholder</code> string will be returned instead of the configured password.</li>
 <li><strong>responses</strong> :<ul>
 <li><strong>200</strong></li>
 <li><strong>description</strong> : The request succeeded.</li>
@@ -5473,7 +5492,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h4 id="postconfigurablecomponentsconfigurationsbypid">POST/configurableComponents/configurations/byPid</h4>
 <ul>
 <li><strong>REST API path</strong> : <code>/services/configuration/v2/configurableComponents/configurations/byPid</code></li>
-<li><strong>description</strong> : Returns a user selected set of configurations. This request will return the <code>pid</code>, <code>ocd</code> and <code>properties</code>.</li>
+<li><strong>description</strong> : Returns a user selected set of configurations. This request will return the <code>pid</code>, <code>ocd</code> and <code>properties</code>. For password properties, the <code>placeholder</code> string will be returned instead of the configured password.</li>
 <li><strong>request body</strong> :<ul>
 <li><a href="#pidset">PidSet</a></li>
 </ul>
@@ -5503,7 +5522,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h4 id="postconfigurablecomponentsconfigurationsbypid_default">POST/configurableComponents/configurations/byPid/_default</h4>
 <ul>
 <li><strong>REST API path</strong> : <code>/services/configuration/v2/configurableComponents/configurations/byPid/_default</code></li>
-<li><strong>description</strong> : Returns the default configuration for a given set of component pids. The default configurations are generated basing on component definition only, user applied modifications will not be taken into account. This request will return the <code>pid</code>, <code>ocd</code> and <code>properties</code>.</li>
+<li><strong>description</strong> : Returns the default configuration for a given set of component pids. The default configurations are generated basing on component definition only, user applied modifications will not be taken into account. This request will return the <code>pid</code>, <code>ocd</code> and <code>properties</code>. Password property values will be returned in plain text.</li>
 <li><strong>request body</strong> :<ul>
 <li><a href="#pidset">PidSet</a></li>
 </ul>
@@ -5606,10 +5625,60 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 </li>
 </ul>
+<h4 id="getsnapshotsbyid">GET/snapshots/byId</h4>
+<ul>
+<li><strong>REST API path</strong> : /services/configuration/v2/snapshots/byId</li>
+<li><strong>description</strong> : Retrieves the snapshot with the given id. Password property values will be returned in plain text.</li>
+<li><strong>request body</strong> :<ul>
+<li><a href="#snaphsotid">SnaphsotId</a></li>
+</ul>
+</li>
+<li>
+<p><strong>responses</strong> :</p>
+<ul>
+<li><strong>200</strong></li>
+<li><strong>description</strong> : The request succeeded. The content of the requested snapshot is returned. The component definitions will not be included in the response.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#componentconfigurationlist">ComponentConfigurationList</a></li>
+</ul>
+</li>
+<li><strong>400</strong></li>
+<li><strong>description</strong> : The request body is not valid JSON or it contains invalid parameters.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#genericfailurereport">GenericFailureReport</a></li>
+</ul>
+</li>
+<li><strong>404</strong></li>
+<li><strong>description</strong> : The requested snapshot cannot be found.</li>
+<li>
+<p><strong>response body</strong> :</p>
+<ul>
+<li><a href="#genericfailurereport">GenericFailureReport</a></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In Kura 5.6.0 and before, if the requested snapshot does not exist, an empty configuration list is returned with status code 200 </p>
+</div>
+</li>
+<li>
+<p><strong>500</strong></p>
+</li>
+<li><strong>description</strong> : An unexpected internal error occurred.</li>
+<li><strong>response body</strong> :<ul>
+<li><a href="#genericfailurereport">GenericFailureReport</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 <h4 id="execsnapshotsbyid_rollback">EXEC/snapshots/byId/_rollback</h4>
 <ul>
 <li><strong>REST API path</strong> : <code>/services/configuration/v2/snapshots/byId/_rollback</code></li>
 <li><strong>description</strong> : Performs a rollback to the snapshot id specified by the user.</li>
+<li><strong>request body</strong> :<ul>
+<li><a href="#snaphsotid">SnaphsotId</a></li>
+</ul>
+</li>
 <li><strong>responses</strong> :<ul>
 <li><strong>200</strong></li>
 <li><strong>description</strong> : The request succeeded.</li>

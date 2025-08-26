@@ -98,6 +98,7 @@ public class NetworkConfigurationServiceCommonTest {
         givenConfigurationProperty("net.interface.1-4.config.password", "foo");
         givenConfigurationProperty("net.interface.wlp1s0.config.wifi.master.passphrase", "bar");
         givenConfigurationProperty("net.interface.wlp1s0.config.wifi.infra.passphrase", "baz");
+        givenConfigurationProperty("net.interface.wlp1s0.config.802-1x.password", "qux");
 
         whenConfigurationPropertiesAreRetrieved();
 
@@ -107,6 +108,8 @@ public class NetworkConfigurationServiceCommonTest {
                 new Password(new char[] { 'b', 'a', 'r' }));
         thenReturnedPropertyEqualsPassword("net.interface.wlp1s0.config.wifi.infra.passphrase",
                 new Password(new char[] { 'b', 'a', 'z' }));
+        thenReturnedPropertyEqualsPassword("net.interface.wlp1s0.config.802-1x.password",
+                new Password(new char[] { 'q', 'u', 'x' }));
 
     }
 
@@ -118,6 +121,8 @@ public class NetworkConfigurationServiceCommonTest {
                 new Password(new char[] { 'b', 'a', 'r' }));
         givenConfigurationProperty("net.interface.wlp1s0.config.wifi.infra.passphrase",
                 new Password(new char[] { 'b', 'a', 'z' }));
+        givenConfigurationProperty("net.interface.wlp1s0.config.802-1x.password",
+                new Password(new char[] { 'q', 'u', 'x' }));
 
         whenConfigurationPropertiesAreRetrieved();
 
@@ -127,6 +132,8 @@ public class NetworkConfigurationServiceCommonTest {
                 new Password(new char[] { 'b', 'a', 'r' }));
         thenReturnedPropertyEqualsPassword("net.interface.wlp1s0.config.wifi.infra.passphrase",
                 new Password(new char[] { 'b', 'a', 'z' }));
+        thenReturnedPropertyEqualsPassword("net.interface.wlp1s0.config.802-1x.password",
+                new Password(new char[] { 'q', 'u', 'x' }));
 
     }
 
@@ -324,7 +331,7 @@ public class NetworkConfigurationServiceCommonTest {
 
     private void thenComponentDefinitionHasCorrectNumberOfResources() {
         assertNotNull(this.ads);
-        assertEquals(189, this.ads.size());
+        assertEquals(190, this.ads.size());
     }
 
     private void thenReturnedPropertyEquals(final String key, final Object value) {
@@ -624,7 +631,7 @@ public class NetworkConfigurationServiceCommonTest {
     }
 
     private void thenComponentDefinitionHasWifiProperties() {
-        assertEquals(50, this.ads.stream().filter(ad -> ad.getName().contains("wlp1s0")).count());
+        assertEquals(51, this.ads.stream().filter(ad -> ad.getName().contains("wlp1s0")).count());
     }
 
     private void thenComponentDefinitionHasModemProperties() {
@@ -845,8 +852,53 @@ public class NetworkConfigurationServiceCommonTest {
                 assertEquals(WifiMode.UNKNOWN.name(), ad.getDefault());
                 adsConfigured++;
             }
+
+            if (String.format("net.interface.%s.config.wifi.infra.bgscan", interfaceName).equals(ad.getId())) {
+                assertTrue(ad.getDefault().isEmpty());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.infra.pingAccessPoint", interfaceName).equals(ad.getId())) {
+                assertFalse(Boolean.parseBoolean(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.infra.ignoreSSID", interfaceName).equals(ad.getId())) {
+                assertFalse(Boolean.parseBoolean(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.802-1x.password", interfaceName).equals(ad.getId())) {
+                assertTrue(ad.getDefault().isEmpty());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.master.broadcast", interfaceName).equals(ad.getId())) {
+                assertFalse(Boolean.parseBoolean(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.master.ignoreSSID", interfaceName).equals(ad.getId())) {
+                assertFalse(Boolean.parseBoolean(ad.getDefault()));
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.master.pairwiseCiphers", interfaceName).equals(ad.getId())) {
+                assertEquals(WifiCiphers.CCMP_TKIP.name(), ad.getDefault());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.config.wifi.master.groupCiphers", interfaceName).equals(ad.getId())) {
+                assertEquals(WifiCiphers.CCMP_TKIP.name(), ad.getDefault());
+                adsConfigured++;
+            }
+
+            if (String.format("net.interface.%s.wifi.capabilities", interfaceName).equals(ad.getId())) {
+                assertTrue(ad.getDefault().isEmpty());
+                adsConfigured++;
+            }
         }
-        assertEquals(24, adsConfigured);
+        assertEquals(33, adsConfigured);
     }
 
     private void thenComponentDefinitionHasModemProperties(String interfaceName) {

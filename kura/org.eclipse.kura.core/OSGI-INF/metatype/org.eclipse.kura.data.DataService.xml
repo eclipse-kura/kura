@@ -1,59 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
-  
+    Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
-	SPDX-License-Identifier: EPL-2.0
-	
-	Contributors:
-	 Eurotech
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.data.DataService"
-         name="DataService" 
-         description="DataService provides auto-connect, reconnect on connection drops and storing of outgoing messages.">
+        name="DataService"
+        description="DataService provides auto-connect, reconnect on connection drops and storing of outgoing messages.">
 
-        <Icon resource="DataService" size="32"/>
-        
+        <Icon resource="DataService" size="32" />
+
         <AD id="connect.auto-on-startup"
             name="Connect Auto-on-startup"
             type="Boolean"
             cardinality="0"
             required="true"
             default="false"
-            description="Enable automatic connect of the Data Publishers on startup and after a disconnection."/>
-                        
+            description="Enable automatic connect of the Data Publishers on startup and after a disconnection." />
+
         <AD id="connect.retry-interval"
             name="Connect Retry-interval"
             type="Integer"
-            cardinality="0" 
+            cardinality="0"
             required="true"
             default="60"
             min="1"
-            description="Frequency in seconds to retry a connection of the Data Publishers after a disconnect (Minimum value 1)."/>
-            
+            description="Frequency in seconds to retry a connection of the Data Publishers after a disconnect (Minimum value 1)." />
+
         <AD id="enable.recovery.on.connection.failure"
             name="Enable Recovery On Connection Failure"
             type="Boolean"
             cardinality="0"
             required="true"
             default="false"
-            description="Enables the recovery feature on connection failure. If the device is not able to connect to a remote cloud platform, the service will wait for a specified amount of connection retries. If the recovery fails, the device will be rebooted. Being based on the Watchdog service, it needs to be activated as well."/>
-        
+            description="Enables the recovery feature on connection failure. If the device is not able to connect to a remote cloud platform, the service will wait for a specified amount of connection retries. If the recovery fails, the device will be rebooted. Being based on the Watchdog service, it needs to be activated as well." />
+
         <AD id="connection.recovery.max.failures"
             name="Connection Recovery Max Failures"
             type="Integer"
-            cardinality="0" 
+            cardinality="0"
             required="true"
             default="10"
             min="1"
-            description="Number of failures in Data Publishers connection before forcing a reboot."/>
-            
+            description="Number of failures in Data Publishers connection before forcing a reboot." />
+
         <AD id="disconnect.quiesce-timeout"
             name="Disconnect Quiesce-timeout"
             type="Integer"
@@ -61,7 +61,7 @@
             required="true"
             default="10"
             min="0"
-            description="Timeout used to try to complete the delivery of stored messages before forcing a disconnect of the Data Publisher."/>
+            description="Timeout used to try to complete the delivery of stored messages before forcing a disconnect of the Data Publisher." />
 
         <AD id="store.db.service.pid"
             name="Message Store Provider Service PID"
@@ -69,7 +69,7 @@
             cardinality="0"
             required="true"
             default="org.eclipse.kura.db.H2DbService"
-            description="The Kura service pid of the Message Store instance to be used. The pid of the default instance is org.eclipse.kura.db.H2DbService."/>
+            description="The Kura service pid of the Message Store instance to be used. The pid of the default instance is org.eclipse.kura.db.H2DbService." />
 
         <AD id="store.housekeeper-interval"
             name="Store Housekeeper-interval"
@@ -78,7 +78,7 @@
             required="true"
             default="900"
             min="5"
-            description="Interval in seconds used to run the Data Store housekeeper task (min 5)."/>
+            description="Interval in seconds used to run the Data Store housekeeper task (min 5)." />
 
         <AD id="store.purge-age"
             name="Store Purge-age"
@@ -87,8 +87,8 @@
             required="true"
             default="60"
             min="5"
-            description="Age in seconds of completed messages (either published with QoS = 0 or confirmed with QoS > 0) after which they are deleted (min 5)."/>
-            
+            description="Age in seconds of completed messages (either published with QoS = 0 or confirmed with QoS > 0) after which they are deleted (min 5)." />
+
         <AD id="store.capacity"
             name="Store Capacity"
             type="Integer"
@@ -96,15 +96,15 @@
             required="true"
             default="10000"
             min="1"
-            description="Maximum number of messages persisted in the Data Store. The limit does not apply to messages with the priority less than 2. These priority levels are reserved to the framework which uses it for life-cycle messages - birth and death certificates - and replies to request/response flows."/>
-            
+            description="Maximum number of messages persisted in the Data Store. The limit does not apply to messages with the priority less than 2. These priority levels are reserved to the framework which uses it for life-cycle messages - birth and death certificates - and replies to request/response flows." />
+
         <AD id="in-flight-messages.republish-on-new-session"
             name="In-flight-messages Republish-on-new-session"
             type="Boolean"
             cardinality="0"
             required="true"
             default="true"
-            description="Whether to republish in-flight messages on a new MQTT session."/>
+            description="Whether to republish in-flight messages on a new MQTT session." />
 
         <AD id="in-flight-messages.max-number"
             name="In-flight-messages Max-number"
@@ -114,8 +114,8 @@
             default="9"
             min="1"
             max="10"
-            description="The maximum number of in-flight messages."/>
-            
+            description="The maximum number of in-flight messages." />
+
         <AD id="in-flight-messages.congestion-timeout"
             name="In-flight-messages Congestion-timeout"
             type="Integer"
@@ -123,13 +123,13 @@
             required="true"
             default="0"
             min="0"
-            description="Timeouts the in-flight messages congestion condition. The service will force a disconnect attempting to reconnect (0 to disable)."/>
-        
-        <AD id="enable.rate.limit" 
-            name="Enable Rate Limit" 
-            type="Boolean" 
-            cardinality="0" 
-            required="true" 
+            description="Timeouts the in-flight messages congestion condition. The service will force a disconnect attempting to reconnect (0 to disable)." />
+
+        <AD id="enable.rate.limit"
+            name="Enable Rate Limit"
+            type="Boolean"
+            cardinality="0"
+            required="true"
             default="true"
             description="Enables the token bucket message rate limiting." />
 
@@ -140,8 +140,8 @@
             required="true"
             default="1"
             min="1"
-            description="The average message publish rate in number of messages per unit of time (e.g. 10 messages per MINUTE). This parameter has some limitations described in https://eclipse.github.io/kura/latest/gateway-configuration/data-service-configuration/"/>
-        
+            description="The average message publish rate in number of messages per unit of time (e.g. 10 messages per MINUTE). This parameter has some limitations described on the data service configuration page in the official product documentation." />
+
         <AD id="rate.limit.time.unit"
             name="Rate Limit Time Unit"
             type="String"
@@ -154,7 +154,7 @@
             <Option label="HOURS" value="HOURS" />
             <Option label="DAYS" value="DAYS" />
         </AD>
-        
+
         <AD id="rate.limit.burst.size"
             name="Rate Limit Burst Size"
             type="Integer"
@@ -162,60 +162,61 @@
             required="true"
             default="1"
             min="1"
-            description="The token bucket burst size."/>
-            
-        <AD id="connection.schedule.enabled" 
-            name="Enable Connection Schedule" 
-            type="Boolean" 
-            cardinality="0" 
-            required="true" 
+            description="The token bucket burst size." />
+
+        <AD id="connection.schedule.enabled"
+            name="Enable Connection Schedule"
+            type="Boolean"
+            cardinality="0"
+            required="true"
             default="false"
             description="Enables or disables the connection scheduling feature." />
-            
-        <AD id="connection.schedule.expression" 
-            name="Connection Schedule CRON Expression" 
-            type="String" 
-            cardinality="0" 
-            required="true" 
+
+        <AD id="connection.schedule.expression"
+            name="Connection Schedule CRON Expression"
+            type="String"
+            cardinality="0"
+            required="true"
             default="0 0 0 ? * * *"
             description="A CRON expression that specifies the instants when the gateway should perform a connection attempt. This parameter is only used if Enable Connection Schedule is set to true. The default expression schedules a connection every day at midnight." />
-            
-        <AD id="connection.schedule.priority.override.enable" 
-            name="Allow priority message to overide connection schedule" 
-            type="Boolean" 
-            cardinality="0" 
-            required="true" 
+
+        <AD id="connection.schedule.priority.override.enable"
+            name="Allow priority message to overide connection schedule"
+            type="Boolean"
+            cardinality="0"
+            required="true"
             default="false"
             description="Allows messages beyond a specified priority to force a connection and be sent regardless of connection schedule." />
-            
-        <AD id="connection.schedule.priority.override.threshold" 
-            name="Message schedule priority override threshold" 
-            type="Integer" 
-            cardinality="0" 
-            required="true" 
+
+        <AD id="connection.schedule.priority.override.threshold"
+            name="Message schedule priority override threshold"
+            type="Integer"
+            cardinality="0"
+            required="true"
             default="1"
             description="A message with a priority equal to or less than this threshold will cause the framework to automatically re-connect and send regardless of the connection schedule." />
-            
-         <AD id="connection.schedule.inactivity.interval.seconds" 
-            name="Connection Schedule Disconnect Inactivity Interval Seconds" 
-            type="Long" 
-            cardinality="0" 
-            required="true" 
+
+        <AD id="connection.schedule.inactivity.interval.seconds"
+            name="Connection Schedule Disconnect Inactivity Interval Seconds"
+            type="Long"
+            cardinality="0"
+            required="true"
             default="60"
             min="1"
             description="Specifies an inactivity timeout in seconds. If the timeout expires, the cloud connection will be automatically closed. This timeout is delayed for the specified amount of seconds every time a new message is published. This parameter is only used if Enable Connection Schedule is set to true." />
 
-          <AD id="maximum.payload.size"
+        <AD id="maximum.payload.size"
             name="Maximum Payload Size"
             type="Long"
             cardinality="0"
             required="true"
             default="16777216"
             min="0"
-            description="The maximum allowed size in bytes for the message payload."/>
+            description="The maximum allowed size in bytes for the message payload." />
 
     </OCD>
-    <Designate pid="org.eclipse.kura.data.DataService" factoryPid="org.eclipse.kura.data.DataService">
-        <Object ocdref="org.eclipse.kura.data.DataService"/>
+    <Designate pid="org.eclipse.kura.data.DataService"
+        factoryPid="org.eclipse.kura.data.DataService">
+        <Object ocdref="org.eclipse.kura.data.DataService" />
     </Designate>
 </MetaData>

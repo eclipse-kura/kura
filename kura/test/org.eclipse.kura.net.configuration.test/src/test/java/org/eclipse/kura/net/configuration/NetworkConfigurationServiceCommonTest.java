@@ -331,7 +331,7 @@ public class NetworkConfigurationServiceCommonTest {
 
     private void thenComponentDefinitionHasCorrectNumberOfResources() {
         assertNotNull(this.ads);
-        assertEquals(190, this.ads.size());
+        assertEquals(192, this.ads.size());
     }
 
     private void thenReturnedPropertyEquals(final String key, final Object value) {

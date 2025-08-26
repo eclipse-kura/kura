@@ -106,7 +106,7 @@ public class HttpDownloadCountingOutputStreamTest {
 
     private void givenDeploymentPackageDownloadOptions(String deployUri, String dpName, String dpVersion) {
         this.deploymentPackageDownloadOpions = new DeploymentPackageDownloadOptions(deployUri, dpName, dpVersion);
-        this.deploymentPackageDownloadOpions.setJobId(0);
+        this.deploymentPackageDownloadOpions.setJobId(123);
     }
 
     private void givenRandomData(String data) {

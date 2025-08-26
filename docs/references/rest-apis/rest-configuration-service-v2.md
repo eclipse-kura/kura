@@ -17,6 +17,7 @@ This page describes the CONF-V2 request handler and `configuration/v2` rest APIs
     - [PUT/configurableComponents/configurations/_update](#putconfigurablecomponentsconfigurations_update)
     - [EXEC/snapshots/_write](#execsnapshots_write)
     - [EXEC/snapshots/_rollback](#execsnapshots_rollback)
+    - [GET/snapshots/byId](#getsnapshotsbyid)
     - [EXEC/snapshots/byId/_rollback](#execsnapshotsbyid_rollback)
 - [JSON definitions](#json-definitions)
     - [PidAndFactoryPidSet](#pidandfactorypidset)
@@ -170,7 +171,7 @@ This page describes the CONF-V2 request handler and `configuration/v2` rest APIs
 
 #### GET/configurableComponents/configurations
   * **REST API path** : `/services/configuration/v2/configurableComponents/configurations`
-  * **description** : Returns all of component configurations available on the system. This request will return the `pid`, `ocd` and `properties`.
+  * **description** : Returns all of component configurations available on the system. This request will return the `pid`, `ocd` and `properties`. For password properties, the `placeholder` string will be returned instead of the configured password.
   * **responses** :
     * **200**
       * **description** : The request succeeded.
@@ -183,7 +184,7 @@ This page describes the CONF-V2 request handler and `configuration/v2` rest APIs
 
 #### POST/configurableComponents/configurations/byPid
   * **REST API path** : `/services/configuration/v2/configurableComponents/configurations/byPid`
-  * **description** : Returns a user selected set of configurations. This request will return the `pid`, `ocd` and `properties`.
+  * **description** : Returns a user selected set of configurations. This request will return the `pid`, `ocd` and `properties`. For password properties, the `placeholder` string will be returned instead of the configured password.
   * **request body** :
     * [PidSet](#pidset)
   * **responses** :
@@ -202,7 +203,7 @@ This page describes the CONF-V2 request handler and `configuration/v2` rest APIs
 
 #### POST/configurableComponents/configurations/byPid/_default
   * **REST API path** : `/services/configuration/v2/configurableComponents/configurations/byPid/_default`
-  * **description** : Returns the default configuration for a given set of component pids. The default configurations are generated basing on component definition only, user applied modifications will not be taken into account. This request will return the `pid`, `ocd` and `properties`.
+  * **description** : Returns the default configuration for a given set of component pids. The default configurations are generated basing on component definition only, user applied modifications will not be taken into account. This request will return the `pid`, `ocd` and `properties`. Password property values will be returned in plain text.
   * **request body** :
     * [PidSet](#pidset)
   * **responses** :
@@ -268,9 +269,38 @@ This page describes the CONF-V2 request handler and `configuration/v2` rest APIs
       * **response body** :
         * [GenericFailureReport](#genericfailurereport)
 
+#### GET/snapshots/byId
+  * **REST API path** : /services/configuration/v2/snapshots/byId
+  * **description** : Retrieves the snapshot with the given id. Password property values will be returned in plain text.
+  * **request body** :
+    * [SnaphsotId](#snaphsotid)
+  * **responses** :
+    * **200**
+      * **description** : The request succeeded. The content of the requested snapshot is returned. The component definitions will not be included in the response.
+      * **response body** :
+        * [ComponentConfigurationList](#componentconfigurationlist)
+    * **400**
+      * **description** : The request body is not valid JSON or it contains invalid parameters.
+      * **response body** :
+        * [GenericFailureReport](#genericfailurereport)
+    * **404**
+      * **description** : The requested snapshot cannot be found.
+      * **response body** :
+        * [GenericFailureReport](#genericfailurereport)
+
+        !!! note
+            In Kura 5.6.0 and before, if the requested snapshot does not exist, an empty configuration list is returned with status code 200 
+
+    * **500**
+      * **description** : An unexpected internal error occurred.
+      * **response body** :
+        * [GenericFailureReport](#genericfailurereport)
+
 #### EXEC/snapshots/byId/_rollback
   * **REST API path** : `/services/configuration/v2/snapshots/byId/_rollback`
   * **description** : Performs a rollback to the snapshot id specified by the user.
+  * **request body** :
+    * [SnaphsotId](#snaphsotid)
   * **responses** :
     * **200**
       * **description** : The request succeeded.

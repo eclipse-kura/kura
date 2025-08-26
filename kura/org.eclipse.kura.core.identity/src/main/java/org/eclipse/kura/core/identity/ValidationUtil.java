@@ -46,6 +46,21 @@ public class ValidationUtil {
         passwordStrengthVerificationService.checkPasswordStrength(password);
     }
 
+    public static void validateNewPassword(String identityName, final char[] password,
+            final PasswordStrengthVerificationService passwordStrengthVerificationService) throws KuraException {
+        if (password.length == 0) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "New password cannot be empty");
+        }
+
+        final String asString = new String(password);
+
+        requireMaximumLength(NEW_PASSWORD, asString, 255);
+
+        requireNoWhitespaceCharacters(NEW_PASSWORD, asString);
+
+        passwordStrengthVerificationService.checkPasswordStrength(identityName, password);
+    }
+
     public static void validateNewIdentityName(final String identityName) throws KuraException {
         requireMinimumLength(IDENTITY_NAME, identityName, 3);
 

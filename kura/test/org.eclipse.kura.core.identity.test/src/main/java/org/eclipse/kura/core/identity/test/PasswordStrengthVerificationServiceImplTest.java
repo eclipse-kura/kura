@@ -57,6 +57,16 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
     }
 
     @Test
+    public void shouldRejectPasswordEqualsToIdentityName() {
+        givenPasswordStrenghtVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
+                "new.password.require.special.characters", false, "new.password.require.both.cases", true);
+
+        whenPasswordIsValidatedAgainstIdentityName("Admin", "Admin");
+
+        thenExceptionIsThrown(KuraException.class);
+    }
+
+    @Test
     public void shouldAcceptPasswordWithDigits() {
         givenPasswordStrenghtVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
                 "new.password.require.special.characters", false, "new.password.require.both.cases", false);
@@ -215,6 +225,14 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
     private void whenPasswordIsValidated(final String password) {
         try {
             this.passwordStrengthVerificationService.checkPasswordStrength(password.toCharArray());
+        } catch (KuraException e) {
+            this.exception = Optional.of(e);
+        }
+    }
+
+    private void whenPasswordIsValidatedAgainstIdentityName(final String identityName, final String password) {
+        try {
+            this.passwordStrengthVerificationService.checkPasswordStrength(identityName, password.toCharArray());
         } catch (KuraException e) {
             this.exception = Optional.of(e);
         }

@@ -441,7 +441,8 @@ public class IdentityServiceImpl implements IdentityService {
 
         if (newPassword.isPresent()) {
 
-            ValidationUtil.validateNewPassword(newPassword.get(), passwordStrengthVerificationService);
+            ValidationUtil.validateNewPassword(identityConfiguration.getName(), newPassword.get(),
+                    passwordStrengthVerificationService);
 
         } else if (!this.userAdminHelper.getUser(identityConfiguration.getName())
                 .filter(u -> u.getCredentials().get(PASSWORD_PROPERTY) != null).isPresent()) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -80,6 +80,11 @@ public class PasswordStrengthValidators {
         };
     }
 
+    public static Validator<String> requireDifferentNameAndPassword(final String identityName) {
+
+        return new PredicateValidator(v -> !v.equals(identityName), new DefaultMessages().pwdNotEqualsUsername());
+    }
+
     public interface Messages {
 
         public String pwdStrengthDigitsRequired();
@@ -89,6 +94,8 @@ public class PasswordStrengthValidators {
         public String pwdStrengthBothCasesRequired();
 
         public String pwdStrengthMinLength(final int value);
+
+        public String pwdNotEqualsUsername();
     }
 
     private static class DefaultMessages implements Messages {
@@ -111,6 +118,11 @@ public class PasswordStrengthValidators {
         @Override
         public String pwdStrengthMinLength(final int value) {
             return "Password length must be at least " + value + " characters";
+        }
+
+        @Override
+        public String pwdNotEqualsUsername() {
+            return "The identity name cannot be the same as the password";
         }
     }
 

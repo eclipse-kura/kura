@@ -508,6 +508,16 @@ public class IdentityServiceImplTest extends IdentityServiceTestBase {
     }
 
     @Test
+    public void shouldNotAllowPasswordEqualsToIdentityName() {
+        givenUserAdminUsers("kura.user.foo");
+
+        whenIdentityConfigurationIsUpdated(new IdentityConfiguration("foo", singletonList(
+                new PasswordConfiguration(false, true, Optional.of("foo".toCharArray()), Optional.empty()))));
+
+        thenExceptionIsThrown(KuraException.class);
+    }
+
+    @Test
     public void shouldAllow255CharsPassword() {
         givenUserAdminUsers("kura.user.foo");
         givenPasswordStrenghtVerificationOptions("new.password.min.length", 8, "new.password.require.digits", false,

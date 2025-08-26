@@ -102,7 +102,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
             }
 
             HttpURLConnection.setFollowRedirects(false);
-            URLConnection urlConnection = getUrlConnection(HttpDownloadCountingOutputStream.this.downloadURL);
+            URLConnection urlConnection = openAndConnect(HttpDownloadCountingOutputStream.this.downloadURL);
 
             checkIsHttpProtocol(urlConnection);
 
@@ -157,11 +157,32 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
         return null;
     }
 
-    private HttpURLConnection getUrlConnection(String downloadUrlString) throws IOException, KuraConnectException {
+    private HttpURLConnection openAndConnect(String downloadUrlString) throws IOException, KuraConnectException {
         URL localUrl = new URL(downloadUrlString);
 
-        HttpURLConnection urlConnection = (HttpURLConnection) localUrl.openConnection();
+        HttpURLConnection urlConnection = openConnection(localUrl);
 
+        setupConnection(urlConnection);
+
+        urlConnection.connect();
+
+        int responseCode = urlConnection.getResponseCode();
+
+        if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP || //
+                responseCode == HttpURLConnection.HTTP_MOVED_PERM || //
+                responseCode == HttpURLConnection.HTTP_SEE_OTHER) {
+            String newLocation = urlConnection.getHeaderField("Location");
+            if (StringUtils.isNotEmpty(newLocation)) {
+                return openAndConnect(newLocation);
+            } else {
+                throw new KuraRuntimeException(KuraErrorCode.INVALID_PARAMETER);
+            }
+        }
+        return urlConnection;
+
+    }
+
+    private void setupConnection(HttpURLConnection urlConnection) throws IOException, KuraConnectException {
         try {
             if (urlConnection instanceof HttpsURLConnection httpsURLConnection) {
                 httpsURLConnection.setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
@@ -177,23 +198,11 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
         int readTimeout = getPropReadTimeout();
         urlConnection.setConnectTimeout(connectTimeout);
         urlConnection.setReadTimeout(readTimeout);
+    }
 
-        urlConnection.connect();
-
-        int responseCode = urlConnection.getResponseCode();
-
-        if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP || //
-                responseCode == HttpURLConnection.HTTP_MOVED_PERM || //
-                responseCode == HttpURLConnection.HTTP_SEE_OTHER) {
-            String newLocation = urlConnection.getHeaderField("Location");
-            if (StringUtils.isNotEmpty(newLocation)) {
-                return getUrlConnection(newLocation);
-            } else {
-                throw new KuraRuntimeException(KuraErrorCode.INVALID_PARAMETER);
-            }
-        }
-        return urlConnection;
-
+    // protected for testing purpose
+    protected HttpURLConnection openConnection(URL localUrl) throws IOException {
+        return (HttpURLConnection) localUrl.openConnection();
     }
 
     private void checkIsHttpProtocol(URLConnection urlConnection) throws KuraConnectException {

@@ -39,7 +39,7 @@ public abstract class DeploymentPackageOptions {
 
     private String clientId = "";
     private String requestClientId = "";
-    private Long jobId = null;
+    private long jobId = 0;
 
     private CloudNotificationPublisher notificationPublisher;
     private String notificationPublisherPid;

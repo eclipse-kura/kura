@@ -307,7 +307,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     public void testGetSnapshotReturnsUnencryptedPassword() throws KuraException {
         givenATestConfigurationPropertyWithAdTypeAndValue(Scalar.PASSWORD, new Password("foobar".toCharArray()));
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/snapshots/byId", "{\"id\":1}");
+        whenRequestIsPerformed(new MethodSpec("POST"), "/snapshots/byId", "{\"id\":10000}");
 
         thenRequestSucceeds();
         thenTestPropertyTypeIs(Json.value("PASSWORD"));
@@ -854,22 +854,34 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void testGetSnapshotException() throws KuraException {
-        givenMockGetSnapshotReturnException();
+        givenMockGetSnapshotsReturnSome(5);
+        givenMockGetSnapshotReturnException(10000);
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/snapshots/byId", "{\"id\":12345}");
+        whenRequestIsPerformed(new MethodSpec("POST"), "/snapshots/byId", "{\"id\":10000}");
 
         thenResponseCodeIs(400);
     }
 
     @Test
     public void testGetSnapshot() throws KuraException {
-        givenMockGetSnapshotReturnSome(12345, 5);
+        givenMockGetSnapshotsReturnSome(5);
+        givenMockGetSnapshotReturnSome(10000, 5);
 
-        whenRequestIsPerformed(new MethodSpec("POST"), "/snapshots/byId", "{\"id\":12345}");
+        whenRequestIsPerformed(new MethodSpec("POST"), "/snapshots/byId", "{\"id\":10000}");
 
         thenRequestSucceeds();
         thenResponseBodyEqualsJson("{\"configs\":[" + "{\"pid\":\"pid0\"}," + "{\"pid\":\"pid1\"},"
                 + "{\"pid\":\"pid2\"}," + "{\"pid\":\"pid3\"}," + "{\"pid\":\"pid4\"}]" + "}");
+    }
+
+    @Test
+    public void testGetSnapshotNotFound() throws KuraException {
+        givenMockGetSnapshotsReturnSome(5);
+        givenMockGetSnapshotReturnSome(10000, 5);
+
+        whenRequestIsPerformed(new MethodSpec("POST"), "/snapshots/byId", "{\"id\":12346}");
+
+        thenResponseCodeIs(404);
     }
 
     @Test
@@ -1395,8 +1407,8 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         when(configurationService.getDefaultComponentConfiguration(ArgumentMatchers.any())).thenReturn(config);
     }
 
-    private void givenMockGetSnapshotReturnException() throws KuraException {
-        when(configurationService.getSnapshot(12345)).thenThrow(new KuraException(KuraErrorCode.BAD_REQUEST));
+    private void givenMockGetSnapshotReturnException(int snapshotId) throws KuraException {
+        when(configurationService.getSnapshot(snapshotId)).thenThrow(new KuraException(KuraErrorCode.BAD_REQUEST));
     }
 
     private void givenMockGetSnapshotReturnSome(long snapshotId, int howManyConfigurations) throws KuraException {
@@ -1464,6 +1476,8 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
             final String pid = i.getArgument(0, String.class);
             return byPid.get(pid);
         });
+
+        givenMockGetSnapshotsReturnSome(5);
 
         Mockito.when(configurationService.getSnapshot(Mockito.anyLong()))
                 .thenReturn(byPid.values().stream().collect(Collectors.toList()));

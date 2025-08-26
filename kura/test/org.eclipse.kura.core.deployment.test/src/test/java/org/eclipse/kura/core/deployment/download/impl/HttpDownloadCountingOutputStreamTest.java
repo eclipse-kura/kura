@@ -16,7 +16,9 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -90,6 +92,7 @@ public class HttpDownloadCountingOutputStreamTest {
         thenNoExceptionOccured();
         thenTransferProgressStatusIs(DownloadStatus.COMPLETED);
         thenDownloadedDataAreCorrect();
+        thenSSLSocketFactoryIsUsed();
     }
 
     private void givenSslManagerService() {
@@ -156,6 +159,14 @@ public class HttpDownloadCountingOutputStreamTest {
 
     private void whenDownloadIsCancelled() {
         cancelDownload();
+    }
+
+    private void thenSSLSocketFactoryIsUsed() {
+        try {
+            verify(this.sslManagerService, atLeastOnce()).getSSLSocketFactory();
+        } catch (Exception e) {
+            fail();
+        }
     }
 
     private void thenNoExceptionOccured() {

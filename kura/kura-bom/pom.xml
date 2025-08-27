@@ -59,7 +59,6 @@
         </plugins>
     </build>
 
-
     <properties>
         <org.eclipse.kura.ai.triton.server.version>2.0.0-SNAPSHOT</org.eclipse.kura.ai.triton.server.version>
         <org.eclipse.kura.api.version>3.0.0-SNAPSHOT</org.eclipse.kura.api.version>
@@ -140,6 +139,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>target-platform-bom</artifactId>
+                <version>6.0.0-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.ai.triton.server</artifactId>

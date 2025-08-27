@@ -1040,11 +1040,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             // POSIX permissions not supported on this file system, log and continue
             logger.warn("Unable to set POSIX file permissions for snapshot file: {}", fSnapshot.getAbsolutePath(), e1);
         } catch (IOException e) {
-            try {
-                Files.delete(tempSnapshotFile.toPath());
-            } catch (IOException e1) {
-                throw new KuraIOException(e1);
-            }
             throw new KuraIOException(e);
         }
     }

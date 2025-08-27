@@ -13,7 +13,4 @@ permissions:
 jobs:
   call-workflow-in-public-repo:
     uses: eclipse-kura/.github/.github/workflows/_shared-force-merge.yml@main
-<<<<<<< Updated upstream
-=======
     secrets: inherit
->>>>>>> Stashed changes

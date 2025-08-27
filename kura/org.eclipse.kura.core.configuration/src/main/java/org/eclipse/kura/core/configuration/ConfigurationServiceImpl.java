@@ -1013,9 +1013,18 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         File tempSnapshotFile = getTempSnapshotFile(fSnapshot);
 
-        storeSnapshotData(conf, fSnapshot, tempSnapshotFile);
-
-        finalizeSnapshotWrite(fSnapshot, tempSnapshotFile);
+        try {
+            storeSnapshotData(conf, fSnapshot, tempSnapshotFile);
+            finalizeSnapshotWrite(fSnapshot, tempSnapshotFile);
+        } finally {
+            if (tempSnapshotFile.exists()) {
+                try {
+                    Files.delete(tempSnapshotFile.toPath());
+                } catch (IOException e) {
+                    logger.warn("Failed to delete temporary snapshot file: {}", tempSnapshotFile.getAbsolutePath(), e);
+                }
+            }
+        }
 
     }
 
@@ -1063,7 +1072,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         File tempSnapshotFile;
         try {
             tempSnapshotFile = File.createTempFile(fSnapshot.getName(), null, new File(fSnapshot.getParent()));
-            tempSnapshotFile.deleteOnExit();
         } catch (IOException ex) {
             throw new KuraIOException(ex);
         }

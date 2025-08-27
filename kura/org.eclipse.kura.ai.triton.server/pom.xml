@@ -35,69 +35,74 @@
         <protobuf-java-util.version>4.30.2</protobuf-java-util.version>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-api</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-context</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-core</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf-lite</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.perfmark</groupId>
+            <artifactId>perfmark-api</artifactId>
+            <version>0.26.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java-util</artifactId>
+            <version>${protobuf-java-util.version}</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.8.1</version>
                 <executions>
                     <execution>
+                        <id>copy-dependencies</id>
                         <phase>generate-sources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
                         <configuration>
                             <outputDirectory>${project.basedir}/lib</outputDirectory>
+                            <includeArtifactIds>
+                                grpc-api, grpc-context, grpc-core, grpc-netty-shaded, grpc-protobuf,
+                                grpc-protobuf-lite, grpc-stub, perfmark-api, protobuf-java-util
+                            </includeArtifactIds>
                             <stripVersion>true</stripVersion>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>io.grpc</groupId>
-                                    <artifactId>grpc-api</artifactId>
-                                    <version>${grpc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.grpc</groupId>
-                                    <artifactId>grpc-context</artifactId>
-                                    <version>${grpc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.grpc</groupId>
-                                    <artifactId>grpc-core</artifactId>
-                                    <version>${grpc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.grpc</groupId>
-                                    <artifactId>grpc-netty-shaded</artifactId>
-                                    <version>${grpc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.grpc</groupId>
-                                    <artifactId>grpc-protobuf</artifactId>
-                                    <version>${grpc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.grpc</groupId>
-                                    <artifactId>grpc-protobuf-lite</artifactId>
-                                    <version>${grpc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.grpc</groupId>
-                                    <artifactId>grpc-stub</artifactId>
-                                    <version>${grpc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.perfmark</groupId>
-                                    <artifactId>perfmark-api</artifactId>
-                                    <version>0.26.0</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.google.protobuf</groupId>
-                                    <artifactId>protobuf-java-util</artifactId>
-                                    <version>${protobuf-java-util.version}</version>
-                                </artifactItem>
-                            </artifactItems>
                         </configuration>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>

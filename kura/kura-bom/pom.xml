@@ -54,7 +54,6 @@
                     <verbose>true</verbose>
                     <projectType>framework</projectType>
                     <includeProvidedScope>false</includeProvidedScope>
-                    <excludeGroupId>org.eclipse.kura</excludeGroupId>
                 </configuration>
             </plugin>
         </plugins>

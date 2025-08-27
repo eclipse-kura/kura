@@ -38,7 +38,9 @@ public interface PasswordStrengthVerificationService {
     public void checkPasswordStrength(final char[] password) throws KuraException;
 
     /**
-     * Similar to {@link #checkPasswordStrength(char[])} checks whether the provided password satisfies the password strength requirements currently configured on the system and in addition verifies that the password
+     * Similar to {@link #checkPasswordStrength(char[])} checks whether 
+     * the provided password satisfies the password strength requirements currently configured 
+     * on the system and in addition verifies that the password
      * does not match the identityName
      * 
      * @param identityName

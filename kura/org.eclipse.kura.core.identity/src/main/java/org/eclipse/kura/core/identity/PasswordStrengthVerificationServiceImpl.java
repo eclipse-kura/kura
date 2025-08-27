@@ -75,7 +75,7 @@ public class PasswordStrengthVerificationServiceImpl
                 currentRequirements.specialCharactersRequired());
 
         List<Validator<String>> validators = new ArrayList<>(PasswordStrengthValidators.fromConfig(validatorOptions));
-        if (identityName != null) {
+        if (identityName != null && !identityName.isEmpty()) {
             validators.add(PasswordStrengthValidators.requireDifferentNameAndPassword(identityName));
         }
         return validators;

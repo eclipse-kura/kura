@@ -101,11 +101,6 @@ public class AllCoreTests {
                     .getComponentConfiguration("org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport");
             Map<String, Object> mqttProps = mqttConfig.getConfigurationProperties();
 
-            // mqttProps.put("broker-url", "mqtt://iot.eclipse.org:1883/");
-            // mqttProps.put("topic.context.account-name", "guest");
-            // mqttProps.put("username", "guest");
-            // mqttProps.put("password", "welcome");
-
             logger.info("Changing cloud credentials...");
             mqttProps.put("broker-url", "mqtt://localhost:1883/");
             mqttProps.put("topic.context.account-name", "ethdev");
@@ -117,7 +112,7 @@ public class AllCoreTests {
             String clientId = null;
             try {
                 clientId = sysService.getPrimaryMacAddress();
-            } catch (Throwable t) {
+            } catch (Exception t) {
                 // ignore.
             }
             if (clientId == null || clientId.isEmpty()) {
@@ -154,7 +149,8 @@ public class AllCoreTests {
     }
 
     public static void startMqttBroker() throws Exception {
-        logger.error("Starting Moquette MQTT broker... with path: {}", System.getProperty("moquette.path"));
+
+        logger.info("Starting Moquette MQTT broker... with path: {}", "moquette.conf");
         IResourceLoader fileLoader = new FileResourceLoader();
         IConfig classPathConfig = new ResourceLoaderConfig(fileLoader, "moquette.conf");
 

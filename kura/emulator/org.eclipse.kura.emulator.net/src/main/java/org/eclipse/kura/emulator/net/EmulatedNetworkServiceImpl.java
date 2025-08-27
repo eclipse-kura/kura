@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -21,8 +21,6 @@ import java.util.Optional;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.net.EthernetInterfaceImpl;
-import org.eclipse.kura.core.net.NetInterfaceAddressImpl;
 import org.eclipse.kura.emulator.Emulator;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
@@ -99,13 +97,13 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
 
     @Override
     public NetInterfaceState getState(String interfaceName) {
-        // Returned unknown state for the emulataed network service.
+        // Returned unknown state for the emulated network service.
         return NetInterfaceState.UNKNOWN;
     }
 
     @Override
     public List<String> getAllNetworkInterfaceNames() throws KuraException {
-        List<String> interfaceNames = new ArrayList<String>();
+        List<String> interfaceNames = new ArrayList<>();
 
         java.net.NetworkInterface jnInterface = null;
         Enumeration<java.net.NetworkInterface> interfaces = null;
@@ -116,7 +114,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                 interfaceNames.add(jnInterface.getName());
             }
         } catch (SocketException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.IO_ERROR, e);
         }
 
         return interfaceNames;
@@ -128,7 +126,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
         IPAddress netAddress = null;
         NetInterfaceAddressImpl addressImpl = null;
         List<NetInterfaceAddress> addresses = null;
-        List<NetInterface<? extends NetInterfaceAddress>> interfaces = new ArrayList<NetInterface<? extends NetInterfaceAddress>>();
+        List<NetInterface<? extends NetInterfaceAddress>> interfaces = new ArrayList<>();
 
         EthernetInterfaceImpl ethInterface = null;
         java.net.NetworkInterface jnInterface = null;
@@ -158,8 +156,8 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                     isP2p = jnInterface.isPointToPoint();
                     multi = jnInterface.supportsMulticast();
                 } catch (Exception e) {
-                    logger.warn("Exception while getting information for interface " + jnInterface.getName() + ": "
-                            + e.getMessage());
+                    logger.warn("Exception while getting information for interface {}:{}", jnInterface.getName(),
+                            e.getMessage());
                 }
                 ethInterface.setHardwareAddress(hwAddr);
                 ethInterface.setLinkUp(isUp);
@@ -169,7 +167,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                 ethInterface.setSupportsMulticast(multi);
                 ethInterface.setUp(isUp);
 
-                addresses = new ArrayList<NetInterfaceAddress>();
+                addresses = new ArrayList<>();
                 jnInterfaceAddresses = jnInterface.getInterfaceAddresses();
                 for (java.net.InterfaceAddress jnInterfaceAddress : jnInterfaceAddresses) {
 
@@ -188,7 +186,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                 interfaces.add(ethInterface);
             }
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.IO_ERROR, e);
         }
         return interfaces;
     }
@@ -209,7 +207,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
         IPAddress netAddress = null;
         NetInterfaceAddressImpl addressImpl = null;
         List<NetInterfaceAddress> addresses = null;
-        List<NetInterface<? extends NetInterfaceAddress>> interfaces = new ArrayList<NetInterface<? extends NetInterfaceAddress>>();
+        List<NetInterface<? extends NetInterfaceAddress>> interfaces = new ArrayList<>();
 
         EthernetInterfaceImpl ethInterface = null;
         java.net.NetworkInterface jnInterface = null;
@@ -255,7 +253,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                         ethInterface.setSupportsMulticast(multi);
                         ethInterface.setUp(isUp);
 
-                        addresses = new ArrayList<NetInterfaceAddress>();
+                        addresses = new ArrayList<>();
                         jnInterfaceAddresses = jnInterface.getInterfaceAddresses();
                         for (java.net.InterfaceAddress jnInterfaceAddress : jnInterfaceAddresses) {
 
@@ -278,7 +276,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
                 }
             }
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.IO_ERROR, e);
         }
         return interfaces;
     }

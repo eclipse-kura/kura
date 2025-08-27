@@ -44,7 +44,6 @@
         <module>org.eclipse.kura.core.deployment</module>
         <module>org.eclipse.kura.core.identity</module>
         <module>org.eclipse.kura.core.inventory</module>
-        <module>org.eclipse.kura.core.net</module>
         <module>org.eclipse.kura.core.status</module>
         <module>org.eclipse.kura.core.system</module>
         <module>org.eclipse.kura.deployment.agent</module>
@@ -56,14 +55,10 @@
         <module>org.eclipse.kura.driver.gpio.provider</module>
         <module>org.eclipse.kura.linux.clock</module>
         <module>org.eclipse.kura.linux.gpio</module>
-        <module>org.eclipse.kura.linux.net</module>
         <module>org.eclipse.kura.linux.usb</module>
         <module>org.eclipse.kura.linux.usb.x86_64</module>
         <module>org.eclipse.kura.linux.usb.aarch64</module>
         <module>org.eclipse.kura.linux.watchdog</module>
-        <module>org.eclipse.kura.net.configuration</module>
-        <module>org.eclipse.kura.nm</module>
-        <module>org.eclipse.kura.net.admin.firewall</module>
         <module>org.eclipse.kura.protocol.modbus</module>
         <module>org.eclipse.kura.stress</module>
         <module>org.eclipse.kura.util</module>
@@ -74,15 +69,12 @@
         <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider</module>
         <module>org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider</module>
         <module>org.eclipse.kura.cloudconnection.raw.mqtt.provider</module>
-        <module>org.eclipse.kura.linux.systemd.provider</module>
         <module>org.eclipse.kura.http.server.manager</module>
         <module>org.eclipse.kura.useradmin.store</module>
-        <module>org.eclipse.kura.network.threat.manager</module>
         <module>org.eclipse.kura.rest.tamper.detection.provider</module>
         <module>org.eclipse.kura.log.filesystem.provider</module>
         <module>org.eclipse.kura.rest.cloudconnection.provider</module>
         <module>org.eclipse.kura.rest.configuration.provider</module>
-        <module>org.eclipse.kura.rest.network.configuration.provider</module>
         <module>org.eclipse.kura.rest.identity.provider</module>
         <module>org.eclipse.kura.rest.inventory.provider</module>
         <module>org.eclipse.kura.rest.packages.provider</module>
@@ -98,7 +90,6 @@
         <module>org.eclipse.kura.configuration.change.manager</module>
         <module>org.eclipse.kura.db.sqlite.provider</module>
         <module>org.eclipse.kura.db.h2db.provider</module>
-        <module>org.eclipse.kura.rest.network.status.provider</module>
         <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</module>
         <module>org.eclipse.kura.cloudconnection.kapua.mqtt.provider</module>
         <module>org.eclipse.kura.jul.to.slf4j.configuration</module>

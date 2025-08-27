@@ -401,7 +401,7 @@ public class CloudServiceImpl
         this.dataService = null;
         this.systemService = null;
         this.systemAdminService = null;
-        this.networkService = null;
+        this.networkService = Optional.empty();
         this.positionService = Optional.empty();
         this.eventAdmin = null;
         this.certificatesService = null;

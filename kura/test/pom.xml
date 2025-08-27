@@ -671,11 +671,6 @@
                                 </requirement>
                                 <requirement>
                                     <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.core.net</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.deployment.agent</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
@@ -763,7 +758,6 @@
         <module>org.eclipse.kura.core.deployment.test</module>
         <module>org.eclipse.kura.core.identity.test</module>
         <module>org.eclipse.kura.core.inventory.test</module>
-        <module>org.eclipse.kura.core.net.test</module>
         <module>org.eclipse.kura.core.ssl.test</module>
         <module>org.eclipse.kura.core.status.test</module>
         <module>org.eclipse.kura.core.system.test</module>
@@ -779,12 +773,8 @@
         <module>org.eclipse.kura.internal.driver.s7plc.test</module>
         <module>org.eclipse.kura.linux.clock.test</module>
         <module>org.eclipse.kura.linux.gpio.test</module>
-        <module>org.eclipse.kura.linux.net.test</module>
         <module>org.eclipse.kura.linux.usb.test</module>
         <module>org.eclipse.kura.linux.watchdog.test</module>
-        <module>org.eclipse.kura.net.admin.firewall.test</module>
-        <module>org.eclipse.kura.nm.test</module>
-        <module>org.eclipse.kura.net.configuration.test</module>
         <module>org.eclipse.kura.protocol.modbus.test</module>
         <module>org.eclipse.kura.stress.test</module>
         <module>org.eclipse.kura.util.test</module>
@@ -792,7 +782,6 @@
         <module>org.eclipse.kura.json.marshaller.unmarshaller.provider.test</module>
         <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider.test</module>
         <module>org.eclipse.kura.http.server.manager.test</module>
-        <module>org.eclipse.kura.network.threat.manager.test</module>
         <module>org.eclipse.kura.rest.tamper.detection.provider.test</module>
         <module>org.eclipse.kura.useradmin.store.test</module>
         <module>org.eclipse.kura.core.keystore.test</module>
@@ -800,11 +789,9 @@
         <module>org.eclipse.kura.log.filesystem.provider.test</module>
         <module>org.eclipse.kura.rest.provider.test</module>
         <module>org.eclipse.kura.rest.configuration.provider.test</module>
-        <module>org.eclipse.kura.rest.network.configuration.provider.test</module>
         <module>org.eclipse.kura.rest.cloudconnection.provider.test</module>
         <module>org.eclipse.kura.rest.identity.provider.test</module>
         <module>org.eclipse.kura.rest.inventory.provider.test</module>
-        <module>org.eclipse.kura.rest.network.status.provider.test</module>
         <module>org.eclipse.kura.rest.packages.provider.test</module>
         <module>org.eclipse.kura.rest.security.provider.test</module>
         <module>org.eclipse.kura.rest.service.listing.provider.test</module>
@@ -818,9 +805,5 @@
         <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test</module>
         <module>org.eclipse.kura.cloudconnection.kapua.mqtt.provider.test</module>
         <module>org.eclipse.kura.cloud.base.provider.test</module>
-        <!--
-        <module>org.eclipse.kura.raspberrypi.sensehat.test</module>
-        -->
-        <!-- note: examples have their own test modules -->
     </modules>
 </project>

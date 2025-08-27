@@ -28,9 +28,6 @@ backup_files() {
 
 INSTALL_DIR=${kura.install.dir}
 
-# create known kura install location
-ln -sf \${INSTALL_DIR}/kura_* \${INSTALL_DIR}/kura
-
 # set up kura init
 cp \${INSTALL_DIR}/kura/install/kura.service /lib/systemd/system/kura.service
 systemctl daemon-reload
@@ -56,7 +53,7 @@ cp \${INSTALL_DIR}/kura/install/manage_kura_users.sh \${INSTALL_DIR}/kura/.data/
 chmod 700 \${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 \${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i -nn
 
-bash "\${INSTALL_DIR}/kura/install/customize-installation.sh" false
+bash "\${INSTALL_DIR}/kura/install/customize-installation.sh"
 
 # copy snapshot_0.xml
 cp \${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml \${INSTALL_DIR}/kura/.data/snapshot_0.xml

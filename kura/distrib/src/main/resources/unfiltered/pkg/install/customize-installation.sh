@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+#  Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
 #
 #  This program and the accompanying materials are made
 #  available under the terms of the Eclipse Public License 2.0
@@ -38,24 +38,12 @@ setup_libudev() {
     fi
 }
 
-customize_snapshot() {
+install_snapshot() {
     if [ ! -d "/opt/eclipse/kura/user/snapshots/" ]; then
         mkdir /opt/eclipse/kura/user/snapshots/
     fi
 
     mv "/opt/eclipse/kura/install/snapshot_0.xml" "/opt/eclipse/kura/user/snapshots/snapshot_0.xml"
-    if [ ${IS_NETWORKING_PROFILE} = "true" ]; then
-        python3 "/opt/eclipse/kura/install/customize_snapshot.py" "--networking_profile"
-    else
-        python3 "/opt/eclipse/kura/install/customize_snapshot.py"
-    fi 
-}
-
-customize_iptables() {
-    if [ "${IS_NETWORKING_PROFILE}" = "true" ]; then
-        mv "/opt/eclipse/kura/install/iptables" "/opt/eclipse/kura/.data/iptables"
-        python3 "/opt/eclipse/kura/install/customize_iptables.py"
-    fi
 }
 
 customize_kura_properties() {
@@ -92,8 +80,6 @@ customize_ram() {
     fi    
 }
 
-IS_NETWORKING_PROFILE=$1
-
 setup_libudev
 
 BOARD="generic-device"
@@ -105,8 +91,7 @@ fi
 
 mv "/opt/eclipse/kura/install/jdk.dio.properties-${BOARD}" "/opt/eclipse/kura/framework/jdk.dio.properties"
 
-customize_snapshot
+install_snapshot
 customize_kura_properties "${BOARD}"
-customize_iptables
 customize_ram "${BOARD}"
 

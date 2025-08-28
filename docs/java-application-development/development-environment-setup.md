@@ -118,7 +118,7 @@ cd kura/
 and then run the tool with the following command
 
 ```bash
-kura-gen
+kura-gen -t target-definition/kura-equinox.target
 ```
 
 #### 4. Open VSCode in the `kura` directory

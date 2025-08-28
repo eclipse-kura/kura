@@ -187,7 +187,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
             if (urlConnection instanceof HttpsURLConnection httpsURLConnection) {
                 httpsURLConnection.setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
 
-                // accept everything and let the SSL socket layer handle it
+                // hostname verification will be managed by the SSLSocketFactory returned by SSLManagerService
                 httpsURLConnection.setHostnameVerifier((hostname, session) -> true);
             }
         } catch (GeneralSecurityException e) {

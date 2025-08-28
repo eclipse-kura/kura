@@ -77,6 +77,17 @@ jobs:
         run: |
           mvn -f kura/pom.xml clean install -Dmaven.test.skip=true
 
+      - name: Get version
+        id: get-version
+        run: "echo \"resolved-version=\
+          $(mvn
+            --file ./kura/pom.xml
+            -Dexec.executable=echo
+            -Dexec.args='${project.version}'
+            --quiet exec:exec --non-recursive
+          )\" >> \"${GITHUB_OUTPUT}\""
+        shell: bash
+
       - name: Setup Node SDK
         uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
@@ -98,6 +109,8 @@ jobs:
             --exclude "**/target/**" \
             --exclude "**/distrib/**" \
             --filter "kura" \
+            --project-version "${{ steps.get-version.outputs.resolved-version }}" \
+            --project-name "kura-core" \
             --deep
 
       - name: Extract product version

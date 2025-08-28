@@ -52,11 +52,9 @@ public class ValidationUtil {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "New password cannot be empty");
         }
 
-        final String asString = new String(password);
+        requireMaximumLength(NEW_PASSWORD, password, 255);
 
-        requireMaximumLength(NEW_PASSWORD, asString, 255);
-
-        requireNoWhitespaceCharacters(NEW_PASSWORD, asString);
+        requireNoWhitespaceCharacters(NEW_PASSWORD, password);
 
         passwordStrengthVerificationService.checkPasswordStrength(identityName, password);
     }
@@ -94,10 +92,28 @@ public class ValidationUtil {
         }
     }
 
+    private static void requireMaximumLength(final String parameterName, final char[] value, final int length)
+            throws KuraException {
+        if (value.length > length) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
+                    parameterName + " must be at most " + length + " characters long");
+        }
+    }
+
     private static void requireNoWhitespaceCharacters(final String parameterName, final String value)
             throws KuraException {
         for (int i = 0; i < value.length(); i++) {
             if (Character.isWhitespace(value.codePointAt(i))) {
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
+                        parameterName + " cannot contain whitespace characters");
+            }
+        }
+    }
+
+    private static void requireNoWhitespaceCharacters(final String parameterName, final char[] value)
+            throws KuraException {
+        for (int i = 0; i < value.length; i++) {
+            if (Character.isWhitespace(value[i])) {
                 throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
                         parameterName + " cannot contain whitespace characters");
             }

@@ -186,6 +186,9 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
         try {
             if (urlConnection instanceof HttpsURLConnection httpsURLConnection) {
                 httpsURLConnection.setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
+
+                // accept everything and let the SSL socket layer handle it
+                httpsURLConnection.setHostnameVerifier((hostname, session) -> true);
             }
         } catch (GeneralSecurityException e) {
             postProgressEvent(this.options.getClientId(), getByteCount(), this.totalBytes, DownloadStatus.FAILED,

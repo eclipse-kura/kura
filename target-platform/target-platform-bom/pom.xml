@@ -1125,6 +1125,11 @@
                 <artifactId>usb4java-javax</artifactId>
                 <version>${usb4java-javax.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>4.30.2</version>
+            </dependency>
             <!-- END Kura target platform BOM -->
         </dependencies>
     </dependencyManagement>
@@ -1890,6 +1895,11 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>usb4java-javax</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>4.30.2</version>
         </dependency>
         <!-- END Kura target platform BOM -->
     </dependencies>

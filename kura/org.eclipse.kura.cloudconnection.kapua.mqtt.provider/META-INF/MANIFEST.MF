@@ -6,8 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
 Service-Component: OSGI-INF/*.xml
-Bundle-ClassPath: .,
- lib/protobuf-java.jar
+Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Import-Package: com.eclipsesource.json;version="0.9.5",
  org.apache.commons.io;version="2.4.0",

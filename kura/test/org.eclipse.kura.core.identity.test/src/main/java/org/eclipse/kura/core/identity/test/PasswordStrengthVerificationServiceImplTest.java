@@ -58,7 +58,7 @@ public class PasswordStrengthVerificationServiceImplTest extends IdentityService
 
     @Test
     public void shouldRejectPasswordEqualsToIdentityName() {
-        givenPasswordStrenghtVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
+        givenPasswordStrengthVerificationOptions("new.password.min.length", 3, "new.password.require.digits", false,
                 "new.password.require.special.characters", false, "new.password.require.both.cases", true);
 
         whenPasswordIsValidatedAgainstIdentityName("Admin", "Admin");

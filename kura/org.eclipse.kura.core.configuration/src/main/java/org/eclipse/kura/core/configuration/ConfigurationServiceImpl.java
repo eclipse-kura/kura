@@ -27,6 +27,9 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Set;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,7 +44,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Function;
@@ -1009,14 +1011,41 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             throw new KuraException(KuraErrorCode.CONFIGURATION_SNAPSHOT_NOT_FOUND);
         }
 
-        File tempSnapshotFile;
+        File tempSnapshotFile = getTempSnapshotFile(fSnapshot);
+
         try {
-            tempSnapshotFile = File.createTempFile(fSnapshot.getName(), null, new File(fSnapshot.getParent()));
-            tempSnapshotFile.deleteOnExit();
-        } catch (IOException ex) {
-            throw new KuraIOException(ex);
+            storeSnapshotData(conf, fSnapshot, tempSnapshotFile);
+            finalizeSnapshotWrite(fSnapshot, tempSnapshotFile);
+        } finally {
+            if (tempSnapshotFile.exists()) {
+                try {
+                    Files.delete(tempSnapshotFile.toPath());
+                } catch (IOException e) {
+                    logger.warn("Failed to delete temporary snapshot file: {}", tempSnapshotFile.getAbsolutePath(), e);
+                }
+            }
         }
 
+    }
+
+    private void finalizeSnapshotWrite(File fSnapshot, File tempSnapshotFile) throws KuraIOException {
+        try {
+            // Consolidate snapshot writing
+            Files.move(tempSnapshotFile.toPath(), fSnapshot.toPath(), StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.ATOMIC_MOVE);
+
+            Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rw-------");
+            Files.setPosixFilePermissions(fSnapshot.toPath(), perms);
+        } catch (UnsupportedOperationException e1) {
+            // POSIX permissions not supported on this file system, log and continue
+            logger.warn("Unable to set POSIX file permissions for snapshot file: {}", fSnapshot.getAbsolutePath(), e1);
+        } catch (IOException e) {
+            throw new KuraIOException(e);
+        }
+    }
+
+    private void storeSnapshotData(XmlComponentConfigurations conf, File fSnapshot, File tempSnapshotFile)
+            throws KuraException {
         // Write the temporary snapshot
         try (FileOutputStream fos = new FileOutputStream(tempSnapshotFile);
                 OutputStream encryptedStream = this.cryptoService.aesEncryptingStream(fos)) {
@@ -1032,21 +1061,16 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         } catch (IOException e) {
             throw new KuraIOException(e);
         }
+    }
 
+    private File getTempSnapshotFile(File fSnapshot) throws KuraIOException {
+        File tempSnapshotFile;
         try {
-            // Consolidate snapshot writing
-            Files.move(tempSnapshotFile.toPath(), fSnapshot.toPath(), StandardCopyOption.REPLACE_EXISTING,
-                    StandardCopyOption.ATOMIC_MOVE);
-
-        } catch (IOException e) {
-            try {
-                Files.delete(tempSnapshotFile.toPath());
-            } catch (IOException e1) {
-                throw new KuraIOException(e1);
-            }
-            throw new KuraIOException(e);
+            tempSnapshotFile = File.createTempFile(fSnapshot.getName(), null, new File(fSnapshot.getParent()));
+        } catch (IOException ex) {
+            throw new KuraIOException(ex);
         }
-
+        return tempSnapshotFile;
     }
 
     private ComponentConfiguration getConfigurableComponentConfiguration(String pid) {

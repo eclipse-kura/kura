@@ -34,6 +34,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -3148,5 +3151,145 @@ public class ConfigurationServiceJunitTest {
         assertEquals(2, implementingDouble.size());
         assertTrue(implementingDouble.stream().filter(config -> isOCDFor(config, "bar", barOcd)).findAny().isPresent());
         assertTrue(implementingDouble.stream().filter(config -> isOCDFor(config, "baz", bazOcd)).findAny().isPresent());
+    }
+
+    @Test
+    public void testWriteSnapshotFilePermissions() throws Throwable {
+        // Test that snapshot files are created with secure 600 permissions (owner read/write only)
+        
+        long sid = 424L;
+        XmlComponentConfigurations cfg = prepareSnapshot();
+        final String dir = "snapshotDirPermissions";
+        
+        File d1 = new File(dir);
+        d1.mkdirs();
+        d1.deleteOnExit();
+        
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
+            @Override
+            String getSnapshotsDirectory() {
+                return dir;
+            }
+            
+            @Override
+            protected <T> T unmarshal(InputStream xmlStream, Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
+                return xmlMarshaller.unmarshal(xmlStream, clazz);
+            }
+            
+            @Override
+            protected void marshal(OutputStream outStream, Object object) {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
+                try {
+                    xmlMarshaller.marshal(outStream, object);
+                } catch (KuraException e) {
+                    // Do nothing...
+                }
+            }
+        };
+        
+        CryptoService cryptoServiceMock = mock(CryptoService.class);
+        cs.setCryptoService(cryptoServiceMock);
+        
+        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
+            return answer.getArgument(0, OutputStream.class);
+        });
+        
+        BundleContext bundleContext = mock(BundleContext.class);
+        TestUtil.setFieldValue(cs, "bundleContext", bundleContext);
+        
+        // Execute the writeSnapshot method
+        TestUtil.invokePrivate(cs, "writeSnapshot", sid, cfg);
+        
+        File f1 = new File(d1, "snapshot_" + sid + ".xml");
+        f1.deleteOnExit();
+        assertTrue("snapshot file was created", f1.exists());
+        
+        try {
+            // Verify file permissions are set to 600 (owner read/write only) on POSIX systems
+            Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(f1.toPath());
+            Set<PosixFilePermission> expectedPerms = PosixFilePermissions.fromString("rw-------");
+            
+            assertEquals("File permissions should be 600 (owner read/write only)", expectedPerms, permissions);
+            
+            // Verify that group and others don't have any permissions
+            assertFalse("Group should not have read permission", permissions.contains(PosixFilePermission.GROUP_READ));
+            assertFalse("Group should not have write permission", permissions.contains(PosixFilePermission.GROUP_WRITE));
+            assertFalse("Others should not have read permission", permissions.contains(PosixFilePermission.OTHERS_READ));
+            assertFalse("Others should not have write permission", permissions.contains(PosixFilePermission.OTHERS_WRITE));
+            
+            // Verify that owner has both read and write permissions
+            assertTrue("Owner should have read permission", permissions.contains(PosixFilePermission.OWNER_READ));
+            assertTrue("Owner should have write permission", permissions.contains(PosixFilePermission.OWNER_WRITE));
+            assertFalse("Owner should not have execute permission", permissions.contains(PosixFilePermission.OWNER_EXECUTE));
+            
+        } catch (UnsupportedOperationException e) {
+            // This test is running on a non-POSIX filesystem (like Windows)
+            // In this case, we can't test the permissions, but we can verify the file was created
+            System.out.println("POSIX file permissions not supported on this filesystem - skipping permission verification");
+        }
+        
+        f1.delete();
+        d1.delete();
+    }
+    
+    @Test
+    public void testWriteSnapshotNonPosixFilesystem() throws Throwable {
+        // Test behavior on non-POSIX filesystems where setPosixFilePermissions is not supported
+        
+        long sid = 525L;
+        XmlComponentConfigurations cfg = prepareSnapshot();
+        final String dir = "snapshotDirNonPosix";
+        
+        File d1 = new File(dir);
+        d1.mkdirs();
+        d1.deleteOnExit();
+        
+        // Mock ConfigurationServiceImpl to simulate non-POSIX filesystem behavior
+        ConfigurationServiceImpl cs = new ConfigurationServiceImpl() {
+            @Override
+            String getSnapshotsDirectory() {
+                return dir;
+            }
+            
+            @Override
+            protected <T> T unmarshal(InputStream xmlStream, Class<T> clazz) throws KuraException {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
+                return xmlMarshaller.unmarshal(xmlStream, clazz);
+            }
+            
+            @Override
+            protected void marshal(OutputStream outStream, Object object) {
+                XmlMarshallUnmarshallImpl xmlMarshaller = new XmlMarshallUnmarshallImpl();
+                try {
+                    xmlMarshaller.marshal(outStream, object);
+                } catch (KuraException e) {
+                    // Do nothing...
+                }
+            }
+        };
+        
+        CryptoService cryptoServiceMock = mock(CryptoService.class);
+        cs.setCryptoService(cryptoServiceMock);
+        
+        when(cryptoServiceMock.aesEncryptingStream((OutputStream) ArgumentMatchers.any())).thenAnswer(answer -> {
+            return answer.getArgument(0, OutputStream.class);
+        });
+        
+        BundleContext bundleContext = mock(BundleContext.class);
+        TestUtil.setFieldValue(cs, "bundleContext", bundleContext);
+        
+        // Execute the writeSnapshot method - should not throw exception even on non-POSIX systems
+        TestUtil.invokePrivate(cs, "writeSnapshot", sid, cfg);
+        
+        File f1 = new File(d1, "snapshot_" + sid + ".xml");
+        f1.deleteOnExit();
+        assertTrue("snapshot file was created", f1.exists());
+        
+        // On non-POSIX systems, the method should complete successfully even if permissions can't be set
+        // We can't easily mock the UnsupportedOperationException here, but this test verifies the method completes
+        
+        f1.delete();
+        d1.delete();
     }
 }

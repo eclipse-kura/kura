@@ -104,7 +104,6 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
             HttpURLConnection.setFollowRedirects(false);
             URLConnection urlConnection = openAndConnect(HttpDownloadCountingOutputStream.this.downloadURL);
 
-            checkIsHttpProtocol(urlConnection);
 
             HttpDownloadCountingOutputStream.this.is = urlConnection.getInputStream();
 
@@ -162,6 +161,7 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 
         HttpURLConnection urlConnection = openConnection(localUrl);
 
+        checkIsHttpProtocol(urlConnection);
         setupConnection(urlConnection);
 
         urlConnection.connect();

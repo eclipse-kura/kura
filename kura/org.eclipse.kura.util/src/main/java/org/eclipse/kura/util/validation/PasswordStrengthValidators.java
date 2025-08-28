@@ -82,7 +82,8 @@ public class PasswordStrengthValidators {
 
     public static Validator<String> requireDifferentNameAndPassword(final String identityName) {
 
-        return new PredicateValidator(v -> !v.equals(identityName), new DefaultMessages().pwdNotEqualsUsername());
+        return new PredicateValidator(v -> !v.equalsIgnoreCase(identityName),
+                new DefaultMessages().pwdNotEqualsUsername());
     }
 
     public interface Messages {

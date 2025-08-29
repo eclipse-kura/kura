@@ -88,6 +88,34 @@
                     </configuration>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.3.1</version>
+                    <executions>
+                        <!--
+                            copy the OSGI-INF directory to a place where it is being detected and
+                            picked up by PDE Launcher as well, supported by M2E in incremental builds
+                            natively
+                        -->
+                        <execution>
+                            <id>prepare-tycho-runtime</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${basedir}/OSGI-INF</outputDirectory>
+                                <resources>
+                                    <resource>
+                                        <directory>${project.build.outputDirectory}/OSGI-INF</directory>
+                                        <filtering>false</filtering>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco.version}</version>

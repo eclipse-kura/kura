@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -33,17 +33,28 @@ public class ValidationUtil {
 
     public static void validateNewPassword(final char[] password,
             final PasswordStrengthVerificationService passwordStrengthVerificationService) throws KuraException {
-        if (password.length == 0) {
+        if (password == null || password.length == 0) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "New password cannot be empty");
         }
 
-        final String asString = new String(password);
+        requireMaximumLength(NEW_PASSWORD, password, 255);
 
-        requireMaximumLength(NEW_PASSWORD, asString, 255);
-
-        requireNoWhitespaceCharacters(NEW_PASSWORD, asString);
+        requireNoWhitespaceCharacters(NEW_PASSWORD, password);
 
         passwordStrengthVerificationService.checkPasswordStrength(password);
+    }
+
+    public static void validateNewPassword(String identityName, final char[] password,
+            final PasswordStrengthVerificationService passwordStrengthVerificationService) throws KuraException {
+        if (password == null || password.length == 0) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "New password cannot be empty");
+        }
+
+        requireMaximumLength(NEW_PASSWORD, password, 255);
+
+        requireNoWhitespaceCharacters(NEW_PASSWORD, password);
+
+        passwordStrengthVerificationService.checkPasswordStrength(identityName, password);
     }
 
     public static void validateNewIdentityName(final String identityName) throws KuraException {
@@ -79,10 +90,18 @@ public class ValidationUtil {
         }
     }
 
-    private static void requireNoWhitespaceCharacters(final String parameterName, final String value)
+    private static void requireMaximumLength(final String parameterName, final char[] value, final int length)
             throws KuraException {
-        for (int i = 0; i < value.length(); i++) {
-            if (Character.isWhitespace(value.codePointAt(i))) {
+        if (value.length > length) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
+                    parameterName + " must be at most " + length + " characters long");
+        }
+    }
+
+    private static void requireNoWhitespaceCharacters(final String parameterName, final char[] value)
+            throws KuraException {
+        for (int i = 0; i < value.length; i++) {
+            if (Character.isWhitespace(value[i])) {
                 throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
                         parameterName + " cannot contain whitespace characters");
             }

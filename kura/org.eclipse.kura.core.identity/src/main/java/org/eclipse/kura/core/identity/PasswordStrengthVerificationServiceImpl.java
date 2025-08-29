@@ -57,14 +57,31 @@ public class PasswordStrengthVerificationServiceImpl
 
     @Override
     public void checkPasswordStrength(char[] password) throws KuraException {
-        final PasswordStrengthRequirements currentRequirements = getPasswordStrengthRequirements();
+        List<Validator<String>> validators = buildValidators(null);
+        checkPasswordStrength(password, validators);
+    }
 
-        ValidatorOptions validatorOptions = new ValidatorOptions(currentRequirements.getPasswordMinimumLength(),
-                currentRequirements.digitsRequired(), currentRequirements.bothCasesRequired(),
+    @Override
+    public void checkPasswordStrength(String identityName, char[] password) throws KuraException {
+        List<Validator<String>> validators = buildValidators(identityName);
+        checkPasswordStrength(password, validators);
+    }
+
+    private List<Validator<String>> buildValidators(String identityName) {
+        PasswordStrengthRequirements currentRequirements = getPasswordStrengthRequirements();
+        ValidatorOptions validatorOptions = new ValidatorOptions(currentRequirements.getPasswordMinimumLength(), //
+                currentRequirements.digitsRequired(), //
+                currentRequirements.bothCasesRequired(), //
                 currentRequirements.specialCharactersRequired());
 
-        final List<Validator<String>> validators = PasswordStrengthValidators.fromConfig(validatorOptions);
+        List<Validator<String>> validators = new ArrayList<>(PasswordStrengthValidators.fromConfig(validatorOptions));
+        if (identityName != null && !identityName.trim().isEmpty()) {
+            validators.add(PasswordStrengthValidators.requireDifferentNameAndPassword(identityName));
+        }
+        return validators;
+    }
 
+    private void checkPasswordStrength(char[] password, List<Validator<String>> validators) throws KuraException {
         final List<String> errors = new ArrayList<>();
 
         for (final Validator<String> validator : validators) {

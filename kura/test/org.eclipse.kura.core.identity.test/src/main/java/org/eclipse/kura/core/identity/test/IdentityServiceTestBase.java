@@ -31,7 +31,7 @@ public abstract class IdentityServiceTestBase {
 
     private final ConfigurationService configurationService;
 
-    protected void givenPasswordStrenghtVerificationOptions(final Object... values) {
+    protected void givenPasswordStrengthVerificationOptions(final Object... values) {
 
         final Iterator<Object> iter = Arrays.asList(values).iterator();
 

@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import org.eclipse.kura.system.SystemService;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(name = "FrameworkProperties", description = "System framework properties including hardware, Java runtime, OS, and Kura-specific information")
 @SuppressWarnings("unused")
 public class FrameworkPropertiesDTO {
 

@@ -32,5 +32,54 @@
     <artifactId>org.eclipse.kura.rest.system.provider</artifactId>
     <packaging>eclipse-plugin</packaging>
     <version>2.0.0-SNAPSHOT</version>
-    
+
+    <dependencies>
+        <!-- OpenAPI/Swagger Dependencies -->
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations-jakarta</artifactId>
+            <version>2.2.36</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-jaxrs2-jakarta</artifactId>
+            <version>2.2.36</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-models</artifactId>
+            <version>2.2.36</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- OpenAPI Documentation Generation Plugin -->
+            <plugin>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-maven-plugin-jakarta</artifactId>
+                <version>2.2.36</version>
+                <configuration>
+                    <!-- Where to write files -->
+                    <outputPath>${project.build.directory}/generated-openapi</outputPath>
+                    <outputFileName>openapi</outputFileName>
+                    <outputFormat>JSONANDYAML</outputFormat>
+                    <prettyPrint>true</prettyPrint>
+                    <!-- What to scan -->
+                    <resourcePackages>
+                        <package>org.eclipse.kura.rest.system</package>
+                    </resourcePackages>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>resolve</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

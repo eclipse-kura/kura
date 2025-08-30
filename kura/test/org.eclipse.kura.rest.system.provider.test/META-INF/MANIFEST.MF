@@ -7,7 +7,16 @@ Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v2.0
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
 Bundle-ActivationPolicy: lazy
-Import-Package: org.eclipse.kura.core.testutil.requesthandler;version="1.1.0",
+Import-Package: io.swagger.v3.oas.annotations;version="2.1.0",
+ io.swagger.v3.oas.annotations.enums;version="2.1.0",
+ io.swagger.v3.oas.annotations.info;version="2.1.0",
+ io.swagger.v3.oas.annotations.media;version="2.1.0",
+ io.swagger.v3.oas.annotations.parameters;version="2.1.0",
+ io.swagger.v3.oas.annotations.responses;version="2.1.0",
+ io.swagger.v3.oas.annotations.security;version="2.1.0",
+ io.swagger.v3.oas.annotations.servers;version="2.1.0",
+ io.swagger.v3.oas.annotations.tags;version="2.1.0",
+ org.eclipse.kura.core.testutil.requesthandler;version="1.1.0",
  org.eclipse.kura.util.wire.test;version="1.1.0",
  org.junit;version="[4.12.0,5.0.0)",
  org.junit.runner;version="[4.12.0,5.0.0)",

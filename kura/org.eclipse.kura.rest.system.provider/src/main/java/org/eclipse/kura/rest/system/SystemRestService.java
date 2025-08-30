@@ -31,6 +31,15 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
@@ -46,6 +55,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Path(REST_APP_ID)
+@Tag(name = "System", description = "System information and properties API for Eclipse Kura gateway")
+@SecurityRequirement(name = "basicAuth")
+@SuppressWarnings("all")
 public class SystemRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(SystemRestService.class);
@@ -82,6 +94,12 @@ public class SystemRestService {
     @RolesAllowed(REST_ROLE_NAME)
     @Path(RESOURCE_FRAMEWORK_PROPERTIES)
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get Framework Properties", description = "Retrieves comprehensive system framework properties including hardware, Java runtime, OS, and Kura-specific information", operationId = "getFrameworkProperties")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Framework properties successfully retrieved", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FrameworkPropertiesDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions"),
+            @ApiResponse(responseCode = "500", description = "Internal server error") })
     public FrameworkPropertiesDTO getFrameworkProperties() {
         try {
             logger.debug(DEBUG_MESSSAGE, RESOURCE_FRAMEWORK_PROPERTIES);
@@ -122,7 +140,15 @@ public class SystemRestService {
     @Path(RESOURCE_FRAMEWORK_PROPERTIES_FILTER)
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public FrameworkPropertiesDTO postFrameworkPropertiesFilter(FilterDTO filter) {
+    @Operation(summary = "Get Filtered Framework Properties", description = "Retrieves system framework properties filtered by specific property names. Only returns the properties specified in the filter.", operationId = "getFilteredFrameworkProperties")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Filtered framework properties successfully retrieved", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FrameworkPropertiesDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Bad request - Invalid filter parameters"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions"),
+            @ApiResponse(responseCode = "500", description = "Internal server error") })
+    public FrameworkPropertiesDTO postFrameworkPropertiesFilter(
+            @RequestBody(description = "Filter criteria specifying which properties to include in the response", required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FilterDTO.class))) FilterDTO filter) {
         try {
             logger.debug(DEBUG_MESSSAGE, RESOURCE_FRAMEWORK_PROPERTIES_FILTER);
             return new FrameworkPropertiesDTO(this.systemService, filter.getNames());

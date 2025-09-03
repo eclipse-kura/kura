@@ -27,7 +27,7 @@
                 <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
             </PatternLayout>
         </Console>
-        <File name="RollingFile" fileName="${log_dir}/${log_name}.log">
+        <File name="LoggingFile" fileName="${log_dir}/${log_name}.log">
             <PatternLayout>
                 <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
             </PatternLayout>
@@ -48,18 +48,18 @@
     <Loggers>
         <Logger name="org.eclipse" level="info" additivity="false">
             <AppenderRef ref="Console" />
-            <AppenderRef ref="RollingFile" />
+            <AppenderRef ref="LoggingFile" />
         </Logger>
         <Logger name="org.glassfish.jersey.internal" level="error" additivity="false">
             <AppenderRef ref="Console" />
-            <AppenderRef ref="RollingFile" />
+            <AppenderRef ref="LoggingFile" />
         </Logger>
         <Logger name="AuditLogger" level="trace" additivity="false">
             <AppenderRef ref="audit" />
         </Logger>
         <Root level="info">
             <AppenderRef ref="Console" />
-            <AppenderRef ref="RollingFile" />
+            <AppenderRef ref="LoggingFile" />
         </Root>
     </Loggers>
 

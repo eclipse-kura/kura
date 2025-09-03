@@ -27,18 +27,12 @@
                 <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
             </PatternLayout>
         </Console>
-        <RollingFile name="RollingFile" fileName="${log_dir}/${log_name}.log"
-            filePattern="${log_dir}/${log_name}-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
+        <File name="RollingFile" fileName="${log_dir}/${log_name}.log">
             <PatternLayout>
                 <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
             </PatternLayout>
-            <Policies>
-                <SizeBasedTriggeringPolicy size="20 MB" />
-            </Policies>
-            <DefaultRolloverStrategy max="10" />
-        </RollingFile>
-        <RollingFile name="audit" fileName="${log_dir}/${log_name}-audit.log"
-            filePattern="${log_dir}/${log_name}-audit-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
+        </File>
+        <File name="audit" fileName="${log_dir}/${log_name}-audit.log">
             <RFC5424Layout enterpriseNumber="28392" includeMDC="true" mdcId="RequestContext"
                 appName="EclipseKura" mdcPrefix="" newLine="true">
                 <LoggerFields>
@@ -48,11 +42,7 @@
                     <KeyValuePair key="exception" value="%ex" />
                 </LoggerFields>
             </RFC5424Layout>
-            <Policies>
-                <SizeBasedTriggeringPolicy size="20 MB" />
-            </Policies>
-            <DefaultRolloverStrategy max="10" />
-        </RollingFile>
+        </File>
     </Appenders>
 
     <Loggers>

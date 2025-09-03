@@ -8,7 +8,9 @@ Bundle-License: Eclipse Public License v2.0
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
 Service-Component: OSGI-INF/*.xml
 Fragment-Host: org.eclipse.kura.core.deployment
-Import-Package: org.bouncycastle.asn1.x500;version="1.78.0",
+Import-Package: jakarta.ws.rs;version="[3.1,4.0)",
+ jakarta.ws.rs.core;version="[3.1.0,4.0.0)",
+ org.bouncycastle.asn1.x500;version="1.78.0",
  org.eclipse.kura;version="[1.2,2.0)",
  org.eclipse.kura.core.deployment.hook;version="[1.0,2.0)",
  org.eclipse.kura.core.deployment.install;version="[1.0,2.0)",

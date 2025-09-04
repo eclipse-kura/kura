@@ -29,7 +29,6 @@ gwt-unitCache
 .launch
 www-test
 .gwt
-*.cache.*
 manifests
 bin/
 +# IntelliJ Idea

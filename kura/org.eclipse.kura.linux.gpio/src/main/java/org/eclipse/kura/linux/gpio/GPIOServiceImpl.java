@@ -13,16 +13,6 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.gpio;
 
-import org.eclipse.kura.gpio.GPIOService;
-import org.eclipse.kura.gpio.KuraGPIODirection;
-import org.eclipse.kura.gpio.KuraGPIOMode;
-import org.eclipse.kura.gpio.KuraGPIOPin;
-import org.eclipse.kura.gpio.KuraGPIOTrigger;
-import org.eclipse.kura.system.SystemService;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -32,6 +22,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+
+import org.eclipse.kura.gpio.GPIOService;
+import org.eclipse.kura.gpio.KuraGPIODirection;
+import org.eclipse.kura.gpio.KuraGPIOMode;
+import org.eclipse.kura.gpio.KuraGPIOPin;
+import org.eclipse.kura.gpio.KuraGPIOTrigger;
+import org.eclipse.kura.system.SystemService;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GPIOServiceImpl implements GPIOService {
 
@@ -57,7 +57,7 @@ public class GPIOServiceImpl implements GPIOService {
      * Test if a file is available for loading
      *
      * @param path
-     *         the path to test
+     *            the path to test
      * @return the path from input which can be used for loading, {@code null} if the file is not present or should not
      *         be used for loading
      */

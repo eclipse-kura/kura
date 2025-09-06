@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -40,6 +41,7 @@ import org.eclipse.kura.identity.PasswordConfiguration;
 import org.eclipse.kura.identity.PasswordHash;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.identity.Permission;
+import org.eclipse.kura.identity.TemporaryIdentityService;
 import org.eclipse.kura.identity.configuration.extension.IdentityConfigurationExtension;
 import org.eclipse.kura.util.useradmin.UserAdminHelper;
 import org.eclipse.kura.util.useradmin.UserAdminHelper.AuthenticationException;
@@ -50,7 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("restriction")
-public class IdentityServiceImpl implements IdentityService {
+public class IdentityServiceImpl implements IdentityService, TemporaryIdentityService {
 
     private static final String IDENTITY_SERVICE_FAILURE_FORMAT_STRING = "{} IdentityService - Failure - {}";
     private static final String IDENTITY_SERVICE_SUCCESS_FORMAT_STRING = "{} IdentityService - Success - {}";
@@ -67,6 +69,7 @@ public class IdentityServiceImpl implements IdentityService {
     private PasswordStrengthVerificationService passwordStrengthVerificationService;
 
     private final Map<String, IdentityConfigurationExtension> extensions = new ConcurrentHashMap<>();
+    private final Map<String, TemporaryIdentity> temporaryIdentities = new ConcurrentHashMap<>();
 
     public void setCryptoService(final CryptoService cryptoService) {
         this.cryptoService = cryptoService;
@@ -278,6 +281,55 @@ public class IdentityServiceImpl implements IdentityService {
         } catch (AuthenticationException e) {
             throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION,
                     "The specified permission is not assigned to the given identity");
+        }
+    }
+
+    @Override
+    public synchronized String createTemporaryIdentity(final String identityName, final Set<Permission> permissions) throws KuraException {
+        audit(() -> {
+            ValidationUtil.validateNewIdentityName(identityName);
+            
+            for (final Permission permission : permissions) {
+                if (!this.userAdminHelper.getPermission(permission.getName()).isPresent()) {
+                    throw new KuraException(KuraErrorCode.INVALID_PARAMETER, 
+                            "Permission '" + permission.getName() + "' does not exist");
+                }
+            }
+            
+            final String token = generateSecureToken();
+            final TemporaryIdentity temporaryIdentity = new TemporaryIdentity(identityName, permissions, token);
+            this.temporaryIdentities.put(token, temporaryIdentity);
+            
+            return token;
+        }, "Create temporary identity " + identityName);
+    }
+
+    @Override
+    public synchronized boolean deleteTemporaryIdentity(final String token) throws KuraException {
+        final TemporaryIdentity removed = audit(() -> this.temporaryIdentities.remove(token), 
+                "Delete temporary identity with token");
+        return removed != null;
+    }
+
+    @Override
+    public synchronized String validateTemporaryToken(final String token) throws KuraException {
+        final TemporaryIdentity identity = this.temporaryIdentities.get(token);
+        if (identity == null) {
+            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Invalid temporary token");
+        }
+        return identity.getName();
+    }
+
+    @Override
+    public synchronized void checkTemporaryPermission(final String token, final Permission permission) throws KuraException {
+        final TemporaryIdentity identity = this.temporaryIdentities.get(token);
+        if (identity == null) {
+            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Invalid temporary token");
+        }
+        
+        if (!identity.hasPermission(permission)) {
+            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION,
+                    "The specified permission is not assigned to the temporary identity");
         }
     }
 
@@ -500,6 +552,10 @@ public class IdentityServiceImpl implements IdentityService {
         }
 
         failureHandler.throwIfFailuresOccurred(KuraErrorCode.CONFIGURATION_ERROR);
+    }
+
+    private String generateSecureToken() {
+        return "kura-temp-" + UUID.randomUUID().toString();
     }
 
     private static class FailureHandler {

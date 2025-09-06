@@ -74,6 +74,9 @@ public class ContainerInstanceOptions {
             "container.signature.verify.transparency.log", true);
     private static final Property<String> ENFORCEMENT_DIGEST = new Property<>("container.signature.enforcement.digest",
             "");
+    
+    private static final Property<Boolean> IDENTITY_INTEGRATION_ENABLED = new Property<>("container.identity.enabled", false);
+    private static final Property<String> CONTAINER_PERMISSIONS = new Property<>("container.permissions", "");
 
     private boolean enabled;
     private final String image;
@@ -107,6 +110,9 @@ public class ContainerInstanceOptions {
     private final Boolean signatureVerifyTransparencyLog;
 
     private final Optional<String> enforcementDigest;
+    
+    private final boolean identityIntegrationEnabled;
+    private final List<String> containerPermissions;
 
     public ContainerInstanceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -143,6 +149,8 @@ public class ContainerInstanceOptions {
         this.signatureTrustAnchor = parseOptionalString(SIGNATURE_TRUST_ANCHOR.getOptional(properties));
         this.signatureVerifyTransparencyLog = SIGNATURE_VERIFY_TLOG.get(properties);
         this.enforcementDigest = parseOptionalString(ENFORCEMENT_DIGEST.getOptional(properties));
+        this.identityIntegrationEnabled = IDENTITY_INTEGRATION_ENABLED.get(properties);
+        this.containerPermissions = parseStringListSplitByComma(CONTAINER_PERMISSIONS.get(properties));
     }
 
     private Map<String, String> parseVolume(String volumeString) {
@@ -362,6 +370,14 @@ public class ContainerInstanceOptions {
         return this.enforcementDigest;
     }
 
+    public boolean isIdentityIntegrationEnabled() {
+        return this.identityIntegrationEnabled;
+    }
+
+    public List<String> getContainerPermissions() {
+        return this.containerPermissions;
+    }
+
     private ImageConfiguration buildImageConfig() {
         return new ImageConfiguration.ImageConfigurationBuilder().setImageName(this.image).setImageTag(this.imageTag)
                 .setImageDownloadTimeoutSeconds(this.imageDownloadTimeout)
@@ -438,8 +454,8 @@ public class ContainerInstanceOptions {
     public int hashCode() {
         return Objects.hash(containerCpus, containerDevice, containerEntryPoint, containerEnv, containerGpus,
                 containerLoggerType, containerLoggingParameters, containerMemory, containerName,
-                containerNetworkingMode, containerPortProtocol, containerRuntime, containerVolumeString,
-                containerVolumes, enabled, enforcementDigest, externalPorts, image, imageDownloadTimeout, imageTag,
+                containerNetworkingMode, containerPermissions, containerPortProtocol, containerRuntime, containerVolumeString,
+                containerVolumes, enabled, enforcementDigest, externalPorts, identityIntegrationEnabled, image, imageDownloadTimeout, imageTag,
                 internalPorts, maxDownloadRetries, privilegedMode, registryPassword, registryURL, registryUsername,
                 restartOnFailure, retryInterval, signatureTrustAnchor, signatureVerifyTransparencyLog);
     }
@@ -466,11 +482,14 @@ public class ContainerInstanceOptions {
                 && Objects.equals(containerMemory, other.containerMemory)
                 && Objects.equals(containerName, other.containerName)
                 && Objects.equals(containerNetworkingMode, other.containerNetworkingMode)
+                && Objects.equals(containerPermissions, other.containerPermissions)
                 && Objects.equals(containerPortProtocol, other.containerPortProtocol)
                 && Objects.equals(containerVolumeString, other.containerVolumeString)
                 && Objects.equals(containerVolumes, other.containerVolumes) && enabled == other.enabled
                 && Objects.equals(enforcementDigest, other.enforcementDigest)
-                && Objects.equals(externalPorts, other.externalPorts) && Objects.equals(image, other.image)
+                && Objects.equals(externalPorts, other.externalPorts) 
+                && identityIntegrationEnabled == other.identityIntegrationEnabled
+                && Objects.equals(image, other.image)
                 && imageDownloadTimeout == other.imageDownloadTimeout && Objects.equals(imageTag, other.imageTag)
                 && Objects.equals(internalPorts, other.internalPorts) && maxDownloadRetries == other.maxDownloadRetries
                 && privilegedMode == other.privilegedMode && Objects.equals(registryPassword, other.registryPassword)

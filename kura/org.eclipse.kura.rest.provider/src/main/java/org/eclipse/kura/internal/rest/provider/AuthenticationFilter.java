@@ -20,6 +20,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.identity.Permission;
+import org.eclipse.kura.identity.TemporaryIdentityService;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
 import org.osgi.service.useradmin.Group;
 import org.osgi.service.useradmin.Role;
@@ -46,6 +49,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     private final Set<AuthenticationProviderHolder> authenticationProviders = new TreeSet<>();
     private UserAdmin userAdmin;
+    private TemporaryIdentityService temporaryIdentityService;
 
     @Context
     private HttpServletRequest request;
@@ -54,6 +58,10 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     public void setUserAdmin(final UserAdmin userAdmin) {
         this.userAdmin = userAdmin;
+    }
+
+    public void setTemporaryIdentityService(final TemporaryIdentityService temporaryIdentityService) {
+        this.temporaryIdentityService = temporaryIdentityService;
     }
 
     public void registerAuthenticationProvider(final AuthenticationProvider authenticationProvider) {
@@ -124,6 +132,10 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     }
 
     private boolean isUserInRole(final Principal requestUser, final String role) {
+        // Check if this is a temporary token principal by examining the class name
+        if (requestUser.getClass().getSimpleName().contains("TemporaryToken")) {
+            return isTemporaryUserInRole(requestUser, role);
+        }
 
         try {
             final User user = (User) this.userAdmin.getRole(KURA_USER_PREFIX + requestUser.getName());
@@ -131,6 +143,22 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             return containsBasicMember(this.userAdmin.getRole(KURA_PERMISSION_REST_PREFIX + role), user)
                     || containsBasicMember(this.userAdmin.getRole(KURA_PERMISSION_PREFIX + "kura.admin"), user);
 
+        } catch (final Exception e) {
+            return false;
+        }
+    }
+
+    private boolean isTemporaryUserInRole(final Principal principal, final String role) {
+        if (this.temporaryIdentityService == null) {
+            return false;
+        }
+
+        try {
+            // Get the token using reflection
+            final String token = (String) principal.getClass().getMethod("getToken").invoke(principal);
+            final Permission permission = new Permission("rest." + role);
+            this.temporaryIdentityService.checkTemporaryPermission(token, permission);
+            return true;
         } catch (final Exception e) {
             return false;
         }

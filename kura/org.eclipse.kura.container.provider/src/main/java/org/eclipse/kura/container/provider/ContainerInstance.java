@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -37,6 +38,8 @@ import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
 import org.eclipse.kura.container.signature.ContainerSignatureValidationService;
 import org.eclipse.kura.container.signature.ValidationResult;
+import org.eclipse.kura.identity.Permission;
+import org.eclipse.kura.identity.TemporaryIdentityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +54,10 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private ContainerOrchestrationService containerOrchestrationService;
     private Set<ContainerSignatureValidationService> availableContainerSignatureValidationService = new HashSet<>();
     private ConfigurationService configurationService;
+    private TemporaryIdentityService temporaryIdentityService;
     private State state = new Disabled(new ContainerInstanceOptions(Collections.emptyMap()));
     private ContainerInstanceOptions currentOptions = null;
+    private String currentTemporaryToken = null;
 
     public void setContainerOrchestrationService(final ContainerOrchestrationService containerOrchestrationService) {
         this.containerOrchestrationService = containerOrchestrationService;
@@ -74,6 +79,10 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     public synchronized void setConfigurationService(final ConfigurationService confService) {
         this.configurationService = confService;
+    }
+
+    public synchronized void setTemporaryIdentityService(final TemporaryIdentityService temporaryIdentityService) {
+        this.temporaryIdentityService = temporaryIdentityService;
     }
 
     // ----------------------------------------------------------------
@@ -153,6 +162,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         logger.info("deactivate...");
 
         updateState(State::onDisabled);
+        cleanupTemporaryIdentity();
 
         this.executor.shutdown();
         this.containerOrchestrationService.unregisterListener(this);
@@ -377,7 +387,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             int maxRetries = options.getMaxDownloadRetries();
             int retryInterval = options.getRetryInterval();
 
-            final ContainerConfiguration containerConfiguration = options.getContainerConfiguration();
+            createTemporaryIdentityIfEnabled(options);
+            final ContainerConfiguration containerConfiguration = getContainerConfigurationWithCredentials(options);
 
             int retries = 0;
             while ((unlimitedRetries || retries < maxRetries) && !Thread.currentThread().isInterrupted()) {
@@ -435,6 +446,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             } catch (Exception e) {
                 logger.error("Error deleting microservice {}", this.options.getContainerName(), e);
             }
+            
+            cleanupTemporaryIdentity();
         }
 
         @Override
@@ -478,6 +491,74 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             logger.error("Impossible to update snapshot for pid {} due to {}",
                     properties.get(ConfigurationService.KURA_SERVICE_PID), ex.getMessage());
         }
+    }
+
+    private void createTemporaryIdentityIfEnabled(final ContainerInstanceOptions options) {
+        if (options.isIdentityIntegrationEnabled() && this.temporaryIdentityService != null) {
+            try {
+                cleanupTemporaryIdentity();
+                
+                final Set<Permission> permissions = options.getContainerPermissions().stream()
+                        .map(Permission::new)
+                        .collect(Collectors.toSet());
+                
+                final String identityName = "container-" + options.getContainerName();
+                this.currentTemporaryToken = this.temporaryIdentityService.createTemporaryIdentity(identityName, permissions);
+                
+                logger.info("Created temporary identity for container {} with {} permissions", 
+                        options.getContainerName(), permissions.size());
+                
+            } catch (KuraException e) {
+                logger.error("Failed to create temporary identity for container {}", options.getContainerName(), e);
+                this.currentTemporaryToken = null;
+            }
+        }
+    }
+
+    private void cleanupTemporaryIdentity() {
+        if (this.currentTemporaryToken != null && this.temporaryIdentityService != null) {
+            try {
+                this.temporaryIdentityService.deleteTemporaryIdentity(this.currentTemporaryToken);
+                logger.info("Cleaned up temporary identity with token");
+            } catch (KuraException e) {
+                logger.warn("Failed to cleanup temporary identity", e);
+            } finally {
+                this.currentTemporaryToken = null;
+            }
+        }
+    }
+
+    private ContainerConfiguration getContainerConfigurationWithCredentials(final ContainerInstanceOptions options) {
+        ContainerConfiguration baseConfig = options.getContainerConfiguration();
+        
+        if (options.isIdentityIntegrationEnabled() && this.currentTemporaryToken != null) {
+            final Map<String, Object> envVars = new HashMap<>(baseConfig.getEnvVars());
+            envVars.put("KURA_IDENTITY_TOKEN", this.currentTemporaryToken);
+            envVars.put("KURA_REST_BASE_URL", "http://localhost:8080/services/rest");
+            
+            return ContainerConfiguration.builder()
+                    .setContainerName(baseConfig.getContainerName())
+                    .setImageConfiguration(baseConfig.getImageConfiguration())
+                    .setContainerPorts(baseConfig.getContainerPorts())
+                    .setEnvVars(envVars)
+                    .setVolumes(baseConfig.getVolumes())
+                    .setPrivilegedMode(baseConfig.isPrivilegedMode())
+                    .setDeviceList(baseConfig.getDeviceList())
+                    .setFrameworkManaged(baseConfig.isFrameworkManaged())
+                    .setLoggingType(baseConfig.getLoggingType())
+                    .setContainerNetowrkConfiguration(baseConfig.getContainerNetworkConfiguration())
+                    .setLoggerParameters(baseConfig.getLoggerParameters())
+                    .setEntryPoint(baseConfig.getEntryPoint())
+                    .setRestartOnFailure(baseConfig.isRestartOnFailure())
+                    .setMemory(baseConfig.getMemory())
+                    .setCpus(baseConfig.getCpus())
+                    .setGpus(baseConfig.getGpus())
+                    .setRuntime(baseConfig.getRuntime())
+                    .setEnforcementDigest(baseConfig.getEnforcementDigest())
+                    .build();
+        }
+        
+        return baseConfig;
     }
 
 }

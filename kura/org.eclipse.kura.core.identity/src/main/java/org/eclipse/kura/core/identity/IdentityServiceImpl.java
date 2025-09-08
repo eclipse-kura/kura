@@ -285,28 +285,29 @@ public class IdentityServiceImpl implements IdentityService, TemporaryIdentitySe
     }
 
     @Override
-    public synchronized String createTemporaryIdentity(final String identityName, final Set<Permission> permissions) throws KuraException {
-        audit(() -> {
+    public synchronized String createTemporaryIdentity(final String identityName, final Set<Permission> permissions)
+            throws KuraException {
+        return audit(() -> {
             ValidationUtil.validateNewIdentityName(identityName);
-            
+
             for (final Permission permission : permissions) {
                 if (!this.userAdminHelper.getPermission(permission.getName()).isPresent()) {
-                    throw new KuraException(KuraErrorCode.INVALID_PARAMETER, 
+                    throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
                             "Permission '" + permission.getName() + "' does not exist");
                 }
             }
-            
+
             final String token = generateSecureToken();
             final TemporaryIdentity temporaryIdentity = new TemporaryIdentity(identityName, permissions, token);
             this.temporaryIdentities.put(token, temporaryIdentity);
-            
+
             return token;
         }, "Create temporary identity " + identityName);
     }
 
     @Override
     public synchronized boolean deleteTemporaryIdentity(final String token) throws KuraException {
-        final TemporaryIdentity removed = audit(() -> this.temporaryIdentities.remove(token), 
+        final TemporaryIdentity removed = audit(() -> this.temporaryIdentities.remove(token),
                 "Delete temporary identity with token");
         return removed != null;
     }
@@ -321,12 +322,13 @@ public class IdentityServiceImpl implements IdentityService, TemporaryIdentitySe
     }
 
     @Override
-    public synchronized void checkTemporaryPermission(final String token, final Permission permission) throws KuraException {
+    public synchronized void checkTemporaryPermission(final String token, final Permission permission)
+            throws KuraException {
         final TemporaryIdentity identity = this.temporaryIdentities.get(token);
         if (identity == null) {
             throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Invalid temporary token");
         }
-        
+
         if (!identity.hasPermission(permission)) {
             throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION,
                     "The specified permission is not assigned to the temporary identity");

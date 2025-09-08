@@ -20,7 +20,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.identity.Permission;
 import org.eclipse.kura.identity.TemporaryIdentityService;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;

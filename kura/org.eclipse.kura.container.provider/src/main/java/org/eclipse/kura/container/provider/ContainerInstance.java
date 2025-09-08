@@ -15,9 +15,11 @@ package org.eclipse.kura.container.provider;
 
 import static java.util.Objects.isNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -502,7 +504,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                         .map(Permission::new)
                         .collect(Collectors.toSet());
                 
-                final String identityName = "container-" + options.getContainerName();
+                final String identityName = "container_" + options.getContainerName().replace("-", "_");
                 this.currentTemporaryToken = this.temporaryIdentityService.createTemporaryIdentity(identityName, permissions);
                 
                 logger.info("Created temporary identity for container {} with {} permissions", 
@@ -532,24 +534,24 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         ContainerConfiguration baseConfig = options.getContainerConfiguration();
         
         if (options.isIdentityIntegrationEnabled() && this.currentTemporaryToken != null) {
-            final Map<String, Object> envVars = new HashMap<>(baseConfig.getEnvVars());
-            envVars.put("KURA_IDENTITY_TOKEN", this.currentTemporaryToken);
-            envVars.put("KURA_REST_BASE_URL", "http://localhost:8080/services/rest");
+            final List<String> envVars = new ArrayList<>(baseConfig.getContainerEnvVars());
+            envVars.add("KURA_IDENTITY_TOKEN=" + this.currentTemporaryToken);
+            envVars.add("KURA_REST_BASE_URL=http://localhost:8080/services/rest");
             
             return ContainerConfiguration.builder()
                     .setContainerName(baseConfig.getContainerName())
                     .setImageConfiguration(baseConfig.getImageConfiguration())
                     .setContainerPorts(baseConfig.getContainerPorts())
                     .setEnvVars(envVars)
-                    .setVolumes(baseConfig.getVolumes())
-                    .setPrivilegedMode(baseConfig.isPrivilegedMode())
-                    .setDeviceList(baseConfig.getDeviceList())
+                    .setVolumes(baseConfig.getContainerVolumes())
+                    .setPrivilegedMode(baseConfig.isContainerPrivileged())
+                    .setDeviceList(baseConfig.getContainerDevices())
                     .setFrameworkManaged(baseConfig.isFrameworkManaged())
-                    .setLoggingType(baseConfig.getLoggingType())
+                    .setLoggingType(baseConfig.getContainerLoggingType())
                     .setContainerNetowrkConfiguration(baseConfig.getContainerNetworkConfiguration())
                     .setLoggerParameters(baseConfig.getLoggerParameters())
                     .setEntryPoint(baseConfig.getEntryPoint())
-                    .setRestartOnFailure(baseConfig.isRestartOnFailure())
+                    .setRestartOnFailure(baseConfig.getRestartOnFailure())
                     .setMemory(baseConfig.getMemory())
                     .setCpus(baseConfig.getCpus())
                     .setGpus(baseConfig.getGpus())

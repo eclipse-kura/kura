@@ -20,7 +20,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.container.ContainerRequestContext;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.identity.Permission;
 import org.eclipse.kura.identity.TemporaryIdentityService;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
 import org.slf4j.Logger;
@@ -45,7 +44,7 @@ public class TemporaryTokenAuthenticationProvider implements AuthenticationProvi
     }
 
     @Override
-    public Optional<Principal> authenticate(final HttpServletRequest request, 
+    public Optional<Principal> authenticate(final HttpServletRequest request,
             final ContainerRequestContext requestContext) {
         if (this.temporaryIdentityService == null) {
             return Optional.empty();
@@ -97,6 +96,7 @@ public class TemporaryTokenAuthenticationProvider implements AuthenticationProvi
      * Principal implementation that holds temporary token information.
      */
     private static class TemporaryTokenPrincipal implements Principal {
+
         private final String name;
         private final String token;
 

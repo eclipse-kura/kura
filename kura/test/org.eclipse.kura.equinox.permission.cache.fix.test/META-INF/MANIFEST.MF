@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.equinox.permission.cache.fix.test
+Bundle-SymbolicName: org.eclipse.kura.equinox.permission.cache.fix.test
+Bundle-Version: 5.6.1.qualifier
+Bundle-Vendor: Eclipse Kura
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Fragment-Host: org.eclipse.kura.equinox.permission.cache.fix
+Import-Package: org.junit;version="4.12.0"

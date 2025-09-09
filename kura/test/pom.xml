@@ -93,6 +93,34 @@
                     </configuration>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.3.1</version>
+                    <executions>
+                        <!--
+                            copy the OSGI-INF directory to a place where it is being detected and
+                            picked up by PDE Launcher as well, supported by M2E in incremental builds
+                            natively
+                        -->
+                        <execution>
+                            <id>prepare-tycho-runtime</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${basedir}/OSGI-INF</outputDirectory>
+                                <resources>
+                                    <resource>
+                                        <directory>${project.build.outputDirectory}/OSGI-INF</directory>
+                                        <filtering>false</filtering>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco.version}</version>
@@ -143,7 +171,7 @@
                             ${tycho.surefire.testenv.args}
                             -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml
                         </argLine>
-                        <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
+                        <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> --> 
                         <dependencies>
                             <dependency>
                                 <type>p2-installable-unit</type>

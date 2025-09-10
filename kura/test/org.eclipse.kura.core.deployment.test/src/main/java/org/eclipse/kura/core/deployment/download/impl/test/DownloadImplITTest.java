@@ -18,10 +18,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
@@ -45,12 +48,14 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.deployment.download.impl.DownloadImpl;
+import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.ssl.SslManagerService;
+
 import org.eclipse.kura.core.testutil.pki.TestCA;
 import org.eclipse.kura.core.testutil.pki.TestCA.CertificateCreationOptions;
 import org.eclipse.kura.core.testutil.pki.TestCA.TestCAException;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
-import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.ssl.SslManagerService;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -58,12 +63,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-@Component(immediate = true)
 public class DownloadImplITTest {
 
     private static final String TEST_FILENAME = "test";
@@ -76,7 +79,7 @@ public class DownloadImplITTest {
 
     private static final String SERVER_KEYSTORE_PID = "serverKeystore";
     private static final String CLIENT_KEYSTORE_PID = "clientKeystore";
-    private static final String HTTP_SERVICE_PID = "org.eclipse.kura.http.server.manager.HttpService";
+    private static final String HTTP_SERVER_MANAGER_PID = "org.eclipse.kura.http.server.manager.HttpService";
     private static final String REST_SERVICE_PID = "org.eclipse.kura.internal.rest.provider.RestService";
     private static final String SSL_MANAGER_SERVICE_PID = "org.eclipse.kura.ssl.SslManagerService";
 
@@ -86,7 +89,7 @@ public class DownloadImplITTest {
     private static SslManagerService sslManagerService;
     private static ConfigurationService configurationService;
     @SuppressWarnings("unused")
-    private static ConfigurableComponent httpService;
+    private static ConfigurableComponent httpServerManager;
     private static CryptoService cryptoService;
     @SuppressWarnings("unused")
     private static ConfigurableComponent restService;
@@ -103,32 +106,27 @@ public class DownloadImplITTest {
 
     private String tempDir = System.getProperty("java.io.tmpdir");
 
-    @Reference
     public void setSslManagerService(SslManagerService sslManagerService) {
         DownloadImplITTest.sslManagerService = sslManagerService;
         dependencies.countDown();
     }
 
-    @Reference
     public void setConfigurationService(ConfigurationService configurationService) {
         DownloadImplITTest.configurationService = configurationService;
         dependencies.countDown();
     }
 
-    @Reference(target = "(kura.service.pid=" + HTTP_SERVICE_PID + ")")
-    public void setHttpService(ConfigurableComponent httpService) {
-        DownloadImplITTest.httpService = httpService;
+    public void setHttpServerManager(ConfigurableComponent httpServerManager) {
+        DownloadImplITTest.httpServerManager = httpServerManager;
         dependencies.countDown();
     }
 
-    @Reference
     public void setCryptoService(CryptoService cryptoService) {
         DownloadImplITTest.cryptoService = cryptoService;
         dependencies.countDown();
     }
 
-    @Reference(target = "(kura.service.pid=" + REST_SERVICE_PID + ")")
-    public static void setRestService(ConfigurableComponent restService) {
+    public void setRestService(ConfigurableComponent restService) {
         DownloadImplITTest.restService = restService;
         dependencies.countDown();
     }
@@ -138,13 +136,13 @@ public class DownloadImplITTest {
         awaitDependencies();
         setupCAAndClientKeystore();
         setupSslManagerService();
-        setupHttpService();
+        setupHttpServerManager();
         setupRestService();
     }
 
     @Before
     public void cleanup() throws IOException {
-        Files.deleteIfExists(Path.of(this.tempDir, TEST_FILENAME));
+        Files.deleteIfExists(Paths.get(this.tempDir, TEST_FILENAME));
     }
 
     @Test
@@ -210,7 +208,7 @@ public class DownloadImplITTest {
     }
 
     private void thenFileIsEmpty(String filename) {
-        Path tempFile = Path.of(this.tempDir, filename);
+        Path tempFile = Paths.get(this.tempDir, filename);
         try {
             assertTrue(Files.readAllBytes(tempFile).length == 0);
         } catch (IOException e) {
@@ -219,10 +217,18 @@ public class DownloadImplITTest {
     }
 
     private void thenDownloadedFileIs(String filename) {
-        byte[] expectedContent;
-        try {
-            expectedContent = getClass().getClassLoader().getResourceAsStream(TEST_FILENAME).readAllBytes();
-            byte[] downloadedContent = Files.readAllBytes(Path.of(this.tempDir, filename));
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(TEST_FILENAME)) {
+            int numberOfBytes;
+            byte[] data = new byte[4096];
+
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+            while ((numberOfBytes = is.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, numberOfBytes);
+            }
+            buffer.flush();
+            byte[] expectedContent = buffer.toByteArray();
+            byte[] downloadedContent = Files.readAllBytes(Paths.get(this.tempDir, filename));
             assertArrayEquals(expectedContent, downloadedContent);
         } catch (IOException e) {
             fail(e.getMessage());
@@ -268,14 +274,14 @@ public class DownloadImplITTest {
 
     }
 
-    private static void setupHttpService() {
+    private static void setupHttpServerManager() {
 
         Map<String, Object> props = new HashMap<>();
         props.put("https.ports", new Integer[] { HTTPS_PORT });
         props.put("KeystoreService.target", serverKeystore.getTargetFilter());
 
         try {
-            updateComponentConfiguration(DownloadImplITTest.configurationService, HTTP_SERVICE_PID, props) //
+            updateComponentConfiguration(DownloadImplITTest.configurationService, HTTP_SERVER_MANAGER_PID, props) //
                     .get(30, TimeUnit.SECONDS);
         } catch (Exception e) {
             fail(e.getMessage());

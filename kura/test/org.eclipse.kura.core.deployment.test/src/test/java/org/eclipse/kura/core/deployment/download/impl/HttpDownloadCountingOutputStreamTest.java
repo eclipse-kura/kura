@@ -133,9 +133,14 @@ public class HttpDownloadCountingOutputStreamTest {
             protected HttpURLConnection openConnection(URL localUrl) throws IOException {
                 HttpURLConnection urlConnection = null;
                 switch (localUrl.getProtocol().toLowerCase()) { //
-                case "http" -> urlConnection = mock(HttpURLConnection.class);
-                case "https" -> urlConnection = mock(HttpsURLConnection.class);
-                default -> throw new IllegalArgumentException("protocol not supported");
+                case "http":
+                    urlConnection = mock(HttpURLConnection.class);
+                    break;
+                case "https":
+                    urlConnection = mock(HttpsURLConnection.class);
+                    break;
+                default:
+                    throw new IllegalArgumentException("protocol not supported");
                 }
 
                 when(urlConnection.getInputStream())

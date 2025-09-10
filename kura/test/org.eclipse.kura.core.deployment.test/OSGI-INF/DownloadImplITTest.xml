@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0"
+    name="org.eclipse.kura.core.deployment.download.impl.test.DownloadImplITTest"
+    immediate="true">
+
+    <reference name="ConfigurationService"
+        interface="org.eclipse.kura.configuration.ConfigurationService"
+        bind="setConfigurationService" />
+    <reference name="CryptoService"
+        interface="org.eclipse.kura.crypto.CryptoService"
+        bind="setCryptoService" />
+    <reference name="HttpServerManager"
+        interface="org.eclipse.kura.configuration.ConfigurableComponent"
+        target="(kura.service.pid=org.eclipse.kura.http.server.manager.HttpService)"
+        bind="setHttpServerManager" />
+    <reference name="RestService"
+        interface="org.eclipse.kura.configuration.ConfigurableComponent"
+        target="(kura.service.pid=org.eclipse.kura.internal.rest.provider.RestService)"
+        bind="setRestService" />
+    <reference name="SslManagerService"
+        interface="org.eclipse.kura.ssl.SslManagerService"
+        bind="setSslManagerService" />
+    <implementation
+        class="org.eclipse.kura.core.deployment.download.impl.test.DownloadImplITTest" />
+</scr:component>

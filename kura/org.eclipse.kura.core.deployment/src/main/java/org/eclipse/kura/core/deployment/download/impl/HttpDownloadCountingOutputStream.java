@@ -104,7 +104,6 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
             HttpURLConnection.setFollowRedirects(false);
             URLConnection urlConnection = openAndConnect(HttpDownloadCountingOutputStream.this.downloadURL);
 
-
             HttpDownloadCountingOutputStream.this.is = urlConnection.getInputStream();
 
             String s = urlConnection.getHeaderField("Content-Length");
@@ -184,7 +183,8 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 
     private void setupConnection(HttpURLConnection urlConnection) throws IOException, KuraConnectException {
         try {
-            if (urlConnection instanceof HttpsURLConnection httpsURLConnection) {
+            if (urlConnection instanceof HttpsURLConnection) {
+                HttpsURLConnection httpsURLConnection = (HttpsURLConnection) urlConnection;
                 httpsURLConnection.setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
 
                 // hostname verification will be managed by the SSLSocketFactory returned by SSLManagerService

@@ -12,21 +12,18 @@
  *******************************************************************************/
 package org.eclipse.kura.core.deployment.download.impl.test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
-import org.osgi.service.component.annotations.Component;
-
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @Path("test/download")
-@Component(immediate = true, property = {
-        "kura.service.pid=org.eclipse.kura.core.deployment.download.impl.test.DownloadTestRestService",
-        "osgi.jakartars.resource=true" }, service = DownloadTestRestService.class)
 public class DownloadTestRestService {
 
     private static final String FILE_NAME = "test";
@@ -34,10 +31,18 @@ public class DownloadTestRestService {
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response getFile() {
-        byte[] content;
-        try {
-            content = getClass().getClassLoader().getResourceAsStream(FILE_NAME).readAllBytes();
-            return Response.ok(content, MediaType.APPLICATION_OCTET_STREAM_TYPE)
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(FILE_NAME)) {
+            int numberOfBytes;
+            byte[] data = new byte[4096];
+
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+            while ((numberOfBytes = is.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, numberOfBytes);
+            }
+            buffer.flush();
+            byte[] content = buffer.toByteArray();
+            return Response.ok(buffer.toByteArray(), MediaType.APPLICATION_OCTET_STREAM_TYPE)
                     .header(HttpHeaders.CONTENT_LENGTH, content.length).build();
         } catch (IOException e) {
             return Response.status(Response.Status.NOT_FOUND).build();

@@ -12,9 +12,16 @@
  *******************************************************************************/
 package org.eclipse.kura.equinox.permission.cache.fix;
 
+import static org.mockito.Mockito.mock;
+
 import org.junit.Test;
+import org.osgi.service.permissionadmin.PermissionAdmin;
 
 public class EquinoxPermissionCacheCleanerTest {
+
+    private EquinoxPermissionCacheCleaner equinoxPermissionCacheCleaner;
+
+    private PermissionAdmin permissionAdmin = mock(PermissionAdmin.class);
 
     @Test
     public void test() {

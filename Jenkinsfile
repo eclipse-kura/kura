@@ -88,7 +88,8 @@ node {
             def repoDistribution = "kura-6"
             def repoModule = "base"
 
-            uploadPackages(repoDistribution, repoModule)
+            def nexusUtils = load 'kura/.jenkins/nexusUtils.groovy'
+            nexusUtils.uploadPackages(repoDistribution, repoModule)
         } else {
             echo "Skipping DEB upload"
             Utils.markStageSkippedForConditional(STAGE_NAME)

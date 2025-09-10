@@ -1,3 +1,5 @@
+import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
+
 def boolean onlyDocumentationFilesChangedIn(String workDirectory) {
     if (!env.CHANGE_TARGET) {
         echo "CHANGE_TARGET not set. Skipping check"
@@ -69,6 +71,27 @@ node {
     stage('Generate test reports') {
         dir("kura") {
             junit 'kura/test/*/target/surefire-reports/*.xml'
+        }
+    }
+
+    stage ("Deploy on Nexus") {
+        def debFilesOutput = sh(script: "find kura -type f -name '*.deb'", returnStdout: true).trim()
+        def debFiles = debFilesOutput ? debFilesOutput.split("\n") : []
+
+        // Call uploadPackages only if we are on the default branch,
+        // if we have DEB packages to upload and if the user has set the pushArtifacts parameter to true
+        // if (debFiles && env.BRANCH_IS_PRIMARY && pipelineParams.pushArtifacts) {
+        if (debFiles && debFiles.size() > 0) {
+            echo "Found DEB packages, uploading..."
+
+            // FIXME read pom to extract distribution and module
+            def repoDistribution = "kura-6"
+            def repoModule = "base"
+
+            uploadPackages(repoDistribution, repoModule)
+        } else {
+            echo "Skipping DEB upload"
+            Utils.markStageSkippedForConditional(STAGE_NAME)
         }
     }
 

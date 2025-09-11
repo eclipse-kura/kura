@@ -121,7 +121,7 @@ To have all the Kura features working, the following dependencies are required:
 - Security: `polkit` or `policykit-1`, `ssh` or `openssh`, `openssl`, `busybox`, `openvpn`.
 - Bluetooth: `bluez` or `bluez5`, `bluez-hcidump` or `bluez5-noinst-tools`.
 - Time: `chrony`, `chronyc`, `cron` or `cronie`.
-- Networking: `network-manager` or `networkmanager`, `bind9` or `bind`, `dnsmasq` or `isc-dhcp-server` or (`dhcp-server` and `dhcp-client`), `iw`, `iptables`, `modemmanager`, `hostapd`, `wpa-supplicant`, `ppp`, `iproute2`.
+- Networking: `network-manager` or `networkmanager`, `bind9` or `bind`, `dnsmasq` or `isc-dhcp-server` or (`dhcp-server` and `dhcp-client`), `iw`, `iptables`, `modemmanager`, `hostapd`, `wpa-supplicant`, `iproute2`.
 - Logs: `logrotate`.
 - Gps: `gpsd`.
 - Python: `python3`.

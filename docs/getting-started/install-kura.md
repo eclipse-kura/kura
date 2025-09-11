@@ -1,6 +1,7 @@
 # Install Kura
 
 Eclipse Kura&trade; is provided using a Debian Linux package. There's two ways you can install Kura on your target system:
+
 1. Use the Eclipse Kura&trade; APT repository (recommended). Follow the instructions below to set up the repository and install Kura using `apt-get` or `apt`.
 2. Alternatively, visit the [Kura download page](https://github.com/eclipse-kura/kura/releases) to find the correct installation file for your target system (see [Kura installers](#kura-installers) section for more details).
 

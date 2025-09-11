@@ -37,6 +37,12 @@ public class EquinoxPermissionCacheCleaner {
 
     private int cacheThresholdSize;
 
+    private Method permAdminCollectionsMethod;
+    private Method condAdminRowsMethod;
+
+    private Object permAdminTable;
+    private Object condAdminTable;
+
     public void setPermissionAdmin(PermissionAdmin permissionAdmin) {
         this.permissionAdmin = permissionAdmin;
     }
@@ -46,28 +52,37 @@ public class EquinoxPermissionCacheCleaner {
 
         logger.debug("Permission cache threshold set to {}", this.cacheThresholdSize);
 
-        this.cacheClearTask = this.executor.scheduleWithFixedDelay(this::clearCache, 0, 30, TimeUnit.SECONDS);
+        try {
+            loadCacheMethods();
+            this.cacheClearTask = this.executor.scheduleWithFixedDelay(this::clearCache, 0, 30, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            logger.error("Unable to lookup SecurityAdmin methods. Permission cache cleanup disabled.", e);
+        }
+    }
+
+    private void loadCacheMethods() throws Exception {
+        Field permAdminTableField = this.permissionAdmin.getClass().getDeclaredField("permAdminTable");
+        permAdminTableField.setAccessible(true);
+
+        Field condAdminTableField = this.permissionAdmin.getClass().getDeclaredField("condAdminTable");
+        condAdminTableField.setAccessible(true);
+
+        this.permAdminTable = permAdminTableField.get(this.permissionAdmin);
+        this.condAdminTable = condAdminTableField.get(this.permissionAdmin);
+
+        this.permAdminCollectionsMethod = permAdminTable.getClass().getDeclaredMethod("getCollections");
+        this.permAdminCollectionsMethod.setAccessible(true);
+
+        this.condAdminRowsMethod = condAdminTable.getClass().getDeclaredMethod("getRows");
+        condAdminRowsMethod.setAccessible(true);
     }
 
     private void clearCache() {
 
         try {
-            Field permAdminTableField = this.permissionAdmin.getClass().getDeclaredField("permAdminTable");
-            permAdminTableField.setAccessible(true);
 
-            Field condAdminTableField = this.permissionAdmin.getClass().getDeclaredField("condAdminTable");
-            condAdminTableField.setAccessible(true);
-
-            Object permAdminTable = permAdminTableField.get(this.permissionAdmin);
-            Object condAdminTable = condAdminTableField.get(this.permissionAdmin);
-
-            Method permAdminCollectionsMethod = permAdminTable.getClass().getDeclaredMethod("getCollections");
-            permAdminCollectionsMethod.setAccessible(true);
-            Method condAdminRowsMethod = condAdminTable.getClass().getDeclaredMethod("getRows");
-            condAdminRowsMethod.setAccessible(true);
-
-            Object[] permAdminCollections = (Object[]) permAdminCollectionsMethod.invoke(permAdminTable);
-            Object[] condAdminRows = (Object[]) condAdminRowsMethod.invoke(condAdminTable);
+            Object[] permAdminCollections = (Object[]) permAdminCollectionsMethod.invoke(this.permAdminTable);
+            Object[] condAdminRows = (Object[]) condAdminRowsMethod.invoke(this.condAdminTable);
 
             if (permAdminCollections.length > this.cacheThresholdSize
                     || condAdminRows.length > this.cacheThresholdSize) {

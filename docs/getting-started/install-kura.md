@@ -56,16 +56,6 @@ Since version 6.0.0 Eclipse Kura&trade; has been split into multiple packages to
 - [kura-position](https://github.com/eclipse-kura/kura-position): Eclipse Kura™ Position addon
 - [kura-wires](https://github.com/eclipse-kura/kura-wires): Eclipse Kura™ Wires and Assets addon
 
-## Kura installers
-
-A user can deploy Kura on a target system using the installer tailored for the device architecture. The installer file looks like:
-
-```
-kura_<kura-version>_<arch>.deb
-```
-
-where `<arch>` is one of the **supported architectures**: *amd64* and *arm64*. Kura requires **at least one** physical ethernet interface to be present on the system and the dependencies listed in the [Kura dependencies](#kura-dependencies) section to be installed. From Kura version 6.0.0 the Java 17 runtime is **required** to run the framework correctly.
-
 ### Java Heap Memory Assignment
 
 The Eclipse Kura&trade;'s installer incorporates an adaptive Heap Memory allocation system during installation. The allocation follows a formula based on your gateway's available memory. If your gateway has less than 1024MB of RAM, Kura will set -Xms and -Xmx to 256MB. For gateways with more than 1024MB, one quarter of the total RAM will be assigned to -Xms and -Xmx.

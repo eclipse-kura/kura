@@ -32,17 +32,28 @@ To install Eclipse Kura&trade; using the APT repository, perform the following s
     apt update
     ```
 
-5. Install Kura core package:
+5. Install Kura package:
 
     ```bash
-    apt install kura-core
+    apt install kura
     ```
 
-Additional packages can be installed as needed, for example:
 
-```bash
-apt install kura-management-ui
-```
+## Kura packages
+
+Since version 6.0.0 Eclipse Kura&trade; has been split into multiple packages to allow the user to install only the required features. The main package `kura` is a meta-package which depends on all the other packages listed below and provides the same installation experience as the old installers. Alternatively, the user can choose to install only the required packages instead of the full Kura framework. The available packages are:
+
+- [kura-core](https://github.com/eclipse-kura/kura): Eclipse Kura™ framework core (mandatory)
+- [kura-apps](https://github.com/eclipse-kura/kura-apps): Applications and examples for Eclipse Kura™ framework
+- [kura-artemis](https://github.com/eclipse-kura/kura-artemis): Eclipse Kura™ Artemis MQTT server addon
+- [kura-bluetooth](https://github.com/eclipse-kura/kura-bluetooth): Eclipse Kura™ Bluetooth addon
+- [kura-command](https://github.com/eclipse-kura/kura-command): Eclipse Kura™ Command addon
+- [kura-gpio](https://github.com/eclipse-kura/kura-gpio): Eclipse Kura™ GPIO handling addon
+- [kura-management-ui](https://github.com/eclipse-kura/kura-management-ui): Eclipse Kura™ Web UI addon
+- [kura-metapackage](https://github.com/eclipse-kura/kura-metapackage): Eclipse Kura™ Metapackage
+- [kura-networking](https://github.com/eclipse-kura/kura-networking): Eclipse Kura™ Networking addon
+- [kura-position](https://github.com/eclipse-kura/kura-position): Eclipse Kura™ Position addon
+- [kura-wires](https://github.com/eclipse-kura/kura-wires): Eclipse Kura™ Wires and Assets addon
 
 ## Kura installers
 
@@ -60,7 +71,7 @@ The Eclipse Kura&trade;'s installer incorporates an adaptive Heap Memory allocat
 
 ### Initial network configuration
 
-During the installation of Eclipse Kura with network management support, the initial network configuration will be generated dynamically. The existing wired and wireless network interface names are detected and sorted in ascending lexicographic order at the installation.
+During the installation of Eclipse Kura with network management package (i.e. `kura-networking`), the initial network configuration will be generated dynamically. The existing wired and wireless network interface names are detected and sorted in ascending lexicographic order at the installation.
 
 If only one ethernet interface is detected (e.g. `eth0`), it will be configured as follows:
 

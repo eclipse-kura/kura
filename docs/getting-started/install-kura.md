@@ -1,25 +1,48 @@
 # Install Kura
 
-Eclipse Kura&trade; is provided using a Debian Linux package. Visit the [Kura download page](https://github.com/eclipse-kura/kura/releases) to find the correct installation file for the target system.
+Eclipse Kura&trade; is provided using a Debian Linux package. There's two ways you can install Kura on your target system:
+1. Use the Eclipse Kura&trade; APT repository (recommended). Follow the instructions below to set up the repository and install Kura using `apt-get` or `apt`.
+2. Alternatively, visit the [Kura download page](https://github.com/eclipse-kura/kura/releases) to find the correct installation file for your target system (see [Kura installers](#kura-installers) section for more details).
 
+## Kura installation using the APT repository (recommended)
 
+To install Eclipse Kura&trade; using the APT repository, perform the following steps:
 
-## Installer types
+1. Install the required packages:
 
-Several installers can be found on such page, and they fall into one of the following categories:
+    ```bash
+    apt install -y curl gpg
+    ```
 
-1. standard **kura** installers, like `kura_6.0.0_arm64.deb`
-2. installers named **kura-nn**, like `kura-nn_6.0.0_arm64.deb`
+2. Download the GPG key and add it to the list of trusted keys:
 
-Profiles of types (1) ship a Kura version with networking functionalities. In particular, they can be installed on targets with [NetworkManager](https://networkmanager.dev), a commonly available tool for managing Linux networking. Kura leverages this tool for networking functionalities. Refer to the [Kura installers](#kura-installers) section for further information.
+    ```bash
+    curl -L "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xba7e3df5edc3fc36" | gpg --dearmor | tee /etc/apt/trusted.gpg.d/kura.gpg > /dev/null
+    ```
 
-Installers of type (2) with the suffix `nn` are **No Networking** profiles that do not bundle the Kura Network Manager: all the network configurations need to be done outside of Kura. Functionalities **missing** in **NN profiles** compared to the full Kura profiles:
+3. Add the Kura APT repository to your system's software sources list:
 
-- Networking interfaces management
-- Firewall configuration management
-- Network Threat management
+    ```bash
+    echo "deb https://repo3.eclipse.org/repository/kura-apt/ bionic main" | sudo tee /etc/apt/sources.list.d/kura.list
+    ```
 
+4. Update the package list:
 
+    ```bash
+    apt update
+    ```
+
+5. Install Kura core package:
+
+    ```bash
+    apt install kura-core
+    ```
+
+Additional packages can be installed as needed, for example:
+
+```bash
+apt install kura-management-ui
+```
 
 ## Kura installers
 
@@ -29,9 +52,7 @@ A user can deploy Kura on a target system using the installer tailored for the d
 kura_<kura-version>_<arch>.deb
 ```
 
-where `<arch>` is one of the **supported architectures**: *amd64* and *arm64*. Kura can work on systems that have available the dependencies listed in the [Kura dependencies](#kura-dependencies) section, and that have **at least one** physical ethernet interface.
-
-From Kura version 6.0.0 the Java 17 runtime is **required** to run the framework correctly.
+where `<arch>` is one of the **supported architectures**: *amd64* and *arm64*. Kura requires **at least one** physical ethernet interface to be present on the system and the dependencies listed in the [Kura dependencies](#kura-dependencies) section to be installed. From Kura version 6.0.0 the Java 17 runtime is **required** to run the framework correctly.
 
 ### Java Heap Memory Assignment
 

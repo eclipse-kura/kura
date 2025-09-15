@@ -41,7 +41,7 @@ Documentation
 
 - [**User Documentation**](https://eclipse-kura.github.io/kura/latest/): here you'll find information on how to **use** Eclipse Kura™ i.e. installation instructions, informations on how to use the web UI and tutorials.
 - [**Developer Documentation**](https://github.com/eclipse-kura/kura/wiki): the Eclipse Kura™ Github Wiki serves as a reference for **developers** who want to contribute to the Eclipse Kura™ project and/or develop new add-ons. Here you'll find Eclipse Kura™ development/release model, guidelines on how to import internal packages, creating new bundles and development environment tips & tricks.
-- [**Docker Containers Documentation**](https://hub.docker.com/r/eclipse/kura/): the Eclipse Kura™ team also provides Docker containers for the project. Information on how to build and run them are available at the project's Docker Hub page.
+- [**Docker Containers Documentation**](https://hub.docker.com/r/eclipse/kura/): the Eclipse Kura™ team also provides Docker containers for the project. Information on how to build and run them are available at https://github.com/eclipse-kura/kura-metapackage.
 - [**Developer Quickstart Guide**](https://github.com/eclipse-kura/kura#build): a quick guide on how to setup the development environment and build the project is also provided in this README.
 
 Additionally, we provide two channels for reporting any issue you find with the project
@@ -172,21 +172,6 @@ Alternatively, you can use the build scripts available in the root directory.
 ```bash
 ./build-all.sh
 ```
-
-### Building Eclipse Kura™ Containers
-
-The Eclipse Kura™ container build process currently only supports x86 containers. Following the instructions below will build two containers. One based on Alpine Linux `kura-alpine-x86_64`, and another on Ubi8 `kura-ubi8-x86_64`.
-
-Build Eclipse Kura™ as per [our instructions](#build-kura). To build the containers you'll need to change the target of the "Build the target profiles" step like the following:
-
-```bash
-mvn -f kura/distrib/pom.xml clean install -DbuildAllContainers
-```
-
-> [!NOTE]
-This build step requires 'docker' to be a executable command on your system. For Instance, if you are using Podman please follow the [Emulating Docker Cli Guide](https://podman-desktop.io/docs/migrating-from-docker/emulating-docker-cli-with-podman) before running the command above.
-
-After this command completes, images can be found in your preferred container engine image list.
 
 IDE Setups
 ----------

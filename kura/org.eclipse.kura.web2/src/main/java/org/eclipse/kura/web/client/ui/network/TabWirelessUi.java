@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -1820,7 +1820,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         if (this.activeConfig != null && this.activeConfig.getChannels() != null
                 && !this.activeConfig.getChannels().isEmpty()) {
             this.netTabs.hardwareTab.channel
-                    .setText(this.channelList.getItemText(this.activeConfig.getChannels().get(0)));
+                    .setText(this.channelList.getItemText(selectedChannelValue));
 
             this.channelList.setSelectedIndex(selectedChannelValue);
         }

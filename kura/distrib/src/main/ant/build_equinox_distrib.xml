@@ -792,6 +792,9 @@ fi]]>
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.useradmin.store_${org.eclipse.kura.useradmin.store.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.equinox.permission.cache.fix_${org.eclipse.kura.equinox.permission.cache.fix.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
         </zip>
 
         <antcall target="camel-jar" />
@@ -1073,6 +1076,8 @@ fi]]>
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.zaxxer.HikariCP_${hikaricp.version}.jar@3" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.quartz-scheduler.quartz_${quartz.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.equinox.permission.cache.fix_${org.eclipse.kura.equinox.permission.cache.fix.version}.jar@1:start" />
         </propertyfile>
     </target>
 

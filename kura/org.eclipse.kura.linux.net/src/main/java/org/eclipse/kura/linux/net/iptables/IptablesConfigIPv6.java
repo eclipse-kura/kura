@@ -35,9 +35,10 @@ public class IptablesConfigIPv6 extends IptablesConfig {
             "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 145 -j ACCEPT",
             "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 146 -j ACCEPT",
             "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 147 -j ACCEPT",
-            "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 130 -j ACCEPT",
-            "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 131 -j ACCEPT",
-            "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 132 -j ACCEPT",
+            // Multicast Listener Discovery - essential for IPv6 multicast (mDNS, DHCPv6, etc.)
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 130 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 131 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 132 -j ACCEPT",
             // Critical Neighbor/Router Discovery - no source restriction for IPv6 connectivity
             "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 133 -j ACCEPT",
             "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 134 -j ACCEPT",
@@ -47,9 +48,10 @@ public class IptablesConfigIPv6 extends IptablesConfig {
             "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 142 -j ACCEPT",
             "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 148 -j ACCEPT",
             "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 149 -j ACCEPT",
-            "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 151 -j ACCEPT",
-            "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 152 -j ACCEPT",
-            "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 153 -j ACCEPT",
+            // Multicast Router Discovery - essential for IPv6 routing protocols
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 151 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 152 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 153 -j ACCEPT",
             "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 1 -j ACCEPT",
             "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 2 -j ACCEPT",
             "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 3/0 -j ACCEPT",

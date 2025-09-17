@@ -43,6 +43,10 @@
                     <KeyValuePair key="exception" value="%ex" />
                 </LoggerFields>
             </RFC5424Layout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="7" />
         </RollingFile>
     </Appenders>
 

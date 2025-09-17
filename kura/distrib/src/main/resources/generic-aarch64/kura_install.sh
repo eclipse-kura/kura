@@ -159,8 +159,6 @@ fi
 chown bind:bind /etc/bind/rndc.key
 chmod 600 /etc/bind/rndc.key
 
-
-
 # set up systemd-tmpfiles
 cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /etc/tmpfiles.d/kura.conf
 

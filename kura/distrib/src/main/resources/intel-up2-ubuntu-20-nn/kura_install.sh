@@ -73,8 +73,6 @@ systemctl disable systemd-timesyncd
 systemctl stop chrony
 systemctl disable chrony
 
-
-
 #set up systemd-tmpfiles
 cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /etc/tmpfiles.d/kura.conf
 

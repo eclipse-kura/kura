@@ -69,8 +69,6 @@ if command -v timedatectl > /dev/null ;
     timedatectl set-ntp false
 fi
 
-
-
 # set up systemd-tmpfiles
 cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /etc/tmpfiles.d/kura.conf
 

@@ -139,8 +139,6 @@ chmod 600 /etc/bind/rndc.key
 cp ${INSTALL_DIR}/kura/install/kura-dhclient-enter-hook /etc/dhcp/dhclient-enter-hooks.d/zz-kura-dhclient-enter-hook
 cp ${INSTALL_DIR}/kura/install/kura-dhclient-enter-route-hook /etc/dhcp/dhclient-enter-hooks.d/yy-kura-dhclient-enter-hook
 
-
-
 #set up systemd-tmpfiles
 cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /etc/tmpfiles.d/kura.conf
 

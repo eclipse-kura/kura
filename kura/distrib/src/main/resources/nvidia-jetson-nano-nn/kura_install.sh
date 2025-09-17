@@ -40,8 +40,6 @@ chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 
 mkdir -p ${INSTALL_DIR}/kura/data
 
-
-
 #set up systemd-tmpfiles
 cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /etc/tmpfiles.d/kura.conf
 

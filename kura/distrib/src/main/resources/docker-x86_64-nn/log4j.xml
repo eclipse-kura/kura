@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2018, 2023 Eurotech and/or its affiliates and others
+    Copyright (c) 2018, 2025 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -27,16 +27,16 @@
                 <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
             </PatternLayout>
         </Console>
-        <RollingFile name="RollingFile" fileName="${log_dir}/${log_name}.log" filePattern="${log_dir}/${log_name}-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
+        <RollingFile name="RollingFile" fileName="${log_dir}/${log_name}.log" filePattern="${log_dir}/${log_name}-%i.log.gz">
             <PatternLayout>
                 <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
             </PatternLayout>
             <Policies>
-                <SizeBasedTriggeringPolicy size="20 MB"/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
             </Policies>
-            <DefaultRolloverStrategy max="10"/>
+            <DefaultRolloverStrategy max="7"/>
         </RollingFile>
-        <RollingFile name="audit" fileName="${log_dir}/${log_name}-audit.log" filePattern="${log_dir}/${log_name}-audit-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
+        <RollingFile name="audit" fileName="${log_dir}/${log_name}-audit.log" filePattern="${log_dir}/${log_name}-audit-%i.log.gz">
             <RFC5424Layout enterpriseNumber="28392" includeMDC="true" mdcId="RequestContext" appName="EclipseKura" mdcPrefix="" newLine="true">
                 <LoggerFields>
                     <KeyValuePair key="thread" value="%t"/>
@@ -46,9 +46,9 @@
                 </LoggerFields>
             </RFC5424Layout>
             <Policies>
-                <SizeBasedTriggeringPolicy size="20 MB"/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
             </Policies>
-            <DefaultRolloverStrategy max="10"/>
+            <DefaultRolloverStrategy max="7"/>
         </RollingFile>
     </Appenders>
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2018, 2025 Eurotech and/or its affiliates and others
+    Copyright (c) 2018, 2023 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -27,12 +27,16 @@
                 <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
             </PatternLayout>
         </Console>
-        <File name="LoggingFile" fileName="${log_dir}/${log_name}.log">
+        <RollingFile name="RollingFile" fileName="${log_dir}/${log_name}.log" filePattern="${log_dir}/${log_name}-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
             <PatternLayout>
                 <Pattern>%d{ISO8601} [%t] %-5p %c{1.} - %m%n%throwable{full}</Pattern>
             </PatternLayout>
-        </File>
-        <File name="audit" fileName="${log_dir}/${log_name}-audit.log">
+            <Policies>
+                <SizeBasedTriggeringPolicy size="20 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+        <RollingFile name="audit" fileName="${log_dir}/${log_name}-audit.log" filePattern="${log_dir}/${log_name}-audit-%d{MM-dd-yy-HH-mm-ss}-%i.log.gz">
             <RFC5424Layout enterpriseNumber="28392" includeMDC="true" mdcId="RequestContext" appName="EclipseKura" mdcPrefix="" newLine="true">
                 <LoggerFields>
                     <KeyValuePair key="thread" value="%t"/>
@@ -41,20 +45,24 @@
                     <KeyValuePair key="exception" value="%ex"/>
                 </LoggerFields>
             </RFC5424Layout>
-        </File>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="20 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
     </Appenders>
 
     <Loggers>
         <Logger name="org.eclipse" level="info" additivity="false">
             <AppenderRef ref="Console"/>
-            <AppenderRef ref="LoggingFile"/>
+            <AppenderRef ref="RollingFile"/>
         </Logger>
         <Logger name="AuditLogger" level="trace" additivity="false">
             <AppenderRef ref="audit"/>
         </Logger>
         <Root level="info">
             <AppenderRef ref="Console"/>
-            <AppenderRef ref="LoggingFile"/>
+            <AppenderRef ref="RollingFile"/>
         </Root>
   </Loggers>
 

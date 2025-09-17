@@ -70,8 +70,6 @@ function preRemove {
         systemctl disable firewall
         rm /lib/systemd/system/firewall.service
     fi
-    
-
 
     rm -f  /var/log/kura*.log
     rm -f  /var/log/kura*.gz

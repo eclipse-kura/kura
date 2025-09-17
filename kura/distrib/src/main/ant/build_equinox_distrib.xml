@@ -565,8 +565,6 @@ fi]]>
             <zipfileset file="src/main/resources/common/kura-tmpfiles.conf"
                 prefix="${build.output.name}/${install.folder}" />
 
-
-
             <zipfileset file="src/main/resources/common/sysctl.kura.conf"
                 prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/sysctl.kura.raspbian.conf"

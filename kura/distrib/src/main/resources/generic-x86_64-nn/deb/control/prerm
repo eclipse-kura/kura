@@ -87,8 +87,6 @@ function preRemove {
         systemctl disable kura
         rm /lib/systemd/system/kura.service
     fi
-    
-
 
     rm -f  /var/log/kura*.log
     rm -f  /var/log/kura*.gz

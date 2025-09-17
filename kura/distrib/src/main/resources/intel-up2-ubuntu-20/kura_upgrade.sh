@@ -22,5 +22,3 @@ cp ${INSTALL_DIR}/kura/install/ifup-local.raspbian /etc/network/if-up.d/ifup-loc
 cp ${INSTALL_DIR}/kura/install/ifdown-local /etc/network/if-down.d/ifdown-local
 chmod +x /etc/network/if-up.d/ifup-local
 chmod +x /etc/network/if-down.d/ifdown-local
-
-

@@ -16,5 +16,3 @@ INSTALL_DIR=/opt/eclipse
 
 #create known kura install location
 ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
-
-

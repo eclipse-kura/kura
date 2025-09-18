@@ -37,7 +37,7 @@
             <repositories>
                 <repository>
                     <id>eurotech-kura</id>
-                    <url>https://kura-repo.s3.us-west-2.amazonaws.com/kura_addons/</url>
+                    <url>s3://kura-repo.s3.us-west-2.amazonaws.com/kura_addons/</url>
                 </repository>
                 <repository>
                     <id>eclipse-releases</id>

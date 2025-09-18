@@ -120,7 +120,7 @@
         <repository>
             <id>kura-addons</id>
             <name>Eclipse Kura Addons Maven Repository</name>
-            <url>https://kura-repo.s3.us-west-2.amazonaws.com/kura_addons/</url>
+            <url>s3://kura-repo.s3.us-west-2.amazonaws.com/kura_addons/</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>

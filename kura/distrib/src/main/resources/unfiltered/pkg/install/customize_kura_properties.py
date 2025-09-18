@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (c) 2024 Eurotech and/or its affiliates and others
+# Copyright (c) 2024, 2025 Eurotech and/or its affiliates and others
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,10 @@
 #
 import sys
 import logging
-import os
 import argparse
+
+sys.path.append("/opt/eclipse/kura/.data")
+
 from network_tools import get_eth_wlan_interfaces_names
 
 def main():

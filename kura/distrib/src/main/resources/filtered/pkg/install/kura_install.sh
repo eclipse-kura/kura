@@ -58,6 +58,9 @@ bash "\${INSTALL_DIR}/kura/install/customize-installation.sh"
 # copy snapshot_0.xml
 cp \${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml \${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
+# copy network_tools.py
+cp \${INSTALL_DIR}/kura/install/network_tools.py \${INSTALL_DIR}/kura/.data/network_tools.py
+
 # disable NTP service
 if command -v timedatectl > /dev/null ;
   then

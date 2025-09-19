@@ -164,13 +164,13 @@
                         <failIfNoTests>false</failIfNoTests>
                         <providerHint>junit4</providerHint>
                         <useUnlimitedThreads>false</useUnlimitedThreads>
-
+                        
                         <argLine>
                             ${tycho.testArgLine}
                             ${tycho.surefire.testenv.args}
                             -Dmoquette.path=${project.basedir}/src/main/resources/moquette/config
                         </argLine>
-                        <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
+                        <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> --> 
                         <dependencies>
                             <dependency>
                                 <type>p2-installable-unit</type>

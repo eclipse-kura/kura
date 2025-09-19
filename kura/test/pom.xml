@@ -164,13 +164,13 @@
                         <failIfNoTests>false</failIfNoTests>
                         <providerHint>junit4</providerHint>
                         <useUnlimitedThreads>false</useUnlimitedThreads>
-                        
+
                         <argLine>
                             ${tycho.testArgLine}
                             ${tycho.surefire.testenv.args}
                             -Dmoquette.path=${project.basedir}/src/main/resources/moquette/config
                         </argLine>
-                        <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> --> 
+                        <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
                         <dependencies>
                             <dependency>
                                 <type>p2-installable-unit</type>
@@ -797,7 +797,6 @@
         <!-- <module>org.eclipse.kura.emulator.position.test</module> -->
         <module>org.eclipse.kura.emulator.watchdog.test</module>
         <module>org.eclipse.kura.event.publisher.test</module>
-        <module>org.eclipse.kura.internal.driver.opcua.test</module>
         <module>org.eclipse.kura.internal.driver.s7plc.test</module>
         <module>org.eclipse.kura.linux.clock.test</module>
         <module>org.eclipse.kura.linux.gpio.test</module>

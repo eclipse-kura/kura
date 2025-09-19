@@ -70,7 +70,6 @@
         <org.eclipse.kura.driver.block.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.block.version>
         <org.eclipse.kura.driver.gpio.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.gpio.provider.version>
         <org.eclipse.kura.driver.helper.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.helper.provider.version>
-        <org.eclipse.kura.driver.opcua.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.opcua.provider.version>
         <org.eclipse.kura.driver.s7plc.provider.version>2.0.0-SNAPSHOT</org.eclipse.kura.driver.s7plc.provider.version>
         <org.eclipse.kura.emulator.version>2.0.0-SNAPSHOT</org.eclipse.kura.emulator.version>
         <org.eclipse.kura.emulator.clock.version>2.0.0-SNAPSHOT</org.eclipse.kura.emulator.clock.version>
@@ -277,11 +276,6 @@
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.driver.helper.provider</artifactId>
                 <version>${org.eclipse.kura.driver.helper.provider.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.driver.opcua.provider</artifactId>
-                <version>${org.eclipse.kura.driver.opcua.provider.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -620,10 +614,6 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.driver.helper.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.driver.opcua.provider</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>

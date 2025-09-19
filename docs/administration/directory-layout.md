@@ -39,14 +39,16 @@ All of the Kura files are located within `/opt/eclipse/kura` folder using the st
 | `.data`            | Backup files needed to restore factory configuration                                                                                   |
 
 ## Log Files
-Kura regularly updates two log files in the **/var/log** directory:
+Kura regularly updates three log sources:
 
-- **/var/log/kura-console.log** - stores the standard console output of the application. This log file contains the eventual errors that are thrown upon Kura startup.
+- **standard out** - Kura logs on the standard output the Eclipse console output of the application. This log contains the eventual errors that are thrown upon Kura startup and can be viewed by executing the following command: `journalctl -f -u kura` (the command may vary depending on the Linux distribution used).
+
+- **/var/log/kura-audit.log** - stores all of the UI access information, including login attempts and configuration changes.
 
 - **/var/log/kura.log** - stores all of the logging information from Kura bundles. The logger levels are defined in the **log4j.xml** configuration file as shown below:
 
 ```
-/opt/eclpse/kura/user/log4j.xml
+/opt/eclipse/kura/log4j/log4j.xml
 ```
 
 The default logger level in this file is set to INFO. This level may be modified for the whole application or for a specific package as shown in the following example:

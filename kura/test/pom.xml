@@ -797,7 +797,6 @@
         <!-- <module>org.eclipse.kura.emulator.position.test</module> -->
         <module>org.eclipse.kura.emulator.watchdog.test</module>
         <module>org.eclipse.kura.event.publisher.test</module>
-        <module>org.eclipse.kura.internal.driver.opcua.test</module>
         <module>org.eclipse.kura.internal.driver.s7plc.test</module>
         <module>org.eclipse.kura.linux.clock.test</module>
         <module>org.eclipse.kura.linux.gpio.test</module>

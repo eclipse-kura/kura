@@ -67,25 +67,10 @@ public class LibGpiodVersionDetector {
         return detectedVersion;
     }
 
-    // /**
-    // * Check if the current libgpiod version is v1.6.x compatible
-    // */
-    // public static boolean isV1Compatible() {
-    // return libGpiodVersion == LibGpiodVersion.V1_6_X;
-    // }
-    //
-    // /**
-    // * Check if the current libgpiod version is v2.x.x compatible
-    // */
-    // public static boolean isV2Compatible() {
-    // return libGpiodVersion == LibGpiodVersion.V2_X_X;
-    // }
-
     /**
      * Detect the libgpiod version by attempting to load and call version functions
      */
     private static void detectVersion() {
-        // try {
         versionInterface = Native.load("gpiod", VersionDetectionInterface.class);
 
         // Try v2.x API first (gpiod_api_version was introduced in v2.x)
@@ -106,81 +91,12 @@ public class LibGpiodVersionDetector {
                 // Parse version to determine if it's 1.6.x
                 if (isVersion1_6_X(detectedVersion)) {
                     libGpiodVersion = LibGpiodVersion.V1_6_X;
-                    // } else {
-                    // libGpiodVersion = LibGpiodVersion.UNKNOWN;
                 }
             }
         } catch (Error e) {
             logger.debug("gpiod_version_string() not found, unable to detect version...");
         }
-
-        // Fallback: try to detect by testing API features really needed??????
-        // detectByApiFeatures();
-
-        // } catch (Exception e) {
-        // detectedVersion = "unknown";
-        // libGpiodVersion = LibGpiodVersion.UNKNOWN;
-        // }
     }
-
-    // /**
-    // * Detect version by testing specific API features
-    // */
-    // private static void detectByApiFeatures() {
-    // // Define interfaces to test specific API features
-    // try {
-    // // Test for v2.x specific functions
-    // interface V2TestInterface extends Library {
-    //
-    // Pointer gpiod_chip_open(String path);
-    //
-    // void gpiod_chip_close(Pointer chip);
-    //
-    // Pointer gpiod_chip_get_info(Pointer chip);
-    //
-    // Pointer gpiod_line_settings_new();
-    //
-    // void gpiod_line_settings_free(Pointer settings);
-    // }
-    //
-    // V2TestInterface v2Test = Native.load("gpiod", V2TestInterface.class);
-    // Pointer settings = v2Test.gpiod_line_settings_new();
-    // if (settings != null) {
-    // v2Test.gpiod_line_settings_free(settings);
-    // detectedVersion = "2.x.x (detected by API)";
-    // libGpiodVersion = LibGpiodVersion.V2_X_X;
-    // return;
-    // }
-    // } catch (Exception e) {
-    // // v2.x functions not available
-    // }
-    //
-    // try {
-    // // Test for v1.x functions
-    // interface V1TestInterface extends Library {
-    //
-    // Pointer gpiod_chip_open(String path);
-    //
-    // void gpiod_chip_close(Pointer chip);
-    //
-    // Pointer gpiod_chip_get_line(Pointer chip, int offset);
-    // }
-    //
-    // V1TestInterface v1Test = Native.load("gpiod", V1TestInterface.class);
-    // // Try to open a dummy path to see if the v1.x API works
-    // // This will fail, but if the function exists, we know it's v1.x
-    // v1Test.gpiod_chip_open("/dev/null"); // This will return null, but won't throw if function exists
-    // detectedVersion = "1.6.x (detected by API)";
-    // libGpiodVersion = LibGpiodVersion.V1_6_X;
-    // return;
-    // } catch (Exception e) {
-    // // v1.x functions not available either
-    // }
-    //
-    // // If we can't detect, assume unknown
-    // detectedVersion = "unknown";
-    // libGpiodVersion = LibGpiodVersion.UNKNOWN;
-    // }
 
     /**
      * Check if the version string indicates libgpiod 1.6.x

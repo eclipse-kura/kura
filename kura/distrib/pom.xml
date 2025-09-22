@@ -81,8 +81,8 @@
         <deb.name>kura-core</deb.name>
         <deb.dependencies>
             setserial, zip, gzip, unzip, procps, usbutils, socat, gawk, sed, inetutils-telnet,
-            polkit | policykit-1, ssh | openssh, openssl, busybox, logrotate, libpam-modules,
-            python3, gpsd, openjdk-17-jre-headless | temurin-17-jdk, dos2unix, libtirpc3, chrony, chronyc | chrony, cron | cronie
+            polkit | policykit-1, ssh | openssh, openssl, busybox, libpam-modules,
+            python3, gpsd, openjdk-17-jre-headless | temurin-17-jdk, dos2unix, libtirpc3, chrony, chronyc | chrony
         </deb.dependencies>
         <deb.recommendations></deb.recommendations>
         <deb.provides></deb.provides>
@@ -120,8 +120,7 @@
         <repository>
             <id>kura-addons</id>
             <name>Eclipse Kura Addons Maven Repository</name>
-            <url>https://raw.github.com/eurotech/kura_addons/mvn-repo/
-            </url>
+            <url>https://raw.githubusercontent.com/eurotech/kura_addons/mvn-repo</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>

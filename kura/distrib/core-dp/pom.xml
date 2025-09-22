@@ -47,7 +47,6 @@
                         <configuration>
                             <includeArtifactIds>
                                 org.eclipse.kura.protocol.modbus,
-                                org.eclipse.kura.driver.opcua,
                                 org.eclipse.kura.driver.s7plc,
                                 org.eclipse.kura.driver.eddystone,
                                 org.eclipse.kura.driver.ibeacon,

@@ -37,7 +37,7 @@
             <repositories>
                 <repository>
                     <id>eurotech-kura</id>
-                    <url>https://raw.githubusercontent.com/eurotech/kura_addons/mvn-repo/</url>
+                    <url>https://raw.githubusercontent.com/eurotech/kura_addons/mvn-repo</url>
                 </repository>
                 <repository>
                     <id>eclipse-releases</id>

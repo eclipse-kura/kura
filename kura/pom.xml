@@ -49,7 +49,6 @@
         <module>org.eclipse.kura.deployment.agent</module>
         <module>org.eclipse.kura.hook.file.move.provider</module>
         <module>org.eclipse.kura.driver.helper.provider</module>
-        <module>org.eclipse.kura.driver.opcua.provider</module>
         <module>org.eclipse.kura.driver.block</module>
         <module>org.eclipse.kura.driver.s7plc.provider</module>
         <module>org.eclipse.kura.driver.gpio.provider</module>
@@ -111,7 +110,7 @@
         <bnd.baseline.continueOnError>false</bnd.baseline.continueOnError>
         <kura.skip.can>true</kura.skip.can>
         <check.plugins.exist.remote>false</check.plugins.exist.remote>
-        <kura.addons.url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</kura.addons.url>
+        <kura.addons.url>https://raw.githubusercontent.com/eurotech/kura_addons/mvn-repo</kura.addons.url>
 
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>

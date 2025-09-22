@@ -15,8 +15,6 @@ KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.equinox"`
 
 if [ -z "$KURA_RUNNING" ] ; then
   nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} \
-        -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
-        -XX:ErrorFile=/var/log/kura-error.log \
         -XX:+IgnoreUnrecognizedVMOptions \
         --add-opens java.base/java.lang=ALL-UNNAMED \
         --add-opens java.base/java.util=ALL-UNNAMED \
@@ -34,14 +32,14 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Djdk.dio.registry=\${DIR}/framework/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
         -Dosgi.console=5002 \
-        -Declipse.consoleLog=true >> /var/log/kura-console.log 2>> /var/log/kura-console.log \
+        -Declipse.consoleLog=true \
         -jar \${DIR}/plugins/org.eclipse.equinox.launcher-${org.eclipse.equinox.launcher.version}.jar \
         -configuration /tmp/.kura/configuration &
 
     #Save the PID
     KURA_PID=$!
-    echo "Kura Started (pid="$KURA_PID") ..." >> /var/log/kura-console.log
+    echo "Kura Started (pid="$KURA_PID") ..."
     echo $KURA_PID > /var/run/kura.pid
 else
-    echo "Failed to start Kura. It is already running ..." >> /var/log/kura-console.log
+    echo "Failed to start Kura. It is already running ..."
 fi

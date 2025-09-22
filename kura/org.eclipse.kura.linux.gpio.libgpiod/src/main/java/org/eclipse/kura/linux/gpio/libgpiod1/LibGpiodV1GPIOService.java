@@ -42,23 +42,13 @@ public class LibGpiodV1GPIOService implements GPIOService {
     private static final String GPIO_CHIP_NAME = "gpiochip";
     private static final Pattern GPIO_CHIP_PATTERN = Pattern.compile("^" + GPIO_CHIP_NAME + "\\d+$");
 
-    // Default chip path if no specific chip is found
-    // private static final String DEFAULT_CHIP_PATH = "/dev/gpiochip0";
-
-    // Cache for available pins across all chips
     private final Map<String, Integer> availablePins = new ConcurrentHashMap<>();
-    // private final Map<String, Integer> pinNameToOffset = new ConcurrentHashMap<>();
-    // private final Map<String, String> pinNameToChip = new ConcurrentHashMap<>();
-
-    // Cache for created pins to avoid duplicates
     private final Map<String, KuraGPIOPin> pinCache = new ConcurrentHashMap<>();
 
-    // Default configurations
     private final KuraGPIODirection defaultDirection = KuraGPIODirection.INPUT;
     private final KuraGPIOMode defaultMode = KuraGPIOMode.INPUT_PULL_UP;
     private final KuraGPIOTrigger defaultTrigger = KuraGPIOTrigger.NONE;
 
-    // Initialization flag
     private volatile AtomicBoolean initialized = new AtomicBoolean(false);
 
     /**
@@ -80,10 +70,7 @@ public class LibGpiodV1GPIOService implements GPIOService {
      */
     private void discoverGPIOChips() {
         this.availablePins.clear();
-        // pinNameToOffset.clear();
-        // pinNameToChip.clear();
 
-        // Find all GPIO chip devices
         File devDir = new File("/dev");
         if (!devDir.exists() || !devDir.isDirectory()) {
             return;
@@ -91,19 +78,15 @@ public class LibGpiodV1GPIOService implements GPIOService {
 
         File[] chipFiles = devDir.listFiles((dir, name) -> GPIO_CHIP_PATTERN.matcher(name).matches());
         if (chipFiles == null || chipFiles.length == 0) {
-            // If no chips found, assume default chip exists
-            // discoverChipPins(DEFAULT_CHIP_PATH);
             return;
         }
 
-        // Sort chip files by number for consistent ordering
         Arrays.sort(chipFiles, (a, b) -> {
             int numA = LibGpiodV1Pin.extractChipNumber(a.getName());
             int numB = LibGpiodV1Pin.extractChipNumber(b.getName());
             return Integer.compare(numA, numB);
         });
 
-        // Discover pins for each chip
         for (File chipFile : chipFiles) {
             discoverChipPins(chipFile.getAbsolutePath());
         }
@@ -116,48 +99,26 @@ public class LibGpiodV1GPIOService implements GPIOService {
         Pointer chip = null;
 
         try {
-            // Open the chip
             chip = LibGpiodV1Native.INSTANCE.gpiod_chip_open(chipPath);
             if (chip == null) {
                 return;
             }
 
-            // String chipName = LibGpiodV1Native.INSTANCE.gpiod_chip_name(chip);
-            // String chipLabel = LibGpiodV1Native.INSTANCE.gpiod_chip_label(chip);
             int numLines = LibGpiodV1Native.INSTANCE.gpiod_chip_num_lines(chip);
 
-            // Use chip name or fallback to path-based name
-            // if (chipName == null || chipName.trim().isEmpty()) {
-            // chipName = new File(chipPath).getName();
-            // }
-
-            // Discover individual pins
             for (int offset = 0; offset < numLines; offset++) {
                 Pointer line = LibGpiodV1Native.INSTANCE.gpiod_chip_get_line(chip, offset);
                 if (line != null) {
                     String pinName = LibGpiodV1Native.INSTANCE.gpiod_line_name(line);
                     if (pinName == null || pinName.trim().isEmpty() || pinName.equals("-")) {
-                        continue; // Skip unnamed lines
+                        continue;
                     }
-
-                    // Use line name if available, otherwise create default name
-                    // String pinName = (lineName != null && !lineName.trim().isEmpty()) ? lineName.trim()
-                    // : chipName + "_GPIO_" + offset;
 
                     // Calculate global pin number (chip_number * 1000 + offset)
                     int chipNumber = LibGpiodV1Pin.extractChipNumber(new File(chipPath).getName());
                     int globalPinNumber = chipNumber * 1000 + offset;
 
                     this.availablePins.put(pinName, globalPinNumber);
-                    // pinNameToOffset.put(pinName, offset);
-                    // pinNameToChip.put(pinName, chipPath);
-
-                    // Also add by offset as alternative name
-                    // String offsetName = "GPIO_" + offset;
-                    // if (!pinNameToOffset.containsKey(offsetName)) {
-                    // pinNameToOffset.put(offsetName, offset);
-                    // pinNameToChip.put(offsetName, chipPath);
-                    // }
                 }
             }
 
@@ -182,17 +143,11 @@ public class LibGpiodV1GPIOService implements GPIOService {
 
         initialize();
 
-        // Check cache first
-        // String cacheKey = createCacheKey(pinName, direction, mode, trigger);
-        // KuraGPIOPin cachedPin = pinCache.get(cacheKey);
         KuraGPIOPin cachedPin = this.pinCache.get(pinName);
         if (cachedPin != null && pinHasSameConfiguration(cachedPin, direction, mode, trigger)) {
             return cachedPin;
         }
 
-        // Look up pin by name
-        // Integer offset = pinNameToOffset.get(pinName);
-        // String chipPath = pinNameToChip.get(pinName);
         Integer globalPinNumber = this.availablePins.get(pinName);
         if (globalPinNumber == null) {
             throw new IllegalArgumentException("Pin not found: " + pinName);
@@ -200,12 +155,8 @@ public class LibGpiodV1GPIOService implements GPIOService {
 
         String chipPath = "/dev/" + GPIO_CHIP_NAME + globalPinNumber / 1000;
         Integer offset = globalPinNumber % 1000;
-        // Create the pin
-        // KuraGPIOPin pin = LibGpiodV1PinFactory.createPin(chipPath, offset, direction, mode, trigger, pinName);
         KuraGPIOPin pin = new LibGpiodV1Pin(chipPath, offset, direction, mode, trigger, pinName);
 
-        // Cache the pin
-        // pinCache.put(cacheKey, pin);
         this.pinCache.put(pinName, pin);
 
         return pin;
@@ -230,8 +181,6 @@ public class LibGpiodV1GPIOService implements GPIOService {
 
         initialize();
 
-        // Check cache first
-        // String cacheKey = createCacheKey("TERMINAL_" + terminal, direction, mode, trigger);
         Optional<String> pinName = this.availablePins.entrySet().stream().filter(entry -> entry.getValue() == terminal)
                 .map(Map.Entry::getKey).findFirst();
         if (!pinName.isPresent()) {
@@ -239,24 +188,19 @@ public class LibGpiodV1GPIOService implements GPIOService {
         }
 
         KuraGPIOPin cachedPin = this.pinCache.get(pinName.get());
-        if (cachedPin != null) {
+        if (cachedPin != null && pinHasSameConfiguration(cachedPin, direction, mode, trigger)) {
             return cachedPin;
         }
 
-        // Check if this is a global pin number (chip_number * 1000 + offset)
         int chipNumber = terminal / 1000;
         int offset = terminal % 1000;
         String chipPath = "/dev/" + GPIO_CHIP_NAME + chipNumber;
 
-        // Verify the pin exists
         if (!isValidPin(chipPath, offset)) {
             throw new IllegalArgumentException("Invalid terminal: " + terminal);
         }
 
-        // Create the pin
         KuraGPIOPin pin = new LibGpiodV1Pin(chipPath, offset, direction, mode, trigger, pinName.get());
-
-        // Cache the pin
         this.pinCache.put(pinName.get(), pin);
 
         return pin;
@@ -293,75 +237,6 @@ public class LibGpiodV1GPIOService implements GPIOService {
     }
 
     /**
-     * Get available pins for a specific chip
-     */
-    // public Map<Integer, String> getAvailablePins(String chipPath) {
-    // Map<Integer, String> chipPins = new HashMap<>();
-    //
-    // for (Map.Entry<String, String> entry : pinNameToChip.entrySet()) {
-    // if (chipPath.equals(entry.getValue())) {
-    // String pinName = entry.getKey();
-    // Integer offset = pinNameToOffset.get(pinName);
-    // if (offset != null) {
-    // chipPins.put(offset, pinName);
-    // }
-    // }
-    // }
-    //
-    // return chipPins;
-    // }
-
-    /**
-     * Get list of available GPIO chips
-     */
-    // public List<String> getAvailableChips() {
-    // Set<String> chips = new HashSet<>();
-    //
-    // File devDir = new File("/dev");
-    // if (devDir.exists() && devDir.isDirectory()) {
-    // File[] chipFiles = devDir.listFiles((dir, name) -> GPIO_CHIP_PATTERN.matcher(name).matches());
-    // if (chipFiles != null) {
-    // for (File chipFile : chipFiles) {
-    // chips.add(chipFile.getAbsolutePath());
-    // }
-    // }
-    // }
-    //
-    // if (chips.isEmpty()) {
-    // chips.add(DEFAULT_CHIP_PATH);
-    // }
-    //
-    // List<String> result = new ArrayList<>(chips);
-    // result.sort(String::compareTo);
-    // return result;
-    // }
-
-    /**
-     * Get chip information
-     */
-    // public ChipInfo getChipInfo(String chipPath) {
-    // Pointer chip = null;
-    //
-    // try {
-    // chip = LibGpiodV1Native.INSTANCE.gpiod_chip_open(chipPath);
-    // if (chip == null) {
-    // return null;
-    // }
-    //
-    // String name = LibGpiodV1Native.INSTANCE.gpiod_chip_name(chip);
-    // String label = LibGpiodV1Native.INSTANCE.gpiod_chip_label(chip);
-    // int numLines = LibGpiodV1Native.INSTANCE.gpiod_chip_num_lines(chip);
-    //
-    // return new ChipInfo(chipPath, name, label, numLines);
-    //
-    // } finally {
-    // if (chip != null) {
-    // LibGpiodV1Native.INSTANCE.gpiod_chip_close(chip);
-    // }
-    // }
-    // }
-
-    /**
      * Clear pin cache - useful for testing or when pin configurations change
      */
     public void clearCache() {
@@ -377,51 +252,4 @@ public class LibGpiodV1GPIOService implements GPIOService {
         initialize();
     }
 
-    /**
-     * Create cache key for pin instances
-     */
-    // private String createCacheKey(String identifier, KuraGPIODirection direction, KuraGPIOMode mode,
-    // KuraGPIOTrigger trigger) {
-    // return identifier + "|" + direction + "|" + mode + "|" + trigger;
-    // }
-
-    /**
-     * Information about a GPIO chip
-     */
-    // public static class ChipInfo {
-    //
-    // private final String path;
-    // private final String name;
-    // private final String label;
-    // private final int numLines;
-    //
-    // public ChipInfo(String path, String name, String label, int numLines) {
-    // this.path = path;
-    // this.name = name;
-    // this.label = label;
-    // this.numLines = numLines;
-    // }
-    //
-    // public String getPath() {
-    // return path;
-    // }
-    //
-    // public String getName() {
-    // return name;
-    // }
-    //
-    // public String getLabel() {
-    // return label;
-    // }
-    //
-    // public int getNumLines() {
-    // return numLines;
-    // }
-    //
-    // @Override
-    // public String toString() {
-    // return String.format("ChipInfo{path='%s', name='%s', label='%s', numLines=%d}", path, name, label,
-    // numLines);
-    // }
-    // }
 }

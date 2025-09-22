@@ -68,7 +68,7 @@ public class LibGpiodGPIOServiceFactoryTest extends CommonSteps {
         whenGetFactoryInstance();
 
         thenNoExceptionOccurred();
-        thenServiceIsNotPresent();
+        thenServiceIsPresent();
     }
 
     @Test

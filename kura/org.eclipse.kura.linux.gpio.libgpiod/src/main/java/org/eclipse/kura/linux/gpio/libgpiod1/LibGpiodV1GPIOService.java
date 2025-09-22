@@ -14,19 +14,13 @@
 package org.eclipse.kura.linux.gpio.libgpiod1;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Pattern;
 
 import org.eclipse.kura.gpio.GPIOService;
 import org.eclipse.kura.gpio.KuraGPIODirection;
 import org.eclipse.kura.gpio.KuraGPIOMode;
 import org.eclipse.kura.gpio.KuraGPIOPin;
 import org.eclipse.kura.gpio.KuraGPIOTrigger;
+import org.eclipse.kura.linux.gpio.libgpiod.LibGpiodGPIOService;
 
 import com.sun.jna.Pointer;
 
@@ -37,65 +31,9 @@ import com.sun.jna.Pointer;
  * pin discovery, name resolution, and pin lifecycle management for the
  * legacy libgpiod v1.6 API.
  */
-public class LibGpiodV1GPIOService implements GPIOService {
+public class LibGpiodV1GPIOService extends LibGpiodGPIOService implements GPIOService {
 
-    private static final String GPIO_CHIP_NAME = "gpiochip";
-    private static final Pattern GPIO_CHIP_PATTERN = Pattern.compile("^" + GPIO_CHIP_NAME + "\\d+$");
-
-    protected final Map<String, Integer> availablePins = new ConcurrentHashMap<>();
-    protected final Map<String, KuraGPIOPin> pinCache = new ConcurrentHashMap<>();
-
-    private static final KuraGPIODirection DEFAULT_DIRECTION = KuraGPIODirection.INPUT;
-    private static final KuraGPIOMode DEFAULT_MODE = KuraGPIOMode.INPUT_PULL_UP;
-    private static final KuraGPIOTrigger DEFAULT_TRIGGER = KuraGPIOTrigger.NONE;
-
-    protected AtomicBoolean initialized = new AtomicBoolean(false);
-
-    /**
-     * Initialize the GPIO service by discovering available GPIO chips and pins
-     */
-    public void initialize() {
-        synchronized (this) {
-            if (this.initialized.get()) {
-                return;
-            }
-
-            discoverGPIOChips();
-            this.initialized.set(true);
-        }
-    }
-
-    /**
-     * Discover all available GPIO chips and their pins
-     */
-    private void discoverGPIOChips() {
-        this.availablePins.clear();
-
-        File devDir = new File(getDeviceFolderPath());
-        if (!devDir.exists() || !devDir.isDirectory()) {
-            return;
-        }
-
-        File[] chipFiles = devDir.listFiles((dir, name) -> GPIO_CHIP_PATTERN.matcher(name).matches());
-        if (chipFiles == null || chipFiles.length == 0) {
-            return;
-        }
-
-        Arrays.sort(chipFiles, (a, b) -> {
-            int numA = LibGpiodV1Pin.extractChipNumber(a.getName());
-            int numB = LibGpiodV1Pin.extractChipNumber(b.getName());
-            return Integer.compare(numA, numB);
-        });
-
-        for (File chipFile : chipFiles) {
-            discoverChipPins(chipFile.getAbsolutePath());
-        }
-    }
-
-    /**
-     * Discover pins for a specific GPIO chip
-     */
-    private void discoverChipPins(String chipPath) {
+    protected void discoverChipPins(String chipPath) {
         Pointer chip = null;
 
         try {
@@ -129,87 +67,7 @@ public class LibGpiodV1GPIOService implements GPIOService {
         }
     }
 
-    @Override
-    public KuraGPIOPin getPinByName(String pinName) {
-        return getPinByName(pinName, DEFAULT_DIRECTION, DEFAULT_MODE, DEFAULT_TRIGGER);
-    }
-
-    @Override
-    public KuraGPIOPin getPinByName(String pinName, KuraGPIODirection direction, KuraGPIOMode mode,
-            KuraGPIOTrigger trigger) {
-        if (pinName == null || pinName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Pin name cannot be null or empty");
-        }
-
-        initialize();
-
-        KuraGPIOPin cachedPin = this.pinCache.get(pinName);
-        if (cachedPin != null && pinHasSameConfiguration(cachedPin, direction, mode, trigger)) {
-            return cachedPin;
-        }
-
-        Integer globalPinNumber = this.availablePins.get(pinName);
-        if (globalPinNumber == null) {
-            throw new IllegalArgumentException("Pin not found: " + pinName);
-        }
-
-        String chipPath = "/dev/" + GPIO_CHIP_NAME + globalPinNumber / 1000;
-        Integer offset = globalPinNumber % 1000;
-        KuraGPIOPin pin = new LibGpiodV1Pin(chipPath, offset, direction, mode, trigger, pinName);
-
-        this.pinCache.put(pinName, pin);
-
-        return pin;
-    }
-
-    private boolean pinHasSameConfiguration(KuraGPIOPin pin, KuraGPIODirection direction, KuraGPIOMode mode,
-            KuraGPIOTrigger trigger) {
-        return pin.getDirection() == direction && pin.getMode() == mode && pin.getTrigger() == trigger;
-    }
-
-    @Override
-    public KuraGPIOPin getPinByTerminal(int terminal) {
-        return getPinByTerminal(terminal, DEFAULT_DIRECTION, DEFAULT_MODE, DEFAULT_TRIGGER);
-    }
-
-    @Override
-    public KuraGPIOPin getPinByTerminal(int terminal, KuraGPIODirection direction, KuraGPIOMode mode,
-            KuraGPIOTrigger trigger) {
-        if (terminal < 0) {
-            throw new IllegalArgumentException("Terminal number must be non-negative");
-        }
-
-        initialize();
-
-        Optional<String> pinName = this.availablePins.entrySet().stream().filter(entry -> entry.getValue() == terminal)
-                .map(Map.Entry::getKey).findFirst();
-        if (!pinName.isPresent()) {
-            throw new IllegalArgumentException("Terminal not found: " + terminal);
-        }
-
-        KuraGPIOPin cachedPin = this.pinCache.get(pinName.get());
-        if (cachedPin != null && pinHasSameConfiguration(cachedPin, direction, mode, trigger)) {
-            return cachedPin;
-        }
-
-        int chipNumber = terminal / 1000;
-        int offset = terminal % 1000;
-        String chipPath = getDeviceFolderPath() + GPIO_CHIP_NAME + chipNumber;
-
-        if (!isValidPin(chipPath, offset)) {
-            throw new IllegalArgumentException("Invalid terminal: " + terminal);
-        }
-
-        KuraGPIOPin pin = new LibGpiodV1Pin(chipPath, offset, direction, mode, trigger, pinName.get());
-        this.pinCache.put(pinName.get(), pin);
-
-        return pin;
-    }
-
-    /**
-     * Verify if a pin exists on the specified chip
-     */
-    private boolean isValidPin(String chipPath, int offset) {
+    protected boolean isValidPin(String chipPath, int offset) {
         Pointer chip = null;
 
         try {
@@ -228,32 +86,9 @@ public class LibGpiodV1GPIOService implements GPIOService {
         }
     }
 
-    @Override
-    public Map<Integer, String> getAvailablePins() {
-        initialize();
-        Map<Integer, String> pins = new HashMap<>();
-        this.availablePins.forEach((name, number) -> pins.put(number, name));
-        return pins;
-    }
-
-    /**
-     * Clear pin cache - useful for testing or when pin configurations change
-     */
-    public void clearCache() {
-        this.pinCache.clear();
-    }
-
-    /**
-     * Refresh pin discovery - rescans all chips
-     */
-    public void refresh() {
-        this.initialized.set(false);
-        clearCache();
-        initialize();
-    }
-
-    protected String getDeviceFolderPath() {
-        return "/dev/";
+    protected KuraGPIOPin createPin(String chipPath, int offset, KuraGPIODirection direction, KuraGPIOMode mode,
+            KuraGPIOTrigger trigger, String pinName) {
+        return new LibGpiodV1Pin(chipPath, offset, direction, mode, trigger, pinName);
     }
 
 }

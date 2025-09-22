@@ -70,6 +70,12 @@ public class LibGpiodV1PinTest extends CommonSteps {
         when(this.nativeInterfaceMock.gpiod_line_request_output_flags(line4, "LibGpiodV1PinDriver", 1, 2))
                 .thenReturn(1);
         when(this.nativeInterfaceMock.gpiod_line_get_value(line4)).thenReturn(1);
+        when(this.nativeInterfaceMock.gpiod_line_request_both_edges_events(line4, "LibGpiodV1PinEventMonitor"))
+                .thenReturn(1);
+        when(this.nativeInterfaceMock.gpiod_line_request_rising_edge_events(line4, "LibGpiodV1PinEventMonitor"))
+                .thenReturn(1);
+        when(this.nativeInterfaceMock.gpiod_line_request_falling_edge_events(line4, "LibGpiodV1PinEventMonitor"))
+                .thenReturn(1);
         Pointer line8 = Pointer.createConstant(8);
         when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, 8)).thenReturn(line8);
         when(this.nativeInterfaceMock.gpiod_line_is_used(line8)).thenReturn(false);
@@ -291,13 +297,58 @@ public class LibGpiodV1PinTest extends CommonSteps {
     }
 
     @Test
-    public void testAddPinStatusListener() {
+    public void testAddPinStatusListenerWithBothEdgesTrigger() throws InterruptedException {
         givenV1Pin("GPIO_01", 2004, KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.BOTH_EDGES);
         givenPinStatusListener();
 
         whenV1PinIsOpened();
         whenV1PinAddPinStatusListener(this.pinStatusListener);
 
+        // Check only if no exception occurred,
+        // since we need to statically mock the LibGpiodV1NativeWrapper class
+        // and this is possible only in the current thread.
+        thenNoExceptionOccurred();
+    }
+
+    @Test
+    public void testAddPinStatusListenerWithFallingEdgesTrigger() throws InterruptedException {
+        givenV1Pin("GPIO_01", 2004, KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.FALLING_EDGE);
+        givenPinStatusListener();
+
+        whenV1PinIsOpened();
+        whenV1PinAddPinStatusListener(this.pinStatusListener);
+
+        // Check only if no exception occurred,
+        // since we need to statically mock the LibGpiodV1NativeWrapper class
+        // and this is possible only in the current thread.
+        thenNoExceptionOccurred();
+    }
+
+    @Test
+    public void testAddPinStatusListenerWithRisingEdgesTrigger() throws InterruptedException {
+        givenV1Pin("GPIO_01", 2004, KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.RAISING_EDGE);
+        givenPinStatusListener();
+
+        whenV1PinIsOpened();
+        whenV1PinAddPinStatusListener(this.pinStatusListener);
+
+        // Check only if no exception occurred,
+        // since we need to statically mock the LibGpiodV1NativeWrapper class
+        // and this is possible only in the current thread.
+        thenNoExceptionOccurred();
+    }
+
+    @Test
+    public void testAddPinStatusListenerWithUnsupportedTrigger() throws InterruptedException {
+        givenV1Pin("GPIO_01", 2004, KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.HIGH_LEVEL);
+        givenPinStatusListener();
+
+        whenV1PinIsOpened();
+        whenV1PinAddPinStatusListener(this.pinStatusListener);
+
+        // Check only if no exception occurred,
+        // since we need to statically mock the LibGpiodV1NativeWrapper class
+        // and this is possible only in the current thread.
         thenNoExceptionOccurred();
     }
 
@@ -305,11 +356,7 @@ public class LibGpiodV1PinTest extends CommonSteps {
     public void testRemovePinStatusListenerWithNullListener() {
         givenV1Pin("GPIO_01", 1, KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.BOTH_EDGES);
 
-        try {
-            this.v1Pin.removePinStatusListener(null);
-        } catch (Exception e) {
-            this.occurredException = e;
-        }
+        whenV1PinRemovePinStatusListener(null);
 
         thenExceptionOccurred(IllegalArgumentException.class);
     }
@@ -363,7 +410,7 @@ public class LibGpiodV1PinTest extends CommonSteps {
         whenV1PinToStringIsCalled();
 
         thenMessageIs(
-                "LibGpiodV1Pin{chip=/dev/gpiochip0, offset=18, name=GPIO18, direction=OUTPUT, mode=OUTPUT_PUSH_PULL, trigger=NONE}");
+                "LibGpiodPin{chip=/dev/gpiochip0, offset=18, name=GPIO18, direction=OUTPUT, mode=OUTPUT_PUSH_PULL, trigger=NONE}");
     }
 
     /*

@@ -4725,16 +4725,19 @@ All of the Kura files are located within <code>/opt/eclipse/kura</code> folder u
 </tbody>
 </table>
 <h2 id="log-files">Log Files</h2>
-<p>Kura regularly updates two log files in the <strong>/var/log</strong> directory:</p>
+<p>Kura regularly updates three log sources:</p>
 <ul>
 <li>
-<p><strong>/var/log/kura-console.log</strong> - stores the standard console output of the application. This log file contains the eventual errors that are thrown upon Kura startup.</p>
+<p><strong>standard out</strong> - Kura logs on the standard output the Eclipse console output of the application. This log contains the eventual errors that are thrown upon Kura startup and can be viewed by executing the following command: <code>journalctl -f -u kura</code> (the command may vary depending on the Linux distribution used).</p>
+</li>
+<li>
+<p><strong>/var/log/kura-audit.log</strong> - stores all of the UI access information, including login attempts and configuration changes.</p>
 </li>
 <li>
 <p><strong>/var/log/kura.log</strong> - stores all of the logging information from Kura bundles. The logger levels are defined in the <strong>log4j.xml</strong> configuration file as shown below:</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>/opt/eclpse/kura/user/log4j.xml
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>/opt/eclipse/kura/log4j/log4j.xml
 </code></pre></div>
 <p>The default logger level in this file is set to INFO. This level may be modified for the whole application or for a specific package as shown in the following example:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">&lt;Loggers&gt;</span>

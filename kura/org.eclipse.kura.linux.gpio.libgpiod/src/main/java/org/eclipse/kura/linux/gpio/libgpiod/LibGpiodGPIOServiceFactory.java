@@ -17,7 +17,6 @@ import java.util.Optional;
 
 import org.eclipse.kura.gpio.GPIOService;
 import org.eclipse.kura.linux.gpio.libgpiod1.LibGpiodV1GPIOService;
-import org.eclipse.kura.linux.gpio.libgpiod2.LibGpiodV2GPIOService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,8 +62,6 @@ public class LibGpiodGPIOServiceFactory {
         switch (version) {
         case V1_6_X:
             return Optional.of(new LibGpiodV1GPIOService());
-        case V2_X_X:
-            return Optional.of(new LibGpiodV2GPIOService());
         case UNKNOWN:
         default:
             logger.warn(

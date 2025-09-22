@@ -1070,7 +1070,7 @@ fi]]>
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.quartz-scheduler.quartz_${quartz.version}.jar@3" />
             <entry key="osgi.bundles" operation="+"
-                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.equinox.permission.cache.fix_${org.eclipse.kura.equinox.permission.cache.fix.version}.jar@3:start" />
+                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.equinox.permission.cache.fix_${org.eclipse.kura.equinox.permission.cache.fix.version}.jar@6:start" />
         </propertyfile>
     </target>
 

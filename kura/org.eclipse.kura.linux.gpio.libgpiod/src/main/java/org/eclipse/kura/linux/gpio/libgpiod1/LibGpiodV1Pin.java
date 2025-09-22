@@ -126,7 +126,7 @@ public class LibGpiodV1Pin implements KuraGPIOPin {
             throw new IOException("Failed to read GPIO value", e);
         }
 
-        return value == LibGpiodV1Native.GPIOD_LINE_ACTIVE_STATE_HIGH;
+        return value == 1;
     }
 
     @Override
@@ -141,8 +141,7 @@ public class LibGpiodV1Pin implements KuraGPIOPin {
             throw new IOException("Cannot set value on non-output pin");
         }
 
-        int gpioValue = value ? LibGpiodV1Native.GPIOD_LINE_ACTIVE_STATE_HIGH
-                : LibGpiodV1Native.GPIOD_LINE_ACTIVE_STATE_LOW;
+        int gpioValue = value ? 1 : 0;
         try {
             int exitCode = LibGpiodV1Native.INSTANCE.gpiod_line_set_value(this.line, gpioValue);
             logger.debug("Set GPIO value to {} with exit code {}", gpioValue, exitCode);
@@ -314,11 +313,11 @@ public class LibGpiodV1Pin implements KuraGPIOPin {
                 closeGpioChip();
                 throw new KuraUnavailableDeviceException("Cannot get GPIO line: " + this.offset);
             }
-            // boolean is_used = LibGpiodV1Native.INSTANCE.gpiod_line_is_used(this.line);
-            // if (is_used) {
-            // closeGpioChip();
-            // throw new KuraUnavailableDeviceException("GPIO line already in use: " + this.offset);
-            // }
+            boolean is_used = LibGpiodV1Native.INSTANCE.gpiod_line_is_used(this.line);
+            if (is_used) {
+                closeGpioChip();
+                throw new KuraUnavailableDeviceException("GPIO line already in use: " + this.offset);
+            }
         } catch (Error e) {
             closeGpioChip();
             throw new KuraUnavailableDeviceException(e, "Cannot get GPIO line: " + this.offset);

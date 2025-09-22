@@ -31,8 +31,8 @@ import org.slf4j.LoggerFactory;
 public class LibGpiodGPIOServiceFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(LibGpiodGPIOServiceFactory.class);
+    private static final Object lock = new Object();
     private static Optional<GPIOService> instance = Optional.empty();
-    private static final Object LOCK = new Object();
 
     private LibGpiodGPIOServiceFactory() {
         // Empty private constructor for static factory class
@@ -45,7 +45,7 @@ public class LibGpiodGPIOServiceFactory {
      */
     public static Optional<GPIOService> getInstance() {
         if (!instance.isPresent()) {
-            synchronized (LOCK) {
+            synchronized (lock) {
                 instance = createService();
             }
         }
@@ -75,36 +75,4 @@ public class LibGpiodGPIOServiceFactory {
         }
     }
 
-    // /**
-    // * Get information about the detected libgpiod version
-    // */
-    // public static String getDetectedVersionInfo() {
-    // LibGpiodVersionDetector.LibGpiodVersion version = LibGpiodVersionDetector.getVersion();
-    // String versionString = LibGpiodVersionDetector.getVersionString();
-    //
-    // return String.format("Detected libgpiod version: %s (%s)", version, versionString);
-    // }
-    //
-    // /**
-    // * Check if libgpiod is available and supported
-    // */
-    // public static boolean isLibGpiodAvailable() {
-    // try {
-    // LibGpiodVersionDetector.LibGpiodVersion version = LibGpiodVersionDetector.getVersion();
-    // return version == LibGpiodVersionDetector.LibGpiodVersion.V1_6_X
-    // || version == LibGpiodVersionDetector.LibGpiodVersion.V2_X_X;
-    // } catch (Exception e) {
-    // return false;
-    // }
-    // }
-    //
-    // /**
-    // * Reset the factory (useful for testing)
-    // */
-    // public static void reset() {
-    // synchronized (lock) {
-    // instance = null;
-    // LibGpiodVersionDetector.redetect();
-    // }
-    // }
 }

@@ -39,6 +39,8 @@ public class HttpServiceOptions {
 
     static final String PROP_KEYSTORE_SERVICE = "KeystoreService.target";
 
+    static final String PROP_HTTPS_SESSION_TIMEOUT = "https.session.timeout";
+
     private static final Property<Integer[]> HTTP_PORTS = new Property<>(PROP_HTTP_PORTS, new Integer[] {});
     private static final Property<Integer[]> HTTPS_PORTS = new Property<>(PROP_HTTPS_PORTS, new Integer[] {});
     private static final Property<Integer[]> HTTPS_CLIENT_AUTH_PORTS = new Property<>(PROP_HTTPS_CLIENT_AUTH_PORTS,
@@ -50,6 +52,9 @@ public class HttpServiceOptions {
     private static final Property<String> KEYSTORE_SERVICE = new Property<>(PROP_KEYSTORE_SERVICE,
             "kura.service.pid=changeit");
 
+    private static final Property<Integer> HTTPS_SESSION_TIMEOUT = new Property<>(PROP_HTTPS_SESSION_TIMEOUT,
+            86400);
+
     private final Set<Integer> httpPorts;
     private final Set<Integer> httpsPorts;
     private final Set<Integer> httpsWithClientAuthPorts;
@@ -57,6 +62,7 @@ public class HttpServiceOptions {
     private final RevocationCheckMode revocationCheckMode;
     private final boolean isRevocationSoftFailEnabled;
     private final String keystoreServicePid;
+    private final int httpsSessionTimeout;
 
     public HttpServiceOptions(final Map<String, Object> properties) {
         this.httpPorts = loadIntArrayProperty(HTTP_PORTS.get(properties));
@@ -67,6 +73,8 @@ public class HttpServiceOptions {
         this.isRevocationSoftFailEnabled = REVOCATION_SOFT_FAIL.get(properties);
 
         this.keystoreServicePid = KEYSTORE_SERVICE.get(properties);
+
+        this.httpsSessionTimeout = HTTPS_SESSION_TIMEOUT.get(properties);
     }
 
     public Set<Integer> getHttpPorts() {
@@ -97,6 +105,10 @@ public class HttpServiceOptions {
         return this.isRevocationSoftFailEnabled;
     }
 
+    public int getHttpsSessionTimeout() {
+        return this.httpsSessionTimeout;
+    }
+
     private static Set<Integer> loadIntArrayProperty(final Integer[] list) {
         if (list == null) {
             return Collections.emptySet();
@@ -115,8 +127,9 @@ public class HttpServiceOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(httpPorts, httpsPorts, httpsWithClientAuthPorts, isRevocationEnabled,
-                isRevocationSoftFailEnabled, keystoreServicePid, revocationCheckMode);
+        return Objects.hash(this.httpPorts, this.httpsPorts, this.httpsWithClientAuthPorts, this.isRevocationEnabled,
+                this.isRevocationSoftFailEnabled, this.keystoreServicePid, this.revocationCheckMode,
+                this.httpsSessionTimeout);
     }
 
     @Override
@@ -128,11 +141,12 @@ public class HttpServiceOptions {
             return false;
         }
         HttpServiceOptions other = (HttpServiceOptions) obj;
-        return Objects.equals(httpPorts, other.httpPorts) && Objects.equals(httpsPorts, other.httpsPorts)
-                && Objects.equals(httpsWithClientAuthPorts, other.httpsWithClientAuthPorts)
-                && isRevocationEnabled == other.isRevocationEnabled
-                && isRevocationSoftFailEnabled == other.isRevocationSoftFailEnabled
-                && Objects.equals(keystoreServicePid, other.keystoreServicePid)
-                && revocationCheckMode == other.revocationCheckMode;
+        return Objects.equals(this.httpPorts, other.httpPorts) && Objects.equals(this.httpsPorts, other.httpsPorts)
+                && Objects.equals(this.httpsWithClientAuthPorts, other.httpsWithClientAuthPorts)
+                && this.isRevocationEnabled == other.isRevocationEnabled
+                && this.isRevocationSoftFailEnabled == other.isRevocationSoftFailEnabled
+                && Objects.equals(this.keystoreServicePid, other.keystoreServicePid)
+                && this.revocationCheckMode == other.revocationCheckMode
+                && this.httpsSessionTimeout == other.httpsSessionTimeout;
     }
 }

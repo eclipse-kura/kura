@@ -188,9 +188,10 @@ public class JettyServerHolder {
         }
     }
 
-    public ServerConnector createHttpConnector(int port) {
+    private ServerConnector createHttpConnector(int port) {
 
         HttpConfiguration httpConfiguration = new HttpConfiguration();
+        httpConfiguration.setIdleTimeout(this.options.getHttpsSessionTimeout() / 10);
 
         final ServerConnector newConnector = new ServerConnector(this.server,
                 new HttpConnectionFactory(httpConfiguration));
@@ -198,6 +199,43 @@ public class JettyServerHolder {
         customizeConnector(newConnector, port);
 
         return newConnector;
+    }
+
+    private ServerConnector createHttpsConnector(final KeystoreService keystoreService, final int port,
+            final boolean enableClientAuth) throws KuraException {
+
+        final BaseSslContextFactory sslContextFactory;
+
+        if (enableClientAuth) {
+            sslContextFactory = new ClientAuthSslContextFactoryImpl(keystoreService, this.options.isRevocationEnabled(),
+                    getRevocationCheckerOptions());
+        } else {
+            sslContextFactory = new BaseSslContextFactory(keystoreService);
+        }
+
+        final KeyStore keystore = keystoreService.getKeyStore();
+
+        sslContextFactory.setKeyStore(keystore);
+        sslContextFactory.setTrustStore(keystore);
+
+        sslContextFactory.setProtocol("TLS");
+        sslContextFactory.setTrustManagerFactoryAlgorithm("PKIX");
+
+        sslContextFactory.setWantClientAuth(enableClientAuth);
+        sslContextFactory.setNeedClientAuth(enableClientAuth);
+
+        sslContextFactory.setSslSessionTimeout(this.options.getHttpsSessionTimeout());
+
+        final HttpConfiguration httpsConfig = new HttpConfiguration();
+        httpsConfig.setIdleTimeout(this.options.getHttpsSessionTimeout() / 10);
+
+        httpsConfig.addCustomizer(new SecureRequestCustomizer(false));
+
+        final ServerConnector connector = new ServerConnector(server,
+                new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(httpsConfig));
+        customizeConnector(connector, port);
+
+        return connector;
     }
 
     private void customizeConnector(final ServerConnector serverConnector, final int port) {
@@ -258,40 +296,6 @@ public class JettyServerHolder {
 
         }
 
-    }
-
-    private ServerConnector createHttpsConnector(final KeystoreService keystoreService, final int port,
-            final boolean enableClientAuth) throws KuraException {
-
-        final BaseSslContextFactory sslContextFactory;
-
-        if (enableClientAuth) {
-            sslContextFactory = new ClientAuthSslContextFactoryImpl(keystoreService, this.options.isRevocationEnabled(),
-                    getRevocationCheckerOptions());
-        } else {
-            sslContextFactory = new BaseSslContextFactory(keystoreService);
-        }
-
-        final KeyStore keystore = keystoreService.getKeyStore();
-
-        sslContextFactory.setKeyStore(keystore);
-        sslContextFactory.setTrustStore(keystore);
-
-        sslContextFactory.setProtocol("TLS");
-        sslContextFactory.setTrustManagerFactoryAlgorithm("PKIX");
-
-        sslContextFactory.setWantClientAuth(enableClientAuth);
-        sslContextFactory.setNeedClientAuth(enableClientAuth);
-
-        final HttpConfiguration httpsConfig = new HttpConfiguration();
-
-        httpsConfig.addCustomizer(new SecureRequestCustomizer(false));
-
-        final ServerConnector connector = new ServerConnector(server,
-                new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(httpsConfig));
-        customizeConnector(connector, port);
-
-        return connector;
     }
 
     private EnumSet<PKIXRevocationChecker.Option> getRevocationCheckerOptions() {

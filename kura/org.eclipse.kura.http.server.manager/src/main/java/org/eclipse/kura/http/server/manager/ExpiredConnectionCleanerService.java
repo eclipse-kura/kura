@@ -70,7 +70,9 @@ public class ExpiredConnectionCleanerService {
     }
 
     public void shutdown() {
-        this.task.cancel(true);
+        if (this.task != null) {
+            this.task.cancel(true);
+        }
         this.cleanUpExecutor.shutdownNow();
     }
 }

@@ -82,9 +82,14 @@ public class JettyServerHolder {
     private final Server server;
     private final File workDir;
 
+    private ExpiredConnectionCleanerService expiredConnectionCleanerService;
+
     public JettyServerHolder(final HttpServiceOptions options, final Optional<KeystoreService> keystoreService,
             final HttpServlet httpServlet, final EventListener eventListener) {
         this.options = options;
+
+        this.expiredConnectionCleanerService = new ExpiredConnectionCleanerService(
+                this.options.getHttpsSessionTimeout());
 
         this.server = new Server(new QueuedThreadPool(200, 8));
         this.server.setErrorHandler(new KuraErrorHandler());
@@ -247,7 +252,7 @@ public class JettyServerHolder {
 
             ((HttpConnectionFactory) factory).getHttpConfiguration().setSendServerVersion(false);
         }
-        serverConnector.addBean(new ConnectionTimeoutListener(this.options.getHttpsSessionTimeout()));
+        serverConnector.addBean(new ConnectionTimeoutListener(this.expiredConnectionCleanerService));
 
         addCustomizer(serverConnector, new ForwardedRequestCustomizer());
     }
@@ -325,6 +330,7 @@ public class JettyServerHolder {
 
     public void stop() {
         try {
+            this.expiredConnectionCleanerService.shutdown();
             this.server.stop();
         } catch (Exception e) {
             logger.warn("Unable to stop the Jetty server", e);

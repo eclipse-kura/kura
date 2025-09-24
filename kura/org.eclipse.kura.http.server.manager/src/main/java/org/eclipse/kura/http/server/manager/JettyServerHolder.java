@@ -247,6 +247,8 @@ public class JettyServerHolder {
 
             ((HttpConnectionFactory) factory).getHttpConfiguration().setSendServerVersion(false);
         }
+        serverConnector.addBean(new ConnectionTimeoutListener(this.options.getHttpsSessionTimeout()));
+
         addCustomizer(serverConnector, new ForwardedRequestCustomizer());
     }
 

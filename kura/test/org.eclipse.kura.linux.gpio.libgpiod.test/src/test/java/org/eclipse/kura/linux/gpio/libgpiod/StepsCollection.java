@@ -57,6 +57,7 @@ public class StepsCollection {
     protected LibGpiodV1GPIOService v1Service;
     protected LibGpiodV1Pin v1Pin;
     protected Boolean v1PinValue;
+    protected String message;
 
     protected Exception occurredException;
     protected KuraGPIOPin resultPin;
@@ -560,6 +561,14 @@ public class StepsCollection {
         }
     }
 
+    protected void whenV1PinToStringIsCalled() {
+        try {
+            this.message = this.v1Pin.toString();
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
     /*
      * Then
      */
@@ -649,6 +658,10 @@ public class StepsCollection {
 
     protected void thenV1PinIndexIs(int expectedIndex) {
         assertEquals(expectedIndex, this.v1Pin.getIndex());
+    }
+
+    protected void thenMessageIs(String expectedMessage) {
+        assertEquals(expectedMessage, this.message);
     }
 
     // protected void thenVersionIs(LibGpiodVersionDetector.LibGpiodVersion expectedVersion) {

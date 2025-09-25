@@ -61,6 +61,16 @@ public class LibGpiodV1PinTest extends StepsCollection {
         when(this.nativeInterfaceMock.gpiod_line_request_output_flags(line4, "LibGpiodV1PinDriver", 1, 2))
                 .thenReturn(1);
         when(this.nativeInterfaceMock.gpiod_line_get_value(line4)).thenReturn(1);
+        Pointer line8 = Pointer.createConstant(8);
+        when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, 8)).thenReturn(line8);
+        when(this.nativeInterfaceMock.gpiod_line_is_used(line8)).thenReturn(false);
+        when(this.nativeInterfaceMock.gpiod_line_request_input_flags(line8, "LibGpiodV1PinDriver", 32)).thenReturn(1);
+        when(this.nativeInterfaceMock.gpiod_line_get_value(line8)).thenReturn(-1);
+        Pointer line9 = Pointer.createConstant(9);
+        when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, 9)).thenReturn(line9);
+        when(this.nativeInterfaceMock.gpiod_line_is_used(line9)).thenReturn(false);
+        when(this.nativeInterfaceMock.gpiod_line_request_input_flags(line9, "LibGpiodV1PinDriver", 32)).thenReturn(1);
+        when(this.nativeInterfaceMock.gpiod_line_get_value(line9)).thenThrow(new Error());
         Pointer chip5 = Pointer.createConstant(5);
         when(this.nativeInterfaceMock.gpiod_chip_open("/dev/gpiochip5")).thenReturn(chip5);
         when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip5)).thenReturn(64);
@@ -71,6 +81,18 @@ public class LibGpiodV1PinTest extends StepsCollection {
         when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 7)).thenReturn(line7);
         when(this.nativeInterfaceMock.gpiod_line_request_output_flags(line7, "LibGpiodV1PinDriver", 0, 2))
                 .thenReturn(-1);
+        Pointer line10 = Pointer.createConstant(10);
+        when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 10)).thenReturn(line10);
+        when(this.nativeInterfaceMock.gpiod_line_is_used(line10)).thenReturn(false);
+        when(this.nativeInterfaceMock.gpiod_line_request_output_flags(line10, "LibGpiodV1PinDriver", 0, 2))
+                .thenReturn(1);
+        when(this.nativeInterfaceMock.gpiod_line_set_value(line10, 1)).thenReturn(-1);
+        Pointer line11 = Pointer.createConstant(11);
+        when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 11)).thenReturn(line11);
+        when(this.nativeInterfaceMock.gpiod_line_is_used(line11)).thenReturn(false);
+        when(this.nativeInterfaceMock.gpiod_line_request_output_flags(line11, "LibGpiodV1PinDriver", 0, 2))
+                .thenReturn(1);
+        when(this.nativeInterfaceMock.gpiod_line_set_value(line11, 1)).thenThrow(new Error());
     }
 
     @After
@@ -160,6 +182,26 @@ public class LibGpiodV1PinTest extends StepsCollection {
     }
 
     @Test
+    public void testGetValueFromPinFailed() {
+        givenV1Pin("GPIO_01", 2008, KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.NONE);
+
+        whenV1PinIsOpened();
+        whenV1PinValueIsRead();
+
+        thenExceptionOccurred(IOException.class);
+    }
+
+    @Test
+    public void testGetValueFromPinThrowException() {
+        givenV1Pin("GPIO_01", 2009, KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.NONE);
+
+        whenV1PinIsOpened();
+        whenV1PinValueIsRead();
+
+        thenExceptionOccurred(IOException.class);
+    }
+
+    @Test
     public void testSetValueOnOutputPin() {
         givenV1Pin("GPIO_01", 2004, KuraGPIODirection.OUTPUT, KuraGPIOMode.OUTPUT_PUSH_PULL, KuraGPIOTrigger.NONE);
 
@@ -197,6 +239,26 @@ public class LibGpiodV1PinTest extends StepsCollection {
         whenV1PinValueIsSetTo(true);
 
         thenExceptionOccurred(KuraUnavailableDeviceException.class);
+    }
+
+    @Test
+    public void testSetValueOnPinFailed() {
+        givenV1Pin("GPIO_01", 5010, KuraGPIODirection.OUTPUT, KuraGPIOMode.OUTPUT_PUSH_PULL, KuraGPIOTrigger.NONE);
+
+        whenV1PinIsOpened();
+        whenV1PinValueIsSetTo(true);
+
+        thenExceptionOccurred(IOException.class);
+    }
+
+    @Test
+    public void testSetValueOnPinThrowException() {
+        givenV1Pin("GPIO_01", 5011, KuraGPIODirection.OUTPUT, KuraGPIOMode.OUTPUT_PUSH_PULL, KuraGPIOTrigger.NONE);
+
+        whenV1PinIsOpened();
+        whenV1PinValueIsSetTo(true);
+
+        thenExceptionOccurred(IOException.class);
     }
 
     @Test
@@ -283,5 +345,15 @@ public class LibGpiodV1PinTest extends StepsCollection {
 
         thenNoExceptionOccurred();
         thenV1PinIsNotOpen();
+    }
+
+    @Test
+    public void testToString() {
+        givenV1Pin("GPIO18", 18, KuraGPIODirection.OUTPUT, KuraGPIOMode.OUTPUT_PUSH_PULL, KuraGPIOTrigger.NONE);
+
+        whenV1PinToStringIsCalled();
+
+        thenMessageIs(
+                "LibGpiodV1Pin{chip=/dev/gpiochip0, offset=18, name=GPIO18, direction=OUTPUT, mode=OUTPUT_PUSH_PULL, trigger=NONE}");
     }
 }

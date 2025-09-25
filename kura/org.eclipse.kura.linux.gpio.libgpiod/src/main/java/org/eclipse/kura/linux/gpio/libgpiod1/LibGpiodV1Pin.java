@@ -144,7 +144,9 @@ public class LibGpiodV1Pin implements KuraGPIOPin {
         int gpioValue = value ? 1 : 0;
         try {
             int exitCode = LibGpiodV1NativeWrapper.getInstance().gpiod_line_set_value(this.line, gpioValue);
-            logger.debug("Set GPIO value to {} with exit code {}", gpioValue, exitCode);
+            if (exitCode < 0) {
+                throw new IOException("Failed to set GPIO value");
+            }
         } catch (Error e) {
             throw new IOException("Failed to set GPIO value", e);
         }

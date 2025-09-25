@@ -15,8 +15,10 @@ package org.eclipse.kura.http.server.manager;
 import java.util.EventListener;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -43,7 +45,8 @@ public class HttpService implements ConfigurableComponent, EventHandler {
     private String keystoreServicePid;
 
     private JettyServerHolder jettyServerHolder;
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    private Future<?> restartTask = CompletableFuture.completedFuture(null);
 
     public void setKeystoreService(KeystoreService keystoreService, final Map<String, Object> properties) {
         this.keystoreService = keystoreService;
@@ -68,7 +71,7 @@ public class HttpService implements ConfigurableComponent, EventHandler {
         logger.info("Activating... Done.");
     }
 
-    public void updated(Map<String, Object> properties) {
+    public synchronized void updated(Map<String, Object> properties) {
         logger.info("Updating {}", this.getClass().getSimpleName());
 
         HttpServiceOptions updatedOptions = new HttpServiceOptions(properties);
@@ -77,15 +80,17 @@ public class HttpService implements ConfigurableComponent, EventHandler {
             logger.debug("Updating, new props");
             this.options = updatedOptions;
 
+            cancelRestartTask();
             restartHttpService();
         }
 
         logger.info("Updating... Done.");
     }
 
-    public void deactivate() {
+    public synchronized void deactivate() {
         logger.info("Deactivating {}", this.getClass().getSimpleName());
 
+        cancelRestartTask();
         stopHttpService();
         shutdownExecutor();
     }
@@ -133,6 +138,22 @@ public class HttpService implements ConfigurableComponent, EventHandler {
         }
     }
 
+    private synchronized void cancelRestartTask() {
+        if (!this.restartTask.isDone()) {
+            this.restartTask.cancel(false);
+        }
+    }
+
+    private synchronized void scheduleDeferredRestart() {
+        cancelRestartTask();
+
+        try {
+            this.restartTask = this.executorService.schedule(this::restartHttpService, 10, TimeUnit.SECONDS);
+        } catch (final Exception e) {
+            logger.warn("failed to schedule restart task", e);
+        }
+    }
+
     @Override
     public void handleEvent(final Event event) {
         if (!(event instanceof KeystoreChangedEvent)) {
@@ -142,7 +163,7 @@ public class HttpService implements ConfigurableComponent, EventHandler {
         final KeystoreChangedEvent keystoreChangedEvent = (KeystoreChangedEvent) event;
 
         if (keystoreChangedEvent.getSenderPid().equals(keystoreServicePid)) {
-            restartHttpService();
+            scheduleDeferredRestart();
         }
     }
 

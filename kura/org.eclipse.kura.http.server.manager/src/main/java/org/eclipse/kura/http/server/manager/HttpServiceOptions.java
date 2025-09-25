@@ -39,7 +39,7 @@ public class HttpServiceOptions {
 
     static final String PROP_KEYSTORE_SERVICE = "KeystoreService.target";
 
-    static final String PROP_HTTPS_SESSION_TIMEOUT = "https.session.timeout";
+    static final String PROP_HTTP_CONNECTION_TIMEOUT = "http.connection.timeout";
 
     private static final Property<Integer[]> HTTP_PORTS = new Property<>(PROP_HTTP_PORTS, new Integer[] {});
     private static final Property<Integer[]> HTTPS_PORTS = new Property<>(PROP_HTTPS_PORTS, new Integer[] {});
@@ -52,8 +52,7 @@ public class HttpServiceOptions {
     private static final Property<String> KEYSTORE_SERVICE = new Property<>(PROP_KEYSTORE_SERVICE,
             "kura.service.pid=changeit");
 
-    private static final Property<Integer> HTTPS_SESSION_TIMEOUT = new Property<>(PROP_HTTPS_SESSION_TIMEOUT,
-            86400);
+    private static final Property<Integer> HTTP_CONNECTION_TIMEOUT = new Property<>(PROP_HTTP_CONNECTION_TIMEOUT, 86400);
 
     private final Set<Integer> httpPorts;
     private final Set<Integer> httpsPorts;
@@ -62,7 +61,7 @@ public class HttpServiceOptions {
     private final RevocationCheckMode revocationCheckMode;
     private final boolean isRevocationSoftFailEnabled;
     private final String keystoreServicePid;
-    private final int httpsSessionTimeout;
+    private final int httpConnectionTimeout;
 
     public HttpServiceOptions(final Map<String, Object> properties) {
         this.httpPorts = loadIntArrayProperty(HTTP_PORTS.get(properties));
@@ -74,7 +73,7 @@ public class HttpServiceOptions {
 
         this.keystoreServicePid = KEYSTORE_SERVICE.get(properties);
 
-        this.httpsSessionTimeout = HTTPS_SESSION_TIMEOUT.get(properties);
+        this.httpConnectionTimeout = HTTP_CONNECTION_TIMEOUT.get(properties);
     }
 
     public Set<Integer> getHttpPorts() {
@@ -105,8 +104,8 @@ public class HttpServiceOptions {
         return this.isRevocationSoftFailEnabled;
     }
 
-    public int getHttpsSessionTimeout() {
-        return this.httpsSessionTimeout;
+    public int getHttpConnectionTimeout() {
+        return this.httpConnectionTimeout;
     }
 
     private static Set<Integer> loadIntArrayProperty(final Integer[] list) {
@@ -129,7 +128,7 @@ public class HttpServiceOptions {
     public int hashCode() {
         return Objects.hash(this.httpPorts, this.httpsPorts, this.httpsWithClientAuthPorts, this.isRevocationEnabled,
                 this.isRevocationSoftFailEnabled, this.keystoreServicePid, this.revocationCheckMode,
-                this.httpsSessionTimeout);
+                this.httpConnectionTimeout);
     }
 
     @Override
@@ -147,6 +146,6 @@ public class HttpServiceOptions {
                 && this.isRevocationSoftFailEnabled == other.isRevocationSoftFailEnabled
                 && Objects.equals(this.keystoreServicePid, other.keystoreServicePid)
                 && this.revocationCheckMode == other.revocationCheckMode
-                && this.httpsSessionTimeout == other.httpsSessionTimeout;
+                && this.httpConnectionTimeout == other.httpConnectionTimeout;
     }
 }

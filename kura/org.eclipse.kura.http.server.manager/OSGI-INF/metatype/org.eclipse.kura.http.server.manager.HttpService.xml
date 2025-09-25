@@ -86,14 +86,14 @@
             default="false"
             description="Specifies whether the revocation soft fail is enabled or not. If it is enabled and the gateway is not able to verify the revocation status of a client certificate (for example due to a connectivity problem), the certificate will be rejected. This parameter is ignored if Revocation Check Enabled is set to false."/>
 
-        <AD id="https.session.timeout"
-            name="TLS session timeout"
+        <AD id="http.connection.timeout"
+            name="HTTP/HTTPS connection timeout"
             type="Integer"
             cardinality="0" 
             required="true"
             default="86400"
             min="3600"
-            description="Specifies the amount of time (in seconds) after which SSL/TLS sessions expire."/>
+            description="Specifies the amount of time (in seconds) after which HTTP/HTTPS connections are forcibly closed, regardless of their status. Idle connections have a timeout of one-tenth of this value."/>
             
     </OCD>
 

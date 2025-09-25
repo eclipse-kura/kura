@@ -14,10 +14,15 @@
 package org.eclipse.kura.linux.gpio.libgpiod;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
+import org.eclipse.kura.gpio.GPIOService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,10 +30,12 @@ import org.mockito.MockedStatic;
 
 import com.sun.jna.Native;
 
-public class LibGpiodGPIOServiceFactoryTest extends StepsCollection {
+public class LibGpiodGPIOServiceFactoryTest extends CommonSteps {
 
     private MockedStatic<Native> nativeMock;
     private LibGpiodVersionDetector.VersionDetectionInterface nativeInterfaceMock;
+    private Optional<GPIOService> resultService;
+    private Optional<GPIOService> resultServiceAgain;
 
     @Before
     public void setup() {
@@ -90,7 +97,7 @@ public class LibGpiodGPIOServiceFactoryTest extends StepsCollection {
      * Given
      */
 
-    protected void givenLibGpiodVersionDetector(String version) {
+    private void givenLibGpiodVersionDetector(String version) {
         if (version.startsWith("1.6.")) {
             when(this.nativeInterfaceMock.gpiod_api_version()).thenThrow(new UnsatisfiedLinkError("Not found"));
             when(this.nativeInterfaceMock.gpiod_version_string()).thenReturn("1.6.3");
@@ -104,10 +111,38 @@ public class LibGpiodGPIOServiceFactoryTest extends StepsCollection {
     }
 
     /*
+     * When
+     */
+
+    private void whenGetFactoryInstance() {
+        try {
+            this.resultService = LibGpiodGPIOServiceFactory.getInstance();
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    private void whenGetFactoryInstanceAgain() {
+        try {
+            this.resultServiceAgain = LibGpiodGPIOServiceFactory.getInstance();
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    /*
      * Then
      */
 
-    protected void thenServicesAreSame() {
+    private void thenServiceIsPresent() {
+        assertTrue(this.resultService.isPresent());
+    }
+
+    private void thenServiceIsNotPresent() {
+        assertFalse(this.resultService.isPresent());
+    }
+
+    private void thenServicesAreSame() {
         assertEquals(this.resultService.get(), this.resultServiceAgain.get());
     }
 }

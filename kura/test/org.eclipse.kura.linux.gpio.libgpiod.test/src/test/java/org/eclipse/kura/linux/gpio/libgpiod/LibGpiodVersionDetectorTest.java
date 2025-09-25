@@ -27,7 +27,7 @@ import org.mockito.MockedStatic;
 
 import com.sun.jna.Native;
 
-public class LibGpiodVersionDetectorTest extends StepsCollection {
+public class LibGpiodVersionDetectorTest extends CommonSteps {
 
     private MockedStatic<Native> nativeMock;
     private LibGpiodVersionDetector.VersionDetectionInterface nativeInterfaceMock;
@@ -129,7 +129,7 @@ public class LibGpiodVersionDetectorTest extends StepsCollection {
      * Given
      */
 
-    protected void givenLibGpiodVersionDetector(String version) {
+    private void givenLibGpiodVersionDetector(String version) {
         if (version.startsWith("1.6.")) {
             when(this.nativeInterfaceMock.gpiod_api_version()).thenThrow(new UnsatisfiedLinkError("Not found"));
             when(this.nativeInterfaceMock.gpiod_version_string()).thenReturn("1.6.3");
@@ -147,7 +147,7 @@ public class LibGpiodVersionDetectorTest extends StepsCollection {
      * When
      */
 
-    protected void whenGetVersion() {
+    private void whenGetVersion() {
         try {
             this.resultVersion = versionDetector.getVersion();
         } catch (Exception e) {
@@ -155,7 +155,7 @@ public class LibGpiodVersionDetectorTest extends StepsCollection {
         }
     }
 
-    protected void whenGetVersionString() {
+    private void whenGetVersionString() {
         try {
             this.resultVersionString = versionDetector.getVersionString();
         } catch (Exception e) {
@@ -163,7 +163,7 @@ public class LibGpiodVersionDetectorTest extends StepsCollection {
         }
     }
 
-    protected void whenGetVersionAgain() {
+    private void whenGetVersionAgain() {
         try {
             this.resultVersionAgain = versionDetector.getVersion();
         } catch (Exception e) {
@@ -171,7 +171,7 @@ public class LibGpiodVersionDetectorTest extends StepsCollection {
         }
     }
 
-    protected void whenGetVersionStringAgain() {
+    private void whenGetVersionStringAgain() {
         try {
             this.resultVersionStringAgain = versionDetector.getVersionString();
         } catch (Exception e) {
@@ -179,7 +179,7 @@ public class LibGpiodVersionDetectorTest extends StepsCollection {
         }
     }
 
-    protected void whenRedetectVersion() {
+    private void whenRedetectVersion() {
         try {
             versionDetector.redetect();
         } catch (Exception e) {
@@ -191,19 +191,11 @@ public class LibGpiodVersionDetectorTest extends StepsCollection {
      * Then
      */
 
-    protected void thenVersionIs(LibGpiodVersionDetector.LibGpiodVersion expectedVersion) {
-        assertEquals(expectedVersion, this.resultVersion);
-    }
-
-    protected void thenVersionStringIs(String expectedVersionString) {
+    private void thenVersionStringIs(String expectedVersionString) {
         assertEquals(expectedVersionString, this.resultVersionString);
     }
 
-    protected void thenVersionStringIsNotNull() {
-        assertNotNull(this.resultVersionString);
-    }
-
-    protected void thenVersionIs(String version) {
+    private void thenVersionIs(String version) {
         assertNotNull(this.resultVersion);
         assertTrue(this.resultVersion instanceof LibGpiodVersionDetector.LibGpiodVersion);
         if (version.startsWith("1.6.")) {
@@ -215,11 +207,11 @@ public class LibGpiodVersionDetectorTest extends StepsCollection {
         }
     }
 
-    protected void thenVersionsAreSame() {
+    private void thenVersionsAreSame() {
         assertEquals(this.resultVersion, this.resultVersionAgain);
     }
 
-    protected void thenVersionStringsAreSame() {
+    private void thenVersionStringsAreSame() {
         assertEquals(this.resultVersionString, this.resultVersionStringAgain);
     }
 }

@@ -19,6 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.kura.gpio.GPIOService;
@@ -45,7 +46,10 @@ public class GPIOServiceImplTest extends CommonSteps {
         this.GPIOServiceMock = mock(GPIOService.class);
         this.libGpiodGPIOServiceFactoryMock.when(() -> LibGpiodGPIOServiceFactory.getInstance())
                 .thenReturn(java.util.Optional.of(this.GPIOServiceMock));
-        when(this.GPIOServiceMock.getAvailablePins()).thenReturn(Map.of(1001, "GPIO_01", 1002, "GPIO_02"));
+        Map<Integer, String> availablePins = new HashMap<>();
+        availablePins.put(1001, "GPIO_01");
+        availablePins.put(1002, "GPIO_02");
+        when(this.GPIOServiceMock.getAvailablePins()).thenReturn(availablePins);
     }
 
     @After

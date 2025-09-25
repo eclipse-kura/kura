@@ -27,7 +27,7 @@ public class GPIOServiceImpl implements GPIOService {
 
     private static final Logger logger = LoggerFactory.getLogger(GPIOServiceImpl.class);
 
-    private Optional<GPIOService> gpioService;
+    private Optional<GPIOService> gpioService = Optional.empty();
 
     protected void activate() {
         logger.info("Activating libgpiod GPIOService...");

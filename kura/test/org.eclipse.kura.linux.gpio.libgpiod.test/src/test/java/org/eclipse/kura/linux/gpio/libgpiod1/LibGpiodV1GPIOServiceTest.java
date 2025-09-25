@@ -16,6 +16,11 @@ package org.eclipse.kura.linux.gpio.libgpiod1;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.eclipse.kura.gpio.KuraGPIODirection;
 import org.eclipse.kura.gpio.KuraGPIOMode;
@@ -27,22 +32,81 @@ import org.junit.Test;
 import org.mockito.MockedStatic;
 
 import com.sun.jna.Native;
+import com.sun.jna.Pointer;
 
 public class LibGpiodV1GPIOServiceTest extends StepsCollection {
 
     private MockedStatic<Native> nativeMock;
     private LibGpiodV1Native nativeInterfaceMock;
+    private MockedStatic<LibGpiodV1NativeWrapper> nativeInterfaceWrapperMock;
 
     @Before
-    public void setup() {
+    public void setup() throws IOException {
         this.nativeMock = mockStatic(Native.class);
         this.nativeInterfaceMock = mock(LibGpiodV1Native.class);
         this.nativeMock.when(() -> Native.load("gpiod", LibGpiodV1Native.class)).thenReturn(this.nativeInterfaceMock);
+        this.nativeInterfaceWrapperMock = mockStatic(LibGpiodV1NativeWrapper.class);
+        this.nativeInterfaceWrapperMock.when(() -> LibGpiodV1NativeWrapper.getInstance())
+                .thenReturn(this.nativeInterfaceMock);
+
+        Pointer chip0 = Pointer.createConstant(0);
+        when(this.nativeInterfaceMock.gpiod_chip_open(StepsCollection.DEVICE_FOLDER + "gpiochip0")).thenReturn(chip0);
+        when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip0)).thenReturn(5);
+        for (int offset = 0; offset < 5; offset++) {
+            Pointer line0 = Pointer.createConstant(offset);
+            when(this.nativeInterfaceMock.gpiod_chip_get_line(chip0, offset)).thenReturn(line0);
+            when(this.nativeInterfaceMock.gpiod_line_name(line0)).thenReturn("GPIO0_" + offset);
+        }
+        Pointer chip1 = Pointer.createConstant(1);
+        when(this.nativeInterfaceMock.gpiod_chip_open(StepsCollection.DEVICE_FOLDER + "gpiochip1")).thenReturn(chip1);
+        when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip1)).thenReturn(5);
+        for (int offset = 0; offset < 5; offset++) {
+            Pointer line1 = Pointer.createConstant(offset + 5);
+            when(this.nativeInterfaceMock.gpiod_chip_get_line(chip1, offset)).thenReturn(line1);
+            when(this.nativeInterfaceMock.gpiod_line_name(line1)).thenReturn("GPIO1_" + offset);
+        }
+        Pointer chip2 = Pointer.createConstant(2);
+        when(this.nativeInterfaceMock.gpiod_chip_open(StepsCollection.DEVICE_FOLDER + "gpiochip2")).thenReturn(chip2);
+        when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip2)).thenReturn(5);
+        for (int offset = 0; offset < 5; offset++) {
+            Pointer line2 = Pointer.createConstant(offset + 10);
+            when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, offset)).thenReturn(line2);
+            when(this.nativeInterfaceMock.gpiod_line_name(line2)).thenReturn("GPIO2_" + offset);
+        }
+        Pointer chip3 = Pointer.createConstant(3);
+        when(this.nativeInterfaceMock.gpiod_chip_open(StepsCollection.DEVICE_FOLDER + "gpiochip3")).thenReturn(chip3);
+        when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip3)).thenReturn(5);
+        for (int offset = 0; offset < 5; offset++) {
+            Pointer line3 = Pointer.createConstant(offset + 15);
+            when(this.nativeInterfaceMock.gpiod_chip_get_line(chip3, offset)).thenReturn(line3);
+            when(this.nativeInterfaceMock.gpiod_line_name(line3)).thenReturn("-");
+        }
+        Pointer chip4 = Pointer.createConstant(4);
+        when(this.nativeInterfaceMock.gpiod_chip_open(StepsCollection.DEVICE_FOLDER + "gpiochip4")).thenReturn(chip4);
+        when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip4)).thenReturn(5);
+        for (int offset = 0; offset < 5; offset++) {
+            Pointer line4 = Pointer.createConstant(offset + 20);
+            when(this.nativeInterfaceMock.gpiod_chip_get_line(chip4, offset)).thenReturn(line4);
+            when(this.nativeInterfaceMock.gpiod_line_name(line4)).thenReturn("");
+        }
+        Pointer chip5 = Pointer.createConstant(2);
+        when(this.nativeInterfaceMock.gpiod_chip_open(StepsCollection.DEVICE_FOLDER + "gpiochip5")).thenReturn(chip5);
+        when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip5)).thenReturn(5);
+        for (int offset = 0; offset < 5; offset++) {
+            Pointer line5 = Pointer.createConstant(offset + 25);
+            when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, offset)).thenReturn(line5);
+            when(this.nativeInterfaceMock.gpiod_line_name(line5)).thenReturn(null);
+        }
+
+        for (int i = 0; i < 6; i++) {
+            Files.deleteIfExists(Paths.get(StepsCollection.DEVICE_FOLDER + "gpiochip" + i));
+        }
     }
 
     @After
     public void cleanup() {
         this.nativeMock.close();
+        this.nativeInterfaceWrapperMock.close();
     }
 
     @Test
@@ -76,23 +140,43 @@ public class LibGpiodV1GPIOServiceTest extends StepsCollection {
     public void testGetPinByNameWithValidNameAndDefaultParameters() {
         givenV1GPIOService();
 
-        whenV1ServiceGetPinByName("GPIO0");
+        whenV1ServiceGetPinByName("GPIO0_1");
 
         thenNoExceptionOccurred();
         thenPinIsNotNull();
-        thenPinIs("GPIO0", KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.NONE);
+        thenPinIs("GPIO0_1", KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.NONE);
     }
 
     @Test
     public void testGetPinByNameWithValidNameAndParameters() {
         givenV1GPIOService();
 
-        whenV1ServiceGetPinByName("GPIO0", KuraGPIODirection.OUTPUT, KuraGPIOMode.OUTPUT_OPEN_DRAIN,
+        whenV1ServiceGetPinByName("GPIO0_1", KuraGPIODirection.OUTPUT, KuraGPIOMode.OUTPUT_OPEN_DRAIN,
                 KuraGPIOTrigger.NONE);
 
         thenNoExceptionOccurred();
         thenPinIsNotNull();
-        thenPinIs("GPIO0", KuraGPIODirection.OUTPUT, KuraGPIOMode.OUTPUT_OPEN_DRAIN, KuraGPIOTrigger.NONE);
+        thenPinIs("GPIO0_1", KuraGPIODirection.OUTPUT, KuraGPIOMode.OUTPUT_OPEN_DRAIN, KuraGPIOTrigger.NONE);
+    }
+
+    @Test
+    public void testGetPinByNameNotInAvailablePins() {
+        givenV1GPIOService();
+
+        whenV1ServiceGetPinByName("GPIO_100");
+
+        thenExceptionOccurred(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void testGetPinByNameFromCache() {
+        givenV1GPIOService();
+
+        whenV1ServiceGetPinByName("GPIO2_3");
+        whenV1ServiceGetPinByNameAgain("GPIO2_3");
+
+        thenNoExceptionOccurred();
+        thenPinsAreSame();
     }
 
     @Test
@@ -112,7 +196,7 @@ public class LibGpiodV1GPIOServiceTest extends StepsCollection {
 
         thenNoExceptionOccurred();
         thenPinIsNotNull();
-        thenPinIs(2003, KuraGPIODirection.OUTPUT, KuraGPIOMode.OUTPUT_OPEN_DRAIN, KuraGPIOTrigger.NONE);
+        thenPinIs(2003, KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.NONE);
     }
 
     @Test
@@ -124,7 +208,45 @@ public class LibGpiodV1GPIOServiceTest extends StepsCollection {
 
         thenNoExceptionOccurred();
         thenPinIsNotNull();
-        thenPinIs(2003, KuraGPIODirection.OUTPUT, KuraGPIOMode.OUTPUT_OPEN_DRAIN, KuraGPIOTrigger.NONE);
+        thenPinIs(2003, KuraGPIODirection.OUTPUT, KuraGPIOMode.OUTPUT_PUSH_PULL, KuraGPIOTrigger.NONE);
+    }
+
+    @Test
+    public void testGetPinByTerminalNotInAvailablePins() {
+        givenV1GPIOService();
+
+        whenV1ServiceGetPinByTerminal(9999);
+
+        thenExceptionOccurred(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void testGetPinByTerminalNotValid() {
+        givenV1GPIOService();
+
+        whenV1ServiceGetPinByTerminal(2033);
+
+        thenExceptionOccurred(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void testGetPinByTerminalWithoutChip() {
+        givenV1GPIOService();
+
+        whenV1ServiceGetPinByTerminal(5023);
+
+        thenExceptionOccurred(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void testGetPinByTerminalFromCache() {
+        givenV1GPIOService();
+
+        whenV1ServiceGetPinByTerminal(2003);
+        whenV1ServiceGetPinByTerminalAgain(2003);
+
+        thenNoExceptionOccurred();
+        thenPinsAreSame();
     }
 
     @Test
@@ -135,17 +257,6 @@ public class LibGpiodV1GPIOServiceTest extends StepsCollection {
 
         thenNoExceptionOccurred();
         thenAvailablePinsIsNotNullOrEmpty();
-    }
-
-    @Test
-    public void testGetPinFromCache() {
-        givenV1GPIOService();
-
-        whenV1ServiceGetPinByName("GPIO_10");
-        whenV1ServiceGetPinByNameAgain("GPIO_10");
-
-        thenNoExceptionOccurred();
-        thenPinsAreSame();
     }
 
     @Test
@@ -166,6 +277,78 @@ public class LibGpiodV1GPIOServiceTest extends StepsCollection {
 
         thenNoExceptionOccurred();
         thenV1CacheIsEmpty();
+    }
+
+    @Test
+    public void testServiceInitialization() throws IOException {
+        givenV1GPIOServiceNotInitialized(StepsCollection.DEVICE_FOLDER);
+        givenTmpGpioChips();
+
+        whenV1ServiceIsInitialized();
+        whenV1ServiceGetAvailablePins();
+
+        thenNoExceptionOccurred();
+        thenAvailablePinsIsNotNullOrEmpty();
+    }
+
+    @Test
+    public void testServiceInitializationWithNotExistingDeviceFolder() throws IOException {
+        givenV1GPIOServiceNotInitialized("not_existing_folder");
+        givenTmpGpioChips();
+
+        whenV1ServiceIsInitialized();
+        whenV1ServiceGetAvailablePins();
+
+        thenNoExceptionOccurred();
+        thenAvailablePinsIsEmpty();
+    }
+
+    @Test
+    public void testServiceInitializationWithNotExistingGpioChips() throws IOException {
+        givenV1GPIOServiceNotInitialized("/opt/");
+        givenTmpGpioChips();
+
+        whenV1ServiceIsInitialized();
+        whenV1ServiceGetAvailablePins();
+
+        thenNoExceptionOccurred();
+        thenAvailablePinsIsEmpty();
+    }
+
+    @Test
+    public void testServiceInitializationWithWrongPinName() throws IOException {
+        givenV1GPIOServiceNotInitialized(StepsCollection.DEVICE_FOLDER);
+        givenTmpGpioChips(3);
+
+        whenV1ServiceIsInitialized();
+        whenV1ServiceGetAvailablePins();
+
+        thenNoExceptionOccurred();
+        thenAvailablePinsIsEmpty();
+    }
+
+    @Test
+    public void testServiceInitializationWithEmptyPinName() throws IOException {
+        givenV1GPIOServiceNotInitialized(StepsCollection.DEVICE_FOLDER);
+        givenTmpGpioChips(4);
+
+        whenV1ServiceIsInitialized();
+        whenV1ServiceGetAvailablePins();
+
+        thenNoExceptionOccurred();
+        thenAvailablePinsIsEmpty();
+    }
+
+    @Test
+    public void testServiceInitializationWithNullPinName() throws IOException {
+        givenV1GPIOServiceNotInitialized(StepsCollection.DEVICE_FOLDER);
+        givenTmpGpioChips(5);
+
+        whenV1ServiceIsInitialized();
+        whenV1ServiceGetAvailablePins();
+
+        thenNoExceptionOccurred();
+        thenAvailablePinsIsEmpty();
     }
 
     protected void thenV1CacheIsEmpty() {

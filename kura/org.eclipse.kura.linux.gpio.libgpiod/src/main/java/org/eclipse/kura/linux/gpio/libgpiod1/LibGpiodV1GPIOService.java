@@ -71,7 +71,7 @@ public class LibGpiodV1GPIOService implements GPIOService {
     private void discoverGPIOChips() {
         this.availablePins.clear();
 
-        File devDir = new File("/dev");
+        File devDir = new File(getDeviceFolderPath());
         if (!devDir.exists() || !devDir.isDirectory()) {
             return;
         }
@@ -99,17 +99,17 @@ public class LibGpiodV1GPIOService implements GPIOService {
         Pointer chip = null;
 
         try {
-            chip = LibGpiodV1Native.INSTANCE.gpiod_chip_open(chipPath);
+            chip = LibGpiodV1NativeWrapper.getInstance().gpiod_chip_open(chipPath);
             if (chip == null) {
                 return;
             }
 
-            int numLines = LibGpiodV1Native.INSTANCE.gpiod_chip_num_lines(chip);
+            int numLines = LibGpiodV1NativeWrapper.getInstance().gpiod_chip_num_lines(chip);
 
             for (int offset = 0; offset < numLines; offset++) {
-                Pointer line = LibGpiodV1Native.INSTANCE.gpiod_chip_get_line(chip, offset);
+                Pointer line = LibGpiodV1NativeWrapper.getInstance().gpiod_chip_get_line(chip, offset);
                 if (line != null) {
-                    String pinName = LibGpiodV1Native.INSTANCE.gpiod_line_name(line);
+                    String pinName = LibGpiodV1NativeWrapper.getInstance().gpiod_line_name(line);
                     if (pinName == null || pinName.trim().isEmpty() || pinName.equals("-")) {
                         continue;
                     }
@@ -124,7 +124,7 @@ public class LibGpiodV1GPIOService implements GPIOService {
 
         } finally {
             if (chip != null) {
-                LibGpiodV1Native.INSTANCE.gpiod_chip_close(chip);
+                LibGpiodV1NativeWrapper.getInstance().gpiod_chip_close(chip);
             }
         }
     }
@@ -194,7 +194,7 @@ public class LibGpiodV1GPIOService implements GPIOService {
 
         int chipNumber = terminal / 1000;
         int offset = terminal % 1000;
-        String chipPath = "/dev/" + GPIO_CHIP_NAME + chipNumber;
+        String chipPath = getDeviceFolderPath() + GPIO_CHIP_NAME + chipNumber;
 
         if (!isValidPin(chipPath, offset)) {
             throw new IllegalArgumentException("Invalid terminal: " + terminal);
@@ -213,17 +213,17 @@ public class LibGpiodV1GPIOService implements GPIOService {
         Pointer chip = null;
 
         try {
-            chip = LibGpiodV1Native.INSTANCE.gpiod_chip_open(chipPath);
+            chip = LibGpiodV1NativeWrapper.getInstance().gpiod_chip_open(chipPath);
             if (chip == null) {
                 return false;
             }
 
-            int numLines = LibGpiodV1Native.INSTANCE.gpiod_chip_num_lines(chip);
+            int numLines = LibGpiodV1NativeWrapper.getInstance().gpiod_chip_num_lines(chip);
             return offset >= 0 && offset < numLines;
 
         } finally {
             if (chip != null) {
-                LibGpiodV1Native.INSTANCE.gpiod_chip_close(chip);
+                LibGpiodV1NativeWrapper.getInstance().gpiod_chip_close(chip);
             }
         }
     }
@@ -250,6 +250,10 @@ public class LibGpiodV1GPIOService implements GPIOService {
         this.initialized.set(false);
         clearCache();
         initialize();
+    }
+
+    protected String getDeviceFolderPath() {
+        return "/dev";
     }
 
 }

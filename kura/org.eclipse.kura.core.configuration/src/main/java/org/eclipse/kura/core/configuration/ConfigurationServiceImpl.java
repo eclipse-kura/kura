@@ -1030,12 +1030,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     private void finalizeSnapshotWrite(File fSnapshot, File tempSnapshotFile) throws KuraIOException {
         try {
+            Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rw-------");
+            Files.setPosixFilePermissions(tempSnapshotFile.toPath(), perms);
+            
             // Consolidate snapshot writing
             Files.move(tempSnapshotFile.toPath(), fSnapshot.toPath(), StandardCopyOption.REPLACE_EXISTING,
                     StandardCopyOption.ATOMIC_MOVE);
-
-            Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rw-------");
-            Files.setPosixFilePermissions(fSnapshot.toPath(), perms);
         } catch (UnsupportedOperationException e1) {
             // POSIX permissions not supported on this file system, log and continue
             logger.warn("Unable to set POSIX file permissions for snapshot file: {}", fSnapshot.getAbsolutePath(), e1);

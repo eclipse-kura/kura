@@ -81,8 +81,11 @@
         <deb.name>kura-core</deb.name>
         <deb.dependencies>
             setserial, zip, gzip, unzip, procps, usbutils, socat, gawk, sed, inetutils-telnet,
-            polkit | policykit-1, ssh | openssh, openssl, busybox, libpam-modules,
-            python3, gpsd, openjdk-17-jre-headless | temurin-17-jdk, dos2unix, libtirpc3, chrony, chronyc | chrony
+            polkit | policykit-1 | polkitd,
+            ssh | openssh, openssl, busybox, libpam-modules,
+            python3, gpsd,
+            openjdk-17-jre-headless | temurin-17-jdk,
+            dos2unix, libtirpc3, chrony, chronyc | chrony
         </deb.dependencies>
         <deb.recommendations></deb.recommendations>
         <deb.provides></deb.provides>

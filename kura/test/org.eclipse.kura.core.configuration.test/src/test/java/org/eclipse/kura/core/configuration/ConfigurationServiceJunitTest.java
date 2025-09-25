@@ -3393,7 +3393,6 @@ public class ConfigurationServiceJunitTest {
             fail("Expected KuraIOException");
         } catch (KuraIOException e) {
             // Expected exception
-            assertTrue("Exception should be of type KuraIOException", e instanceof KuraIOException);
         }
         
         tempFile.delete();
@@ -3542,7 +3541,7 @@ public class ConfigurationServiceJunitTest {
         // Test that moveTempFile properly throws KuraIOException on IO failure
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
         
-        File tempFile = new File("/tmp/temp_snapshot_move_test.xml");
+        File tempFile = new File(System.getProperty("java.io.tmpdir"), "temp_snapshot_move_test.xml");
         tempFile.createNewFile();
         tempFile.deleteOnExit();
         

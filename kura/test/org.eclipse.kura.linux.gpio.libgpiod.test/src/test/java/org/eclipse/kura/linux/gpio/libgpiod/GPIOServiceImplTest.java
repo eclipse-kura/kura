@@ -17,6 +17,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
+
 import org.eclipse.kura.gpio.GPIOService;
 import org.eclipse.kura.gpio.KuraGPIODirection;
 import org.eclipse.kura.gpio.KuraGPIOMode;
@@ -38,6 +40,7 @@ public class GPIOServiceImplTest extends StepsCollection {
         this.GPIOServiceMock = mock(GPIOService.class);
         this.libGpiodGPIOServiceFactoryMock.when(() -> LibGpiodGPIOServiceFactory.getInstance())
                 .thenReturn(java.util.Optional.of(this.GPIOServiceMock));
+        when(this.GPIOServiceMock.getAvailablePins()).thenReturn(Map.of(1001, "GPIO_01", 1002, "GPIO_02"));
     }
 
     @After
@@ -163,7 +166,7 @@ public class GPIOServiceImplTest extends StepsCollection {
 
         whenGetAvailablePins();
 
-        thenAvailablePinsIsNotNull();
+        thenAvailablePinsIsNotNullOrEmpty();
     }
 
     /*

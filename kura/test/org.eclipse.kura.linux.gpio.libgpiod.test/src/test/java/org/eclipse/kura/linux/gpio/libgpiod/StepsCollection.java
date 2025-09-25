@@ -25,7 +25,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +40,7 @@ import org.eclipse.kura.gpio.KuraGPIODirection;
 import org.eclipse.kura.gpio.KuraGPIOMode;
 import org.eclipse.kura.gpio.KuraGPIOPin;
 import org.eclipse.kura.gpio.KuraGPIOTrigger;
+import org.eclipse.kura.gpio.PinStatusListener;
 import org.eclipse.kura.linux.gpio.libgpiod1.LibGpiodV1GPIOService;
 import org.eclipse.kura.linux.gpio.libgpiod1.LibGpiodV1Native;
 import org.eclipse.kura.linux.gpio.libgpiod1.LibGpiodV1Pin;
@@ -44,10 +50,13 @@ import com.sun.jna.Pointer;
 
 public class StepsCollection {
 
+    protected static final String DEVICE_FOLDER = "/tmp/";
+
     // protected LibGpiodVersionDetector versionDetector;
     protected GPIOServiceImpl gpioServiceImpl;
     protected LibGpiodV1GPIOService v1Service;
     protected LibGpiodV1Pin v1Pin;
+    protected Boolean v1PinValue;
 
     protected Exception occurredException;
     protected KuraGPIOPin resultPin;
@@ -55,6 +64,7 @@ public class StepsCollection {
     protected Map<Integer, String> resultPins;
     protected Optional<GPIOService> resultService;
     protected Optional<GPIOService> resultServiceAgain;
+    protected PinStatusListener pinStatusListener;
     // protected LibGpiodVersionDetector.LibGpiodVersion resultVersion;
     // protected String resultVersionString;
     // protected LibGpiodVersionDetector.LibGpiodVersion resultVersionAgain;
@@ -217,12 +227,47 @@ public class StepsCollection {
 
             @Override
             public void initialize() {
-                this.availablePins.put("GPIO0", 1001);
-                this.availablePins.put("GPIO1", 2003);
-                this.availablePins.put("GPIO_10", 5023);
+                this.availablePins.put("GPIO0_1", 1);
+                this.availablePins.put("GPIO2_3", 2003);
+                this.availablePins.put("GPIO5_23", 5023);
                 this.initialized.set(true);
             }
+
+            @Override
+            protected String getDeviceFolderPath() {
+                return DEVICE_FOLDER;
+            }
         };
+    }
+
+    protected void givenV1GPIOServiceNotInitialized(String deviceFolderPath) {
+        this.v1Service = new LibGpiodV1GPIOService() {
+
+            @Override
+            protected String getDeviceFolderPath() {
+                return deviceFolderPath;
+            }
+        };
+    }
+
+    protected void givenTmpGpioChips() throws IOException {
+        for (int i = 0; i < 3; i++) {
+            try {
+                Path newFilePath = Paths.get(DEVICE_FOLDER + "gpiochip" + i);
+                Files.createFile(newFilePath);
+            } catch (FileAlreadyExistsException e) {
+                // Ignore if file already exists
+            }
+        }
+    }
+
+    protected void givenTmpGpioChips(int gpioChipNumber) throws IOException {
+        try {
+            Path newFilePath = Paths.get(DEVICE_FOLDER + "gpiochip" + gpioChipNumber);
+            Files.createFile(newFilePath);
+        } catch (FileAlreadyExistsException e) {
+            // Ignore if file already exists
+        }
     }
 
     protected void givenV1Pin(String pinName, int terminal) {
@@ -237,6 +282,10 @@ public class StepsCollection {
         String chipPath = "/dev/gpiochip" + terminal / 1000;
         Integer offset = terminal % 1000;
         this.v1Pin = new LibGpiodV1Pin(chipPath, offset, direction, mode, trigger, pinName);
+    }
+
+    protected void givenPinStatusListener() {
+        this.pinStatusListener = mock(PinStatusListener.class);
     }
 
     /*
@@ -398,6 +447,14 @@ public class StepsCollection {
         }
     }
 
+    protected void whenV1ServiceGetPinByTerminalAgain(int pinTerminal) {
+        try {
+            this.resultPinAgain = this.v1Service.getPinByTerminal(pinTerminal);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
     protected void whenV1ServiceGetPinByTerminal(int pinTerminal, KuraGPIODirection direction, KuraGPIOMode mode,
             KuraGPIOTrigger trigger) {
         try {
@@ -442,6 +499,62 @@ public class StepsCollection {
     protected void whenV1CacheIsRefreshed() {
         try {
             this.v1Service.refresh();
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    protected void whenV1PinIsOpened() {
+        try {
+            this.v1Pin.open();
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    protected void whenV1PinIsClosed() {
+        try {
+            this.v1Pin.close();
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    protected void whenV1PinValueIsRead() {
+        try {
+            this.v1PinValue = this.v1Pin.getValue();
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    protected void whenV1PinValueIsSetTo(boolean value) {
+        try {
+            this.v1Pin.setValue(value);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    protected void whenV1PinAddPinStatusListener(PinStatusListener listener) {
+        try {
+            this.v1Pin.addPinStatusListener(listener);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    protected void whenV1PinRemovePinStatusListener(PinStatusListener listener) {
+        try {
+            this.v1Pin.removePinStatusListener(listener);
+        } catch (Exception e) {
+            this.occurredException = e;
+        }
+    }
+
+    protected void whenV1ServiceIsInitialized() {
+        try {
+            this.v1Service.initialize();
         } catch (Exception e) {
             this.occurredException = e;
         }
@@ -501,6 +614,41 @@ public class StepsCollection {
 
     protected void thenPinsAreSame() {
         assertEquals(this.resultPin, this.resultPinAgain);
+    }
+
+    protected void thenV1PinIsCreated() {
+        assertNotNull(this.v1Pin);
+        assertTrue(this.v1Pin instanceof LibGpiodV1Pin);
+    }
+
+    protected void thenV1PinHasCorrectParameters(String pinName, int pinTerminal, KuraGPIODirection direction,
+            KuraGPIOMode mode, KuraGPIOTrigger trigger) {
+        assertEquals(pinName, this.v1Pin.getName());
+        assertEquals(pinTerminal, this.v1Pin.getIndex());
+        assertEquals(direction, this.v1Pin.getDirection());
+        assertEquals(mode, this.v1Pin.getMode());
+        assertEquals(trigger, this.v1Pin.getTrigger());
+    }
+
+    protected void thenV1PinIsNotOpen() {
+        assertFalse(v1Pin.isOpen());
+    }
+
+    protected void thenV1PinIsOpen() {
+        assertTrue(v1Pin.isOpen());
+    }
+
+    protected void thenV1PinValueIsBoolean() {
+        assertNotNull(this.v1PinValue);
+        assertTrue(this.v1PinValue instanceof Boolean);
+    }
+
+    protected void thenV1PinValueReadIs(boolean expectedValue) {
+        assertEquals(expectedValue, this.v1PinValue.booleanValue());
+    }
+
+    protected void thenV1PinIndexIs(int expectedIndex) {
+        assertEquals(expectedIndex, this.v1Pin.getIndex());
     }
 
     // protected void thenVersionIs(LibGpiodVersionDetector.LibGpiodVersion expectedVersion) {

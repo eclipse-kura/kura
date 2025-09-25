@@ -22,8 +22,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,6 +49,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.KuraPartialSuccessException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -1174,40 +1179,61 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         // Encrypt the XML
         char[] encryptedXML = this.cryptoService.encryptAes(xmlResult.toCharArray());
 
+        File tempSnapshotFile = getTempSnapshotFile(fSnapshot);
+
         // Write the snapshot
-        FileOutputStream fos = null;
-        OutputStreamWriter osw = null;
         try {
+            try (FileOutputStream fos = new FileOutputStream(tempSnapshotFile);
+                OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+                logger.debug("Writing temp snapshot - Saving {}...", tempSnapshotFile.getAbsolutePath());
+                osw.append(new String(encryptedXML));
+                osw.flush();
+                fos.flush();
+                fos.getFD().sync();
+                logger.debug("Writing temp snapshot - Saving {}... Done.", tempSnapshotFile.getAbsolutePath());
+            }
             logger.info("Writing snapshot - Saving {}...", fSnapshot.getAbsolutePath());
-            fos = new FileOutputStream(fSnapshot);
-            osw = new OutputStreamWriter(fos, "UTF-8");
-            osw.append(new String(encryptedXML));
-            osw.flush();
-            fos.flush();
-            fos.getFD().sync();
+            moveTempFile(fSnapshot, tempSnapshotFile);
             logger.info("Writing snapshot - Saving {}... Done.", fSnapshot.getAbsolutePath());
         } catch (FileNotFoundException e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        } catch (UnsupportedEncodingException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraIOException(e);
         } finally {
-            if (osw != null) {
+            if (tempSnapshotFile.exists()) {
                 try {
-                    osw.close();
+                    Files.delete(tempSnapshotFile.toPath());
                 } catch (IOException e) {
-
-                }
-            }
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-
+                    // Ignore cleanup errors
                 }
             }
         }
+    }
+
+    private void moveTempFile(File fSnapshot, File tempSnapshotFile) throws KuraIOException {
+        try {
+            Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rw-------");
+            Files.setPosixFilePermissions(tempSnapshotFile.toPath(), perms);
+
+            // Consolidate snapshot writing
+            Files.move(tempSnapshotFile.toPath(), fSnapshot.toPath(), StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.ATOMIC_MOVE);
+        } catch (UnsupportedOperationException e1) {
+            // POSIX permissions not supported on this file system, log and continue
+            logger.warn("Unable to set POSIX file permissions for snapshot file: {}", fSnapshot.getAbsolutePath(), e1);
+        } catch (IOException e) {
+            throw new KuraIOException(e);
+        }
+    }
+
+    private File getTempSnapshotFile(File fSnapshot) throws KuraIOException {
+        File tempSnapshotFile;
+        try {
+            tempSnapshotFile = File.createTempFile(fSnapshot.getName(), null, new File(fSnapshot.getParent()));
+        } catch (IOException ex) {
+            throw new KuraIOException(ex);
+        }
+        return tempSnapshotFile;
     }
 
     private ComponentConfiguration getConfigurableComponentConfiguration(String pid) {

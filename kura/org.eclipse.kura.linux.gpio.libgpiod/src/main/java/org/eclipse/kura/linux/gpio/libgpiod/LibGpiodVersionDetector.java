@@ -27,7 +27,7 @@ public class LibGpiodVersionDetector {
     /**
      * Minimal interface to detect libgpiod version
      */
-    private interface VersionDetectionInterface extends Library {
+    protected interface VersionDetectionInterface extends Library {
 
         String gpiod_version_string();
 
@@ -36,8 +36,8 @@ public class LibGpiodVersionDetector {
 
     private static final Logger logger = LoggerFactory.getLogger(LibGpiodVersionDetector.class);
     private static VersionDetectionInterface versionInterface;
-    private static String detectedVersion = "unknown";
-    private static LibGpiodVersion libGpiodVersion = LibGpiodVersion.UNKNOWN;
+    private String detectedVersion = "unknown";
+    private LibGpiodVersion libGpiodVersion = LibGpiodVersion.UNKNOWN;
 
     public enum LibGpiodVersion {
         V1_6_X,
@@ -45,39 +45,35 @@ public class LibGpiodVersionDetector {
         UNKNOWN
     }
 
-    static {
+    public LibGpiodVersionDetector() {
         detectVersion();
-    }
-
-    private LibGpiodVersionDetector() {
-        // Empty private constructor for static utility class
     }
 
     /**
      * Get the detected libgpiod version
      */
-    public static LibGpiodVersion getVersion() {
-        return libGpiodVersion;
+    public LibGpiodVersion getVersion() {
+        return this.libGpiodVersion;
     }
 
     /**
      * Get the detected version string
      */
-    public static String getVersionString() {
-        return detectedVersion;
+    public String getVersionString() {
+        return this.detectedVersion;
     }
 
     /**
      * Detect the libgpiod version by attempting to load and call version functions
      */
-    private static void detectVersion() {
+    private void detectVersion() {
         versionInterface = Native.load("gpiod", VersionDetectionInterface.class);
 
         // Try v2.x API first (gpiod_api_version was introduced in v2.x)
         try {
-            detectedVersion = versionInterface.gpiod_api_version();
-            if (detectedVersion != null && !detectedVersion.trim().isEmpty()) {
-                libGpiodVersion = LibGpiodVersion.V2_X_X;
+            this.detectedVersion = versionInterface.gpiod_api_version();
+            if (this.detectedVersion != null && !this.detectedVersion.trim().isEmpty()) {
+                this.libGpiodVersion = LibGpiodVersion.V2_X_X;
                 return;
             }
         } catch (Error e) {
@@ -86,11 +82,11 @@ public class LibGpiodVersionDetector {
 
         // Try v1.x API (gpiod_version_string)
         try {
-            detectedVersion = versionInterface.gpiod_version_string();
-            if (detectedVersion != null && !detectedVersion.trim().isEmpty()) {
+            this.detectedVersion = versionInterface.gpiod_version_string();
+            if (this.detectedVersion != null && !this.detectedVersion.trim().isEmpty()) {
                 // Parse version to determine if it's 1.6.x
-                if (isVersion1_6_X(detectedVersion)) {
-                    libGpiodVersion = LibGpiodVersion.V1_6_X;
+                if (isVersion1_6_X(this.detectedVersion)) {
+                    this.libGpiodVersion = LibGpiodVersion.V1_6_X;
                 }
             }
         } catch (Error e) {
@@ -101,7 +97,7 @@ public class LibGpiodVersionDetector {
     /**
      * Check if the version string indicates libgpiod 1.6.x
      */
-    private static boolean isVersion1_6_X(String version) {
+    protected static boolean isVersion1_6_X(String version) {
         if (version == null) {
             return false;
         }
@@ -113,10 +109,10 @@ public class LibGpiodVersionDetector {
     /**
      * Force a re-detection of the version (useful for testing)
      */
-    public static void redetect() {
+    public void redetect() {
         versionInterface = null;
-        detectedVersion = "unknown";
-        libGpiodVersion = LibGpiodVersion.UNKNOWN;
+        this.detectedVersion = "unknown";
+        this.libGpiodVersion = LibGpiodVersion.UNKNOWN;
         detectVersion();
     }
 }

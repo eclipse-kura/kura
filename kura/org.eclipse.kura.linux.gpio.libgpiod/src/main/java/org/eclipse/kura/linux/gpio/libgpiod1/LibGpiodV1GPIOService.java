@@ -42,14 +42,14 @@ public class LibGpiodV1GPIOService implements GPIOService {
     private static final String GPIO_CHIP_NAME = "gpiochip";
     private static final Pattern GPIO_CHIP_PATTERN = Pattern.compile("^" + GPIO_CHIP_NAME + "\\d+$");
 
-    private final Map<String, Integer> availablePins = new ConcurrentHashMap<>();
-    private final Map<String, KuraGPIOPin> pinCache = new ConcurrentHashMap<>();
+    protected final Map<String, Integer> availablePins = new ConcurrentHashMap<>();
+    protected final Map<String, KuraGPIOPin> pinCache = new ConcurrentHashMap<>();
 
     private final KuraGPIODirection defaultDirection = KuraGPIODirection.INPUT;
     private final KuraGPIOMode defaultMode = KuraGPIOMode.INPUT_PULL_UP;
     private final KuraGPIOTrigger defaultTrigger = KuraGPIOTrigger.NONE;
 
-    private volatile AtomicBoolean initialized = new AtomicBoolean(false);
+    protected volatile AtomicBoolean initialized = new AtomicBoolean(false);
 
     /**
      * Initialize the GPIO service by discovering available GPIO chips and pins

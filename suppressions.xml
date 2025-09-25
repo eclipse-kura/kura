@@ -12,7 +12,6 @@
     <suppress checks="." files="kura[\\/]org.eclipse.kura.nm[\\/]src[\\/]main[\\/]java[\\/]fi[\\/]w1[\\/]"/>
     <suppress checks="." files="kura[\\/]org.eclipse.kura.linux.gpio.libgpiod[\\/]src[\\/]main[\\/]java[\\/]org[\\/]eclipse[\\/]kura[\\/]linux[\\/]gpio[\\/]libgpiod1[\\/]LibGpiodV1Native.java"/>
     <suppress checks="." files="kura[\\/]org.eclipse.kura.linux.gpio.libgpiod[\\/]src[\\/]main[\\/]java[\\/]org[\\/]eclipse[\\/]kura[\\/]linux[\\/]gpio[\\/]libgpiod1[\\/]LibGpiodV1Pin.java"/>
-    <suppress checks="." files="kura[\\/]org.eclipse.kura.linux.gpio.libgpiod[\\/]src[\\/]main[\\/]java[\\/]org[\\/]eclipse[\\/]kura[\\/]linux[\\/]gpio[\\/]libgpiod2[\\/]LibGpiodV2Native.java"/>
     <suppress checks="." files="kura[\\/]org.eclipse.kura.linux.gpio.libgpiod[\\/]src[\\/]main[\\/]java[\\/]org[\\/]eclipse[\\/]kura[\\/]linux[\\/]gpio[\\/]libgpiod[\\/]LibGpiodVersionDetector.java"/>
 </suppressions>
 

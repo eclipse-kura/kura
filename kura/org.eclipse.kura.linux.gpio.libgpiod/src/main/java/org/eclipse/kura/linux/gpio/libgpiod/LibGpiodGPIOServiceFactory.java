@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 public class LibGpiodGPIOServiceFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(LibGpiodGPIOServiceFactory.class);
-    private static final Object lock = new Object();
+    private static final Object LOCK = new Object();
     private static Optional<GPIOService> instance = Optional.empty();
 
     private LibGpiodGPIOServiceFactory() {
@@ -44,7 +44,7 @@ public class LibGpiodGPIOServiceFactory {
      */
     public static Optional<GPIOService> getInstance() {
         if (!instance.isPresent()) {
-            synchronized (lock) {
+            synchronized (LOCK) {
                 instance = createService();
             }
         }
@@ -57,18 +57,26 @@ public class LibGpiodGPIOServiceFactory {
      * @return Optional<GPIOService> instance
      */
     public static Optional<GPIOService> createService() {
-        LibGpiodVersionDetector.LibGpiodVersion version = LibGpiodVersionDetector.getVersion();
+        LibGpiodVersionDetector versionDetector = new LibGpiodVersionDetector();
+        LibGpiodVersionDetector.LibGpiodVersion version = versionDetector.getVersion();
 
         switch (version) {
         case V1_6_X:
             return Optional.of(new LibGpiodV1GPIOService());
         case UNKNOWN:
         default:
-            logger.warn(
-                    "Unsupported or undetected libgpiod version: {}. Supported versions are 1.6.x and 2.x.x. "
-                            + "Please install a compatible version of libgpiod.",
-                    LibGpiodVersionDetector.getVersionString());
+            logger.warn("Unsupported or undetected libgpiod version: {}. Supported versions are 1.6.x and 2.x.x. "
+                    + "Please install a compatible version of libgpiod.", versionDetector.getVersionString());
             return Optional.empty();
+        }
+    }
+
+    /**
+     * Clear the cached instance (for testing purposes)
+     */
+    public static void clearInstance() {
+        synchronized (LOCK) {
+            instance = Optional.empty();
         }
     }
 

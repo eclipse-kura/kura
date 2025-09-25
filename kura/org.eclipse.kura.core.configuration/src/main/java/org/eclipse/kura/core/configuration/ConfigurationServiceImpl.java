@@ -1218,9 +1218,9 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             // Consolidate snapshot writing
             Files.move(tempSnapshotFile.toPath(), fSnapshot.toPath(), StandardCopyOption.REPLACE_EXISTING,
                     StandardCopyOption.ATOMIC_MOVE);
-        } catch (UnsupportedOperationException e1) {
+        } catch (UnsupportedOperationException e) {
             // POSIX permissions not supported on this file system, log and continue
-            logger.warn("Unable to set POSIX file permissions for snapshot file: {}", fSnapshot.getAbsolutePath(), e1);
+            logger.warn("Unable to set POSIX file permissions for snapshot file: {}", fSnapshot.getAbsolutePath(), e);
         } catch (IOException e) {
             throw new KuraIOException(e);
         }

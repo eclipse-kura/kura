@@ -253,7 +253,7 @@ public class LibGpiodV1GPIOService implements GPIOService {
     }
 
     protected String getDeviceFolderPath() {
-        return "/dev";
+        return "/dev/";
     }
 
 }

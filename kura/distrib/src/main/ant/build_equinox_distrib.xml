@@ -780,6 +780,9 @@ fi]]>
                 file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio.libgpiod_${org.eclipse.kura.linux.gpio.libgpiod.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.linux_${org.eclipse.kura.linux.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
             <zipfileset
@@ -1742,6 +1745,9 @@ fi]]>
             update="true">
             <zipfileset
                 file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.linux.gpio.libgpiod_${org.eclipse.kura.linux.gpio.libgpiod.version}.jar"
                 prefix="${build.output.name}/${plugins.folder}" />
         </zip>
     </target>

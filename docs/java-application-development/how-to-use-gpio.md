@@ -124,3 +124,35 @@ button.setInputListener(new PinListener(){
 
 ```
 
+## LibGpiod
+
+In version 5.6.1, Eclipse Kura introduces an experimental support for [**LibGpiod**](https://libgpiod.readthedocs.io/en/latest/). It provides a low-level library, bindings and tools for interacting with the GPIO lines on Linux systems.
+
+Kura implements the **GPIOService** interface using a [JNA](https://github.com/java-native-access/jna) interface of the **LibGpiod** C APIs. The user applications can seamlessly continue to use the **GPIOService** APIs without changes on the code. The only difference is the way the GPIO pin number is managed by the new library. **LibGpiod** has not the concept of terminal (a.k.a. a number that identifies the GPIO pin), but it selects the pins using **gpiochip** and **line**. To correctly use the `getPinByTerminal` method, a pin is identified by a number calculated as follows:
+
+```
+terminal = gpiochip * 1000 + line
+```
+
+The `getPinByName` method can be used as in the previous implementation.
+
+There isn't any correlation between the terminal number and name used in **LibGpiod** and **OpenJDK Device I/O**. To get the new **gpiochip**, **line** numbers and names, use the following command that lists all the gpio available on the system:
+
+```
+gpioinfo
+```
+
+!!! warning
+    If a GPIO on a Linux system is exported in `/sys/class/gpio`, it cannot be directly used by **LibGpiod**. The user has to unexport the pin with this command: `echo <pin-number> > /sys/class/gpio/unexport`.
+
+Since the support is experimental, the **LibGpiod** bundle is installed, but not activated. To enable it, edit the `/opt/eclipse/kura/framework/config.ini` and modify this entry:
+
+```
+reference\:file\:/opt/eclipse/kura/plugins/org.eclipse.kura.linux.gpio_1.6.0.jar@5\:start
+```
+
+with
+
+```
+reference\:file\:/opt/eclipse/kura/plugins/org.eclipse.kura.linux.gpio.libgpiod_1.0.0-SNAPSHOT.jar@5\:start
+```

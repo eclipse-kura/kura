@@ -526,6 +526,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.linux.gpio.libgpiod</artifactId>
+                                    <version>${org.eclipse.kura.linux.gpio.libgpiod.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.moka7</artifactId>
                                     <version>${org.moka7.version}</version>
                                 </artifactItem>
@@ -815,6 +820,7 @@
                                 <move file="target/plugins/org.eclipse.kura.util.jar" tofile="target/plugins/org.eclipse.kura.util_${org.eclipse.kura.util.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.web2.jar" tofile="target/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" failonerror="false" />
                                 <move file="target/plugins/org.eclipse.kura.linux.gpio.jar" tofile="target/plugins/org.eclipse.kura.linux.gpio_${org.eclipse.kura.linux.gpio.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.linux.gpio.libgpiod.jar" tofile="target/plugins/org.eclipse.kura.linux.gpio.libgpiod_${org.eclipse.kura.linux.gpio.libgpiod.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.emulator.jar" tofile="target/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.emulator.clock.jar" tofile="target/plugins/org.eclipse.kura.emulator.clock_${org.eclipse.kura.emulator.clock.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.emulator.gpio.jar" tofile="target/plugins/org.eclipse.kura.emulator.gpio_${org.eclipse.kura.emulator.gpio.version}.jar" />

@@ -55,8 +55,7 @@ public class LibGpiodV1PinTest extends CommonSteps {
         this.nativeInterfaceMock = mock(LibGpiodV1Native.class);
         this.nativeMock.when(() -> Native.load("gpiod", LibGpiodV1Native.class)).thenReturn(this.nativeInterfaceMock);
         this.nativeInterfaceWrapperMock = mockStatic(LibGpiodV1NativeWrapper.class);
-        this.nativeInterfaceWrapperMock.when(() -> LibGpiodV1NativeWrapper.getInstance())
-                .thenReturn(this.nativeInterfaceMock);
+        this.nativeInterfaceWrapperMock.when(LibGpiodV1NativeWrapper::getInstance).thenReturn(this.nativeInterfaceMock);
 
         Pointer chip0 = Pointer.createConstant(1);
         when(this.nativeInterfaceMock.gpiod_chip_open("/dev/gpiochip0")).thenReturn(chip0);
@@ -481,7 +480,7 @@ public class LibGpiodV1PinTest extends CommonSteps {
     }
 
     private void thenV1PinValueReadIs(boolean expectedValue) {
-        assertEquals(expectedValue, this.v1PinValue.booleanValue());
+        assertEquals(expectedValue, this.v1PinValue);
     }
 
     private void thenV1PinIndexIs(int expectedIndex) {

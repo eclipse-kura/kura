@@ -35,7 +35,7 @@ public class LibGpiodVersionDetector {
     }
 
     private static final Logger logger = LoggerFactory.getLogger(LibGpiodVersionDetector.class);
-    private static VersionDetectionInterface versionInterface;
+    private VersionDetectionInterface versionInterface;
     private String detectedVersion = "unknown";
     private LibGpiodVersion libGpiodVersion = LibGpiodVersion.UNKNOWN;
 
@@ -67,11 +67,11 @@ public class LibGpiodVersionDetector {
      * Detect the libgpiod version by attempting to load and call version functions
      */
     private void detectVersion() {
-        versionInterface = Native.load("gpiod", VersionDetectionInterface.class);
+        this.versionInterface = Native.load("gpiod", VersionDetectionInterface.class);
 
         // Try v2.x API first (gpiod_api_version was introduced in v2.x)
         try {
-            this.detectedVersion = versionInterface.gpiod_api_version();
+            this.detectedVersion = this.versionInterface.gpiod_api_version();
             if (this.detectedVersion != null && !this.detectedVersion.trim().isEmpty()) {
                 this.libGpiodVersion = LibGpiodVersion.V2_X_X;
                 return;
@@ -82,12 +82,10 @@ public class LibGpiodVersionDetector {
 
         // Try v1.x API (gpiod_version_string)
         try {
-            this.detectedVersion = versionInterface.gpiod_version_string();
-            if (this.detectedVersion != null && !this.detectedVersion.trim().isEmpty()) {
-                // Parse version to determine if it's 1.6.x
-                if (isVersion1_6_X(this.detectedVersion)) {
-                    this.libGpiodVersion = LibGpiodVersion.V1_6_X;
-                }
+            this.detectedVersion = this.versionInterface.gpiod_version_string();
+            if (this.detectedVersion != null && !this.detectedVersion.trim().isEmpty()
+                    && isVersion16X(this.detectedVersion)) {
+                this.libGpiodVersion = LibGpiodVersion.V1_6_X;
             }
         } catch (Error e) {
             logger.debug("gpiod_version_string() not found, unable to detect version...");
@@ -97,7 +95,7 @@ public class LibGpiodVersionDetector {
     /**
      * Check if the version string indicates libgpiod 1.6.x
      */
-    protected static boolean isVersion1_6_X(String version) {
+    protected static boolean isVersion16X(String version) {
         if (version == null) {
             return false;
         }
@@ -110,7 +108,7 @@ public class LibGpiodVersionDetector {
      * Force a re-detection of the version (useful for testing)
      */
     public void redetect() {
-        versionInterface = null;
+        this.versionInterface = null;
         this.detectedVersion = "unknown";
         this.libGpiodVersion = LibGpiodVersion.UNKNOWN;
         detectVersion();

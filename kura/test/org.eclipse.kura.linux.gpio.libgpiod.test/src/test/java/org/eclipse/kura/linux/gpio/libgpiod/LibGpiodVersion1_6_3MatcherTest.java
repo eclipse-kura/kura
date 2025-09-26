@@ -59,7 +59,7 @@ public class LibGpiodVersion1_6_3MatcherTest {
     }
 
     private void whenCheckVersion() {
-        this.calculatedMatch = LibGpiodVersionDetector.isVersion1_6_X(this.inputVersion);
+        this.calculatedMatch = LibGpiodVersionDetector.isVersion16X(this.inputVersion);
     }
 
     private void thenMatchIsCorrect() {

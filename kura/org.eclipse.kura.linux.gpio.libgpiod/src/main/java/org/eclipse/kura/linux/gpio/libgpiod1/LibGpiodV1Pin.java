@@ -41,6 +41,7 @@ import com.sun.jna.Pointer;
 public class LibGpiodV1Pin implements KuraGPIOPin {
 
     private static final Logger logger = LoggerFactory.getLogger(LibGpiodV1Pin.class);
+    private static final String LIB_GPIOD_V1_PIN_EVENT_MONITOR = "LibGpiodV1PinEventMonitor";
     private static final int DEFAULT_TIMEOUT_SEC = 1;
     private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool(runnable -> {
         Thread thread = new Thread(runnable, "GPIO-EventMonitor");
@@ -223,18 +224,18 @@ public class LibGpiodV1Pin implements KuraGPIOPin {
             switch (this.trigger) {
             case RAISING_EDGE:
                 triggerResult = LibGpiodV1NativeWrapper.getInstance().gpiod_line_request_rising_edge_events(this.line,
-                        "LibGpiodV1PinEventMonitor");
+                        LIB_GPIOD_V1_PIN_EVENT_MONITOR);
                 break;
             case FALLING_EDGE:
                 triggerResult = LibGpiodV1NativeWrapper.getInstance().gpiod_line_request_falling_edge_events(this.line,
-                        "LibGpiodV1PinEventMonitor");
+                        LIB_GPIOD_V1_PIN_EVENT_MONITOR);
                 break;
             case BOTH_EDGES:
                 triggerResult = LibGpiodV1NativeWrapper.getInstance().gpiod_line_request_both_edges_events(this.line,
-                        "LibGpiodV1PinEventMonitor");
+                        LIB_GPIOD_V1_PIN_EVENT_MONITOR);
                 break;
             default:
-                logger.error("Unsupported trigger mode for event monitoring: " + this.trigger);
+                logger.error("Unsupported trigger mode for event monitoring: {}", this.trigger);
                 this.isMonitoring.set(false);
                 return;
             }
@@ -253,25 +254,23 @@ public class LibGpiodV1Pin implements KuraGPIOPin {
                         this.listener.ifPresent(l -> l.pinStatusChange(newValue));
                     }
                 } else if (waitResult < 0) {
-                    logger.error("Error waiting for GPIO event: " + waitResult);
+                    logger.error("Error waiting for GPIO event: {}", waitResult);
                 }
             }
         } catch (Error e) {
-            logger.error("Exception in GPIO event monitoring: " + e.getMessage());
+            logger.error("Exception in GPIO event monitoring: {}", e.getMessage());
         }
     }
 
     private void stopEventMonitoring() {
-        if (this.isMonitoring.compareAndSet(true, false)) {
-            if (this.monitoringTask != null) {
-                this.monitoringTask.cancel(true);
-                try {
-                    Thread.sleep(DEFAULT_TIMEOUT_SEC * 2000L);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                this.monitoringTask = null;
+        if (this.isMonitoring.compareAndSet(true, false) && this.monitoringTask != null) {
+            this.monitoringTask.cancel(true);
+            try {
+                Thread.sleep(DEFAULT_TIMEOUT_SEC * 2000L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
+            this.monitoringTask = null;
         }
     }
 
@@ -315,8 +314,8 @@ public class LibGpiodV1Pin implements KuraGPIOPin {
                 closeGpioChip();
                 throw new KuraUnavailableDeviceException("Cannot get GPIO line: " + this.offset);
             }
-            boolean is_used = LibGpiodV1NativeWrapper.getInstance().gpiod_line_is_used(this.line);
-            if (is_used) {
+            boolean isUsed = LibGpiodV1NativeWrapper.getInstance().gpiod_line_is_used(this.line);
+            if (isUsed) {
                 closeGpioChip();
                 throw new KuraUnavailableDeviceException("GPIO line already in use: " + this.offset);
             }

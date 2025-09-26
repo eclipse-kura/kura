@@ -45,11 +45,11 @@ public class LibGpiodV1GPIOService implements GPIOService {
     protected final Map<String, Integer> availablePins = new ConcurrentHashMap<>();
     protected final Map<String, KuraGPIOPin> pinCache = new ConcurrentHashMap<>();
 
-    private final KuraGPIODirection defaultDirection = KuraGPIODirection.INPUT;
-    private final KuraGPIOMode defaultMode = KuraGPIOMode.INPUT_PULL_UP;
-    private final KuraGPIOTrigger defaultTrigger = KuraGPIOTrigger.NONE;
+    private static final KuraGPIODirection DEFAULT_DIRECTION = KuraGPIODirection.INPUT;
+    private static final KuraGPIOMode DEFAULT_MODE = KuraGPIOMode.INPUT_PULL_UP;
+    private static final KuraGPIOTrigger DEFAULT_TRIGGER = KuraGPIOTrigger.NONE;
 
-    protected volatile AtomicBoolean initialized = new AtomicBoolean(false);
+    protected AtomicBoolean initialized = new AtomicBoolean(false);
 
     /**
      * Initialize the GPIO service by discovering available GPIO chips and pins
@@ -131,7 +131,7 @@ public class LibGpiodV1GPIOService implements GPIOService {
 
     @Override
     public KuraGPIOPin getPinByName(String pinName) {
-        return getPinByName(pinName, this.defaultDirection, this.defaultMode, this.defaultTrigger);
+        return getPinByName(pinName, DEFAULT_DIRECTION, DEFAULT_MODE, DEFAULT_TRIGGER);
     }
 
     @Override
@@ -169,7 +169,7 @@ public class LibGpiodV1GPIOService implements GPIOService {
 
     @Override
     public KuraGPIOPin getPinByTerminal(int terminal) {
-        return getPinByTerminal(terminal, this.defaultDirection, this.defaultMode, this.defaultTrigger);
+        return getPinByTerminal(terminal, DEFAULT_DIRECTION, DEFAULT_MODE, DEFAULT_TRIGGER);
     }
 
     @Override

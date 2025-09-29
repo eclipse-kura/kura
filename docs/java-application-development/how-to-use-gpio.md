@@ -156,3 +156,11 @@ with
 ```
 reference\:file\:/opt/eclipse/kura/plugins/org.eclipse.kura.linux.gpio.libgpiod_1.0.0-SNAPSHOT.jar@5\:start
 ```
+
+This is a bash script that edit the `config.ini` to enable libgpiod.
+
+```bash
+#!/bin/bash
+CONFIG_FILE="/opt/eclipse/kura/framework/config.ini"
+sed -i.bak -E 's/org\.eclipse\.kura\.linux\.gpio_[^,]*/org.eclipse.kura.linux.gpio.libgpiod_1.0.0-SNAPSHOT.jar@5\:start/g' "$CONFIG_FILE"
+```

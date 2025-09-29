@@ -119,7 +119,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     private Unmarshaller xmlUnmarshaller;
     protected EventAdmin eventAdmin;
 
-    // contains all the PIDs (aka kura.service.pid) - both of configurable and self configuring components
+    // contains all the PIDs (aka kura.service.pid) - both of configurable and self
+    // configuring components
     private final Set<String> allActivatedPids;
 
     // contains the self configuring components ONLY!
@@ -404,8 +405,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
 
         try {
-            // Second argument in createFactoryConfiguration is a bundle location. If left null the new bundle location
-            // will be bound to the location of the first bundle that registers a Managed Service Factory with a
+            // Second argument in createFactoryConfiguration is a bundle location. If left
+            // null the new bundle location
+            // will be bound to the location of the first bundle that registers a Managed
+            // Service Factory with a
             // corresponding PID
             logger.info("Creating new configuration for factory pid {} and pid {}", factoryPid, pid);
             String servicePid = this.configurationAdmin.createFactoryConfiguration(factoryPid, null).getPid();
@@ -580,7 +583,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     // ----------------------------------------------------------------
     synchronized void registerComponentOCD(String metatypePid, Tocd ocd, boolean isFactory, final Bundle provider)
             throws KuraException {
-        // metatypePid is either the 'pid' or 'factoryPid' attribute of the MetaType Designate element
+        // metatypePid is either the 'pid' or 'factoryPid' attribute of the MetaType
+        // Designate element
         // 'pid' matches a service.pid, not a kura.service.pid
         logger.info("Registering metatype pid: {} ...", metatypePid);
 
@@ -736,7 +740,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         updateConfigurationInternal(configsToUpdate, configs, causes);
 
-        // this step creates any not yet existing factory configuration present in configsToUpdate
+        // this step creates any not yet existing factory configuration present in
+        // configsToUpdate
         for (ComponentConfiguration config : configsToUpdate) {
             String factoryPid = null;
             final Map<String, Object> properties = config.getConfigurationProperties();
@@ -1030,17 +1035,26 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     private void finalizeSnapshotWrite(File fSnapshot, File tempSnapshotFile) throws KuraIOException {
         try {
+            setSnapshotFilePermissions(fSnapshot, tempSnapshotFile);
+            
             // Consolidate snapshot writing
             Files.move(tempSnapshotFile.toPath(), fSnapshot.toPath(), StandardCopyOption.REPLACE_EXISTING,
                     StandardCopyOption.ATOMIC_MOVE);
-
-            Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rw-------");
-            Files.setPosixFilePermissions(fSnapshot.toPath(), perms);
-        } catch (UnsupportedOperationException e1) {
-            // POSIX permissions not supported on this file system, log and continue
-            logger.warn("Unable to set POSIX file permissions for snapshot file: {}", fSnapshot.getAbsolutePath(), e1);
         } catch (IOException e) {
             throw new KuraIOException(e);
+        }
+
+    }
+
+    private void setSnapshotFilePermissions(File fSnapshot, File tempSnapshotFile) throws IOException {
+        try {
+            Set<PosixFilePermission> perms = PosixFilePermissions.fromString("rw-------");
+            Files.setPosixFilePermissions(tempSnapshotFile.toPath(), perms);
+
+        } catch (UnsupportedOperationException e1) {
+            // POSIX permissions not supported on this file system, log and continue
+            logger.warn("Unable to set POSIX file permissions for snapshot file: {}", fSnapshot.getAbsolutePath(),
+                    e1);
         }
     }
 
@@ -1562,8 +1576,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     private void mergeConfigurations(List<ComponentConfiguration> configsToUpdate, List<ComponentConfiguration> result)
             throws KuraException {
-        // Merge the current configuration of registered components with the provided configurations.
-        // It is assumed that the PIDs in the provided configurations is a subset of the registered PIDs.
+        // Merge the current configuration of registered components with the provided
+        // configurations.
+        // It is assumed that the PIDs in the provided configurations is a subset of the
+        // registered PIDs.
 
         List<ComponentConfiguration> currentConfigs = getComponentConfigurationsInternal();
         if (configsToUpdate == null || configsToUpdate.isEmpty()) {
@@ -1572,7 +1588,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
 
         for (ComponentConfiguration currentConfig : currentConfigs) {
-            // add new configuration obtained by merging its properties with the ones provided
+            // add new configuration obtained by merging its properties with the ones
+            // provided
             ComponentConfiguration cc = currentConfig;
             String pid = currentConfig.getPid();
             for (ComponentConfiguration configToUpdate : configsToUpdate) {
@@ -1610,7 +1627,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
      * Convert property value to string
      *
      * @param value
-     *            the input value
+     *              the input value
      * @return the string property value, or {@code null}
      */
     private static String makeString(Object value) {

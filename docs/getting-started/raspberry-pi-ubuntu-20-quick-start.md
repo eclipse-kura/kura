@@ -40,6 +40,8 @@ following steps:
     !!! tip
         **Optional**: Since version 5.3.0 Kura also supports [Eclipse Temurin&trade;](https://adoptium.net/en-GB/) as an alternative JVM. To install it you need to perform these additional steps:
 
+        <details><summary>Debian Bookworm and earlier</summary>
+
         ```bash
         sudo apt-get install -y wget apt-transport-https gnupg
         ```
@@ -51,10 +53,31 @@ following steps:
         ```
         ```bash
         sudo apt-get update
-        ```
-        ```bash
         sudo apt-get install temurin-17-jdk
         ```
+
+        </details>
+
+        <details><summary>Debian Trixie and later</summary>
+
+        ```bash
+        sudo mkdir /usr/local/share/keyrings
+        ```
+
+        ```bash
+        curl https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | dd of=/usr/local/share/keyrings/adoptium-keyring.gpg
+        ```
+
+        ```bash
+        echo "deb [signed-by=/usr/local/share/keyrings/adoptium-keyring.gpg] https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | sudo tee -a /etc/apt/sources.list.d/adoptium.list
+        ```
+
+        ```bash
+        sudo apt-get update
+        sudo apt-get install temurin-17-jdk
+        ```
+
+        </details>
 
 4. Download the Kura package with:
 

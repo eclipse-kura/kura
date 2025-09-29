@@ -3738,6 +3738,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#libgpiod" class="md-nav__link">
+    <span class="md-ellipsis">
+      LibGpiod
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4777,6 +4786,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#libgpiod" class="md-nav__link">
+    <span class="md-ellipsis">
+      LibGpiod
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4885,6 +4903,30 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">            </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">event</span><span class="p">.</span><span class="na">getLastTimeStamp</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; - &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">event</span><span class="p">.</span><span class="na">getValue</span><span class="p">());</span>
 <a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">        </span><span class="p">}</span>
 <a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="p">});</span>
+</code></pre></div>
+<h2 id="libgpiod">LibGpiod</h2>
+<p>In version 5.6.1, Eclipse Kura introduces an experimental support for <a href="https://libgpiod.readthedocs.io/en/latest/"><strong>LibGpiod</strong></a>. It provides a low-level library, bindings and tools for interacting with the GPIO lines on Linux systems.</p>
+<p>Kura implements the <strong>GPIOService</strong> interface using a <a href="https://github.com/java-native-access/jna">JNA</a> interface of the <strong>LibGpiod</strong> C APIs. The user applications can seamlessly continue to use the <strong>GPIOService</strong> APIs without changes on the code. The only difference is the way the GPIO pin number is managed by the new library. <strong>LibGpiod</strong> has not the concept of terminal (a.k.a. a number that identifies the GPIO pin), but it selects the pins using <strong>gpiochip</strong> and <strong>line</strong>. To correctly use the <code>getPinByTerminal</code> method, a pin is identified by a number calculated as follows:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>terminal = gpiochip * 1000 + line
+</code></pre></div>
+<p>The <code>getPinByName</code> method can be used as in the previous implementation.</p>
+<p>There isn't any correlation between the terminal number and name used in <strong>LibGpiod</strong> and <strong>OpenJDK Device I/O</strong>. To get the new <strong>gpiochip</strong>, <strong>line</strong> numbers and names, use the following command that lists all the gpio available on the system:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>gpioinfo
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If a GPIO on a Linux system is exported in <code>/sys/class/gpio</code>, it cannot be directly used by <strong>LibGpiod</strong>. The user has to unexport the pin with this command: <code>echo &lt;pin-number&gt; &gt; /sys/class/gpio/unexport</code>.</p>
+</div>
+<p>Since the support is experimental, the <strong>LibGpiod</strong> bundle is installed, but not activated. To enable it, edit the <code>/opt/eclipse/kura/framework/config.ini</code> and modify this entry:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>reference\:file\:/opt/eclipse/kura/plugins/org.eclipse.kura.linux.gpio_1.6.0.jar@5\:start
+</code></pre></div>
+<p>with</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>reference\:file\:/opt/eclipse/kura/plugins/org.eclipse.kura.linux.gpio.libgpiod_1.0.0-SNAPSHOT.jar@5\:start
+</code></pre></div>
+<p>This is a bash script that edit the <code>config.ini</code> to enable libgpiod.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="ch">#!/bin/bash</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="nv">CONFIG_FILE</span><span class="o">=</span><span class="s2">&quot;/opt/eclipse/kura/framework/config.ini&quot;</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>sed<span class="w"> </span>-i.bak<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;s/org\.eclipse\.kura\.linux\.gpio_[^,]*/org.eclipse.kura.linux.gpio.libgpiod_1.0.0-SNAPSHOT.jar@5\:start/g&#39;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CONFIG_FILE</span><span class="s2">&quot;</span>
 </code></pre></div>
 
 

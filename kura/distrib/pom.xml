@@ -84,7 +84,7 @@
             polkit | policykit-1 | polkitd,
             ssh | openssh, openssl, busybox, libpam-modules,
             python3, gpsd,
-            java17-runtime-headless | java17-runtime | openjdk-17-jre-headless | temurin-17-jdk,
+            java17-runtime-headless | java17-runtime,
             dos2unix, libtirpc3, chrony, chronyc | chrony
         </deb.dependencies>
         <deb.recommendations></deb.recommendations>

@@ -87,7 +87,7 @@
             java17-runtime-headless | java17-runtime,
             dos2unix, libtirpc3, chrony, chronyc | chrony
         </deb.dependencies>
-        <deb.conflicts>java24-runtime-headless, java24-runtime, java-runtime-headless (>> 21~)</deb.conflicts>
+        <deb.conflicts>java18-runtime-headless, java18-runtime, java-runtime-headless (>= 18~)</deb.conflicts>
         <deb.recommendations></deb.recommendations>
         <deb.provides></deb.provides>
         <deb.architecture>unset</deb.architecture>

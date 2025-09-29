@@ -84,10 +84,10 @@
             polkit | policykit-1 | polkitd,
             ssh | openssh, openssl, busybox, libpam-modules,
             python3, gpsd,
-            java17-runtime-headless | java17-runtime | java-runtime-headless (= 17),
+            java17-runtime-headless | java17-runtime | java-runtime-headless (= 17) | java-runtime (= 17),
             dos2unix, libtirpc3, chrony, chronyc | chrony
         </deb.dependencies>
-        <deb.conflicts>java18-runtime-headless, java18-runtime, java-runtime-headless (>= 18~)</deb.conflicts>
+        <deb.conflicts>java18-runtime-headless, java18-runtime, java-runtime-headless (>= 18~), java-runtime (>= 18~)</deb.conflicts>
         <deb.recommendations></deb.recommendations>
         <deb.provides></deb.provides>
         <deb.architecture>unset</deb.architecture>

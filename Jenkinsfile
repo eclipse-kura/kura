@@ -59,7 +59,8 @@ node {
                                     -Dsonar.java.binaries='target/' \
                                     -Dsonar.core.codeCoveragePlugin=jacoco \
                                     -Dsonar.projectKey=org.eclipse.kura:kura \
-                                    -Dsonar.exclusions=test/**/*,test-util/**/*,org.eclipse.kura.web2/**/*,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*,org.eclipse.kura.nm/src/main/java/fi/w1/**/*,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod1/LibGpiodV1Native.java
+                                    -Dsonar.exclusions=org.eclipse.kura.web2/**/*,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*,org.eclipse.kura.nm/src/main/java/fi/w1/**/*,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod1/LibGpiodV1Native.java
+                                    -Dsonar.test.exclusions=test/**/*,test-util/**/*
                             '''
                         }
                     }

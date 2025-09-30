@@ -4630,6 +4630,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </div>
 <p>This quickstart has been tested using the latest Raspberry Pi OS 64 bits images which are available for download through <a href="https://www.raspberrypi.com/software/operating-systems/">the official Raspberry Pi foundation site</a> and the Raspberry Pi Imager.</p>
 <p>For additional details on OS compatibility refer to the <a href="https://github.com/eclipse-kura/kura/releases">Kura&trade; release notes</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Please note that, at the time of this writing, only 64 bit OS image is supported.</p>
+</div>
 <h2 id="enable-ssh-access">Enable SSH Access</h2>
 <p>The ssh server is disabled by default on Raspbian images released after November 2016,
 in order to enable it follow the instructions available <a href="https://www.raspberrypi.org/documentation/remote-access/ssh/">here</a>.</p>
@@ -4654,6 +4658,7 @@ following steps:</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p><strong>Optional</strong>: Since version 5.3.0 Kura also supports <a href="https://adoptium.net/en-GB/">Eclipse Temurin&trade;</a> as an alternative JVM. To install it you need to perform these additional steps:</p>
+<p><details><summary>Raspbian Bookworm and earlier</summary></p>
 <p><div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>wget<span class="w"> </span>apt-transport-https<span class="w"> </span>gnupg
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>wget<span class="w"> </span>-O<span class="w"> </span>-<span class="w"> </span>https://packages.adoptium.net/artifactory/api/gpg/key/public<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>apt-key<span class="w"> </span>add<span class="w"> </span>-
@@ -4661,25 +4666,36 @@ following steps:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb https://packages.adoptium.net/artifactory/deb </span><span class="k">$(</span>awk<span class="w"> </span>-F<span class="o">=</span><span class="w"> </span><span class="s1">&#39;/^VERSION_CODENAME/{print$2}&#39;</span><span class="w"> </span>/etc/os-release<span class="k">)</span><span class="s2"> main&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/adoptium.list
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>temurin-17-jdk
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>temurin-17-jdk
 </code></pre></div></p>
+</details>
+<p><details><summary>Raspbian Trixie and later</summary></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>/usr/local/share/keyrings
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>curl<span class="w"> </span>https://packages.adoptium.net/artifactory/api/gpg/key/public<span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--dearmor<span class="w"> </span><span class="p">|</span><span class="w"> </span>dd<span class="w"> </span><span class="nv">of</span><span class="o">=</span>/usr/local/share/keyrings/adoptium-keyring.gpg
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb [signed-by=/usr/local/share/keyrings/adoptium-keyring.gpg] https://packages.adoptium.net/artifactory/deb </span><span class="k">$(</span>awk<span class="w"> </span>-F<span class="o">=</span><span class="w"> </span><span class="s1">&#39;/^VERSION_CODENAME/{print$2}&#39;</span><span class="w"> </span>/etc/os-release<span class="k">)</span><span class="s2"> main&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/apt/sources.list.d/adoptium.list
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>temurin-17-jdk
+</code></pre></div>
+</details>
 </div>
 </li>
 <li>
 <p>Download the Kura package with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura-&lt;kura-version&gt;_&lt;arch&gt;.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura-&lt;kura-version&gt;_&lt;arch&gt;.deb
 </code></pre></div>
 <p>Note: replace <code>&lt;version&gt;</code> in the URL above with the version number of the latest release (e.g. 5.5.0) and <code>&lt;arch&gt;</code> with your device architecture </p>
 </li>
 <li>
 <p>Install Kura with: </p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo apt-get install ./kura-&lt;kura-version&gt;_&lt;arch&gt;.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>sudo apt-get install ./kura-&lt;kura-version&gt;_&lt;arch&gt;.deb
 </code></pre></div>
 </li>
 <li>
 <p>For a correct configuration of the Wlan interface, it is necessary to set the <strong>Locale</strong> and the <strong>WLAN Country</strong> through the <code>raspi-config</code> command:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo raspi-config
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>sudo raspi-config
 </code></pre></div>
 <p><img alt="raspi-config menu" src="../images/raspi-config.png" /></p>
 <p>From the raspi-config main menu select <code>Localisation Options</code>:</p>
@@ -4715,47 +4731,47 @@ following steps:</p>
 <ul>
 <li>Modify the <code>/opt/eclipse/kura/framework/jdk.dio.properties</code> with the number and controllers found in the previous step:</li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>573 = deviceType: gpio.GPIOPin, pinNumber:573, name:GPI02
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>574 = deviceType: gpio.GPIOPin, pinNumber:574, name:GPIO3
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>575 = deviceType: gpio.GPIOPin, pinNumber:575, name:GPIO4
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>576 = deviceType: gpio.GPIOPin, pinNumber:576, name:GPIO5
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>577 = deviceType: gpio.GPIOPin, pinNumber:577, name:GPIO6
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>578 = deviceType: gpio.GPIOPin, pinNumber:578, name:GPIO7
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>579 = deviceType: gpio.GPIOPin, pinNumber:579, name:GPIO8
-<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>580 = deviceType: gpio.GPIOPin, pinNumber:580, name:GPIO9
-<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>581 = deviceType: gpio.GPIOPin, pinNumber:581, name:GPIO10
-<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>582 = deviceType: gpio.GPIOPin, pinNumber:582, name:GPIO11
-<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>583 = deviceType: gpio.GPIOPin, pinNumber:583, name:GPIO12
-<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>584 = deviceType: gpio.GPIOPin, pinNumber:584, name:GPIO13
-<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>585 = deviceType: gpio.GPIOPin, pinNumber:585, name:GPIO14
-<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>586 = deviceType: gpio.GPIOPin, pinNumber:586, name:GPIO15
-<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>587 = deviceType: gpio.GPIOPin, pinNumber:587, name:GPIO16
-<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>588 = deviceType: gpio.GPIOPin, pinNumber:588, name:GPIO17
-<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>589 = deviceType: gpio.GPIOPin, pinNumber:589, name:GPIO18
-<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a>590 = deviceType: gpio.GPIOPin, pinNumber:590, name:GPIO19
-<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a>591 = deviceType: gpio.GPIOPin, pinNumber:591, name:GPIO20
-<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a>592 = deviceType: gpio.GPIOPin, pinNumber:592, name:GPIO21
-<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a>593 = deviceType: gpio.GPIOPin, pinNumber:593, name:GPIO22
-<a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a>594 = deviceType: gpio.GPIOPin, pinNumber:594, name:GPIO23
-<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a>595 = deviceType: gpio.GPIOPin, pinNumber:595, name:GPIO24
-<a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a>596 = deviceType: gpio.GPIOPin, pinNumber:596, name:GPIO25
-<a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a>597 = deviceType: gpio.GPIOPin, pinNumber:597, name:GPIO26
-<a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a>598 = deviceType: gpio.GPIOPin, pinNumber:598, name:GPIO27
-<a id="__codelineno-10-27" name="__codelineno-10-27" href="#__codelineno-10-27"></a>
-<a id="__codelineno-10-28" name="__codelineno-10-28" href="#__codelineno-10-28"></a>gpio.GPIOPin = initValue:0, deviceNumber:0, direction:3, mode:-1, trigger:3
-<a id="__codelineno-10-29" name="__codelineno-10-29" href="#__codelineno-10-29"></a>uart.UART = baudRate:19200, parity:0, dataBits:8, stopBits:1, flowControl:0
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>573 = deviceType: gpio.GPIOPin, pinNumber:573, name:GPI02
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>574 = deviceType: gpio.GPIOPin, pinNumber:574, name:GPIO3
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>575 = deviceType: gpio.GPIOPin, pinNumber:575, name:GPIO4
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>576 = deviceType: gpio.GPIOPin, pinNumber:576, name:GPIO5
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>577 = deviceType: gpio.GPIOPin, pinNumber:577, name:GPIO6
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>578 = deviceType: gpio.GPIOPin, pinNumber:578, name:GPIO7
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>579 = deviceType: gpio.GPIOPin, pinNumber:579, name:GPIO8
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>580 = deviceType: gpio.GPIOPin, pinNumber:580, name:GPIO9
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>581 = deviceType: gpio.GPIOPin, pinNumber:581, name:GPIO10
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>582 = deviceType: gpio.GPIOPin, pinNumber:582, name:GPIO11
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>583 = deviceType: gpio.GPIOPin, pinNumber:583, name:GPIO12
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>584 = deviceType: gpio.GPIOPin, pinNumber:584, name:GPIO13
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>585 = deviceType: gpio.GPIOPin, pinNumber:585, name:GPIO14
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>586 = deviceType: gpio.GPIOPin, pinNumber:586, name:GPIO15
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>587 = deviceType: gpio.GPIOPin, pinNumber:587, name:GPIO16
+<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>588 = deviceType: gpio.GPIOPin, pinNumber:588, name:GPIO17
+<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a>589 = deviceType: gpio.GPIOPin, pinNumber:589, name:GPIO18
+<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a>590 = deviceType: gpio.GPIOPin, pinNumber:590, name:GPIO19
+<a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a>591 = deviceType: gpio.GPIOPin, pinNumber:591, name:GPIO20
+<a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a>592 = deviceType: gpio.GPIOPin, pinNumber:592, name:GPIO21
+<a id="__codelineno-13-21" name="__codelineno-13-21" href="#__codelineno-13-21"></a>593 = deviceType: gpio.GPIOPin, pinNumber:593, name:GPIO22
+<a id="__codelineno-13-22" name="__codelineno-13-22" href="#__codelineno-13-22"></a>594 = deviceType: gpio.GPIOPin, pinNumber:594, name:GPIO23
+<a id="__codelineno-13-23" name="__codelineno-13-23" href="#__codelineno-13-23"></a>595 = deviceType: gpio.GPIOPin, pinNumber:595, name:GPIO24
+<a id="__codelineno-13-24" name="__codelineno-13-24" href="#__codelineno-13-24"></a>596 = deviceType: gpio.GPIOPin, pinNumber:596, name:GPIO25
+<a id="__codelineno-13-25" name="__codelineno-13-25" href="#__codelineno-13-25"></a>597 = deviceType: gpio.GPIOPin, pinNumber:597, name:GPIO26
+<a id="__codelineno-13-26" name="__codelineno-13-26" href="#__codelineno-13-26"></a>598 = deviceType: gpio.GPIOPin, pinNumber:598, name:GPIO27
+<a id="__codelineno-13-27" name="__codelineno-13-27" href="#__codelineno-13-27"></a>
+<a id="__codelineno-13-28" name="__codelineno-13-28" href="#__codelineno-13-28"></a>gpio.GPIOPin = initValue:0, deviceNumber:0, direction:3, mode:-1, trigger:3
+<a id="__codelineno-13-29" name="__codelineno-13-29" href="#__codelineno-13-29"></a>uart.UART = baudRate:19200, parity:0, dataBits:8, stopBits:1, flowControl:0
 </code></pre></div>
 <p>You can also check your GPIO device configuration executing the command <code>pinout</code></p>
 </li>
 <li>
 <p>Reboot the Raspberry Pi with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>sudo reboot
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>sudo reboot
 </code></pre></div>
 <p>Kura starts on the target platform after reboot.</p>
 </li>
 <li>
 <p>Kura setups a local web ui that is available using a browser via:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>https://&lt;device-ip&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>https://&lt;device-ip&gt;
 </code></pre></div>
 <p>The browser will prompt the user to accept the connection to an endpoint with an untrusted certificate:</p>
 <p><img alt="Proceed trusting the source" src="../images/untrusted_cert.png" /></p>

@@ -4656,6 +4656,7 @@ following steps:</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p><strong>Optional</strong>: Since version 5.3.0 Kura also supports <a href="https://adoptium.net/en-GB/">Eclipse Temurin&trade;</a> as an alternative JVM. To install it you need to perform these additional steps:</p>
+<p><details><summary>Debian Bookworm and earlier</summary></p>
 <p><div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>wget<span class="w"> </span>apt-transport-https<span class="w"> </span>gnupg
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo<span class="w"> </span>wget<span class="w"> </span>-O<span class="w"> </span>-<span class="w"> </span>https://packages.adoptium.net/artifactory/api/gpg/key/public<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>apt-key<span class="w"> </span>add<span class="w"> </span>-
@@ -4663,20 +4664,31 @@ following steps:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb https://packages.adoptium.net/artifactory/deb </span><span class="k">$(</span>awk<span class="w"> </span>-F<span class="o">=</span><span class="w"> </span><span class="s1">&#39;/^VERSION_CODENAME/{print$2}&#39;</span><span class="w"> </span>/etc/os-release<span class="k">)</span><span class="s2"> main&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/adoptium.list
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>temurin-17-jdk
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>temurin-17-jdk
 </code></pre></div></p>
+</details>
+<p><details><summary>Debian Trixie and later</summary></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo<span class="w"> </span>mkdir<span class="w"> </span>/usr/local/share/keyrings
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>curl<span class="w"> </span>https://packages.adoptium.net/artifactory/api/gpg/key/public<span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--dearmor<span class="w"> </span><span class="p">|</span><span class="w"> </span>dd<span class="w"> </span><span class="nv">of</span><span class="o">=</span>/usr/local/share/keyrings/adoptium-keyring.gpg
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb [signed-by=/usr/local/share/keyrings/adoptium-keyring.gpg] https://packages.adoptium.net/artifactory/deb </span><span class="k">$(</span>awk<span class="w"> </span>-F<span class="o">=</span><span class="w"> </span><span class="s1">&#39;/^VERSION_CODENAME/{print$2}&#39;</span><span class="w"> </span>/etc/os-release<span class="k">)</span><span class="s2"> main&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>-a<span class="w"> </span>/etc/apt/sources.list.d/adoptium.list
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>temurin-17-jdk
+</code></pre></div>
+</details>
 </div>
 </li>
 <li>
 <p>Download the Kura package with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura-&lt;kura-version&gt;_&lt;arch&gt;.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura-&lt;kura-version&gt;_&lt;arch&gt;.deb
 </code></pre></div>
 <p>Note: replace <code>&lt;version&gt;</code> in the URL above with the version number of the latest release (e.g. 5.5.0) and <code>&lt;arch&gt;</code> with your device architecture </p>
 </li>
 <li>
 <p>Install Kura with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>sudo apt install ./kura-&lt;kura-version&gt;_&lt;arch&gt;_installer.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>sudo apt install ./kura-&lt;kura-version&gt;_&lt;arch&gt;_installer.deb
 </code></pre></div>
 <p>All the required dependencies will be downloaded and installed.</p>
 </li>
@@ -4685,48 +4697,48 @@ following steps:</p>
 </li>
 <li>
 <p>(Optional) Configure the GPIO replacing the content of the file <code>/opt/eclise/kura/framework/jdk.dio.properties</code> with the following text:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>0 = deviceType: gpio.GPIOPin, pinNumber:0, name:GPIO0
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>1 = deviceType: gpio.GPIOPin, pinNumber:1, name:GPIO1
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>2 = deviceType: gpio.GPIOPin, pinNumber:2, name:GPI02
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>3 = deviceType: gpio.GPIOPin, pinNumber:3, name:GPIO3
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>4 = deviceType: gpio.GPIOPin, pinNumber:4, name:GPIO4
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>5 = deviceType: gpio.GPIOPin, pinNumber:5, name:GPIO5
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>6 = deviceType: gpio.GPIOPin, pinNumber:6, name:GPIO6
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>7 = deviceType: gpio.GPIOPin, pinNumber:7, name:GPIO7
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>8 = deviceType: gpio.GPIOPin, pinNumber:8, name:GPIO8
-<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>9 = deviceType: gpio.GPIOPin, pinNumber:9, name:GPIO9
-<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>10 = deviceType: gpio.GPIOPin, pinNumber:10, name:GPIO10
-<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>11 = deviceType: gpio.GPIOPin, pinNumber:11, name:GPIO11
-<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>12 = deviceType: gpio.GPIOPin, pinNumber:12, name:GPIO12
-<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>13 = deviceType: gpio.GPIOPin, pinNumber:13, name:GPIO13
-<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>14 = deviceType: gpio.GPIOPin, pinNumber:14, name:GPIO14
-<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>15 = deviceType: gpio.GPIOPin, pinNumber:14, name:GPIO15
-<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>16 = deviceType: gpio.GPIOPin, pinNumber:16, name:GPIO16
-<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>17 = deviceType: gpio.GPIOPin, pinNumber:17, name:GPIO17
-<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a>18 = deviceType: gpio.GPIOPin, pinNumber:18, name:GPIO18
-<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>19 = deviceType: gpio.GPIOPin, pinNumber:19, name:GPIO19
-<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a>20 = deviceType: gpio.GPIOPin, pinNumber:20, name:GPIO20
-<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a>21 = deviceType: gpio.GPIOPin, pinNumber:21, name:GPIO21
-<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a>22 = deviceType: gpio.GPIOPin, pinNumber:22, name:GPIO22
-<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a>23 = deviceType: gpio.GPIOPin, pinNumber:23, name:GPIO23
-<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a>24 = deviceType: gpio.GPIOPin, pinNumber:24, name:GPIO24
-<a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a>25 = deviceType: gpio.GPIOPin, pinNumber:25, name:GPIO25
-<a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a>26 = deviceType: gpio.GPIOPin, pinNumber:26, name:GPIO26
-<a id="__codelineno-9-28" name="__codelineno-9-28" href="#__codelineno-9-28"></a>27 = deviceType: gpio.GPIOPin, pinNumber:27, name:GPIO27
-<a id="__codelineno-9-29" name="__codelineno-9-29" href="#__codelineno-9-29"></a>
-<a id="__codelineno-9-30" name="__codelineno-9-30" href="#__codelineno-9-30"></a>gpio.GPIOPin = initValue:0, deviceNumber:0, direction:3, mode:-1, trigger:3
-<a id="__codelineno-9-31" name="__codelineno-9-31" href="#__codelineno-9-31"></a>uart.UART = baudRate:19200, parity:0, dataBits:8, stopBits:1, flowControl:0
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>0 = deviceType: gpio.GPIOPin, pinNumber:0, name:GPIO0
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>1 = deviceType: gpio.GPIOPin, pinNumber:1, name:GPIO1
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>2 = deviceType: gpio.GPIOPin, pinNumber:2, name:GPI02
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>3 = deviceType: gpio.GPIOPin, pinNumber:3, name:GPIO3
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>4 = deviceType: gpio.GPIOPin, pinNumber:4, name:GPIO4
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>5 = deviceType: gpio.GPIOPin, pinNumber:5, name:GPIO5
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>6 = deviceType: gpio.GPIOPin, pinNumber:6, name:GPIO6
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>7 = deviceType: gpio.GPIOPin, pinNumber:7, name:GPIO7
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>8 = deviceType: gpio.GPIOPin, pinNumber:8, name:GPIO8
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>9 = deviceType: gpio.GPIOPin, pinNumber:9, name:GPIO9
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>10 = deviceType: gpio.GPIOPin, pinNumber:10, name:GPIO10
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>11 = deviceType: gpio.GPIOPin, pinNumber:11, name:GPIO11
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>12 = deviceType: gpio.GPIOPin, pinNumber:12, name:GPIO12
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>13 = deviceType: gpio.GPIOPin, pinNumber:13, name:GPIO13
+<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>14 = deviceType: gpio.GPIOPin, pinNumber:14, name:GPIO14
+<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a>15 = deviceType: gpio.GPIOPin, pinNumber:14, name:GPIO15
+<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a>16 = deviceType: gpio.GPIOPin, pinNumber:16, name:GPIO16
+<a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a>17 = deviceType: gpio.GPIOPin, pinNumber:17, name:GPIO17
+<a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a>18 = deviceType: gpio.GPIOPin, pinNumber:18, name:GPIO18
+<a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a>19 = deviceType: gpio.GPIOPin, pinNumber:19, name:GPIO19
+<a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a>20 = deviceType: gpio.GPIOPin, pinNumber:20, name:GPIO20
+<a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a>21 = deviceType: gpio.GPIOPin, pinNumber:21, name:GPIO21
+<a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a>22 = deviceType: gpio.GPIOPin, pinNumber:22, name:GPIO22
+<a id="__codelineno-12-24" name="__codelineno-12-24" href="#__codelineno-12-24"></a>23 = deviceType: gpio.GPIOPin, pinNumber:23, name:GPIO23
+<a id="__codelineno-12-25" name="__codelineno-12-25" href="#__codelineno-12-25"></a>24 = deviceType: gpio.GPIOPin, pinNumber:24, name:GPIO24
+<a id="__codelineno-12-26" name="__codelineno-12-26" href="#__codelineno-12-26"></a>25 = deviceType: gpio.GPIOPin, pinNumber:25, name:GPIO25
+<a id="__codelineno-12-27" name="__codelineno-12-27" href="#__codelineno-12-27"></a>26 = deviceType: gpio.GPIOPin, pinNumber:26, name:GPIO26
+<a id="__codelineno-12-28" name="__codelineno-12-28" href="#__codelineno-12-28"></a>27 = deviceType: gpio.GPIOPin, pinNumber:27, name:GPIO27
+<a id="__codelineno-12-29" name="__codelineno-12-29" href="#__codelineno-12-29"></a>
+<a id="__codelineno-12-30" name="__codelineno-12-30" href="#__codelineno-12-30"></a>gpio.GPIOPin = initValue:0, deviceNumber:0, direction:3, mode:-1, trigger:3
+<a id="__codelineno-12-31" name="__codelineno-12-31" href="#__codelineno-12-31"></a>uart.UART = baudRate:19200, parity:0, dataBits:8, stopBits:1, flowControl:0
 </code></pre></div>
 </li>
 <li>
 <p>Reboot the Raspberry Pi with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>sudo reboot
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>sudo reboot
 </code></pre></div>
 <p>Kura starts on the target platform after reboot.</p>
 </li>
 <li>
 <p>Kura setups a local web ui that is available using a browser via:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>https://&lt;device-ip&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>https://&lt;device-ip&gt;
 </code></pre></div>
 <p>The browser will prompt the user to accept the connection to an endpoint with a self signed certificate, select <code>Accept the risk and continue</code>:</p>
 <p><img alt="Proceed trusting the source" src="../images/untrusted_cert.png" /></p>

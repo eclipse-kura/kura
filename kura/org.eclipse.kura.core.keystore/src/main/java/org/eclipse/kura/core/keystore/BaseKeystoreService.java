@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -188,9 +188,8 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
         try {
             ks.getKeystore().setEntry(alias, entry, protectionParameter);
             saveKeystore(ks);
-            if (!tryAddToCrlManagement(entry)) {
-                postChangedEvent();
-            }
+            tryAddToCrlManagement(entry);
+            postChangedEvent();
         } catch (GeneralSecurityException | IOException e) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to set the entry " + alias);
         }
@@ -230,11 +229,8 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
         try {
             ks.getKeystore().deleteEntry(alias);
             saveKeystore(ks);
-            boolean crlStoreChanged = false;
-            crlStoreChanged = tryRemoveFromCrlManagement(currentEntry.get());
-            if (!crlStoreChanged) {
-                postChangedEvent();
-            }
+            tryRemoveFromCrlManagement(currentEntry.get());
+            postChangedEvent();
         } catch (GeneralSecurityException | IOException e) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to delete entry " + alias);
         }

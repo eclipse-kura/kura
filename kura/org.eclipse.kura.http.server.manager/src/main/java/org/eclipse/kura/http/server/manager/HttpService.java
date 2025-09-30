@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,8 +19,13 @@ import java.util.EnumSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import javax.net.ssl.KeyManager;
@@ -53,6 +58,9 @@ public class HttpService implements ConfigurableComponent, EventHandler {
 
     private String keystoreServicePid;
 
+    private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+    private Future<?> restartTask = CompletableFuture.completedFuture(null);
+
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -72,7 +80,7 @@ public class HttpService implements ConfigurableComponent, EventHandler {
         logger.info("Activating... Done.");
     }
 
-    public void updated(Map<String, Object> properties) {
+    public synchronized void updated(Map<String, Object> properties) {
         logger.info("Updating {}", this.getClass().getSimpleName());
 
         HttpServiceOptions updatedOptions = new HttpServiceOptions(properties, this.systemService.getKuraHome());
@@ -81,16 +89,19 @@ public class HttpService implements ConfigurableComponent, EventHandler {
             logger.debug("Updating, new props");
             this.options = updatedOptions;
 
+            cancelRestartTask();
             restartHttpService();
         }
 
         logger.info("Updating... Done.");
     }
 
-    public void deactivate() {
+    public synchronized void deactivate() {
         logger.info("Deactivating {}", this.getClass().getSimpleName());
 
+        cancelRestartTask();
         deactivateHttpService();
+        shutdownExecutor();
     }
 
     private Dictionary<String, Object> getJettyConfig() {
@@ -192,22 +203,54 @@ public class HttpService implements ConfigurableComponent, EventHandler {
     }
 
     private synchronized void activateHttpService() {
-        try {
-            logger.info("starting Jetty instance...");
-            JettyConfigurator.startServer(KURA_JETTY_PID, getJettyConfig());
-            logger.info("starting Jetty instance...done");
-        } catch (final Exception e) {
-            logger.error("Could not start Jetty Web server", e);
-        }
+        this.executorService.submit(() -> {
+            try {
+                logger.info("starting Jetty instance...");
+                JettyConfigurator.startServer(KURA_JETTY_PID, getJettyConfig());
+                logger.info("starting Jetty instance...done");
+            } catch (final Exception e) {
+                logger.error("Could not start Jetty Web server", e);
+            }
+        });
     }
 
     private synchronized void deactivateHttpService() {
+        this.executorService.submit(() -> {
+            try {
+                logger.info("stopping Jetty instance...");
+                JettyConfigurator.stopServer(KURA_JETTY_PID);
+                logger.info("stopping Jetty instance...done");
+            } catch (final Exception e) {
+                logger.error("Could not stop Jetty Web server", e);
+            }
+        });
+    }
+
+    private synchronized void shutdownExecutor() {
         try {
-            logger.info("stopping Jetty instance...");
-            JettyConfigurator.stopServer(KURA_JETTY_PID);
-            logger.info("stopping Jetty instance...done");
+            this.executorService.shutdown();
+            this.executorService.awaitTermination(30, TimeUnit.SECONDS);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error("Could not stop executor", e);
+        } finally {
+            this.executorService.shutdownNow();
+        }
+    }
+
+    private synchronized void cancelRestartTask() {
+        if (!this.restartTask.isDone()) {
+            this.restartTask.cancel(false);
+        }
+    }
+
+    private synchronized void scheduleDeferredRestart() {
+        cancelRestartTask();
+
+        try {
+            this.restartTask = this.executorService.schedule(this::restartHttpService, 10, TimeUnit.SECONDS);
         } catch (final Exception e) {
-            logger.error("Could not stop Jetty Web server", e);
+            logger.warn("failed to schedule restart task", e);
         }
     }
 
@@ -220,7 +263,7 @@ public class HttpService implements ConfigurableComponent, EventHandler {
         final KeystoreChangedEvent keystoreChangedEvent = (KeystoreChangedEvent) event;
 
         if (keystoreChangedEvent.getSenderPid().equals(keystoreServicePid)) {
-            restartHttpService();
+            scheduleDeferredRestart();
         }
     }
 

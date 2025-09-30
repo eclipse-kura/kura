@@ -37,6 +37,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.CompletableFuture;
@@ -1184,34 +1185,29 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     }
 
     private void givenHttpServiceClientCertAuthEnabled(final String keystorePid, final int port) {
-        try {
-            final ConfigurationService configurationService = ServiceUtil
-                    .trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
 
-            final Map<String, Object> properties = new HashMap<>();
-            properties.put("KeystoreService.target", "(kura.service.pid=" + keystorePid + ")");
-            properties.put("https.client.auth.ports", new Integer[] { port });
-
-            configurationService.updateConfiguration("org.eclipse.kura.http.server.manager.HttpService", properties);
-
-            RestTransport.waitPortOpen("localhost", port, 1, TimeUnit.MINUTES);
-
-        } catch (Exception e) {
-            fail("cannot set httpservice keystore pid");
-        }
+        givenHttpServiceConfig(OptionalInt.of(8080), "https.client.auth.ports", new Integer[] { port },
+                "KeystoreService.target", "(kura.service.pid=" + keystorePid + ")");
     }
 
     private void givenHttpServiceClientCertAuthDisabled() {
+
+        givenHttpServiceConfig(OptionalInt.of(8080), "https.client.auth.ports", new Integer[] {});
+    }
+
+    private void givenHttpServiceConfig(final OptionalInt waitPortOpen, final Object... httpServiceProps) {
         try {
+
             final ConfigurationService configurationService = ServiceUtil
                     .trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
 
-            final Map<String, Object> properties = Collections.singletonMap("https.client.auth.ports",
-                    new Integer[] {});
+            final Map<String, Object> properties = collectProperties(httpServiceProps);
 
             configurationService.updateConfiguration("org.eclipse.kura.http.server.manager.HttpService", properties);
 
-            RestTransport.waitPortOpen("localhost", 8080, 1, TimeUnit.MINUTES);
+            if (waitPortOpen.isPresent()) {
+                RestTransport.waitPortOpen("localhost", waitPortOpen.getAsInt(), 1, TimeUnit.MINUTES);
+            }
 
         } catch (Exception e) {
             fail("cannot set httpservice keystore pid");
@@ -1465,6 +1461,21 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         return (T) userAdmin.createRole(name, type);
     }
 
+    private Map<String, Object> collectProperties(final Object[] properties) {
+        final Map<String, Object> result = new HashMap<>();
+
+        final Iterator<Object> iter = Arrays.asList(properties).iterator();
+
+        while (iter.hasNext()) {
+            final String key = (String) iter.next();
+            final Object value = iter.next();
+
+            result.put(key, value);
+        }
+
+        return result;
+    }
+
     @After
     public void cleanUp() {
         this.registeredServices.forEach(ServiceRegistration::unregister);
@@ -1480,6 +1491,9 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
             givenRestServiceConfiguration(defaultConfig);
         }
+
+        givenHttpServiceConfig(OptionalInt.empty(), "KeystoreService.target", "(kura.service.pid=nonexisting)",
+                "https.client.auth.ports", new Integer[] {});
 
         try {
             if (createdFactoryPids.isEmpty()) {

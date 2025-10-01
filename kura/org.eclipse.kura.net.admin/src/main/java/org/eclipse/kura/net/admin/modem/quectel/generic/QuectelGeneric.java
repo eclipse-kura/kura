@@ -212,9 +212,13 @@ public class QuectelGeneric extends HspaModem implements HspaCellularModem {
             sQnwinfo = sQnwinfo.substring("+QNWINFO:".length()).trim();
             logger.trace("getQueryNetworkInformation() :: +QNWINFO={}", sQnwinfo);
             this.asQnwinfo = sQnwinfo.split(",");
-            this.band = this.asQnwinfo[2].substring(1, this.asQnwinfo[2].length() - 1);
+            if (this.asQnwinfo.length > 2 && this.asQnwinfo[2] != null) {
+                this.band = this.asQnwinfo[2].substring(1, this.asQnwinfo[2].length() - 1);
+            }
             logger.trace("getBand() :: Band={}", this.band);
-            this.radio = this.asQnwinfo[0].substring(1, this.asQnwinfo[0].length() - 1);
+            if (this.asQnwinfo.length > 0 && this.asQnwinfo[0] != null) {
+                this.radio = this.asQnwinfo[0].substring(1, this.asQnwinfo[0].length() - 1);
+            }
             logger.info("getRadio() :: Radio={}", this.radio);
         }
         return this.asQnwinfo;

@@ -4,7 +4,7 @@ Section: misc
 Priority: low
 Depends: dos2unix, unzip, telnet, 
  bluez-hcidump, chrony, ntpdate | ntpsec-ntpdate, 
- openjdk-17-jre-headless | temurin-17-jdk | java-runtime-headless (= 17) | java-runtime-headless (= 21)
+ openjdk-17-jre-headless | temurin-17-jdk | java-runtime-headless (= 17) | java-runtime-headless (= 21) | openjdk-8-jre-headless | temurin-8-jdk
 Architecture: all
 Maintainer: support@eurotech.com
 Description: Kura is an inclusive software framework that puts a layer

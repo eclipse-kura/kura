@@ -14,11 +14,11 @@ Package: kura
 Version: [[project.version]]
 Section: misc
 Priority: low
-Depends: openjdk-17-jre-headless | temurin-17-jdk | openjdk-8-jre-headless | temurin-8-jdk,
+Depends: openjdk-17-jre-headless | temurin-17-jdk | java-runtime-headless (= 17) | java-runtime-headless (= 21),
  setserial, zip, gzip, unzip, procps, usbutils, socat, gawk, sed, inetutils-telnet,
- polkit | policykit-1, ssh | openssh, openssl, busybox, openvpn,
+ polkit | policykit-1 | polkitd, ssh | openssh, openssl, busybox, openvpn,
  bluez | bluez5, bluez-hcidump | bluez5-noinst-tools,
- ntpdate, chrony, chronyc | chrony,
+ ntpdate | ntpsec-ntpdate, chrony, chronyc | chrony,
  network-manager | networkmanager, bind9 | bind, dnsmasq | isc-dhcp-server, isc-dhcp-client | dhcpcd, iw, iptables, modemmanager,
  gpsd, python3
 Architecture: all

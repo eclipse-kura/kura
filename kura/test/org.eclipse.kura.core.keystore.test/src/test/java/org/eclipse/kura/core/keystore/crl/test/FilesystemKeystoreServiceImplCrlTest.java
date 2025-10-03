@@ -414,6 +414,47 @@ public class FilesystemKeystoreServiceImplCrlTest {
         }
     }
 
+    @Test
+    public void shouldSupportDisablingCRLVerificationWithUpdate() throws Exception {
+        final X500Name name = new X500Name("cn=Test CA, dc=bar.com");
+
+        try (final Fixture fixture = new Fixture()) {
+
+            final TestCA ca = new TestCA(CertificateCreationOptions.builder(name)
+                    .withCRLDownloadURI(new URI(fixture.getCrlDownloadURL("/foo.crl"))).build());
+
+            CompletableFuture<String> nextDownload = fixture.nextDownloadRelativeURI();
+
+            fixture.setOptions(fixture.getOptions().setCrlManagerEnabled(true).setCrlUpdateInterval(1)
+                    .setCrlUpdateIntervalTimeUnit(TimeUnit.SECONDS));
+            fixture.activate();
+            fixture.update(fixture.getOptions().setCrlVerificationEnabled(false));
+
+            final X509CRL crl = ca.generateCRL(CRLCreationOptions.builder().build());
+            fixture.setCrl("/foo.crl", crl);
+
+            fixture.keystoreService.setEntry("foo", new TrustedCertificateEntry(ca.getCertificate()));
+
+            assertEquals("/foo.crl", nextDownload.get(1, TimeUnit.MINUTES));
+            assertEquals(DEFAULT_KEYSTORE_PID,
+                    ((KeystoreChangedEvent) fixture.expectNextEventAdminEvent(1, TimeUnit.MINUTES)).getSenderPid());
+            assertEquals(DEFAULT_KEYSTORE_PID,
+                    ((KeystoreChangedEvent) fixture.expectNextEventAdminEvent(1, TimeUnit.MINUTES)).getSenderPid());
+
+            final TestCA otherCA = new TestCA(CertificateCreationOptions.builder(name).build());
+            fixture.setCrl("/foo.crl", otherCA.generateCRL(CRLCreationOptions.builder().build()));
+
+            nextDownload = fixture.nextDownloadRelativeURI();
+            nextDownload.get(1, TimeUnit.MINUTES);
+
+            nextDownload = fixture.nextDownloadRelativeURI();
+            nextDownload.get(1, TimeUnit.MINUTES);
+
+            assertEquals(true, fixture.nextEventAdminEvent(10, TimeUnit.SECONDS).isPresent());
+
+        }
+    }
+
     private static class Fixture implements AutoCloseable {
 
         private final FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();

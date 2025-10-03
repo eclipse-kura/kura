@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -172,8 +172,13 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         }
 
         File packagesDir = new File(this.packagesPath);
-        if (!packagesDir.exists() && !packagesDir.mkdirs()) {
-            throw new ComponentException("Cannot create packages directory");
+        if (!packagesDir.exists()) {
+            if (!packagesDir.mkdirs()) {
+                throw new ComponentException("Cannot create packages directory");
+            }
+            packagesDir.setReadable(true, true);
+            packagesDir.setWritable(true, true);
+            packagesDir.setExecutable(true, true);
         }
 
         installPackagesFromConfFile();

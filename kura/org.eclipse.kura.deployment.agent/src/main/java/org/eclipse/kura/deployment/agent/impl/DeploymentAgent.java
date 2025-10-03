@@ -176,9 +176,13 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             if (!packagesDir.mkdirs()) {
                 throw new ComponentException("Cannot create packages directory");
             }
-            packagesDir.setReadable(true, true);
-            packagesDir.setWritable(true, true);
-            packagesDir.setExecutable(true, true);
+            boolean success = packagesDir.setReadable(true, true) &&
+                packagesDir.setWritable(true, true) &&
+                packagesDir.setExecutable(true, true);
+
+            if (!success) {
+                logger.warn("Could not set permissions on packages directory");
+            }
         }
 
         installPackagesFromConfFile();

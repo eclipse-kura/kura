@@ -75,20 +75,17 @@ node {
     }
 
     stage ("Deploy on Nexus") {
-        def debFilesOutput = sh(script: "find kura -type f -name '*.deb'", returnStdout: true).trim()
-        def debFiles = debFilesOutput ? debFilesOutput.split("\n") : []
-
         // Call uploadPackages only if we are on the default branch,
         // if we have DEB packages to upload and if the user has set the pushArtifacts parameter to true
-        // if (debFiles && env.BRANCH_IS_PRIMARY && pipelineParams.pushArtifacts) {
-        if (debFiles && debFiles.size() > 0) {
-            echo "Found DEB packages, uploading..."
+        // if (env.BRANCH_IS_PRIMARY && pipelineParams.pushArtifacts) {
+        if (true) {
+            echo "Uploading DEB packages..."
 
-            // FIXME read pom to extract distribution and module
-            def repoDistribution = "kura-6"
-            def repoModule = "base"
+            def distribPom = readMavenPom file: 'kura/kura/distrib/pom.xml'
 
-            def nexusUtils = load 'kura/.jenkins/nexusUtils.groovy'
+            def repoDistribution = distribPom.properties['kura.repo.distribution']
+            def repoModule = distribPom.properties['kura.repo.module']
+
             nexusUtils.uploadPackages(repoDistribution, repoModule)
         } else {
             echo "Skipping DEB upload"

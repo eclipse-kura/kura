@@ -17,13 +17,21 @@ def uploadPackages(String repoDistribution, String repoModule, Boolean setupProm
     }
 
     stage("Upload .deb packages to Artifactory") {
-        def debFilesOutput = sh(script: "find kura -type f -name '*.deb'", returnStdout: true).trim()
-        def debFiles = debFilesOutput ? debFilesOutput.split("\n") : []
+        def debFiles = findFiles(glob: 'kura/**/*.deb')
+
+        if (debFiles.size() == 0) {
+            error("No .deb files found to upload")
+        }
 
         debFiles.each {
             withCredentials([usernameColonPassword(credentialsId: 'repo.eclipse.org-bot-account', variable: 'USERPASS')]) {
                 sh(
-                    script: "curl -u \"\$USERPASS\" -H \"Content-Type: multipart/form-data\" --data-binary \"@./${it}\" \"https://repo3.eclipse.org/repository/kura-apt/\"",
+                    script: """
+                        curl -u \"\$USERPASS\" \
+                        -H \"Content-Type: multipart/form-data\" \
+                        --data-binary \"@./${it}\" \
+                        \"https://repo3.eclipse.org/repository/kura-apt/\"
+                    """,
                     returnStatus: true
                 )
             }

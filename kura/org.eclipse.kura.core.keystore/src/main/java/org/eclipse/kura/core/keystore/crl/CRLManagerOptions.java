@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -110,7 +110,8 @@ public class CRLManagerOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(crlCheckIntervalMs, crlManagementEnabled, crlStore, crlURIs, crlUpdateIntervalMs);
+        return Objects.hash(crlCheckIntervalMs, crlManagementEnabled, crlStore, crlURIs, crlUpdateIntervalMs,
+                verifyCRL);
     }
 
     @Override
@@ -124,7 +125,7 @@ public class CRLManagerOptions {
         CRLManagerOptions other = (CRLManagerOptions) obj;
         return crlCheckIntervalMs == other.crlCheckIntervalMs && crlManagementEnabled == other.crlManagementEnabled
                 && Objects.equals(crlStore, other.crlStore) && Objects.equals(crlURIs, other.crlURIs)
-                && crlUpdateIntervalMs == other.crlUpdateIntervalMs;
+                && crlUpdateIntervalMs == other.crlUpdateIntervalMs && verifyCRL == other.verifyCRL;
     }
 
 }

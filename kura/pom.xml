@@ -69,6 +69,7 @@
         <module>org.eclipse.kura.linux.clock</module>
         <module>org.eclipse.kura.linux.command</module>
         <module>org.eclipse.kura.linux.gpio</module>
+        <module>org.eclipse.kura.linux.gpio.libgpiod</module>
         <module>org.eclipse.kura.linux.net</module>
         <module>org.eclipse.kura.linux.position</module>
         <module>org.eclipse.kura.linux.usb</module>

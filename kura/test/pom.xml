@@ -942,6 +942,7 @@
         <module>org.eclipse.kura.internal.driver.s7plc.test</module>
         <module>org.eclipse.kura.linux.clock.test</module>
         <module>org.eclipse.kura.linux.gpio.test</module>
+        <module>org.eclipse.kura.linux.gpio.libgpiod.test</module>
         <module>org.eclipse.kura.linux.net.test</module>
         <module>org.eclipse.kura.linux.position.test</module>
         <module>org.eclipse.kura.linux.usb.test</module>

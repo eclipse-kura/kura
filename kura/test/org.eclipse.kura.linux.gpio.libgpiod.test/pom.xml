@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
-
+    Copyright (c) 2025 Eurotech and/or its affiliates and others
+  
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
-
-    SPDX-License-Identifier: EPL-2.0
-
-    Contributors:
-     Eurotech
+ 
+	SPDX-License-Identifier: EPL-2.0
+	
+	Contributors:
+	 Eurotech
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -23,7 +23,7 @@
         <version>5.6.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.eclipse.kura.nm.test</artifactId>
+    <artifactId>org.eclipse.kura.linux.gpio.libgpiod.test</artifactId>
     <packaging>eclipse-test-plugin</packaging>
 
     <properties>
@@ -33,15 +33,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.hypfvieh</groupId>
-            <artifactId>dbus-java</artifactId>
-            <version>3.3.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
             <version>4.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.11.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

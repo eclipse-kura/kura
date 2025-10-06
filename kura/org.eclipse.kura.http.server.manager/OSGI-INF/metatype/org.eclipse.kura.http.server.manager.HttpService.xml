@@ -92,8 +92,8 @@
             cardinality="0" 
             required="true"
             default="86400"
-            min="3600"
-            description="Specifies the amount of time (in seconds) after which HTTP/HTTPS connections are forcibly closed, regardless of their status. Idle connections have a timeout of one-tenth of this value."/>
+            min="0"
+            description="Specifies the amount of time (in seconds) after which HTTP/HTTPS connections are forcibly closed, regardless of their status. Idle connections have a timeout of one-tenth of this value. A value of 0 means the feature timeout is disabled."/>
             
     </OCD>
 

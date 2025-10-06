@@ -88,8 +88,10 @@ public class JettyServerHolder {
             final HttpServlet httpServlet, final EventListener eventListener) {
         this.options = options;
 
-        this.expiredConnectionCleanerService = new ExpiredConnectionCleanerService(
-                this.options.getHttpConnectionTimeout());
+        if (this.options.isHttpConnectionTimeoutEnabled()) {
+            this.expiredConnectionCleanerService = new ExpiredConnectionCleanerService(
+                    this.options.getHttpConnectionTimeout());
+        }
 
         this.server = new Server(new QueuedThreadPool(200, 8));
         this.server.setErrorHandler(new KuraErrorHandler());
@@ -196,7 +198,9 @@ public class JettyServerHolder {
     private ServerConnector createHttpConnector(int port) {
 
         HttpConfiguration httpConfiguration = new HttpConfiguration();
-        httpConfiguration.setIdleTimeout(this.options.getHttpConnectionTimeout() / 10);
+        if (this.options.isHttpConnectionTimeoutEnabled()) {
+            httpConfiguration.setIdleTimeout(this.options.getHttpConnectionTimeout() / 10);
+        }
 
         final ServerConnector newConnector = new ServerConnector(this.server,
                 new HttpConnectionFactory(httpConfiguration));
@@ -229,10 +233,12 @@ public class JettyServerHolder {
         sslContextFactory.setWantClientAuth(enableClientAuth);
         sslContextFactory.setNeedClientAuth(enableClientAuth);
 
-        sslContextFactory.setSslSessionTimeout(this.options.getHttpConnectionTimeout());
-
         final HttpConfiguration httpsConfig = new HttpConfiguration();
-        httpsConfig.setIdleTimeout(this.options.getHttpConnectionTimeout() / 10);
+
+        if (this.options.isHttpConnectionTimeoutEnabled()) {
+            sslContextFactory.setSslSessionTimeout(this.options.getHttpConnectionTimeout());
+            httpsConfig.setIdleTimeout(this.options.getHttpConnectionTimeout() / 10);
+        }
 
         httpsConfig.addCustomizer(new SecureRequestCustomizer(false));
 
@@ -252,7 +258,10 @@ public class JettyServerHolder {
 
             ((HttpConnectionFactory) factory).getHttpConfiguration().setSendServerVersion(false);
         }
-        serverConnector.addBean(new ConnectionTimeoutListener(this.expiredConnectionCleanerService));
+
+        if (this.options.isHttpConnectionTimeoutEnabled()) {
+            serverConnector.addBean(new ConnectionTimeoutListener(this.expiredConnectionCleanerService));
+        }
 
         addCustomizer(serverConnector, new ForwardedRequestCustomizer());
     }

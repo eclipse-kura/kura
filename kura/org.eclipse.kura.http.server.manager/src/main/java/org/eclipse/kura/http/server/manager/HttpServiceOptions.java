@@ -52,7 +52,10 @@ public class HttpServiceOptions {
     private static final Property<String> KEYSTORE_SERVICE = new Property<>(PROP_KEYSTORE_SERVICE,
             "kura.service.pid=changeit");
 
-    private static final Property<Integer> HTTP_CONNECTION_TIMEOUT = new Property<>(PROP_HTTP_CONNECTION_TIMEOUT, 86400);
+    private static final Property<Integer> HTTP_CONNECTION_TIMEOUT = new Property<>(PROP_HTTP_CONNECTION_TIMEOUT,
+            86400);
+
+    private static final int CONNECTION_TIMEOUT_DISABLED_VALUE = 0;
 
     private final Set<Integer> httpPorts;
     private final Set<Integer> httpsPorts;
@@ -62,6 +65,7 @@ public class HttpServiceOptions {
     private final boolean isRevocationSoftFailEnabled;
     private final String keystoreServicePid;
     private final int httpConnectionTimeout;
+    private boolean httpConnectionTimeoutEnabled = true;
 
     public HttpServiceOptions(final Map<String, Object> properties) {
         this.httpPorts = loadIntArrayProperty(HTTP_PORTS.get(properties));
@@ -74,6 +78,10 @@ public class HttpServiceOptions {
         this.keystoreServicePid = KEYSTORE_SERVICE.get(properties);
 
         this.httpConnectionTimeout = HTTP_CONNECTION_TIMEOUT.get(properties);
+
+        if (this.httpConnectionTimeout == CONNECTION_TIMEOUT_DISABLED_VALUE) {
+            this.httpConnectionTimeoutEnabled = false;
+        }
     }
 
     public Set<Integer> getHttpPorts() {
@@ -108,6 +116,10 @@ public class HttpServiceOptions {
         return this.httpConnectionTimeout;
     }
 
+    public boolean isHttpConnectionTimeoutEnabled() {
+        return this.httpConnectionTimeoutEnabled;
+    }
+
     private static Set<Integer> loadIntArrayProperty(final Integer[] list) {
         if (list == null) {
             return Collections.emptySet();
@@ -126,9 +138,9 @@ public class HttpServiceOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.httpPorts, this.httpsPorts, this.httpsWithClientAuthPorts, this.isRevocationEnabled,
-                this.isRevocationSoftFailEnabled, this.keystoreServicePid, this.revocationCheckMode,
-                this.httpConnectionTimeout);
+        return Objects.hash(this.httpConnectionTimeout, this.httpConnectionTimeoutEnabled, this.httpPorts,
+                this.httpsPorts, this.httpsWithClientAuthPorts, this.isRevocationEnabled,
+                this.isRevocationSoftFailEnabled, this.keystoreServicePid, this.revocationCheckMode);
     }
 
     @Override
@@ -136,16 +148,18 @@ public class HttpServiceOptions {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof HttpServiceOptions)) {
+        if ((obj == null) || (getClass() != obj.getClass())) {
             return false;
         }
         HttpServiceOptions other = (HttpServiceOptions) obj;
-        return Objects.equals(this.httpPorts, other.httpPorts) && Objects.equals(this.httpsPorts, other.httpsPorts)
+        return this.httpConnectionTimeout == other.httpConnectionTimeout
+                && this.httpConnectionTimeoutEnabled == other.httpConnectionTimeoutEnabled
+                && Objects.equals(this.httpPorts, other.httpPorts) && Objects.equals(this.httpsPorts, other.httpsPorts)
                 && Objects.equals(this.httpsWithClientAuthPorts, other.httpsWithClientAuthPorts)
                 && this.isRevocationEnabled == other.isRevocationEnabled
                 && this.isRevocationSoftFailEnabled == other.isRevocationSoftFailEnabled
                 && Objects.equals(this.keystoreServicePid, other.keystoreServicePid)
-                && this.revocationCheckMode == other.revocationCheckMode
-                && this.httpConnectionTimeout == other.httpConnectionTimeout;
+                && this.revocationCheckMode == other.revocationCheckMode;
     }
+
 }

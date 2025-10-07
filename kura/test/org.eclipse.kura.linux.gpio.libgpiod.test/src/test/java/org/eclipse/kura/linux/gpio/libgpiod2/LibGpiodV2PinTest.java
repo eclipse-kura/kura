@@ -266,7 +266,7 @@ public class LibGpiodV2PinTest extends CommonSteps {
     }
 
     @Test
-    public void testAddPinStatusListenerWithBothEdgesTrigger() throws InterruptedException {
+    public void testAddPinStatusListenerWithBothEdgesTrigger() {
         givenV2Pin("GPIO_01", 2004, KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.BOTH_EDGES);
         givenPinStatusListener();
 
@@ -280,7 +280,7 @@ public class LibGpiodV2PinTest extends CommonSteps {
     }
 
     @Test
-    public void testAddPinStatusListenerWithFallingEdgesTrigger() throws InterruptedException {
+    public void testAddPinStatusListenerWithFallingEdgesTrigger() {
         givenV2Pin("GPIO_01", 2004, KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.FALLING_EDGE);
         givenPinStatusListener();
 
@@ -294,7 +294,7 @@ public class LibGpiodV2PinTest extends CommonSteps {
     }
 
     @Test
-    public void testAddPinStatusListenerWithRisingEdgesTrigger() throws InterruptedException {
+    public void testAddPinStatusListenerWithRisingEdgesTrigger() {
         givenV2Pin("GPIO_01", 2004, KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.RAISING_EDGE);
         givenPinStatusListener();
 
@@ -308,7 +308,7 @@ public class LibGpiodV2PinTest extends CommonSteps {
     }
 
     @Test
-    public void testAddPinStatusListenerWithUnsupportedTrigger() throws InterruptedException {
+    public void testAddPinStatusListenerWithUnsupportedTrigger() {
         givenV2Pin("GPIO_01", 2004, KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.HIGH_LEVEL);
         givenPinStatusListener();
 

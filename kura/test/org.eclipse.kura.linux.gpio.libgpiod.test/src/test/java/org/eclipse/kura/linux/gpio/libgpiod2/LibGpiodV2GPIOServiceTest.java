@@ -60,8 +60,7 @@ public class LibGpiodV2GPIOServiceTest extends CommonSteps {
         this.nativeInterfaceMock = mock(LibGpiodV2Native.class);
         this.nativeMock.when(() -> Native.load("gpiod", LibGpiodV2Native.class)).thenReturn(this.nativeInterfaceMock);
         this.nativeInterfaceWrapperMock = mockStatic(LibGpiodV2NativeWrapper.class);
-        this.nativeInterfaceWrapperMock.when(() -> LibGpiodV2NativeWrapper.getInstance())
-                .thenReturn(this.nativeInterfaceMock);
+        this.nativeInterfaceWrapperMock.when(LibGpiodV2NativeWrapper::getInstance).thenReturn(this.nativeInterfaceMock);
 
         Pointer chip0 = Pointer.createConstant(0);
         when(this.nativeInterfaceMock.gpiod_chip_open(DEVICE_FOLDER + "gpiochip0")).thenReturn(chip0);

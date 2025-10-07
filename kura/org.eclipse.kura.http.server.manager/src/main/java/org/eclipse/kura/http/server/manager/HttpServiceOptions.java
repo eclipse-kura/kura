@@ -39,6 +39,7 @@ public class HttpServiceOptions {
 
     static final String PROP_KEYSTORE_SERVICE = "KeystoreService.target";
 
+    static final String PROP_HTTP_CONNECTION_TIMEOUT_ENABLED = "http.connection.timeout.enabled";
     static final String PROP_HTTP_CONNECTION_TIMEOUT = "http.connection.timeout";
 
     private static final Property<Integer[]> HTTP_PORTS = new Property<>(PROP_HTTP_PORTS, new Integer[] {});
@@ -51,11 +52,10 @@ public class HttpServiceOptions {
     private static final Property<Boolean> REVOCATION_SOFT_FAIL = new Property<>(PROP_REVOCATION_SOFT_FAIL, false);
     private static final Property<String> KEYSTORE_SERVICE = new Property<>(PROP_KEYSTORE_SERVICE,
             "kura.service.pid=changeit");
-
+    private static final Property<Boolean> HTTP_CONNECTION_TIMEOUT_ENABLED = new Property<>(
+            PROP_HTTP_CONNECTION_TIMEOUT_ENABLED, true);
     private static final Property<Integer> HTTP_CONNECTION_TIMEOUT = new Property<>(PROP_HTTP_CONNECTION_TIMEOUT,
             86400);
-
-    private static final int CONNECTION_TIMEOUT_DISABLED_VALUE = 0;
 
     private final Set<Integer> httpPorts;
     private final Set<Integer> httpsPorts;
@@ -65,7 +65,7 @@ public class HttpServiceOptions {
     private final boolean isRevocationSoftFailEnabled;
     private final String keystoreServicePid;
     private final int httpConnectionTimeout;
-    private boolean httpConnectionTimeoutEnabled = true;
+    private boolean httpConnectionTimeoutEnabled;
 
     public HttpServiceOptions(final Map<String, Object> properties) {
         this.httpPorts = loadIntArrayProperty(HTTP_PORTS.get(properties));
@@ -77,11 +77,9 @@ public class HttpServiceOptions {
 
         this.keystoreServicePid = KEYSTORE_SERVICE.get(properties);
 
+        this.httpConnectionTimeoutEnabled = HTTP_CONNECTION_TIMEOUT_ENABLED.get(properties);
         this.httpConnectionTimeout = HTTP_CONNECTION_TIMEOUT.get(properties);
 
-        if (this.httpConnectionTimeout == CONNECTION_TIMEOUT_DISABLED_VALUE) {
-            this.httpConnectionTimeoutEnabled = false;
-        }
     }
 
     public Set<Integer> getHttpPorts() {

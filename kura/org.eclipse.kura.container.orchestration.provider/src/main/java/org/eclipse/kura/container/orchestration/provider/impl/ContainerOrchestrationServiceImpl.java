@@ -499,8 +499,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
 
         if (item.isPullSuccessIndicated()) {
-
-            logger.info("Image pull of {}:{}, Layer: {}, was succsessful", imageName, imageTag, item.getId());
+            logger.info("Image pull of {}:{}, Layer: {}, was successful", imageName, imageTag, item.getId());
         }
     }
 

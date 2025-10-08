@@ -178,10 +178,6 @@ systemctl disable resolvconf.service
 systemctl stop ModemManager
 systemctl disable ModemManager
 
-#disable systemd-hostnamed
-systemctl stop systemd-hostnamed
-systemctl disable systemd-hostnamed
-
 #disable wpa_supplicant
 systemctl stop wpa_supplicant
 systemctl disable wpa_supplicant

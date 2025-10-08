@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -499,8 +499,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
 
         if (item.isPullSuccessIndicated()) {
-
-            logger.info("Image pull of {}:{}, Layer: {}, was succsessful", imageName, imageTag, item.getId());
+            logger.info("Image pull of {}:{}, Layer: {}, was successful", imageName, imageTag, item.getId());
         }
     }
 

@@ -222,7 +222,7 @@ public class GpioComponent implements ConfigurableComponent {
         KuraGPIOPin pin = null;
         try {
             int terminal = Integer.parseInt(resource);
-            if (terminal > 0 && terminal < 10000) {
+            if (terminal > 0 && terminal < 100000) {
                 pin = this.gpioService.getPinByTerminal(Integer.parseInt(resource), pinDirection, pinMode, pinTrigger);
             }
         } catch (NumberFormatException e) {

@@ -15,9 +15,6 @@ package org.eclipse.kura.linux.gpio.libgpiod1;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.gpio.KuraClosedDeviceException;
@@ -27,7 +24,7 @@ import org.eclipse.kura.gpio.KuraGPIOMode;
 import org.eclipse.kura.gpio.KuraGPIOPin;
 import org.eclipse.kura.gpio.KuraGPIOTrigger;
 import org.eclipse.kura.gpio.KuraUnavailableDeviceException;
-import org.eclipse.kura.gpio.PinStatusListener;
+import org.eclipse.kura.linux.gpio.libgpiod.LibGpiodPin;
 import org.eclipse.kura.linux.gpio.libgpiod1.LibGpiodV1Native.LineEvent;
 import org.eclipse.kura.linux.gpio.libgpiod1.LibGpiodV1Native.TimeSpec;
 import org.slf4j.Logger;
@@ -38,41 +35,17 @@ import com.sun.jna.Pointer;
 /**
  * GPIO pin implementation for libgpiod v1.6.x
  */
-public class LibGpiodV1Pin implements KuraGPIOPin {
+public class LibGpiodV1Pin extends LibGpiodPin implements KuraGPIOPin {
 
     private static final Logger logger = LoggerFactory.getLogger(LibGpiodV1Pin.class);
     private static final String LIB_GPIOD_V1_PIN_EVENT_MONITOR = "LibGpiodV1PinEventMonitor";
-    private static final int DEFAULT_TIMEOUT_SEC = 1;
-    private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool(runnable -> {
-        Thread thread = new Thread(runnable, "GPIO-EventMonitor");
-        thread.setDaemon(true);
-        return thread;
-    });
 
-    private final String chipPath;
-    private final int offset;
-    private final String pinName;
-    private final KuraGPIODirection direction;
-    private final KuraGPIOMode mode;
-    private final KuraGPIOTrigger trigger;
-
-    private Pointer chip;
     private Pointer line;
-    private final AtomicBoolean isOpen = new AtomicBoolean(false);
     private final AtomicBoolean isReserved = new AtomicBoolean(false);
-    private final AtomicBoolean isMonitoring = new AtomicBoolean(false);
-
-    private Optional<PinStatusListener> listener = Optional.empty();
-    private Future<?> monitoringTask;
 
     public LibGpiodV1Pin(String chipPath, int offset, KuraGPIODirection direction, KuraGPIOMode mode,
             KuraGPIOTrigger trigger, String pinName) {
-        this.chipPath = chipPath;
-        this.offset = offset;
-        this.direction = direction;
-        this.mode = mode;
-        this.trigger = trigger;
-        this.pinName = pinName;
+        super(chipPath, offset, direction, mode, trigger, pinName);
     }
 
     @Override
@@ -139,7 +112,7 @@ public class LibGpiodV1Pin implements KuraGPIOPin {
         }
 
         if (this.direction != KuraGPIODirection.OUTPUT) {
-            throw new IOException("Cannot set value on non-output pin");
+            throw new IOException("Cannot set value on input pin");
         }
 
         int gpioValue = value ? 1 : 0;
@@ -153,66 +126,7 @@ public class LibGpiodV1Pin implements KuraGPIOPin {
         }
     }
 
-    @Override
-    public boolean isOpen() {
-        return this.isOpen.get();
-    }
-
-    @Override
-    public String getName() {
-        return this.pinName;
-    }
-
-    @Override
-    public int getIndex() {
-        return extractChipNumber(this.chipPath) * 1000 + this.offset;
-    }
-
-    @Override
-    public KuraGPIODirection getDirection() {
-        return this.direction;
-    }
-
-    @Override
-    public KuraGPIOMode getMode() {
-        return this.mode;
-    }
-
-    @Override
-    public KuraGPIOTrigger getTrigger() {
-        return this.trigger;
-    }
-
-    @Override
-    public void addPinStatusListener(PinStatusListener listener) throws KuraClosedDeviceException, IOException {
-        if (listener == null) {
-            throw new IllegalArgumentException("Listener cannot be null");
-        }
-
-        if (!this.isOpen.get()) {
-            throw new KuraClosedDeviceException("Pin is closed");
-        }
-
-        this.listener = Optional.of(listener);
-
-        if (shouldMonitorEvents()) {
-            startEventMonitoring();
-        }
-    }
-
-    private boolean shouldMonitorEvents() {
-        return this.direction == KuraGPIODirection.INPUT && this.trigger != KuraGPIOTrigger.NONE
-                && this.trigger != KuraGPIOTrigger.HIGH_LEVEL && this.trigger != KuraGPIOTrigger.LOW_LEVEL
-                && this.trigger != KuraGPIOTrigger.BOTH_LEVELS;
-    }
-
-    private void startEventMonitoring() {
-        if (this.isMonitoring.compareAndSet(false, true)) {
-            this.monitoringTask = EXECUTOR.submit(this::monitorEvents);
-        }
-    }
-
-    private void monitorEvents() {
+    protected void monitorEvents() {
         if (!this.isMonitoring.get() || !this.isOpen.get()) {
             return;
         }
@@ -245,43 +159,34 @@ public class LibGpiodV1Pin implements KuraGPIOPin {
             }
 
             while (this.isMonitoring.get() && this.isOpen.get()) {
-                int waitResult = LibGpiodV1NativeWrapper.getInstance().gpiod_line_event_wait(this.line, timeout);
-                if (waitResult > 0) {
-                    LineEvent event = new LineEvent();
-                    int readResult = LibGpiodV1NativeWrapper.getInstance().gpiod_line_event_read(this.line, event);
-                    if (readResult == 0) {
-                        boolean newValue = event.event_type == LibGpiodV1Native.GPIOD_LINE_EVENT_RISING_EDGE;
-                        this.listener.ifPresent(l -> l.pinStatusChange(newValue));
-                    }
-                } else if (waitResult < 0) {
-                    logger.error("Error waiting for GPIO event: {}", waitResult);
-                }
+                manageEvents(timeout);
             }
         } catch (Error e) {
             logger.error("Exception in GPIO event monitoring: {}", e.getMessage());
         }
     }
 
-    private void stopEventMonitoring() {
-        if (this.isMonitoring.compareAndSet(true, false) && this.monitoringTask != null) {
-            this.monitoringTask.cancel(true);
-            try {
-                Thread.sleep(DEFAULT_TIMEOUT_SEC * 2000L);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+    private void manageEvents(TimeSpec timeout) {
+        try {
+            int waitResult = LibGpiodV1NativeWrapper.getInstance().gpiod_line_event_wait(this.line, timeout);
+            if (waitResult > 0) {
+                LineEvent[] events = new LineEvent[10];
+                int numEvents = LibGpiodV1NativeWrapper.getInstance().gpiod_line_event_read_multiple(this.line, events,
+                        64);
+                if (numEvents > 0) {
+                    for (int i = 0; i < numEvents; i++) {
+                        if (events[i] != null) {
+                            boolean newValue = events[i].event_type == LibGpiodV1Native.GPIOD_LINE_EVENT_RISING_EDGE;
+                            this.listener.ifPresent(l -> l.pinStatusChange(newValue));
+                        }
+                    }
+                }
+            } else if (waitResult < 0) {
+                logger.error("Error waiting for GPIO event: {}", waitResult);
             }
-            this.monitoringTask = null;
+        } catch (Error e) {
+            logger.error("Exception while managing GPIO events: {}", e.getMessage());
         }
-    }
-
-    @Override
-    public void removePinStatusListener(PinStatusListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("Listener cannot be null");
-        }
-
-        stopEventMonitoring();
-        this.listener = Optional.empty();
     }
 
     private void openGpioChip() throws KuraUnavailableDeviceException {
@@ -339,7 +244,7 @@ public class LibGpiodV1Pin implements KuraGPIOPin {
 
     private void ensureOpenAndReserved() throws KuraClosedDeviceException, KuraGPIODeviceException {
         if (!this.isOpen.get()) {
-            throw new KuraClosedDeviceException("Pin is closed");
+            throw new KuraClosedDeviceException(this.pinName);
         }
 
         if (!this.isReserved.get()) {
@@ -403,17 +308,4 @@ public class LibGpiodV1Pin implements KuraGPIOPin {
         return flags;
     }
 
-    public static int extractChipNumber(String chipName) {
-        try {
-            return Integer.parseInt(chipName.replaceAll("\\D", ""));
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
-
-    @Override
-    public String toString() {
-        return String.format("LibGpiodV1Pin{chip=%s, offset=%d, name=%s, direction=%s, mode=%s, trigger=%s}",
-                this.chipPath, this.offset, this.pinName, this.direction, this.mode, this.trigger);
-    }
 }

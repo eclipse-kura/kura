@@ -6,9 +6,9 @@ Depends: hostapd, isc-dhcp-server, iw,
  dos2unix, bind9, unzip, 
  ethtool, telnet, bluez-hcidump, 
  bluez, wireless-tools, net-tools, 
- iptables, chrony, ntpdate, 
+ iptables, chrony, ntpdate | ntpsec-ntpdate, 
  ifupdown,
- openjdk-17-jre-headless | temurin-17-jdk | openjdk-8-jre-headless | temurin-8-jdk, 
+ openjdk-17-jre-headless | temurin-17-jdk | java-runtime-headless (= 17) | java-runtime-headless (= 21) | openjdk-8-jre-headless | temurin-8-jdk,
  dmidecode
 Architecture: all
 Maintainer: support@eurotech.com

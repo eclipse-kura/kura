@@ -30,6 +30,7 @@
         <property name="security.folder" value="${user.config.folder}/security" />
         <property name="console.folder" value="console" />
         <property name="log4j.folder" value="log4j" />
+        <property name="packages.folder" value="packages" />
 
         <!-- Loads entries from a manifest file. @jar The jar from where to read
             @prefix A prefix to prepend -->
@@ -656,6 +657,10 @@ fi]]>
                 <!-- exclude .SNAPSHOT bundles -->
                 <exclude name="*.SNAPSHOT.jar" />
 
+            </zipfileset>
+
+            <zipfileset dir="src/main/resources/common/packages/" prefix="${build.output.name}/${packages.folder}" dirmode="700">
+                <exclude name=".gitkeep" />
             </zipfileset>
 
             <zipfileset dir="../target-definition/common/repository/plugins"

@@ -101,7 +101,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
     private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
 
-    private static final Set<PosixFilePermission> DEFAULT_PACKAGES_DIR_PERMMISION = PosixFilePermissions
+    private static final Set<PosixFilePermission> DEFAULT_PACKAGES_DIR_PERMISSIONS = PosixFilePermissions
             .fromString("rwx------");
 
     private DeploymentAdmin deploymentAdmin;

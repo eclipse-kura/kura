@@ -90,17 +90,28 @@ Eclipse Kura&trade; do not contain gateway specific customizations, this implies
 
 ### Kura dependencies
 
-To have all the Kura features working, the following dependencies are required:
+The following dependencies are required by each of the Kura modules.
 
-- General: `setserial`, `zip`, `gzip`, `unzip`, `procps`, `usbutils`, `socat`, `gawk`, `sed`, `inetutils-telnet`.
-- Security: `polkit` or `policykit-1`, `ssh` or `openssh`, `openssl`, `busybox`, `openvpn`.
-- Bluetooth: `bluez` or `bluez5`, `bluez-hcidump` or `bluez5-noinst-tools`.
+#### Kura core
+
+- General: `setserial`, `zip`, `gzip`, `unzip`, `procps`, `usbutils`, `socat`, `gawk`, `sed`, `inetutils-telnet`, `dos2unix`, `libtirpc3`
+- Security: `polkit` or `policykit-1` or `polkitd`, `ssh` or `openssh`, `openssl`, `busybox`, `libpam-modules`
+- Python: `python3`
+- Gps: `gpsd`
 - Time: `chrony`, `chronyc`
-- Networking: `network-manager` or `networkmanager`, `bind9` or `bind`, `dnsmasq` or `isc-dhcp-server` or (`dhcp-server` and `dhcp-client`), `iw`, `iptables`, `modemmanager`, `hostapd`, `wpa-supplicant`, `ppp`, `iproute2`.
-- Gps: `gpsd`.
-- Python: `python3`.
-- Java: `openjdk-17-jre-headless` or `temurin-17-jdk`.
-- Others: `dos2unix`
+- Java: `openjdk-17-jre-headless` or `temurin-17-jdk` or a JRE installation that provides `java-runtime-headless (= 17)` or `java-runtime-headless (= 21)`
+
+#### Kura bluetooth
+
+- `bluez` or `bluez5`, `bluez-hcidump` or `bluez5-noinst-tools`
+
+#### Kura networking
+
+- Networking: `network-manager` or `networkmanager`, `modemmanager`
+- DNS resolving: `bind9` or `bind`
+- DHCP server: `dnsmasq` or `isc-dhcp-server`, `isc-dhcp-client` or `dhcpcd`
+- Wireless: `iw`
+- Firewall: `iptables`, `python3-fail2ban` or `python-fail2ban` or `fail2ban`
 
 ### Reference devices
 

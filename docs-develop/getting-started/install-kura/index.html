@@ -422,6 +422,39 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Kura dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kura-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kura core
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kura-bluetooth" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kura bluetooth
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kura-networking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kura networking
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -4689,6 +4722,39 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Kura dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kura-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kura core
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kura-bluetooth" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kura bluetooth
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kura-networking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kura networking
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -4816,17 +4882,27 @@ enabled for LAN with a DHCP server, <code>enp3s0</code> will be enabled for WAN 
 <li>Edit the <code>/opt/eclipse/kura/framework/jdk.dio.properties</code> with the correct GPIO mappings. By default this file is empty.</li>
 </ul>
 <h3 id="kura-dependencies">Kura dependencies</h3>
-<p>To have all the Kura features working, the following dependencies are required:</p>
+<p>The following dependencies are required by each of the Kura modules.</p>
+<h4 id="kura-core">Kura core</h4>
 <ul>
-<li>General: <code>setserial</code>, <code>zip</code>, <code>gzip</code>, <code>unzip</code>, <code>procps</code>, <code>usbutils</code>, <code>socat</code>, <code>gawk</code>, <code>sed</code>, <code>inetutils-telnet</code>.</li>
-<li>Security: <code>polkit</code> or <code>policykit-1</code>, <code>ssh</code> or <code>openssh</code>, <code>openssl</code>, <code>busybox</code>, <code>openvpn</code>.</li>
-<li>Bluetooth: <code>bluez</code> or <code>bluez5</code>, <code>bluez-hcidump</code> or <code>bluez5-noinst-tools</code>.</li>
+<li>General: <code>setserial</code>, <code>zip</code>, <code>gzip</code>, <code>unzip</code>, <code>procps</code>, <code>usbutils</code>, <code>socat</code>, <code>gawk</code>, <code>sed</code>, <code>inetutils-telnet</code>, <code>dos2unix</code>, <code>libtirpc3</code></li>
+<li>Security: <code>polkit</code> or <code>policykit-1</code> or <code>polkitd</code>, <code>ssh</code> or <code>openssh</code>, <code>openssl</code>, <code>busybox</code>, <code>libpam-modules</code></li>
+<li>Python: <code>python3</code></li>
+<li>Gps: <code>gpsd</code></li>
 <li>Time: <code>chrony</code>, <code>chronyc</code></li>
-<li>Networking: <code>network-manager</code> or <code>networkmanager</code>, <code>bind9</code> or <code>bind</code>, <code>dnsmasq</code> or <code>isc-dhcp-server</code> or (<code>dhcp-server</code> and <code>dhcp-client</code>), <code>iw</code>, <code>iptables</code>, <code>modemmanager</code>, <code>hostapd</code>, <code>wpa-supplicant</code>, <code>ppp</code>, <code>iproute2</code>.</li>
-<li>Gps: <code>gpsd</code>.</li>
-<li>Python: <code>python3</code>.</li>
-<li>Java: <code>openjdk-17-jre-headless</code> or <code>temurin-17-jdk</code>.</li>
-<li>Others: <code>dos2unix</code></li>
+<li>Java: <code>openjdk-17-jre-headless</code> or <code>temurin-17-jdk</code> or a JRE installation that provides <code>java-runtime-headless (= 17)</code> or <code>java-runtime-headless (= 21)</code></li>
+</ul>
+<h4 id="kura-bluetooth">Kura bluetooth</h4>
+<ul>
+<li><code>bluez</code> or <code>bluez5</code>, <code>bluez-hcidump</code> or <code>bluez5-noinst-tools</code></li>
+</ul>
+<h4 id="kura-networking">Kura networking</h4>
+<ul>
+<li>Networking: <code>network-manager</code> or <code>networkmanager</code>, <code>modemmanager</code></li>
+<li>DNS resolving: <code>bind9</code> or <code>bind</code></li>
+<li>DHCP server: <code>dnsmasq</code> or <code>isc-dhcp-server</code>, <code>isc-dhcp-client</code> or <code>dhcpcd</code></li>
+<li>Wireless: <code>iw</code></li>
+<li>Firewall: <code>iptables</code>, <code>python3-fail2ban</code> or <code>python-fail2ban</code> or <code>fail2ban</code></li>
 </ul>
 <h3 id="reference-devices">Reference devices</h3>
 <p>Eclipse Kura&trade; has been tested on the following devices and provides full configuration of all the available interfaces and GPIO mappings.</p>

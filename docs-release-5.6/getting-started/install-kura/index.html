@@ -4863,15 +4863,14 @@ enabled for LAN with a DHCP server, <code>enp3s0</code> will be enabled for WAN 
 <h3 id="kura-dependencies">Kura dependencies</h3>
 <p>To have all the Kura features working, the following dependencies are required:</p>
 <ul>
-<li>General: <code>setserial</code>, <code>zip</code>, <code>gzip</code>, <code>unzip</code>, <code>procps</code>, <code>usbutils</code>, <code>socat</code>, <code>gawk</code>, <code>sed</code>, <code>inetutils-telnet</code>.</li>
-<li>Security: <code>polkit</code> or <code>policykit-1</code>, <code>ssh</code> or <code>openssh</code>, <code>openssl</code>, <code>busybox</code>, <code>openvpn</code>.</li>
-<li>Bluetooth: <code>bluez</code> or <code>bluez5</code>, <code>bluez-hcidump</code> or <code>bluez5-noinst-tools</code>.</li>
-<li>Time: <code>ntpdate</code>, <code>chrony</code>, <code>chronyc</code></li>
-<li>Networking: <code>network-manager</code> or <code>networkmanager</code>, <code>bind9</code> or <code>bind</code>, <code>dnsmasq</code> or <code>isc-dhcp-server</code> or (<code>dhcp-server</code> and <code>dhcp-client</code>), <code>iw</code>, <code>iptables</code>, <code>modemmanager</code>, <code>hostapd</code>, <code>wpa-supplicant</code>, <code>ppp</code>, <code>iproute2</code>.</li>
-<li>Gps: <code>gpsd</code>.</li>
-<li>Python: <code>python3</code>.</li>
-<li>Java: <code>openjdk-17-jre-headless</code> or <code>temurin-17-jdk</code> or <code>openjdk-8-jre-headless</code> or <code>temurin-8-jdk</code>.</li>
-<li>Others: <code>dos2unix</code></li>
+<li>General: <code>setserial</code>, <code>zip</code>, <code>gzip</code>, <code>unzip</code>, <code>procps</code>, <code>usbutils</code>, <code>socat</code>, <code>gawk</code>, <code>sed</code>, <code>inetutils-telnet</code></li>
+<li>Security: <code>polkit</code> or <code>policykit-1</code> or <code>polkitd</code>, <code>ssh</code> or <code>openssh</code>, <code>openssl</code>, <code>busybox</code>, <code>openvpn</code></li>
+<li>Bluetooth: <code>bluez</code> or <code>bluez5</code>, <code>bluez-hcidump</code> or <code>bluez5-noinst-tools</code></li>
+<li>Time: <code>ntpdate</code> or <code>ntpsec-ntpdate</code>, <code>chrony</code>, <code>chronyc</code></li>
+<li>Networking: <code>network-manager</code> or <code>networkmanager</code>, <code>bind9</code> or <code>bind</code>, <code>dnsmasq</code> or <code>isc-dhcp-server</code> or (<code>dhcp-server</code> and <code>dhcp-client</code>), <code>iw</code>, <code>iptables</code>, <code>modemmanager</code>, <code>hostapd</code>, <code>wpa-supplicant</code>, <code>ppp</code>, <code>iproute2</code></li>
+<li>Gps: <code>gpsd</code></li>
+<li>Python: <code>python3</code></li>
+<li>Java: <code>openjdk-17-jre-headless</code> or <code>temurin-17-jdk</code> or a JRE that provides <code>java-runtime-headless (= 17)</code> or <code>java-runtime-headless (= 21)</code>. For retrocompatibility, <code>openjdk-8-jre-headless</code> or <code>temurin-8-jdk</code></li>
 </ul>
 <h3 id="supported-devices">Supported devices</h3>
 <p>Kura generic has been tested on the following devices and provides full configuration of all the available interfaces and GPIO mappings.</p>

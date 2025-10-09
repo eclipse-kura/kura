@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.Deflater;
@@ -199,7 +200,8 @@ public class JettyServerHolder {
 
         HttpConfiguration httpConfiguration = new HttpConfiguration();
         if (this.options.isHttpConnectionTimeoutEnabled()) {
-            httpConfiguration.setIdleTimeout(this.options.getHttpConnectionTimeout() / 10);
+            httpConfiguration.setIdleTimeout(
+                    TimeUnit.MILLISECONDS.convert(this.options.getHttpConnectionTimeout() / 10, TimeUnit.SECONDS));
         }
 
         final ServerConnector newConnector = new ServerConnector(this.server,
@@ -237,7 +239,8 @@ public class JettyServerHolder {
 
         if (this.options.isHttpConnectionTimeoutEnabled()) {
             sslContextFactory.setSslSessionTimeout(this.options.getHttpConnectionTimeout());
-            httpsConfig.setIdleTimeout(this.options.getHttpConnectionTimeout() / 10);
+            httpsConfig.setIdleTimeout(
+                    TimeUnit.MILLISECONDS.convert(this.options.getHttpConnectionTimeout() / 10, TimeUnit.SECONDS));
         }
 
         httpsConfig.addCustomizer(new SecureRequestCustomizer(false));

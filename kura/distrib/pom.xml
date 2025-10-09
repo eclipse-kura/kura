@@ -819,6 +819,17 @@
                                 </mapper>
                             </data>
                             <data>
+                                <src>${project.build.directory}/pkg/packages/</src>
+                                <type>directory</type>
+                                <mapper>
+                                    <type>perm</type>
+                                    <prefix>${kura.install.dir}/${kura.symlink}/packages</prefix>
+                                    <user>root</user>
+                                    <group>root</group>
+                                    <filemode>600</filemode>
+                                </mapper>
+                            </data>
+                            <data>
                                 <src>${project.build.directory}/pkg/plugins/</src>
                                 <type>directory</type>
                                 <mapper>

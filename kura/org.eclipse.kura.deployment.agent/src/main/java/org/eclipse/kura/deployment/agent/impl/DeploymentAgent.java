@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -26,6 +26,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -97,6 +100,9 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
     private static final String READ_TIMEOUT_PROPNAME = "dpa.read.timeout";
 
     private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
+
+    private static final Set<PosixFilePermission> DEFAULT_PACKAGES_DIR_PERMISSIONS = PosixFilePermissions
+            .fromString("rwx------");
 
     private DeploymentAdmin deploymentAdmin;
     private EventAdmin eventAdmin;
@@ -172,8 +178,13 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         }
 
         File packagesDir = new File(this.packagesPath);
-        if (!packagesDir.exists() && !packagesDir.mkdirs()) {
-            throw new ComponentException("Cannot create packages directory");
+        if (!packagesDir.exists()) {
+            try {
+                Files.createDirectories(Path.of(this.packagesPath),
+                        PosixFilePermissions.asFileAttribute(DEFAULT_PACKAGES_DIR_PERMISSIONS));
+            } catch (Exception e) {
+                throw new ComponentException("Cannot create packages directory", e);
+            }
         }
 
         installPackagesFromConfFile();

@@ -92,15 +92,14 @@ Kura generic profiles do not contain gateway specific customizations, this impli
 
 To have all the Kura features working, the following dependencies are required:
 
-- General: `setserial`, `zip`, `gzip`, `unzip`, `procps`, `usbutils`, `socat`, `gawk`, `sed`, `inetutils-telnet`.
-- Security: `polkit` or `policykit-1`, `ssh` or `openssh`, `openssl`, `busybox`, `openvpn`.
-- Bluetooth: `bluez` or `bluez5`, `bluez-hcidump` or `bluez5-noinst-tools`.
-- Time: `ntpdate`, `chrony`, `chronyc`
-- Networking: `network-manager` or `networkmanager`, `bind9` or `bind`, `dnsmasq` or `isc-dhcp-server` or (`dhcp-server` and `dhcp-client`), `iw`, `iptables`, `modemmanager`, `hostapd`, `wpa-supplicant`, `ppp`, `iproute2`.
-- Gps: `gpsd`.
-- Python: `python3`.
-- Java: `openjdk-17-jre-headless` or `temurin-17-jdk` or `openjdk-8-jre-headless` or `temurin-8-jdk`.
-- Others: `dos2unix`
+- General: `setserial`, `zip`, `gzip`, `unzip`, `procps`, `usbutils`, `socat`, `gawk`, `sed`, `inetutils-telnet`
+- Security: `polkit` or `policykit-1` or `polkitd`, `ssh` or `openssh`, `openssl`, `busybox`, `openvpn`
+- Bluetooth: `bluez` or `bluez5`, `bluez-hcidump` or `bluez5-noinst-tools`
+- Time: `ntpdate` or `ntpsec-ntpdate`, `chrony`, `chronyc`
+- Networking: `network-manager` or `networkmanager`, `bind9` or `bind`, `dnsmasq` or `isc-dhcp-server` or (`dhcp-server` and `dhcp-client`), `iw`, `iptables`, `modemmanager`, `hostapd`, `wpa-supplicant`, `ppp`, `iproute2`
+- Gps: `gpsd`
+- Python: `python3`
+- Java: `openjdk-17-jre-headless` or `temurin-17-jdk` or a JRE that provides `java-runtime-headless (= 17)` or `java-runtime-headless (= 21)`. For retrocompatibility, `openjdk-8-jre-headless` or `temurin-8-jdk`
 
 ### Supported devices
 

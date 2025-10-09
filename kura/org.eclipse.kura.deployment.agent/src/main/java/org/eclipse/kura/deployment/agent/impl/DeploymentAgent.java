@@ -26,7 +26,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.security.GeneralSecurityException;
@@ -180,7 +180,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         File packagesDir = new File(this.packagesPath);
         if (!packagesDir.exists()) {
             try {
-                Files.createDirectories(Path.of(this.packagesPath),
+                Files.createDirectories(Paths.get(this.packagesPath),
                         PosixFilePermissions.asFileAttribute(DEFAULT_PACKAGES_DIR_PERMISSIONS));
             } catch (Exception e) {
                 throw new ComponentException("Cannot create packages directory", e);

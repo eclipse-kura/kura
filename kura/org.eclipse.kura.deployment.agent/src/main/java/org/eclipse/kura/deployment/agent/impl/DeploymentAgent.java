@@ -181,7 +181,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         if (!packagesDir.exists()) {
             try {
                 Files.createDirectories(Path.of(this.packagesPath),
-                        PosixFilePermissions.asFileAttribute(DEFAULT_PACKAGES_DIR_PERMMISION));
+                        PosixFilePermissions.asFileAttribute(DEFAULT_PACKAGES_DIR_PERMISSIONS));
             } catch (Exception e) {
                 throw new ComponentException("Cannot create packages directory", e);
             }

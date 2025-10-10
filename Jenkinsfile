@@ -1,3 +1,5 @@
+import org.jenkinsci.plugins.pipeline.modeldefinition.Utils
+
 def boolean onlyDocumentationFilesChangedIn(String workDirectory) {
     if (!env.CHANGE_TARGET) {
         echo "CHANGE_TARGET not set. Skipping check"
@@ -69,6 +71,24 @@ node {
     stage('Generate test reports') {
         dir("kura") {
             junit 'kura/test/*/target/surefire-reports/*.xml'
+        }
+    }
+
+    stage ("Deploy on Nexus") {
+        // Call uploadPackages only if we are on the default branch,
+        // if we have DEB packages to upload and if the user has set the pushArtifacts parameter to true
+        if (env.BRANCH_IS_PRIMARY) {
+            echo "Uploading DEB packages..."
+
+            def distribPom = readMavenPom file: 'kura/kura/distrib/pom.xml'
+
+            def repoDistribution = distribPom.properties['kura.repo.distribution']
+            def repoModule = distribPom.properties['kura.repo.module']
+
+            nexusUtils.uploadPackages(repoDistribution, repoModule)
+        } else {
+            echo "Skipping DEB upload"
+            Utils.markStageSkippedForConditional(STAGE_NAME)
         }
     }
 

@@ -77,8 +77,7 @@ node {
     stage ("Deploy on Nexus") {
         // Call uploadPackages only if we are on the default branch,
         // if we have DEB packages to upload and if the user has set the pushArtifacts parameter to true
-        // if (env.BRANCH_IS_PRIMARY && pipelineParams.pushArtifacts) {
-        if (true) {
+        if (env.BRANCH_IS_PRIMARY) {
             echo "Uploading DEB packages..."
 
             def distribPom = readMavenPom file: 'kura/kura/distrib/pom.xml'

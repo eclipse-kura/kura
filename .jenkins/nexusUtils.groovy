@@ -16,7 +16,7 @@ def uploadPackages(String repoDistribution, String repoModule, Boolean setupProm
         assert valid_modules.contains(repoModule)
     }
 
-    stage("Upload .deb packages to Artifactory") {
+    stage("Upload .deb packages to Nexus") {
         def debFiles = findFiles(glob: 'kura/**/*.deb')
 
         if (debFiles.size() == 0) {

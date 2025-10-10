@@ -1,37 +1,62 @@
 # Install Kura
 
-Eclipse Kura&trade; is provided using a Debian Linux package. Visit the [Kura download page](https://github.com/eclipse-kura/kura/releases) to find the correct installation file for the target system.
+Eclipse Kura&trade; is provided using a Debian Linux package. There's two ways you can install Kura on your target system:
 
+1. Use the Eclipse Kura&trade; APT repository (recommended). Follow the instructions below to set up the repository and install Kura using `apt-get` or `apt`.
+2. Alternatively, visit the [Kura download page](https://github.com/eclipse-kura/kura/releases) to find the correct installation file for your target system.
 
+## Kura installation using the APT repository (recommended)
 
-## Installer types
+To install Eclipse Kura&trade; using the APT repository, perform the following steps:
 
-Several installers can be found on such page, and they fall into one of the following categories:
+1. Install the required packages:
 
-1. standard **kura** installers, like `kura_6.0.0_arm64.deb`
-2. installers named **kura-nn**, like `kura-nn_6.0.0_arm64.deb`
+    ```bash
+    apt install -y curl gpg
+    ```
 
-Profiles of types (1) ship a Kura version with networking functionalities. In particular, they can be installed on targets with [NetworkManager](https://networkmanager.dev), a commonly available tool for managing Linux networking. Kura leverages this tool for networking functionalities. Refer to the [Kura installers](#kura-installers) section for further information.
+2. Download the GPG key and add it to the list of trusted keys:
 
-Installers of type (2) with the suffix `nn` are **No Networking** profiles that do not bundle the Kura Network Manager: all the network configurations need to be done outside of Kura. Functionalities **missing** in **NN profiles** compared to the full Kura profiles:
+    ```bash
+    curl -L "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xba7e3df5edc3fc36" | gpg --dearmor | tee /etc/apt/trusted.gpg.d/kura.gpg > /dev/null
+    ```
 
-- Networking interfaces management
-- Firewall configuration management
-- Network Threat management
+3. Add the Kura APT repository to your system's software sources list:
 
+    ```bash
+    echo "deb https://repo3.eclipse.org/repository/kura-apt/ stable main" | tee /etc/apt/sources.list.d/kura.list
+    ```
 
+4. Update the package list:
 
-## Kura installers
+    ```bash
+    apt update
+    ```
 
-A user can deploy Kura on a target system using the installer tailored for the device architecture. The installer file looks like:
+5. Install Kura package:
 
-```
-kura_<kura-version>_<arch>.deb
-```
+    ```bash
+    apt install kura
+    ```
 
-where `<arch>` is one of the **supported architectures**: *amd64* and *arm64*. Kura can work on systems that have available the dependencies listed in the [Kura dependencies](#kura-dependencies) section, and that have **at least one** physical ethernet interface.
+!!! note
+    The above instructions might require `sudo` privileges depending on your system configuration.
 
-From Kura version 6.0.0 the Java 17 runtime is **required** to run the framework correctly.
+## Kura packages
+
+Since version 6.0.0 Eclipse Kura&trade; has been split into multiple packages to allow the user to install only the required features. The main package `kura` is a meta-package which depends on all the other packages listed below and provides the same installation experience as the old installers. Alternatively, the user can choose to install only the required packages instead of the full Kura framework. The available packages are:
+
+- [kura-core](https://github.com/eclipse-kura/kura): Eclipse Kura™ framework core (mandatory)
+- [kura-apps](https://github.com/eclipse-kura/kura-apps): Applications and examples for Eclipse Kura™ framework
+- [kura-artemis](https://github.com/eclipse-kura/kura-artemis): Eclipse Kura™ Artemis MQTT server addon
+- [kura-bluetooth](https://github.com/eclipse-kura/kura-bluetooth): Eclipse Kura™ Bluetooth addon
+- [kura-command](https://github.com/eclipse-kura/kura-command): Eclipse Kura™ Command addon
+- [kura-gpio](https://github.com/eclipse-kura/kura-gpio): Eclipse Kura™ GPIO handling addon
+- [kura-management-ui](https://github.com/eclipse-kura/kura-management-ui): Eclipse Kura™ Web UI addon
+- [kura-metapackage](https://github.com/eclipse-kura/kura-metapackage): Eclipse Kura™ Metapackage
+- [kura-networking](https://github.com/eclipse-kura/kura-networking): Eclipse Kura™ Networking addon
+- [kura-position](https://github.com/eclipse-kura/kura-position): Eclipse Kura™ Position addon
+- [kura-wires](https://github.com/eclipse-kura/kura-wires): Eclipse Kura™ Wires and Assets addon
 
 ### Java Heap Memory Assignment
 
@@ -39,7 +64,7 @@ The Eclipse Kura&trade;'s installer incorporates an adaptive Heap Memory allocat
 
 ### Initial network configuration
 
-During the installation of Eclipse Kura with network management support, the initial network configuration will be generated dynamically. The existing wired and wireless network interface names are detected and sorted in ascending lexicographic order at the installation.
+During the installation of Eclipse Kura with network management package (i.e. `kura-networking`), the initial network configuration will be generated dynamically. The existing wired and wireless network interface names are detected and sorted in ascending lexicographic order at the installation.
 
 If only one ethernet interface is detected (e.g. `eth0`), it will be configured as follows:
 

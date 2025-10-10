@@ -361,22 +361,22 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#installer-types" class="md-nav__link">
+  <a href="#kura-installation-using-the-apt-repository-recommended" class="md-nav__link">
     <span class="md-ellipsis">
-      Installer types
+      Kura installation using the APT repository (recommended)
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#kura-installers" class="md-nav__link">
+  <a href="#kura-packages" class="md-nav__link">
     <span class="md-ellipsis">
-      Kura installers
+      Kura packages
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Kura installers">
+    <nav class="md-nav" aria-label="Kura packages">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -4661,22 +4661,22 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#installer-types" class="md-nav__link">
+  <a href="#kura-installation-using-the-apt-repository-recommended" class="md-nav__link">
     <span class="md-ellipsis">
-      Installer types
+      Kura installation using the APT repository (recommended)
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#kura-installers" class="md-nav__link">
+  <a href="#kura-packages" class="md-nav__link">
     <span class="md-ellipsis">
-      Kura installers
+      Kura packages
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Kura installers">
+    <nav class="md-nav" aria-label="Kura packages">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -4788,30 +4788,63 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 
 <h1 id="install-kura">Install Kura</h1>
-<p>Eclipse Kura&trade; is provided using a Debian Linux package. Visit the <a href="https://github.com/eclipse-kura/kura/releases">Kura download page</a> to find the correct installation file for the target system.</p>
-<h2 id="installer-types">Installer types</h2>
-<p>Several installers can be found on such page, and they fall into one of the following categories:</p>
+<p>Eclipse Kura&trade; is provided using a Debian Linux package. There's two ways you can install Kura on your target system:</p>
 <ol>
-<li>standard <strong>kura</strong> installers, like <code>kura_6.0.0_arm64.deb</code></li>
-<li>installers named <strong>kura-nn</strong>, like <code>kura-nn_6.0.0_arm64.deb</code></li>
+<li>Use the Eclipse Kura&trade; APT repository (recommended). Follow the instructions below to set up the repository and install Kura using <code>apt-get</code> or <code>apt</code>.</li>
+<li>Alternatively, visit the <a href="https://github.com/eclipse-kura/kura/releases">Kura download page</a> to find the correct installation file for your target system.</li>
 </ol>
-<p>Profiles of types (1) ship a Kura version with networking functionalities. In particular, they can be installed on targets with <a href="https://networkmanager.dev">NetworkManager</a>, a commonly available tool for managing Linux networking. Kura leverages this tool for networking functionalities. Refer to the <a href="#kura-installers">Kura installers</a> section for further information.</p>
-<p>Installers of type (2) with the suffix <code>nn</code> are <strong>No Networking</strong> profiles that do not bundle the Kura Network Manager: all the network configurations need to be done outside of Kura. Functionalities <strong>missing</strong> in <strong>NN profiles</strong> compared to the full Kura profiles:</p>
-<ul>
-<li>Networking interfaces management</li>
-<li>Firewall configuration management</li>
-<li>Network Threat management</li>
-</ul>
-<h2 id="kura-installers">Kura installers</h2>
-<p>A user can deploy Kura on a target system using the installer tailored for the device architecture. The installer file looks like:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>kura_&lt;kura-version&gt;_&lt;arch&gt;.deb
+<h2 id="kura-installation-using-the-apt-repository-recommended">Kura installation using the APT repository (recommended)</h2>
+<p>To install Eclipse Kura&trade; using the APT repository, perform the following steps:</p>
+<ol>
+<li>
+<p>Install the required packages:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>gpg
 </code></pre></div>
-<p>where <code>&lt;arch&gt;</code> is one of the <strong>supported architectures</strong>: <em>amd64</em> and <em>arm64</em>. Kura can work on systems that have available the dependencies listed in the <a href="#kura-dependencies">Kura dependencies</a> section, and that have <strong>at least one</strong> physical ethernet interface.</p>
-<p>From Kura version 6.0.0 the Java 17 runtime is <strong>required</strong> to run the framework correctly.</p>
+</li>
+<li>
+<p>Download the GPG key and add it to the list of trusted keys:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>curl<span class="w"> </span>-L<span class="w"> </span><span class="s2">&quot;https://keyserver.ubuntu.com/pks/lookup?op=get&amp;search=0xba7e3df5edc3fc36&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gpg<span class="w"> </span>--dearmor<span class="w"> </span><span class="p">|</span><span class="w"> </span>tee<span class="w"> </span>/etc/apt/trusted.gpg.d/kura.gpg<span class="w"> </span>&gt;<span class="w"> </span>/dev/null
+</code></pre></div>
+</li>
+<li>
+<p>Add the Kura APT repository to your system's software sources list:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb https://repo3.eclipse.org/repository/kura-apt/ stable main&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/kura.list
+</code></pre></div>
+</li>
+<li>
+<p>Update the package list:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>apt<span class="w"> </span>update
+</code></pre></div>
+</li>
+<li>
+<p>Install Kura package:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>apt<span class="w"> </span>install<span class="w"> </span>kura
+</code></pre></div>
+</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The above instructions might require <code>sudo</code> privileges depending on your system configuration.</p>
+</div>
+<h2 id="kura-packages">Kura packages</h2>
+<p>Since version 6.0.0 Eclipse Kura&trade; has been split into multiple packages to allow the user to install only the required features. The main package <code>kura</code> is a meta-package which depends on all the other packages listed below and provides the same installation experience as the old installers. Alternatively, the user can choose to install only the required packages instead of the full Kura framework. The available packages are:</p>
+<ul>
+<li><a href="https://github.com/eclipse-kura/kura">kura-core</a>: Eclipse Kura™ framework core (mandatory)</li>
+<li><a href="https://github.com/eclipse-kura/kura-apps">kura-apps</a>: Applications and examples for Eclipse Kura™ framework</li>
+<li><a href="https://github.com/eclipse-kura/kura-artemis">kura-artemis</a>: Eclipse Kura™ Artemis MQTT server addon</li>
+<li><a href="https://github.com/eclipse-kura/kura-bluetooth">kura-bluetooth</a>: Eclipse Kura™ Bluetooth addon</li>
+<li><a href="https://github.com/eclipse-kura/kura-command">kura-command</a>: Eclipse Kura™ Command addon</li>
+<li><a href="https://github.com/eclipse-kura/kura-gpio">kura-gpio</a>: Eclipse Kura™ GPIO handling addon</li>
+<li><a href="https://github.com/eclipse-kura/kura-management-ui">kura-management-ui</a>: Eclipse Kura™ Web UI addon</li>
+<li><a href="https://github.com/eclipse-kura/kura-metapackage">kura-metapackage</a>: Eclipse Kura™ Metapackage</li>
+<li><a href="https://github.com/eclipse-kura/kura-networking">kura-networking</a>: Eclipse Kura™ Networking addon</li>
+<li><a href="https://github.com/eclipse-kura/kura-position">kura-position</a>: Eclipse Kura™ Position addon</li>
+<li><a href="https://github.com/eclipse-kura/kura-wires">kura-wires</a>: Eclipse Kura™ Wires and Assets addon</li>
+</ul>
 <h3 id="java-heap-memory-assignment">Java Heap Memory Assignment</h3>
 <p>The Eclipse Kura&trade;'s installer incorporates an adaptive Heap Memory allocation system during installation. The allocation follows a formula based on your gateway's available memory. If your gateway has less than 1024MB of RAM, Kura will set -Xms and -Xmx to 256MB. For gateways with more than 1024MB, one quarter of the total RAM will be assigned to -Xms and -Xmx.</p>
 <h3 id="initial-network-configuration">Initial network configuration</h3>
-<p>During the installation of Eclipse Kura with network management support, the initial network configuration will be generated dynamically. The existing wired and wireless network interface names are detected and sorted in ascending lexicographic order at the installation.</p>
+<p>During the installation of Eclipse Kura with network management package (i.e. <code>kura-networking</code>), the initial network configuration will be generated dynamically. The existing wired and wireless network interface names are detected and sorted in ascending lexicographic order at the installation.</p>
 <p>If only one ethernet interface is detected (e.g. <code>eth0</code>), it will be configured as follows:</p>
 <table>
 <thead>

@@ -34,8 +34,8 @@ def uploadPackages(String repoDistribution, String repoModule, Boolean setupProm
                         \"https://repo3.eclipse.org/repository/kura-apt-dev/\" \
                         -o /dev/null
                     """,
-                    returnStatus: true
-                )
+                    returnStdout: true
+                ).trim()
 
                 if (status != "201") {
                     error("Returned status code = $status")

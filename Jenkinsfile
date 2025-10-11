@@ -85,6 +85,7 @@ node {
             def repoDistribution = distribPom.properties['kura.repo.distribution']
             def repoModule = distribPom.properties['kura.repo.module']
 
+            def nexusUtils = load 'kura/.jenkins/nexusUtils.groovy'
             nexusUtils.uploadPackages(repoDistribution, repoModule)
         } else {
             echo "Skipping DEB upload"

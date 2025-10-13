@@ -84,6 +84,18 @@ function restore_netplan {
   restore_backup_files kurasave /lib/netplan/* /etc/netplan/*
 }
 
+function restore_systemd_watchdog {
+    if [ -f /usr/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf ]; then
+        rm /usr/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf
+    fi
+    if [ -f /usr/local/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf ]; then
+        rm /usr/local/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf
+    fi
+    if [ -f /etc/systemd/system.conf.d/zz-kura-disable-watchdog.conf ]; then
+        rm /etc/systemd/system.conf.d/zz-kura-disable-watchdog.conf
+    fi
+}
+
 # Pre-remove script
 function preRemove {
     #Remove INIT scripts
@@ -127,6 +139,7 @@ function preRemove {
     fi
 
     restore_netplan
+    restore_systemd_watchdog
 }
 ##############################################
 # END UTILITY FUNCTIONS

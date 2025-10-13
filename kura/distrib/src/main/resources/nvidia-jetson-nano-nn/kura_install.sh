@@ -40,6 +40,30 @@ chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 
 mkdir -p ${INSTALL_DIR}/kura/data
 
+# disable systemd watchdog
+# https://manpages.debian.org/testing/systemd/systemd-system.conf.5.en.html
+#
+# Order of application of conf files:
+# 1. /usr/lib/systemd/system.conf.d/
+# 2. /usr/local/lib/systemd/system.conf.d/
+# 3. /etc/systemd/system.conf.d/
+# docs suggest to use 10-40 priority for drop-ins in /usr/, and 50-90 for /etc/
+# we use zz since some OSs do not respect that convention (raspbian, ubuntu jammy)
+#
+chmod 644 ${INSTALL_DIR}/kura/install/zz-kura-disable-watchdog.conf
+if [ -d /usr/lib/systemd/system.conf.d/ ]; then
+    echo "Installing /usr/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf"
+    cp ${INSTALL_DIR}/kura/install/zz-kura-disable-watchdog.conf /usr/lib/systemd/system.conf.d/
+elif [ -d /usr/local/lib/systemd/system.conf.d/ ]; then
+    echo "Installing /usr/local/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf"
+    cp ${INSTALL_DIR}/kura/install/zz-kura-disable-watchdog.conf /usr/local/lib/systemd/system.conf.d/
+elif [ -d /etc/systemd/system.conf.d/ ]; then
+    echo "Installing /etc/systemd/system.conf.d/zz-kura-disable-watchdog.conf"
+    cp ${INSTALL_DIR}/kura/install/zz-kura-disable-watchdog.conf /etc/systemd/system.conf.d/
+else
+    echo "No systemd drop-in directory found, watchdog not disabled"
+fi
+
 #set up systemd-tmpfiles
 cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /etc/tmpfiles.d/kura.conf
 

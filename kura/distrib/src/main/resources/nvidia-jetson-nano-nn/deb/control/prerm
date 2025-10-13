@@ -51,6 +51,18 @@ function stopWatchdog {
     fi
 }
 
+function restore_systemd_watchdog {
+    if [ -f /usr/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf ]; then
+        rm /usr/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf
+    fi
+    if [ -f /usr/local/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf ]; then
+        rm /usr/local/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf
+    fi
+    if [ -f /etc/systemd/system.conf.d/zz-kura-disable-watchdog.conf ]; then
+        rm /etc/systemd/system.conf.d/zz-kura-disable-watchdog.conf
+    fi
+}
+
 # Pre-remove script
 function preRemove {
     #Remove INIT scripts
@@ -67,6 +79,8 @@ function preRemove {
     rm -f  /var/log/kura*.gz
     rm -rf /tmp/.kura
     rm -rf /tmp/kura
+
+    restore_systemd_watchdog
 
     #Delete Eclipse directory if present
     if [ -d "${INSTALL_DIR}/kura" ] ; then

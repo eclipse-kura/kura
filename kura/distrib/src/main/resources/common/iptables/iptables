@@ -57,12 +57,10 @@ COMMIT
 -A input-kura -i ETH_INTERFACE_0 -p tcp -m tcp --dport 22 -j ACCEPT
 -A input-kura -i lo -j ACCEPT
 -A input-kura -m state --state RELATED,ESTABLISHED -j ACCEPT
--A input-kura -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
 -A input-kura -j RETURN
 -A forward-kura -i ETH_INTERFACE_0 -o WIFI_INTERFACE_0 -m state --state RELATED,ESTABLISHED -j ACCEPT
 -A forward-kura -i WIFI_INTERFACE_0 -o ETH_INTERFACE_0 -j ACCEPT
 -A forward-kura -j RETURN
--A output-kura -p icmp -m icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j ACCEPT
 -A output-kura -j RETURN
 -A forward-kura-pf -j RETURN
 -A forward-kura-ipf -j RETURN
@@ -70,22 +68,38 @@ COMMIT
 *mangle
 :PREROUTING ACCEPT [0:0]
 :INPUT ACCEPT [0:0]
-:OUTPUT ACCEPT [0:0]
 :FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
+:forward-kura - [0:0]
 :input-kura - [0:0]
 :output-kura - [0:0]
-:forward-kura - [0:0]
 :postrouting-kura - [0:0]
 :prerouting-kura - [0:0]
--I PREROUTING -j prerouting-kura
--I INPUT -j input-kura
--I OUTPUT -j output-kura
--I FORWARD -j forward-kura
--I POSTROUTING -j postrouting-kura
--A prerouting-kura -j RETURN
+-A PREROUTING -j prerouting-kura
+-A INPUT -j input-kura
+-A FORWARD -j forward-kura
+-A OUTPUT -j output-kura
+-A POSTROUTING -j postrouting-kura
+-A forward-kura -j RETURN
 -A input-kura -j RETURN
 -A output-kura -j RETURN
--A forward-kura -j RETURN
 -A postrouting-kura -j RETURN
+-A prerouting-kura -m conntrack --ctstate INVALID -j DROP
+-A prerouting-kura -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m conntrack --ctstate NEW -j DROP
+-A prerouting-kura -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP
+-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
+-A prerouting-kura -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -j DROP
+-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,RST FIN,RST -j DROP
+-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,ACK FIN -j DROP
+-A prerouting-kura -p tcp -m tcp --tcp-flags ACK,URG URG -j DROP
+-A prerouting-kura -p tcp -m tcp --tcp-flags PSH,ACK PSH -j DROP
+-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j DROP
+-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
+-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,PSH,URG -j DROP
+-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,PSH,URG -j DROP
+-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,ACK,URG -j DROP
+-A prerouting-kura -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j DROP
+-A prerouting-kura -f -j DROP
+-A prerouting-kura -j RETURN
 COMMIT

@@ -151,9 +151,7 @@ public class IptablesConfigConstants {
             "-A input-kura -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT",
             "-A output-kura -p icmp -m icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j ACCEPT" };
 
-    protected static final String[] DO_NOT_ALLOW_ICMP = {
-            "-A input-kura -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j DROP",
-            "-A output-kura -p icmp -m icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j DROP" };
+    protected static final String[] DO_NOT_ALLOW_ICMP = {}; // The INPUT and FORWARD chains are dropped by default
 
     protected IptablesConfigConstants() {
         // Empty constructor

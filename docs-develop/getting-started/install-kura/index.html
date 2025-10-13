@@ -4826,6 +4826,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p class="admonition-title">Note</p>
 <p>The above instructions might require <code>sudo</code> privileges depending on your system configuration.</p>
 </div>
+<details class="tip">
+<summary>Nightly builds APT repository</summary>
+<p>For users who want to test the latest development builds of Eclipse Kura&trade;, a development APT repository is available. This repository contains pre-release versions and is intended for testing purposes only.</p>
+<p>To use the development repository instead of the stable repository, replace step 3 in the above instructions with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb https://repo3.eclipse.org/repository/kura-apt-dev/ unstable main&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/kura-unstable.list
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The development repository contains unstable builds that may have bugs or incomplete features. <strong>It is not recommended for production use.</strong></p>
+</div>
+</details>
 <h2 id="kura-packages">Kura packages</h2>
 <p>Since version 6.0.0 Eclipse Kura&trade; has been split into multiple packages to allow the user to install only the required features. The main package <code>kura</code> is a meta-package which depends on all the other packages listed below and provides the same installation experience as the old installers. Alternatively, the user can choose to install only the required packages instead of the full Kura framework. The available packages are:</p>
 <ul>

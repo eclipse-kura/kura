@@ -42,6 +42,20 @@ To install Eclipse Kura&trade; using the APT repository, perform the following s
 !!! note
     The above instructions might require `sudo` privileges depending on your system configuration.
 
+
+??? tip "Nightly builds APT repository"
+
+    For users who want to test the latest development builds of Eclipse Kura&trade;, a development APT repository is available. This repository contains pre-release versions and is intended for testing purposes only.
+
+    To use the development repository instead of the stable repository, replace step 3 in the above instructions with:
+
+    ```bash
+    echo "deb https://repo3.eclipse.org/repository/kura-apt-dev/ unstable main" | tee /etc/apt/sources.list.d/kura-unstable.list
+    ```
+
+    !!! warning
+        The development repository contains unstable builds that may have bugs or incomplete features. **It is not recommended for production use.**
+
 ## Kura packages
 
 Since version 6.0.0 Eclipse Kura&trade; has been split into multiple packages to allow the user to install only the required features. The main package `kura` is a meta-package which depends on all the other packages listed below and provides the same installation experience as the old installers. Alternatively, the user can choose to install only the required packages instead of the full Kura framework. The available packages are:

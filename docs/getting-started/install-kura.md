@@ -45,7 +45,7 @@ To install Eclipse Kura&trade; using the APT repository, perform the following s
 
 ??? tip "Nightly builds APT repository"
 
-    For users who want to test the latest development builds of Eclipse Kura&trade;, a development APT repository is available. This repository includes pre-release versions and is intended solely for testing purposes.
+    For users who want to test the latest development builds of Eclipse Kura&trade;, a development APT repository is available. This repository contains pre-release versions and is intended for testing purposes only.
 
     To use the development repository instead of the stable repository, replace step 3 in the above instructions with:
 

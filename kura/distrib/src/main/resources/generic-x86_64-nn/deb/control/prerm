@@ -79,12 +79,15 @@ function restore_backup_files {
 function restore_systemd_watchdog {
     if [ -f /usr/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf ]; then
         rm /usr/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf
+        systemctl daemon-reload
     fi
     if [ -f /usr/local/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf ]; then
         rm /usr/local/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf
+        systemctl daemon-reload
     fi
     if [ -f /etc/systemd/system.conf.d/zz-kura-disable-watchdog.conf ]; then
         rm /etc/systemd/system.conf.d/zz-kura-disable-watchdog.conf
+        systemctl daemon-reload
     fi
 }
 

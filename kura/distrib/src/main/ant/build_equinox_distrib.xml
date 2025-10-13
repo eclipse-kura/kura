@@ -563,8 +563,6 @@ fi]]>
             <zipfileset file="src/main/resources/${build.name}/network.interfaces"
                 prefix="${build.output.name}/${install.folder}" />
 
-            <zipfileset file="src/main/resources/common/zz-kura-disable-watchdog.conf"
-                prefix="${build.output.name}/${install.folder}" />
             <zipfileset file="src/main/resources/common/kura-tmpfiles.conf"
                 prefix="${build.output.name}/${install.folder}" />
 

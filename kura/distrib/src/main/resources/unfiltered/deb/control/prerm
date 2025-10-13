@@ -99,6 +99,17 @@ function preRemove {
       rm -rf ${INSTALL_DIR}/kura
       rm -rf $PARENT
     fi
+
+    # remove systemd watchdog conf files
+    if [ -f /usr/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf ]; then
+        rm /usr/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf
+    fi
+    if [ -f /usr/local/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf ]; then
+        rm /usr/local/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf
+    fi
+    if [ -f /etc/systemd/system.conf.d/zz-kura-disable-watchdog.conf ]; then
+        rm /etc/systemd/system.conf.d/zz-kura-disable-watchdog.conf
+    fi
 }
 ##############################################
 # END UTILITY FUNCTIONS

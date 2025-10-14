@@ -16,6 +16,11 @@ INSTALL_DIR=/opt/eclipse
 WD_TMP_FILE=/tmp/watchdog
 REFRESH_TIME=5
 TIMEOUT_TIME=300
+SYSTEMD_WATCHDOG_CONFIG="[Manager]
+RuntimeWatchdogSec=0
+RebootWatchdogSec=0
+KExecWatchdogSec=0
+"
 
 ##############################################
 # UTILITY FUNCTIONS
@@ -61,6 +66,36 @@ function stopWatchdog {
     fi
 }
 
+function disable_systemd_watchdog() {
+    # disable systemd watchdog
+    # https://manpages.debian.org/testing/systemd/systemd-system.conf.5.en.html
+    #
+    # Order of application of conf files:
+    # 1. /usr/lib/systemd/system.conf.d/
+    # 2. /usr/local/lib/systemd/system.conf.d/
+    # 3. /etc/systemd/system.conf.d/
+    # docs suggest to use 10-40 priority for drop-ins in /usr/, and 50-90 for /etc/
+    # we use zz since some OSs do not respect that convention (raspbian, ubuntu jammy)
+    #
+    path=""
+    if [ -d /usr/lib/systemd/system.conf.d/ ]; then
+        path="/usr/lib/systemd/system.conf.d"
+    elif [ -d /usr/local/lib/systemd/system.conf.d/ ]; then
+        path="/usr/local/lib/systemd/system.conf.d"
+    elif [ -d /etc/systemd/system.conf.d/ ]; then
+        path="/etc/systemd/system.conf.d"        
+    fi
+
+    if [ ! -z "${path}" ]; then
+        echo "Installing $path/zz-kura-disable-watchdog.conf"
+        echo -e "${SYSTEMD_WATCHDOG_CONFIG}" > ${path}/zz-kura-disable-watchdog.conf
+        chmod 644 ${path}/zz-kura-disable-watchdog.conf
+        systemctl daemon-reload
+    else
+        echo "No systemd drop-in directory found, watchdog not disabled"
+    fi
+}
+
 # Pre-install script
 function preInstall {
     #clean up old installation if present
@@ -97,6 +132,7 @@ if [ -f "/var/run/kura.pid" ] ; then
   done
 fi
 
+disable_systemd_watchdog
 runPreInstall
 ##############################################
 # END PRE-INSTALL SCRIPT

@@ -84,17 +84,22 @@ function restore_netplan {
   restore_backup_files kurasave /lib/netplan/* /etc/netplan/*
 }
 
-function restore_systemd_watchdog {
+function restore_systemd_watchdog() {
+    file_to_restore=""
+
     if [ -f /usr/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf ]; then
-        rm /usr/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf
-        systemctl daemon-reload
+        file_to_restore="/usr/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf"
     fi
     if [ -f /usr/local/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf ]; then
-        rm /usr/local/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf
-        systemctl daemon-reload
+        file_to_restore="/usr/local/lib/systemd/system.conf.d/zz-kura-disable-watchdog.conf"
     fi
     if [ -f /etc/systemd/system.conf.d/zz-kura-disable-watchdog.conf ]; then
-        rm /etc/systemd/system.conf.d/zz-kura-disable-watchdog.conf
+        file_to_restore="/etc/systemd/system.conf.d/zz-kura-disable-watchdog.conf"
+    fi
+
+    if [ ! -z "${file_to_restore}" ]; then
+        echo "Restoring systemd watchdog configuration: removing ${file_to_restore}"
+        rm "${file_to_restore}"
         systemctl daemon-reload
     fi
 }

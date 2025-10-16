@@ -393,6 +393,29 @@ public abstract class AbstractLinuxFirewall {
         this.iptables.setAdditionalFilterRules(this.additionalFilterRules);
         this.iptables.setAdditionalNatRules(this.additionalNatRules);
         this.iptables.setAdditionalMangleRules(this.additionalMangleRules);
-        this.iptables.setAllowIcmp(this.allowIcmp);
+
+        boolean customIcmpRulesExist = hasIcmpRulesInAdditionalRules();
+        // Only apply default ICMP rules if no custom ICMP rules are defined
+        this.iptables.setAllowIcmp(!customIcmpRulesExist);
+    }
+
+    private boolean hasIcmpRulesInAdditionalRules() {
+        return hasIcmpRules(this.additionalFilterRules)
+                || hasIcmpRules(this.additionalNatRules)
+                || hasIcmpRules(this.additionalMangleRules);
+    }
+
+    private boolean hasIcmpRules(Set<String> rules) {
+        if (rules == null || rules.isEmpty()) {
+            return false;
+        }
+        for (String rule : rules) {
+            // Check for both icmp (IPv4) and ipv6-icmp (IPv6) rules
+            if (rule.contains("-p icmp") || rule.contains("-p ipv6-icmp") || rule.contains("-p icmpv6")
+                    || rule.contains("--protocol icmp") || rule.contains("--protocol ipv6-icmp") || rule.contains("--protocol icmpv6")) {
+                return true;
+            }
+        }
+        return false;
     }
 }

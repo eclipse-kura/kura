@@ -41,7 +41,8 @@ public class FloodingProtectionOptions {
             "-A prerouting-kura -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP",
-            "-A prerouting-kura -p icmp -j DROP", "-A prerouting-kura -f -j DROP" };
+            "-A prerouting-kura -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j DROP",
+            "-A prerouting-kura -f -j DROP" };
 
     private static final String[] FLOODING_PROTECTION_MANGLE_RULES_IPV6 = {
             "-A prerouting-kura -m conntrack --ctstate INVALID -j DROP",
@@ -60,7 +61,6 @@ public class FloodingProtectionOptions {
             "-A prerouting-kura -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP",
             "-A prerouting-kura -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP",
             "-A prerouting-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 128 -j DROP",
-            "-A prerouting-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 129 -j DROP",
             "-A prerouting-kura -m ipv6header --header dst --soft -j DROP",
             "-A prerouting-kura -m ipv6header --header hop --soft -j DROP",
             "-A prerouting-kura -m ipv6header --header route --soft -j DROP",

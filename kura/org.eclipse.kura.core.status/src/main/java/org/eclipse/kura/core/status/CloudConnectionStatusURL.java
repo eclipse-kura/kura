@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,11 +17,17 @@ import static java.util.Objects.requireNonNull;
 import java.util.Locale;
 import java.util.Properties;
 
+import org.eclipse.kura.core.status.GpioLedManager.GpioIdentifier;
+import org.eclipse.kura.core.status.GpioLedManager.GpioName;
+import org.eclipse.kura.core.status.GpioLedManager.GpioTerminal;
+
 public class CloudConnectionStatusURL {
 
     public static final String NOTIFICATION_TYPE = "notification_type";
     public static final String CCS = "ccs:";
     public static final String LED = "led:";
+    public static final String LED_NAME_PREFIX = "name:";
+    public static final String LED_TERMINAL_PREFIX = "terminal:";
     public static final String LINUX_LED = "linux_led:";
     public static final String LOG = "log";
     public static final String NONE = "none";
@@ -61,21 +67,21 @@ public class CloudConnectionStatusURL {
         String urlLowerCase = urlImage.toLowerCase(Locale.ENGLISH);
         if (urlLowerCase.startsWith(LED)) {
             // Cloud Connection Status on LED
-            String ledString = urlLowerCase.replace(LED, "").trim();
+            String ledString = urlImage.substring(4);
             try {
-                if (ledString.endsWith(INVERTED)) {
-                    props.put("inverted", true);
-                } else {
-                    props.put("inverted", false);
+
+                final boolean inverted = urlLowerCase.endsWith(INVERTED);
+
+                if (inverted) {
+                    ledString = ledString.substring(0, ledString.length() - INVERTED.length());
                 }
 
-                // in case of typo
-                if (ledString.contains(":")) {
-                    ledString = ledString.substring(0, ledString.indexOf(":"));
-                }
-                int ledPin = Integer.parseInt(ledString.trim());
+                props.put("inverted", inverted);
+
+                final GpioIdentifier identifier = parseLedIdentifier(ledString);
+
                 props.put(NOTIFICATION_TYPE, StatusNotificationTypeEnum.LED);
-                props.put("led", ledPin);
+                props.put("led", identifier);
             } catch (Exception ex) {
                 // Do nothing
             }
@@ -89,5 +95,27 @@ public class CloudConnectionStatusURL {
             props.put(NOTIFICATION_TYPE, StatusNotificationTypeEnum.NONE);
         }
         return props;
+    }
+
+    private static GpioIdentifier parseLedIdentifier(final String identifier) {
+        if (identifier.toLowerCase().startsWith(LED_NAME_PREFIX)) {
+            final String name = identifier.substring(LED_NAME_PREFIX.length());
+
+            if (!name.isEmpty()) {
+                return new GpioName(name);
+            }
+        } else {
+            final String number;
+
+            if (identifier.toLowerCase().startsWith(LED_TERMINAL_PREFIX)) {
+                number = identifier.substring(LED_TERMINAL_PREFIX.length());
+            } else {
+                number = identifier;
+            }
+
+            return new GpioTerminal(Integer.parseInt(number.trim()));
+        }
+
+        throw new IllegalArgumentException("invalid GPIO identifier " + identifier);
     }
 }

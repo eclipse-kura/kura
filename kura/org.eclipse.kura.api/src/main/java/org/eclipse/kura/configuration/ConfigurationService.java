@@ -45,8 +45,7 @@ import org.osgi.framework.Filter;
  * (or equivalent XML descriptor). Components with {@code ConfigurationPolicy.OPTIONAL} will not be tracked
  * because they may become active before receiving a Configuration, and without a service.pid property,
  * the Configuration Service cannot manage them.
- * <br>
- * <b>Note:</b> Components implementing {@link SelfConfiguringComponent}, instead, need to have
+ * Instead, components implementing {@link SelfConfiguringComponent} need to have
  * {@code configurationPolicy = ConfigurationPolicy.OPTIONAL} unless a configuration for them is seeded
  * in snapshot_0.
  * <br>

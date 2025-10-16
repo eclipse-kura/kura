@@ -46,6 +46,10 @@ import org.osgi.framework.Filter;
  * because they may become active before receiving a Configuration, and without a service.pid property,
  * the Configuration Service cannot manage them.
  * <br>
+ * <b>Note:</b> Components implementing {@link SelfConfiguringComponent}, instead, need to have
+ * {@code configurationPolicy = ConfigurationPolicy.OPTIONAL} unless a configuration for them is seeded
+ * in snapshot_0.
+ * <br>
  * More explicitly it does not manage the following services of the OSGi specification:
  * <ul>
  * <li>Managed Service

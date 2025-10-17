@@ -5,7 +5,7 @@ Wants=network-pre.target
 
 [Service]
 Type=oneshot
-ExecStart=/bin/sh KURA_DIR/bin/firewall
+ExecStart=/bin/sh -c '$KURA_DIR/bin/firewall'
 
 [Install]
 WantedBy=multi-user.target

@@ -50,14 +50,14 @@ public class ConsoleOptions {
 
     private final SelfConfiguringComponentProperty<Boolean> bannerEnabled = new SelfConfiguringComponentProperty<>(
             new AdBuilder("access.banner.enabled", "Access Banner Enabled", Tscalar.BOOLEAN) //
-                    .setDefault("false") //
+                    .setDefault("true") //
                     .setDescription("Enables or disables the displaying of a customizable banner at user login.") //
                     .build(), //
             Boolean.class);
 
     private final SelfConfiguringComponentProperty<String> bannerContent = new SelfConfiguringComponentProperty<>(
             new AdBuilder("access.banner.content", "Access Banner Content", Tscalar.STRING) //
-                    .setDefault("Sample Banner Content") //
+                    .setDefault("WARNING: This is a secure system. The details of this login attempt have been recorded for future inspection by the system administrator. Log out now if you are not authorized to use this device.") //
                     .setDescription(
                             "Access banner content. To be displayed at every user access, if the feature is enabled.|TextArea") //
                     .build(), //

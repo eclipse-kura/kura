@@ -131,8 +131,6 @@ fi
 
 runPreRemove >> "$LOG" 2>&1
 
-mkdir -p /opt/eclipse/kura/log/
-mv "$LOG" /opt/eclipse/kura/log/
 
 # Remove dnsmasq leases file if it exists and is owned by 'kurad'
 DNSMASQ_LEASES_FILE="/var/lib/dhcp/dnsmasq.leases"
@@ -143,6 +141,9 @@ if [ -f "${DNSMASQ_LEASES_FILE}" ]; then
         echo "The dnsmasq leases file has been successfully removed."
     fi
 fi
+
+mkdir -p /opt/eclipse/kura/log/
+mv "$LOG" /opt/eclipse/kura/log/
 
 echo ""
 echo "Uninstalling KURA... Done!"

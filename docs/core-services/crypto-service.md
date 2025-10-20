@@ -5,17 +5,20 @@ The `CryptoService` interface in Eclipse Kura provides cryptographic utilities f
 **Purpose:**  
 The interface centralizes cryptographic operations and keystore password management for Kura-based IoT applications, ensuring consistent, secure handling of sensitive data.
 The interface is implemented by the `CryptoServiceImpl` class that provides a baseline reference for users to generate their own versions of the CryptoService if needed.
+A notable use of the `CryptoService` is encrypting the configuration snapshot files and the configuration properties of PASSWORD type.
 
 !!! note
-    The default `CryptoServiceImpl` bundled with Kura uses a well-known, default password when no secret is provided. This default is intended only for evaluation and local testing. For production deployments, users MUST replace the default secret by setting the Java environment variable:
+    The default `CryptoServiceImpl` bundled with Kura uses a well-known, default encryption key when no secret is provided. This default is intended only for development and testing purposes. For production deployments, users MUST replace the default secret by setting the Java environment variable:
 
     - org.eclipse.kura.core.crypto.secretKey
 
-    Provide a secret of at least 16 bytes (characters). Example (set as JVM argument or environment variable depending on your runtime):
+    The secret key must be either 16, 24, or 32 bytes (characters) long. Example (set as JVM argument or environment variable depending on your runtime):
 
     - As JVM system property: -Dorg.eclipse.kura.core.crypto.secretKey=your-16+char-secret
 
     Failing to replace the default secret leaves encrypted data vulnerable. Ensure secrets are stored and managed securely in your environment.
+
+    To implement an alternative mechanism for storing the key it is possible to replace the `org.eclipse.kura.core.crypto` bundle with a custom implementation.
 
 ## Key Functional Areas
 

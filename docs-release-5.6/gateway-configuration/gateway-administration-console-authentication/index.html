@@ -4893,6 +4893,23 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </tbody>
 </table>
 <p>It is possible to modify/remove the default identity configuration.</p>
+<p>Starting from Kura 5.6.1, the <code>appadmin</code> and <code>netadmin</code> default identities have been removed. The default identity is:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Password</th>
+<th>Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>admin</td>
+<td>admin</td>
+<td>kura.admin</td>
+</tr>
+</tbody>
+</table>
 <h2 id="login">Login</h2>
 <p>The login screen can be accessed by entering the <code>https://${device.ip}</code> URL in a browser window, where <code>${device.ip}</code> is the IP address. Replace <code>https</code> with <code>http</code> if HTTPS support has been disabled on the gateway.</p>
 <h3 id="identity-name-and-password">Identity name and password</h3>

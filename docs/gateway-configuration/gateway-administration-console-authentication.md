@@ -31,7 +31,11 @@ Kura provides the following identities by default:
 
 It is possible to modify/remove the default identity configuration.
 
+Starting from Kura 5.6.1, the `appadmin` and `netadmin` default identities have been removed. The default identity is:
 
+| Name | Password | Permissions |
+| ---- | -------- | ----------- |
+| admin | admin | kura.admin |
 
 ## Login
 

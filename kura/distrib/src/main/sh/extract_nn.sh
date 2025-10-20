@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+#  Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
 #
 #  This program and the accompanying materials are made
 #  available under the terms of the Eclipse Public License 2.0
@@ -124,6 +124,10 @@ function kura_install {
 	
 	echo ""
 	echo "Finished.  Kura has been installed to ${INSTALL_DIR}/kura and will start automatically after a reboot"
+	echo ""
+	echo "****************************************************************"
+	echo "WARNING: Set the crypto service key in the Eclipse Kura Systemd unit before rebooting to have snapshot encryption enabled."
+	echo "****************************************************************"
 	##############################################
 	# END POST INSTALL SCRIPT
 	##############################################

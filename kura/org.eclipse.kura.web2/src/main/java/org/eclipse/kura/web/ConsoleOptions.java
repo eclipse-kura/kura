@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -50,14 +50,14 @@ public class ConsoleOptions {
 
     private final SelfConfiguringComponentProperty<Boolean> bannerEnabled = new SelfConfiguringComponentProperty<>(
             new AdBuilder("access.banner.enabled", "Access Banner Enabled", Tscalar.BOOLEAN) //
-                    .setDefault("false") //
+                    .setDefault("true") //
                     .setDescription("Enables or disables the displaying of a customizable banner at user login.") //
                     .build(), //
             Boolean.class);
 
     private final SelfConfiguringComponentProperty<String> bannerContent = new SelfConfiguringComponentProperty<>(
             new AdBuilder("access.banner.content", "Access Banner Content", Tscalar.STRING) //
-                    .setDefault("Sample Banner Content") //
+                    .setDefault("WARNING: This is a secure system. The details of this login attempt have been recorded for future inspection by the system administrator. Log out now if you are not authorized to use this device.") //
                     .setDescription(
                             "Access banner content. To be displayed at every user access, if the feature is enabled.|TextArea") //
                     .build(), //
@@ -65,7 +65,7 @@ public class ConsoleOptions {
 
     private final SelfConfiguringComponentProperty<Integer> passwordMinLength = new SelfConfiguringComponentProperty<>(
             new AdBuilder("new.password.min.length", "Minimum password length", Tscalar.INTEGER) //
-                    .setDefault("8") //
+                    .setDefault("12") //
                     .setMin("0") //
                     .setDescription("The minimum length to be enforced for new passwords. Set to 0 to disable.") //
                     .build(), //
@@ -73,7 +73,7 @@ public class ConsoleOptions {
 
     private final SelfConfiguringComponentProperty<Boolean> passwordRequireDigits = new SelfConfiguringComponentProperty<>(
             new AdBuilder("new.password.require.digits", "Require digits in new password", Tscalar.BOOLEAN) //
-                    .setDefault("false") //
+                    .setDefault("true") //
                     .setDescription(
                             "If set to true, new passwords will be accepted only if containing at least one digit.") //
                     .build(), //
@@ -82,7 +82,7 @@ public class ConsoleOptions {
     private final SelfConfiguringComponentProperty<Boolean> passwordRequireSpecialCharacters = new SelfConfiguringComponentProperty<>(
             new AdBuilder("new.password.require.special.characters", "Require special characters in new password",
                     Tscalar.BOOLEAN) //
-                            .setDefault("false") //
+                            .setDefault("true") //
                             .setDescription(
                                     "If set to true, new passwords will be accepted only if containing at least one non alphanumeric character.") //
                             .build(), //
@@ -91,7 +91,7 @@ public class ConsoleOptions {
     private final SelfConfiguringComponentProperty<Boolean> passwordRequireBothCases = new SelfConfiguringComponentProperty<>(
             new AdBuilder("new.password.require.both.cases",
                     "Require uppercase and lowercase characters in new passwords", Tscalar.BOOLEAN) //
-                            .setDefault("false") //
+                            .setDefault("true") //
                             .setDescription(
                                     "If set to true, new passwords will be accepted only if containing both uppercase and lowercase alphanumeric characters.") //
                             .build(), //

@@ -33,6 +33,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Optional;
 import java.util.Properties;
 
 import javax.crypto.BadPaddingException;
@@ -61,15 +62,16 @@ public class CryptoServiceImpl implements CryptoService {
     private static final String CIPHER = "AES/GCM/NoPadding";
     private static final int AUTH_TAG_LENGTH_BIT = 128;
     private static final int IV_SIZE = 12;
-    private static final byte[] SECRET_KEY = System
-            .getProperty("org.eclipse.kura.core.crypto.secretKey").getBytes();
     private static final String ENCRYPTED_STRING_SEPARATOR = "-";
     private static final String DEFAULT_SECRET_KEY = "rv;ipse329183!@#";
+    private static final String SECRET_KEY_CREDENTIAL_ID = "kura_encryption_key";
+    private static final String SECRET_KEY_SYSTEM_PROPERTY_NAME = "org.eclipse.kura.core.crypto.secretKey";
 
     private String keystorePasswordPath;
 
     private final SecureRandom random = new SecureRandom();
     private SystemService systemService;
+    private byte[] secretKey;
 
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
@@ -80,11 +82,24 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     protected void activate() {
-        if (this.systemService == null) {
-            throw new IllegalStateException("Unable to get instance of: " + SystemService.class.getName());
-        }
+
+        this.secretKey = loadEncryptionKey();
 
         this.keystorePasswordPath = this.systemService.getKuraDataDirectory() + File.separator + "store.save";
+    }
+
+    private byte[] loadEncryptionKey() {
+
+        final Optional<String> keyFromProperties = Optional
+                .ofNullable(System.getProperty(SECRET_KEY_SYSTEM_PROPERTY_NAME));
+
+        if (keyFromProperties.isPresent()) {
+            logger.debug("using key from system properties");
+            return keyFromProperties.get().getBytes(StandardCharsets.UTF_8);
+        }
+
+        logger.debug("using default key");
+        return DEFAULT_SECRET_KEY.getBytes(StandardCharsets.UTF_8);
     }
 
     @Override
@@ -316,12 +331,13 @@ public class CryptoServiceImpl implements CryptoService {
         return false;
     }
 
-    private static Key generateKey() {
-        if (SECRET_KEY.length != 16 && SECRET_KEY.length != 24 && SECRET_KEY.length != 32) {
-            logger.error("Invalid secret key. Using default secret key. Please set a valid secret key of length 16, 24, or 32 bytes (characters).");
+    private Key generateKey() {
+        if (this.secretKey.length != 16 && this.secretKey.length != 24 && this.secretKey.length != 32) {
+            logger.error(
+                    "Invalid secret key. Using default secret key. Please set a valid secret key of length 16, 24, or 32 bytes (characters).");
             return new SecretKeySpec(DEFAULT_SECRET_KEY.getBytes(StandardCharsets.UTF_8), ALGORITHM);
         }
-        return new SecretKeySpec(SECRET_KEY, ALGORITHM);
+        return new SecretKeySpec(this.secretKey, ALGORITHM);
     }
 
     @Override

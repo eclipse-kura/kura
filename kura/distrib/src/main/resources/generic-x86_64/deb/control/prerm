@@ -146,6 +146,16 @@ function preRemove {
         mv /etc/default/dnsmasq.old /etc/default/dnsmasq
     fi
 
+    # Remove dnsmasq leases file if it exists and is owned by 'kurad'
+    DNSMASQ_LEASES_FILE="/var/lib/dhcp/dnsmasq.leases"
+    if [ -f "${DNSMASQ_LEASES_FILE}" ]; then
+        FILE_OWNER=$(stat -c '%U' "${DNSMASQ_LEASES_FILE}" 2>/dev/null)
+        if [ "${FILE_OWNER}" = "kurad" ]; then
+            rm -f "${DNSMASQ_LEASES_FILE}"
+            echo "The dnsmasq leases file has been successfully removed."
+        fi
+    fi
+
     restore_netplan
     restore_systemd_watchdog
 }

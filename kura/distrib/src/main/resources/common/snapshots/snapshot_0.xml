@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
 
-    Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+    Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -391,6 +391,16 @@ NETWORK_CONFIGURATION
             </esf:property>
             <esf:property array="false" encrypted="false" name="service.pid" type="String">
                 <esf:value>org.eclipse.kura.internal.rest.provider.RestService</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="flooding.protection.enabled.ipv6" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="flooding.protection.enabled" type="Boolean">
+                <esf:value>true</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

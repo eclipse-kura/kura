@@ -136,7 +136,6 @@ The following dependencies are required by each of the Kura modules.
 - General: `setserial`, `zip`, `gzip`, `unzip`, `procps`, `usbutils`, `socat`, `gawk`, `sed`, `inetutils-telnet`, `dos2unix`, `libtirpc3`
 - Security: `polkit` or `policykit-1` or `polkitd`, `ssh` or `openssh`, `openssl`, `busybox`, `libpam-modules`
 - Python: `python3`
-- Gps: `gpsd`
 - Time: `chrony`, `chronyc`
 - Java: `openjdk-17-jre-headless` or `temurin-17-jdk` or a JRE installation that provides `java-runtime-headless (= 17)` or `java-runtime-headless (= 21)`
 
@@ -151,6 +150,10 @@ The following dependencies are required by each of the Kura modules.
 - DHCP server: `dnsmasq` or `isc-dhcp-server`, `isc-dhcp-client` or `dhcpcd`
 - Wireless: `iw`
 - Firewall: `iptables`, `python3-fail2ban` or `python-fail2ban` or `fail2ban`
+
+#### Kura position
+
+- `gpsd`
 
 ### Reference devices
 

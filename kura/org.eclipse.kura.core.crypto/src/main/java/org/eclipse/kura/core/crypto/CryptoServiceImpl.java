@@ -67,8 +67,9 @@ public class CryptoServiceImpl implements CryptoService {
     private static final int AUTH_TAG_LENGTH_BIT = 128;
     private static final int IV_SIZE = 12;
     private static final byte[] SECRET_KEY = System
-            .getProperty("org.eclipse.kura.core.crypto.secretKey", "rv;ipse329183!@#").getBytes();
+            .getProperty("org.eclipse.kura.core.crypto.secretKey").getBytes();
     private static final String ENCRYPTED_STRING_SEPARATOR = "-";
+    private static final String DEFAULT_SECRET_KEY = "rv;ipse329183!@#";
 
     private String keystorePasswordPath;
 
@@ -395,6 +396,10 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     private static Key generateKey() {
+        if (SECRET_KEY.length != 16 && SECRET_KEY.length != 24 && SECRET_KEY.length != 32) {
+            logger.error("Invalid secret key. Using default secret key. Please set a valid secret key of length 16, 24, or 32 bytes (characters).");
+            return new SecretKeySpec(DEFAULT_SECRET_KEY.getBytes(StandardCharsets.UTF_8), ALGORITHM);
+        }
         return new SecretKeySpec(SECRET_KEY, ALGORITHM);
     }
 

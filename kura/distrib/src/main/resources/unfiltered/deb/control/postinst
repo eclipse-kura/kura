@@ -82,6 +82,10 @@ function postInstall {
     
     echo ""
     echo "Finished. KURA has been installed to ${INSTALL_DIR}/kura and will start automatically after a reboot"
+    echo ""
+    echo "****************************************************************"
+    echo "WARNING: Set the crypto service key in the Eclipse Kura Systemd unit before rebooting to have snapshot encryption enabled."
+    echo "****************************************************************"
 }
 ##############################################
 # END UTILITY FUNCTIONS

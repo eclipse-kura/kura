@@ -50,11 +50,3 @@ A notable use of the `CryptoService` is encrypting the configuration snapshot fi
 ### Security Mode
 
 - `isFrameworkSecure()`: Checks if the Kura framework is running in security mode.
-
-## Notes
-
-- The interface is part of the `org.eclipse.kura.core.crypto` package.
-- Methods may throw various exceptions, such as `KuraException`, `NoSuchAlgorithmException`, `UnsupportedEncodingException`, and `IOException`.
-- Deprecated methods exist for legacy support and are noted in the interface.
-- Some methods use default implementations (e.g., SHA hashing).
-- Not intended to be implemented by clients (@noimplement).

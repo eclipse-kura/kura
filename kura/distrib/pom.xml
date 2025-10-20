@@ -83,7 +83,7 @@
             setserial, zip, gzip, unzip, procps, usbutils, socat, gawk, sed, inetutils-telnet,
             polkit | policykit-1 | polkitd,
             ssh | openssh, openssl, busybox, libpam-modules,
-            python3, gpsd,
+            python3,
             openjdk-17-jre-headless | temurin-17-jdk | java-runtime-headless (= 17) | java-runtime-headless (= 21),
             dos2unix, libtirpc3, chrony, chronyc | chrony
         </deb.dependencies>

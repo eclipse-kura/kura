@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2025 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,15 +12,19 @@
  *******************************************************************************/
 package org.eclipse.kura.core.status;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 
 import org.eclipse.kura.core.testutil.TestUtil;
-
 import org.eclipse.kura.status.CloudConnectionStatusComponent;
 import org.eclipse.kura.status.CloudConnectionStatusEnum;
 import org.eclipse.kura.status.CloudConnectionStatusService;
@@ -32,6 +36,34 @@ import org.osgi.service.component.ComponentContext;
 public class CloudConnectionStatusServiceImplTest {
 
     private static final String STATUS_NOTIFICATION_URL = "ccs.status.notification.url";
+
+    @Test
+    public void testActivateEmptyProperty() throws NoSuchFieldException {
+        CloudConnectionStatusServiceImpl service = initCloudConnectionStatusService("");
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+        service.activate(componentContext);
+
+        assertNotNull(TestUtil.getFieldValue(service, "properties"));
+        assertNotNull(TestUtil.getFieldValue(service, "idleComponent"));
+        HashSet<CloudConnectionStatusComponent> componentRegistry = (HashSet) TestUtil.getFieldValue(service,
+                "componentRegistry");
+        assertEquals(1, componentRegistry.size());
+    }
+
+    @Test
+    public void testActivateInvalidProperty() throws NoSuchFieldException {
+        CloudConnectionStatusServiceImpl service = initCloudConnectionStatusService("ccs:foo");
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+        service.activate(componentContext);
+
+        assertNotNull(TestUtil.getFieldValue(service, "properties"));
+        assertNotNull(TestUtil.getFieldValue(service, "idleComponent"));
+        HashSet<CloudConnectionStatusComponent> componentRegistry = (HashSet) TestUtil.getFieldValue(service,
+                "componentRegistry");
+        assertEquals(1, componentRegistry.size());
+    }
 
     @Test
     public void testActivateNone() throws NoSuchFieldException {

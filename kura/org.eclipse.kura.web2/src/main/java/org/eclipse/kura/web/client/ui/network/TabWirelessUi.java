@@ -1742,6 +1742,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             this.groupPassword.setValidationState(ValidationState.ERROR);
             result = false;
         } else {
+            TabWirelessUi.this.helpPassword.setText("");
             this.groupPassword.setValidationState(ValidationState.NONE);
         }
 

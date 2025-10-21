@@ -2,6 +2,8 @@
 
 Eclipse Kura&trade; is provided using a Debian Linux package. Visit the [Kura download page](https://github.com/eclipse-kura/kura/releases) to find the correct installation file for the target system.
 
+!!! note
+    Before first boot, please configure the Java system property `-Dorg.eclipse.kura.core.crypto.secretKey=<your-secret-key>` to set a custom secret key for Eclipse Kura's encryption services. The secret key must be either 16, 24, or 32 bytes (characters) long. Refer to the [crypto-service documentation](../../core-services/crypto-service) for more details.
 
 
 ## Installer types

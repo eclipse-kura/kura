@@ -38,7 +38,7 @@ systemd-ask-password -n | ( echo "[Service]" && systemd-creds encrypt --name=kur
 
 ### Using a custom storage implementation
 
-To implement an alternative mechanism for storing the key it is possible to replace the `org.eclipse.kura.core.crypto` bundle with a custom implementation.
+To implement an alternative mechanism for key storage, you can replace the `org.eclipse.kura.core.crypto` bundle with a custom implementation.
 
 !!! note
 

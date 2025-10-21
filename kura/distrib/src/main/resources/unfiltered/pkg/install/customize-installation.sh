@@ -69,7 +69,7 @@ customize_ram() {
         fi
     
         echo "Setting kura RAM to ${RAM_MB_FOR_KURA}"
-        start_scripts_to_change=("start_kura.sh" "start_kura_debug.sh" "start_kura_background.sh")
+        start_scripts_to_change=("start_kura.sh" "start_kura_debug.sh" "start_kura_background.sh", "start_kura_background_debug.sh")
     
         RAM_REPLACEMENT_STRING="-Xms${RAM_MB_FOR_KURA}m -Xmx${RAM_MB_FOR_KURA}m"
         for installer_name in "${start_scripts_to_change[@]}"; do

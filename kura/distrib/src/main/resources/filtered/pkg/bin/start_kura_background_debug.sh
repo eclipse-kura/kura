@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# Kura should be installed to the \${kura.install.dir} directory.
 export PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/opt/jvm/bin:/usr/java/bin:$PATH
 export MALLOC_ARENA_MAX=1
 
@@ -13,7 +14,7 @@ mkdir -p /tmp/.kura/configuration
 KURA_RUNNING=`ps ax | grep java | grep "org.eclipse.equinox"`
 
 if [ -z "$KURA_RUNNING" ] ; then
-    exec java -Xms${kura.mem.size} -Xmx${kura.mem.size} \
+    nohup java -Xms${kura.mem.size} -Xmx${kura.mem.size} \
         -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -Xloggc:/var/log/kura-gc.log \
         -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M \
         -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
@@ -26,7 +27,6 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.os.version=${kura.os.version} \
         -Dkura.arch=${kura.arch} \
         -Dtarget.device=${target.device} \
-        -Dorg.eclipse.kura.core.crypto.secretKey="$KURA_CRYPTO_SECRET_KEY" \
         -Declipse.ignoreApp=true \
         -Dkura.home=\${DIR} \
         -Dkura.configuration=file:\${DIR}/framework/kura.properties \
@@ -40,7 +40,12 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dosgi.console=5002 \
         -Declipse.consoleLog=true \
         -jar \${DIR}/plugins/org.eclipse.equinox.launcher-${org.eclipse.equinox.launcher.version}.jar \
-        -configuration  /tmp/.kura/configuration
+        -configuration /tmp/.kura/configuration &
+
+    #Save the PID
+    KURA_PID=$!
+    echo "Kura Started (pid="$KURA_PID") ..."
+    echo $KURA_PID > /var/run/kura.pid
 else
     echo "Failed to start Kura. It is already running ..."
 fi

@@ -35,15 +35,15 @@ public class EncryptDecryptTest {
 
     @Before
     public void setup() {
-        final SystemService systemService = Mockito.mock(SystemService.class);
+        final SystemService mockSystemService = Mockito.mock(SystemService.class);
         try {
-            Mockito.when(systemService.getKuraDataDirectory()).thenReturn(Files.createTempDirectory(null).toString());
+            Mockito.when(mockSystemService.getKuraDataDirectory()).thenReturn(Files.createTempDirectory(null).toString());
         } catch (IOException e) {
             throw new IllegalStateException("cannot create temporary directory");
         }
 
-        this.cryptoService = new CryptoServiceImpl();
-        this.cryptoService.setSystemService(systemService);
+this.cryptoService = new CryptoServiceImpl();
+        this.cryptoService.setSystemService(mockSystemService);
         this.cryptoService.activate();
     }
 

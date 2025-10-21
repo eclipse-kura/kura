@@ -44,6 +44,34 @@ public class CloudConnectionStatusServiceImplTest {
     private static final String STATUS_NOTIFICATION_URL = "ccs.status.notification.url";
 
     @Test
+    public void testActivateEmptyProperty() throws NoSuchFieldException {
+        CloudConnectionStatusServiceImpl service = initCloudConnectionStatusService("");
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+        service.activate(componentContext);
+
+        assertNotNull(TestUtil.getFieldValue(service, "properties"));
+        assertNotNull(TestUtil.getFieldValue(service, "idleComponent"));
+        HashSet<CloudConnectionStatusComponent> componentRegistry = (HashSet) TestUtil.getFieldValue(service,
+                "componentRegistry");
+        assertEquals(1, componentRegistry.size());
+    }
+
+    @Test
+    public void testActivateInvalidProperty() throws NoSuchFieldException {
+        CloudConnectionStatusServiceImpl service = initCloudConnectionStatusService("ccs:foo");
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+        service.activate(componentContext);
+
+        assertNotNull(TestUtil.getFieldValue(service, "properties"));
+        assertNotNull(TestUtil.getFieldValue(service, "idleComponent"));
+        HashSet<CloudConnectionStatusComponent> componentRegistry = (HashSet) TestUtil.getFieldValue(service,
+                "componentRegistry");
+        assertEquals(1, componentRegistry.size());
+    }
+
+    @Test
     public void testActivateNone() throws NoSuchFieldException {
         CloudConnectionStatusServiceImpl service = initCloudConnectionStatusService("ccs:none");
 

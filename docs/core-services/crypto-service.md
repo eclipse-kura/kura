@@ -9,7 +9,7 @@ A notable use of the `CryptoService` is encrypting the configuration snapshot fi
 
 ## Encryption key
 
-The default `CryptoServiceImpl` bundled with Kura perfmorms encryption with a configurable encryption key. A well-known, default encryption key is used when no secret is provided. This default is intended only for development and testing purposes. For production deployments, users **MUST** replace the default encryption key.
+The default `CryptoServiceImpl` included with Kura utilizes a configurable encryption key for encryption purposes. When no secret key is provided, a commonly known default encryption key is used. This default should only be used in development and testing environments. For production deployments, it is **CRUCIAL** that users replace the default encryption key with a secure one.
 
 !!! warning
 

@@ -965,7 +965,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         });
 
         this.password.addBlurHandler(e -> this.password.validate());
-        this.password.setAllowBlank(false);
+        this.password.setAllowBlank(true);
         this.password.addMouseOutHandler(event -> resetHelp());
 
         this.buttonPassword.addClickHandler(event -> {
@@ -1331,6 +1331,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             configUserOptions.setPasswordMinimumLength(Math.min(configUserOptions.getPasswordMinimumLength(), 26));
             this.password.setValidatorsFrom(configUserOptions);
             this.password.addValidator(GwtValidators.regex(REGEX_PASS_WEP, MSGS.netWifiWirelessInvalidWEPPassword()));
+        } else if (this.security != null && this.security.getSelectedItemText().equals(WIFI_SECURITY_NONE_MESSAGE)) {
+            configUserOptions.allowAnyPassword();
+            this.password.setAllowedEmptyValidatorsFrom(configUserOptions);
         } else {
             configUserOptions.allowAnyPassword();
             this.password.setValidatorsFrom(configUserOptions);

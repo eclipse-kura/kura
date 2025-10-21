@@ -1693,7 +1693,9 @@ public class GwtNetworkServiceImpl {
             }
 
         } else if (passKey != null && mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
-            GwtServerUtil.validateUserPassword(passKey);
+            if (!gwtWifiConfig.getSecurity().equals(GwtWifiSecurity.netWifiSecurityNONE.name())) {
+                GwtServerUtil.validateUserPassword(passKey);
+            }
             properties.put(wifiPassphrasePropName, new Password(passKey));
         } else if (passKey != null) {
             properties.put(wifiPassphrasePropName, new Password(passKey));

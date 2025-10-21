@@ -69,6 +69,14 @@ public class NewPasswordInput extends Input {
         }
     }
 
+    public void setAllowedEmptyValidatorsFrom(final GwtConsoleUserOptions userOptions) {
+        this.validators.clear();
+
+        for (final Validator<String> validator : GwtValidators.newEmptyPassword(userOptions)) {
+            this.validators.add(validator);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public void setValidators(final Validator<String>... validators) {

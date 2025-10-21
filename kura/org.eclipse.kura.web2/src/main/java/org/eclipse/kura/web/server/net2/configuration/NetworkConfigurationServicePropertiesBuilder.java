@@ -30,6 +30,7 @@ import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtWifiSecurity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -234,7 +235,9 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
                 this.properties.setWifiMasterPassphrase(this.ifname, gwtApConfig.getPassword());
             } else {
-                GwtServerUtil.validateUserPassword(gwtWifiConfig.getPassword());
+                if (!gwtWifiConfig.getSecurity().equals(GwtWifiSecurity.netWifiSecurityNONE.name())) {
+                    GwtServerUtil.validateUserPassword(gwtWifiConfig.getPassword());
+                }
                 this.properties.setWifiMasterPassphrase(this.ifname, gwtWifiConfig.getPassword());
             }
         }

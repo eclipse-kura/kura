@@ -35,6 +35,7 @@ import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.Properties;
@@ -68,7 +69,7 @@ public class CryptoServiceImpl implements CryptoService {
     private static final int AUTH_TAG_LENGTH_BIT = 128;
     private static final int IV_SIZE = 12;
     private static final String ENCRYPTED_STRING_SEPARATOR = "-";
-    private static final String DEFAULT_SECRET_KEY = "rv;ipse329183!@#";
+    private static final byte[] DEFAULT_SECRET_KEY = "rv;ipse329183!@#".getBytes(StandardCharsets.UTF_8);
     private static final String SECRET_KEY_CREDENTIAL_ID = "kura_encryption_key";
     private static final String SECRET_KEY_SYSTEM_PROPERTY_NAME = "org.eclipse.kura.core.crypto.secretKey";
 
@@ -88,7 +89,7 @@ public class CryptoServiceImpl implements CryptoService {
 
     protected void activate() {
 
-        this.secretKey = loadEncryptionKey();
+        this.secretKey = validateEncryptionKey(loadEncryptionKey());
 
         this.keystorePasswordPath = this.systemService.getKuraDataDirectory() + File.separator + "store.save";
     }
@@ -120,7 +121,16 @@ public class CryptoServiceImpl implements CryptoService {
         }
 
         logger.debug("using default key");
-        return DEFAULT_SECRET_KEY.getBytes(StandardCharsets.UTF_8);
+        return DEFAULT_SECRET_KEY;
+    }
+
+    private byte[] validateEncryptionKey(final byte[] key) {
+
+        if ((key.length != 16 && key.length != 24 && key.length != 32) || Arrays.equals(key, DEFAULT_SECRET_KEY)) {
+            return DEFAULT_SECRET_KEY;
+        } else {
+            return key;
+        }
     }
 
     @Override
@@ -427,11 +437,14 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     private Key generateKey() {
-        if (this.secretKey.length != 16 && this.secretKey.length != 24 && this.secretKey.length != 32) {
-            logger.error(
-                    "Invalid secret key. Using default secret key. Please set a valid secret key of length 16, 24, or 32 bytes (characters).");
-            return new SecretKeySpec(DEFAULT_SECRET_KEY.getBytes(StandardCharsets.UTF_8), ALGORITHM);
+
+        if (this.secretKey == DEFAULT_SECRET_KEY) {
+            logger.warn("A user defined encryption key has not been provided or is invalid."
+                    + " The default well known key is in use."
+                    + " Please reinstall Kura and provide a valid encryption key of length 16, 24, or 32 bytes (characters)"
+                    + " as explained in Kura documentation.");
         }
+
         return new SecretKeySpec(this.secretKey, ALGORITHM);
     }
 

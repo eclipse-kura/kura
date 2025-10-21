@@ -34,7 +34,6 @@ The following rules are added to the **mangle** table and they are implemented t
 -A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,ACK,URG -j DROP
 -A prerouting-kura -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j DROP
 -A prerouting-kura -f -j DROP
--A prerouting-kura -j RETURN
 ```
 
 To further filter the incoming TCP fragmented packets, specific system configuration files are configured.
@@ -71,7 +70,6 @@ The following rules are applied to the **mangle** table:
 -A prerouting-kura -m ipv6header --header esp --soft -j DROP
 -A prerouting-kura -m ipv6header --header ipv6-nonxt --soft -j DROP
 -A prerouting-kura -m rt --rt-type 0 -j DROP
--A prerouting-kura -j RETURN
 ```
 
 Also in this case, to enable the feature and add the rules to the firewall, the **flooding.protection.enabled.ipv6** property has to be set to true. If the device doesn't support IPv6, this property is ignored.

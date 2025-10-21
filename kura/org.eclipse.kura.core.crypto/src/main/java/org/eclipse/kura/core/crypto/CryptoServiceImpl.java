@@ -433,7 +433,7 @@ public class CryptoServiceImpl implements CryptoService {
             logger.warn("A user defined encryption key has not been provided or is invalid."
                     + " The default well known key is in use."
                     + " Please reinstall Kura and provide a valid encryption key of length 16, 24, or 32 bytes (characters)"
-                    + " as explained in Kura documentation.");
+                    + " as explained in the Eclipse Kura documentation.");
             return new SecretKeySpec(DEFAULT_SECRET_KEY, ALGORITHM);
         }
 

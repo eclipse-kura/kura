@@ -77,7 +77,7 @@ public class CryptoServiceImpl implements CryptoService {
 
     private final SecureRandom random = new SecureRandom();
     private SystemService systemService;
-    private byte[] secretKey;
+    private Optional<byte[]> secretKey;
 
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
@@ -89,12 +89,12 @@ public class CryptoServiceImpl implements CryptoService {
 
     protected void activate() {
 
-        this.secretKey = validateEncryptionKey(loadEncryptionKey());
+        this.secretKey = loadCustomEncryptionKey().filter(CryptoServiceImpl::isEncryptionKeyValid);
 
         this.keystorePasswordPath = this.systemService.getKuraDataDirectory() + File.separator + "store.save";
     }
 
-    private byte[] loadEncryptionKey() {
+    private Optional<byte[]> loadCustomEncryptionKey() {
         try {
             final Optional<SystemdCredentialLoader> loader = SystemdCredentialLoader.fromEnv();
 
@@ -104,7 +104,7 @@ public class CryptoServiceImpl implements CryptoService {
 
                 if (keyFromSystemd.isPresent()) {
                     logger.debug("using key from systemd");
-                    return keyFromSystemd.get();
+                    return Optional.of(keyFromSystemd.get());
                 }
             }
 
@@ -112,25 +112,16 @@ public class CryptoServiceImpl implements CryptoService {
             logger.warn("Unexpected exception loading encryption provided by systemd", e);
         }
 
-        final Optional<String> keyFromProperties = Optional
-                .ofNullable(System.getProperty(SECRET_KEY_SYSTEM_PROPERTY_NAME));
-
-        if (keyFromProperties.isPresent()) {
-            logger.debug("using key from system properties");
-            return keyFromProperties.get().getBytes(StandardCharsets.UTF_8);
-        }
-
-        logger.debug("using default key");
-        return DEFAULT_SECRET_KEY;
+        return Optional.ofNullable(System.getProperty(SECRET_KEY_SYSTEM_PROPERTY_NAME)).filter(k -> !k.isEmpty())
+                .map(k -> {
+                    logger.debug("using key from system properties");
+                    return k.getBytes(StandardCharsets.UTF_8);
+                });
     }
 
-    private byte[] validateEncryptionKey(final byte[] key) {
+    private static boolean isEncryptionKeyValid(final byte[] key) {
 
-        if ((key.length != 16 && key.length != 24 && key.length != 32) || Arrays.equals(key, DEFAULT_SECRET_KEY)) {
-            return DEFAULT_SECRET_KEY;
-        } else {
-            return key;
-        }
+        return (key.length == 16 || key.length == 24 || key.length == 32) && !Arrays.equals(key, DEFAULT_SECRET_KEY);
     }
 
     @Override
@@ -438,14 +429,15 @@ public class CryptoServiceImpl implements CryptoService {
 
     private Key generateKey() {
 
-        if (this.secretKey == DEFAULT_SECRET_KEY) {
+        if (!this.secretKey.isPresent()) {
             logger.warn("A user defined encryption key has not been provided or is invalid."
                     + " The default well known key is in use."
                     + " Please reinstall Kura and provide a valid encryption key of length 16, 24, or 32 bytes (characters)"
                     + " as explained in Kura documentation.");
+            return new SecretKeySpec(DEFAULT_SECRET_KEY, ALGORITHM);
         }
 
-        return new SecretKeySpec(this.secretKey, ALGORITHM);
+        return new SecretKeySpec(this.secretKey.get(), ALGORITHM);
     }
 
     @Override

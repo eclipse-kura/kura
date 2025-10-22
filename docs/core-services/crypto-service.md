@@ -17,7 +17,7 @@ The default `CryptoServiceImpl` included with Kura utilizes a configurable encry
 
 The secret key must be either 16, 24, or 32 bytes (characters) long, it can be specified in the following ways:
 
-### Using systemd-credentials (recommended)
+### Option 1: Using systemd-credentials (recommended)
 
 !!! note
     systemd-credentials is available starting from systemd version 250. This method cannot be used on container based deployments.

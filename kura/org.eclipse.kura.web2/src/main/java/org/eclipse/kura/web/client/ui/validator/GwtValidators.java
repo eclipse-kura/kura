@@ -55,19 +55,6 @@ public class GwtValidators {
                 stringLength(255, MSGS.pwdMaxLength()),
                 noWhitespaceCharacters(MSGS.pwdWhitespaceCharacters()));
 
-        return generateValidatorList(userOptions, defaultValidators);
-    }
-
-    public static List<Validator<String>> newEmptyPassword(final GwtConsoleUserOptions userOptions) {
-
-        final List<Validator<String>> defaultValidators = Arrays.asList();
-
-        return generateValidatorList(userOptions, defaultValidators);
-    }
-
-    private static List<Validator<String>> generateValidatorList(final GwtConsoleUserOptions userOptions,
-            List<Validator<String>> defaultValidators) {
-
         return Stream
                 .concat(PasswordStrengthValidators.fromConfig(userOptions, new PasswordStrengthValidators.Messages() {
 

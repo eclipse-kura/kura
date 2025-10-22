@@ -4656,67 +4656,67 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 
 <h1 id="network-threat-manager">Network Threat Manager</h1>
-<p>Eclipse Kura provides a set of features to detect and prevent network attacks. The Security section in the Gateway Administration Console shows the Network Threat Manager tab where is it possible to activate these functions.</p>
+<p>Eclipse Kura provides a set of features to detect and prevent network attacks. The Network Threat Manager tab in the Security section of the Gateway Administration Console allows the user to activate these functions.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>The Network Threat Manager tab is not available for the <a href="../../getting-started/install-kura/#installer-types">No Network version of Eclipse Kura</a>.</p>
 </div>
 <p><img alt="Network Threat Manager" src="../images/network-threat-manager.png" /></p>
 <h2 id="flooding-protection">Flooding protection</h2>
-<p>The flooding protection function is used to prevent DDos (Distributed Denial-of-Service) attacks using the firewall. When enabled, the feature adds a set of firewall rules to the <strong>mangle</strong> table.</p>
+<p>The flooding protection function is used to prevent DDos (Distributed Denial-of-Service) attacks using specific firewall rules. When enabled, the feature modifies the <strong>filter</strong> and <strong>mangle</strong> tables in the <em>iptables</em> firewall to close or limit common attacks.</p>
 <h3 id="flooding-protection-for-ipv4">Flooding protection for IPv4</h3>
-<p>The following rules are added to the <strong>mangle</strong> table and they are implemented to block invalid or malicious network packets:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>iptables -A prerouting-kura -m conntrack --ctstate INVALID -j DROP
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>iptables -A prerouting-kura -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>iptables -A prerouting-kura -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>iptables -A prerouting-kura -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>iptables -A prerouting-kura -p tcp --tcp-flags SYN,RST SYN,RST -j DROP
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>iptables -A prerouting-kura -p tcp --tcp-flags FIN,RST FIN,RST -j DROP
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>iptables -A prerouting-kura -p tcp --tcp-flags FIN,ACK FIN -j DROP
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>iptables -A prerouting-kura -p tcp --tcp-flags ACK,URG URG -j DROP
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>iptables -A prerouting-kura -p tcp --tcp-flags ACK,FIN FIN -j DROP
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>iptables -A prerouting-kura -p tcp --tcp-flags ACK,PSH PSH -j DROP
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>iptables -A prerouting-kura -p tcp --tcp-flags ALL ALL -j DROP
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>iptables -A prerouting-kura -p tcp --tcp-flags ALL NONE -j DROP
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>iptables -A prerouting-kura -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>iptables -A prerouting-kura -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>iptables -A prerouting-kura -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>iptables -A prerouting-kura -p icmp -j DROP
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>iptables -A prerouting-kura -f -j DROP
+<p>The <strong>flooding.protection.enabled</strong> property is used to enable the feature.
+The following rules are added to the <strong>mangle</strong> table and they are implemented to block invalid or malicious network packets:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>-A prerouting-kura -m conntrack --ctstate INVALID -j DROP
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>-A prerouting-kura -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m conntrack --ctstate NEW -j DROP
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>-A prerouting-kura -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -j DROP
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,RST FIN,RST -j DROP
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,ACK FIN -j DROP
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags ACK,URG URG -j DROP
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,ACK FIN -j DROP
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags PSH,ACK PSH -j DROP
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j DROP
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,PSH,URG -j DROP
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,PSH,URG -j DROP
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,ACK,URG -j DROP
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>-A prerouting-kura -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j DROP
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>-A prerouting-kura -f -j DROP
 </code></pre></div>
 <p>To further filter the incoming TCP fragmented packets, specific system configuration files are configured.
-The <strong>flooding.protection.enabled</strong> property is used to enable the feature.</p>
+When enabled, the device will not respond to ping requests.</p>
 <h3 id="flooding-protection-for-ipv6">Flooding protection for IPv6</h3>
-<p>The same rules applied to the IPv4 are used for preventing attack on IPv6. In addition, some rules are implemented to drop specific IPv6 headers and limit the incoming ICMPv6 packets. Moreover, the incoming TCP fragmented packets are dropped configuring specific system files.</p>
+<p>The same rules applied to the IPv4 are used for preventing attack on IPv6. In addition, some of them are implemented to drop specific IPv6 headers and limit the incoming ICMPv6 packets. Moreover, the incoming TCP fragmented packets are dropped configuring specific system files.</p>
 <p>The following rules are applied to the <strong>mangle</strong> table:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>ip6tables -A prerouting-kura -m conntrack --ctstate INVALID -j DROP
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>ip6tables -A prerouting-kura -p tcp ! --syn -m conntrack --ctstate NEW -j DROP
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>ip6tables -A prerouting-kura -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>ip6tables -A prerouting-kura -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>ip6tables -A prerouting-kura -p tcp --tcp-flags SYN,RST SYN,RST -j DROP
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>ip6tables -A prerouting-kura -p tcp --tcp-flags FIN,RST FIN,RST -j DROP
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>ip6tables -A prerouting-kura -p tcp --tcp-flags FIN,ACK FIN -j DROP
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>ip6tables -A prerouting-kura -p tcp --tcp-flags ACK,URG URG -j DROP
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>ip6tables -A prerouting-kura -p tcp --tcp-flags ACK,FIN FIN -j DROP
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>ip6tables -A prerouting-kura -p tcp --tcp-flags ACK,PSH PSH -j DROP
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>ip6tables -A prerouting-kura -p tcp --tcp-flags ALL ALL -j DROP
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>ip6tables -A prerouting-kura -p tcp --tcp-flags ALL NONE -j DROP
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>ip6tables -A prerouting-kura -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>ip6tables -A prerouting-kura -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>ip6tables -A prerouting-kura -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>ip6tables -A prerouting-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 128 -j DROP
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>ip6tables -A prerouting-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 129 -j DROP
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>ip6tables -A prerouting-kura -m ipv6header --header dst --soft -j DROP
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>ip6tables -A prerouting-kura -m ipv6header --header hop --soft -j DROP
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>ip6tables -A prerouting-kura -m ipv6header --header route --soft -j DROP
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>ip6tables -A prerouting-kura -m ipv6header --header frag --soft -j DROP
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>ip6tables -A prerouting-kura -m ipv6header --header auth --soft -j DROP
-<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>ip6tables -A prerouting-kura -m ipv6header --header esp --soft -j DROP
-<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>ip6tables -A prerouting-kura -m ipv6header --header none --soft -j DROP
-<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>ip6tables -A prerouting-kura -m rt --rt-type 0 -j DROP
-<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>ip6tables -A output-kura -m rt --rt-type 0 -j DROP
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>-A prerouting-kura -m conntrack --ctstate INVALID -j DROP
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>-A prerouting-kura -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m conntrack --ctstate NEW -j DROP
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>-A prerouting-kura -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -j DROP
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,RST FIN,RST -j DROP
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,ACK FIN -j DROP
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags ACK,URG URG -j DROP
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,ACK FIN -j DROP
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags PSH,ACK PSH -j DROP
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j DROP
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,PSH,URG -j DROP
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,PSH,URG -j DROP
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>-A prerouting-kura -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,ACK,URG -j DROP
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>-A prerouting-kura -p ipv6-icmp -m icmp6 --icmpv6-type 128 -j DROP
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>-A prerouting-kura -m ipv6header --header ipv6-opts --soft -j DROP
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>-A prerouting-kura -m ipv6header --header hop-by-hop --soft -j DROP
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>-A prerouting-kura -m ipv6header --header ipv6-route --soft -j DROP
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>-A prerouting-kura -m ipv6header --header ipv6-frag --soft -j DROP
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>-A prerouting-kura -m ipv6header --header ah --soft -j DROP
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>-A prerouting-kura -m ipv6header --header esp --soft -j DROP
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>-A prerouting-kura -m ipv6header --header ipv6-nonxt --soft -j DROP
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>-A prerouting-kura -m rt --rt-type 0 -j DROP
 </code></pre></div>
-<p>Also in this case, to enable the feature and add the rules to the firewall, the <strong>flooding.protection.enabled.ipv6</strong> property has to be set to true. If the device doesn't support IPv6, this property is ignored.</p>
+<p>Also in this case, to enable the feature and add the rules to the firewall, the <strong>flooding.protection.enabled.ipv6</strong> property has to be set to true. If the device doesn't support IPv6, this property is ignored.
+When enabled, the device will not respond to ping requests.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>To recover the device state when the IPv6 flooding protection feature is disabled, a reboot is required. So, to disable the feature, set the <strong>flooding.protection.enabled.ipv6</strong> property to false tha reboot the device.</p>

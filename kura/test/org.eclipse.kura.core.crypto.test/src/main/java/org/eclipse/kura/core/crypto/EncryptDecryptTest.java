@@ -20,11 +20,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.system.SystemService;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class EncryptDecryptTest {
 
@@ -32,7 +35,16 @@ public class EncryptDecryptTest {
 
     @Before
     public void setup() {
-        this.cryptoService = new CryptoServiceImpl();
+        final SystemService mockSystemService = Mockito.mock(SystemService.class);
+        try {
+            Mockito.when(mockSystemService.getKuraDataDirectory()).thenReturn(Files.createTempDirectory(null).toString());
+        } catch (IOException e) {
+            throw new IllegalStateException("cannot create temporary directory");
+        }
+
+this.cryptoService = new CryptoServiceImpl();
+        this.cryptoService.setSystemService(mockSystemService);
+        this.cryptoService.activate();
     }
 
     @Test

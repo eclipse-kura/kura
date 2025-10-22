@@ -35,7 +35,9 @@ import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Optional;
 import java.util.Properties;
 
 import javax.crypto.BadPaddingException;
@@ -66,14 +68,16 @@ public class CryptoServiceImpl implements CryptoService {
     private static final String CIPHER = "AES/GCM/NoPadding";
     private static final int AUTH_TAG_LENGTH_BIT = 128;
     private static final int IV_SIZE = 12;
-    private static final byte[] SECRET_KEY = System
-            .getProperty("org.eclipse.kura.core.crypto.secretKey", "rv;ipse329183!@#").getBytes();
     private static final String ENCRYPTED_STRING_SEPARATOR = "-";
+    private static final byte[] DEFAULT_SECRET_KEY = "rv;ipse329183!@#".getBytes(StandardCharsets.UTF_8);
+    private static final String SECRET_KEY_CREDENTIAL_ID = "kura_encryption_key";
+    private static final String SECRET_KEY_SYSTEM_PROPERTY_NAME = "org.eclipse.kura.core.crypto.secretKey";
 
     private String keystorePasswordPath;
 
     private final SecureRandom random = new SecureRandom();
     private SystemService systemService;
+    private Optional<byte[]> secretKey;
 
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
@@ -84,11 +88,40 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     protected void activate() {
-        if (this.systemService == null) {
-            throw new IllegalStateException("Unable to get instance of: " + SystemService.class.getName());
-        }
+
+        this.secretKey = loadCustomEncryptionKey().filter(CryptoServiceImpl::isEncryptionKeyValid);
 
         this.keystorePasswordPath = this.systemService.getKuraDataDirectory() + File.separator + "store.save";
+    }
+
+    private Optional<byte[]> loadCustomEncryptionKey() {
+        try {
+            final Optional<SystemdCredentialLoader> loader = SystemdCredentialLoader.fromEnv();
+
+            if (loader.isPresent()) {
+
+                final Optional<byte[]> keyFromSystemd = loader.get().loadCredential(SECRET_KEY_CREDENTIAL_ID);
+
+                if (keyFromSystemd.isPresent()) {
+                    logger.debug("using key from systemd");
+                    return Optional.of(keyFromSystemd.get());
+                }
+            }
+
+        } catch (final Exception e) {
+            logger.warn("Unexpected exception loading encryption provided by systemd", e);
+        }
+
+        return Optional.ofNullable(System.getProperty(SECRET_KEY_SYSTEM_PROPERTY_NAME)).filter(k -> !k.isEmpty())
+                .map(k -> {
+                    logger.debug("using key from system properties");
+                    return k.getBytes(StandardCharsets.UTF_8);
+                });
+    }
+
+    private static boolean isEncryptionKeyValid(final byte[] key) {
+
+        return (key.length == 16 || key.length == 24 || key.length == 32) && !Arrays.equals(key, DEFAULT_SECRET_KEY);
     }
 
     @Override
@@ -394,8 +427,17 @@ public class CryptoServiceImpl implements CryptoService {
         return false;
     }
 
-    private static Key generateKey() {
-        return new SecretKeySpec(SECRET_KEY, ALGORITHM);
+    private Key generateKey() {
+
+        if (!this.secretKey.isPresent()) {
+            logger.warn("A user defined encryption key has not been provided or is invalid."
+                    + " The default well known key is in use."
+                    + " Please reinstall Kura and provide a valid encryption key of length 16, 24, or 32 bytes (characters)"
+                    + " as explained in the Eclipse Kura documentation.");
+            return new SecretKeySpec(DEFAULT_SECRET_KEY, ALGORITHM);
+        }
+
+        return new SecretKeySpec(this.secretKey.get(), ALGORITHM);
     }
 
     @Override

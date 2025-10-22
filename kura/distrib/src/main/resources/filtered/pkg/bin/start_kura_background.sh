@@ -22,6 +22,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.os.version=${kura.os.version} \
         -Dkura.arch=${kura.arch} \
         -Dtarget.device=${target.device} \
+        -Dorg.eclipse.kura.core.crypto.secretKey="$KURA_CRYPTO_SECRET_KEY" \
         -Declipse.ignoreApp=true \
         -Dkura.home=\${DIR} \
         -Dkura.configuration=file:\${DIR}/framework/kura.properties \

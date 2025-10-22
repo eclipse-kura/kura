@@ -67,7 +67,7 @@ SetCredentialEncrypted=kura_encryption_key: \
 
     The setup above is just an example, systemd offers different ways to pass credentials to services. Please review systemd documentation to understand the different options and chose the most appropriate for your case.
 
-### Using a Java system property
+### Option 2: Using a Java system property
 
 The encryption key can be configured with the following Java system property:
 

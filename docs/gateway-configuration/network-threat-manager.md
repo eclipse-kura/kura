@@ -3,7 +3,7 @@
 Eclipse Kura provides a set of features to detect and prevent network attacks. The Network Threat Manager tab in the Security section of the Gateway Administration Console allows the user to activate these functions.
 
 !!! Warning
-    The Network Threat Manager tab is not available for the [No Network version of Eclipse Kura](../../getting-started/install-kura/#installer-types).
+    The Network Threat Manager feature is provided by the **kura-networking** package.
 
 ![Network Threat Manager](./images/network-threat-manager.png)
 

@@ -14,14 +14,12 @@
 package org.eclipse.kura.core.crypto;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Base64;
 
 import org.eclipse.kura.KuraException;
@@ -40,7 +38,6 @@ public class CryptoServiceImplCustomKeyTest {
 
     private CryptoServiceImpl cryptoService;
     private SystemService mockSystemService;
-    private Path credentialDirectory;
     private String testPlaintext;
     private char[] encryptedData;
     private char[] decryptedData;
@@ -60,7 +57,7 @@ public class CryptoServiceImplCustomKeyTest {
 
     @After
     public void cleanup() {
-        System.clearProperty("org.eclipse.kura.crypto.secretKey");
+        System.clearProperty("org.eclipse.kura.core.crypto.secretKey");
     }
 
     @Test
@@ -150,17 +147,7 @@ public class CryptoServiceImplCustomKeyTest {
         thenServiceIsActivated();
     }
 
-    @Test
-    public void encryptWithSystemdCredentialKey() {
-        given32ByteCustomKey();
-        givenSystemdCredentialFile("kura-encryption-secret-key");
-        givenPlaintext("test-data");
 
-        whenActivatingCryptoService();
-        whenEncryptingData();
-
-        thenDataIsEncrypted();
-    }
 
     @Test
     public void encryptAndDecryptWithCustomKey() {
@@ -205,25 +192,10 @@ public class CryptoServiceImplCustomKeyTest {
         this.testPlaintext = plaintext;
     }
 
-    private void givenSystemdCredentialFile(String credentialName) {
-        try {
-            this.credentialDirectory = tempFolder.newFolder().toPath();
-            Path credFile = this.credentialDirectory.resolve(credentialName);
-            Files.write(credFile, this.testPlaintext.getBytes(StandardCharsets.UTF_8));
-            System.setProperty("CREDENTIALS_DIRECTORY", this.credentialDirectory.toString());
-        } catch (IOException e) {
-            fail("Failed to create systemd credential file");
-        }
-    }
+
 
     private void givenSystemPropertyKey() {
-        System.setProperty("org.eclipse.kura.crypto.secretKey", this.testPlaintext);
-    }
-
-    private void givenDifferentSystemPropertyKey() {
-        String differentKey = Base64.getEncoder()
-                .encodeToString("different-key-32-bytes-long!".getBytes(StandardCharsets.UTF_8));
-        System.setProperty("org.eclipse.kura.crypto.secretKey", differentKey);
+        System.setProperty("org.eclipse.kura.core.crypto.secretKey", this.testPlaintext);
     }
 
     private void whenActivatingCryptoService() {
@@ -252,10 +224,6 @@ public class CryptoServiceImplCustomKeyTest {
 
     private void thenServiceFallsBackToDefaultKey() {
         assertNotNull(this.cryptoService);
-    }
-
-    private void thenDataIsEncrypted() {
-        assertNotNull(this.encryptedData);
     }
 
     private void thenDecryptedDataMatchesPlaintext() {

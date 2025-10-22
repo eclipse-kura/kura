@@ -124,7 +124,7 @@ kura.service content
 EnvironmentFile=/etc/kura-key.conf
 ```
 
-#### Contanier based deployments
+#### Container based deployments
 
 Specify the environment variable using the `--env` or `--env-file` command line option of the `docker`/`podman` `run` or `create` commands.
 

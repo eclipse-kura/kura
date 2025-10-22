@@ -69,15 +69,13 @@ customize_ram() {
         fi
     
         echo "Setting kura RAM to ${RAM_MB_FOR_KURA}"
-        start_scripts_to_change=("start_kura.sh" "start_kura_debug.sh" "start_kura_background.sh", "start_kura_background_debug.sh")
     
         RAM_REPLACEMENT_STRING="-Xms${RAM_MB_FOR_KURA}m -Xmx${RAM_MB_FOR_KURA}m"
-        for installer_name in "${start_scripts_to_change[@]}"; do
-            echo "Updating RAM values for $installer_name"
-            sed -i "s/-Xms[0-9]*m -Xmx[0-9]*m/$RAM_REPLACEMENT_STRING/g" "/opt/eclipse/kura/bin/$installer_name"
-        done
-        
-    fi    
+
+        echo "Updating RAM values for start_kura.sh"
+        sed -i "s/-Xms[0-9]*m -Xmx[0-9]*m/$RAM_REPLACEMENT_STRING/g" "/opt/eclipse/kura/bin/start_kura.sh"
+
+    fi
 }
 
 setup_libudev
@@ -94,4 +92,3 @@ mv "/opt/eclipse/kura/install/jdk.dio.properties-${BOARD}" "/opt/eclipse/kura/fr
 install_snapshot
 customize_kura_properties "${BOARD}"
 customize_ram "${BOARD}"
-

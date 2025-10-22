@@ -42,6 +42,7 @@ while [[ $# -gt 0 ]]; do
         echo
         echo "Options:"
         echo "    -d | --detached    run Kura in detached mode"
+        echo "    -x | --debug       run Kura in debug mode"
         exit 0
         ;;
     *)

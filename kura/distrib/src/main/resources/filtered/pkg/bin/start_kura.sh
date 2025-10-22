@@ -65,11 +65,7 @@ DEBUG_OPTS=""
 if [[ $IS_DEBUG_MODE == "true" ]]; then
     DEBUG_OPTS="-Xdebug \
         -Xrunjdwp:server=y,transport=dt_socket,address=*:8000,suspend=n \
-        -XX:+PrintGCTimeStamps \
         -Xlog:gc=info:file=/var/log/kura-gc.log:time:filecount=10,filesize=10m \
-        -XX:+UseGCLogFileRotation \
-        -XX:NumberOfGCLogFiles=10 \
-        -XX:GCLogFileSize=100M \
         -XX:+HeapDumpOnOutOfMemoryError \
         -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
         -XX:ErrorFile=/var/log/kura-error.log"

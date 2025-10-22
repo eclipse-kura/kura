@@ -104,8 +104,7 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.commons/commons-compress/1.27.1, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #17651
 * maven/mavencentral/org.apache.commons/commons-csv/1.4, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.commons/commons-exec/1.3, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/org.apache.commons/commons-lang3/3.12.0, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/org.apache.commons/commons-lang3/3.17.0, Apache-2.0, approved, #16044
+* maven/mavencentral/org.apache.commons/commons-lang3/3.19.0, Apache-2.0, approved, #23560
 * maven/mavencentral/org.apache.felix/org.apache.felix.dependencymanager/3.0.0, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.felix/org.apache.felix.deploymentadmin/0.9.5, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.geronimo.specs/geronimo-jms_2.0_spec/1.0-alpha-2, Apache-2.0, approved, clearlydefined

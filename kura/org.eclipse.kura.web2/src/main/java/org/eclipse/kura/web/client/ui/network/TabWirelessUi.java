@@ -1331,11 +1331,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             configUserOptions.setPasswordMinimumLength(Math.min(configUserOptions.getPasswordMinimumLength(), 26));
             this.password.setValidatorsFrom(configUserOptions);
             this.password.addValidator(GwtValidators.regex(REGEX_PASS_WEP, MSGS.netWifiWirelessInvalidWEPPassword()));
-        } else if (this.security != null && this.security.getSelectedItemText().equals(WIFI_SECURITY_NONE_MESSAGE)) {
-            this.password.setValidators();
         } else {
-            configUserOptions.allowAnyPassword();
-            this.password.setValidatorsFrom(configUserOptions);
+            // Clears all validators when password is not required
+            this.password.setValidators();
         }
 
     }

@@ -96,7 +96,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
     TextBox username;
 
     @UiField
-    NewPasswordInput password;
+    Input password;
 
     @UiField
     TextBox keystorePid;
@@ -267,7 +267,7 @@ public class Tab8021xUi extends Composite implements NetworkTab {
         });
 
         this.password.addBlurHandler(e -> this.password.validate());
-        this.password.setAllowBlank(false);
+        this.password.setAllowBlank(true);
         this.password.addMouseOutHandler(event -> resetHelpText());
 
         this.password.addChangeHandler(event -> {

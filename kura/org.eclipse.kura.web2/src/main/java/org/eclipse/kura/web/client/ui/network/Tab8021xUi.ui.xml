@@ -91,8 +91,8 @@
                             <util:HelpButton ui:field="helpPassword"/>
                             <b:HelpBlock color="red"
                                 ui:field="helpblockPassword" />
-                            <kura:NewPasswordInput type="PASSWORD" b:id="password"
-                                ui:field="password" allowPlaceholder="true"/>
+                            <b:Input type="PASSWORD" b:id="password"
+                                ui:field="password" />
                         </b:FormGroup>
 
                         <b:FormGroup ui:field="identityKeystorePid">

@@ -1834,6 +1834,72 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#encryption-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      Encryption key
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Encryption key">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-1-using-systemd-credentials-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option 1: Using systemd-credentials (recommended)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-2-using-a-java-system-property" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option 2: Using a Java system property
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Option 2: Using a Java system property">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#systemd-deployments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Systemd deployments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-based-deployments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Container based deployments
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-3-using-a-custom-storage-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option 3: Using a custom storage implementation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#key-functional-areas" class="md-nav__link">
     <span class="md-ellipsis">
       Key Functional Areas
@@ -4634,6 +4700,72 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#encryption-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      Encryption key
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Encryption key">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-1-using-systemd-credentials-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option 1: Using systemd-credentials (recommended)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-2-using-a-java-system-property" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option 2: Using a Java system property
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Option 2: Using a Java system property">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#systemd-deployments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Systemd deployments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-based-deployments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Container based deployments
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-3-using-a-custom-storage-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option 3: Using a custom storage implementation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#key-functional-areas" class="md-nav__link">
     <span class="md-ellipsis">
       Key Functional Areas
@@ -4715,18 +4847,102 @@ You are viewing the documentation relative to the develop branch or to an outdat
 The interface centralizes cryptographic operations and keystore password management for Kura-based IoT applications, ensuring consistent, secure handling of sensitive data.
 The interface is implemented by the <code>CryptoServiceImpl</code> class that provides a baseline reference for users to generate their own versions of the CryptoService if needed.
 A notable use of the <code>CryptoService</code> is encrypting the configuration snapshot files and the configuration properties of PASSWORD type.</p>
+<h2 id="encryption-key">Encryption key</h2>
+<p>The default <code>CryptoServiceImpl</code> included with Kura utilizes a configurable encryption key for encryption purposes. When no secret key is provided, a commonly known default encryption key is used. This default should only be used in development and testing environments. For production deployments, it is <strong>CRUCIAL</strong> that users replace the default encryption key with a secure one.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Failing to replace the default secret leaves encrypted data vulnerable. Ensure secrets are stored and managed securely in your environment.</p>
+</div>
+<p>The secret key must be either 16, 24, or 32 bytes (characters) long, it can be specified in the following ways:</p>
+<h3 id="option-1-using-systemd-credentials-recommended">Option 1: Using systemd-credentials (recommended)</h3>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The default <code>CryptoServiceImpl</code> bundled with Kura uses a well-known, default encryption key when no secret is provided. This default is intended only for development and testing purposes. For production deployments, users MUST replace the default secret by setting the Java environment variable:</p>
+<p>systemd-credentials is available starting from systemd version 250. This method cannot be used on container based deployments.</p>
+</div>
+<p>Strating from Eclipse Kura 6.0, the default <code>CryptoService</code> implementation supports loading the encryption key from a <a href="https://systemd.io/CREDENTIALS/">systemd credential</a> named <code>kura_encryption_key</code>.</p>
+<p>It can be speficied using any of the methods supported by systemd. For example it can be stored in encrypted form in a configuration dropin of the <code>kura.service</code> unit, as shown below (adapted from Example 2 in <a href="https://www.freedesktop.org/software/systemd/man/latest/systemd-creds.html">systemd-creds</a> man page).</p>
+<p>The commands should be run as root.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/systemd/system/kura.service.d
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>systemd-ask-password<span class="w"> </span>-n<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="o">(</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;[Service]&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>systemd-creds<span class="w"> </span>encrypt<span class="w"> </span>--name<span class="o">=</span>kura_encryption_key<span class="w"> </span>-p<span class="w"> </span>-<span class="w"> </span>-<span class="w"> </span><span class="o">)</span><span class="w"> </span>&gt;/etc/systemd/system/kura.service.d/50-encryption-key.conf
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>systemctl<span class="w"> </span>daemon-reload
+</code></pre></div>
+<p>The result can be verified with <code>systemctl cat kura</code>, it should produce an output similar to the following:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>systemctl<span class="w"> </span>cat<span class="w"> </span>kura
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># /lib/systemd/system/kura.service</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="o">[</span>Unit<span class="o">]</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="nv">Description</span><span class="o">=</span>Kura
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="nv">Wants</span><span class="o">=</span>dbus.service
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="nv">After</span><span class="o">=</span>dbus.service
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>....
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>kura.service<span class="w"> </span>content
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>....
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="c1"># /etc/systemd/system/kura.service.d/50-encryption-key.conf</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="o">[</span>Service<span class="o">]</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="nv">SetCredentialEncrypted</span><span class="o">=</span>kura_encryption_key:<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">        </span>Whxqht+dQJax1aZeCGLxmiAAAAABAAAADAAAABAAAADQfAnaQJMAVKCEJjcAAAAASk3/B<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">        </span>EZuKkHQPNKDXe7zn68bjyhzE7ni2R+g2B9o9aWrtMT9OGztsK+WbpsjTr8ci4FKcFL/dd<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">        </span>B1nKZ+O2Zt1Q<span class="o">==</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The setup above is just an example, systemd offers different ways to pass credentials to services. Please review systemd documentation to understand the different options and chose the most appropriate for your case.</p>
+</div>
+<h3 id="option-2-using-a-java-system-property">Option 2: Using a Java system property</h3>
+<p>The encryption key can be configured with the following Java system property:</p>
 <ul>
-<li>org.eclipse.kura.core.crypto.secretKey</li>
+<li><code>org.eclipse.kura.core.crypto.secretKey</code></li>
 </ul>
-<p>The secret key must be either 16, 24, or 32 bytes (characters) long. Example (set as JVM argument or environment variable depending on your runtime):</p>
-<ul>
-<li>As JVM system property: -Dorg.eclipse.kura.core.crypto.secretKey=your-16+char-secret</li>
-</ul>
-<p>Failing to replace the default secret leaves encrypted data vulnerable. Ensure secrets are stored and managed securely in your environment.</p>
-<p>To implement an alternative mechanism for storing the key it is possible to replace the <code>org.eclipse.kura.core.crypto</code> bundle with a custom implementation.</p>
+<p>Kura default start scripts (see <code>/opt/eclipse/kura/bin/</code>) will set the system property above to the content of the <code>KURA_CRYPTO_SECRET_KEY</code> environment variable.</p>
+<h4 id="systemd-deployments">Systemd deployments</h4>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Consider using systemd-credentials if available on your system</p>
+</div>
+<p>A possible way to provide the key is creating an environment file like shown below. The commands must be run as root.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nb">echo</span><span class="w"> </span><span class="nv">KURA_CRYPTO_SECRET_KEY</span><span class="o">=</span><span class="k">$(</span>systemd-ask-password<span class="w"> </span>-n<span class="k">)</span><span class="w"> </span>&gt;<span class="w"> </span>/etc/kura-key.conf
+</code></pre></div>
+<p>Review the content of the <code>/etc/kura-key.conf</code> to verify if it needs escaping as explained in the description of the <code>EnvironmentFile</code> parameter in <a href="https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html">systemd documentation</a>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>chmod<span class="w"> </span><span class="m">400</span><span class="w"> </span>/etc/kura-key.conf
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mkdir<span class="w"> </span>-p<span class="w"> </span>/etc/systemd/system/kura.service.d
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="o">(</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;[Service]&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;EnvironmentFile=/etc/kura-key.conf&quot;</span><span class="w"> </span><span class="o">)</span><span class="w"> </span>&gt;/etc/systemd/system/kura.service.d/50-key-env-file.conf
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>systemctl<span class="w"> </span>daemon-reload
+</code></pre></div>
+<p>The result can be verified with <code>systemctl cat kura</code>, it should produce an output similar to the following:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>systemctl<span class="w"> </span>cat<span class="w"> </span>kura
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="c1"># /lib/systemd/system/kura.service</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="o">[</span>Unit<span class="o">]</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="nv">Description</span><span class="o">=</span>Kura
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="nv">Wants</span><span class="o">=</span>dbus.service
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="nv">After</span><span class="o">=</span>dbus.service
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>....
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>kura.service<span class="w"> </span>content
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>....
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="c1"># /etc/systemd/system/kura.service.d/50-key-env-file.conf</span>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="o">[</span>Service<span class="o">]</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="nv">EnvironmentFile</span><span class="o">=</span>/etc/kura-key.conf
+</code></pre></div>
+<h4 id="container-based-deployments">Container based deployments</h4>
+<p>Specify the environment variable using the <code>--env</code> or <code>--env-file</code> command line option of the <code>docker</code>/<code>podman</code> <code>run</code> or <code>create</code> commands.</p>
+<p>For additional information about Eclipse Kura containers see: https://hub.docker.com/r/eclipse/kura/</p>
+<h3 id="option-3-using-a-custom-storage-implementation">Option 3: Using a custom storage implementation</h3>
+<p>To implement an alternative mechanism for key storage, you can replace the <code>org.eclipse.kura.core.crypto</code> bundle with a custom implementation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The default CryptoService implementation will load the encryption key from the supported sources in the following order (higher priority first), falling back to the next one if the key cannot be loaded:</p>
+<ol>
+<li>Systemd credential</li>
+<li>Java system property</li>
+<li>Default well-known key</li>
+</ol>
 </div>
 <h2 id="key-functional-areas">Key Functional Areas</h2>
 <h3 id="aes-encryptiondecryption">AES Encryption/Decryption</h3>

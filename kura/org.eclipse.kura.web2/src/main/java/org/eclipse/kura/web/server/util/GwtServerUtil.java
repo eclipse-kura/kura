@@ -767,16 +767,19 @@ public final class GwtServerUtil {
             if (netConfig instanceof GwtWifiNetInterfaceConfig) {
                 GwtWifiNetInterfaceConfig wifiConfig = (GwtWifiNetInterfaceConfig) netConfig;
                 GwtWifiConfig gwtAPWifiConfig = wifiConfig.getAccessPointWifiConfig();
-                if (gwtAPWifiConfig != null) {
+                if (gwtAPWifiConfig != null && gwtAPWifiConfig.getPassword() != null
+                        && !gwtAPWifiConfig.getPassword().isEmpty()) {
                     gwtAPWifiConfig.setPassword(PASSWORD_PLACEHOLDER);
                 }
 
                 GwtWifiConfig gwtStationWifiConfig = wifiConfig.getStationWifiConfig();
-                if (gwtStationWifiConfig != null) {
+                if (gwtStationWifiConfig != null && gwtStationWifiConfig.getPassword() != null
+                        && !gwtStationWifiConfig.getPassword().isEmpty()) {
                     gwtStationWifiConfig.setPassword(PASSWORD_PLACEHOLDER);
                 }
                 Gwt8021xConfig gwt8021xConfig = wifiConfig.get8021xConfig();
-                if (gwt8021xConfig != null) {
+                if (gwt8021xConfig != null && gwt8021xConfig.getPassword() != null
+                        && !gwt8021xConfig.getPassword().isEmpty()) {
                     gwt8021xConfig.setPassword(PASSWORD_PLACEHOLDER);
                 }
 

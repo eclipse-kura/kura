@@ -65,7 +65,6 @@ public class CryptoServiceImpl implements CryptoService {
     private static final int IV_SIZE = 12;
     private static final String ENCRYPTED_STRING_SEPARATOR = "-";
     private static final byte[] DEFAULT_SECRET_KEY = "rv;ipse329183!@#".getBytes(StandardCharsets.UTF_8);
-    private static final String SECRET_KEY_CREDENTIAL_ID = "kura_encryption_key";
     private static final String SECRET_KEY_SYSTEM_PROPERTY_NAME = "org.eclipse.kura.core.crypto.secretKey";
 
     private String keystorePasswordPath;

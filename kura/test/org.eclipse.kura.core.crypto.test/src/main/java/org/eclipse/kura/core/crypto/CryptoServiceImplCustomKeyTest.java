@@ -15,12 +15,15 @@ package org.eclipse.kura.core.crypto;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
-import java.util.Base64;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.system.SystemService;
@@ -67,7 +70,7 @@ public class CryptoServiceImplCustomKeyTest {
 
         whenActivatingCryptoService();
 
-        thenServiceIsActivated();
+        thenSecretKeyLengthIs(16);
     }
 
     @Test
@@ -77,7 +80,7 @@ public class CryptoServiceImplCustomKeyTest {
 
         whenActivatingCryptoService();
 
-        thenServiceIsActivated();
+        thenSecretKeyLengthIs(24);
     }
 
     @Test
@@ -87,7 +90,7 @@ public class CryptoServiceImplCustomKeyTest {
 
         whenActivatingCryptoService();
 
-        thenServiceIsActivated();
+        thenSecretKeyLengthIs(32);
     }
 
     @Test
@@ -97,7 +100,7 @@ public class CryptoServiceImplCustomKeyTest {
 
         whenActivatingCryptoService();
 
-        thenServiceFallsBackToDefaultKey();
+        thenDefaultKeyIsUsed();
     }
 
     @Test
@@ -107,7 +110,7 @@ public class CryptoServiceImplCustomKeyTest {
 
         whenActivatingCryptoService();
 
-        thenServiceFallsBackToDefaultKey();
+        thenDefaultKeyIsUsed();
     }
 
     @Test
@@ -117,7 +120,7 @@ public class CryptoServiceImplCustomKeyTest {
 
         whenActivatingCryptoService();
 
-        thenServiceFallsBackToDefaultKey();
+        thenDefaultKeyIsUsed();
     }
 
     @Test
@@ -127,7 +130,7 @@ public class CryptoServiceImplCustomKeyTest {
 
         whenActivatingCryptoService();
 
-        thenServiceFallsBackToDefaultKey();
+        thenDefaultKeyIsUsed();
     }
 
     @Test
@@ -137,14 +140,14 @@ public class CryptoServiceImplCustomKeyTest {
 
         whenActivatingCryptoService();
 
-        thenServiceFallsBackToDefaultKey();
+        thenDefaultKeyIsUsed();
     }
 
     @Test
     public void useDefaultKeyWhenNoCustomKeyProvided() {
         whenActivatingCryptoService();
 
-        thenServiceIsActivated();
+        thenDefaultKeyIsUsed();
     }
 
 
@@ -154,26 +157,77 @@ public class CryptoServiceImplCustomKeyTest {
         given32ByteCustomKey();
         givenSystemPropertyKey();
         givenPlaintext("test-data-to-encrypt");
-
         whenActivatingCryptoService();
+        thenSecretKeyLengthIs(32);
         whenEncryptingData();
         whenDecryptingData();
-
         thenDecryptedDataMatchesPlaintext();
     }
 
+    @Test
+    public void encryptAndDecryptWithDefaultKey() {
+        givenPlaintext("default-key-roundtrip");
+        whenActivatingCryptoService();
+        thenDefaultKeyIsUsed();
+        whenEncryptingData();
+        whenDecryptingData();
+        thenDecryptedDataMatchesPlaintext();
+    }
+
+    @Test
+    public void ciphertextFormatHasSeparator() {
+        given16ByteCustomKey();
+        givenSystemPropertyKey();
+        whenActivatingCryptoService();
+        thenSecretKeyLengthIs(16);
+        whenEncryptingData();
+        String c = new String(this.encryptedData);
+        assertTrue(c.contains("-"));
+        assertEquals(2, c.split("-").length);
+    }
+
+    @Test(expected = KuraException.class)
+    public void decryptMalformedThrows() throws KuraException {
+        whenActivatingCryptoService();
+        this.cryptoService.decryptAes("malformed".toCharArray());
+    }
+
+    @Test
+    public void base64RoundTrip() throws Exception {
+        whenActivatingCryptoService();
+        String v = "roundtrip";
+        String enc = this.cryptoService.encodeBase64(v);
+        String dec = this.cryptoService.decodeBase64(enc);
+        assertEquals(v, dec);
+    }
+
+    @Test
+    public void hashProducesDifferentValues() throws Exception {
+        whenActivatingCryptoService();
+        String a = this.cryptoService.hash("a", "SHA-256");
+        String b = this.cryptoService.hash("b", "SHA-256");
+        assertFalse(a.equals(b));
+    }
+
+    @Test
+    public void keystorePasswordPersists() throws Exception {
+        whenActivatingCryptoService();
+        char[] pwd = "p@ssw0rd".toCharArray();
+        this.cryptoService.setKeyStorePassword("/ks", pwd);
+        char[] out = this.cryptoService.getKeyStorePassword("/ks");
+        assertArrayEquals(pwd, out);
+    }
+
     private void given16ByteCustomKey() {
-        this.testPlaintext = Base64.getEncoder().encodeToString("1234567890123456".getBytes(StandardCharsets.UTF_8));
+        this.testPlaintext = "1234567890ABCDEF";
     }
 
     private void given24ByteCustomKey() {
-        this.testPlaintext = Base64.getEncoder()
-                .encodeToString("123456789012345678901234".getBytes(StandardCharsets.UTF_8));
+        this.testPlaintext = "12345678901234567890ABCD";
     }
 
     private void given32ByteCustomKey() {
-        this.testPlaintext = Base64.getEncoder()
-                .encodeToString("12345678901234567890123456789012".getBytes(StandardCharsets.UTF_8));
+        this.testPlaintext = "12345678901234567890123456789012";
     }
 
     private void givenDefaultKey() {
@@ -181,18 +235,16 @@ public class CryptoServiceImplCustomKeyTest {
     }
 
     private void givenCustomKeyWithLength(int length) {
-        byte[] keyBytes = new byte[length];
+        StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
-            keyBytes[i] = (byte) i;
+            builder.append((char) ('a' + (i % 26)));
         }
-        this.testPlaintext = Base64.getEncoder().encodeToString(keyBytes);
+        this.testPlaintext = builder.toString();
     }
 
     private void givenPlaintext(String plaintext) {
         this.testPlaintext = plaintext;
     }
-
-
 
     private void givenSystemPropertyKey() {
         System.setProperty("org.eclipse.kura.core.crypto.secretKey", this.testPlaintext);
@@ -218,12 +270,30 @@ public class CryptoServiceImplCustomKeyTest {
         }
     }
 
-    private void thenServiceIsActivated() {
-        assertNotNull(this.cryptoService);
+    private Optional<byte[]> getSecretKey() {
+        try {
+            Field field = CryptoServiceImpl.class.getDeclaredField("secretKey");
+            field.setAccessible(true);
+            Object value = field.get(this.cryptoService);
+            if (value == null) {
+                return Optional.empty();
+            }
+            return (Optional<byte[]>) value;
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            fail("Unable to access secret key: " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
-    private void thenServiceFallsBackToDefaultKey() {
-        assertNotNull(this.cryptoService);
+    private void thenSecretKeyLengthIs(int expectedLength) {
+        Optional<byte[]> secretKey = getSecretKey();
+        assertTrue(secretKey.isPresent());
+        assertEquals(expectedLength, secretKey.get().length);
+    }
+
+    private void thenDefaultKeyIsUsed() {
+        Optional<byte[]> secretKey = getSecretKey();
+        assertFalse(secretKey.isPresent());
     }
 
     private void thenDecryptedDataMatchesPlaintext() {

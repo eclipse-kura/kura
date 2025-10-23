@@ -42,8 +42,8 @@ To install Eclipse Kura&trade; using the APT repository, perform the following s
 !!! note
     The above instructions might require `sudo` privileges depending on your system configuration.
 
-!!! note
-    Before first boot, please configure the Java system property `-Dorg.eclipse.kura.core.crypto.secretKey=<your-secret-key>` to set a custom secret key for Eclipse Kura's encryption services. The secret key must be either 16, 24, or 32 bytes (characters) long. Refer to the [crypto-service documentation](../../core-services/crypto-service) for more details.
+!!! warning
+    Before first boot, it is crucial to set a custom secret key for Eclipse Kura's encryption services. Refer to the [crypto-service documentation](../../core-services/crypto-service) for more details.
 
 ??? tip "Nightly builds APT repository"
 

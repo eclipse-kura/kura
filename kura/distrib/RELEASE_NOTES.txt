@@ -1,15 +1,18 @@
-Eclipse Kura - 5.6.0 - November 2024
+Eclipse Kura - 5.6.1-SNAPSHOT - October 2025
 -------------------------------------------------------------------------------------------------
 Description:
-This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces features and changes to simplify the user interaction and deployment of the framework.
-This release contains improvements and simplifications to the cellular configuration, leveraging NetworkManager, allowing to enable a cellular interface without the need to specify a modem dial string or APN.
-A change has been made to the profiles to give more flexibility and connectivity ease of use when installed on gateways with more than one ethernet interfaces.
-A new scale and offset modality has been added to the asset component.
-A new provider that allows to retrieve location information from ModemManager has been added to the PositionService. 
-The release contains a number of bug fixes and general feature improvements.
+[TODO]
 
 
 Features:
+  * e121df3ecf - [RED-DA] remove appadmin and netadmin from emulator [backport release-5.6.0] (#6050) (Pierantonio Merlino)
+  * ac4fb9a6f6 - [RED-DA] remove `appadmin` and `netadmin` from snapshot_0 [backport release-5.6.0] (#6045) (Pierantonio Merlino)
+  * bbea586e52 - [RED-DA] default enable flooding protection [backport release 5.6.0] (#6041) (Matteo Maiero)
+  * 90767eccca - [RED-DA] new password strength policy [backport release-5.6.0] (#6038) (Matteo Maiero)
+  * 8ea2e7754b - [RED-DA] enable access banner by default [backport release-5.6.0] (#6037) (Matteo Maiero)
+  * 5f0822acdb - [linux.gpio] Libgpiod v2 implementation (#6002) (Pierantonio Merlino)
+  * 17086209fb - [linux.gpio] Libgpiod V1.6.X implementation (#5986) (Pierantonio Merlino)
+  * 3f00ed7e54 - added MTU limits in webUI [backport release-5.6.0] (#5605) (eclipse-kura-bot)
   * e908f7c714 - modemManager based position provider [backport release-5.6.0] (#5512) (eclipse-kura-bot)
   * f43a382899 - Add default log manager property [backport release-5.6.0] (#5507) (eclipse-kura-bot)
   * 132eded3ae - [web-ui] Added a column filter to channels table in the asset configuration [backport release-5.6.0] (#5501) (eclipse-kura-bot)
@@ -31,20 +34,40 @@ Features:
   * 392ee9413c - Modified modem APN tooltip (backport) (#5360) (Pierantonio Merlino)
   * d5a020ab82 - Add net2 check to hide pdp if not needed (#5356) (Matteo Maiero)
   * 766a3328e2 - [nm] Modem APN as an optional parameter [backport release-5.6.0] (#5353) (github-actions[bot])
+  * 4d8a098496 - [linux.gpio] Added support to gpio symlinks [backport release-5.5.0] (#5247) (github-actions[bot])
 
 Target Environments:
- Kura is released as pre-compiled binary installers for the following platforms:
-  * Intel Up Squared board running Ubuntu 20.04 (Kura networking)
-  * Nvidia Jetson Nano board running Ubuntu 18 (Kura networking)
-  * Generic Debian Package for x86_64 (NetworkManager)
-  * Generic Debian Package for arm32 (NetworkManager)
-  * Generic Debian Package for arm64 (NetworkManager)
- Kura no longer provides a dedicated installer for the following platforms, but support is still provided through the Generic Debian Packages (see https://github.com/eclipse/kura/discussions/5224):
-  * Raspberry Pi 2/3/4 based on Raspberry Pi OS (32 bits)
-  * Raspberry Pi 3/4 based on 64 bits OS
- Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
+[TODO]
 
 Bug Fixes:
+  * a53272526d - Flooding protection version reference [backport release-5.6.0] (#6057) (Matteo Maiero)
+  * 9108400a8b - Allowed to get GPIO by name in CloudConnectionStatusService [backport release-5.6.0] (#6039) (nicolatimeus)
+  * ccd46ac565 - [linux.net] Allow outgoing ping while flooding protection is enabled [backport 5.6.0] (#6028) (Matteo Maiero)
+  * bb70adedbd - [distrib] disable systemd watchdog to allow kura managing it [backport-5.6] (#6027) (Marcello Rinaldo Martina)
+  * f7d91e0196 - [distrib] Fixed packages dir permissions [backport release-5.6.0] (#6018) (Salvatore Coppola)
+  * f609efd476 - [distrib] added polkitd, ntpdate, jre 17, jre 21 alternative deps [backport release-5.6] (#6007) (Marcello Rinaldo Martina)
+  * 8f6496b64b - fixed verifyCRL ignored by CRLManagerOptions.equals() [backport release-5.6.0] (#6012) (github-actions[bot])
+  * a8c4c987a4 - check existance of parameter in modem (#6001) (sfiorani)
+  * 7f2c266663 - Fixed KeystoreChangedEvent not posted in some scenarios [backport release-5.6.0] (#5997) (nicolatimeus)
+  * 410a0efdec - [core.configuration] make snapshot storage more resilient [backport 5.6.0] (#5991) (Matteo Maiero)
+  * 2916d45c79 - ipv6 firewall icmpv6 sources [Backport 5.6.0] (#5973) (Matteo Maiero)
+  * 57f4bb59ea - [distrib] update start level of `permission.cache.fix` (#5978) (Mattia Dal Ben)
+  * b1b465e70b - [distrib] restore log output (#5976) (Mattia Dal Ben)
+  * e1c979c43e - [core.deployment] Configured SslManagerService is now correctly used by the Deployment agent [Backport release-5.6.0] (#5968) (Salvatore Coppola)
+  * 1856b9bdd6 - [ui] initialize unconfigured wireless interface to resolve NPE, fix channel selection on hardware tab, fix validation message on empty password [backport release-5.6.0] (#5956) (Marcello Rinaldo Martina)
+  * 8d78486364 - [equinox] Permission cache fix (#5966) (Salvatore Coppola)
+  * 489f6ed952 - wifi 802 1x password field definition [backport] (#5947) (Matteo Maiero)
+  * 6e0948299d - [data-service] replace hardcoded documentation link with descriptive text [backport release-5.6.0] (#5948) (github-actions[bot])
+  * fbfa71fb58 - [web2] avoid password validation in 802.1x config for station mode (#5945) (Marcello Rinaldo Martina)
+  * f8e420df15 - Do not include router option if no nat [backport release-5.6.0] (#5753) (eclipse-kura-bot)
+  * f3733694f5 - [distrib] kura_install.sh is broken [backport release-5.6.0] (#5647) (eclipse-kura-bot)
+  * bf26d47a2f - release notes automation after Github executors update [backport release-5.6.0] (#5621) (eclipse-kura-bot)
+  * 3353d228cd - Extended log download timeframe. Improved messages. [backport release-5.6.0] (#5600) (eclipse-kura-bot)
+  * 8633fc1e3b - [web2] Fixed wireless mode selection [backport release-5.6.0] (#5590) (eclipse-kura-bot)
+  * dd1fde9c0f - correctly stopping gpsd thread [backport release-5.6.0] (#5588) (eclipse-kura-bot)
+  * a2a0047944 - Fixed IPv6 validation [backport release-5.6.0] (#5582) (eclipse-kura-bot)
+  * 56e5f7a096 - fixed loading of country code [backport release-5.6.0] (#5581) (eclipse-kura-bot)
+  * 025688e2e1 - Improved ordering of services list [backport release-5.6.0] (#5577) (eclipse-kura-bot)
   * dabb9acce3 - position not updated when fix is lost [backport release-5.6.0] (#5567) (eclipse-kura-bot)
   * 830b3fe28b - ipv4 empty subnet gateway checks - improvement [backport release-5.6.0] (#5561) (eclipse-kura-bot)
   * 9e652a80e3 - Corrected the checks for empty subnet and gateway [backport release-5.6.0] (#5559) (eclipse-kura-bot)
@@ -72,74 +95,101 @@ Bug Fixes:
   * ccd2e08db6 - Updated the Eclipse Marketplace certificate [backport release-5.6.0] (#5395) (github-actions[bot])
   * 6ca13b211c - Disable systemd-resolved stub mode on systemd versions less than 248 [backport release-5.6.0] (#5369) (github-actions[bot])
   * b3dff8ffdb - Connection Scheduler metatype improvement. [backport release-5.6.0] (#5365) (github-actions[bot])
+  * ba1a7169d8 - Update web2 audit context on session id change [backport release-5.5.0] (#5307) (github-actions[bot])
+  * ed6915cfb9 - Fixed Keypair validity display to link only the leaf [backport release-5.5.0] (#5303) (github-actions[bot])
+  * 23e22f7735 - Fixed wrong IPv6 status for modem interfaces [backport release-5.5.0] (#5299) (github-actions[bot])
+  * 781591d167 - [nm] Fixed dnsmasq behavior on configuration change [backport release-5.5.0] (#5301) (github-actions[bot])
+  * d4969a7fd0 - Added a check to not display the automatic option for the old networking [backport release-5.5.0] (#5297) (github-actions[bot])
+  * 01b2ea6c48 - Always generate new session id on login [backport release-5.5.0] (#5293) (github-actions[bot])
+  * 7e0368d07a - [web2] Removed handler from button in certificate import form (#5… (#5286) (Pierantonio Merlino)
+  * 254b4b33da - fixed null in wi-fi frontend and missing wi-fi update on IPv6 [backport release-5.5.0] (#5292) (github-actions[bot])
+  * d6d326c8d7 - [distrib] customize-installation.sh to always patch interface names on snapshot_0.xml and iptables [backport release-5.5.0] (#5278) (github-actions[bot])
+  * 3d2e6a3dcc - [rest.identity] fixed status codes and error messages for malformed requests [backport release-5.5.0] (#5279) (github-actions[bot])
+  * e4e5477af2 - [nm] Avoid querying wifi ap for info if it is not available anymore [backport release-5.5.0] (#5271) (github-actions[bot])
+  * 6533fc5d63 - Fixed console not immediately applying SslManagerService target update [backport release-5.5.0] (#5274) (nicolatimeus)
+  * 0bbbc9499d - [distrib] missing uninstallation logging [backport release-5.5.0] (#5273) (github-actions[bot])
+  * 61be2a7403 - [distrib] add wpa_supplicant dbus permissions only on NN profiles [backport release-5.5.0] (#5270) (github-actions[bot])
+  * 7aea9512a5 - [web2] Removed servlet unregistration during update if options are not changed [backport release-5.5.0] (#5268) (github-actions[bot])
+  * 24feced08e - [core.cloud] [backport] Added null checks to unset reference methods  (#5262) (Salvatore Coppola)
+  * b1ea671a6f - [distrib] kurad installation on docker-alpine-x86_64-nn container [backport release-5.5.0] (#5257) (github-actions[bot])
+  * 16a06ae68f - Allow kurad to shutdown and reboot the system [backport release-5.5.0] (#5254) (github-actions[bot])
+  * ad375f3720 - correct management of wi-fi disabled state and visualization [backport release-5.5.0] (#5256) (github-actions[bot])
 
 Target Platform Updates:
+  * df0ee1988e - updated commons-lang3 to 3.19.0 [backport release-5.6.0] (#6061) (Marcello Rinaldo Martina)
+  * c79b800893 - adding dnsmasq leases file removal at uninstall (#6036) (sfiorani)
+  * 5d294471aa - add maven-clean-plugin configuration for lib directories (#5980) (Matteo Maiero)
+  * cdae814508 - update `kura_addons` URL [backport #5977] (#5979) (Mattia Dal Ben)
+  * d04ae54d64 - Update docker-java to 3.5.3 (#5881) [backport release-5.6.0]  (#5897) (Matteo Maiero)
+  * e2b1ea2344 - Upgraded netty to 4.1.121.Final [backport release-5.6.0] (#5823) (github-actions[bot])
+  * 6588b69988 - Upgraded netty to 4.1.118.Final [backport release-5.6.0] (#5739) (eclipse-kura-bot)
   * ca1a41ed36 - updated Jetty 9.4.55 -> 9.4.56 [backport release-5.6.0] (#5527) (eclipse-kura-bot)
   * f768acc086 - updated jetty version to 9.4.55.v20240627 [backport release-5.6.0] (#5502) (eclipse-kura-bot)
   * a4940f21fe - Reduce number of job history to 5 [backport release-5.6.0] (#5465) (eclipse-kura-bot)
   * f45421ebef - Protobuf update to 3.25.5 [backport 5.6.0] (#5431) (#5450) (Matteo Maiero)
 
 Known Issues:
-  * During a wifi scan, some access points with the WPA/WPA2 wifi security are recognized as WPA.
-  * On devices with Ubuntu 20.04, the DHCP server provided by isc-dhcp-server may not assign an IP address to the clients. Use dnsmasq instead.
-  * Different GNSS Type retrieved from different Position Providers (see #5409 for details)
-  * Snapshot rollback operation may fail processing factory component configurations.
-  * The firewall rule applied by the network threat manager that block uncommon TCP MSS values is not applied in the Nvidia Jetson Nano.
-  * When the IPv6 network threat manager is disabled, the filtering on TCP fragments is disabled only after a reboot.
-  * The republish.mqtt.birth.cert.on.modem.detect property in the CloudService configuration is not supported for devices that use NetworkManager. The property value is ignored.
-  * When dnsmasq is used as DHCP server, only one file is used to store the leases.
-  * When dnsmasq is used as DHCP server, the DHCP List field in the DHCP and NAT tab shows the leases for all the interfaces.
-  * The system reboot command cannot be issued even with a privileged user in Debian Bookworm due to an OS issue related to the CAP_SYS_BOOT capability.
-  * The Wi-Fi AP scanning may fail in Debian Bookworm on the first scanning attempt in the specific Raspberry PI profile. A forced rescan can succeed and properly display the available APs.
-  * The nvidia-jetson-nano installer disables FAN protocol support due to compatibility issues (see #4593)
-  * The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
-  * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is
-    built and run immediately after installation.
-  * An update to the sslmanagerservice where the pid of the keystoreservice is updated can lead to an error in the following reconnection.
-    The issue impact is limited, if the dataservice reconnect option is enabled.
-  * The implementation of the CryptoService performs encryption using a
-    password that is hardcoded and published.
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * WiFi on Raspberry Pi 2 has only been tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipset.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported with old networking. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * #4212: Wrong order of BIRTH/APPLICATION certificates for custom APP IDs registration
-  * #3972: Topic name validation: issue with names containing "//" (Cloud Subscriber)
-  * #4141: Sometimes user is not logged in after changing password
-  * #3796: Server manager does not close properly
-  * #3211: Kura Docker | Bluetooth error in log during starting service
-  * #3005: Kura Gets Stuck in Loading View if Services Clicked Too Fast
-  * #2843: Access Banner Content All in One Line
-  * #2747: No Spacing Between "Wire Components" and Error in Wire Graph
-  * #2728: WireGraph Component Description Windows Too Wide
-  * #2725: Different Pop-up Windows for Warnings
-  * #2702: Error Message For Long Item Names Not Displayed Properly
-  * #2696: Component Name Inteferes With Wire Graph Border
-  * #2695: Component Names in Wires Not Limited
-  * #2410: Deployment handler and URLs with many query parameters
-  * #2038: [Kura 3.2.0 QA] Package uninstallation log
-  * #1993: Search Domains Are Not Supported
-  * #1663: Authentication Issue with Deploy V2
-  * #1572: serial modbus has errors on some hardware
-  * #1529: OSGI console is not redirected to Eclipse IDE with Kura 3.0
-  * #1161: Incorrectly configuring a component can be irreversable.
-  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
-  * #1016: ConfigurationServiceImpl creates duplicate instances
-  * #797:  Design of ServiceUtil is broken
-  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
-  * #654:  Clean up static initialization around "modem" functionality
-  * #645:  Clean up internal dependencies in Kura
-  * #522:  [Net] Modem monitor should monitor interfaces, not modems
-  * #486:  Build environment broken on Windows
-  * #406:  Replace System.get* with calls to SystemService.getProperties
-  * #329:  [DEPLOY-V2] Review/refactoring needed
-  * #297:  [Status led] What connection instance controls the status led?
-  * #253:  Check if bundle contexes correctly unget services after invoking getService
-  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
+[TODO]
 
 Changelog:
+  * df0ee1988e - build(deps): updated commons-lang3 to 3.19.0 [backport release-5.6.0] (#6061) (Marcello Rinaldo Martina)
+  * a53272526d - fix: Flooding protection version reference [backport release-5.6.0] (#6057) (Matteo Maiero)
+  * e121df3ecf - feat(RED-DA): remove appadmin and netadmin from emulator [backport release-5.6.0] (#6050) (Pierantonio Merlino)
+  * c79b800893 - build: adding dnsmasq leases file removal at uninstall (#6036) (sfiorani)
+  * ac4fb9a6f6 - feat(RED-DA): remove `appadmin` and `netadmin` from snapshot_0 [backport release-5.6.0] (#6045) (Pierantonio Merlino)
+  * bbea586e52 - feat(RED-DA): default enable flooding protection [backport release 5.6.0] (#6041) (Matteo Maiero)
+  * 35f5c79774 - docs(api): clarify ConfigurationPolicy.REQUIRED requirement for ConfigurableComponent [backport release-5.6.0] (#6040) (github-actions[bot])
+  * 9108400a8b - fix: Allowed to get GPIO by name in CloudConnectionStatusService [backport release-5.6.0] (#6039) (nicolatimeus)
+  * 90767eccca - feat(RED-DA): new password strength policy [backport release-5.6.0] (#6038) (Matteo Maiero)
+  * 8ea2e7754b - feat(RED-DA): enable access banner by default [backport release-5.6.0] (#6037) (Matteo Maiero)
+  * ccd46ac565 - fix(linux.net): Allow outgoing ping while flooding protection is enabled [backport 5.6.0] (#6028) (Matteo Maiero)
+  * 6fa92b114d - chore: Updated certificates for Eclipse Marketplace [backport release-5.6.0] (#6031) (Matteo Maiero)
+  * 1d1b5bd43c - refactor(distrib): align watchdog restore code in develop (#6030) (Marcello Rinaldo Martina)
+  * bb70adedbd - fix(distrib): disable systemd watchdog to allow kura managing it [backport-5.6] (#6027) (Marcello Rinaldo Martina)
+  * c96d898fe6 - chore: Changed UI labels to make them more understandable (#5614) [backport release-5.6.0] (#6021) (Matteo Maiero)
+  * f7d91e0196 - fix(distrib): Fixed packages dir permissions [backport release-5.6.0] (#6018) (Salvatore Coppola)
+  * 5f0822acdb - feat(linux.gpio): Libgpiod v2 implementation (#6002) (Pierantonio Merlino)
+  * 1391ff3a8b - chore: fix typo in ContainerOrchestrationServiceImpl log [backport release-5.6.0] (#6014) (github-actions[bot])
+  * a7c7deca59 - chore: Removed systemd-hostnamed disabling [backport-release-5.6.0] (#6017) (Salvatore Coppola)
+  * f609efd476 - fix(distrib): added polkitd, ntpdate, jre 17, jre 21 alternative deps [backport release-5.6] (#6007) (Marcello Rinaldo Martina)
+  * 17086209fb - feat(linux.gpio): Libgpiod V1.6.X implementation (#5986) (Pierantonio Merlino)
+  * 8f6496b64b - fix: fixed verifyCRL ignored by CRLManagerOptions.equals() [backport release-5.6.0] (#6012) (github-actions[bot])
+  * b1724048bb - chore: Updated netty bundles to 4.1.127 (#6008) (Pierantonio Merlino)
+  * a8c4c987a4 - fix: check existance of parameter in modem (#6001) (sfiorani)
+  * 7f2c266663 - fix: Fixed KeystoreChangedEvent not posted in some scenarios [backport release-5.6.0] (#5997) (nicolatimeus)
+  * 410a0efdec - fix(core.configuration): make snapshot storage more resilient [backport 5.6.0] (#5991) (Matteo Maiero)
+  * 2916d45c79 - fix: ipv6 firewall icmpv6 sources [Backport 5.6.0] (#5973) (Matteo Maiero)
+  * 57f4bb59ea - fix(distrib): update start level of `permission.cache.fix` (#5978) (Mattia Dal Ben)
+  * 5d294471aa - build(cloudconnection): add maven-clean-plugin configuration for lib directories (#5980) (Matteo Maiero)
+  * cdae814508 - build: update `kura_addons` URL [backport #5977] (#5979) (Mattia Dal Ben)
+  * b1b465e70b - fix(distrib): restore log output (#5976) (Mattia Dal Ben)
+  * e1c979c43e - fix(core.deployment): Configured SslManagerService is now correctly used by the Deployment agent [Backport release-5.6.0] (#5968) (Salvatore Coppola)
+  * 1856b9bdd6 - fix(ui): initialize unconfigured wireless interface to resolve NPE, fix channel selection on hardware tab, fix validation message on empty password [backport release-5.6.0] (#5956) (Marcello Rinaldo Martina)
+  * 8d78486364 - fix(equinox): Permission cache fix (#5966) (Salvatore Coppola)
+  * 489f6ed952 - fix: wifi 802 1x password field definition [backport] (#5947) (Matteo Maiero)
+  * 6e0948299d - fix(data-service): replace hardcoded documentation link with descriptive text [backport release-5.6.0] (#5948) (github-actions[bot])
+  * fbfa71fb58 - fix(web2): avoid password validation in 802.1x config for station mode (#5945) (Marcello Rinaldo Martina)
+  * 98366b11dd - test: fix failing CloudConnectionEndpointsTest.shouldConnectEndpoint [backport release-5.6.0] (#5930) (github-actions[bot])
+  * 7a16d49e4b - chore: Fixed dependencies and updated notice file (#5910) (Matteo Maiero)
+  * 4d88cd7bd4 - chore: Updated commons fileupload and commons io (#5902) (Pierantonio Merlino)
+  * d04ae54d64 - build: Update docker-java to 3.5.3 (#5881) [backport release-5.6.0]  (#5897) (Matteo Maiero)
+  * e2b1ea2344 - build: Upgraded netty to 4.1.121.Final [backport release-5.6.0] (#5823) (github-actions[bot])
+  * c3222c3fed - ci: fix Lint PR workflow permissions (#5824) (Mattia Dal Ben)
+  * cd0df913bd - chore: Update opcua dependency to align to Kura target platform [backport release-5.6.0] (#5805) (github-actions[bot])
+  * f8e420df15 - fix: Do not include router option if no nat [backport release-5.6.0] (#5753) (eclipse-kura-bot)
+  * 6588b69988 - build: Upgraded netty to 4.1.118.Final [backport release-5.6.0] (#5739) (eclipse-kura-bot)
+  * f3733694f5 - fix(distrib): kura_install.sh is broken [backport release-5.6.0] (#5647) (eclipse-kura-bot)
+  * bf26d47a2f - fix: release notes automation after Github executors update [backport release-5.6.0] (#5621) (eclipse-kura-bot)
+  * 3f00ed7e54 - feat: added MTU limits in webUI [backport release-5.6.0] (#5605) (eclipse-kura-bot)
+  * 3353d228cd - fix: Extended log download timeframe. Improved messages. [backport release-5.6.0] (#5600) (eclipse-kura-bot)
+  * 8633fc1e3b - fix(web2): Fixed wireless mode selection [backport release-5.6.0] (#5590) (eclipse-kura-bot)
+  * dd1fde9c0f - fix: correctly stopping gpsd thread [backport release-5.6.0] (#5588) (eclipse-kura-bot)
+  * a2a0047944 - fix: Fixed IPv6 validation [backport release-5.6.0] (#5582) (eclipse-kura-bot)
+  * 56e5f7a096 - fix: fixed loading of country code [backport release-5.6.0] (#5581) (eclipse-kura-bot)
+  * 025688e2e1 - fix: Improved ordering of services list [backport release-5.6.0] (#5577) (eclipse-kura-bot)
+  * eca56edecd - chore: automated uptick to 5.6.1-SNAPSHOT (#5575) (eclipse-kura-bot)
+  * 2673f47bf8 - chore: Added raw MQTT cloud connection copy to distrib step [backport release-5.6.0] (#5571) (nicolatimeus)
+  * ec0a4a4b5a - chore: add Kura 5.6.0 release notes (#5569) (eclipse-kura-bot)
   * dabb9acce3 - fix: position not updated when fix is lost [backport release-5.6.0] (#5567) (eclipse-kura-bot)
   * 0ed4c417bc - chore: Cleanup of app update log [backport release-5.6.0] (#5566) (eclipse-kura-bot)
   * f29abe3155 - chore: add Kura 5.6.0 release notes (#5562) (eclipse-kura-bot)
@@ -208,3 +258,29 @@ Changelog:
   * 766a3328e2 - feat(nm): Modem APN as an optional parameter [backport release-5.6.0] (#5353) (github-actions[bot])
   * 8d11fda564 - chore: automated uptick to 5.6.0-SNAPSHOT (#5349) (github-actions[bot])
   * 963255b4c4 - chore: automated uptick to 5.5.1-SNAPSHOT (#5314) (github-actions[bot])
+  * 48f242c1b9 - chore: add Kura 5.5.0 release notes (#5308) (github-actions[bot])
+  * ba1a7169d8 - fix: Update web2 audit context on session id change [backport release-5.5.0] (#5307) (github-actions[bot])
+  * 31726a4786 - chore: add Kura 5.5.0 release notes (#5304) (github-actions[bot])
+  * ed6915cfb9 - fix: Fixed Keypair validity display to link only the leaf [backport release-5.5.0] (#5303) (github-actions[bot])
+  * c30ff1776a - chore: Improved Web UI identity messages [backport release-5.5.0] (#5302) (github-actions[bot])
+  * 23e22f7735 - fix: Fixed wrong IPv6 status for modem interfaces [backport release-5.5.0] (#5299) (github-actions[bot])
+  * 781591d167 - fix(nm): Fixed dnsmasq behavior on configuration change [backport release-5.5.0] (#5301) (github-actions[bot])
+  * d4969a7fd0 - fix: Added a check to not display the automatic option for the old networking [backport release-5.5.0] (#5297) (github-actions[bot])
+  * 01b2ea6c48 - fix: Always generate new session id on login [backport release-5.5.0] (#5293) (github-actions[bot])
+  * 7e0368d07a - fix(web2): Removed handler from button in certificate import form (#5… (#5286) (Pierantonio Merlino)
+  * 254b4b33da - fix: fixed null in wi-fi frontend and missing wi-fi update on IPv6 [backport release-5.5.0] (#5292) (github-actions[bot])
+  * cea7441dbd - chore: add Kura 5.5.0 release notes (#5283) (github-actions[bot])
+  * d6d326c8d7 - fix(distrib): customize-installation.sh to always patch interface names on snapshot_0.xml and iptables [backport release-5.5.0] (#5278) (github-actions[bot])
+  * 3d2e6a3dcc - fix(rest.identity): fixed status codes and error messages for malformed requests [backport release-5.5.0] (#5279) (github-actions[bot])
+  * e4e5477af2 - fix(nm): Avoid querying wifi ap for info if it is not available anymore [backport release-5.5.0] (#5271) (github-actions[bot])
+  * 6533fc5d63 - fix: Fixed console not immediately applying SslManagerService target update [backport release-5.5.0] (#5274) (nicolatimeus)
+  * 0bbbc9499d - fix(distrib): missing uninstallation logging [backport release-5.5.0] (#5273) (github-actions[bot])
+  * 61be2a7403 - fix(distrib): add wpa_supplicant dbus permissions only on NN profiles [backport release-5.5.0] (#5270) (github-actions[bot])
+  * 7aea9512a5 - fix(web2): Removed servlet unregistration during update if options are not changed [backport release-5.5.0] (#5268) (github-actions[bot])
+  * 24feced08e - fix(core.cloud): [backport] Added null checks to unset reference methods  (#5262) (Salvatore Coppola)
+  * b1ea671a6f - fix(distrib): kurad installation on docker-alpine-x86_64-nn container [backport release-5.5.0] (#5257) (github-actions[bot])
+  * 16a06ae68f - fix: Allow kurad to shutdown and reboot the system [backport release-5.5.0] (#5254) (github-actions[bot])
+  * ad375f3720 - fix: correct management of wi-fi disabled state and visualization [backport release-5.5.0] (#5256) (github-actions[bot])
+  * 4d8a098496 - feat(linux.gpio): Added support to gpio symlinks [backport release-5.5.0] (#5247) (github-actions[bot])
+  * 0be0b6f8f3 - chore: add Kura 5.5.0 release notes (#5244) (github-actions[bot])
+  * b64ef78bfd - chore: Upticked versions for 5.5.0 release  (#5243) (nicolatimeus)

@@ -7,18 +7,80 @@ The interface centralizes cryptographic operations and keystore password managem
 The interface is implemented by the `CryptoServiceImpl` class that provides a baseline reference for users to generate their own versions of the CryptoService if needed.
 A notable use of the `CryptoService` is encrypting the configuration snapshot files and the configuration properties of PASSWORD type.
 
-!!! note
-    The default `CryptoServiceImpl` bundled with Kura uses a well-known, default encryption key when no secret is provided. This default is intended only for development and testing purposes. For production deployments, users MUST replace the default secret by setting the Java environment variable:
+## Encryption key
 
-    - org.eclipse.kura.core.crypto.secretKey
+The default `CryptoServiceImpl` included with Kura utilizes a configurable encryption key for encryption purposes. When no secret key is provided, a commonly known default encryption key is used. This default should only be used in development and testing environments. For production deployments, it is **CRUCIAL** that users replace the default encryption key with a secure one.
 
-    The secret key must be either 16, 24, or 32 bytes (characters) long. Example (set as JVM argument or environment variable depending on your runtime):
-
-    - As JVM system property: -Dorg.eclipse.kura.core.crypto.secretKey=your-16+char-secret
+!!! warning
 
     Failing to replace the default secret leaves encrypted data vulnerable. Ensure secrets are stored and managed securely in your environment.
 
-    To implement an alternative mechanism for storing the key it is possible to replace the `org.eclipse.kura.core.crypto` bundle with a custom implementation.
+The secret key must be either 16, 24, or 32 bytes (characters) long, it can be specified in the following ways:
+
+The encryption key can be configured with the following Java system property:
+
+- `org.eclipse.kura.core.crypto.secretKey`
+
+Kura default start scripts (see `/opt/eclipse/kura/bin/`) will set the system property above to the content of the `KURA_CRYPTO_SECRET_KEY` environment variable.
+
+#### Systemd deployments
+
+A possible way to provide the key is creating an environment file like shown below. The commands must be run as root.
+
+```sh
+echo KURA_CRYPTO_SECRET_KEY=$(systemd-ask-password -n) > /etc/kura-key.conf
+```
+
+Review the content of the `/etc/kura-key.conf` to verify if it needs escaping as explained in the description of the `EnvironmentFile` parameter in [systemd documentation](https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html).
+
+```sh
+chmod 400 /etc/kura-key.conf
+```
+
+```sh
+mkdir -p /etc/systemd/system/kura.service.d
+```
+
+```sh
+( echo "[Service]" && echo "EnvironmentFile=/etc/kura-key.conf" ) >/etc/systemd/system/kura.service.d/50-key-env-file.conf
+```
+
+```sh
+systemctl daemon-reload
+```
+
+The result can be verified with `systemctl cat kura`, it should produce an output similar to the following:
+
+```sh
+systemctl cat kura
+# /lib/systemd/system/kura.service
+[Unit]
+Description=Kura
+Wants=dbus.service
+After=dbus.service
+
+....
+kura.service content
+....
+
+# /etc/systemd/system/kura.service.d/50-key-env-file.conf
+[Service]
+EnvironmentFile=/etc/kura-key.conf
+```
+
+#### Container based deployments
+
+Specify the environment variable using the `--env` or `--env-file` command line option of the `docker`/`podman` `run` or `create` commands.
+
+For additional information about Eclipse Kura containers see: https://hub.docker.com/r/eclipse/kura/
+
+!!! note
+
+    The default CryptoService implementation will load the encryption key from the Java system property first, falling back to the default well-known key if the property has not been specified or its content is not valid.
+
+### Using a custom storage implementation
+
+To implement an alternative mechanism for key storage, you can replace the `org.eclipse.kura.core.crypto` bundle with a custom implementation.
 
 ## Key Functional Areas
 

@@ -62,6 +62,7 @@ if [[ -n "${KURA_DEBUG_MODE}" && "${KURA_DEBUG_MODE}" == "true" ]]; then
 fi
 
 DEBUG_OPTS=""
+EQUINOX_DEBUG_OPTS=""
 if [[ $IS_DEBUG_MODE == "true" ]]; then
     DEBUG_OPTS="-Xdebug \
         -Xrunjdwp:server=y,transport=dt_socket,address=*:8000,suspend=n \
@@ -69,6 +70,9 @@ if [[ $IS_DEBUG_MODE == "true" ]]; then
         -XX:+HeapDumpOnOutOfMemoryError \
         -XX:HeapDumpPath=/var/log/kura-heapdump.hprof \
         -XX:ErrorFile=/var/log/kura-error.log"
+
+    EQUINOX_DEBUG_OPTS="-console 5002 \
+    -consoleLog"
 fi
 
 KURA_LAUNCH_COMMAND="exec java"
@@ -98,7 +102,8 @@ KURA_CMD="${KURA_LAUNCH_COMMAND} -Xms${kura.mem.size} -Xmx${kura.mem.size} \
     -Djdk.tls.trustNameService=true \
     -Declipse.consoleLog=true \
     -jar \${DIR}/plugins/org.eclipse.equinox.launcher-${org.eclipse.equinox.launcher.version}.jar \
-    -configuration /tmp/.kura/configuration"
+    -configuration /tmp/.kura/configuration \
+    $EQUINOX_DEBUG_OPTS"
 
 if [[ $IS_DETACHED_MODE == "true" ]]; then
     eval "$KURA_CMD &"

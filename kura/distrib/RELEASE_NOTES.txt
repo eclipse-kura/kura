@@ -133,6 +133,9 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * d19fde34dd - chore(core.crypto): uptick core.crypto [release 5.6.0] (#6068) (sfiorani)
+  * 3cfdd41ca9 - chore: add Kura 5.6.1-SNAPSHOT release notes (#6067) (eclipse-kura-bot)
+  * 001e6094c6 - chore: automated uptick to 5.6.1 (#6060) (eclipse-kura-bot)
   * a8f97f759d - fix(web2): generic error when setting access point with no password [backport release-5.6.0] (#6054) (sfiorani)
   * 201c9aa92c - fix: Prominent alert on using default password for CryptoServiceImpl [backport release-5.6.0] (#6053) (nicolatimeus)
   * df0ee1988e - build(deps): updated commons-lang3 to 3.19.0 [backport release-5.6.0] (#6061) (Marcello Rinaldo Martina)

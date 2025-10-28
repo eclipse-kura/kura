@@ -22,8 +22,6 @@ function find_dbus_config_path {
         echo "${default_path}"
     elif [ -f "${fallback_path}" ]; then
         echo "${fallback_path}"
-    else
-        echo "${default_path}"
     fi
 }
 

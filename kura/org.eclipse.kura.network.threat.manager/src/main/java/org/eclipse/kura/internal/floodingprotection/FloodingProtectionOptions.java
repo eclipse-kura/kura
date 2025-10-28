@@ -69,6 +69,49 @@ public class FloodingProtectionOptions {
             "-A prerouting-kura -m ipv6header --header esp --soft -j DROP",
             "-A prerouting-kura -m ipv6header --header none --soft -j DROP",
             "-A prerouting-kura -m rt --rt-type 0 -j DROP", "-A output-kura -m rt --rt-type 0 -j DROP" };
+    
+    private static final String[] FLOODING_PROTECTION_FILTER_RULES_IPV6 = {
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 1 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 2 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 3/0 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 3/1 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 4/0 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 4/1 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 4/2 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 128 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 129 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 144 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 145 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 146 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 147 -j ACCEPT",
+            // Multicast Listener Discovery - essential for IPv6 multicast (mDNS, DHCPv6, etc.)
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 130 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 131 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 132 -j ACCEPT",
+            // Critical Neighbor/Router Discovery - no source restriction for IPv6 connectivity
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 133 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 134 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 135 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 136 -j ACCEPT",
+            "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 141 -j ACCEPT",
+            "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 142 -j ACCEPT",
+            "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 148 -j ACCEPT",
+            "-A input-kura -s fe80::/10 -p ipv6-icmp -m ipv6-icmp --icmpv6-type 149 -j ACCEPT",
+            // Multicast Router Discovery - essential for IPv6 routing protocols
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 151 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 152 -j ACCEPT",
+            "-A input-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 153 -j ACCEPT",
+            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 1 -j ACCEPT",
+            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 2 -j ACCEPT",
+            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 3/0 -j ACCEPT",
+            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 3/1 -j ACCEPT",
+            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 4/0 -j ACCEPT",
+            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 4/1 -j ACCEPT",
+            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 4/2 -j ACCEPT",
+            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 144 -j ACCEPT",
+            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 145 -j ACCEPT",
+            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 146 -j ACCEPT",
+            "-A forward-kura -p ipv6-icmp -m ipv6-icmp --icmpv6-type 147 -j ACCEPT" };
 
     private static final String FRAG_LOW_THR_IPV4_NAME = "/proc/sys/net/ipv4/ipfrag_low_thresh";
     private static final String FRAG_HIGH_THR_IPV4_NAME = "/proc/sys/net/ipv4/ipfrag_high_thresh";
@@ -132,7 +175,11 @@ public class FloodingProtectionOptions {
     }
 
     public Set<String> getFloodingProtectionFilterRulesIPv6() {
-        return new LinkedHashSet<>();
+        if (isIPv6Enabled()) {
+            return new LinkedHashSet<>(Arrays.asList(FLOODING_PROTECTION_FILTER_RULES_IPV6));
+        } else {
+            return new LinkedHashSet<>();
+        }
     }
 
     public Set<String> getFloodingProtectionNatRulesIPv6() {

@@ -4604,7 +4604,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>enabled</strong> - sets whether or not this service is enabled or disabled. (Required field)</p>
 </li>
 <li>
-<p><strong>pingInterval</strong> - defines the maximum time interval between two watchdogs' refresh to prevent the system from rebooting. (Required field)</p>
+<p><strong>pingInterval</strong> - defines the maximum time interval (in milliseconds) allowed between two watchdog refreshes to prevent the system from rebooting. (This is a required field.) The interval must be set to a value less than the system's <strong>watchdog timeout</strong>; otherwise, the watchdog will not be refreshed in time, resulting in a system reboot. On most systems, you can check the watchdog timeout using the following command:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>wdctl<span class="w"> </span>&lt;watchdog-device&gt;
+</code></pre></div>
+    The <code>wdctl</code> tool allows to change the default timeout value. Refer to specific <a href="https://man7.org/linux/man-pages/man8/wdctl.8.html">man page</a> for details.</p>
 </li>
 <li>
 <p><strong>Watchdog device path</strong> - sets the watchdog device path. (Required field)</p>

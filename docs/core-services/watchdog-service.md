@@ -10,7 +10,7 @@ This service provides the following configuration parameters:
 
 - **enabled** - sets whether or not this service is enabled or disabled. (Required field)
 
-- **pingInterval** - defines the maximum time interval (in milliseconds) between two watchdogs' refresh to prevent the system from rebooting. (Required field). The interval should be set to a value inferior to the system's **watchdog timeout**, otherwise the watchdog will never be refreshed on time and the system will be rebooted. On most systems, the watchdog timeout can be inspected with the following command:
+- **pingInterval** - defines the maximum time interval (in milliseconds) allowed between two watchdog refreshes to prevent the system from rebooting. (This is a required field.) The interval must be set to a value less than the system's **watchdog timeout**; otherwise, the watchdog will not be refreshed in time, resulting in a system reboot. On most systems, you can check the watchdog timeout using the following command:
     ```bash
     wdctl <watchdog-device>
     ```

@@ -58,13 +58,13 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.commons/commons-fileupload2-jakarta-servlet5/2.0.0-M2, Apache-2.0, approved, #15737
 * maven/mavencentral/commons-io/commons-io/2.19.0, Apache-2.0, approved, #20657
 * maven/mavencentral/commons-net/commons-net/3.8.0, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.grpc/grpc-api/1.76.0, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.grpc/grpc-context/1.76.0, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.grpc/grpc-core/1.76.0, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.grpc/grpc-netty-shaded/1.76.0, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.grpc/grpc-protobuf-lite/1.76.0, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.grpc/grpc-protobuf/1.76.0, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/io.grpc/grpc-stub/1.76.0, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/io.grpc/grpc-api/1.76.0, Apache-2.0, approved, #24621
+* maven/mavencentral/io.grpc/grpc-context/1.76.0, Apache-2.0, approved, #24616
+* maven/mavencentral/io.grpc/grpc-core/1.76.0, Apache-2.0, approved, #24615
+* maven/mavencentral/io.grpc/grpc-netty-shaded/1.76.0, Apache-2.0, approved, #24617
+* maven/mavencentral/io.grpc/grpc-protobuf-lite/1.76.0, Apache-2.0, approved, #24618
+* maven/mavencentral/io.grpc/grpc-protobuf/1.76.0, Apache-2.0, approved, #24619
+* maven/mavencentral/io.grpc/grpc-stub/1.76.0, Apache-2.0, approved, #24620
 * maven/mavencentral/io.netty/netty-all/4.1.127.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ22582
 * maven/mavencentral/io.netty/netty-buffer/4.1.127.Final, Apache-2.0, approved, CQ21842
 * maven/mavencentral/io.netty/netty-codec-http/4.1.127.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926

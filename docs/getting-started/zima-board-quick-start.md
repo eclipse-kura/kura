@@ -4,7 +4,7 @@
 
 ## Eclipse Kura&trade; Installation
 
-## Notes
+## Known Issues
 
 On Ubuntu 24.04 with NetworkManager and DHCP (IPv4), a network interface fails to obtain an IPv4 address automatically. The issue is due to this [bug](https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/2116733).
 

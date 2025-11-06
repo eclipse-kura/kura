@@ -37,6 +37,3 @@ To fix it, the `AppArmor` configuration has to be updated as follows:
   network inet6 dgram,
 }
 ```
-
-
-

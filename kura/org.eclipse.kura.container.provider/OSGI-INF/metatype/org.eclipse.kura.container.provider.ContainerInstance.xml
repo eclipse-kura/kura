@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-     Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
-   
-     This program and the accompanying materials are made
-     available under the terms of the Eclipse Public License 2.0
-     which is available at https://www.eclipse.org/legal/epl-2.0/
-  
- 	SPDX-License-Identifier: EPL-2.0
- 	
- 	Contributors:
- 	 Eurotech
- -->
+
+    Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+-->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.container.provider.ContainerInstance" name="Container Instance"
         description="Allows for the creation of containers.">
@@ -116,12 +117,16 @@
             
         <AD id="container.memory" name="Memory"
             description="The maximum amount of memory the container can use in bytes. Set it as a positive integer, optionally followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes. 
-            The minimum allowed value is platform dependent (i.e. 6m). If left empty, the memory assigned to the container will be set to a default value by the native container orchestrator."
+            The minimum allowed value is platform dependent (i.e. 6m). If left empty, the memory assigned to the container will be set to a default value by the native container orchestrator.
+            This parameter only takes effect if the host system’s kernel has the corresponding cgroup v2 features enabled.
+            Please refer to the Kura documentation for more information."
             type="String" cardinality="0"
             required="false" default="" />
             
         <AD id="container.cpus" name="CPUs"
-            description="Specify how many CPUs a container can use. Decimal values are allowed, so if set to 1.5, the container will use at most one and a half cpu resource."
+            description="Specify how many CPUs a container can use. Decimal values are allowed, so if set to 1.5, the container will use at most one and a half cpu resource.
+            This parameter only takes effect if the host system’s kernel has the corresponding cgroup v2 features enabled.
+            Please refer to the Kura documentation for more information."
             type="Float" cardinality="0"
             required="false" default="" />
 

@@ -95,8 +95,8 @@ After specifying container parameters, ensure to set **Enabled** to **true** and
 ![Container Orchestration Provider Container Configuration](./images/container-orchestration-provider-container-configuration.png)
 
 ## Manage container resources
-Memory and CPUs parameters only takes effect if the host machine's kernel has enabled the related cgroup v2 feature.
-To verify which cgroups subsystems are enabled check the file `/proc/cgroup` 
+Memory and CPU settings only take effect if the host system’s kernel has the corresponding cgroup v2 features enabled.
+To see which cgroup subsystems are enabled, inspect the `/proc/cgroup` file.
 ```shell
 cat /proc/cgroups
 ```

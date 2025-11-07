@@ -94,7 +94,36 @@ After specifying container parameters, ensure to set **Enabled** to **true** and
 
 ![Container Orchestration Provider Container Configuration](./images/container-orchestration-provider-container-configuration.png)
 
+## Manage container resources
+Memory and CPU settings only take effect if the host system’s kernel has the corresponding cgroup v2 features enabled.
+To see which cgroup subsystems are enabled, inspect the `/proc/cgroup` file.
+```shell
+cat /proc/cgroups
+```
+You should see output similar to this:
+```shell
+#subsys_name    hierarchy       num_cgroups     enabled
+cpuset  0       97      1
+cpu     0       97      1
+cpuacct 0       97      1
+blkio   0       97      1
+devices 0       97      1
+freezer 0       97      1
+net_cls 0       97      1
+perf_event      0       97      1
+net_prio        0       97      1
+pids    0       97      1
+```
 
+**enabled**: Indicates whether the subsystem is enabled (1) or disabled (0) in the kernel.
+
+To enable the subsystem in Raspberry Pi OS, for example, you need to add the following entries to the bootloader options:
+`cgroup_enable=memory cgroup_memory=1 swapaccount=1 cgroup_enable=cpuset` and reboot the system.
+
+E.g.
+```shell
+echo " cgroup_enable=memory cgroup_memory=1 swapaccount=1 cgroup_enable=cpuset" > /boot/firmware/cmdline.txt
+```
 
 ## Stopping the container
 

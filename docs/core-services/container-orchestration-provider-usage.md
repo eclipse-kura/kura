@@ -117,7 +117,7 @@ pids    0       97      1
 
 **enabled**: Indicates whether the subsystem is enabled (1) or disabled (0) in the kernel.
 
-To enable the subsystem in RaspiOS, for example, you need to add the following entries to the bootloader options:
+To enable the subsystem in Raspberry Pi OS, for example, you need to add the following entries to the bootloader options:
 `cgroup_enable=memory cgroup_memory=1 swapaccount=1 cgroup_enable=cpuset` and reboot the system.
 
 E.g.

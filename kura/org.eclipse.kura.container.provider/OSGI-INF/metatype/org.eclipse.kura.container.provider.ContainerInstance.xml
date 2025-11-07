@@ -118,7 +118,7 @@
         <AD id="container.memory" name="Memory"
             description="The maximum amount of memory the container can use in bytes. Set it as a positive integer, optionally followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes. 
             The minimum allowed value is platform dependent (i.e. 6m). If left empty, the memory assigned to the container will be set to a default value by the native container orchestrator.
-            This parameter only takes effect if the host machine's kernel has enabled the related cgroup v2 feature.
+            This parameter only takes effect if the host system’s kernel has the corresponding cgroup v2 features enabled."
             Please refer to the Kura documentation for more information."
             type="String" cardinality="0"
             required="false" default="" />

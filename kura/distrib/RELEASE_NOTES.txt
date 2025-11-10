@@ -1,4 +1,4 @@
-Eclipse Kura - 5.6.1 - October 2025
+Eclipse Kura - 5.6.1 - November 2025
 -------------------------------------------------------------------------------------------------
 Description:
 This patch release of Eclipse Kura, compatible with Java 8 and OSGi R7 includes:
@@ -8,6 +8,7 @@ This patch release of Eclipse Kura, compatible with Java 8 and OSGi R7 includes:
   - Improved GPIO support with a new libgpiod integration.
 
 Features:
+  * 66fea3a0ba - add IPv6 ICMPv6 filter rules for flooding protection [release-5.6.0] (#6075) (Matteo Maiero)
   * e121df3ecf - [RED-DA] remove appadmin and netadmin from emulator [backport release-5.6.0] (#6050) (Pierantonio Merlino)
   * ac4fb9a6f6 - [RED-DA] remove `appadmin` and `netadmin` from snapshot_0 [backport release-5.6.0] (#6045) (Pierantonio Merlino)
   * bbea586e52 - [RED-DA] default enable flooding protection [backport release 5.6.0] (#6041) (Matteo Maiero)
@@ -30,6 +31,10 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * 1706193ac9 - fix: Network failover configuration fixes [backport release-5.6.0] (#6087) (Pierantonio Merlino)
+  * cba5b06c9a - fix: Fixed container provider version [release-5.6.0] (#6086) (Pierantonio Merlino)
+  * 0c9e06e908 - fix: Fixed wrong bluetooth.conf and wpa_supplicant.conf reference on Ubuntu 24.04 (eclipse-kura-bot)
+  * 4f9203df1c - fix: fixed firewall service variable replacement [release-5.6.0] (#6072) (Matteo Maiero)
   * a8f97f759d - [web2] generic error when setting access point with no password [backport release-5.6.0] (#6054) (sfiorani)
   * 201c9aa92c - Prominent alert on using default password for CryptoServiceImpl [backport release-5.6.0] (#6053) (nicolatimeus)
   * a53272526d - Flooding protection version reference [backport release-5.6.0] (#6057) (Matteo Maiero)
@@ -133,6 +138,16 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 1706193ac9 - fix: Network failover configuration fixes [backport release-5.6.0] (#6087) (Pierantonio Merlino)
+  * cba5b06c9a - fix: Fixed container provider version [release-5.6.0] (#6086) (Pierantonio Merlino)
+  * 7415d4ef68 - docs(container.provider): Added info on container resource management [backport release-5.6.0] (#6085) (Pierantonio Merlino)
+  * fce33ffcb8 - refactor(distrib): remove redundant else clause in find_dbus_config_path (#6074) (eclipse-kura-bot)
+  * 66fea3a0ba - feat(network.threat.manager): add IPv6 ICMPv6 filter rules for flooding protection [release-5.6.0] (#6075) (Matteo Maiero)
+  * eff5e0c6e8 - refactor: Extract duplicated dbus config path detection into reusable function (GitHub Copilot)
+  * 263e1a89cd - Apply suggestion from @Copilot (eclipse-kura-bot)
+  * 0c9e06e908 - fix: Fixed wrong bluetooth.conf and wpa_supplicant.conf reference on Ubuntu 24.04 (eclipse-kura-bot)
+  * 4f9203df1c - fix: fixed firewall service variable replacement [release-5.6.0] (#6072) (Matteo Maiero)
+  * 3f5e395d2f - chore: add Kura 5.6.1 release notes (#6069) (eclipse-kura-bot)
   * d19fde34dd - chore(core.crypto): uptick core.crypto [release 5.6.0] (#6068) (sfiorani)
   * 3cfdd41ca9 - chore: add Kura 5.6.1-SNAPSHOT release notes (#6067) (eclipse-kura-bot)
   * 001e6094c6 - chore: automated uptick to 5.6.1 (#6060) (eclipse-kura-bot)

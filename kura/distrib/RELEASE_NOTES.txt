@@ -1,4 +1,4 @@
-Eclipse Kura - 5.6.1 - October 2025
+Eclipse Kura - 5.6.1 - November 2025
 -------------------------------------------------------------------------------------------------
 Description:
 This patch release of Eclipse Kura, compatible with Java 8 and OSGi R7 includes:

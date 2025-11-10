@@ -118,10 +118,31 @@ pids    0       97      1
 **enabled**: Indicates whether the subsystem is enabled (1) or disabled (0) in the kernel.
 
 To enable the subsystem in Raspberry Pi OS, for example, you need to add the following entries to the bootloader options:
-`cgroup_enable=memory cgroup_memory=1 swapaccount=1 cgroup_enable=cpuset` and reboot the system.
+
+ - `cgroup_enable=memory`
+ - `cgroup_memory=1`
+ - `swapaccount=1`
+ - `cgroup_enable=cpuset`
+ 
+ and reboot the system.
+
+For example, on Raspberry Pi 5 with Debian Bookworm 12.2, you can add them to the `/boot/firmware/cmdline.txt` file, whose original content is:
+ 
+```shell
+ console=serial0,115200 console=tty1 root=PARTUUID=6312077f-02 rootfstype=ext4 fsck.repair=yes rootwait cfg80211.ieee80211_regdom=IT
+```
+
+The result should be a single line with all the existing options plus the new ones.
+
+```shell
+ console=serial0,115200 console=tty1 root=PARTUUID=6312077f-02 rootfstype=ext4 fsck.repair=yes rootwait cfg80211.ieee80211_regdom=IT cgroup_enable=memory cgroup_memory=1 swapaccount=1 cgroup_enable=cpuset`
+```
+
+!!! warning
+    Modifying the bootloader options incorrectly may prevent the system from booting. Please ensure to back up any important data before making changes to these settings.
 
 E.g.
-```shell
+```
 echo " cgroup_enable=memory cgroup_memory=1 swapaccount=1 cgroup_enable=cpuset" > /boot/firmware/cmdline.txt
 ```
 

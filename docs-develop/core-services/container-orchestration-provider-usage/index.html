@@ -4842,11 +4842,24 @@ You should see output similar to this:
 <a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>pids<span class="w">    </span><span class="m">0</span><span class="w">       </span><span class="m">97</span><span class="w">      </span><span class="m">1</span>
 </code></pre></div></p>
 <p><strong>enabled</strong>: Indicates whether the subsystem is enabled (1) or disabled (0) in the kernel.</p>
-<p>To enable the subsystem in Raspberry Pi OS, for example, you need to add the following entries to the bootloader options:
-<code>cgroup_enable=memory cgroup_memory=1 swapaccount=1 cgroup_enable=cpuset</code> and reboot the system.</p>
-<p>E.g.
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot; cgroup_enable=memory cgroup_memory=1 swapaccount=1 cgroup_enable=cpuset&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/boot/firmware/cmdline.txt
-</code></pre></div></p>
+<p>To enable the subsystem in Raspberry Pi OS, for example, you need to add the following entries to the bootloader options:</p>
+<ul>
+<li><code>cgroup_enable=memory</code></li>
+<li><code>cgroup_memory=1</code></li>
+<li><code>swapaccount=1</code></li>
+<li><code>cgroup_enable=cpuset</code></li>
+</ul>
+<p>and reboot the system.</p>
+<p>For example, on Raspberry Pi 5 with Debian Bookworm 12.2, you can add them to the <code>/boot/firmware/cmdline.txt</code> file, whose original content is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="w"> </span><span class="nv">console</span><span class="o">=</span>serial0,115200<span class="w"> </span><span class="nv">console</span><span class="o">=</span>tty1<span class="w"> </span><span class="nv">root</span><span class="o">=</span><span class="nv">PARTUUID</span><span class="o">=</span>6312077f-02<span class="w"> </span><span class="nv">rootfstype</span><span class="o">=</span>ext4<span class="w"> </span>fsck.repair<span class="o">=</span>yes<span class="w"> </span>rootwait<span class="w"> </span>cfg80211.ieee80211_regdom<span class="o">=</span>IT
+</code></pre></div>
+<p>The result should be a single line with all the existing options plus the new ones.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="w"> </span><span class="nv">console</span><span class="o">=</span>serial0,115200<span class="w"> </span><span class="nv">console</span><span class="o">=</span>tty1<span class="w"> </span><span class="nv">root</span><span class="o">=</span><span class="nv">PARTUUID</span><span class="o">=</span>6312077f-02<span class="w"> </span><span class="nv">rootfstype</span><span class="o">=</span>ext4<span class="w"> </span>fsck.repair<span class="o">=</span>yes<span class="w"> </span>rootwait<span class="w"> </span>cfg80211.ieee80211_regdom<span class="o">=</span>IT<span class="w"> </span><span class="nv">cgroup_enable</span><span class="o">=</span>memory<span class="w"> </span><span class="nv">cgroup_memory</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">swapaccount</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">cgroup_enable</span><span class="o">=</span>cpuset<span class="sb">`</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Modifying the bootloader options incorrectly may prevent the system from booting. Please ensure to back up any important data before making changes to these settings.</p>
+</div>
 <h2 id="stopping-the-container">Stopping the container</h2>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>

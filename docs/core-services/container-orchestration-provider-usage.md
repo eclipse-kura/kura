@@ -141,11 +141,6 @@ The result should be a single line with all the existing options plus the new on
 !!! warning
     Modifying the bootloader options incorrectly may prevent the system from booting. Please ensure to back up any important data before making changes to these settings.
 
-E.g.
-```
-echo " cgroup_enable=memory cgroup_memory=1 swapaccount=1 cgroup_enable=cpuset" > /boot/firmware/cmdline.txt
-```
-
 ## Stopping the container
 
 !!! warning

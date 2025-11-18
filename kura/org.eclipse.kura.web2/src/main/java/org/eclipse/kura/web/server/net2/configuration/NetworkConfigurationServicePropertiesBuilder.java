@@ -235,7 +235,8 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
                 this.properties.setWifiMasterPassphrase(this.ifname, gwtApConfig.getPassword());
             } else {
-                if (!gwtWifiConfig.getSecurity().equals(GwtWifiSecurity.netWifiSecurityNONE.name())) {
+                if (!gwtWifiConfig.getSecurity().equals(GwtWifiSecurity.netWifiSecurityNONE.name())
+                        && !gwtWifiConfig.getSecurity().equals(GwtWifiSecurity.netWifiSecurityWEP.name())) {
                     GwtServerUtil.validateUserPassword(gwtWifiConfig.getPassword());
                 }
                 this.properties.setWifiMasterPassphrase(this.ifname, gwtWifiConfig.getPassword());

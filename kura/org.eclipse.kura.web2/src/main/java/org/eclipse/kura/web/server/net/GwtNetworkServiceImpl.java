@@ -102,7 +102,6 @@ import org.eclipse.kura.web.shared.model.GwtWifiNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiRadioMode;
 import org.eclipse.kura.web.shared.model.GwtWifiSecurity;
 import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("restriction")
@@ -1693,7 +1692,8 @@ public class GwtNetworkServiceImpl {
             }
 
         } else if (passKey != null && mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
-            if (!gwtWifiConfig.getSecurity().equals(GwtWifiSecurity.netWifiSecurityNONE.name())) {
+            if (!gwtWifiConfig.getSecurity().equals(GwtWifiSecurity.netWifiSecurityNONE.name())
+                        && !gwtWifiConfig.getSecurity().equals(GwtWifiSecurity.netWifiSecurityWEP.name())) {
                 GwtServerUtil.validateUserPassword(passKey);
             }
             properties.put(wifiPassphrasePropName, new Password(passKey));

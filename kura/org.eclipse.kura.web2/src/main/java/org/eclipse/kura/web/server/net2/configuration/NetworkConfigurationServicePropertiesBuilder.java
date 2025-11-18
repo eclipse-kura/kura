@@ -167,14 +167,14 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
     private void setIpv4DhcpClientProperties() {
         switch (this.gwtConfig.getConfigModeEnum()) {
-        case netIPv4ConfigModeDHCP:
-            this.properties.setDhcpClient4Enabled(this.ifname, true);
-            break;
-        case netIPv4ConfigModeManual:
-            this.properties.setDhcpClient4Enabled(this.ifname, false);
-            break;
-        default:
-            break;
+            case netIPv4ConfigModeDHCP:
+                this.properties.setDhcpClient4Enabled(this.ifname, true);
+                break;
+            case netIPv4ConfigModeManual:
+                this.properties.setDhcpClient4Enabled(this.ifname, false);
+                break;
+            default:
+                break;
         }
     }
 
@@ -235,7 +235,8 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
                 this.properties.setWifiMasterPassphrase(this.ifname, gwtApConfig.getPassword());
             } else {
-                if (!gwtWifiConfig.getSecurity().equals(GwtWifiSecurity.netWifiSecurityNONE.name())) {
+                if (!gwtWifiConfig.getSecurity().equals(GwtWifiSecurity.netWifiSecurityNONE.name())
+                        && !gwtWifiConfig.getSecurity().equals(GwtWifiSecurity.netWifiSecurityWEP.name())) {
                     GwtServerUtil.validateUserPassword(gwtWifiConfig.getPassword());
                 }
                 this.properties.setWifiMasterPassphrase(this.ifname, gwtWifiConfig.getPassword());

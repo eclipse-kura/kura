@@ -167,14 +167,14 @@ public class NetworkConfigurationServicePropertiesBuilder {
 
     private void setIpv4DhcpClientProperties() {
         switch (this.gwtConfig.getConfigModeEnum()) {
-            case netIPv4ConfigModeDHCP:
-                this.properties.setDhcpClient4Enabled(this.ifname, true);
-                break;
-            case netIPv4ConfigModeManual:
-                this.properties.setDhcpClient4Enabled(this.ifname, false);
-                break;
-            default:
-                break;
+        case netIPv4ConfigModeDHCP:
+            this.properties.setDhcpClient4Enabled(this.ifname, true);
+            break;
+        case netIPv4ConfigModeManual:
+            this.properties.setDhcpClient4Enabled(this.ifname, false);
+            break;
+        default:
+            break;
         }
     }
 

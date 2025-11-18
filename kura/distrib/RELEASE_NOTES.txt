@@ -31,10 +31,11 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
-  * 1706193ac9 - fix: Network failover configuration fixes [backport release-5.6.0] (#6087) (Pierantonio Merlino)
-  * cba5b06c9a - fix: Fixed container provider version [release-5.6.0] (#6086) (Pierantonio Merlino)
-  * 0c9e06e908 - fix: Fixed wrong bluetooth.conf and wpa_supplicant.conf reference on Ubuntu 24.04 (eclipse-kura-bot)
-  * 4f9203df1c - fix: fixed firewall service variable replacement [release-5.6.0] (#6072) (Matteo Maiero)
+  * d95a6d3b13 - access point WEP password validation failure (#6092) (sfiorani)
+  * 1706193ac9 - Network failover configuration fixes [backport release-5.6.0] (#6087) (Pierantonio Merlino)
+  * cba5b06c9a - Fixed container provider version [release-5.6.0] (#6086) (Pierantonio Merlino)
+  * 0c9e06e908 - Fixed wrong bluetooth.conf and wpa_supplicant.conf reference on Ubuntu 24.04 (eclipse-kura-bot)
+  * 4f9203df1c - fixed firewall service variable replacement [release-5.6.0] (#6072) (Matteo Maiero)
   * a8f97f759d - [web2] generic error when setting access point with no password [backport release-5.6.0] (#6054) (sfiorani)
   * 201c9aa92c - Prominent alert on using default password for CryptoServiceImpl [backport release-5.6.0] (#6053) (nicolatimeus)
   * a53272526d - Flooding protection version reference [backport release-5.6.0] (#6057) (Matteo Maiero)
@@ -78,6 +79,7 @@ Target Platform Updates:
   * 6588b69988 - Upgraded netty to 4.1.118.Final [backport release-5.6.0] (#5739) (eclipse-kura-bot)
 
 Known Issues:
+  * On some devices, Kura cannot apply prerouting rules to mangle table on ip6tables due to the lack of the RT module.
   * During a wifi scan, some access points with the WPA/WPA2 wifi security are recognized as WPA.
   * On devices with Ubuntu 20.04, the DHCP server provided by isc-dhcp-server may not assign an IP address to the clients. Use dnsmasq instead.
   * Different GNSS Type retrieved from different Position Providers (see #5409 for details)
@@ -138,6 +140,8 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * d95a6d3b13 - fix: access point WEP password validation failure (#6092) (sfiorani)
+  * 1706193ac9 - chore: add Kura 5.6.1 release notes (#6088) (sfiorani)
   * 1706193ac9 - fix: Network failover configuration fixes [backport release-5.6.0] (#6087) (Pierantonio Merlino)
   * cba5b06c9a - fix: Fixed container provider version [release-5.6.0] (#6086) (Pierantonio Merlino)
   * 7415d4ef68 - docs(container.provider): Added info on container resource management [backport release-5.6.0] (#6085) (Pierantonio Merlino)

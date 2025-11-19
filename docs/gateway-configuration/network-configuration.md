@@ -39,23 +39,6 @@ The **IPv4** and **IPv6** tabs contain the following configuration parameters:
 
 If the network interface is configured as *Enabled for LAN* and manually configured (i.e., not a DHCP client) in the **IPV4** tab, the **DHCPv4 & NAT** tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.
 
-### More details about the Not Managed interface Status - (TBD: not applicable in NM)
-
-When a network interface is configured as **Not Managed**, Kura will ignore it and the configuration will not be touched. The user can configure the interface with the network tools provided by the OS, allowing unusual network setups.
-
-Regarding DNS, both Kura and the external tools store the DNS addresses in the `/etc/resolv.conf` file. So, if multiple interfaces are configured to get the DNS information and store it in the same file, the device can be misconfigured. To avoid that, the following table presents who is responsible to update the DNS file depending on the network interfaces configurations.
-
-| Is there at least an interface set as `WAN`? | Is there at least one interface set as `Not Managed`? | Does Kura manage resolv.conf? |
-| ------------------ | ------------------------- | ----------------------------- |
-| NO                 | NO                        | **YES**                           |
-| NO                 | YES                       | **NO**                            |
-| YES                | NO                        | **YES**                           |
-| YES                | YES                       | **YES**                           |
-
-So, the only way to configure the DNS addresses with external tools, is to configure at least one interface as **Not Managed** and not to set any interface as **Enabled For Wan** using Kura. If at least one WAN interface is configured by Kura, it will take the control of the `/etc/resolv.conf/` file. Finally, if any interface is configured in **Enabled For Wan** or **Not Managed** mode, Kura will empty the file.
-
-To avoid device misconfigurations when **Not Managed** interfaces are used, **don't** use the _dns-nameservers_ directive in the `/etc/network/interfaces` file. Please add the DNS addresses directly to the `/etc/resolv.conf` file.
-
 ![Network Configuration TCP/IP](./images/network-configuration-tcpip.png)
 
 ## DHCPv4 & NAT Configuration

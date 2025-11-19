@@ -6,30 +6,35 @@ In case of typing errors, the **Reset** button can be used to reload the prior c
 Since the network configuration shown on the screen may not be synchronized with the current state of the system, it can be updated pressing the **Refresh** button. This can be used also to force the reload of specific parameters like the RSSI or dynamic IP addresses. The refresh procedure reads all the needed parameters from the system and can take several seconds before updating.
 
 !!! tip
-    It is recommended that the **TCP/IP** tab is configured first since it defines how the interface is going to be used.
+    It is recommended that the **TCP/IP**, **IPv4** or **IPv6** tab is configured first since it defines how the interface is going to be used.
 
 ## TCP/IP Configuration
 
-The **TCP/IP** tab contains the following configuration parameters:
+The **TCP/IP**, **IPv4** and **IPv6** tabs contain the following configuration parameters:
 
 - **Status**
     - Disabled: disables the selected interface (i.e., administratively down).
     - Enabled for LAN: designates the interface for a local network. It can be set as a DHCP server for hosts on the local network and can serve as a default gateway for those hosts; however, it cannot be set as an actual gateway interface for this device. That is, packets must be routed from this interface to another interface that is configured as WAN. The interface is automatically brought up at boot.
     - Enabled for WAN: designates the interface as a gateway to an external network. The interface is automatically brought up at boot.
-    - Not Managed: the interface will be ignored by Kura.
+    - Not Managed: the interface will be ignored by Kura (available only for **IPv4**).
     - Layer 2 Only[^1]: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot.
 - **Configure**
     - Manually: allows manual entry of the _IP Address_ and _Netmask_ fields, if the interface is configured as LAN; allows manual entry of the _IP Address_, _Netmask_, _Gateway_, and _DNS Servers_ fields, if the interface is designated as WAN.
-    - Using DHCP: configures the interface as a DHCP client obtaining the IP address from a network DHCP server.
+    - Using DHCP/DHCPv6: configures the interface as a DHCP client obtaining the IP address from a network DHCP server.
+    - Stateless Address Auto-Configuration (SLAAC)[^2]: automatically assign an IP address (available only for IPv6).
 - **IP Address** - defines the IP address of the interface, if manually configured.
 - **Subnet Mask** - defines the subnet mask of the interface, if manually configured.
 - **Gateway** - specifies the default gateway for the unit. (Required field if the interface is designated as WAN and manually configured.)
 - **DNS Servers** - provides a list of DNS servers, if the interface is designated as WAN and is manually configured.
 - **Search Domains** - Not implemented.
+- **Privacy**[^2] - configure privacy extension for SLAAC (available only for IPv6).
+    - Disabled: disables the privacy extension.
+    - Prefer public addresses: use public address for outgoing traffic.
+    - Prefer temporary addresses: prefer temporary address for outgoing traffic.
 
-If the network interface is *Enabled for LAN* and manually configured (i.e., not a DHCP client), the **DHCP & NAT** tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.
+If the network interface is *Enabled for LAN* and manually configured (i.e., not a DHCP client), the **DHCPv4 & NAT** or **DHCP & NAT** tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.
 
-### More details about the Not Managed interface Status
+### More details about the Not Managed interface Status [^1]
 
 When a network interface is configured as **Not Managed**, Kura will ignore it and the configuration will not be touched. The user can configure the interface with the network tools provided by the OS, allowing unusual network setups.
 
@@ -48,9 +53,9 @@ To avoid device misconfigurations when **Not Managed** interfaces are used, **do
 
 ![Network Configuration TCP/IP](./images/network-configuration-tcpip.png)
 
-## DHCP & NAT Configuration
+## DHCP/DHCPv4 & NAT Configuration
 
-The **DHCP & NAT** tab contains the following configuration parameters:
+The **DHCP & NAT** and **DHCPv4 & NAT** tabs contain the following configuration parameters:
 
 - **Router Mode**
   - DHCP and NAT: indicates that both DHCP server and NAT are enabled.

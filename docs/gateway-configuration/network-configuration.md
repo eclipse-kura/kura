@@ -39,23 +39,6 @@ The **IPv4** and **IPv6** tabs contain the following configuration parameters:
 
 If the network interface is configured as *Enabled for LAN* and manually configured (i.e., not a DHCP client) in the **IPV4** tab, the **DHCPv4 & NAT** tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.
 
-### More details about the Not Managed interface Status - (TBD: not applicable in NM)
-
-When a network interface is configured as **Not Managed**, Kura will ignore it and the configuration will not be touched. The user can configure the interface with the network tools provided by the OS, allowing unusual network setups.
-
-Regarding DNS, both Kura and the external tools store the DNS addresses in the `/etc/resolv.conf` file. So, if multiple interfaces are configured to get the DNS information and store it in the same file, the device can be misconfigured. To avoid that, the following table presents who is responsible to update the DNS file depending on the network interfaces configurations.
-
-| Is there at least an interface set as `WAN`? | Is there at least one interface set as `Not Managed`? | Does Kura manage resolv.conf? |
-| ------------------ | ------------------------- | ----------------------------- |
-| NO                 | NO                        | **YES**                           |
-| NO                 | YES                       | **NO**                            |
-| YES                | NO                        | **YES**                           |
-| YES                | YES                       | **YES**                           |
-
-So, the only way to configure the DNS addresses with external tools, is to configure at least one interface as **Not Managed** and not to set any interface as **Enabled For Wan** using Kura. If at least one WAN interface is configured by Kura, it will take the control of the `/etc/resolv.conf/` file. Finally, if any interface is configured in **Enabled For Wan** or **Not Managed** mode, Kura will empty the file.
-
-To avoid device misconfigurations when **Not Managed** interfaces are used, **don't** use the _dns-nameservers_ directive in the `/etc/network/interfaces` file. Please add the DNS addresses directly to the `/etc/resolv.conf` file.
-
 ![Network Configuration TCP/IP](./images/network-configuration-tcpip.png)
 
 ## DHCPv4 & NAT Configuration
@@ -100,6 +83,23 @@ When applying a new network configuration, Kura configures NetworkManager and Mo
 
 !!! warning
     It is **NOT** recommended performing manual editing of the Linux networking configuration files or manually configuring  NetworkManager or ModemManager when the gateway configuration is being managed through Kura. Kura will be notified by NM/MM and it will roll-back the configuration.
+
+## IPv6 Addressing Modes
+
+When the **Configure** option in the **IPv6** tab is set to **Using DHCPv6**, the network interface obtains its IPv6 address and DNS information from the DHCPv6 server. However, the default gateway is not provided in this mode, even if the interface is marked as **Enabled for WAN**.
+
+To retrieve the default gateway, set the **Configure** option to **SLAAC**. In this configuration, the default gateway is obtained through Router Advertisements (RA) sent as part of the Neighbor Discovery Protocol (NDP).
+
+If the interface is configured in **Using DHCPv6** mode, ensure that UDP port 546 is open in the IPv6 firewall so the DHCPv6 client can receive replies.
+
+It is important to note that the actual behavior also depends on how the router is configured. Router Advertisements include two flags (M (Managed) and O (Other)) which influence whether hosts should use SLAAC, DHCPv6, or a combination of both. The following table summarizes these combinations:
+
+Flags (M/O) | Address source | DNS Source | Default Gateway Source | Description |
+------------|----------------|------------|------------------------|-|
+M=0, O=0    | SLAAC          | RA         | RA                     | Pure SLAAC environment. The router provides all required configuration through Router Advertisements. No DHCPv6 services are used. |
+M=0, O=1    | SLAAC          | DHCPv6     | RA                     | SLAAC for addressing, with DHCPv6 used only for “other” configuration such as DNS. A mixed or “hybrid” setup. |   
+M=1, O=0    | DHCPv6         | DHCPv6     | RA                     | Fully managed IPv6 network. Hosts rely on DHCPv6 for address and configuration details. |
+M=1, O=1    | DHCPv6         | DHCPv6     | RA                     | Same as M=1/O=0: a stateful, DHCPv6-managed network. Both flags instruct hosts to use DHCPv6 for address assignment and additional configuration. |
 
 ## Network Configuration properties
 

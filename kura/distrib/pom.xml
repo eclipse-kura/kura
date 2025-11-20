@@ -664,6 +664,8 @@
                             <configuration>
                                 <outputDirectory>${project.build.directory}/pkg/plugins/5s</outputDirectory>
                                 <includeArtifactIds>
+                                    <!-- event-publisher-plugins -->
+                                    org.eclipse.kura.event.publisher,
                                     <!-- deployment.agent-plugins -->
                                     org.eclipse.kura.deployment.agent,
                                     <!-- http.server.manager-plugin -->
@@ -685,8 +687,6 @@
                             <configuration>
                                 <outputDirectory>${project.build.directory}/pkg/plugins/6</outputDirectory>
                                 <includeArtifactIds>
-                                    <!-- event-publisher-plugins -->
-                                    org.eclipse.kura.event.publisher,
                                     <!-- osgi-base-plugins -->
                                     minimal-json, commons-exec
                                 </includeArtifactIds>

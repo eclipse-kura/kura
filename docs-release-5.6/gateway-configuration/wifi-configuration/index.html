@@ -4749,7 +4749,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>
 <p><strong>Pairwise Ciphers</strong>: lists accepted pairwise (unicast) ciphers for WPA/WPA2.</p>
 <ul>
-<li>In <em>Access Point</em> mode, this option is disabled.</li>
+<li>In <em>Access Point</em> mode, this option is enabled only when WPA or WPA2 security is selected.</li>
 <li>In <em>Station</em> mode,<ul>
 <li>CCMP (AES-based encryption mode with strong security)</li>
 <li>TKIP (Temporal Key Integrity Protocol)</li>
@@ -4758,6 +4758,12 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
 </ul>
 </li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The TKIP cipher is not compatible with WPA2 wireless security. Use it only with WPA.</p>
+</div>
+<ul>
 <li>
 <p><strong>Group Ciphers</strong>: lists accepted group (broadcast/multicast) ciphers for WPA/WPA2.</p>
 <ul>

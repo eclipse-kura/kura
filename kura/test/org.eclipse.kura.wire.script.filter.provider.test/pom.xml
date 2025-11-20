@@ -90,11 +90,6 @@
                             </requirement>
                             <requirement>
                                 <type>p2-installable-unit</type>
-                                <id>com.eclipsesource.jaxrs.jersey-min</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>p2-installable-unit</type>
                                 <id>jakarta.xml.bind-api</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
@@ -236,11 +231,6 @@
                             <requirement>
                                 <type>eclipse-plugin</type>
                                 <id>org.eclipse.equinox.http.jetty</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>com.eclipsesource.jaxrs.jersey-min</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                             <requirement>
@@ -712,11 +702,6 @@
                         </bundle>
                         <bundle>
                             <id>org.eclipse.kura.http.server.manager</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>com.eclipsesource.jaxrs.jersey-min</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>

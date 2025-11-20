@@ -6,7 +6,7 @@ In case of typing errors, the **Reset** button can be used to reload the prior c
 Since the network configuration shown on the screen may not be synchronized with the current state of the system, it can be updated pressing the **Refresh** button. This can be used also to force the reload of specific parameters like the RSSI or dynamic IP addresses. The refresh procedure reads all the needed parameters from the system and can take several seconds before updating.
 
 !!! tip
-    It is recommended that the **TCP/IP**, **IPv4** or **IPv6** tab is configured first since it defines how the interface is going to be used.
+    It is advisable to configure the **TCP/IP**, **IPv4**, or **IPv6** tab first, as this determines how the interface will function.
 
 ## TCP/IP Configuration
 

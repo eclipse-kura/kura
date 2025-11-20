@@ -16,7 +16,7 @@ The **TCP/IP**, **IPv4** and **IPv6** tabs contain the following configuration p
     - Disabled: disables the selected interface (i.e., administratively down).
     - Enabled for LAN: designates the interface for a local network. It can be set as a DHCP server for hosts on the local network and can serve as a default gateway for those hosts; however, it cannot be set as an actual gateway interface for this device. That is, packets must be routed from this interface to another interface that is configured as WAN. The interface is automatically brought up at boot.
     - Enabled for WAN: designates the interface as a gateway to an external network. The interface is automatically brought up at boot.
-    - Not Managed: the interface will be ignored by Kura (available only for **IPv4**).
+    - Not Managed: the interface will be ignored by Kura (not available in **IPv6**).
     - Layer 2 Only[^1]: only the Layer 2 portion of the interface will be configured. The interface is automatically brought up at boot.
 - **Configure**
     - Manually: allows manual entry of the _IP Address_ and _Netmask_ fields, if the interface is configured as LAN; allows manual entry of the _IP Address_, _Netmask_, _Gateway_, and _DNS Servers_ fields, if the interface is designated as WAN.

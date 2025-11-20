@@ -37,11 +37,14 @@ The **Wireless** tab contains the following configuration parameters:
     - WPA/WPA2: pre-shared key
 
 - **Pairwise Ciphers**: lists accepted pairwise (unicast) ciphers for WPA/WPA2.
-    - In _Access Point_ mode, this option is disabled.
+    - In _Access Point_ mode, this option is enabled only when WPA or WPA2 security is selected.
     - In _Station_ mode,
         - CCMP (AES-based encryption mode with strong security)
         - TKIP (Temporal Key Integrity Protocol)
         - CCMP and TKIP
+
+!!! warning
+    The TKIP cipher is not compatible with WPA2 wireless security. Use it only with WPA.
 
 - **Group Ciphers**: lists accepted group (broadcast/multicast) ciphers for WPA/WPA2.
     - In _Access Point_ mode, this option is disabled.

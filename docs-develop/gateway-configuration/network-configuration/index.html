@@ -648,21 +648,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="TCP/IP Configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#more-details-about-the-not-managed-interface-status-tbd-not-applicable-in-nm" class="md-nav__link">
-    <span class="md-ellipsis">
-      More details about the Not Managed interface Status - (TBD: not applicable in NM)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -678,6 +663,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
   <a href="#network-linux-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       Network Linux Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ipv6-addressing-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      IPv6 Addressing Modes
     </span>
   </a>
   
@@ -4822,21 +4816,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="TCP/IP Configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#more-details-about-the-not-managed-interface-status-tbd-not-applicable-in-nm" class="md-nav__link">
-    <span class="md-ellipsis">
-      More details about the Not Managed interface Status - (TBD: not applicable in NM)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -4852,6 +4831,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
   <a href="#network-linux-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       Network Linux Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ipv6-addressing-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      IPv6 Addressing Modes
     </span>
   </a>
   
@@ -5090,7 +5078,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <li>Disabled: disables the selected interface (i.e., administratively down).</li>
 <li>Enabled for LAN: designates the interface for a local network. It can be set as a DHCP server for hosts on the local network and can serve as a default gateway for those hosts; however, it cannot be set as an actual gateway interface for this device. That is, packets must be routed from this interface to another interface that is configured as WAN. The interface is automatically brought up at boot.</li>
 <li>Enabled for WAN: designates the interface as a gateway to an external network. The interface is automatically brought up at boot.</li>
-<li>Not Managed: the interface will be ignored by Kura (available only for <strong>IPv4</strong>).</li>
+<li>Not Managed: the interface will be ignored by Kura. The user can configure the interface with the network tools provided by the OS. This option is available only in the <strong>IPv4</strong> tab and it applies to both <strong>IPv4</strong> and <strong>IPv6</strong>. </li>
 </ul>
 </li>
 <li><strong>WAN Priority</strong> - configure the network failover. See <a href="../network-failover/">here</a> for more details.</li>
@@ -5117,42 +5105,6 @@ Since the network configuration shown on the screen may not be synchronized with
 </li>
 </ul>
 <p>If the network interface is configured as <em>Enabled for LAN</em> and manually configured (i.e., not a DHCP client) in the <strong>IPV4</strong> tab, the <strong>DHCPv4 &amp; NAT</strong> tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.</p>
-<h3 id="more-details-about-the-not-managed-interface-status-tbd-not-applicable-in-nm">More details about the Not Managed interface Status - (TBD: not applicable in NM)</h3>
-<p>When a network interface is configured as <strong>Not Managed</strong>, Kura will ignore it and the configuration will not be touched. The user can configure the interface with the network tools provided by the OS, allowing unusual network setups.</p>
-<p>Regarding DNS, both Kura and the external tools store the DNS addresses in the <code>/etc/resolv.conf</code> file. So, if multiple interfaces are configured to get the DNS information and store it in the same file, the device can be misconfigured. To avoid that, the following table presents who is responsible to update the DNS file depending on the network interfaces configurations.</p>
-<table>
-<thead>
-<tr>
-<th>Is there at least an interface set as <code>WAN</code>?</th>
-<th>Is there at least one interface set as <code>Not Managed</code>?</th>
-<th>Does Kura manage resolv.conf?</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>NO</td>
-<td>NO</td>
-<td><strong>YES</strong></td>
-</tr>
-<tr>
-<td>NO</td>
-<td>YES</td>
-<td><strong>NO</strong></td>
-</tr>
-<tr>
-<td>YES</td>
-<td>NO</td>
-<td><strong>YES</strong></td>
-</tr>
-<tr>
-<td>YES</td>
-<td>YES</td>
-<td><strong>YES</strong></td>
-</tr>
-</tbody>
-</table>
-<p>So, the only way to configure the DNS addresses with external tools, is to configure at least one interface as <strong>Not Managed</strong> and not to set any interface as <strong>Enabled For Wan</strong> using Kura. If at least one WAN interface is configured by Kura, it will take the control of the <code>/etc/resolv.conf/</code> file. Finally, if any interface is configured in <strong>Enabled For Wan</strong> or <strong>Not Managed</strong> mode, Kura will empty the file.</p>
-<p>To avoid device misconfigurations when <strong>Not Managed</strong> interfaces are used, <strong>don't</strong> use the <em>dns-nameservers</em> directive in the <code>/etc/network/interfaces</code> file. Please add the DNS addresses directly to the <code>/etc/resolv.conf</code> file.</p>
 <p><img alt="Network Configuration TCP/IP" src="../images/network-configuration-tcpip.png" /></p>
 <h2 id="dhcpv4-nat-configuration">DHCPv4 &amp; NAT Configuration</h2>
 <p>The <strong>DHCPv4 &amp; NAT</strong> tab contains the following configuration parameters:</p>
@@ -5189,6 +5141,52 @@ Since the network configuration shown on the screen may not be synchronized with
 <p class="admonition-title">Warning</p>
 <p>It is <strong>NOT</strong> recommended performing manual editing of the Linux networking configuration files or manually configuring  NetworkManager or ModemManager when the gateway configuration is being managed through Kura. Kura will be notified by NM/MM and it will roll-back the configuration.</p>
 </div>
+<h2 id="ipv6-addressing-modes">IPv6 Addressing Modes</h2>
+<p>When the <strong>Configure</strong> option in the <strong>IPv6</strong> tab is set to <strong>Using DHCPv6</strong>, the network interface obtains its IPv6 address and DNS information from the DHCPv6 server. However, the default gateway is not provided in this mode, even if the interface is marked as <strong>Enabled for WAN</strong>.</p>
+<p>To retrieve the default gateway, set the <strong>Configure</strong> option to <strong>SLAAC</strong>. In this configuration, the default gateway is obtained through Router Advertisements (RA) sent as part of the Neighbor Discovery Protocol (NDP).</p>
+<p>If the interface is configured in <strong>Using DHCPv6</strong> mode, ensure that UDP port 546 is open in the IPv6 firewall so the DHCPv6 client can receive replies.</p>
+<p>It is important to note that the actual behavior also depends on how the router is configured. Router Advertisements include two flags (M (Managed) and O (Other)) which influence whether hosts should use SLAAC, DHCPv6, or a combination of both. The following table summarizes these combinations:</p>
+<table>
+<thead>
+<tr>
+<th>Flags (M/O)</th>
+<th>Address source</th>
+<th>DNS Source</th>
+<th>Default Gateway Source</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M=0, O=0</td>
+<td>SLAAC</td>
+<td>RA</td>
+<td>RA</td>
+<td>Pure SLAAC environment. The router provides all required configuration through Router Advertisements. No DHCPv6 services are used.</td>
+</tr>
+<tr>
+<td>M=0, O=1</td>
+<td>SLAAC</td>
+<td>DHCPv6</td>
+<td>RA</td>
+<td>SLAAC for addressing, with DHCPv6 used only for “other” configuration such as DNS. A mixed or “hybrid” setup.</td>
+</tr>
+<tr>
+<td>M=1, O=0</td>
+<td>DHCPv6</td>
+<td>DHCPv6</td>
+<td>RA</td>
+<td>Fully managed IPv6 network. Hosts rely on DHCPv6 for address and configuration details.</td>
+</tr>
+<tr>
+<td>M=1, O=1</td>
+<td>DHCPv6</td>
+<td>DHCPv6</td>
+<td>RA</td>
+<td>Same as M=1/O=0: a stateful, DHCPv6-managed network. Both flags instruct hosts to use DHCPv6 for address assignment and additional configuration.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="network-configuration-properties">Network Configuration properties</h2>
 <p>The Network configuration can be modified using the Kura Gateway Administration Console, as described above, the <a href="doc:configuration-service">Configuration Service</a> or appling a proper <a href="doc:snapshot-management">snapshot</a>.</p>
 <p>The following table describes all the properties related to the Network Configuration. It includes the name of the property, the type, a description and the default value (if applicable). The network configuration pid is <code>org.eclipse.kura.net.admin.NetworkConfigurationService</code>.</p>

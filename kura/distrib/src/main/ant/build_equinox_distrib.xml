@@ -1029,7 +1029,33 @@ fi]]>
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.exec_${org.apache.commons.exec.version}.jar" />
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.eclipsesource.jaxrs.jersey-min_${com.eclipsesource.jaxrs.jersey-min.version}.jar@3" />
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.jersey.containers.jersey-container-servlet_${jersey.distrib.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.jersey.containers.jersey-container-servlet-core_${jersey.distrib.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.jersey.core.jersey-common_${jersey.distrib.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.jersey.core.jersey-server_${jersey.distrib.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.jersey.core.jersey-client_${jersey.distrib.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.jersey.media.jersey-media-sse_${jersey.distrib.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.jersey.media.jersey-media-multipart_${jersey.distrib.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.jvnet.mimepull_${mimepull.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.jersey.inject.jersey-hk2_${jersey.distrib.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.hk2.locator_${hk2.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.hk2.external.aopalliance-repackaged_${hk2.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.hk2.api_${hk2.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.hk2.utils_${hk2.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/javassist_${javassist.distrib.version}.jar@3" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.eclipsesource.jaxrs.publisher_${com.eclipsesource.jaxrs.publisher.jar.version}.jar@4:start" />
             <entry key="osgi.bundles" operation="+"
@@ -1068,6 +1094,14 @@ fi]]>
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jakarta.xml.ws-api_${jakarta.xml.ws-api.version}.jar@2" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jakarta.xml.soap-api_${jakarta.xml.soap-api.version}.jar@2" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jakarta.validation.jakarta.validation-api_${jakarta.validation-api.version}.jar@2" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jakarta.annotation-api_${jakarta.annotation-api.version}.jar@2" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jakarta.ws.rs-api_${jakarta.ws.rs-api.version}.jar@2" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.hk2.external.jakarta.inject_${jakarta.inject.version}.jar@2" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.sun.xml.bind.jaxb-osgi_${jaxb-osgi.version}.jar@2:start" />
             <entry key="osgi.bundles" operation="+"

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -37,6 +37,8 @@ import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -48,6 +50,7 @@ import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
 import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
+import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.deployment.agent.MarketplacePackageDescriptor;
 import org.eclipse.kura.internal.rest.deployment.agent.DeploymentRestService;
@@ -64,8 +67,9 @@ import org.junit.runners.Parameterized;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
 
@@ -267,26 +271,28 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
+        final BundleContext packagesRestServiceContext = FrameworkUtil.getBundle(PackagesRestServiceTest.class)
+                .getBundleContext();
+
+        final ServiceComponentRuntime scrService = ServiceUtil
+                .trackService(ServiceComponentRuntime.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+
+        final ComponentDescriptionDTO dto = scrService.getComponentDescriptionDTOs().stream()
+                .filter(c -> Objects.equals("org.eclipse.kura.deployment.agent", c.name)).findAny()
+                .orElseThrow(() -> new IllegalStateException("cannot find deployment agent component"));
+
+        scrService.disableComponent(dto).timeout(30000).getValue();
+
         final Dictionary<String, Object> deploymentServiceProperties = new Hashtable<>();
         deploymentServiceProperties.put("service.ranking", Integer.MIN_VALUE);
         deploymentServiceProperties.put("kura.service.pid", "mockDeploymentService");
 
-        BundleContext packagesRestServiceContext = FrameworkUtil.getBundle(PackagesRestServiceTest.class)
-                .getBundleContext();
         packagesRestServiceContext.registerService(DeploymentAgentService.class, deploymentAgentService,
                 deploymentServiceProperties);
 
-        // Inject mock deployment admin
-        final ServiceReference<DeploymentRestService> deploymentRestServiceRef = packagesRestServiceContext
-                .getServiceReference(DeploymentRestService.class);
-        if (Objects.isNull(deploymentRestServiceRef)) {
-            throw new IllegalStateException("Unable to find instance of: " + DeploymentRestService.class.getName());
-        }
+        final DeploymentRestService service = ServiceUtil.trackService(DeploymentRestService.class, Optional.empty())
+                .get(30, TimeUnit.SECONDS);
 
-        final DeploymentRestService service = packagesRestServiceContext.getService(deploymentRestServiceRef);
-        if (Objects.isNull(service)) {
-            throw new IllegalStateException("Unable to get instance of: " + DeploymentRestService.class.getName());
-        }
         service.setDeploymentAdmin(deploymentAdmin);
 
     }
@@ -323,7 +329,8 @@ public class PackagesRestServiceTest extends AbstractRequestHandlerTest {
         doThrow(new RuntimeException()).when(deploymentAgentService).installDeploymentPackageAsync(anyString());
     }
 
-    private void givenDeploymentAgentServiceReturnsMarketplacePackageDescriptor(MarketplacePackageDescriptor descriptor) {
+    private void givenDeploymentAgentServiceReturnsMarketplacePackageDescriptor(
+            MarketplacePackageDescriptor descriptor) {
         when(deploymentAgentService.getMarketplacePackageDescriptor(anyString())).thenReturn(descriptor);
     }
 

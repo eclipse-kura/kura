@@ -35,7 +35,6 @@ This project leverages the following third party content.
 
 ### Maven Dependencies
 
-* maven/mavencentral/com.eclipsesource.jaxrs/jersey-min/2.22.2, (CDDL-1.1 OR GPL-2.0-only OR GPL-2.0-only with Classpath-exception-2.0) AND (MPL-1.1 OR LGPL-2.1-or-later OR Apache-2.0) AND Apache-2.0 AND LicenseRef-Public-Domain, approved, #3084
 * maven/mavencentral/com.eclipsesource.jaxrs/provider-gson/2.3, EPL-1.0, approved, #3091
 * maven/mavencentral/com.eclipsesource.jaxrs/provider-multipart/2.2, EPL-1.0, approved, #3092
 * maven/mavencentral/com.eclipsesource.jaxrs/provider-security/2.2, EPL-1.0, approved, #3093
@@ -217,6 +216,24 @@ This project leverages the following third party content.
 * maven/mavencentral/com.google.guava/failureaccess/1.0, Apache-2.0, approved, CQ22654
 * maven/mavencentral/com.digitalpetri.fsm/strict-machine/0.6, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/com.digitalpetri.netty/netty-channel-fsm/0.8, Apache-2.0, approved, #6168
+* maven/mavencentral/jakarta.annotation/jakarta.annotation-api/1.3.5, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.ca
+* maven/mavencentral/jakarta.validation/jakarta.validation-api/2.0.2, Apache-2.0, approved, ee4j.validation
+* maven/mavencentral/jakarta.ws.rs/jakarta.ws.rs-api/2.1.6, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.rest
+* maven/mavencentral/org.glassfish.hk2.external/aopalliance-repackaged/2.6.1, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.glassfish
+* maven/mavencentral/org.glassfish.hk2.external/jakarta.inject/2.6.1, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.glassfish
+* maven/mavencentral/org.glassfish.hk2/hk2-api/2.6.1, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.glassfish
+* maven/mavencentral/org.glassfish.hk2/hk2-locator/2.6.1, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.glassfish
+* maven/mavencentral/org.glassfish.hk2/hk2-utils/2.6.1, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.glassfish
+* maven/mavencentral/org.glassfish.jersey.containers/jersey-container-servlet-core/2.47, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jersey
+* maven/mavencentral/org.glassfish.jersey.containers/jersey-container-servlet/2.47, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jersey
+* maven/mavencentral/org.glassfish.jersey.core/jersey-client/2.47, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jersey
+* maven/mavencentral/org.glassfish.jersey.core/jersey-common/2.47, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jersey
+* maven/mavencentral/org.glassfish.jersey.core/jersey-server/2.47, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jersey
+* maven/mavencentral/org.glassfish.jersey.inject/jersey-hk2/2.47, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jersey
+* maven/mavencentral/org.glassfish.jersey.media/jersey-media-multipart/2.47, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jersey
+* maven/mavencentral/org.glassfish.jersey.media/jersey-media-sse/2.47, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jersey
+* maven/mavencentral/org.javassist/javassist/3.30.2-GA, Apache-2.0 AND LGPL-2.1-or-later AND MPL-1.1, approved, #12108
+* maven/mavencentral/org.jvnet.mimepull/mimepull/1.9.15, CDDL-1.1 OR GPL-2.0-only WITH Classpath-exception-2.0, approved, CQ21484
 
 ### Additional Dependencies
 

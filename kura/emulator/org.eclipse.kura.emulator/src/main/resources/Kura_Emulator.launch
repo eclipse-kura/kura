@@ -112,6 +112,26 @@
         <setEntry value="org.usb4java@default:default"/>
         <setEntry value="slf4j.api@default:default"/>
         <setEntry value="usb4java-javax@default:default"/>
+        <setEntry value="org.glassfish.hk2.api@default:default"/>
+        <setEntry value="org.glassfish.hk2.external.aopalliance-repackaged@default:default"/>
+        <setEntry value="org.glassfish.hk2.external.jakarta.inject@default:default"/>
+        <setEntry value="org.glassfish.hk2.locator@default:default"/>
+        <setEntry value="org.glassfish.hk2.osgi-resource-locator@default:default"/>
+        <setEntry value="org.glassfish.hk2.utils@default:default"/>
+        <setEntry value="org.glassfish.jersey.containers.jersey-container-servlet-core@default:default"/>
+        <setEntry value="org.glassfish.jersey.containers.jersey-container-servlet@default:default"/>
+        <setEntry value="org.glassfish.jersey.core.jersey-client@default:default"/>
+        <setEntry value="org.glassfish.jersey.core.jersey-common@default:default"/>
+        <setEntry value="org.glassfish.jersey.core.jersey-server@default:default"/>
+        <setEntry value="org.glassfish.jersey.inject.jersey-hk2@default:default"/>
+        <setEntry value="org.glassfish.jersey.media.jersey-media-multipart@default:default"/>
+        <setEntry value="org.glassfish.jersey.media.jersey-media-sse@default:default"/>
+        <setEntry value="org.jvnet.mimepull@default:default"/>
+        <setEntry value="jakarta.annotation-api@default:default"/>
+        <setEntry value="jakarta.validation.jakarta.validation-api@default:default"/>
+        <setEntry value="jakarta.ws.rs-api@default:default"/>
+        <setEntry value="jakarta.xml.bind-api@default:default"/>
+        <setEntry value="javassist@default:default"/>
     </setAttribute>
     <setAttribute key="selected_workspace_bundles">
         <setEntry value="org.eclipse.kura.api@default:default"/>

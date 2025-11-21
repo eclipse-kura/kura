@@ -592,6 +592,11 @@
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
+                                <id>com.eclipsesource.jaxrs.provider.multipart</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
                                 <id>com.eclipsesource.jaxrs.publisher</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
@@ -820,6 +825,11 @@
                                 </requirement>
                                 <requirement>
                                     <type>eclipse-plugin</type>
+                                    <id>com.eclipsesource.jaxrs.provider.multipart</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
                                     <id>com.eclipsesource.jaxrs.publisher</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
@@ -871,6 +881,16 @@
                                 <requirement>
                                     <type>eclipse-plugin</type>
                                     <id>jakarta.validation.jakarta.validation-api</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.glassfish.jersey.media.jersey-media-multipart</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.glassfish.jersey.media.jersey-media-sse</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
                             </extraRequirements>

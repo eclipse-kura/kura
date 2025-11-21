@@ -29,6 +29,9 @@
         <Logger name="org.eclipse" level="info" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
+        <Logger name="org.glassfish.jersey.internal" level="error" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
         <Root level="info">
             <AppenderRef ref="Console"/>
         </Root>

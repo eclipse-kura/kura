@@ -234,6 +234,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.slf4j</groupId>
+                                    <artifactId>jul-to-slf4j</artifactId>
+                                    <version>${slf4j.api.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.slf4j</groupId>
                                     <artifactId>jcl-over-slf4j</artifactId>
                                     <version>${jcl.over.slf4j.version}</version>
                                 </artifactItem>
@@ -763,6 +768,7 @@
                                 <move file="target/source/plugins/jdk.dio.x86_64.jar" tofile="target/source/plugins/jdk.dio.x86_64_${jdk.dio.version}.jar"/>
                                 <move file="target/source/plugins/jdk.dio.aarch64.jar" tofile="target/source/plugins/jdk.dio.aarch64_${jdk.dio.version}.jar"/>
                                 <move file="target/source/plugins/slf4j-api.jar" tofile="target/source/plugins/slf4j.api_${slf4j.api.version}.jar"/>
+                                <move file="target/source/plugins/jul-to-slf4j.jar" tofile="target/source/plugins/jul-to-slf4j_${jul.to.slf4j.version}.jar"/>
                                 <move file="target/source/plugins/jcl-over-slf4j.jar" tofile="target/source/plugins/jcl-over-slf4j_${jcl.over.slf4j.version}.jar"/>
                                 <move file="target/source/plugins/log4j-api.jar" tofile="target/source/plugins/log4j-api_${log4j.version}.jar"/>
                                 <move file="target/source/plugins/log4j2-api-config.jar" tofile="target/source/plugins/org.apache.log4j2-api-config_${log4j2-api-config.version}.jar"/>

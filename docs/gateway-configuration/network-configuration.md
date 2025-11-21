@@ -19,7 +19,7 @@ The **IPv4** and **IPv6** tabs contain the following configuration parameters:
     - Disabled: disables the selected interface (i.e., administratively down).
     - Enabled for LAN: designates the interface for a local network. It can be set as a DHCP server for hosts on the local network and can serve as a default gateway for those hosts; however, it cannot be set as an actual gateway interface for this device. That is, packets must be routed from this interface to another interface that is configured as WAN. The interface is automatically brought up at boot.
     - Enabled for WAN: designates the interface as a gateway to an external network. The interface is automatically brought up at boot.
-    - Not Managed: the interface will be ignored by Kura. The user can configure the interface with the network tools provided by the OS. This option is available only in the **IPv4** tab and it applies to both **IPv4** and **IPv6**. 
+    - Not Managed: the interface will be ignored by Kura. Users can configure the interface using the networking tools provided by the operating system. This option is available exclusively in the **IPv4** tab and applies to both **IPv4** and **IPv6** configurations.
 - **WAN Priority** - configure the network failover. See [here](network-failover.md) for more details.
 - **Configure**
     - Manually: allows manual entry of the _IP Address_ and _Netmask_ fields, if the interface is configured as LAN; allows manual entry of the _IP Address_, _Netmask_, _Gateway_, and _DNS Servers_ fields, if the interface is designated as WAN.
@@ -86,13 +86,13 @@ When applying a new network configuration, Kura configures NetworkManager and Mo
 
 ## IPv6 Addressing Modes
 
-When the **Configure** option in the **IPv6** tab is set to **Using DHCPv6**, the network interface obtains its IPv6 address and DNS information from the DHCPv6 server. However, the default gateway is not provided in this mode, even if the interface is marked as **Enabled for WAN**.
+When the **Configure** option in the **IPv6** tab is set to **Using DHCPv6**, the network interface obtains its IPv6 address and DNS information from the DHCPv6 server. However, it is important to note that the default gateway is not supplied by the network in this mode, even if the interface is designated as **Enabled for WAN**.
 
 To retrieve the default gateway, set the **Configure** option to **SLAAC**. In this configuration, the default gateway is obtained through Router Advertisements (RA) sent as part of the Neighbor Discovery Protocol (NDP).
 
 If the interface is configured in **Using DHCPv6** mode, ensure that UDP port 546 is open in the IPv6 firewall so the DHCPv6 client can receive replies.
 
-It is important to note that the actual behavior also depends on how the router is configured. Router Advertisements include two flags (M (Managed) and O (Other)) which influence whether hosts should use SLAAC, DHCPv6, or a combination of both. The following table summarizes these combinations:
+It is important to note that the actual behavior is influenced by the router's configuration. Router Advertisements include two flags, M (Managed) and O (Other), which determine whether hosts should utilize SLAAC, DHCPv6, or a combination of both. The table below summarizes these configurations:
 
 Flags (M/O) | Address source | DNS Source | Default Gateway Source | Description |
 ------------|----------------|------------|------------------------|-|

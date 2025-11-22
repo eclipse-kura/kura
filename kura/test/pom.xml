@@ -412,6 +412,16 @@
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
+                                <id>jul.to.slf4j</id>
+                                <level>1</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.eclipse.kura.jul.to.slf4j.configuration</id>
+                                <level>1</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
                                 <id>log4j2-api-config</id>
                                 <level>4</level>
                                 <autoStart>false</autoStart>
@@ -656,6 +666,16 @@
                                 <requirement>
                                     <type>p2-installable-unit</type>
                                     <id>org.apache.logging.log4j.core</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>jul.to.slf4j</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>p2-installable-unit</type>
+                                    <id>org.eclipse.kura.jul.to.slf4j.configuration</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
                                 <requirement>

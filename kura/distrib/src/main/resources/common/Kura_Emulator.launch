@@ -182,6 +182,8 @@
         <setEntry value="org.knowhowlab.osgi.monitoradmin@default:default"/>
         <setEntry value="org.usb4java@default:default"/>
         <setEntry value="slf4j.api@default:default"/>
+        <setEntry value="org.eclipse.kura.jul.to.slf4j.configuration@default:default"/>
+        <setEntry value="jul.to.slf4j@default:default"/>
         <setEntry value="usb4java-javax@default:default"/>
         <setEntry value="org.apache.servicemix.bundles.c3p0@default:default"/>
         <setEntry value="com.zaxxer.HikariCP@default:default"/>

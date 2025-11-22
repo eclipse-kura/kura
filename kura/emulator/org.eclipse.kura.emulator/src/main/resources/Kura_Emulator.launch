@@ -111,6 +111,8 @@
         <setEntry value="org.quartz-scheduler.quartz@default:default"/>
         <setEntry value="org.usb4java@default:default"/>
         <setEntry value="slf4j.api@default:default"/>
+        <setEntry value="org.eclipse.kura.jul.to.slf4j.configuration@default:default"/>
+        <setEntry value="jul.to.slf4j@default:default"/>
         <setEntry value="usb4java-javax@default:default"/>
         <setEntry value="org.glassfish.hk2.api@default:default"/>
         <setEntry value="org.glassfish.hk2.external.aopalliance-repackaged@default:default"/>

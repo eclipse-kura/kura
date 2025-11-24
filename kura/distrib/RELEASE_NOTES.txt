@@ -33,6 +33,7 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * ee49b7c3f9 - Updated beanutils reference after dep name change (#6106) (Matteo Maiero)
   * d95a6d3b13 - access point WEP password validation failure (#6092) (sfiorani)
   * 1706193ac9 - Network failover configuration fixes [backport release-5.6.0] (#6087) (github-actions[bot])
   * cba5b06c9a - Fixed container provider version [release-5.6.0] (#6086) (Matteo Maiero)
@@ -145,6 +146,8 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * ee49b7c3f9 - fix: Updated beanutils reference after dep name change (#6106) (Matteo Maiero)
+  * 553408d9a8 - chore: add Kura 5.6.1 release notes (#6105) (eclipse-kura-bot)
   * 4d358a66d2 - build(deps): bump commons-beanutils:commons-beanutils from 1.9.3 to 1.11.0 [backport release-5.6.0] (#6104) (Matteo Maiero)
   * 868fe32125 - feat: Added jul.to.sl4j bridge (#6102) (Salvatore Coppola)
   * a263fa0236 - build: Updated jersey to 2.47 (#6100) (nicolatimeus)

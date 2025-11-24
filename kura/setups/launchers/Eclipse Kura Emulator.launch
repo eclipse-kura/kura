@@ -54,7 +54,7 @@
 <setEntry value="org.apache.camel.camel-core-osgi@default:default"/>
 <setEntry value="org.apache.camel.camel-core@default:default"/>
 <setEntry value="org.apache.camel.camel-stream@default:default"/>
-<setEntry value="org.apache.commons.beanutils@default:default"/>
+<setEntry value="org.apache.commons.commons-beanutils@default:default"/>
 <setEntry value="org.apache.commons.collections@default:default"/>
 <setEntry value="org.apache.commons.csv@default:default"/>
 <setEntry value="org.apache.commons.exec@default:default"/>

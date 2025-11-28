@@ -156,7 +156,7 @@ Name                                                  | Type     | Description  
 ------------------------------------------------------|----------|------------------------------------------|----------------------------
 `net.interface.<interface>.config.ip6.status`	      | String   | The status of the interface for the IPv6 configuration; possibile values are: `netIPv6StatusDisabled`, `netIPv6StatusUnmanaged`, `netIPv6StatusEnabledLAN`, `netIPv6StatusEnabledWAN`, `netIPv6StatusUnknown` | `netIPv6StatusDisabled` (see note below)
 `net.interface.<interface>.config.ip6.wan.priority`   | Integer  | Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See [Network Failover](./network-failover.md) for further details | -1
-`net.interface.<interface>.config.ip6.address.method` | String   | The IPv6 configuration method; possible values are: `AUTO`, `DHCP`, `MANUAL`. | `AUTO`
+`net.interface.<interface>.config.ip6.address.method` | String   | The IPv6 configuration method; possible values are: `AUTO`, `MANUAL`. | `AUTO`
 `net.interface.<interface>.config.ip6.address`        | String   | The IPv6 address assigned to the network interface |
 `net.interface.<interface>.config.ip6.prefix`	      | Short    | The IPv6 netmask assigned to the network interface | -1
 `net.interface.<interface>.config.ip6.gateway`        | String   | The IPv6 address of the default gateway |

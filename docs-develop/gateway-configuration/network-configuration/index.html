@@ -5084,11 +5084,11 @@ Since the network configuration shown on the screen may not be synchronized with
 <li><strong>WAN Priority</strong> - configure the network failover. See <a href="../network-failover/">here</a> for more details.</li>
 <li><strong>Configure</strong><ul>
 <li>Manually: allows manual entry of the <em>IP Address</em> and <em>Netmask</em> fields, if the interface is configured as LAN; allows manual entry of the <em>IP Address</em>, <em>Netmask</em>, <em>Gateway</em>, and <em>DNS Servers</em> fields, if the interface is designated as WAN.</li>
-<li>Using DHCP/DHCPv6: configures the interface as a DHCP client obtaining the IP address from a network DHCP server.</li>
-<li>Stateless Address Auto-Configuration (SLAAC): automatically assign an IP address (available only for <strong>IPv6</strong>).</li>
+<li>Using DHCP: configures the interface as a DHCP client obtaining the IP address from a network DHCP server (available only for <strong>IPv4</strong>).</li>
+<li>Auto: automatically assign an IP address (available only for <strong>IPv6</strong>).</li>
 </ul>
 </li>
-<li><strong>Address Generation Mode</strong> - defines the method used to automatically generate the IP address with SLAAC (available only for <strong>IPv6</strong>)<ul>
+<li><strong>Address Generation Mode</strong> - defines the method used to automatically generate the IP address with Stateless Address Auto-Configuration (SLAAC) (available only for <strong>IPv6</strong>)<ul>
 <li>EUI64: use EUI-64 method for address generation</li>
 <li>Stable-privacy: use RFC7217 method for address generation</li>
 </ul>
@@ -5142,10 +5142,9 @@ Since the network configuration shown on the screen may not be synchronized with
 <p>It is <strong>NOT</strong> recommended performing manual editing of the Linux networking configuration files or manually configuring  NetworkManager or ModemManager when the gateway configuration is being managed through Kura. Kura will be notified by NM/MM and it will roll-back the configuration.</p>
 </div>
 <h2 id="ipv6-addressing-modes">IPv6 Addressing Modes</h2>
-<p>When the <strong>Configure</strong> option in the <strong>IPv6</strong> tab is set to <strong>Using DHCPv6</strong>, the network interface obtains its IPv6 address and DNS information from the DHCPv6 server. However, it is important to note that the default gateway is not supplied by the network in this mode, even if the interface is designated as <strong>Enabled for WAN</strong>.</p>
-<p>To retrieve the default gateway, set the <strong>Configure</strong> option to <strong>SLAAC</strong>. In this configuration, the default gateway is obtained through Router Advertisements (RA) sent as part of the Neighbor Discovery Protocol (NDP).</p>
-<p>If the interface is configured in <strong>Using DHCPv6</strong> mode, ensure that UDP port 546 is open in the IPv6 firewall so the DHCPv6 client can receive replies.</p>
-<p>It is important to note that the actual behavior is influenced by the router's configuration. Router Advertisements include two flags, M (Managed) and O (Other), which determine whether hosts should utilize SLAAC, DHCPv6, or a combination of both. The table below summarizes these configurations:</p>
+<p>When the Configure option in the <strong>IPv6</strong> tab is set to Auto, the interface automatically obtains an IPv6 address from the network router. If the interface is marked <strong>Enabled for WAN</strong>, it will also receive DNS settings and the default gateway.</p>
+<p>Actual behavior depends on how the router is configured. IPv6 settings may be provided through Router Advertisements (RA), which are part of the Neighbor Discovery Protocol (NDP), or through a DHCPv6 server on the network. If DHCPv6 is used, make sure UDP port 546 is open in the IPv6 firewall so the client can receive DHCPv6 replies.</p>
+<p>Router Advertisements contain two important flags — M (Managed) and O (Other) — which tell hosts whether to use SLAAC, DHCPv6, or both. The combinations are summarized below:</p>
 <table>
 <thead>
 <tr>
@@ -5187,6 +5186,7 @@ Since the network configuration shown on the screen may not be synchronized with
 </tr>
 </tbody>
 </table>
+<p>Review your router's RA and DHCPv6 settings to ensure the IPv6 behavior matches your intended network design.</p>
 <h2 id="network-configuration-properties">Network Configuration properties</h2>
 <p>The Network configuration can be modified using the Kura Gateway Administration Console, as described above, the <a href="doc:configuration-service">Configuration Service</a> or appling a proper <a href="doc:snapshot-management">snapshot</a>.</p>
 <p>The following table describes all the properties related to the Network Configuration. It includes the name of the property, the type, a description and the default value (if applicable). The network configuration pid is <code>org.eclipse.kura.net.admin.NetworkConfigurationService</code>.</p>
@@ -5392,7 +5392,7 @@ Since the network configuration shown on the screen may not be synchronized with
 <tr>
 <td><code>net.interface.&lt;interface&gt;.config.ip6.address.method</code></td>
 <td>String</td>
-<td>The IPv6 configuration method; possible values are: <code>AUTO</code>, <code>DHCP</code>, <code>MANUAL</code>.</td>
+<td>The IPv6 configuration method; possible values are: <code>AUTO</code>, <code>MANUAL</code>.</td>
 <td><code>AUTO</code></td>
 </tr>
 <tr>

@@ -23,9 +23,9 @@ The **IPv4** and **IPv6** tabs contain the following configuration parameters:
 - **WAN Priority** - configure the network failover. See [here](network-failover.md) for more details.
 - **Configure**
     - Manually: allows manual entry of the _IP Address_ and _Netmask_ fields, if the interface is configured as LAN; allows manual entry of the _IP Address_, _Netmask_, _Gateway_, and _DNS Servers_ fields, if the interface is designated as WAN.
-    - Using DHCP/DHCPv6: configures the interface as a DHCP client obtaining the IP address from a network DHCP server.
-    - Stateless Address Auto-Configuration (SLAAC): automatically assign an IP address (available only for **IPv6**).
-- **Address Generation Mode** - defines the method used to automatically generate the IP address with SLAAC (available only for **IPv6**)
+    - Using DHCP: configures the interface as a DHCP client obtaining the IP address from a network DHCP server (available only for **IPv4**).
+    - Auto: automatically assign an IP address (available only for **IPv6**).
+- **Address Generation Mode** - defines the method used to automatically generate the IP address with Stateless Address Auto-Configuration (SLAAC) (available only for **IPv6**)
     - EUI64: use EUI-64 method for address generation
     - Stable-privacy: use RFC7217 method for address generation
 - **IP Address** - defines the IP address of the interface, if manually configured.
@@ -86,13 +86,11 @@ When applying a new network configuration, Kura configures NetworkManager and Mo
 
 ## IPv6 Addressing Modes
 
-When the **Configure** option in the **IPv6** tab is set to **Using DHCPv6**, the network interface obtains its IPv6 address and DNS information from the DHCPv6 server. However, it is important to note that the default gateway is not supplied by the network in this mode, even if the interface is designated as **Enabled for WAN**.
+When the Configure option in the **IPv6** tab is set to Auto, the interface automatically obtains an IPv6 address from the network router. If the interface is marked **Enabled for WAN**, it will also receive DNS settings and the default gateway.
 
-To retrieve the default gateway, set the **Configure** option to **SLAAC**. In this configuration, the default gateway is obtained through Router Advertisements (RA) sent as part of the Neighbor Discovery Protocol (NDP).
+Actual behavior depends on how the router is configured. IPv6 settings may be provided through Router Advertisements (RA), which are part of the Neighbor Discovery Protocol (NDP), or through a DHCPv6 server on the network. If DHCPv6 is used, make sure UDP port 546 is open in the IPv6 firewall so the client can receive DHCPv6 replies.
 
-If the interface is configured in **Using DHCPv6** mode, ensure that UDP port 546 is open in the IPv6 firewall so the DHCPv6 client can receive replies.
-
-It is important to note that the actual behavior is influenced by the router's configuration. Router Advertisements include two flags, M (Managed) and O (Other), which determine whether hosts should utilize SLAAC, DHCPv6, or a combination of both. The table below summarizes these configurations:
+Router Advertisements contain two important flags — M (Managed) and O (Other) — which tell hosts whether to use SLAAC, DHCPv6, or both. The combinations are summarized below:
 
 Flags (M/O) | Address source | DNS Source | Default Gateway Source | Description |
 ------------|----------------|------------|------------------------|-|
@@ -100,6 +98,8 @@ M=0, O=0    | SLAAC          | RA         | RA                     | Pure SLAAC 
 M=0, O=1    | SLAAC          | DHCPv6     | RA                     | SLAAC for addressing, with DHCPv6 used only for “other” configuration such as DNS. A mixed or “hybrid” setup. |   
 M=1, O=0    | DHCPv6         | DHCPv6     | RA                     | Fully managed IPv6 network. Hosts rely on DHCPv6 for address and configuration details. |
 M=1, O=1    | DHCPv6         | DHCPv6     | RA                     | Same as M=1/O=0: a stateful, DHCPv6-managed network. Both flags instruct hosts to use DHCPv6 for address assignment and additional configuration. |
+
+Review your router's RA and DHCPv6 settings to ensure the IPv6 behavior matches your intended network design.
 
 ## Network Configuration properties
 
@@ -156,7 +156,7 @@ Name                                                  | Type     | Description  
 ------------------------------------------------------|----------|------------------------------------------|----------------------------
 `net.interface.<interface>.config.ip6.status`	      | String   | The status of the interface for the IPv6 configuration; possibile values are: `netIPv6StatusDisabled`, `netIPv6StatusUnmanaged`, `netIPv6StatusEnabledLAN`, `netIPv6StatusEnabledWAN`, `netIPv6StatusUnknown` | `netIPv6StatusDisabled` (see note below)
 `net.interface.<interface>.config.ip6.wan.priority`   | Integer  | Priority used to determine which interface select as primary WAN. Allowed values range from -1 to 2147483647, inclusive. See [Network Failover](./network-failover.md) for further details | -1
-`net.interface.<interface>.config.ip6.address.method` | String   | The IPv6 configuration method; possible values are: `AUTO`, `DHCP`, `MANUAL`. | `AUTO`
+`net.interface.<interface>.config.ip6.address.method` | String   | The IPv6 configuration method; possible values are: `AUTO`, `MANUAL`. | `AUTO`
 `net.interface.<interface>.config.ip6.address`        | String   | The IPv6 address assigned to the network interface |
 `net.interface.<interface>.config.ip6.prefix`	      | Short    | The IPv6 netmask assigned to the network interface | -1
 `net.interface.<interface>.config.ip6.gateway`        | String   | The IPv6 address of the default gateway |

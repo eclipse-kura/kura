@@ -195,21 +195,33 @@
                         </goals>
                         <configuration>
                             <target>
-                                <move file="${project.build.directory}/source/plugins/org.apache.felix.dependencymanager.jar" tofile="${project.build.directory}/source/plugins/org.apache.felix.dependencymanager_${org.apache.felix.dependencymanager.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/org.apache.felix.deploymentadmin.jar" tofile="${project.build.directory}/source/plugins/org.apache.felix.deploymentadmin_${org.apache.felix.deploymentadmin.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/org.knowhowlab.osgi.monitoradmin.jar" tofile="${project.build.directory}/source/plugins/org.knowhowlab.osgi.monitoradmin_${org.knowhowlab.osgi.monitoradmin.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-http.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.http_${org.eclipse.jetty.http.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-continuation.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.continuation_${org.eclipse.jetty.continuation.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-io.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.io_${org.eclipse.jetty.io.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-security.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.security_${org.eclipse.jetty.security.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-server.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.server_${org.eclipse.jetty.server.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-servlet.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.servlet_${org.eclipse.jetty.servlet.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-util.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.util_${org.eclipse.jetty.util.version}.jar" />
-                                <move file="${project.build.directory}/source/plugins/jetty-util-ajax.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.util.ajax_${org.eclipse.jetty.util.ajax.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.apache.felix.dependencymanager.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.apache.felix.dependencymanager_${org.apache.felix.dependencymanager.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.apache.felix.deploymentadmin.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.apache.felix.deploymentadmin_${org.apache.felix.deploymentadmin.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.knowhowlab.osgi.monitoradmin.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.knowhowlab.osgi.monitoradmin_${org.knowhowlab.osgi.monitoradmin.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-http.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.http_${org.eclipse.jetty.http.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-continuation.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.continuation_${org.eclipse.jetty.continuation.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-io.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.io_${org.eclipse.jetty.io.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-security.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.security_${org.eclipse.jetty.security.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-server.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.server_${org.eclipse.jetty.server.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-servlet.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.servlet_${org.eclipse.jetty.servlet.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-util.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.util_${org.eclipse.jetty.util.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-util-ajax.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.util.ajax_${org.eclipse.jetty.util.ajax.version}.jar" />
                                 <!--
                                     use wireadming 1.0.800, remove this on full Equinox upgrade
                                 -->
-                                <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.wireadmin.jar" tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.wireadmin_${org.eclipse.equinox.wireadmin.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.wireadmin.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.wireadmin_${org.eclipse.equinox.wireadmin.version}.jar" />
                             </target>
                         </configuration>
                     </execution>

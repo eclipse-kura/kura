@@ -35,6 +35,11 @@
         <Logger name="org.eclipse" level="info" additivity="false">
             <AppenderRef ref="RollingFile"/>
         </Logger>
+
+        <Logger name="org.glassfish.jersey.internal" level="error" additivity="false">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="RollingFile" />
+        </Logger>
  
         <Root level="info">
             <AppenderRef ref="RollingFile"/>

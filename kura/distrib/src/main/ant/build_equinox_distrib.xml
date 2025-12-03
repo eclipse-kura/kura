@@ -660,6 +660,11 @@ fi]]>
 			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.linux_${org.eclipse.kura.linux.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
+
+			<zipfileset
+				file="${project.build.directory}/plugins/org.eclipse.kura.jul.to.slf4j.configuration_${org.eclipse.kura.jul.to.slf4j.configuration.version}.jar"
+				prefix="${build.output.name}/${plugins.folder}" />
+
 		</zip>
 
 		<antcall target="camel-jar" />
@@ -829,6 +834,10 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.io_${org.apache.commons.io.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/slf4j.api_${slf4j.api.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jul.to.slf4j_${jul.to.slf4j.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.jul.to.slf4j.configuration_${org.eclipse.kura.jul.to.slf4j.configuration.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jcl.over.slf4j_${jcl.over.slf4j.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"

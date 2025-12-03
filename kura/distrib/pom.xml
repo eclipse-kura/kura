@@ -505,6 +505,16 @@
                                     <artifactId>org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider</artifactId>
                                     <version>${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.jul.to.slf4j.configuration</artifactId>
+                                    <version>${org.eclipse.kura.jul.to.slf4j.configuration.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.jul.to.slf4j.configuration</artifactId>
+                                    <version>${org.eclipse.kura.jul.to.slf4j.configuration.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -715,6 +725,8 @@
                                     tofile="target/plugins/org.eclipse.kura.wire.component.join.provider_${org.eclipse.kura.wire.component.join.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider_${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.jul.to.slf4j.configuration.jar"
+                                    tofile="target/plugins/org.eclipse.kura.jul.to.slf4j.configuration_${org.eclipse.kura.jul.to.slf4j.configuration.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>
@@ -1872,6 +1884,11 @@
                                             file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.12.50/repository/plugins"
                                             failonerror="false" />
+
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.jul.to.slf4j.configuration_${org.eclipse.kura.jul.to.slf4j.configuration.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
+                                            
                                         <!-- Add REST bundles-->
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar"

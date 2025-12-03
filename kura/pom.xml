@@ -101,11 +101,14 @@
         <module>org.eclipse.kura.linux.debian.provider</module>
         <module>org.eclipse.kura.linux.redhat.provider</module>
 
+        <module>org.eclipse.kura.jul.to.slf4j.configuration</module>
+
         <module>features</module>
         <module>emulator</module>
 
         <!-- final p2 repository -->
         <module>org.eclipse.kura-p2</module>
+        
     </modules>
 
     <properties>

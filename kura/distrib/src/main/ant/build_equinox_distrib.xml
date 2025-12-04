@@ -239,6 +239,7 @@
 		</propertyfile>
 
 
+
 		<propertyfile
 			file="${project.build.directory}/${build.output.name}/dpa.properties">
 			<entry key="kura"
@@ -547,8 +548,7 @@ fi]]>
 				file="${project.build.directory}/${build.output.name}/kura.properties"
 				prefix="${build.output.name}/${framework.config.folder}/" />
 
-			<zipfileset dir="${kura.osgi.repo}/plugins/"
-				prefix="${build.output.name}/${plugins.folder}">
+			<zipfileset dir="${kura.osgi.repo}/plugins/" prefix="${build.output.name}/${plugins.folder}">
 
 				<!-- exclude source bundles -->
 				<exclude name="*.source_*.jar" />
@@ -704,6 +704,7 @@ fi]]>
 			<arg value="${build.name}" />
 			<arg value="${kura.install.dir}" />
 		</exec>
+
 
 
 		<!-- Get version information for the bundles/files in this build -->

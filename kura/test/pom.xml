@@ -9,9 +9,7 @@ Copyright (c) 2016, 2025 Eurotech and/or its affiliates and others
   http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.kura</groupId>
@@ -249,9 +247,7 @@ Copyright (c) 2016, 2025 Eurotech and/or its affiliates and others
     </build>
     <properties>
         <kura.basedir>${project.basedir}/..</kura.basedir>
-        <tycho.argline>
-            ${jacocoArgs}
-            -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml</tycho.argline>
+        <tycho.argline>${jacocoArgs} -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml</tycho.argline>
     </properties>
     <modules>
         <module>org.eclipse.kura.asset.provider.test</module>

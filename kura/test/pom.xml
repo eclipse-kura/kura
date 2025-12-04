@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
+Copyright (c) 2016, 2025 Eurotech and/or its affiliates and others
 
   All rights reserved. This program and the accompanying materials
   are made available under the terms of the Eclipse Public License v1.0
@@ -9,7 +9,9 @@ Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
   http://www.eclipse.org/legal/epl-v10.html
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.kura</groupId>
@@ -131,7 +133,7 @@ Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.eclipse.kura.jul.to.slf4j.configuration</id>
+                            <id>org.eclipse.kura.jul.to.slf4j.configuration.backported</id>
                             <level>1</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -218,7 +220,7 @@ Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
                             </requirement>
                             <requirement>
                                 <type>p2-installable-unit</type>
-                                <id>org.eclipse.kura.jul.to.slf4j.configuration</id>
+                                <id>org.eclipse.kura.jul.to.slf4j.configuration.backported</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                             <requirement>
@@ -247,7 +249,9 @@ Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
     </build>
     <properties>
         <kura.basedir>${project.basedir}/..</kura.basedir>
-        <tycho.argline>${jacocoArgs} -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml</tycho.argline>
+        <tycho.argline>
+            ${jacocoArgs}
+            -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml</tycho.argline>
     </properties>
     <modules>
         <module>org.eclipse.kura.asset.provider.test</module>

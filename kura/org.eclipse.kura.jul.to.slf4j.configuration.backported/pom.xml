@@ -19,12 +19,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-		<groupId>org.eclipse.kura</groupId>
-		<artifactId>kura</artifactId>
-		<version>4.1.5-SNAPSHOT</version>
-	</parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>kura</artifactId>
+        <version>4.1.5-SNAPSHOT</version>
+    </parent>
 
-    <artifactId>org.eclipse.kura.jul.to.slf4j.configuration</artifactId>
+    <artifactId>org.eclipse.kura.jul.to.slf4j.configuration.backported</artifactId>
     <version>1.0.0</version>
     <packaging>eclipse-plugin</packaging>
 

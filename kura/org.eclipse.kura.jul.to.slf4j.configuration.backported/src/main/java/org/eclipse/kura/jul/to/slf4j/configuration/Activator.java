@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.jul.to.slf4j.configuration;
+package org.eclipse.kura.jul.to.slf4j.configuration.backported;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

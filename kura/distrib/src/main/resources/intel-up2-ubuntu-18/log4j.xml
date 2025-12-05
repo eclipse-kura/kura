@@ -37,7 +37,6 @@
         </Logger>
 
         <Logger name="org.glassfish.jersey.internal" level="error" additivity="false">
-            <AppenderRef ref="Console" />
             <AppenderRef ref="RollingFile" />
         </Logger>
  

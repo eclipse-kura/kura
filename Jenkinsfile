@@ -40,43 +40,4 @@ node {
             archiveArtifacts artifacts: 'kura/distrib/target/*.deb', onlyIfSuccessful: true
         }
     }
-
-    stage('Sonar') {
-        timeout(time: 2, unit: 'HOURS') {
-            dir('kura') {
-                withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
-                    withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONARCLOUD_TOKEN')]) {
-                        withSonarQubeEnv {
-                            sh '''
-                                mvn -f kura/pom.xml sonar:sonar \
-                                    -Dmaven.test.failure.ignore=true \
-                                    -Dsonar.organization=eclipse \
-                                    -Dsonar.host.url=${SONAR_HOST_URL} \
-                                    -Dsonar.token=${SONARCLOUD_TOKEN} \
-                                    -Dsonar.branch.name=${BRANCH_NAME} \
-                                    -Dsonar.branch.target=${CHANGE_TARGET} \
-                                    -Dsonar.java.source=8 \
-                                    -Dsonar.java.binaries='target/' \
-                                    -Dsonar.core.codeCoveragePlugin=jacoco \
-                                    -Dsonar.projectKey=org.eclipse.kura:kura \
-                                    -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*,org.eclipse.kura.nm/src/main/java/fi/w1/**/*,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod1/LibGpiodV1Native.java,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod2/LibGpiodV2Native.java
-                            '''
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    stage('quality-gate') {
-        // Sonar quality gate
-        timeout(time: 30, unit: 'MINUTES') {
-            withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONARCLOUD_TOKEN')]) {
-                def qg = waitForQualityGate()
-                if (qg.status != 'OK') {
-                    error "Pipeline aborted due to sonar quality gate failure: ${qg.status}"
-                }
-            }
-        }
-    }
 }

@@ -1,9 +1,19 @@
 Eclipse Kura™
 =============
-Travis-ci:
-[![Build Status](https://travis-ci.org/eclipse/kura.svg?branch=master)](https://travis-ci.org/eclipse/kura)
-Hudson:
-[![Hudson](https://img.shields.io/jenkins/s/https/hudson.eclipse.org/kura/job/kura-develop.svg)](https://hudson.eclipse.org/kura/)
+
+<p align="center">
+<img src="https://eclipse.dev/kura/images/kura.png" alt="Kura™ logo" width="500"/>
+</p>
+
+<div align="center">
+
+[![GitHub Tag](https://img.shields.io/github/v/tag/eclipse/kura?label=Latest%20Tag)](https://github.com/eclipse/kura/tags)
+[![GitHub](https://img.shields.io/github/license/eclipse/kura?label=License)](https://github.com/eclipse/kura/blob/develop/LICENSE)
+
+[![Jenkins](https://img.shields.io/jenkins/build?jobUrl=https:%2F%2Fci.eclipse.org%2Fkura%2Fjob%2Fmultibranch%2Fjob%2Fdevelop&label=Jenkins%20Build&logo=jenkins)](https://ci.eclipse.org/kura/job/multibranch/job/develop/)
+[![Jenkins](https://img.shields.io/jenkins/tests?compact_message&failed_label=%E2%9D%8C&jobUrl=https:%2F%2Fci.eclipse.org%2Fkura%2Fjob%2Fmultibranch%2Fjob%2Fdevelop%2F&label=Jenkins%20CI&passed_label=%E2%9C%85&skipped_label=%E2%9D%95&logo=jenkins)](https://ci.eclipse.org/kura/job/multibranch/) <br/>
+  
+</div>
 
 An OSGi-based Application Framework for M2M Service Gateways
 

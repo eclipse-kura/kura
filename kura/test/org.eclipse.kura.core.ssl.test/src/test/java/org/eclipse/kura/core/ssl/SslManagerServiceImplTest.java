@@ -17,6 +17,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -693,7 +694,7 @@ public class SslManagerServiceImplTest {
 
         assertTrue(visited.get());
 
-        verify(csMock, times(1)).setKeyStorePassword(anyString(), (char[]) anyObject());
+        verify(csMock, never()).setKeyStorePassword(anyString(), (char[]) anyObject());
     }
 
     @Test
@@ -932,7 +933,8 @@ public class SslManagerServiceImplTest {
 
         assertTrue(store.isKeyEntry(alias));
 
-        // install another private key and check that getKeyStore only returns one, if alias is specified
+        // install another private key and check that getKeyStore only returns one, if
+        // alias is specified
 
         pair = gen.generateKeyPair();
         key = pair.getPrivate();

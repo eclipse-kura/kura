@@ -17,6 +17,7 @@ package org.eclipse.kura.container.provider;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
@@ -50,7 +52,10 @@ public class ContainerIdentityIntegrationTest {
     private static final String CONTAINER_TAG = "latest";
     private static final String PERMISSIONS = "rest.read,rest.write";
     private static final String TOKEN = "temp-token";
+    private static final String SECOND_TOKEN = "next-temp-token";
     private static final String CONTAINER_ID = "container-id";
+    private static final String SECOND_CONTAINER_ID = "container-id-2";
+    private static final String UPDATED_CONTAINER_NAME = CONTAINER_NAME + "-v2";
 
     private ContainerInstance containerInstance;
     private ContainerOrchestrationService containerOrchestrationService;
@@ -60,6 +65,9 @@ public class ContainerIdentityIntegrationTest {
     private CountDownLatch startLatch;
     private CountDownLatch createLatch;
     private CountDownLatch deleteLatch;
+    private AtomicInteger createCount;
+    private AtomicInteger deleteCount;
+    private AtomicInteger startCount;
     private ArgumentCaptor<ContainerConfiguration> configurationCaptor;
     private ArgumentCaptor<Set<Permission>> permissionsCaptor;
 
@@ -73,6 +81,9 @@ public class ContainerIdentityIntegrationTest {
         this.startLatch = new CountDownLatch(1);
         this.createLatch = new CountDownLatch(1);
         this.deleteLatch = new CountDownLatch(1);
+        this.createCount = new AtomicInteger(0);
+        this.deleteCount = new AtomicInteger(0);
+        this.startCount = new AtomicInteger(0);
         this.configurationCaptor = ArgumentCaptor.forClass(ContainerConfiguration.class);
         this.permissionsCaptor = ArgumentCaptor.forClass(Set.class);
 
@@ -112,6 +123,32 @@ public class ContainerIdentityIntegrationTest {
         thenTemporaryIdentityIsDeleted();
     }
 
+    @Test
+    public void recreatesTemporaryIdentityOnConfigurationChange() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentityServiceProvidesTokens(TOKEN, SECOND_TOKEN);
+        givenContainerOrchestratorStartsSuccessfullyWithIds(CONTAINER_ID, SECOND_CONTAINER_ID);
+
+        whenContainerInstanceIsActivatedUntilCreated();
+        whenContainerConfigurationIsUpdatedWithNewName();
+
+        thenTemporaryIdentityIsRecreated();
+        thenLatestContainerStartReceivesToken(SECOND_TOKEN);
+    }
+
+    @Test
+    public void cleansUpTemporaryIdentityOnceAcrossMultipleShutdowns() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentityServiceProvidesToken();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivatedUntilCreated();
+        whenContainerInstanceIsDisabled();
+        whenContainerInstanceIsDeactivated();
+
+        thenTemporaryIdentityIsDeletedOnlyOnce();
+    }
+
     /*
      * GIVEN
      */
@@ -128,19 +165,57 @@ public class ContainerIdentityIntegrationTest {
     private void givenTemporaryIdentityServiceProvidesToken() throws Exception {
         doAnswer(invocation -> {
             this.createLatch.countDown();
+            this.createCount.incrementAndGet();
             return TOKEN;
         }).when(this.temporaryIdentityService).createTemporaryIdentity(anyString(), this.permissionsCaptor.capture());
 
         doAnswer(invocation -> {
             this.deleteLatch.countDown();
+            this.deleteCount.incrementAndGet();
             return null;
         }).when(this.temporaryIdentityService).deleteTemporaryIdentity(TOKEN);
+    }
+
+    private void givenTemporaryIdentityServiceProvidesTokens(final String firstToken, final String secondToken)
+            throws Exception {
+        this.createLatch = new CountDownLatch(2);
+        this.deleteLatch = new CountDownLatch(1);
+        this.createCount.set(0);
+        this.deleteCount.set(0);
+
+        final AtomicInteger index = new AtomicInteger(0);
+
+        doAnswer(invocation -> {
+            this.createLatch.countDown();
+            this.createCount.incrementAndGet();
+            return index.getAndIncrement() == 0 ? firstToken : secondToken;
+        }).when(this.temporaryIdentityService).createTemporaryIdentity(anyString(), this.permissionsCaptor.capture());
+
+        doAnswer(invocation -> {
+            this.deleteLatch.countDown();
+            this.deleteCount.incrementAndGet();
+            return true;
+        }).when(this.temporaryIdentityService).deleteTemporaryIdentity(anyString());
     }
 
     private void givenContainerOrchestratorStartsSuccessfully() throws Exception {
         doAnswer(invocation -> {
             this.startLatch.countDown();
+            this.startCount.incrementAndGet();
             return CONTAINER_ID;
+        }).when(this.containerOrchestrationService).startContainer(this.configurationCaptor.capture());
+    }
+
+    private void givenContainerOrchestratorStartsSuccessfullyWithIds(final String... containerIds) throws Exception {
+        this.startLatch = new CountDownLatch(containerIds.length);
+        this.startCount.set(0);
+        final AtomicInteger index = new AtomicInteger(0);
+
+        doAnswer(invocation -> {
+            this.startLatch.countDown();
+            this.startCount.incrementAndGet();
+            final int current = Math.min(index.getAndIncrement(), containerIds.length - 1);
+            return containerIds[current];
         }).when(this.containerOrchestrationService).startContainer(this.configurationCaptor.capture());
     }
 
@@ -157,11 +232,23 @@ public class ContainerIdentityIntegrationTest {
         thenWaitForContainerState("Created");
     }
 
+    private void whenContainerConfigurationIsUpdatedWithNewName() throws InterruptedException {
+        final Map<String, Object> updated = new HashMap<>(this.properties);
+        updated.put("container.name", UPDATED_CONTAINER_NAME);
+
+        this.containerInstance.updated(updated);
+        thenWaitForContainerState("Created");
+    }
+
     private void whenContainerInstanceIsDisabled() {
         final Map<String, Object> disabled = new HashMap<>(this.properties);
         disabled.put("container.enabled", false);
 
         this.containerInstance.updated(disabled);
+    }
+
+    private void whenContainerInstanceIsDeactivated() {
+        this.containerInstance.deactivate();
     }
 
     /*
@@ -198,10 +285,42 @@ public class ContainerIdentityIntegrationTest {
         verify(this.temporaryIdentityService).deleteTemporaryIdentity(TOKEN);
     }
 
+    private void thenTemporaryIdentityIsDeletedOnlyOnce() throws Exception {
+        assertTrue("Temporary identity deletion did not occur", this.deleteLatch.await(5, TimeUnit.SECONDS));
+        verify(this.temporaryIdentityService, times(1)).deleteTemporaryIdentity(TOKEN);
+    }
+
+    private void thenTemporaryIdentityIsRecreated() throws Exception {
+        awaitCounterAtLeast(this.createCount, 2);
+        awaitCounterAtLeast(this.deleteCount, 1);
+        awaitCounterAtLeast(this.startCount, 2);
+
+        assertTrue("Temporary identities were not created twice", this.createLatch.await(5, TimeUnit.SECONDS));
+        assertTrue("Original temporary identity was not cleaned up", this.deleteLatch.await(5, TimeUnit.SECONDS));
+        assertTrue("Container was not started twice", this.startLatch.await(5, TimeUnit.SECONDS));
+    }
+
+    private void thenLatestContainerStartReceivesToken(final String expectedToken) {
+        final List<ContainerConfiguration> configurations = this.configurationCaptor.getAllValues();
+        final ContainerConfiguration latestConfiguration = configurations.get(configurations.size() - 1);
+
+        final List<String> envVars = latestConfiguration.getContainerEnvVars();
+        assertTrue("Latest start should include refreshed token",
+                envVars.contains("KURA_IDENTITY_TOKEN=" + expectedToken));
+    }
+
     private void thenWaitForContainerState(String expectedState) throws InterruptedException {
-        int attempts = 10;
+        int attempts = 50;
         while (!expectedState.equals(this.containerInstance.getState()) && attempts-- > 0) {
             Thread.sleep(100);
         }
+    }
+
+    private void awaitCounterAtLeast(final AtomicInteger counter, final int expected) throws InterruptedException {
+        int attempts = 50;
+        while (counter.get() < expected && attempts-- > 0) {
+            Thread.sleep(100);
+        }
+        assertTrue("Counter did not reach expected value", counter.get() >= expected);
     }
 }

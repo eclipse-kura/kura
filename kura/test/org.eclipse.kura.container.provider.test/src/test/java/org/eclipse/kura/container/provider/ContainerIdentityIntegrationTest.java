@@ -156,6 +156,7 @@ public class ContainerIdentityIntegrationTest {
     private void givenIdentityIntegrationIsEnabled() {
         this.properties.put("container.enabled", true);
         this.properties.put("container.name", CONTAINER_NAME);
+        this.properties.put("kura.service.pid", CONTAINER_NAME);
         this.properties.put("container.image", CONTAINER_IMAGE);
         this.properties.put("container.image.tag", CONTAINER_TAG);
         this.properties.put("container.identity.enabled", true);
@@ -235,6 +236,7 @@ public class ContainerIdentityIntegrationTest {
     private void whenContainerConfigurationIsUpdatedWithNewName() throws InterruptedException {
         final Map<String, Object> updated = new HashMap<>(this.properties);
         updated.put("container.name", UPDATED_CONTAINER_NAME);
+        updated.put("kura.service.pid", UPDATED_CONTAINER_NAME);
 
         this.containerInstance.updated(updated);
         thenWaitForContainerState("Created");

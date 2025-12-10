@@ -835,7 +835,7 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/slf4j.api_${slf4j.api.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jul.to.slf4j_${jul.to.slf4j.version}.jar@3" />
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jul.to.slf4j_${slf4j.api.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.jul.to.slf4j.configuration.backported_${org.eclipse.kura.jul.to.slf4j.configuration.backported.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"

@@ -510,11 +510,6 @@
                                     <artifactId>org.eclipse.kura.jul.to.slf4j.configuration.backported</artifactId>
                                     <version>${org.eclipse.kura.jul.to.slf4j.configuration.backported.version}</version>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>org.eclipse.kura.jul.to.slf4j.configuration.backported</artifactId>
-                                    <version>${org.eclipse.kura.jul.to.slf4j.configuration.backported.version}</version>
-                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>

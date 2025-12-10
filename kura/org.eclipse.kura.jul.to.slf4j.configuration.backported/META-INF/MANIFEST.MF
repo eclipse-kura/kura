@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.eclipse.kura.jul.to.slf4j.configuration.backported;sing
 Bundle-Version: 1.0.0
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v2.0
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.kura.jul.to.slf4j.configuration.backported.Activator
 Import-Package: org.osgi.framework;version="1.8.0",

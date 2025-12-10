@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright (c) 2011, 2022 Eurotech and others
+  Copyright (c) 2011, 2025 Eurotech and others
   All rights reserved. This program and the accompanying materials
   are made available under the terms of the Eclipse Public License v1.0
   which accompanies this distribution, and is available at
@@ -101,6 +101,8 @@
         <module>org.eclipse.kura.linux.debian.provider</module>
         <module>org.eclipse.kura.linux.redhat.provider</module>
 
+        <module>org.eclipse.kura.jul.to.slf4j.configuration.backported</module>
+
         <module>features</module>
         <module>emulator</module>
 
@@ -121,11 +123,11 @@
         <kura.build.version>${maven.build.timestamp}</kura.build.version>
 
         <!-- Jacoco version -->
-        <!-- <jacoco.version>0.8.1</jacoco.version>
+        <jacoco.version>0.8.1</jacoco.version>
         <jacoco.reportDir>target/jacoco/</jacoco.reportDir>
         <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath> -->
+        <sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 
         <!-- BND baseline plugin -->
         <bnd.baseline.version>3.4.0</bnd.baseline.version>
@@ -228,7 +230,7 @@
                 <module>tools</module>
             </modules>
         </profile>
-        <!-- <profile>
+        <profile>
             <id>tests</id>
             <activation>
                 <property>
@@ -238,7 +240,7 @@
             <modules>
                 <module>test</module>
             </modules>
-        </profile> -->
+        </profile>
 
         <profile>
             <id>web</id>
@@ -353,7 +355,7 @@
                 </configuration>
             </plugin>
 
-            <!-- <plugin>
+            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
@@ -369,7 +371,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin> -->
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>

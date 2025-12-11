@@ -1509,6 +1509,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Position Service
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -1519,6 +1531,34 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#multiple-gps-module-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multiple GPS module support
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -4536,6 +4576,23 @@ You are viewing the documentation relative to the develop branch or to an outdat
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#multiple-gps-module-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multiple GPS module support
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -4566,7 +4623,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>static</strong> - specifies true or false whether to use a static position instead of a GPS. (Required field.)</p>
 </li>
 <li>
-<p><strong>provider</strong> - species which position provider use, can be gpsd or serial. </p>
+<p><strong>provider</strong> - specifies which position provider use. Possible options are: </p>
 <ul>
 <li><strong>gpsd</strong> - gpsd service daemon if is available on the system. </li>
 <li><strong>serial</strong> - direct access to gps device through serial or usb port.</li>
@@ -4619,6 +4676,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>parity</strong> - sets the parity for the serial communication to the GPS device.</p>
 </li>
 </ul>
+<h2 id="multiple-gps-module-support">Multiple GPS module support</h2>
+<p>Eclipse Kura provides limited support for systems with multiple GPS modules. When more than one module is installed and managed by gpsd, Kura will monitor all of them. The reported position is taken from the first module that has a valid fix; if multiple modules have a fix, Kura selects the one that comes first in lexicographical order.</p>
 
 
 

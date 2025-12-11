@@ -339,37 +339,37 @@
                                 <artifactItem>
                                     <groupId>org.glassfish.jersey.containers</groupId>
                                     <artifactId>jersey-container-servlet</artifactId>
-                                    <version>${jersey.version}</version>
+                                    <version>${jersey.distrib.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.glassfish.jersey.containers</groupId>
                                     <artifactId>jersey-container-servlet-core</artifactId>
-                                    <version>${jersey.version}</version>
+                                    <version>${jersey.distrib.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.glassfish.jersey.core</groupId>
                                     <artifactId>jersey-common</artifactId>
-                                    <version>${jersey.version}</version>
+                                    <version>${jersey.distrib.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.glassfish.jersey.core</groupId>
                                     <artifactId>jersey-server</artifactId>
-                                    <version>${jersey.version}</version>
+                                    <version>${jersey.distrib.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.glassfish.jersey.core</groupId>
                                     <artifactId>jersey-client</artifactId>
-                                    <version>${jersey.version}</version>
+                                    <version>${jersey.distrib.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.glassfish.jersey.media</groupId>
                                     <artifactId>jersey-media-sse</artifactId>
-                                    <version>${jersey.version}</version>
+                                    <version>${jersey.distrib.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.glassfish.jersey.media</groupId>
                                     <artifactId>jersey-media-multipart</artifactId>
-                                    <version>${jersey.version}</version>
+                                    <version>${jersey.distrib.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.jvnet.mimepull</groupId>
@@ -379,7 +379,7 @@
                                 <artifactItem>
                                     <groupId>org.glassfish.jersey.inject</groupId>
                                     <artifactId>jersey-hk2</artifactId>
-                                    <version>${jersey.version}</version>
+                                    <version>${jersey.distrib.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.glassfish.hk2</groupId>
@@ -641,20 +641,20 @@
                                 <move file="target/source/plugins/minimal-json.jar" tofile="target/source/plugins/minimal-json_${com.eclipsesource.minimal-json.version}.jar"/>
                                 <move file="target/source/plugins/osgi.annotation.jar" tofile="target/source/plugins/osgi.annotation_${osgi.annotation.version}.jar"/>
                                 <move file="target/source/plugins/org.moka7.jar" tofile="target/source/plugins/org.moka7_${org.moka7.version}.jar"/>
-                                <move file="target/source/plugins/jersey-container-servlet.jar" tofile="target/source/plugins/jersey-container-servlet_${jersey.version}.jar"/>
-                                <move file="target/source/plugins/jersey-container-servlet-core.jar" tofile="target/source/plugins/jersey-container-servlet-core_${jersey.version}.jar"/>
-                                <move file="target/source/plugins/jersey-common.jar" tofile="target/source/plugins/jersey-common_${jersey.version}.jar"/>
-                                <move file="target/source/plugins/jersey-server.jar" tofile="target/source/plugins/jersey-server_${jersey.version}.jar"/>
-                                <move file="target/source/plugins/jersey-client.jar" tofile="target/source/plugins/jersey-client_${jersey.version}.jar"/>
+                                <move file="target/source/plugins/jersey-container-servlet.jar" tofile="target/source/plugins/jersey-container-servlet_${jersey.distrib.version}.jar" />
+                                <move file="target/source/plugins/jersey-container-servlet-core.jar" tofile="target/source/plugins/jersey-container-servlet-core_${jersey.distrib.version}.jar" />
+                                <move file="target/source/plugins/jersey-common.jar" tofile="target/source/plugins/jersey-common_${jersey.distrib.version}.jar" />
+                                <move file="target/source/plugins/jersey-server.jar" tofile="target/source/plugins/jersey-server_${jersey.distrib.version}.jar" />
+                                <move file="target/source/plugins/jersey-client.jar" tofile="target/source/plugins/jersey-client_${jersey.distrib.version}.jar" />
                                 <move file="target/source/plugins/jakarta.validation-api.jar" tofile="target/source/plugins/jakarta.validation-api_${jakarta.validation-api.version}.jar"/>
                                 <move file="target/source/plugins/jakarta.annotation-api.jar" tofile="target/source/plugins/jakarta.annotation-api_${jakarta.annotation-api.version}.jar"/>
                                 <move file="target/source/plugins/jakarta.ws.rs-api.jar" tofile="target/source/plugins/jakarta.ws.rs-api_${jakarta.ws.rs-api.version}.jar"/>
                                 <move file="target/source/plugins/jakarta.xml.bind-api.jar" tofile="target/source/plugins/jakarta.xml.bind-api_${jakarta.xml.bind-api.version}.jar"/>
                                 <move file="target/source/plugins/jakarta.inject.jar" tofile="target/source/plugins/jakarta.inject_${jakarta.inject.version}.jar"/>
-                                <move file="target/source/plugins/jersey-media-sse.jar" tofile="target/source/plugins/jersey-media-sse_${jersey.version}.jar"/>
-                                <move file="target/source/plugins/jersey-media-multipart.jar" tofile="target/source/plugins/jersey-media-multipart_${jersey.version}.jar"/>
+                                <move file="target/source/plugins/jersey-media-sse.jar" tofile="target/source/plugins/jersey-media-sse_${jersey.distrib.version}.jar" />
+                                <move file="target/source/plugins/jersey-media-multipart.jar" tofile="target/source/plugins/jersey-media-multipart_${jersey.distrib.version}.jar" />
                                 <move file="target/source/plugins/mimepull.jar" tofile="target/source/plugins/mimepull_${mimepull.version}.jar"/>
-                                <move file="target/source/plugins/jersey-hk2.jar" tofile="target/source/plugins/jersey-hk2_${jersey.version}.jar"/>
+                                <move file="target/source/plugins/jersey-hk2.jar" tofile="target/source/plugins/jersey-hk2_${jersey.distrib.version}.jar" />
                                 <move file="target/source/plugins/hk2-locator.jar" tofile="target/source/plugins/hk2-locator_${hk2.version}.jar"/>
                                 <move file="target/source/plugins/aopalliance-repackaged.jar" tofile="target/source/plugins/aopalliance-repackaged_${hk2.version}.jar"/>
                                 <move file="target/source/plugins/hk2-api.jar" tofile="target/source/plugins/hk2-api_${hk2.version}.jar"/>

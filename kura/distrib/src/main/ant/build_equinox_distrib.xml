@@ -907,7 +907,7 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.hk2.osgi-resource-locator_${hk2-osgi-resource-locator.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/javassist_${javassist.version}.jar@3" />
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/javassist_${javassist.distrib.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jakarta.validation.jakarta.validation-api_${jakarta.validation-api.version}.jar@2" />
 			<entry key="osgi.bundles" operation="+"

@@ -231,6 +231,32 @@ Copyright (c) 2016, 2025 Eurotech and/or its affiliates and others
                                 <id>org.apache.logging.log4j.slf4j-impl</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
+
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.glassfish.jersey.inject.jersey-hk2</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.glassfish.jersey.containers.jersey-container-servlet</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>jakarta.validation.jakarta.validation-api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.glassfish.jersey.media.jersey-media-multipart</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>eclipse-plugin</type>
+                                <id>org.glassfish.jersey.media.jersey-media-sse</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
                         </extraRequirements>
                     </dependency-resolution>
                 </configuration>

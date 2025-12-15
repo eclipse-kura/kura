@@ -506,7 +506,7 @@
                                     javassist, jersey-media-sse, protobuf-java, bcpkix-jdk18on,
                                     jersey-entity-filtering, jdk.dio.${native.tag},
                                     jersey-media-jaxb, commons-csv, gson, aopalliance-repackaged,
-                                    bcprov-jdk18on, jersey-container-servlet-core, 
+                                    bcprov-jdk18on,
                                     <!-- netty-plugins --> 
                                     netty-common, netty-codec-http, netty-codec, netty-transport, netty-buffer,
                                     netty-transport-classes-epoll, netty-resolver, netty-handler,
@@ -674,6 +674,7 @@
                                     org.eclipse.osgitech.rest, jakarta.ws.rs-api,
                                     jetty-ee10-servlet, org.apache.felix.http.bridge,
                                     org.osgi.service.jakartars,
+                                    jakarta.servlet-api,
                                     org.eclipse.osgitech.rest.servlet.whiteboard
                                 </includeArtifactIds>
                             </configuration>

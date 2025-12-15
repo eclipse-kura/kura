@@ -72,10 +72,10 @@
         <failureaccess.version>1.0.1</failureaccess.version>
         <guava.version>32.1.1-jre</guava.version>
         <hikaricp.version>2.7.9</hikaricp.version>
-        <hk2.version>3.1.1</hk2.version>
+        <hk2.version>4.0.0-M3</hk2.version>
         <io.netty.version>4.1.127.Final</io.netty.version>
         <javassist.version>3.30.2-GA</javassist.version>
-        <jersey.version>3.1.11</jersey.version>
+        <jersey.version>4.0.0</jersey.version>
         <log4j.version>2.23.1</log4j.version>
         <mimepull.version>1.10.0</mimepull.version>
         <org.apache.aries.spifly.dynamic.bundle.version>1.3.7</org.apache.aries.spifly.dynamic.bundle.version>
@@ -88,13 +88,13 @@
         <org.apache.felix.http.bridge.version>5.1.8</org.apache.felix.http.bridge.version>
         <org.apache.felix.http.jetty12.version>1.0.2</org.apache.felix.http.jetty12.version>
         <org.apache.felix.http.proxy.version>4.0.0</org.apache.felix.http.proxy.version>
-        <org.apache.felix.http.servlet-api.version>3.0.0</org.apache.felix.http.servlet-api.version>
+        <org.apache.felix.http.servlet-api.version>6.1.0</org.apache.felix.http.servlet-api.version>
         <org.apache.felix.http.wrappers.version>1.1.2</org.apache.felix.http.wrappers.version>
         <org.apache.felix.useradmin.version>1.0.4.k1</org.apache.felix.useradmin.version>
         <org.apache.servicemix.bundles.c3p0.version>0.9.5.5_1</org.apache.servicemix.bundles.c3p0.version>
         <org.bouncycastle.version>1.78.1</org.bouncycastle.version>
         <org.eclipse.jetty.version>12.0.14</org.eclipse.jetty.version>
-        <org.eclipse.osgi-technology.rest.version>1.2.3</org.eclipse.osgi-technology.rest.version>
+        <org.eclipse.osgi-technology.rest.version>2.0.0-SNAPSHOT</org.eclipse.osgi-technology.rest.version>
         <org.eclipse.paho.client.mqttv3.version>1.2.1</org.eclipse.paho.client.mqttv3.version>
         <org.hamcrest.core.version>1.3.0.v201303031735</org.hamcrest.core.version>
         <org.knowhowlab.osgi.monitoradmin.version>1.0.3</org.knowhowlab.osgi.monitoradmin.version>
@@ -104,7 +104,7 @@
         <org.osgi.service.servlet.version>2.0.0</org.osgi.service.servlet.version>
         <org.ow2.asm.version>9.7.1</org.ow2.asm.version>
         <org.xerial.sqlite-jdbc.version>3.42.0.0</org.xerial.sqlite-jdbc.version>
-        <osgi-resource-locator.version>1.0.3</osgi-resource-locator.version>
+        <osgi-resource-locator.version>3.0.0</osgi-resource-locator.version>
         <osgi.annotation.version>8.1.0</osgi.annotation.version>
         <quartz.version>2.5.0</quartz.version>
         <slf4j.version>2.0.17</slf4j.version>
@@ -116,13 +116,14 @@
         <!-- END Artemis and Camel common dependencies -->
         <!-- START Jakarta dependencies -->
         <jakarta.activation-api.version>2.1.2</jakarta.activation-api.version>
-        <jakarta.annotation-api.version>2.1.1</jakarta.annotation-api.version>
+        <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
         <jakarta.inject-api.version>2.0.1</jakarta.inject-api.version>
-        <jakarta.validation-api.version>3.0.2</jakarta.validation-api.version>
+        <jakarta.validation-api.version>3.1.1</jakarta.validation-api.version>
         <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
         <jakarta.xml.ws-api.version>4.0.2</jakarta.xml.ws-api.version>
         <jakarta.xml.soap-api.version>3.0.2</jakarta.xml.soap-api.version>
         <jakarta.ws.rs-api.version>3.1.0</jakarta.ws.rs-api.version>
+        <jakarta.servlet-api.version>6.1.0</jakarta.servlet-api.version>
         <org.osgi.service.jakartars.version>2.0.0</org.osgi.service.jakartars.version>
         <jaxb-osgi.version>4.0.2</jaxb-osgi.version>
         <!-- END Jakarta dependencies -->
@@ -661,11 +662,6 @@
                 <version>${jersey.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.glassfish.jersey.containers</groupId>
-                <artifactId>jersey-container-servlet-core</artifactId>
-                <version>${jersey.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.glassfish.jersey.core</groupId>
                 <artifactId>jersey-client</artifactId>
                 <version>${jersey.version}</version>
@@ -788,6 +784,11 @@
                 <groupId>jakarta.ws.rs</groupId>
                 <artifactId>jakarta.ws.rs-api</artifactId>
                 <version>${jakarta.ws.rs-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${jakarta.servlet-api.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
@@ -1507,10 +1508,6 @@
             <artifactId>jersey-container-servlet</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.glassfish.jersey.containers</groupId>
-            <artifactId>jersey-container-servlet-core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
         </dependency>
@@ -1610,6 +1607,10 @@
             <groupId>jakarta.ws.rs</groupId>
             <artifactId>jakarta.ws.rs-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.service.jakartars</artifactId>

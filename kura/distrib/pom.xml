@@ -123,7 +123,7 @@
         <repository>
             <id>kura-addons</id>
             <name>Eclipse Kura Addons Maven Repository</name>
-            <url>https://raw.githubusercontent.com/eurotech/kura_addons/mvn-repo</url>
+            <url>https://artifactory.dev.everyware.io/artifactory/kura-addons</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>

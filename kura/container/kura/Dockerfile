@@ -23,9 +23,14 @@ COPY . /context
 RUN \
     echo "$GIT_REPO / $GIT_BRANCH / $KURA_COMMIT" && \
     chmod a+x -R /usr/local/bin && \
+    sed -i 's|#[ ]*baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/*.repo && \
     yum -y update && \
     yum -y install scl-utils scl-utils-build centos-release-scl && \
-    yum -y install git java-1.8.0-openjdk-devel rh-maven35 && \
+    sed -i 's|#[ ]*baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/*.repo && \
+    yum -y install git java-1.8.0-openjdk-devel && \
+    curl -o /tmp/maven.tar.gz https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.tar.gz && \
+    tar -xf /tmp/maven.tar.gz -C /tmp/ && \
+    export PATH="/tmp/apache-maven-3.9.11/bin:$PATH" && \
     \
     if [ -d /context/.git ]; then \
       mv /context /kura; \
@@ -34,16 +39,16 @@ RUN \
       git clone "$GIT_REPO" -b "$GIT_BRANCH"; \
     fi && \
     cd kura && \
-    if [ -n "$KURA_COMIT" ]; then git checkout "$KURA_COMMIT"; fi && \
+    if [ -n "$KURA_COMMIT" ]; then git checkout "$KURA_COMMIT"; fi && \
     git log -1 && \
     \
     ( \
       cd /kura && \
       `# Replace broken 'nn' script` \
       cp kura/distrib/src/main/sh/extract.sh kura/distrib/src/main/sh/extract_nn.sh && \
-      scl enable rh-maven35 "mvn -B -f target-platform/pom.xml clean install $MAVEN_PROPS" && \
-      scl enable rh-maven35 "mvn -B -f kura/pom.xml clean install $MAVEN_PROPS -Pspeedup" && \
-      scl enable rh-maven35 "mvn -B -f kura/distrib/pom.xml clean install $MAVEN_PROPS -Pintel-up2-centos-7-nn -nsu" \
+      mvn -B -f target-platform/pom.xml clean install $MAVEN_PROPS && \
+      mvn -B -f kura/pom.xml clean install $MAVEN_PROPS -Pspeedup && \
+      mvn -B -f kura/distrib/pom.xml clean install $MAVEN_PROPS -Pintel-up2-centos-7-nn -nsu \
     ) && \
     ls -la /kura/kura/distrib/target && \
     yum -y history undo last && \

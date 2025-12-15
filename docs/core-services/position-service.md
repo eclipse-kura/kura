@@ -18,7 +18,7 @@ This service provides the following configuration parameters:
 
 - **static** - specifies true or false whether to use a static position instead of a GPS. (Required field.)
 
-- **provider** - specifies which position provider use. Possible options are: 
+- **provider** - specifies which position provider to use. Available options include: 
     - **gpsd** - gpsd service daemon if is available on the system. 
     - **serial** - direct access to gps device through serial or usb port.
     - **modemManager** - location information retrieved through a Modem Manager controlled modem
@@ -52,6 +52,6 @@ This service provides the following configuration parameters:
 
 - **parity** - sets the parity for the serial communication to the GPS device.
 
-## Multiple GPS module support
+## Support for multiple GPS modules
 
-Eclipse Kura provides limited support for systems with multiple GPS modules. When more than one module is installed and managed by gpsd, Kura will monitor all of them. The reported position is taken from the first module that has a valid fix; if multiple modules have a fix, Kura selects the one that comes first in lexicographical order.
+Eclipse Kura offers limited support for systems equipped with multiple GPS modules. When more than one module is installed and managed by gpsd, Kura will monitor all modules concurrently. The reported position is derived from the first module that achieves a valid fix; if multiple modules attain a fix, Kura selects the one that appears first in lexicographical order.

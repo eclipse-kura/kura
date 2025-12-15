@@ -1548,9 +1548,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#multiple-gps-module-support" class="md-nav__link">
+  <a href="#support-for-multiple-gps-modules" class="md-nav__link">
     <span class="md-ellipsis">
-      Multiple GPS module support
+      Support for multiple GPS modules
     </span>
   </a>
   
@@ -4583,9 +4583,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#multiple-gps-module-support" class="md-nav__link">
+  <a href="#support-for-multiple-gps-modules" class="md-nav__link">
     <span class="md-ellipsis">
-      Multiple GPS module support
+      Support for multiple GPS modules
     </span>
   </a>
   
@@ -4623,7 +4623,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>static</strong> - specifies true or false whether to use a static position instead of a GPS. (Required field.)</p>
 </li>
 <li>
-<p><strong>provider</strong> - specifies which position provider use. Possible options are: </p>
+<p><strong>provider</strong> - specifies which position provider to use. Available options include: </p>
 <ul>
 <li><strong>gpsd</strong> - gpsd service daemon if is available on the system. </li>
 <li><strong>serial</strong> - direct access to gps device through serial or usb port.</li>
@@ -4676,8 +4676,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p><strong>parity</strong> - sets the parity for the serial communication to the GPS device.</p>
 </li>
 </ul>
-<h2 id="multiple-gps-module-support">Multiple GPS module support</h2>
-<p>Eclipse Kura provides limited support for systems with multiple GPS modules. When more than one module is installed and managed by gpsd, Kura will monitor all of them. The reported position is taken from the first module that has a valid fix; if multiple modules have a fix, Kura selects the one that comes first in lexicographical order.</p>
+<h2 id="support-for-multiple-gps-modules">Support for multiple GPS modules</h2>
+<p>Eclipse Kura offers limited support for systems equipped with multiple GPS modules. When more than one module is installed and managed by gpsd, Kura will monitor all modules concurrently. The reported position is derived from the first module that achieves a valid fix; if multiple modules attain a fix, Kura selects the one that appears first in lexicographical order.</p>
 
 
 

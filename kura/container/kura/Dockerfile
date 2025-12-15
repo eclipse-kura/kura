@@ -23,8 +23,10 @@ COPY . /context
 RUN \
     echo "$GIT_REPO / $GIT_BRANCH / $KURA_COMMIT" && \
     chmod a+x -R /usr/local/bin && \
+    sed -i 's|#[ ]*baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/*.repo && \
     yum -y update && \
     yum -y install scl-utils scl-utils-build centos-release-scl && \
+    sed -i 's|#[ ]*baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/*.repo && \
     yum -y install git java-1.8.0-openjdk-devel rh-maven35 && \
     \
     if [ -d /context/.git ]; then \
@@ -34,7 +36,7 @@ RUN \
       git clone "$GIT_REPO" -b "$GIT_BRANCH"; \
     fi && \
     cd kura && \
-    if [ -n "$KURA_COMIT" ]; then git checkout "$KURA_COMMIT"; fi && \
+    if [ -n "$KURA_COMMIT" ]; then git checkout "$KURA_COMMIT"; fi && \
     git log -1 && \
     \
     ( \

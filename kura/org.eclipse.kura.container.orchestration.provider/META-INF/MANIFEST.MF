@@ -38,6 +38,7 @@ Service-Component: OSGI-INF/component.xml
 Bundle-ClassPath: .,
  lib/commons-codec.jar,
  lib/commons-compress.jar,
+ lib/docker-java.jar,
  lib/docker-java-api.jar,
  lib/docker-java-core.jar,
  lib/docker-java-transport.jar,

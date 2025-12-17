@@ -21,6 +21,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.eclipse.kura.audit.AuditConstants;
+import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.identity.Permission;
 import org.eclipse.kura.identity.TemporaryIdentityService;
 import org.eclipse.kura.internal.rest.auth.TokenHolder;
@@ -91,6 +93,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         final boolean isSecure = requestContext.getUriInfo().getRequestUri().getScheme().equals("https");
 
         if (principal.isPresent()) {
+            final AuditContext auditContext = AuditContext.currentOrInternal();
+            auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), principal.get().getName());
+
             requestContext.setSecurityContext(new SecurityContext() {
 
                 final Principal currentPrincipal = principal.get();

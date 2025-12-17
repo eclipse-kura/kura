@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Kura Configurator for jul-to-slf4j
 Bundle-SymbolicName: org.eclipse.kura.jul.to.slf4j.configuration.backported;singleton:=true
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.1.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v2.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

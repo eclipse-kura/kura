@@ -38,6 +38,18 @@
     <version>2.0.0-SNAPSHOT</version>
     <packaging>eclipse-plugin</packaging>
 
+    <!--
+    The dependency is committed in lib/.
+    Adding to the dependencies section for tracking it and make it parsable from BOM tools
+    -->
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>1.2.1</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
 

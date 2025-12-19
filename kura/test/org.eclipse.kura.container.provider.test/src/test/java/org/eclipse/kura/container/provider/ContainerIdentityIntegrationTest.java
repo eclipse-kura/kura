@@ -278,8 +278,9 @@ public class ContainerIdentityIntegrationTest {
         final List<String> envVars = configuration.getContainerEnvVars();
 
         assertTrue("Token env var missing", envVars.contains("KURA_IDENTITY_TOKEN=" + TOKEN));
-        assertTrue("Base URL env var missing",
-                envVars.contains("KURA_REST_BASE_URL=http://localhost:8080/services/rest"));
+        // Check that KURA_REST_BASE_URL is set (now dynamic, not hardcoded to localhost:8080)
+        assertTrue("Base URL env var missing", envVars.stream()
+                .anyMatch(envVar -> envVar.startsWith("KURA_REST_BASE_URL=")));
     }
 
     private void thenTemporaryIdentityIsDeleted() throws Exception {

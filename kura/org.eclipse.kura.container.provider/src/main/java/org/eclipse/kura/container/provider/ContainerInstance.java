@@ -16,8 +16,11 @@ package org.eclipse.kura.container.provider;
 
 import static java.util.Objects.isNull;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +36,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
@@ -44,6 +48,10 @@ import org.eclipse.kura.container.signature.ContainerSignatureValidationService;
 import org.eclipse.kura.container.signature.ValidationResult;
 import org.eclipse.kura.identity.Permission;
 import org.eclipse.kura.identity.TemporaryIdentityService;
+import org.eclipse.kura.net.IPAddress;
+import org.eclipse.kura.net.NetInterface;
+import org.eclipse.kura.net.NetInterfaceAddress;
+import org.eclipse.kura.net.NetworkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +67,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private Set<ContainerSignatureValidationService> availableContainerSignatureValidationService = new HashSet<>();
     private ConfigurationService configurationService;
     private TemporaryIdentityService temporaryIdentityService;
+    private NetworkService networkService;
     private State state = new Disabled(new ContainerInstanceOptions(Collections.emptyMap()));
     private ContainerInstanceOptions currentOptions = null;
     private final AtomicReference<String> currentTemporaryToken = new AtomicReference<>();
@@ -87,6 +96,10 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     public synchronized void setTemporaryIdentityService(final TemporaryIdentityService temporaryIdentityService) {
         this.temporaryIdentityService = temporaryIdentityService;
+    }
+
+    public synchronized void setNetworkService(final NetworkService networkService) {
+        this.networkService = networkService;
     }
 
     // ----------------------------------------------------------------
@@ -533,16 +546,160 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         }
     }
 
+    private boolean isHttpsEnabled() {
+        if (this.configurationService == null) {
+            logger.debug("ConfigurationService not available, defaulting to HTTP");
+            return false;
+        }
+
+        try {
+            ComponentConfiguration config = this.configurationService.getComponentConfiguration(
+                    "org.eclipse.kura.http.server.manager.HttpService");
+
+            if (config != null && config.getConfigurationProperties() != null) {
+                Map<String, Object> properties = config.getConfigurationProperties();
+                Integer[] httpsPorts = (Integer[]) properties.get("https.ports");
+                return httpsPorts != null && httpsPorts.length > 0;
+            }
+        } catch (KuraException e) {
+            logger.warn("Failed to check HTTPS configuration", e);
+        }
+        return false;
+    }
+
+    private int getRestServicePort(boolean useHttps) {
+        if (this.configurationService == null) {
+            logger.debug("ConfigurationService not available, using default port");
+            return useHttps ? 443 : 8080;
+        }
+
+        try {
+            ComponentConfiguration config = this.configurationService.getComponentConfiguration(
+                    "org.eclipse.kura.http.server.manager.HttpService");
+
+            if (config != null && config.getConfigurationProperties() != null) {
+                Map<String, Object> properties = config.getConfigurationProperties();
+
+                if (useHttps) {
+                    Integer[] httpsPorts = (Integer[]) properties.get("https.ports");
+                    if (httpsPorts != null && httpsPorts.length > 0) {
+                        return httpsPorts[0];
+                    }
+                } else {
+                    Integer[] httpPorts = (Integer[]) properties.get("http.ports");
+                    if (httpPorts != null && httpPorts.length > 0) {
+                        return httpPorts[0];
+                    }
+                }
+            }
+        } catch (KuraException e) {
+            logger.warn("Failed to get REST service port configuration", e);
+        }
+
+        return useHttps ? 443 : 8080;
+    }
+
+    private String getDockerBridgeGateway() {
+        // Try using NetworkService first
+        if (this.networkService != null) {
+            try {
+                for (NetInterface<?> netInterface : this.networkService.getNetworkInterfaces()) {
+                    if ("docker0".equals(netInterface.getName())) {
+                        List<? extends NetInterfaceAddress> addresses = netInterface.getNetInterfaceAddresses();
+                        if (!addresses.isEmpty()) {
+                            IPAddress ipAddress = addresses.get(0).getAddress();
+                            if (ipAddress != null) {
+                                logger.debug("Found docker0 interface with address: {}", ipAddress.getHostAddress());
+                                return ipAddress.getHostAddress();
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                logger.debug("Failed to detect docker0 interface using NetworkService", e);
+            }
+        }
+
+        // Fallback: try Java NetworkInterface API directly
+        try {
+            NetworkInterface dockerInterface = NetworkInterface.getByName("docker0");
+            if (dockerInterface != null) {
+                Enumeration<InetAddress> addresses = dockerInterface.getInetAddresses();
+                if (addresses.hasMoreElements()) {
+                    String address = addresses.nextElement().getHostAddress();
+                    logger.debug("Found docker0 interface with address (via Java API): {}", address);
+                    return address;
+                }
+            }
+        } catch (Exception e) {
+            logger.debug("Failed to detect docker0 interface using Java NetworkInterface API", e);
+        }
+
+        return null;
+    }
+
+    private String getHostAddressForNetworkMode(String networkMode) {
+        if ("host".equalsIgnoreCase(networkMode)) {
+            logger.debug("Container using host network mode, using localhost");
+            return "localhost";
+        }
+
+        // For bridge mode or unspecified, try to find Docker gateway
+        String dockerGateway = getDockerBridgeGateway();
+        if (dockerGateway != null) {
+            return dockerGateway;
+        }
+
+        // Fallback: use host's primary IP
+        try {
+            Enumeration<NetworkInterface> nifs = NetworkInterface.getNetworkInterfaces();
+            if (nifs != null) {
+                while (nifs.hasMoreElements()) {
+                    NetworkInterface nif = nifs.nextElement();
+                    if (!nif.isLoopback() && nif.isUp() && !nif.isVirtual() && nif.getHardwareAddress() != null) {
+                        Enumeration<InetAddress> nadrs = nif.getInetAddresses();
+                        while (nadrs.hasMoreElements()) {
+                            InetAddress adr = nadrs.nextElement();
+                            if (adr != null && !adr.isLoopbackAddress()
+                                    && (nif.isPointToPoint() || !adr.isLinkLocalAddress())) {
+                                logger.debug("Using host primary IP address: {}", adr.getHostAddress());
+                                return adr.getHostAddress();
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to determine host IP address", e);
+        }
+
+        // Last resort fallback
+        logger.warn("Could not determine host address, using host.docker.internal as fallback");
+        return "host.docker.internal";
+    }
+
+    private String buildRestBaseUrl(ContainerInstanceOptions options) {
+        boolean useHttps = isHttpsEnabled();
+        String protocol = useHttps ? "https" : "http";
+        String host = getHostAddressForNetworkMode(options.getContainerNetworkingMode().orElse("bridge"));
+        int port = getRestServicePort(useHttps);
+
+        return String.format("%s://%s:%d/services", protocol, host, port);
+    }
+
     private ContainerConfiguration getContainerConfigurationWithCredentials(final ContainerInstanceOptions options) {
         ContainerConfiguration baseConfig = options.getContainerConfiguration();
-        
+
         final String token = this.currentTemporaryToken.get();
 
         if (options.isIdentityIntegrationEnabled() && token != null) {
             final List<String> envVars = new ArrayList<>(baseConfig.getContainerEnvVars());
             envVars.add("KURA_IDENTITY_TOKEN=" + token);
-            envVars.add("KURA_REST_BASE_URL=http://localhost:8080/services/rest");
-            
+
+            String restBaseUrl = buildRestBaseUrl(options);
+            envVars.add("KURA_REST_BASE_URL=" + restBaseUrl);
+            logger.info("Setting container REST base URL to: {}", restBaseUrl);
+
             return ContainerConfiguration.builder()
                     .setContainerName(baseConfig.getContainerName())
                     .setImageConfiguration(baseConfig.getImageConfiguration())

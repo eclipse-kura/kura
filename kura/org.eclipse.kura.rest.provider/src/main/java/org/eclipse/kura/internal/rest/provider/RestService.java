@@ -91,6 +91,8 @@ public class RestService implements ConfigurableComponent {
     private PasswordStrengthVerificationService passwordStrengthVerificationService;
     private LoginBannerService loginBannerService;
 
+    private TemporaryIdentityService temporaryIdentityService;
+
     @Reference
     public void setUserAdmin(final UserAdmin userAdmin) {
         this.userAdmin = userAdmin;
@@ -99,11 +101,14 @@ public class RestService implements ConfigurableComponent {
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
     public void setTemporaryIdentityService(final TemporaryIdentityService temporaryIdentityService) {
+        this.temporaryIdentityService = temporaryIdentityService;
         this.authenticationFilter.setTemporaryIdentityService(temporaryIdentityService);
     }
 
     public void unsetTemporaryIdentityService(final TemporaryIdentityService temporaryIdentityService) {
-        this.authenticationFilter.setTemporaryIdentityService(null);
+        if (this.temporaryIdentityService == temporaryIdentityService) {
+            this.authenticationFilter.setTemporaryIdentityService(null);
+        }
     }
 
     @Reference

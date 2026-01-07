@@ -44,8 +44,8 @@ To connect via EAP-TLS you will need the following items in unencrypted PEM form
  1. Navigate to `Security` under the `System` tab.
  2. Under the `Keystore Configuration` add a new keystore, and keep note of the name. ![Adding a new keystore](images/802-1x-images/wifi-create-keystore.png)
  3. After the Keystore is created, be sure to change the path to a persistent directory. ![Alt text](images/802-1x-images/wifi-create-change-path.png)
- 4. Navigate to the `Certificate List` and create a new Certificate. Insert the PEM and Apply, keep note of the name. ![add certificate](images/802-1x-images/wifi-create-keystore-add-certificate.png)
- 5. Now press `add` and create a new Private Key. Insert both the certificates in the PEM in the dialogue and press apply. keep note of the name. ![Alt text](images/802-1x-images/wifi-create-keystore-add-privatekey.png)
+ 4. Navigate to the `Certificate List` and create a new Trusted Certificate. Insert the PEM and Apply, keep note of the name. ![add certificate](images/802-1x-images/wifi-create-keystore-add-certificate.png)
+ 5. Now press `add` and create a new Key Pair. Insert the private key and the certificates in PEM format in the dialogue and press apply. Keep note of the name. ![Alt text](images/802-1x-images/wifi-create-keystore-add-privatekey.png)
 
 ### Wifi Setup
 
@@ -54,9 +54,9 @@ To connect via EAP-TLS you will need the following items in unencrypted PEM form
  3. Select the 802.1x tab.
  4. Set Enteprise EAP -> `TLS`.
  5. Set `Identity (Username)`.
- 6. Set `Keystore Pid` to the name of the keystore created above.
- 7. Set `Certificate Authority Certificate (CA-Cert)` to the name of the certificate created above.
- 8. Set the `Client Private Key` to the name of the Private Key created above.
+ 6. Select the `Keystore Pid` from the list of the available keystores in the framework.
+ 7. Select the `Certificate Authority Certificate (CA-Cert)` from the list of the available trusted certificated within the chosen keystore.
+ 8. Select the `Client Private Key` from the list of the available key pairs within the chosen keystore.
 
 When completed the Wi-Fi configuration should look like the following:
 ![tls-configuration](images/802-1x-images/wifi-tls.png)

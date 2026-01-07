@@ -30,17 +30,17 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.identity.TemporaryIdentityService;
 import org.eclipse.kura.identity.LoginBannerService;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
+import org.eclipse.kura.identity.IdentityService;
+import org.eclipse.kura.identity.TemporaryIdentityService;
 import org.eclipse.kura.internal.rest.auth.BasicAuthenticationProvider;
 import org.eclipse.kura.internal.rest.auth.CertificateAuthenticationProvider;
+import org.eclipse.kura.internal.rest.auth.RestIdentityHelper;
 import org.eclipse.kura.internal.rest.auth.RestSessionHelper;
 import org.eclipse.kura.internal.rest.auth.SessionAuthProvider;
 import org.eclipse.kura.internal.rest.auth.SessionRestService;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
-import org.eclipse.kura.util.useradmin.UserAdminHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -55,7 +55,6 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,8 +71,7 @@ public class RestService implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(RestService.class);
 
-    private CryptoService cryptoService;
-    private UserAdmin userAdmin;
+    private IdentityService identityService;
     private ConfigurationAdmin configurationAdmin;
 
     private RestServiceOptions options;
@@ -94,9 +92,9 @@ public class RestService implements ConfigurableComponent {
     private TemporaryIdentityService temporaryIdentityService;
 
     @Reference
-    public void setUserAdmin(final UserAdmin userAdmin) {
-        this.userAdmin = userAdmin;
-        this.authenticationFilter.setUserAdmin(userAdmin);
+    public void setIdentityService(final IdentityService identityService) {
+        this.identityService = identityService;
+        this.authenticationFilter.setIdentityService(identityService);
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
@@ -109,11 +107,6 @@ public class RestService implements ConfigurableComponent {
         if (this.temporaryIdentityService == temporaryIdentityService) {
             this.authenticationFilter.setTemporaryIdentityService(null);
         }
-    }
-
-    @Reference
-    public void setCryptoService(CryptoService cryptoService) {
-        this.cryptoService = cryptoService;
     }
 
     @Reference
@@ -143,13 +136,12 @@ public class RestService implements ConfigurableComponent {
 
     @Activate
     public void activate(final Map<String, Object> properties) {
-        UserAdminHelper userAdminHelper;
         logger.info("activating...");
 
         final BundleContext bundleContext = FrameworkUtil.getBundle(RestService.class).getBundleContext();
 
-        userAdminHelper = new UserAdminHelper(this.userAdmin, this.cryptoService);
-        final RestSessionHelper restSessionHelper = new RestSessionHelper(userAdminHelper);
+        final RestIdentityHelper identityHelper = new RestIdentityHelper(this.identityService);
+        final RestSessionHelper restSessionHelper = new RestSessionHelper(identityHelper);
         final Dictionary<String, Object> serviceProperties = RestServiceUtils.extensionProperties();
 
         registeredServices.add(bundleContext.registerService(ContainerRequestFilter.class, this.incomingPortCheckFilter,
@@ -164,14 +156,14 @@ public class RestService implements ConfigurableComponent {
                 new String[] { MessageBodyReader.class.getName(), MessageBodyWriter.class.getName() },
                 new GsonSerializer<Object>(), serviceProperties));
 
-        this.basicAuthProvider = new BasicAuthenticationProvider(bundleContext, userAdminHelper);
-        this.certificateAuthProvider = new CertificateAuthenticationProvider(userAdminHelper);
+        this.basicAuthProvider = new BasicAuthenticationProvider(bundleContext, identityHelper);
+        this.certificateAuthProvider = new CertificateAuthenticationProvider(identityHelper);
         this.sessionAuthenticationProvider = new SessionAuthProvider(//
                 restSessionHelper,
                 new HashSet<>(Arrays.asList(BASE_PATH + CHANGE_PASSWORD_PATH, BASE_PATH + XSRF_TOKEN_PATH)),
                 Collections.singleton(BASE_PATH + XSRF_TOKEN_PATH));
 
-        this.authRestService = new SessionRestService(userAdminHelper, restSessionHelper, this.configurationAdmin,
+        this.authRestService = new SessionRestService(identityHelper, restSessionHelper, this.configurationAdmin,
                 this.passwordStrengthVerificationService, this.loginBannerService);
 
         this.registeredServices.add(bundleContext.registerService(SessionRestService.class, this.authRestService,

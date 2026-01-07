@@ -23,14 +23,11 @@ import java.util.TreeSet;
 
 import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
+import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.Permission;
 import org.eclipse.kura.identity.TemporaryIdentityService;
 import org.eclipse.kura.internal.rest.auth.TokenHolder;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
-import org.osgi.service.useradmin.Group;
-import org.osgi.service.useradmin.Role;
-import org.osgi.service.useradmin.User;
-import org.osgi.service.useradmin.UserAdmin;
 
 import jakarta.annotation.Priority;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,12 +43,10 @@ import jakarta.ws.rs.ext.Provider;
 @Priority(Priorities.AUTHENTICATION)
 public class AuthenticationFilter implements ContainerRequestFilter {
 
-    private static final String KURA_PERMISSION_PREFIX = "kura.permission.";
-    private static final String KURA_PERMISSION_REST_PREFIX = KURA_PERMISSION_PREFIX + "rest.";
-    private static final String KURA_USER_PREFIX = "kura.user.";
+    private static final String KURA_ADMIN_PERMISSION = "kura.admin";
 
     private final Set<AuthenticationProviderHolder> authenticationProviders = new TreeSet<>();
-    private UserAdmin userAdmin;
+    private IdentityService identityService;
     private TemporaryIdentityService temporaryIdentityService;
 
     @Context
@@ -59,8 +54,8 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     @Context
     private HttpServletResponse response;
 
-    public void setUserAdmin(final UserAdmin userAdmin) {
-        this.userAdmin = userAdmin;
+    public void setIdentityService(final IdentityService identityService) {
+        this.identityService = identityService;
     }
 
     public void setTemporaryIdentityService(final TemporaryIdentityService temporaryIdentityService) {
@@ -143,13 +138,15 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         }
 
         try {
-            final User user = (User) this.userAdmin.getRole(KURA_USER_PREFIX + requestUser.getName());
-
-            return containsBasicMember(this.userAdmin.getRole(KURA_PERMISSION_REST_PREFIX + role), user)
-                    || containsBasicMember(this.userAdmin.getRole(KURA_PERMISSION_PREFIX + "kura.admin"), user);
-
+            this.identityService.checkPermission(requestUser.getName(), new Permission("rest." + role));
+            return true;
         } catch (final Exception e) {
-            return false;
+            try {
+                this.identityService.checkPermission(requestUser.getName(), new Permission(KURA_ADMIN_PERMISSION));
+                return true;
+            } catch (final Exception ignored) {
+                return false;
+            }
         }
     }
 
@@ -171,28 +168,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         } catch (final Exception e) {
             return false;
         }
-    }
-
-    private static boolean containsBasicMember(final Role group, final User user) {
-        if (!(group instanceof Group)) {
-            return false;
-        }
-
-        final Group asGroup = (Group) group;
-
-        final Role[] members = asGroup.getMembers();
-
-        if (members == null) {
-            return false;
-        }
-
-        for (final Role member : members) {
-            if (member.getName().equals(user.getName())) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public void close() {

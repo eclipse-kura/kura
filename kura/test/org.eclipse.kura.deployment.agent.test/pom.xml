@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
+Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
 
 This program and the accompanying materials are made
 available under the terms of the Eclipse Public License 2.0
@@ -37,16 +37,18 @@ Eurotech
         <groupId>org.mock-server</groupId>
         <artifactId>mockserver-client-java-no-dependencies</artifactId>
         <version>${mockserver.version}</version>
+        <scope>test</scope>
     </dependency>
     <dependency>
         <groupId>org.mock-server</groupId>
         <artifactId>mockserver-netty-no-dependencies</artifactId>
         <version>${mockserver.version}</version>
+        <scope>test</scope>
     </dependency>
     <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-inline</artifactId>
-        <version>4.8.1</version>
+        <scope>test</scope>
     </dependency>
 </dependencies>
 

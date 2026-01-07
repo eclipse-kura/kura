@@ -67,6 +67,103 @@ Starting from Kura 5.5 the following restrictions will be applied by the Identit
   - must be at least 3 and at most 255 characters long.
   - can only be composed by one or more sequences of alphanumeric characters (`[A-Za-z0-9]+`) separated by the dot symbol, the dot is not allowed at the beginning or at the end of the permission name (examples of valid permission names are `foo1.bAr`, `foo`, `a.b.c`).
 
+## Temporary Identities
+
+Kura 5.6 introduces the **TemporaryIdentityService**, a specialized service for creating and managing temporary, non-persistent identities. Temporary identities are designed for short-lived authentication scenarios where identity persistence is not required.
+
+### Key Characteristics
+
+- **Non-Persistent**: Temporary identities exist only in memory and are never persisted to disk or configuration snapshots
+- **Token-Based Authentication**: Each temporary identity is associated with a unique authentication token
+- **Automatic Lifecycle Management**: Temporary identities can be programmatically created and deleted as needed
+- **Permission-Based Authorization**: Temporary identities support the same permission model as regular identities
+- **No Password Management**: Temporary identities use token-based authentication and do not require password management
+
+### Primary Use Case: Container Identity Integration
+
+The main use case for temporary identities is the **Container Identity Integration** feature, which automatically provisions authentication credentials for containerized applications. When a container is configured with identity integration enabled:
+
+1. Kura creates a temporary identity with the specified permissions
+2. Generates a unique authentication token for the identity
+3. Provides the token to the container via environment variables
+4. Automatically cleans up the temporary identity when the container stops
+
+This allows containers to securely access Kura's REST APIs without manual credential configuration or exposing persistent credentials.
+
+### TemporaryIdentityService API
+
+The `TemporaryIdentityService` provides the following operations:
+
+#### Create Temporary Identity
+```java
+String createTemporaryIdentity(String identityName, Set<Permission> permissions)
+```
+Creates a temporary identity with the given name and permissions, returning an authentication token.
+
+#### Delete Temporary Identity
+```java
+boolean deleteTemporaryIdentity(String token)
+```
+Deletes a temporary identity identified by its token.
+
+#### Validate Temporary Token
+```java
+String validateTemporaryToken(String token)
+```
+Validates a token and returns the associated identity name.
+
+#### Check Temporary Permission
+```java
+void checkTemporaryPermission(String token, Permission permission)
+```
+Verifies that a temporary identity has a specific permission.
+
+### Usage Example
+
+```java
+import org.eclipse.kura.identity.TemporaryIdentityService;
+import org.eclipse.kura.identity.Permission;
+
+// Create temporary identity with specific permissions
+Set<Permission> permissions = new HashSet<>();
+permissions.add(new Permission("rest.system"));
+permissions.add(new Permission("rest.configuration"));
+
+String token = temporaryIdentityService.createTemporaryIdentity(
+    "container_myapp",
+    permissions
+);
+
+// Token can now be used for REST API authentication
+// ...
+
+// Clean up when no longer needed
+temporaryIdentityService.deleteTemporaryIdentity(token);
+```
+
+### Differences from Regular Identities
+
+| Aspect | Regular Identity | Temporary Identity |
+|--------|-----------------|-------------------|
+| Persistence | Stored in configuration snapshots | Memory only, never persisted |
+| Authentication | Password-based | Token-based |
+| Lifecycle | Manual creation/deletion via UI or API | Programmatic creation/deletion |
+| Use Case | Long-term user accounts | Short-lived service authentication |
+| Management | Web UI, REST API, MQTT | Java API only |
+
+### Security Considerations
+
+- Temporary identities follow the same permission model as regular identities
+- Tokens should be treated as sensitive credentials and not logged or persisted
+- Temporary identities are automatically removed from memory when deleted
+- Best practice: delete temporary identities as soon as they are no longer needed
+
+### Further Reading
+
+- [Container Identity Integration](../core-services/container-orchestration-provider-usage.md#container-identity-integration) - Detailed guide on using temporary identities with containers
+- [How to Use Temporary Identity Service](../java-application-development/how-to-use-temporary-identity-service.md) - Developer guide for using the TemporaryIdentityService API
+- [REST Identity API](../references/rest-apis/rest-identity-api-v2.md) - REST APIs for identity management (regular identities only)
+
 ## UserAdmin persistence
 
 The `org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl` Kura service allows to persist the UserAdmin state in Kura configuration snapshot, this includes the defined identities and permissions.

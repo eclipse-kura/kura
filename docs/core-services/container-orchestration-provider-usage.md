@@ -90,6 +90,10 @@ To begin configuring the container, look under **Services** and select the item 
 
 - **Restart Container On Failure** - A boolean that tells the container engine to automatically restart the container when it has failed or shut down.
 
+- **Identity Integration Enabled** - When enabled, Kura automatically creates a temporary identity with the specified permissions and provides the container with authentication credentials to access Kura's REST APIs. See [Container Identity Integration](#container-identity-integration) for more details.
+
+- **Container Permissions (optional)** - A comma-separated list of permission names to grant to the container's temporary identity (e.g., `rest.system,rest.configuration`). This field is only used when **Identity Integration Enabled** is set to true. See [Container Identity Integration](#container-identity-integration) for available permissions and usage examples.
+
 After specifying container parameters, ensure to set **Enabled** to **true** and press **Apply**. The container engine will then pull the respective image, spin up and start the container. If the gateway or the framework is power cycled, and the container and Container Orchestration Service are set to **enabled**, the framework will automatically start the container again upon startup.
 
 ![Container Orchestration Provider Container Configuration](./images/container-orchestration-provider-container-configuration.png)
@@ -140,6 +144,297 @@ The result should be a single line with all the existing options plus the new on
 
 !!! warning
     Modifying the bootloader options incorrectly may prevent the system from booting. Please ensure to back up any important data before making changes to these settings.
+
+## Container Identity Integration
+
+The Container Identity Integration feature allows containers to securely authenticate and interact with Kura's REST APIs using temporary credentials. When enabled, Kura automatically manages authentication tokens for containers, eliminating the need for manual credential configuration.
+
+### Overview
+
+When Identity Integration is enabled for a container instance, Kura performs the following operations:
+
+1. **Creates a Temporary Identity**: A temporary, non-persistent identity is created specifically for the container with a unique name based on the container name (e.g., `container_myapp` for a container named `myapp`).
+
+2. **Assigns Permissions**: The temporary identity is granted the permissions specified in the **Container Permissions** field.
+
+3. **Provides Credentials**: The container receives two environment variables:
+   - `KURA_IDENTITY_TOKEN`: The authentication token for accessing Kura's REST APIs
+   - `KURA_REST_BASE_URL`: The complete base URL for Kura's REST API endpoints (e.g., `http://172.17.0.1:8080/services` or `https://172.17.0.1:443/services`)
+
+4. **Automatic Cleanup**: When the container stops or is deleted, Kura automatically removes the temporary identity and invalidates the token.
+
+### Features
+
+- **Zero Configuration**: Containers automatically receive the correct REST API URL based on the gateway's HTTPS configuration and network mode.
+- **Network-Aware**: The REST base URL is automatically adjusted based on the container's networking mode (bridge, host, etc.).
+- **Secure**: Tokens are temporary and automatically invalidated when containers stop.
+- **Non-Persistent**: Temporary identities exist only in memory and are never persisted to disk.
+- **Permission-Based**: Fine-grained access control using Kura's existing permission system.
+
+### Configuration
+
+To enable Identity Integration for a container:
+
+1. Set **Identity Integration Enabled** to `true`
+2. Specify the required permissions in **Container Permissions** field (comma-separated)
+3. Apply the configuration
+
+The framework will create the temporary identity when the container starts and clean it up when the container stops.
+
+### Available Permissions
+
+The following permissions can be assigned to container identities. Use the exact permission names as shown below:
+
+| Permission | Description |
+|------------|-------------|
+| `rest.configuration` | Access to configuration management APIs |
+| `rest.system` | Access to system information and management APIs |
+| `rest.network.configuration` | Access to network configuration APIs |
+| `rest.network.status` | Access to network status information |
+| `rest.deploy` | Access to deployment package management |
+| `rest.cloudconnection` | Access to cloud connection management |
+| `rest.assets` | Access to asset management (Wires) |
+| `rest.wires.admin` | Administrative access to Wires framework |
+| `rest.identity` | Access to identity and permission management |
+| `rest.security` | Access to security-related APIs |
+| `rest.keystores` | Access to keystore management |
+| `rest.command` | Access to command execution APIs |
+| `rest.inventory` | Access to inventory information |
+| `rest.position` | Access to position/GPS information |
+| `kura.admin` | Full administrative access (use with caution) |
+
+For a complete list of available permissions, use the [REST Identity API](/references/rest-apis/rest-identity-api-v2/#get-defined-permissions) to query defined permissions in your system.
+
+### Usage Examples
+
+#### Example 1: Container with Read-Only System Access
+
+A monitoring container that needs to read system information but cannot modify configuration:
+
+**Container Configuration:**
+- **Identity Integration Enabled**: `true`
+- **Container Permissions**: `rest.system`
+
+**Container Code (Python):**
+```python
+import os
+import requests
+
+# Read credentials from environment variables
+token = os.environ.get('KURA_IDENTITY_TOKEN')
+base_url = os.environ.get('KURA_REST_BASE_URL')
+
+# Make authenticated request to get system information
+headers = {
+    'Authorization': f'Bearer {token}'
+}
+
+response = requests.get(f'{base_url}/system/info', headers=headers)
+if response.status_code == 200:
+    system_info = response.json()
+    print(f"System info: {system_info}")
+else:
+    print(f"Failed to get system info: {response.status_code}")
+```
+
+#### Example 2: Container with Configuration Management Access
+
+A deployment automation container that can read and update configurations:
+
+**Container Configuration:**
+- **Identity Integration Enabled**: `true`
+- **Container Permissions**: `rest.configuration,rest.system`
+
+**Container Code (JavaScript/Node.js):**
+```javascript
+const axios = require('axios');
+
+const token = process.env.KURA_IDENTITY_TOKEN;
+const baseUrl = process.env.KURA_REST_BASE_URL;
+
+// Configure axios with authentication header
+const api = axios.create({
+  baseURL: baseUrl,
+  headers: {
+    'Authorization': `Bearer ${token}`
+  }
+});
+
+// Get current configuration
+async function getConfiguration(pid) {
+  try {
+    const response = await api.get(`/configuration/v2/configurations/${pid}`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to get configuration:', error);
+  }
+}
+
+// Update configuration
+async function updateConfiguration(pid, config) {
+  try {
+    const response = await api.put('/configuration/v2/configurations', {
+      pid: pid,
+      properties: config
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to update configuration:', error);
+  }
+}
+
+// Example usage
+(async () => {
+  const config = await getConfiguration('org.eclipse.kura.clock.ClockService');
+  console.log('Current clock config:', config);
+
+  // Modify and update configuration
+  config.properties['clock.ntp.enabled'] = true;
+  await updateConfiguration('org.eclipse.kura.clock.ClockService', config.properties);
+})();
+```
+
+#### Example 3: Container with Network Management Access
+
+A network diagnostic container that monitors network status:
+
+**Container Configuration:**
+- **Identity Integration Enabled**: `true`
+- **Container Permissions**: `rest.network.status,rest.network.configuration`
+
+**Container Code (Shell Script):**
+```bash
+#!/bin/bash
+
+# Read credentials from environment
+TOKEN="${KURA_IDENTITY_TOKEN}"
+BASE_URL="${KURA_REST_BASE_URL}"
+
+# Function to make authenticated API calls
+kura_api() {
+  curl -s -H "Authorization: Bearer ${TOKEN}" "${BASE_URL}$1"
+}
+
+# Get network interfaces status
+echo "Fetching network interfaces..."
+kura_api "/network/v2/interfaces" | jq '.'
+
+# Get modem status
+echo "Fetching modem status..."
+kura_api "/network/v2/modems" | jq '.'
+```
+
+#### Example 4: Multi-Permission Container for Data Collection
+
+A telemetry container that collects various system metrics:
+
+**Container Configuration:**
+- **Identity Integration Enabled**: `true`
+- **Container Permissions**: `rest.system,rest.network.status,rest.position,rest.inventory`
+
+**Container Code (Python):**
+```python
+import os
+import requests
+import time
+import json
+
+class KuraClient:
+    def __init__(self):
+        self.token = os.environ.get('KURA_IDENTITY_TOKEN')
+        self.base_url = os.environ.get('KURA_REST_BASE_URL')
+        self.headers = {
+            'Authorization': f'Bearer {self.token}',
+            'Content-Type': 'application/json'
+        }
+
+    def get(self, endpoint):
+        """Make authenticated GET request to Kura API"""
+        url = f'{self.base_url}{endpoint}'
+        response = requests.get(url, headers=self.headers)
+        response.raise_for_status()
+        return response.json()
+
+    def collect_telemetry(self):
+        """Collect telemetry data from various Kura APIs"""
+        telemetry = {}
+
+        try:
+            # Collect system information
+            telemetry['system'] = self.get('/system/info')
+        except Exception as e:
+            telemetry['system'] = {'error': str(e)}
+
+        try:
+            # Collect network status
+            telemetry['network'] = self.get('/network/v2/interfaces')
+        except Exception as e:
+            telemetry['network'] = {'error': str(e)}
+
+        try:
+            # Collect position data
+            telemetry['position'] = self.get('/position/v1/current')
+        except Exception as e:
+            telemetry['position'] = {'error': str(e)}
+
+        try:
+            # Collect inventory
+            telemetry['inventory'] = self.get('/inventory/v1/devices')
+        except Exception as e:
+            telemetry['inventory'] = {'error': str(e)}
+
+        return telemetry
+
+# Main telemetry loop
+client = KuraClient()
+
+while True:
+    try:
+        data = client.collect_telemetry()
+        print(json.dumps(data, indent=2))
+
+        # Send to external monitoring system or process locally
+        # ...
+
+        time.sleep(60)  # Collect every minute
+    except Exception as e:
+        print(f"Error collecting telemetry: {e}")
+        time.sleep(60)
+```
+
+### Best Practices
+
+1. **Principle of Least Privilege**: Only grant permissions that are absolutely necessary for the container's functionality.
+
+2. **Validate Environment Variables**: Always check that `KURA_IDENTITY_TOKEN` and `KURA_REST_BASE_URL` are present before making API calls.
+
+3. **Handle Token Lifecycle**: Be prepared for the token to become invalid when the container is stopping or restarting.
+
+4. **Error Handling**: Implement proper error handling for API calls, as permissions may be denied if the container doesn't have the required permission.
+
+5. **Network Mode Considerations**: The REST base URL is automatically adjusted based on network mode:
+   - **bridge mode** (default): Uses the Docker bridge gateway IP (typically `172.17.0.1`)
+   - **host mode**: Uses `localhost`
+
+6. **HTTPS Support**: The REST base URL automatically uses HTTPS if enabled in Kura's HTTP Service configuration.
+
+### Troubleshooting
+
+**Container cannot access Kura APIs:**
+- Verify that **Identity Integration Enabled** is set to `true`
+- Check that the container has been granted the necessary permissions in **Container Permissions**
+- Ensure the container is reading the environment variables correctly
+- Check container logs for authentication errors
+
+**Token authentication fails:**
+- Verify the token is being sent in the `Authorization` header as `Bearer <token>`
+- Check that the temporary identity was created successfully in Kura logs
+- Ensure the container is using the correct REST base URL
+
+**Permission denied errors:**
+- Verify the permission name is correct (case-sensitive)
+- Ensure the permission exists in the system (use the REST Identity API to list defined permissions)
+- Check that the permission was correctly added to the **Container Permissions** field
 
 ## Stopping the container
 

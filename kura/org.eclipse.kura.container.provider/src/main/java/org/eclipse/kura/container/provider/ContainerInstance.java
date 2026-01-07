@@ -424,6 +424,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                 return this;
             }
 
+            cleanupTemporaryIdentity();
             this.startupFuture.cancel(true);
 
             if (newOptions.isEnabled()) {
@@ -440,6 +441,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
         @Override
         public State onStartupFailure() {
+            cleanupTemporaryIdentity();
             return new Disabled(this.options);
         }
 

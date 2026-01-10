@@ -22,7 +22,7 @@
    <reference bind="setConfigurationService" cardinality="1..1" interface="org.eclipse.kura.configuration.ConfigurationService" name="ConfigurationService" policy="static"/>
    <reference bind="setIdentityService" cardinality="1..1" interface="org.eclipse.kura.identity.IdentityService" name="IdentityService" policy="static"/>
    <reference name="NetworkService" 
-              policy="dynamic" 
+              policy="static" 
               cardinality="0..1" 
               bind="setNetworkService"
               interface="org.eclipse.kura.net.NetworkService"/>

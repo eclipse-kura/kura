@@ -7,10 +7,11 @@
 
  	SPDX-License-Identifier: EPL-2.0
 
- 	Contributors:
- 	 Eurotech
+	Contributors:
+	 Eurotech
  -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" activate="activate" configuration-policy="require" deactivate="deactivate" modified="updated" name="org.eclipse.kura.container.provider.ContainerInstance">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" immediate="true" activate="activate"
+    configuration-policy="require" deactivate="deactivate" modified="updated" name="org.eclipse.kura.container.provider.ContainerInstance">
    <implementation class="org.eclipse.kura.container.provider.ContainerInstance"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>

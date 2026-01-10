@@ -124,7 +124,6 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     }
 
     public void updated(Map<String, Object> properties) {
-        logger.info("updated() called with enabled={}", properties.get("container.enabled"));
 
         if (isNull(properties)) {
             throw new IllegalArgumentException("Properties cannot be null!");
@@ -133,15 +132,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         try {
             ContainerInstanceOptions newOptions = new ContainerInstanceOptions(properties);
 
-            logger.info("currentOptions is null: {}", this.currentOptions == null);
-            if (this.currentOptions != null) {
-                logger.info("currentOptions.enabled={}, newOptions.enabled={}",
-                      this.currentOptions.isEnabled(), newOptions.isEnabled());
-                logger.info("options equal: {}", this.currentOptions.equals(newOptions));
-            }
-
             if (this.currentOptions != null && this.currentOptions.equals(newOptions)) {
-                logger.info("Early return - options are equal");
                 return;
             }
 

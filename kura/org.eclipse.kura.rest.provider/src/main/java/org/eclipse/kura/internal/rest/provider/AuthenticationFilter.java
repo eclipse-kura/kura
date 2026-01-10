@@ -25,8 +25,6 @@ import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.Permission;
-import org.eclipse.kura.identity.TemporaryIdentityService;
-import org.eclipse.kura.internal.rest.auth.TokenHolder;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
 
 import jakarta.annotation.Priority;
@@ -47,7 +45,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     private final Set<AuthenticationProviderHolder> authenticationProviders = new TreeSet<>();
     private IdentityService identityService;
-    private TemporaryIdentityService temporaryIdentityService;
 
     @Context
     private HttpServletRequest request;
@@ -56,10 +53,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     public void setIdentityService(final IdentityService identityService) {
         this.identityService = identityService;
-    }
-
-    public void setTemporaryIdentityService(final TemporaryIdentityService temporaryIdentityService) {
-        this.temporaryIdentityService = temporaryIdentityService;
     }
 
     public void registerAuthenticationProvider(final AuthenticationProvider authenticationProvider) {
@@ -133,10 +126,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     }
 
     private boolean isUserInRole(final Principal requestUser, final String role) {
-        if (requestUser instanceof TokenHolder) {
-            return isTemporaryUserInRole((TokenHolder) requestUser, role);
-        }
-
+        // Unified authorization path for all identities (regular and temporary)
         try {
             this.identityService.checkPermission(requestUser.getName(), new Permission("rest." + role));
             return true;
@@ -147,26 +137,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             } catch (final Exception ignored) {
                 return false;
             }
-        }
-    }
-
-    private boolean isTemporaryUserInRole(final TokenHolder tokenHolder, final String role) {
-        if (this.temporaryIdentityService == null) {
-            return false;
-        }
-
-        try {
-            final String token = tokenHolder.getToken();
-
-            if (token == null) {
-                return false;
-            }
-
-            final Permission permission = new Permission("rest." + role);
-            this.temporaryIdentityService.checkTemporaryPermission(token, permission);
-            return true;
-        } catch (final Exception e) {
-            return false;
         }
     }
 

@@ -1,7 +1,7 @@
 [Unit]
 Description=Kura
-Wants=dbus.service
-After=dbus.service
+Wants=dbus.service,docker.service
+After=dbus.service,docker.service
 
 [Service]
 User=kurad

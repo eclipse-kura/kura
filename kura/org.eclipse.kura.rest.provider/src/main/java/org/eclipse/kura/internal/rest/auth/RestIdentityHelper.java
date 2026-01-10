@@ -29,6 +29,7 @@ import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.PasswordConfiguration;
 import org.eclipse.kura.identity.PasswordHash;
 import org.eclipse.kura.identity.Permission;
+import org.eclipse.kura.identity.TokenConfiguration;
 
 public class RestIdentityHelper {
 
@@ -81,6 +82,52 @@ public class RestIdentityHelper {
 
     public PasswordHash computePasswordHash(final char[] password) throws KuraException {
         return identityService.computePasswordHash(password);
+    }
+
+    // Token authentication support
+
+    /**
+     * Finds an identity by its authentication token.
+     * Works for both regular and temporary identities.
+     *
+     * @param token the authentication token
+     * @return the identity name if found, empty otherwise
+     * @throws KuraException if lookup fails
+     */
+    public Optional<String> getIdentityNameByToken(final String token) throws KuraException {
+        return identityService.findIdentityByToken(token);
+    }
+
+    /**
+     * Validates a token for a given identity.
+     * Checks that the token matches and is not expired.
+     *
+     * @param identityName the identity name
+     * @param token        the token to validate
+     * @throws KuraException if the token is invalid, doesn't match, or is expired
+     */
+    public void checkToken(final String identityName, final String token) throws KuraException {
+        Optional<IdentityConfiguration> config = identityService.getIdentityConfiguration(identityName,
+                Set.of(TokenConfiguration.class));
+
+        if (!config.isPresent()) {
+            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Identity not found");
+        }
+
+        TokenConfiguration tokenConfig = config.get().getComponent(TokenConfiguration.class)
+                .orElseThrow(() -> new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "No token configured"));
+
+        if (!tokenConfig.isTokenAuthEnabled()) {
+            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Token authentication not enabled");
+        }
+
+        if (tokenConfig.isExpired()) {
+            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Token expired");
+        }
+
+        if (!tokenConfig.getToken().equals(token)) {
+            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Invalid token");
+        }
     }
 
     private Optional<IdentityConfiguration> identityConfiguration(final String username,

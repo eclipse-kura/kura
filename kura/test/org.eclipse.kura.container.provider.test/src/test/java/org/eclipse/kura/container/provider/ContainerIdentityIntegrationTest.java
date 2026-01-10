@@ -31,11 +31,16 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import java.time.Duration;
+
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.identity.AssignedPermissions;
+import org.eclipse.kura.identity.IdentityConfiguration;
+import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.Permission;
-import org.eclipse.kura.identity.TemporaryIdentityService;
+import org.eclipse.kura.identity.TokenConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,15 +56,13 @@ public class ContainerIdentityIntegrationTest {
     private static final String CONTAINER_IMAGE = "nginx";
     private static final String CONTAINER_TAG = "latest";
     private static final String PERMISSIONS = "rest.read,rest.write";
-    private static final String TOKEN = "temp-token";
-    private static final String SECOND_TOKEN = "next-temp-token";
     private static final String CONTAINER_ID = "container-id";
     private static final String SECOND_CONTAINER_ID = "container-id-2";
     private static final String UPDATED_CONTAINER_NAME = CONTAINER_NAME + "-v2";
 
     private ContainerInstance containerInstance;
     private ContainerOrchestrationService containerOrchestrationService;
-    private TemporaryIdentityService temporaryIdentityService;
+    private IdentityService identityService;
     private ConfigurationService configurationService;
     private Map<String, Object> properties;
     private CountDownLatch startLatch;
@@ -69,13 +72,17 @@ public class ContainerIdentityIntegrationTest {
     private AtomicInteger deleteCount;
     private AtomicInteger startCount;
     private ArgumentCaptor<ContainerConfiguration> configurationCaptor;
-    private ArgumentCaptor<Set<Permission>> permissionsCaptor;
+    private ArgumentCaptor<String> identityNameCaptor;
+    private ArgumentCaptor<IdentityConfiguration> identityConfigCaptor;
+    private ArgumentCaptor<Duration> durationCaptor;
+    private String capturedToken;
+    private String capturedIdentityName;
 
     @Before
     public void setUp() {
         this.containerInstance = new ContainerInstance();
         this.containerOrchestrationService = Mockito.mock(ContainerOrchestrationService.class);
-        this.temporaryIdentityService = Mockito.mock(TemporaryIdentityService.class);
+        this.identityService = Mockito.mock(IdentityService.class);
         this.configurationService = Mockito.mock(ConfigurationService.class);
         this.properties = new HashMap<>();
         this.startLatch = new CountDownLatch(1);
@@ -85,10 +92,12 @@ public class ContainerIdentityIntegrationTest {
         this.deleteCount = new AtomicInteger(0);
         this.startCount = new AtomicInteger(0);
         this.configurationCaptor = ArgumentCaptor.forClass(ContainerConfiguration.class);
-        this.permissionsCaptor = ArgumentCaptor.forClass(Set.class);
+        this.identityNameCaptor = ArgumentCaptor.forClass(String.class);
+        this.identityConfigCaptor = ArgumentCaptor.forClass(IdentityConfiguration.class);
+        this.durationCaptor = ArgumentCaptor.forClass(Duration.class);
 
         this.containerInstance.setContainerOrchestrationService(this.containerOrchestrationService);
-        this.containerInstance.setTemporaryIdentityService(this.temporaryIdentityService);
+        this.containerInstance.setIdentityService(this.identityService);
         this.containerInstance.setConfigurationService(this.configurationService);
 
         when(this.containerOrchestrationService.listContainerDescriptors()).thenReturn(Collections.emptyList());
@@ -126,14 +135,14 @@ public class ContainerIdentityIntegrationTest {
     @Test
     public void recreatesTemporaryIdentityOnConfigurationChange() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesTokens(TOKEN, SECOND_TOKEN);
+        givenTemporaryIdentityServiceProvidesMultipleTokens();
         givenContainerOrchestratorStartsSuccessfullyWithIds(CONTAINER_ID, SECOND_CONTAINER_ID);
 
         whenContainerInstanceIsActivatedUntilCreated();
         whenContainerConfigurationIsUpdatedWithNewName();
 
         thenTemporaryIdentityIsRecreated();
-        thenLatestContainerStartReceivesToken(SECOND_TOKEN);
+        thenLatestContainerStartReceivesRefreshedToken();
     }
 
     @Test
@@ -167,36 +176,53 @@ public class ContainerIdentityIntegrationTest {
         doAnswer(invocation -> {
             this.createLatch.countDown();
             this.createCount.incrementAndGet();
-            return TOKEN;
-        }).when(this.temporaryIdentityService).createTemporaryIdentity(anyString(), this.permissionsCaptor.capture());
+
+            // Capture the identity name and extract token from configuration
+            this.capturedIdentityName = invocation.getArgument(0);
+            IdentityConfiguration config = invocation.getArgument(1);
+            TokenConfiguration tokenConfig = config.getComponent(TokenConfiguration.class).orElseThrow();
+            this.capturedToken = tokenConfig.getToken();
+
+            return null; // New API returns void
+        }).when(this.identityService).createTemporaryIdentity(
+                this.identityNameCaptor.capture(),
+                this.identityConfigCaptor.capture(),
+                this.durationCaptor.capture());
 
         doAnswer(invocation -> {
             this.deleteLatch.countDown();
             this.deleteCount.incrementAndGet();
-            return null;
-        }).when(this.temporaryIdentityService).deleteTemporaryIdentity(TOKEN);
+            return true; // New API returns boolean
+        }).when(this.identityService).deleteTemporaryIdentity(anyString());
     }
 
-    private void givenTemporaryIdentityServiceProvidesTokens(final String firstToken, final String secondToken)
-            throws Exception {
+    private void givenTemporaryIdentityServiceProvidesMultipleTokens() throws Exception {
         this.createLatch = new CountDownLatch(2);
         this.deleteLatch = new CountDownLatch(1);
         this.createCount.set(0);
         this.deleteCount.set(0);
 
-        final AtomicInteger index = new AtomicInteger(0);
-
         doAnswer(invocation -> {
             this.createLatch.countDown();
             this.createCount.incrementAndGet();
-            return index.getAndIncrement() == 0 ? firstToken : secondToken;
-        }).when(this.temporaryIdentityService).createTemporaryIdentity(anyString(), this.permissionsCaptor.capture());
+
+            // Capture the identity name and extract token from configuration
+            this.capturedIdentityName = invocation.getArgument(0);
+            IdentityConfiguration config = invocation.getArgument(1);
+            TokenConfiguration tokenConfig = config.getComponent(TokenConfiguration.class).orElseThrow();
+            this.capturedToken = tokenConfig.getToken();
+
+            return null; // New API returns void
+        }).when(this.identityService).createTemporaryIdentity(
+                this.identityNameCaptor.capture(),
+                this.identityConfigCaptor.capture(),
+                this.durationCaptor.capture());
 
         doAnswer(invocation -> {
             this.deleteLatch.countDown();
             this.deleteCount.incrementAndGet();
             return true;
-        }).when(this.temporaryIdentityService).deleteTemporaryIdentity(anyString());
+        }).when(this.identityService).deleteTemporaryIdentity(anyString());
     }
 
     private void givenContainerOrchestratorStartsSuccessfully() throws Exception {
@@ -261,10 +287,20 @@ public class ContainerIdentityIntegrationTest {
         assertTrue("Temporary identity was not created", this.createLatch.await(2, TimeUnit.SECONDS));
 
         final String expectedIdentityName = "container_" + CONTAINER_NAME.replace("-", "_");
-        verify(this.temporaryIdentityService).createTemporaryIdentity(expectedIdentityName,
-                this.permissionsCaptor.getValue());
+        verify(this.identityService).createTemporaryIdentity(
+                this.identityNameCaptor.capture(),
+                this.identityConfigCaptor.capture(),
+                this.durationCaptor.capture());
 
-        final Set<Permission> permissions = this.permissionsCaptor.getValue();
+        // Verify identity name
+        assertTrue("Identity name should match expected",
+                this.identityNameCaptor.getValue().equals(expectedIdentityName));
+
+        // Verify permissions from IdentityConfiguration
+        IdentityConfiguration config = this.identityConfigCaptor.getValue();
+        AssignedPermissions assignedPermissions = config.getComponent(AssignedPermissions.class).orElseThrow();
+        Set<Permission> permissions = assignedPermissions.getPermissions();
+
         assertTrue("Expected rest.read permission", permissions.stream()
                 .anyMatch(permission -> "rest.read".equals(permission.getName())));
         assertTrue("Expected rest.write permission", permissions.stream()
@@ -277,7 +313,7 @@ public class ContainerIdentityIntegrationTest {
         final ContainerConfiguration configuration = this.configurationCaptor.getValue();
         final List<String> envVars = configuration.getContainerEnvVars();
 
-        assertTrue("Token env var missing", envVars.contains("KURA_IDENTITY_TOKEN=" + TOKEN));
+        assertTrue("Token env var missing", envVars.contains("KURA_IDENTITY_TOKEN=" + this.capturedToken));
         // Check that KURA_REST_BASE_URL is set (now dynamic, not hardcoded to localhost:8080)
         assertTrue("Base URL env var missing", envVars.stream()
                 .anyMatch(envVar -> envVar.startsWith("KURA_REST_BASE_URL=")));
@@ -285,12 +321,12 @@ public class ContainerIdentityIntegrationTest {
 
     private void thenTemporaryIdentityIsDeleted() throws Exception {
         assertTrue("Temporary identity was not deleted", this.deleteLatch.await(2, TimeUnit.SECONDS));
-        verify(this.temporaryIdentityService).deleteTemporaryIdentity(TOKEN);
+        verify(this.identityService).deleteTemporaryIdentity(this.capturedIdentityName);
     }
 
     private void thenTemporaryIdentityIsDeletedOnlyOnce() throws Exception {
         assertTrue("Temporary identity deletion did not occur", this.deleteLatch.await(5, TimeUnit.SECONDS));
-        verify(this.temporaryIdentityService, times(1)).deleteTemporaryIdentity(TOKEN);
+        verify(this.identityService, times(1)).deleteTemporaryIdentity(this.capturedIdentityName);
     }
 
     private void thenTemporaryIdentityIsRecreated() throws Exception {
@@ -303,13 +339,21 @@ public class ContainerIdentityIntegrationTest {
         assertTrue("Container was not started twice", this.startLatch.await(5, TimeUnit.SECONDS));
     }
 
-    private void thenLatestContainerStartReceivesToken(final String expectedToken) {
+    private void thenLatestContainerStartReceivesRefreshedToken() {
+        // Extract the latest token from captured IdentityConfiguration
+        final List<IdentityConfiguration> identityConfigs = this.identityConfigCaptor.getAllValues();
+        final IdentityConfiguration latestIdentityConfig = identityConfigs.get(identityConfigs.size() - 1);
+        final TokenConfiguration latestTokenConfig = latestIdentityConfig.getComponent(TokenConfiguration.class)
+                .orElseThrow();
+        final String latestToken = latestTokenConfig.getToken();
+
+        // Verify the latest container start received this token
         final List<ContainerConfiguration> configurations = this.configurationCaptor.getAllValues();
         final ContainerConfiguration latestConfiguration = configurations.get(configurations.size() - 1);
-
         final List<String> envVars = latestConfiguration.getContainerEnvVars();
+
         assertTrue("Latest start should include refreshed token",
-                envVars.contains("KURA_IDENTITY_TOKEN=" + expectedToken));
+                envVars.contains("KURA_IDENTITY_TOKEN=" + latestToken));
     }
 
     private void thenWaitForContainerState(String expectedState) throws InterruptedException {

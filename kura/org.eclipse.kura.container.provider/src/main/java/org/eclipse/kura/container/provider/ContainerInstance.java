@@ -19,7 +19,9 @@ import static java.util.Objects.isNull;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -29,6 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -47,8 +50,11 @@ import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
 import org.eclipse.kura.container.signature.ContainerSignatureValidationService;
 import org.eclipse.kura.container.signature.ValidationResult;
+import org.eclipse.kura.identity.AssignedPermissions;
+import org.eclipse.kura.identity.IdentityConfiguration;
+import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.Permission;
-import org.eclipse.kura.identity.TemporaryIdentityService;
+import org.eclipse.kura.identity.TokenConfiguration;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
@@ -67,10 +73,11 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private ContainerOrchestrationService containerOrchestrationService;
     private Set<ContainerSignatureValidationService> availableContainerSignatureValidationService = new HashSet<>();
     private ConfigurationService configurationService;
-    private TemporaryIdentityService temporaryIdentityService;
+    private IdentityService identityService;
     private NetworkService networkService;
     private State state = new Disabled(new ContainerInstanceOptions(Collections.emptyMap()));
     private ContainerInstanceOptions currentOptions = null;
+    private final AtomicReference<String> currentTemporaryIdentityName = new AtomicReference<>();
     private final AtomicReference<String> currentTemporaryToken = new AtomicReference<>();
 
     public void setContainerOrchestrationService(final ContainerOrchestrationService containerOrchestrationService) {
@@ -95,8 +102,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         this.configurationService = confService;
     }
 
-    public synchronized void setTemporaryIdentityService(final TemporaryIdentityService temporaryIdentityService) {
-        this.temporaryIdentityService = temporaryIdentityService;
+    public synchronized void setIdentityService(final IdentityService identityService) {
+        this.identityService = identityService;
     }
 
     public synchronized void setNetworkService(final NetworkService networkService) {
@@ -396,23 +403,45 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         }
 
         private void createTemporaryIdentityIfEnabled(final ContainerInstanceOptions options) {
-            if (options.isIdentityIntegrationEnabled() && ContainerInstance.this.temporaryIdentityService != null) {
+            if (options.isIdentityIntegrationEnabled() && ContainerInstance.this.identityService != null) {
                 try {
                     cleanupTemporaryIdentity();
-                    
+
                     final Set<Permission> permissions = options.getContainerPermissions().stream()
                             .map(Permission::new)
                             .collect(Collectors.toSet());
-                    
+
                     final String identityName = "container_" + options.getContainerName().replace("-", "_");
-                    ContainerInstance.this.currentTemporaryToken.set(
-                            ContainerInstance.this.temporaryIdentityService.createTemporaryIdentity(identityName, permissions));
-                    
-                    logger.info("Created temporary identity for container {} with {} permissions",
-                            options.getContainerName(), permissions.size());
+
+                    // Generate a unique token
+                    final String token = "kura-temp-" + UUID.randomUUID().toString();
+
+                    // Create TokenConfiguration with unlimited expiration (no renewal mechanism)
+                    final TokenConfiguration tokenConfig = new TokenConfiguration(token, Optional.empty());
+
+                    // Create AssignedPermissions
+                    final AssignedPermissions assignedPermissions = new AssignedPermissions(permissions);
+
+                    // Create IdentityConfiguration
+                    final IdentityConfiguration configuration = new IdentityConfiguration(identityName,
+                            Arrays.asList(tokenConfig, assignedPermissions));
+
+                    // Create temporary identity with very long lifetime (365 days)
+                    // The identity lifetime matches the container lifecycle - cleanup happens when container stops
+                    // The duration is a safety net for cases where cleanup fails
+                    ContainerInstance.this.identityService.createTemporaryIdentity(identityName, configuration,
+                            Duration.ofDays(365));
+
+                    // Store both identity name and token
+                    ContainerInstance.this.currentTemporaryIdentityName.set(identityName);
+                    ContainerInstance.this.currentTemporaryToken.set(token);
+
+                    logger.info("Created temporary identity {} for container {} with {} permissions",
+                            identityName, options.getContainerName(), permissions.size());
 
                 } catch (KuraException e) {
                     logger.error("Failed to create temporary identity for container {}", options.getContainerName(), e);
+                    ContainerInstance.this.currentTemporaryIdentityName.set(null);
                     ContainerInstance.this.currentTemporaryToken.set(null);
                 }
             }
@@ -775,14 +804,15 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     }
 
     private void cleanupTemporaryIdentity() {
-        final String token = this.currentTemporaryToken.getAndSet(null);
+        final String identityName = this.currentTemporaryIdentityName.getAndSet(null);
+        this.currentTemporaryToken.set(null);
 
-        if (token != null && this.temporaryIdentityService != null) {
+        if (identityName != null && this.identityService != null) {
             try {
-                this.temporaryIdentityService.deleteTemporaryIdentity(token);
-                logger.info("Cleaned up temporary identity with token");
+                this.identityService.deleteTemporaryIdentity(identityName);
+                logger.info("Cleaned up temporary identity: {}", identityName);
             } catch (KuraException e) {
-                logger.warn("Failed to cleanup temporary identity", e);
+                logger.warn("Failed to cleanup temporary identity: {}", identityName, e);
             }
         }
     }

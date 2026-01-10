@@ -33,13 +33,13 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.identity.LoginBannerService;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.identity.IdentityService;
-import org.eclipse.kura.identity.TemporaryIdentityService;
 import org.eclipse.kura.internal.rest.auth.BasicAuthenticationProvider;
 import org.eclipse.kura.internal.rest.auth.CertificateAuthenticationProvider;
 import org.eclipse.kura.internal.rest.auth.RestIdentityHelper;
 import org.eclipse.kura.internal.rest.auth.RestSessionHelper;
 import org.eclipse.kura.internal.rest.auth.SessionAuthProvider;
 import org.eclipse.kura.internal.rest.auth.SessionRestService;
+import org.eclipse.kura.internal.rest.auth.TokenAuthenticationProvider;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -80,6 +80,7 @@ public class RestService implements ConfigurableComponent {
 
     private AuthenticationProvider basicAuthProvider;
     private AuthenticationProvider certificateAuthProvider;
+    private AuthenticationProvider tokenAuthProvider;
 
     private SessionAuthProvider sessionAuthenticationProvider;
     private SessionRestService authRestService;
@@ -89,24 +90,10 @@ public class RestService implements ConfigurableComponent {
     private PasswordStrengthVerificationService passwordStrengthVerificationService;
     private LoginBannerService loginBannerService;
 
-    private TemporaryIdentityService temporaryIdentityService;
-
     @Reference
     public void setIdentityService(final IdentityService identityService) {
         this.identityService = identityService;
         this.authenticationFilter.setIdentityService(identityService);
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    public void setTemporaryIdentityService(final TemporaryIdentityService temporaryIdentityService) {
-        this.temporaryIdentityService = temporaryIdentityService;
-        this.authenticationFilter.setTemporaryIdentityService(temporaryIdentityService);
-    }
-
-    public void unsetTemporaryIdentityService(final TemporaryIdentityService temporaryIdentityService) {
-        if (this.temporaryIdentityService == temporaryIdentityService) {
-            this.authenticationFilter.setTemporaryIdentityService(null);
-        }
     }
 
     @Reference
@@ -158,6 +145,7 @@ public class RestService implements ConfigurableComponent {
 
         this.basicAuthProvider = new BasicAuthenticationProvider(bundleContext, identityHelper);
         this.certificateAuthProvider = new CertificateAuthenticationProvider(identityHelper);
+        this.tokenAuthProvider = new TokenAuthenticationProvider(identityHelper);
         this.sessionAuthenticationProvider = new SessionAuthProvider(//
                 restSessionHelper,
                 new HashSet<>(Arrays.asList(BASE_PATH + CHANGE_PASSWORD_PATH, BASE_PATH + XSRF_TOKEN_PATH)),
@@ -243,6 +231,9 @@ public class RestService implements ConfigurableComponent {
         } else {
             unbindAuthenticationProvider(this.certificateAuthProvider);
         }
+
+        // Token authentication always enabled for both regular and temporary identities
+        bindAuthenticationProvider(this.tokenAuthProvider);
 
         if (options.isSessionManagementEnabled()) {
             bindAuthenticationProvider(this.sessionAuthenticationProvider);

@@ -16,11 +16,14 @@ package org.eclipse.kura.rest.provider.test;
 
 import static org.junit.Assert.fail;
 
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -29,8 +32,11 @@ import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.core.testutil.requesthandler.Transport.Response;
 import org.eclipse.kura.core.testutil.service.ServiceUtil;
+import org.eclipse.kura.identity.AssignedPermissions;
+import org.eclipse.kura.identity.IdentityConfiguration;
+import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.Permission;
-import org.eclipse.kura.identity.TemporaryIdentityService;
+import org.eclipse.kura.identity.TokenConfiguration;
 import org.junit.After;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
@@ -50,6 +56,7 @@ public class TemporaryTokenRestAuthorizationTest extends AbstractRequestHandlerT
 
     private Optional<ServiceRegistration<?>> serviceRegistration = Optional.empty();
     private Optional<String> temporaryToken = Optional.empty();
+    private Optional<String> temporaryIdentityName = Optional.empty();
 
     public TemporaryTokenRestAuthorizationTest() {
         super(new RestTransport("testservice"));
@@ -130,13 +137,30 @@ public class TemporaryTokenRestAuthorizationTest extends AbstractRequestHandlerT
     }
 
     private void givenTemporaryIdentityTokenWithPermissions(final Set<String> permissions) throws Exception {
-        final TemporaryIdentityService temporaryIdentityService = ServiceUtil
-                .trackService(TemporaryIdentityService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+        final IdentityService identityService = ServiceUtil
+                .trackService(IdentityService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
 
         final Set<Permission> asPermissions = permissions.stream().map(Permission::new).collect(Collectors.toSet());
 
-        this.temporaryToken = Optional
-                .of(temporaryIdentityService.createTemporaryIdentity("container_ci", asPermissions));
+        // Generate unique token
+        final String token = "kura-temp-" + UUID.randomUUID().toString();
+        final String identityName = "container_ci_" + UUID.randomUUID().toString().replace("-", "_");
+
+        // Create TokenConfiguration with unlimited expiration
+        final TokenConfiguration tokenConfig = new TokenConfiguration(token, Optional.empty());
+
+        // Create AssignedPermissions
+        final AssignedPermissions assignedPermissions = new AssignedPermissions(asPermissions);
+
+        // Create IdentityConfiguration
+        final IdentityConfiguration configuration = new IdentityConfiguration(identityName,
+                Arrays.asList(tokenConfig, assignedPermissions));
+
+        // Create temporary identity with long lifetime (test will cleanup explicitly)
+        identityService.createTemporaryIdentity(identityName, configuration, Duration.ofHours(1));
+
+        this.temporaryToken = Optional.of(token);
+        this.temporaryIdentityName = Optional.of(identityName);
     }
 
     /*
@@ -177,11 +201,12 @@ public class TemporaryTokenRestAuthorizationTest extends AbstractRequestHandlerT
         this.serviceRegistration.ifPresent(ServiceRegistration::unregister);
         this.serviceRegistration = Optional.empty();
 
-        if (this.temporaryToken.isPresent()) {
-            final TemporaryIdentityService temporaryIdentityService = ServiceUtil
-                    .trackService(TemporaryIdentityService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
-            temporaryIdentityService.deleteTemporaryIdentity(this.temporaryToken.get());
+        if (this.temporaryIdentityName.isPresent()) {
+            final IdentityService identityService = ServiceUtil
+                    .trackService(IdentityService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+            identityService.deleteTemporaryIdentity(this.temporaryIdentityName.get());
         }
         this.temporaryToken = Optional.empty();
+        this.temporaryIdentityName = Optional.empty();
     }
 }

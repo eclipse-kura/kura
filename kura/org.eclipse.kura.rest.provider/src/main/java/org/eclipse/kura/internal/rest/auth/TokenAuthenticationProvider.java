@@ -74,7 +74,8 @@ public class TokenAuthenticationProvider implements AuthenticationProvider {
             return Optional.of(() -> identityName.get());
 
         } catch (KuraException e) {
-            logger.debug("Token authentication failed for token", e);
+            logger.warn("Token authentication failed: {}", e.getMessage());
+            logger.debug("Token authentication failure details", e);
             return Optional.empty();
         }
     }

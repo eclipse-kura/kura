@@ -65,7 +65,7 @@
                         <outputDirectory>${project.basedir}/lib</outputDirectory>
                         <stripVersion>true</stripVersion>
                         <includeArtifactIds>
-                            mockserver-client-java-no-dependencies
+                            mockserver-client-java-no-dependencies,
                             mockserver-netty-no-dependencies
                         </includeArtifactIds>
                     </configuration>

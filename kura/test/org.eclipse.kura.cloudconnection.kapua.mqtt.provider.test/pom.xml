@@ -54,16 +54,12 @@
                         <configuration>
                             <outputDirectory>${project.basedir}/lib</outputDirectory>
                             <stripVersion>true</stripVersion>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.google.protobuf</groupId>
-                                    <artifactId>protobuf-java</artifactId>
-                                    <version>4.30.2</version>
-                                </artifactItem>
-                            </artifactItems>
+                            <includeArtifactIds>
+                                protobuf-java
+                            </includeArtifactIds>
                         </configuration>
                         <goals>
-                            <goal>copy</goal>
+                            <goal>copy-dependencies</goal>
                         </goals>
                     </execution>
                 </executions>

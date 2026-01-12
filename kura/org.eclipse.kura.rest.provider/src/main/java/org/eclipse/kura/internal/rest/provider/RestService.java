@@ -39,7 +39,6 @@ import org.eclipse.kura.internal.rest.auth.RestIdentityHelper;
 import org.eclipse.kura.internal.rest.auth.RestSessionHelper;
 import org.eclipse.kura.internal.rest.auth.SessionAuthProvider;
 import org.eclipse.kura.internal.rest.auth.SessionRestService;
-import org.eclipse.kura.internal.rest.auth.TokenAuthenticationProvider;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -63,7 +62,6 @@ import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 
-@SuppressWarnings("restriction")
 @Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class RestService implements ConfigurableComponent {
 
@@ -80,7 +78,6 @@ public class RestService implements ConfigurableComponent {
 
     private AuthenticationProvider basicAuthProvider;
     private AuthenticationProvider certificateAuthProvider;
-    private AuthenticationProvider tokenAuthProvider;
 
     private SessionAuthProvider sessionAuthenticationProvider;
     private SessionRestService authRestService;
@@ -145,7 +142,6 @@ public class RestService implements ConfigurableComponent {
 
         this.basicAuthProvider = new BasicAuthenticationProvider(bundleContext, identityHelper);
         this.certificateAuthProvider = new CertificateAuthenticationProvider(identityHelper);
-        this.tokenAuthProvider = new TokenAuthenticationProvider(identityHelper);
         this.sessionAuthenticationProvider = new SessionAuthProvider(//
                 restSessionHelper,
                 new HashSet<>(Arrays.asList(BASE_PATH + CHANGE_PASSWORD_PATH, BASE_PATH + XSRF_TOKEN_PATH)),
@@ -231,9 +227,6 @@ public class RestService implements ConfigurableComponent {
         } else {
             unbindAuthenticationProvider(this.certificateAuthProvider);
         }
-
-        // Token authentication always enabled for both regular and temporary identities
-        bindAuthenticationProvider(this.tokenAuthProvider);
 
         if (options.isSessionManagementEnabled()) {
             bindAuthenticationProvider(this.sessionAuthenticationProvider);

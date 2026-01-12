@@ -53,8 +53,8 @@ import org.eclipse.kura.container.signature.ValidationResult;
 import org.eclipse.kura.identity.AssignedPermissions;
 import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityService;
+import org.eclipse.kura.identity.PasswordConfiguration;
 import org.eclipse.kura.identity.Permission;
-import org.eclipse.kura.identity.TokenConfiguration;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
@@ -78,7 +78,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private State state = new Disabled(new ContainerInstanceOptions(Collections.emptyMap()));
     private ContainerInstanceOptions currentOptions = null;
     private final AtomicReference<String> currentTemporaryIdentityName = new AtomicReference<>();
-    private final AtomicReference<String> currentTemporaryToken = new AtomicReference<>();
+    private final AtomicReference<String> currentTemporaryPassword = new AtomicReference<>();
 
     public void setContainerOrchestrationService(final ContainerOrchestrationService containerOrchestrationService) {
         this.containerOrchestrationService = containerOrchestrationService;
@@ -364,41 +364,37 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             this.startupFuture = ContainerInstance.this.executor.submit(() -> startMicroservice(options));
         }
 
-        private ContainerConfiguration getContainerConfigurationWithCredentials(final ContainerInstanceOptions options) {
+        private ContainerConfiguration getContainerConfigurationWithCredentials(
+                final ContainerInstanceOptions options) {
             ContainerConfiguration baseConfig = options.getContainerConfiguration();
 
-            final String token = ContainerInstance.this.currentTemporaryToken.get();
+            final String identityName = ContainerInstance.this.currentTemporaryIdentityName.get();
+            final String password = ContainerInstance.this.currentTemporaryPassword.get();
 
-            if (options.isIdentityIntegrationEnabled() && token != null) {
+            if (options.isIdentityIntegrationEnabled() && password != null && identityName != null) {
                 final List<String> envVars = new ArrayList<>(baseConfig.getContainerEnvVars());
-                envVars.add("KURA_IDENTITY_TOKEN=" + token);
+                envVars.add("KURA_IDENTITY_NAME=" + identityName);
+                envVars.add("KURA_IDENTITY_PASSWORD=" + password);
 
                 String restBaseUrl = buildRestBaseUrl(options);
                 envVars.add("KURA_REST_BASE_URL=" + restBaseUrl);
                 logger.info("Setting container REST base URL to: {}", restBaseUrl);
 
-                return ContainerConfiguration.builder()
-                        .setContainerName(baseConfig.getContainerName())
+                return ContainerConfiguration.builder().setContainerName(baseConfig.getContainerName())
                         .setImageConfiguration(baseConfig.getImageConfiguration())
-                        .setContainerPorts(baseConfig.getContainerPorts())
-                        .setEnvVars(envVars)
+                        .setContainerPorts(baseConfig.getContainerPorts()).setEnvVars(envVars)
                         .setVolumes(baseConfig.getContainerVolumes())
                         .setPrivilegedMode(baseConfig.isContainerPrivileged())
                         .setDeviceList(baseConfig.getContainerDevices())
                         .setFrameworkManaged(baseConfig.isFrameworkManaged())
                         .setLoggingType(baseConfig.getContainerLoggingType())
                         .setContainerNetowrkConfiguration(baseConfig.getContainerNetworkConfiguration())
-                        .setLoggerParameters(baseConfig.getLoggerParameters())
-                        .setEntryPoint(baseConfig.getEntryPoint())
-                        .setRestartOnFailure(baseConfig.getRestartOnFailure())
-                        .setMemory(baseConfig.getMemory())
-                        .setCpus(baseConfig.getCpus())
-                        .setGpus(baseConfig.getGpus())
-                        .setRuntime(baseConfig.getRuntime())
-                        .setEnforcementDigest(baseConfig.getEnforcementDigest())
-                        .build();
+                        .setLoggerParameters(baseConfig.getLoggerParameters()).setEntryPoint(baseConfig.getEntryPoint())
+                        .setRestartOnFailure(baseConfig.getRestartOnFailure()).setMemory(baseConfig.getMemory())
+                        .setCpus(baseConfig.getCpus()).setGpus(baseConfig.getGpus()).setRuntime(baseConfig.getRuntime())
+                        .setEnforcementDigest(baseConfig.getEnforcementDigest()).build();
             }
-            
+
             return baseConfig;
         }
 
@@ -407,24 +403,24 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                 try {
                     cleanupTemporaryIdentity();
 
-                    final Set<Permission> permissions = options.getContainerPermissions().stream()
-                            .map(Permission::new)
+                    final Set<Permission> permissions = options.getContainerPermissions().stream().map(Permission::new)
                             .collect(Collectors.toSet());
 
                     final String identityName = "container_" + options.getContainerName().replace("-", "_");
 
                     // Generate a unique token
-                    final String token = "kura-temp-" + UUID.randomUUID().toString();
+                    final String password = UUID.randomUUID().toString();
 
-                    // Create TokenConfiguration with unlimited expiration (no renewal mechanism)
-                    final TokenConfiguration tokenConfig = new TokenConfiguration(token, Optional.empty());
+                    // Create Password for new container
+                    final PasswordConfiguration passwordConfiguration = new PasswordConfiguration(true, true,
+                            Optional.of(password.toCharArray()), Optional.empty());
 
                     // Create AssignedPermissions
                     final AssignedPermissions assignedPermissions = new AssignedPermissions(permissions);
 
                     // Create IdentityConfiguration
                     final IdentityConfiguration configuration = new IdentityConfiguration(identityName,
-                            Arrays.asList(tokenConfig, assignedPermissions));
+                            Arrays.asList(passwordConfiguration, assignedPermissions));
 
                     // Create temporary identity with very long lifetime (365 days)
                     // The identity lifetime matches the container lifecycle - cleanup happens when container stops
@@ -434,15 +430,15 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
                     // Store both identity name and token
                     ContainerInstance.this.currentTemporaryIdentityName.set(identityName);
-                    ContainerInstance.this.currentTemporaryToken.set(token);
+                    ContainerInstance.this.currentTemporaryPassword.set(password);
 
-                    logger.info("Created temporary identity {} for container {} with {} permissions",
-                            identityName, options.getContainerName(), permissions.size());
+                    logger.info("Created temporary identity {} for container {} with {} permissions", identityName,
+                            options.getContainerName(), permissions.size());
 
                 } catch (KuraException e) {
                     logger.error("Failed to create temporary identity for container {}", options.getContainerName(), e);
                     ContainerInstance.this.currentTemporaryIdentityName.set(null);
-                    ContainerInstance.this.currentTemporaryToken.set(null);
+                    ContainerInstance.this.currentTemporaryPassword.set(null);
                 }
             }
         }
@@ -550,8 +546,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             }
 
             try {
-                ComponentConfiguration config = ContainerInstance.this.configurationService.getComponentConfiguration(
-                        "org.eclipse.kura.http.server.manager.HttpService");
+                ComponentConfiguration config = ContainerInstance.this.configurationService
+                        .getComponentConfiguration("org.eclipse.kura.http.server.manager.HttpService");
 
                 return extractPortFromConfig(config, useHttps).orElse(defaultPort);
             } catch (KuraException e) {
@@ -584,8 +580,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             }
 
             try {
-                ComponentConfiguration config = ContainerInstance.this.configurationService.getComponentConfiguration(
-                        "org.eclipse.kura.http.server.manager.HttpService");
+                ComponentConfiguration config = ContainerInstance.this.configurationService
+                        .getComponentConfiguration("org.eclipse.kura.http.server.manager.HttpService");
 
                 if (config != null && config.getConfigurationProperties() != null) {
                     Map<String, Object> properties = config.getConfigurationProperties();
@@ -728,8 +724,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         }
 
         private boolean isValidAddress(InetAddress adr, NetworkInterface nif) throws SocketException {
-            return adr != null && !adr.isLoopbackAddress()
-                    && (nif.isPointToPoint() || !adr.isLinkLocalAddress());
+            return adr != null && !adr.isLoopbackAddress() && (nif.isPointToPoint() || !adr.isLinkLocalAddress());
         }
 
     }
@@ -756,7 +751,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             } catch (Exception e) {
                 logger.error("Error deleting microservice {}", this.options.getContainerName(), e);
             }
-            
+
             cleanupTemporaryIdentity();
         }
 
@@ -805,7 +800,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     private void cleanupTemporaryIdentity() {
         final String identityName = this.currentTemporaryIdentityName.getAndSet(null);
-        this.currentTemporaryToken.set(null);
+        this.currentTemporaryPassword.set(null);
 
         if (identityName != null && this.identityService != null) {
             try {

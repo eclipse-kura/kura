@@ -14,7 +14,6 @@
 package org.eclipse.kura.core.identity;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,7 +43,6 @@ import org.eclipse.kura.identity.PasswordConfiguration;
 import org.eclipse.kura.identity.PasswordHash;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.identity.Permission;
-import org.eclipse.kura.identity.TokenConfiguration;
 import org.eclipse.kura.identity.configuration.extension.IdentityConfigurationExtension;
 import org.eclipse.kura.util.useradmin.UserAdminHelper;
 import org.eclipse.kura.util.useradmin.UserAdminHelper.AuthenticationException;
@@ -59,9 +57,6 @@ public class IdentityServiceImpl implements IdentityService {
 
     private static final String IDENTITY_SERVICE_FAILURE_FORMAT_STRING = "{} IdentityService - Failure - {}";
     private static final String IDENTITY_SERVICE_SUCCESS_FORMAT_STRING = "{} IdentityService - Success - {}";
-    private static final String TOKEN_PROPERTY = "kura.token";
-    private static final String TOKEN_EXPIRATION_PROPERTY = "kura.token.expiration";
-    private static final String TOKEN_ENABLED_PROPERTY = "kura.token.enabled";
 
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
     private static final Logger logger = LoggerFactory.getLogger(IdentityServiceImpl.class);
@@ -193,10 +188,6 @@ public class IdentityServiceImpl implements IdentityService {
             components.add(getAdditionalConfigurationsDefaults(identityName));
         }
 
-        if (componentsToReturn.contains(TokenConfiguration.class)) {
-            components.add(new TokenConfiguration("", Optional.empty(), false));
-        }
-
         return new IdentityConfiguration(identityName, components);
     }
 
@@ -224,11 +215,6 @@ public class IdentityServiceImpl implements IdentityService {
                 validateAssignedPermissions(assignedPermissions.get());
             }
 
-            final Optional<TokenConfiguration> tokenConfiguration = identityConfiguration
-                    .getComponent(TokenConfiguration.class);
-            if (tokenConfiguration.isPresent()) {
-                validateTokenConfiguration(tokenConfiguration.get());
-            }
         }, "Validate configuration for identity" + identityConfiguration.getName());
 
     }
@@ -369,10 +355,6 @@ public class IdentityServiceImpl implements IdentityService {
 
         }
 
-        final Optional<TokenConfiguration> tokenConfiguration = identity.getComponent(TokenConfiguration.class);
-        if (tokenConfiguration.isPresent()) {
-            updateTokenConfiguration(identityName, tokenConfiguration.get(), user);
-        }
     }
 
     private IdentityConfiguration buildIdentity(final String name, final User user,
@@ -392,10 +374,6 @@ public class IdentityServiceImpl implements IdentityService {
 
         if (componentsToReturn.contains(AdditionalConfigurations.class)) {
             components.add(getAdditionalConfigurations(name));
-        }
-
-        if (componentsToReturn.contains(TokenConfiguration.class)) {
-            components.add(getTokenConfiguration(user));
         }
 
         return new IdentityConfiguration(name, components);
@@ -428,24 +406,6 @@ public class IdentityServiceImpl implements IdentityService {
         }
 
         return new AdditionalConfigurations(additionalConfigurations);
-    }
-
-    private TokenConfiguration getTokenConfiguration(final User user) {
-        final Dictionary<String, Object> properties = user.getProperties();
-        final String token = Optional.ofNullable(properties.get(TOKEN_PROPERTY))
-                .filter(String.class::isInstance)
-                .map(String.class::cast)
-                .orElse("");
-        final Optional<Instant> expiration = Optional.ofNullable(properties.get(TOKEN_EXPIRATION_PROPERTY))
-                .filter(String.class::isInstance)
-                .map(String.class::cast)
-                .flatMap(this::safeParseInstant);
-        final boolean enabled = Optional.ofNullable(properties.get(TOKEN_ENABLED_PROPERTY))
-                .map(String::valueOf)
-                .map(Boolean::parseBoolean)
-                .orElse(false);
-
-        return new TokenConfiguration(token, expiration, enabled);
     }
 
     private PasswordConfiguration getPasswordData(final User user) {
@@ -521,31 +481,6 @@ public class IdentityServiceImpl implements IdentityService {
         }
     }
 
-    private void updateTokenConfiguration(final String identityName, final TokenConfiguration tokenConfiguration,
-            final User user) {
-        final Dictionary<String, Object> properties = user.getProperties();
-
-        if (!tokenConfiguration.isTokenAuthEnabled()) {
-            audit(() -> {
-                removeProperty(properties, TOKEN_PROPERTY);
-                removeProperty(properties, TOKEN_EXPIRATION_PROPERTY);
-                removeProperty(properties, TOKEN_ENABLED_PROPERTY);
-            }, "Disable token authentication for identity " + identityName);
-            return;
-        }
-
-        audit(() -> {
-            setProperty(properties, TOKEN_PROPERTY, tokenConfiguration.getToken());
-            setProperty(properties, TOKEN_ENABLED_PROPERTY, Boolean.toString(true));
-
-            if (tokenConfiguration.getExpiration().isPresent()) {
-                setProperty(properties, TOKEN_EXPIRATION_PROPERTY, tokenConfiguration.getExpiration().get().toString());
-            } else {
-                removeProperty(properties, TOKEN_EXPIRATION_PROPERTY);
-            }
-        }, "Update token configuration for identity " + identityName);
-    }
-
     private void validatePasswordConfiguration(final IdentityConfiguration identityConfiguration,
             final PasswordConfiguration passwordCofiguration) throws KuraException {
         if (!passwordCofiguration.isPasswordAuthEnabled()) {
@@ -571,12 +506,6 @@ public class IdentityServiceImpl implements IdentityService {
             if (!this.userAdminHelper.getPermission(permission.getName()).isPresent()) {
                 throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Permission does not exist");
             }
-        }
-    }
-
-    private void validateTokenConfiguration(final TokenConfiguration tokenConfiguration) throws KuraException {
-        if (tokenConfiguration.isTokenAuthEnabled() && tokenConfiguration.getToken().trim().isEmpty()) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Token authentication is enabled but no token set");
         }
     }
 
@@ -674,19 +603,6 @@ public class IdentityServiceImpl implements IdentityService {
                 "Delete temporary identity " + identityName);
     }
 
-    @Override
-    public synchronized Optional<String> findIdentityByToken(String token) throws KuraException {
-        final List<IdentityConfiguration> allIdentities = getIdentitiesConfiguration(Set.of(TokenConfiguration.class));
-        for (IdentityConfiguration config : allIdentities) {
-            Optional<TokenConfiguration> tokenConfig = config.getComponent(TokenConfiguration.class);
-            if (tokenConfig.isPresent() && token.equals(tokenConfig.get().getToken())) {
-                return Optional.of(config.getName());
-            }
-        }
-
-        return Optional.empty();
-    }
-
     private IdentityConfiguration filterIdentityConfiguration(final IdentityConfiguration configuration,
             final Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) {
         if (componentsToReturn.isEmpty()) {
@@ -717,14 +633,6 @@ public class IdentityServiceImpl implements IdentityService {
                 mergedComponents);
 
         this.temporaryStore.updateIdentity(identityConfiguration.getName(), mergedConfiguration);
-    }
-
-    private Optional<Instant> safeParseInstant(final String raw) {
-        try {
-            return Optional.of(Instant.parse(raw));
-        } catch (final Exception e) {
-            return Optional.empty();
-        }
     }
 
     private static class FailureHandler {

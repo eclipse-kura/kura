@@ -14,8 +14,6 @@
 package org.eclipse.kura.core.identity.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.time.Duration;
@@ -23,7 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -35,9 +32,10 @@ import org.eclipse.kura.identity.AssignedPermissions;
 import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.Permission;
-import org.eclipse.kura.identity.TokenConfiguration;
 import org.junit.After;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Feature: Manage temporary identities.
@@ -51,7 +49,6 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
 
     private String identityName;
     private Set<String> permissions;
-    private String temporaryToken;
     private final Set<String> createdPermissions = new HashSet<>();
     private final Set<String> createdIdentities = new HashSet<>();
 
@@ -92,28 +89,10 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
         givenIdentityName("container_test");
         givenPermissions("rest.asset.read", "rest.configuration.write");
         givenExistingPermissions("rest.asset.read", "rest.configuration.write");
-        givenTemporaryToken();
 
         whenTemporaryIdentityIsCreated();
-        whenTemporaryTokenIsResolved();
 
         thenNoExceptionIsThrown();
-        thenTemporaryTokenStartsWithPrefix("kura-temp-");
-        thenTemporaryTokenCanBeResolvedToIdentity();
-    }
-
-    @Test
-    public void shouldValidateTemporaryToken() {
-        givenIdentityName("container_test");
-        givenPermissions("rest.asset.read");
-        givenExistingPermissions("rest.asset.read");
-        givenTemporaryToken();
-        givenExistingTemporaryIdentity();
-
-        whenTemporaryTokenIsResolved();
-
-        thenNoExceptionIsThrown();
-        thenValidatedIdentityNameMatches();
     }
 
     @Test
@@ -121,7 +100,6 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
         givenIdentityName("container_test");
         givenPermissions("rest.asset.read");
         givenExistingPermissions("rest.asset.read");
-        givenTemporaryToken();
         givenExistingTemporaryIdentity();
 
         whenPermissionIsChecked("rest.asset.read");
@@ -134,7 +112,6 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
         givenIdentityName("container_test");
         givenPermissions("rest.asset.read");
         givenExistingPermissions("rest.asset.read", "rest.configuration.write");
-        givenTemporaryToken();
         givenExistingTemporaryIdentity();
 
         whenPermissionIsChecked("rest.configuration.write");
@@ -147,17 +124,12 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
         givenIdentityName("container_test");
         givenPermissions("rest.asset.read");
         givenExistingPermissions("rest.asset.read");
-        givenTemporaryToken();
         givenExistingTemporaryIdentity();
 
         whenTemporaryIdentityIsDeleted();
 
         thenNoExceptionIsThrown();
         thenTemporaryIdentityServiceReportsDeleted(true);
-
-        whenTemporaryTokenIsResolved();
-
-        thenTemporaryTokenIsNoLongerValid();
     }
 
     @Test
@@ -172,18 +144,10 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
     public void shouldFailToCreateTemporaryIdentityWithNonexistentPermission() {
         givenIdentityName("container_test");
         givenPermissions("nonexistent.permission");
-        givenTemporaryToken();
 
         whenTemporaryIdentityIsCreated();
 
         thenExceptionIsThrown(KuraException.class);
-    }
-
-    @Test
-    public void shouldFailToValidateInvalidToken() {
-        whenTemporaryTokenIsResolved("invalid-token");
-
-        thenTemporaryTokenIsNotResolved();
     }
 
     // Given methods
@@ -206,17 +170,12 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
         }
     }
 
-    private void givenTemporaryToken() {
-        this.temporaryToken = "kura-temp-" + UUID.randomUUID().toString();
-    }
-
     private void givenExistingTemporaryIdentity() {
         try {
-            final AssignedPermissions assignedPermissions = new AssignedPermissions(this.permissions.stream()
-                    .map(Permission::new).collect(Collectors.toSet()));
-            final TokenConfiguration tokenConfiguration = new TokenConfiguration(this.temporaryToken, Optional.empty());
+            final AssignedPermissions assignedPermissions = new AssignedPermissions(
+                    this.permissions.stream().map(Permission::new).collect(Collectors.toSet()));
             final IdentityConfiguration identityConfiguration = new IdentityConfiguration(this.identityName,
-                    List.of(tokenConfiguration, assignedPermissions));
+                    List.of(assignedPermissions));
 
             this.identityService.createTemporaryIdentity(this.identityName, identityConfiguration, Duration.ofHours(1));
             this.createdIdentities.add(this.identityName);
@@ -228,11 +187,10 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
     // When methods
     private void whenTemporaryIdentityIsCreated() {
         call(() -> {
-            final AssignedPermissions assignedPermissions = new AssignedPermissions(this.permissions.stream()
-                    .map(Permission::new).collect(Collectors.toSet()));
-            final TokenConfiguration tokenConfiguration = new TokenConfiguration(this.temporaryToken, Optional.empty());
+            final AssignedPermissions assignedPermissions = new AssignedPermissions(
+                    this.permissions.stream().map(Permission::new).collect(Collectors.toSet()));
             final IdentityConfiguration identityConfiguration = new IdentityConfiguration(this.identityName,
-                    List.of(tokenConfiguration, assignedPermissions));
+                    List.of(assignedPermissions));
 
             this.identityService.createTemporaryIdentity(this.identityName, identityConfiguration, Duration.ofHours(1));
             this.createdIdentities.add(this.identityName);
@@ -246,14 +204,6 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
 
     private void whenTemporaryIdentityIsDeleted(final String token) {
         call(() -> this.identityService.deleteTemporaryIdentity(token));
-    }
-
-    private void whenTemporaryTokenIsResolved() {
-        call(() -> this.identityService.findIdentityByToken(this.temporaryToken));
-    }
-
-    private void whenTemporaryTokenIsResolved(final String token) {
-        call(() -> this.identityService.findIdentityByToken(token));
     }
 
     private void whenPermissionIsChecked(final String permissionName) {
@@ -272,32 +222,8 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
         assertEquals(Optional.of(clazz), this.exception.map(Object::getClass));
     }
 
-    private void thenTemporaryTokenStartsWithPrefix(final String prefix) {
-        assertTrue("Token should start with prefix " + prefix, this.temporaryToken.startsWith(prefix));
-    }
-
-    private void thenValidatedIdentityNameMatches() {
-        assertEquals("Validated identity name should match", this.identityName,
-                ((Optional<?>) expectResult(Optional.class)).orElse(null));
-    }
-
     private void thenTemporaryIdentityServiceReportsDeleted(final boolean deleted) {
         assertEquals(Optional.of(deleted), this.result);
-    }
-
-    private void thenTemporaryTokenIsNoLongerValid() {
-        final Optional<?> resolved = (Optional<?>) expectResult(Optional.class);
-        assertFalse("Token should no longer be valid after deletion", resolved.isPresent());
-    }
-
-    private void thenTemporaryTokenCanBeResolvedToIdentity() {
-        final Optional<?> resolved = (Optional<?>) expectResult(Optional.class);
-        assertEquals("Identity name should match", this.identityName, resolved.orElse(null));
-    }
-
-    private void thenTemporaryTokenIsNotResolved() {
-        final Optional<?> resolved = (Optional<?>) expectResult(Optional.class);
-        assertFalse("Token should not be resolved", resolved.isPresent());
     }
 
     private void thenSecurityExceptionIsThrown() {
@@ -306,17 +232,10 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
         assertEquals(KuraErrorCode.SECURITY_EXCEPTION, ex.getCode());
     }
 
-    // Helper methods
-    private <T> T expectResult(final Class<T> ty) {
-        return this.result.filter(ty::isInstance).map(ty::cast)
-                .orElseThrow(() -> new IllegalStateException("unexpected return type"));
-    }
-
     private void call(final Callable<?> callable) {
         try {
             this.exception = Optional.empty();
-            this.result = Optional.empty();
-            this.result = Optional.of(callable.call());
+            this.result = Optional.ofNullable(callable.call());
         } catch (Exception e) {
             this.exception = Optional.of(e);
         }

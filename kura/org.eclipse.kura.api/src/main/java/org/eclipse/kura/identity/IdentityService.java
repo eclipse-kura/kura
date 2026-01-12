@@ -241,15 +241,4 @@ public interface IdentityService {
      */
     public boolean deleteTemporaryIdentity(final String identityName) throws KuraException;
 
-    /**
-     * Finds an identity by its authentication token.
-     * This method searches both regular and temporary identities for a matching token.
-     *
-     * @param token the authentication token to search for.
-     * @return the identity name if an identity with this token is found, or empty if no
-     *         identity has this token.
-     * @throws KuraException if a failure occurs while searching for the identity.
-     * @since 2.8.0
-     */
-    public Optional<String> findIdentityByToken(final String token) throws KuraException;
 }

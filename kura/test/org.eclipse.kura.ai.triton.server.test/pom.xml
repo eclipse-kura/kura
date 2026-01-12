@@ -63,16 +63,12 @@
                         <configuration>
                             <outputDirectory>${project.basedir}/lib</outputDirectory>
                             <stripVersion>true</stripVersion>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>io.grpc</groupId>
-                                    <artifactId>grpc-testing</artifactId>
-                                    <version>${grpc.version}</version>
-                                </artifactItem>
-                            </artifactItems>
+                            <includeArtifactIds>
+                                grpc-testing
+                            </includeArtifactIds>
                         </configuration>
                         <goals>
-                            <goal>copy</goal>
+                            <goal>copy-dependencies</goal>
                         </goals>
                     </execution>
                 </executions>

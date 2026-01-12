@@ -425,7 +425,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                     // Create temporary identity with very long lifetime (365 days)
                     // The identity lifetime matches the container lifecycle - cleanup happens when container stops
                     // The duration is a safety net for cases where cleanup fails
-                    ContainerInstance.this.identityService.createTemporaryIdentity(identityName, configuration,
+                    ContainerInstance.this.identityService.createTemporaryIdentity(configuration,
                             Duration.ofDays(365));
 
                     // Store both identity name and token

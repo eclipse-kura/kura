@@ -173,13 +173,13 @@ public class ContainerIdentityIntegrationTest {
         doAnswer(invocation -> {
             this.createCount.incrementAndGet();
 
-            // Capture the identity name and extract token from configuration
-            this.capturedIdentityNames.add(invocation.getArgument(0));
-            IdentityConfiguration config = invocation.getArgument(1);
+            // Extract identity name and password from configuration (first argument)
+            IdentityConfiguration config = invocation.getArgument(0);
+            this.capturedIdentityNames.add(config.getName());
             this.capturedPasswordConfigurations.add(config.getComponent(PasswordConfiguration.class).orElseThrow());
 
-            return null; // New API returns void
-        }).when(this.identityService).createTemporaryIdentity(this.identityNameCaptor.capture(),
+            return null; // API returns void
+        }).when(this.identityService).createTemporaryIdentity(
                 this.identityConfigCaptor.capture(), this.durationCaptor.capture());
 
         doAnswer(invocation -> {
@@ -250,15 +250,15 @@ public class ContainerIdentityIntegrationTest {
         awaitCounterAtLeast(this.createCount, 1);
 
         final String expectedIdentityName = "container_" + CONTAINER_NAME.replace("-", "_");
-        verify(this.identityService).createTemporaryIdentity(this.identityNameCaptor.capture(),
+        verify(this.identityService).createTemporaryIdentity(
                 this.identityConfigCaptor.capture(), this.durationCaptor.capture());
 
-        // Verify identity name
+        // Verify identity name from configuration
+        IdentityConfiguration config = this.identityConfigCaptor.getValue();
         assertTrue("Identity name should match expected",
-                this.identityNameCaptor.getValue().equals(expectedIdentityName));
+                config.getName().equals(expectedIdentityName));
 
         // Verify permissions from IdentityConfiguration
-        IdentityConfiguration config = this.identityConfigCaptor.getValue();
         AssignedPermissions assignedPermissions = config.getComponent(AssignedPermissions.class).orElseThrow();
         Set<Permission> permissions = assignedPermissions.getPermissions();
 

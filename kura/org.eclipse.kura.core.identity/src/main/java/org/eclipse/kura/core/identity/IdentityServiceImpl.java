@@ -555,8 +555,11 @@ public class IdentityServiceImpl implements IdentityService {
     // New unified temporary identity methods (IdentityService interface)
 
     @Override
-    public synchronized void createTemporaryIdentity(String identityName, IdentityConfiguration configuration,
+    public synchronized void createTemporaryIdentity(IdentityConfiguration configuration,
             Duration lifetime) throws KuraException {
+
+        final String identityName = configuration.getName();
+
         // Check if identity already exists (temporary or regular)
         if (this.temporaryStore.exists(identityName)) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
@@ -582,8 +585,12 @@ public class IdentityServiceImpl implements IdentityService {
                 }
             }
 
-            // Create temporary identity in memory store
-            this.temporaryStore.createIdentity(identityName, configuration, lifetime);
+            // Process the configuration to hash passwords before storage
+            final IdentityConfiguration processedConfiguration =
+                    processConfigurationForTemporaryStorage(configuration);
+
+            // Create temporary identity in memory store with processed configuration
+            this.temporaryStore.createIdentity(identityName, processedConfiguration, lifetime);
 
         }, "Create temporary identity " + identityName);
     }
@@ -614,6 +621,61 @@ public class IdentityServiceImpl implements IdentityService {
                 .collect(Collectors.toList());
 
         return new IdentityConfiguration(configuration.getName(), filteredComponents);
+    }
+
+    private PasswordConfiguration processPasswordForStorage(final String identityName,
+            final PasswordConfiguration passwordConfiguration) throws KuraException {
+
+        if (!passwordConfiguration.isPasswordAuthEnabled()) {
+            // Password auth not enabled, return configuration with cleared password data
+            return new PasswordConfiguration(
+                    passwordConfiguration.isPasswordChangeNeeded(),
+                    false,
+                    Optional.empty(),
+                    Optional.empty());
+        }
+
+        final Optional<char[]> newPassword = passwordConfiguration.getNewPassword();
+
+        if (!newPassword.isPresent()) {
+            // Password auth enabled but no password provided - this is invalid for new identities
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
+                    "Password authentication is enabled but no password has been provided");
+        }
+
+        // Validate the password
+        ValidationUtil.validateNewPassword(identityName, newPassword.get(),
+                this.passwordStrengthVerificationService);
+
+        // Hash the password
+        final PasswordHash hash = computePasswordHash(newPassword.get());
+
+        // Return new PasswordConfiguration with hash populated and newPassword cleared
+        return new PasswordConfiguration(
+                passwordConfiguration.isPasswordChangeNeeded(),
+                true,
+                Optional.empty(),
+                Optional.of(hash));
+    }
+
+    private IdentityConfiguration processConfigurationForTemporaryStorage(
+            final IdentityConfiguration configuration) throws KuraException {
+
+        final String identityName = configuration.getName();
+        final List<IdentityConfigurationComponent> processedComponents = new ArrayList<>();
+
+        for (final IdentityConfigurationComponent component : configuration.getComponents()) {
+            if (component instanceof PasswordConfiguration) {
+                // Process and hash the password
+                processedComponents.add(
+                        processPasswordForStorage(identityName, (PasswordConfiguration) component));
+            } else {
+                // Keep other components as-is
+                processedComponents.add(component);
+            }
+        }
+
+        return new IdentityConfiguration(identityName, processedComponents);
     }
 
     private void updateTemporaryIdentityConfiguration(final IdentityConfiguration identityConfiguration) {

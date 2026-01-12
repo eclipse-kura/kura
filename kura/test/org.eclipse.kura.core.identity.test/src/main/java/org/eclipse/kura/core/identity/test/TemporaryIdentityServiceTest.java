@@ -31,6 +31,7 @@ import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.eclipse.kura.identity.AssignedPermissions;
 import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityService;
+import org.eclipse.kura.identity.PasswordConfiguration;
 import org.eclipse.kura.identity.Permission;
 import org.junit.After;
 import org.junit.Test;
@@ -46,6 +47,7 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
     private Optional<Object> result = Optional.empty();
 
     private String identityName;
+    private String password;
     private Set<String> permissions;
     private final Set<String> createdPermissions = new HashSet<>();
     private final Set<String> createdIdentities = new HashSet<>();
@@ -148,6 +150,32 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
         thenExceptionIsThrown(KuraException.class);
     }
 
+    @Test
+    public void shouldAuthenticateWithPasswordForTemporaryIdentity() {
+        givenIdentityName("container_test_password");
+        givenPermissions("rest.asset.read");
+        givenExistingPermissions("rest.asset.read");
+        givenPassword("SecurePassword123!");
+        givenExistingTemporaryIdentityWithPassword();
+
+        whenPasswordIsChecked("SecurePassword123!");
+
+        thenNoExceptionIsThrown();
+    }
+
+    @Test
+    public void shouldFailAuthenticationWithWrongPassword() {
+        givenIdentityName("container_test_password");
+        givenPermissions("rest.asset.read");
+        givenExistingPermissions("rest.asset.read");
+        givenPassword("SecurePassword123!");
+        givenExistingTemporaryIdentityWithPassword();
+
+        whenPasswordIsChecked("WrongPassword123!");
+
+        thenSecurityExceptionIsThrown();
+    }
+
     // Given methods
     private void givenIdentityName(final String name) {
         this.identityName = name;
@@ -175,10 +203,30 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
             final IdentityConfiguration identityConfiguration = new IdentityConfiguration(this.identityName,
                     List.of(assignedPermissions));
 
-            this.identityService.createTemporaryIdentity(this.identityName, identityConfiguration, Duration.ofHours(1));
+            this.identityService.createTemporaryIdentity(identityConfiguration, Duration.ofHours(1));
             this.createdIdentities.add(this.identityName);
         } catch (KuraException e) {
             fail("Failed to create temporary identity for test setup");
+        }
+    }
+
+    private void givenPassword(final String pwd) {
+        this.password = pwd;
+    }
+
+    private void givenExistingTemporaryIdentityWithPassword() {
+        try {
+            final AssignedPermissions assignedPermissions = new AssignedPermissions(
+                    this.permissions.stream().map(Permission::new).collect(Collectors.toSet()));
+            final PasswordConfiguration passwordConfiguration = new PasswordConfiguration(
+                    false, true, Optional.of(this.password.toCharArray()), Optional.empty());
+            final IdentityConfiguration identityConfiguration = new IdentityConfiguration(this.identityName,
+                    List.of(assignedPermissions, passwordConfiguration));
+
+            this.identityService.createTemporaryIdentity(identityConfiguration, Duration.ofHours(1));
+            this.createdIdentities.add(this.identityName);
+        } catch (KuraException e) {
+            fail("Failed to create temporary identity for test setup: " + e.getMessage());
         }
     }
 
@@ -190,7 +238,7 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
             final IdentityConfiguration identityConfiguration = new IdentityConfiguration(this.identityName,
                     List.of(assignedPermissions));
 
-            this.identityService.createTemporaryIdentity(this.identityName, identityConfiguration, Duration.ofHours(1));
+            this.identityService.createTemporaryIdentity(identityConfiguration, Duration.ofHours(1));
             this.createdIdentities.add(this.identityName);
             return null;
         });
@@ -207,6 +255,13 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
     private void whenPermissionIsChecked(final String permissionName) {
         callVoid(() -> {
             this.identityService.checkPermission(this.identityName, new Permission(permissionName));
+            return null;
+        });
+    }
+
+    private void whenPasswordIsChecked(final String pwd) {
+        callVoid(() -> {
+            this.identityService.checkPassword(this.identityName, pwd.toCharArray());
             return null;
         });
     }

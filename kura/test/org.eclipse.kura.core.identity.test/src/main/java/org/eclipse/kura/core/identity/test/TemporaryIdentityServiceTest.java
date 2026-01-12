@@ -34,8 +34,6 @@ import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.Permission;
 import org.junit.After;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Feature: Manage temporary identities.

@@ -22,6 +22,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,9 +33,10 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
-import java.time.Duration;
-
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
@@ -74,7 +77,7 @@ public class ContainerIdentityIntegrationTest {
     private ArgumentCaptor<String> identityNameCaptor;
     private ArgumentCaptor<IdentityConfiguration> identityConfigCaptor;
     private ArgumentCaptor<Duration> durationCaptor;
-    private List<PasswordConfiguration> capturedPasswordConfigurations = new ArrayList<>();
+    private List<String> capturedPasswords = new ArrayList<>();
     private List<String> capturedIdentityNames = new ArrayList<>();
 
     @Before
@@ -155,6 +158,29 @@ public class ContainerIdentityIntegrationTest {
         thenTemporaryIdentityIsDeletedOnlyOnce();
     }
 
+    @Test
+    public void clearsTemporaryPasswordAfterContainerStarts() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentityServiceProvidesPassword();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivatedUntilCreated();
+
+        thenTemporaryPasswordIsCleared();
+    }
+
+    @Test
+    public void clearsTemporaryPasswordAfterStartupFailure() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentityServiceProvidesPassword();
+        givenContainerOrchestratorFailsToStart();
+        givenFastRetryConfiguration();
+
+        whenContainerInstanceIsActivatedUntilDisabled();
+
+        thenTemporaryPasswordIsCleared();
+    }
+
     /*
      * GIVEN
      */
@@ -176,7 +202,9 @@ public class ContainerIdentityIntegrationTest {
             // Extract identity name and password from configuration (first argument)
             IdentityConfiguration config = invocation.getArgument(0);
             this.capturedIdentityNames.add(config.getName());
-            this.capturedPasswordConfigurations.add(config.getComponent(PasswordConfiguration.class).orElseThrow());
+            final char[] newPassword = config.getComponent(PasswordConfiguration.class).orElseThrow()
+                    .getNewPassword().orElseThrow();
+            this.capturedPasswords.add(new String(newPassword));
 
             return null; // API returns void
         }).when(this.identityService).createTemporaryIdentity(
@@ -209,6 +237,18 @@ public class ContainerIdentityIntegrationTest {
         }).when(this.containerOrchestrationService).startContainer(this.configurationCaptor.capture());
     }
 
+    private void givenContainerOrchestratorFailsToStart() throws Exception {
+        doAnswer(invocation -> {
+            this.startCount.incrementAndGet();
+            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE);
+        }).when(this.containerOrchestrationService).startContainer(this.configurationCaptor.capture());
+    }
+
+    private void givenFastRetryConfiguration() {
+        this.properties.put("container.image.download.retries", 1);
+        this.properties.put("container.image.download.interval", 0);
+    }
+
     /*
      * WHEN
      */
@@ -220,6 +260,11 @@ public class ContainerIdentityIntegrationTest {
     private void whenContainerInstanceIsActivatedUntilCreated() throws InterruptedException {
         this.containerInstance.activate(this.properties);
         thenWaitForContainerState("Created");
+    }
+
+    private void whenContainerInstanceIsActivatedUntilDisabled() throws InterruptedException {
+        this.containerInstance.activate(this.properties);
+        thenWaitForContainerState("Disabled");
     }
 
     private void whenContainerConfigurationIsUpdatedWithNewName() throws InterruptedException {
@@ -276,8 +321,8 @@ public class ContainerIdentityIntegrationTest {
 
         assertTrue("Identity name var missing",
                 envVars.contains("KURA_IDENTITY_NAME=" + this.capturedIdentityNames.get(0)));
-        assertTrue("Password var missing", envVars.contains("KURA_IDENTITY_PASSWORD="
-                + new String(this.capturedPasswordConfigurations.get(0).getNewPassword().orElseThrow())));
+        assertTrue("Password var missing",
+                envVars.contains("KURA_IDENTITY_PASSWORD=" + this.capturedPasswords.get(0)));
         // Check that KURA_REST_BASE_URL is set (now dynamic, not hardcoded to localhost:8080)
         assertTrue("Base URL env var missing",
                 envVars.stream().anyMatch(envVar -> envVar.startsWith("KURA_REST_BASE_URL=")));
@@ -307,11 +352,7 @@ public class ContainerIdentityIntegrationTest {
 
     private void thenLatestContainerStartReceivesRefreshedPassword() {
         // Extract the latest token from captured IdentityConfiguration
-        final List<IdentityConfiguration> identityConfigs = this.identityConfigCaptor.getAllValues();
-        final IdentityConfiguration latestIdentityConfig = identityConfigs.get(identityConfigs.size() - 1);
-        final PasswordConfiguration latestPasswordConfig = latestIdentityConfig
-                .getComponent(PasswordConfiguration.class).orElseThrow();
-        final String latestPassword = latestPasswordConfig.getNewPassword().map(String::new).orElseThrow();
+        final String latestPassword = this.capturedPasswords.get(this.capturedPasswords.size() - 1);
 
         // Verify the latest container start received this password
         final List<ContainerConfiguration> configurations = this.configurationCaptor.getAllValues();
@@ -320,6 +361,15 @@ public class ContainerIdentityIntegrationTest {
 
         assertTrue("Latest start should include refreshed token",
                 envVars.contains("KURA_IDENTITY_PASSWORD=" + latestPassword));
+    }
+
+    private void thenTemporaryPasswordIsCleared() throws Exception {
+        final Field field = ContainerInstance.class.getDeclaredField("currentTemporaryPassword");
+        field.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        final AtomicReference<char[]> passwordRef = (AtomicReference<char[]>) field.get(this.containerInstance);
+
+        assertTrue("Temporary password should be cleared", passwordRef.get() == null);
     }
 
     private void thenWaitForContainerState(String expectedState) throws InterruptedException {

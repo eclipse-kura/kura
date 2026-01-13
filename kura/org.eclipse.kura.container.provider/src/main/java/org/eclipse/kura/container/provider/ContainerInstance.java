@@ -78,7 +78,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private State state = new Disabled(new ContainerInstanceOptions(Collections.emptyMap()));
     private ContainerInstanceOptions currentOptions = null;
     private final AtomicReference<String> currentTemporaryIdentityName = new AtomicReference<>();
-    private final AtomicReference<String> currentTemporaryPassword = new AtomicReference<>();
+    private final AtomicReference<char[]> currentTemporaryPassword = new AtomicReference<>();
 
     public void setContainerOrchestrationService(final ContainerOrchestrationService containerOrchestrationService) {
         this.containerOrchestrationService = containerOrchestrationService;
@@ -369,12 +369,12 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             ContainerConfiguration baseConfig = options.getContainerConfiguration();
 
             final String identityName = ContainerInstance.this.currentTemporaryIdentityName.get();
-            final String password = ContainerInstance.this.currentTemporaryPassword.get();
+            final char[] password = ContainerInstance.this.currentTemporaryPassword.get();
 
             if (options.isIdentityIntegrationEnabled() && password != null && identityName != null) {
                 final List<String> envVars = new ArrayList<>(baseConfig.getContainerEnvVars());
                 envVars.add("KURA_IDENTITY_NAME=" + identityName);
-                envVars.add("KURA_IDENTITY_PASSWORD=" + password);
+                envVars.add("KURA_IDENTITY_PASSWORD=" + new String(password));
 
                 String restBaseUrl = buildRestBaseUrl(options);
                 envVars.add("KURA_REST_BASE_URL=" + restBaseUrl);
@@ -408,29 +408,24 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
                     final String identityName = "container_" + options.getContainerName().replace("-", "_");
 
-                    // Generate a unique token
+                    // Generate password - String exists anyway from UUID.randomUUID().toString()
                     final String password = UUID.randomUUID().toString();
 
-                    // Create Password for new container
+                    // Create identity configuration (computePasswordHash will clear this char[])
                     final PasswordConfiguration passwordConfiguration = new PasswordConfiguration(true, true,
                             Optional.of(password.toCharArray()), Optional.empty());
-
-                    // Create AssignedPermissions
                     final AssignedPermissions assignedPermissions = new AssignedPermissions(permissions);
-
-                    // Create IdentityConfiguration
                     final IdentityConfiguration configuration = new IdentityConfiguration(identityName,
                             Arrays.asList(passwordConfiguration, assignedPermissions));
 
                     // Create temporary identity with very long lifetime (365 days)
                     // The identity lifetime matches the container lifecycle - cleanup happens when container stops
                     // The duration is a safety net for cases where cleanup fails
-                    ContainerInstance.this.identityService.createTemporaryIdentity(configuration,
-                            Duration.ofDays(365));
+                    ContainerInstance.this.identityService.createTemporaryIdentity(configuration, Duration.ofDays(365));
 
-                    // Store both identity name and token
+                    // Store identity name and password for env injection (fresh char[] from same string)
                     ContainerInstance.this.currentTemporaryIdentityName.set(identityName);
-                    ContainerInstance.this.currentTemporaryPassword.set(password);
+                    ContainerInstance.this.currentTemporaryPassword.set(password.toCharArray());
 
                     logger.info("Created temporary identity {} for container {} with {} permissions", identityName,
                             options.getContainerName(), permissions.size());
@@ -438,7 +433,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                 } catch (KuraException e) {
                     logger.error("Failed to create temporary identity for container {}", options.getContainerName(), e);
                     ContainerInstance.this.currentTemporaryIdentityName.set(null);
-                    ContainerInstance.this.currentTemporaryPassword.set(null);
+                    clearTemporaryPassword();
                 }
             }
         }
@@ -461,11 +456,13 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
         @Override
         public State onContainerReady(final String containerId) {
+            clearTemporaryPassword();
             return new Created(this.options, containerId);
         }
 
         @Override
         public State onStartupFailure() {
+            clearTemporaryPassword();
             cleanupTemporaryIdentity();
             return new Disabled(this.options);
         }
@@ -800,7 +797,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     private void cleanupTemporaryIdentity() {
         final String identityName = this.currentTemporaryIdentityName.getAndSet(null);
-        this.currentTemporaryPassword.set(null);
+        clearTemporaryPassword();
 
         if (identityName != null && this.identityService != null) {
             try {
@@ -809,6 +806,13 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             } catch (KuraException e) {
                 logger.warn("Failed to cleanup temporary identity: {}", identityName, e);
             }
+        }
+    }
+
+    private void clearTemporaryPassword() {
+        final char[] password = this.currentTemporaryPassword.getAndSet(null);
+        if (password != null) {
+            Arrays.fill(password, '\0');
         }
     }
 

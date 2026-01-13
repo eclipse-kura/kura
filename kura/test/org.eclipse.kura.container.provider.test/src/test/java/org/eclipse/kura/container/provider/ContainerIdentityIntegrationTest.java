@@ -185,7 +185,7 @@ public class ContainerIdentityIntegrationTest {
         doAnswer(invocation -> {
             this.deleteCount.incrementAndGet();
             return true; // New API returns boolean
-        }).when(this.identityService).deleteTemporaryIdentity(anyString());
+        }).when(this.identityService).deleteIdentity(anyString());
     }
 
     private void givenContainerOrchestratorStartsSuccessfully() throws Exception {
@@ -286,13 +286,13 @@ public class ContainerIdentityIntegrationTest {
     private void thenTemporaryIdentityIsDeleted() throws Exception {
         awaitCounterAtLeast(this.deleteCount, 1);
         assertEquals("Temporary identity was not deleted", 1, this.deleteCount.get());
-        verify(this.identityService).deleteTemporaryIdentity(this.capturedIdentityNames.get(0));
+        verify(this.identityService).deleteIdentity(this.capturedIdentityNames.get(0));
     }
 
     private void thenTemporaryIdentityIsDeletedOnlyOnce() throws Exception {
         awaitCounterAtLeast(this.deleteCount, 1);
         assertEquals("Temporary identity was not deleted", 1, this.deleteCount.get());
-        verify(this.identityService, times(1)).deleteTemporaryIdentity(this.capturedIdentityNames.get(0));
+        verify(this.identityService, times(1)).deleteIdentity(this.capturedIdentityNames.get(0));
     }
 
     private void thenTemporaryIdentityIsRecreated() throws Exception {

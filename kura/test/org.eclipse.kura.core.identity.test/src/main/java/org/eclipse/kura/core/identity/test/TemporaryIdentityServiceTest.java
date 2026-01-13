@@ -67,7 +67,7 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
     public void cleanup() {
         for (final String identity : this.createdIdentities) {
             try {
-                this.identityService.deleteTemporaryIdentity(identity);
+                this.identityService.deleteIdentity(identity);
             } catch (Exception e) {
                 // no need
             }
@@ -245,11 +245,11 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
     }
 
     private void whenTemporaryIdentityIsDeleted() {
-        call(() -> this.identityService.deleteTemporaryIdentity(this.identityName));
+        call(() -> this.identityService.deleteIdentity(this.identityName));
     }
 
     private void whenTemporaryIdentityIsDeleted(final String token) {
-        call(() -> this.identityService.deleteTemporaryIdentity(token));
+        call(() -> this.identityService.deleteIdentity(token));
     }
 
     private void whenPermissionIsChecked(final String permissionName) {

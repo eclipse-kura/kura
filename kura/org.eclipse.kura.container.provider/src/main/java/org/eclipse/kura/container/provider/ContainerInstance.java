@@ -804,7 +804,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
         if (identityName != null && this.identityService != null) {
             try {
-                this.identityService.deleteTemporaryIdentity(identityName);
+                this.identityService.deleteIdentity(identityName);
                 logger.info("Cleaned up temporary identity: {}", identityName);
             } catch (KuraException e) {
                 logger.warn("Failed to cleanup temporary identity: {}", identityName, e);

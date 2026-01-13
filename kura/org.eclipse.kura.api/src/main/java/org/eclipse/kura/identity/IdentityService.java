@@ -43,7 +43,7 @@ public interface IdentityService {
     public boolean createIdentity(final String identityName) throws KuraException;
 
     /**
-     * Deletes the identity with the given name.
+     * Deletes the identity with the given name, including temporary identities.
      * 
      * @param identityName the name of the identity to be deleted.
      * @return {@code true} if the identity with the given name has been deleted as
@@ -220,28 +220,5 @@ public interface IdentityService {
      */
     public void createTemporaryIdentity(final IdentityConfiguration configuration,
             final Duration lifetime) throws KuraException;
-
-    /**
-     * Checks if the given identity is temporary (not persisted).
-     *
-     * @param identityName the identity name to check.
-     * @return {@code true} if the identity is temporary (stored in-memory only),
-     *         {@code false} if the identity is a regular persisted identity or does not exist.
-     * @throws KuraException if a failure occurs while performing the check.
-     * @since 2.8.0
-     */
-    public boolean isTemporaryIdentity(final String identityName) throws KuraException;
-
-    /**
-     * Deletes a temporary identity.
-     *
-     * @param identityName the name of the temporary identity to delete.
-     * @return {@code true} if the identity was deleted as part of the method call,
-     *         {@code false} if the identity does not exist.
-     * @throws KuraException if the identity is not temporary (is a regular persisted identity)
-     *                       or if deletion fails.
-     * @since 2.8.0
-     */
-    public boolean deleteTemporaryIdentity(final String identityName) throws KuraException;
 
 }

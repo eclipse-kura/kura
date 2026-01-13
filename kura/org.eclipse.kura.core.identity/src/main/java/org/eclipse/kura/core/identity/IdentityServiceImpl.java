@@ -494,10 +494,17 @@ public class IdentityServiceImpl implements IdentityService {
             ValidationUtil.validateNewPassword(identityConfiguration.getName(), newPassword.get(),
                     passwordStrengthVerificationService);
 
-        } else if (!this.userAdminHelper.getUser(identityConfiguration.getName())
-                .filter(u -> u.getCredentials().get(PASSWORD_PROPERTY) != null).isPresent()) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
-                    "Password authentication is enabled but no password has been provided or is currently assigned");
+        } else {
+            final boolean hasPersistedPasswordHash = this.userAdminHelper.getUser(identityConfiguration.getName())
+                    .filter(u -> u.getCredentials().get(PASSWORD_PROPERTY) != null).isPresent();
+            final boolean hasTemporaryPasswordHash = this.temporaryStore.getIdentity(identityConfiguration.getName())
+                    .flatMap(config -> config.getComponent(PasswordConfiguration.class))
+                    .flatMap(PasswordConfiguration::getPasswordHash)
+                    .isPresent();
+            if (!hasPersistedPasswordHash && !hasTemporaryPasswordHash) {
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
+                        "Password authentication is enabled but no password has been provided or is currently assigned");
+            }
         }
     }
 
@@ -587,7 +594,7 @@ public class IdentityServiceImpl implements IdentityService {
 
             // Process the configuration to hash passwords before storage
             final IdentityConfiguration processedConfiguration =
-                    processConfigurationForTemporaryStorage(configuration);
+                    processConfigurationForTemporaryStorage(configuration, Optional.empty());
 
             // Create temporary identity in memory store with processed configuration
             this.temporaryStore.createIdentity(identityName, processedConfiguration, lifetime);
@@ -624,7 +631,8 @@ public class IdentityServiceImpl implements IdentityService {
     }
 
     private PasswordConfiguration processPasswordForStorage(final String identityName,
-            final PasswordConfiguration passwordConfiguration) throws KuraException {
+            final PasswordConfiguration passwordConfiguration, final Optional<PasswordHash> existingPasswordHash)
+            throws KuraException {
 
         if (!passwordConfiguration.isPasswordAuthEnabled()) {
             // Password auth not enabled, return configuration with cleared password data
@@ -637,40 +645,46 @@ public class IdentityServiceImpl implements IdentityService {
 
         final Optional<char[]> newPassword = passwordConfiguration.getNewPassword();
 
-        if (!newPassword.isPresent()) {
-            // Password auth enabled but no password provided - this is invalid for new identities
+        if (newPassword.isPresent()) {
+            ValidationUtil.validateNewPassword(identityName, newPassword.get(),
+                    this.passwordStrengthVerificationService);
+
+            final PasswordHash hash = computePasswordHash(newPassword.get());
+
+            return new PasswordConfiguration(
+                    passwordConfiguration.isPasswordChangeNeeded(),
+                    true,
+                    Optional.empty(),
+                    Optional.of(hash));
+        }
+
+        if (!existingPasswordHash.isPresent()) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
                     "Password authentication is enabled but no password has been provided");
         }
 
-        // Validate the password
-        ValidationUtil.validateNewPassword(identityName, newPassword.get(),
-                this.passwordStrengthVerificationService);
-
-        // Hash the password
-        final PasswordHash hash = computePasswordHash(newPassword.get());
-
-        // Return new PasswordConfiguration with hash populated and newPassword cleared
         return new PasswordConfiguration(
                 passwordConfiguration.isPasswordChangeNeeded(),
                 true,
                 Optional.empty(),
-                Optional.of(hash));
+                existingPasswordHash);
     }
 
     private IdentityConfiguration processConfigurationForTemporaryStorage(
-            final IdentityConfiguration configuration) throws KuraException {
+            final IdentityConfiguration configuration, final Optional<IdentityConfiguration> existingConfiguration)
+            throws KuraException {
 
         final String identityName = configuration.getName();
+        final Optional<PasswordHash> existingPasswordHash = existingConfiguration
+                .flatMap(config -> config.getComponent(PasswordConfiguration.class))
+                .flatMap(PasswordConfiguration::getPasswordHash);
         final List<IdentityConfigurationComponent> processedComponents = new ArrayList<>();
 
         for (final IdentityConfigurationComponent component : configuration.getComponents()) {
             if (component instanceof PasswordConfiguration) {
-                // Process and hash the password
                 processedComponents.add(
-                        processPasswordForStorage(identityName, (PasswordConfiguration) component));
+                        processPasswordForStorage(identityName, (PasswordConfiguration) component, existingPasswordHash));
             } else {
-                // Keep other components as-is
                 processedComponents.add(component);
             }
         }
@@ -678,15 +692,19 @@ public class IdentityServiceImpl implements IdentityService {
         return new IdentityConfiguration(identityName, processedComponents);
     }
 
-    private void updateTemporaryIdentityConfiguration(final IdentityConfiguration identityConfiguration) {
+    private void updateTemporaryIdentityConfiguration(final IdentityConfiguration identityConfiguration)
+            throws KuraException {
         final IdentityConfiguration existingConfiguration = this.temporaryStore.getIdentity(identityConfiguration.getName())
                 .orElseGet(() -> new IdentityConfiguration(identityConfiguration.getName(), Collections.emptyList()));
+
+        final IdentityConfiguration processedConfiguration =
+                processConfigurationForTemporaryStorage(identityConfiguration, Optional.of(existingConfiguration));
 
         final Map<Class<? extends IdentityConfigurationComponent>, IdentityConfigurationComponent> merged = new HashMap<>();
         for (final IdentityConfigurationComponent component : existingConfiguration.getComponents()) {
             merged.put(component.getClass(), component);
         }
-        for (final IdentityConfigurationComponent component : identityConfiguration.getComponents()) {
+        for (final IdentityConfigurationComponent component : processedConfiguration.getComponents()) {
             merged.put(component.getClass(), component);
         }
 

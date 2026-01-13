@@ -33,13 +33,13 @@ import org.eclipse.kura.identity.PasswordConfiguration;
 import org.eclipse.kura.identity.PasswordHash;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 
-class TemporaryIdentityStoreAdapter implements IdentityStore {
+public class TemporaryIdentityStoreAdapter implements IdentityStore {
 
     private final TemporaryIdentityStore temporaryStore;
     private final PasswordStrengthVerificationService passwordStrengthVerificationService;
     private final PasswordHasher passwordHasher;
 
-    TemporaryIdentityStoreAdapter(final TemporaryIdentityStore temporaryStore,
+    public TemporaryIdentityStoreAdapter(final TemporaryIdentityStore temporaryStore,
             final PasswordStrengthVerificationService passwordStrengthVerificationService,
             final PasswordHasher passwordHasher) {
         this.temporaryStore = temporaryStore;
@@ -105,7 +105,7 @@ class TemporaryIdentityStoreAdapter implements IdentityStore {
         return this.temporaryStore.deleteIdentity(identityName);
     }
 
-    void createIdentity(final IdentityConfiguration configuration, final Duration lifetime) throws KuraException {
+    public void createIdentity(final IdentityConfiguration configuration, final Duration lifetime) throws KuraException {
         final IdentityConfiguration processedConfiguration = processConfigurationForTemporaryStorage(configuration,
                 Optional.empty());
         this.temporaryStore.createIdentity(configuration.getName(), processedConfiguration, lifetime);

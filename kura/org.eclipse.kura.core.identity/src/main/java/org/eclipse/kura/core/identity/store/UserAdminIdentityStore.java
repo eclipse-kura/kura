@@ -30,6 +30,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.identity.IdentityServiceImpl;
+import org.eclipse.kura.core.identity.PasswordHashImpl;
 import org.eclipse.kura.core.identity.PasswordHasher;
 import org.eclipse.kura.identity.AdditionalConfigurations;
 import org.eclipse.kura.identity.AssignedPermissions;
@@ -37,21 +38,20 @@ import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityConfigurationComponent;
 import org.eclipse.kura.identity.PasswordConfiguration;
 import org.eclipse.kura.identity.Permission;
-import org.eclipse.kura.identity.PasswordHashImpl;
 import org.eclipse.kura.identity.configuration.extension.IdentityConfigurationExtension;
 import org.eclipse.kura.util.useradmin.UserAdminHelper;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.User;
 import org.slf4j.Logger;
 
-class UserAdminIdentityStore implements IdentityStore {
+public class UserAdminIdentityStore implements IdentityStore {
 
     private final UserAdminHelper userAdminHelper;
     private final Map<String, IdentityConfigurationExtension> extensions;
     private final Logger logger;
     private final PasswordHasher passwordHasher;
 
-    UserAdminIdentityStore(final UserAdminHelper userAdminHelper,
+    public UserAdminIdentityStore(final UserAdminHelper userAdminHelper,
             final Map<String, IdentityConfigurationExtension> extensions,
             final Logger logger,
             final PasswordHasher passwordHasher) {

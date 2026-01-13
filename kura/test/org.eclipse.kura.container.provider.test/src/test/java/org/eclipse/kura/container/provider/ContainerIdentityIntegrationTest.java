@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,6 +80,7 @@ public class ContainerIdentityIntegrationTest {
     private ArgumentCaptor<Duration> durationCaptor;
     private List<String> capturedPasswords = new ArrayList<>();
     private List<String> capturedIdentityNames = new ArrayList<>();
+    private char[] lastTemporaryPassword;
 
     @Before
     public void setUp() {
@@ -159,6 +161,16 @@ public class ContainerIdentityIntegrationTest {
     }
 
     @Test
+    public void clearsTemporaryPasswordArrayAndReference() throws Exception {
+        givenTemporaryPasswordIsSet();
+
+        whenTemporaryPasswordIsCleared();
+
+        thenTemporaryPasswordArrayIsCleared();
+        thenTemporaryPasswordIsCleared();
+    }
+
+    @Test
     public void clearsTemporaryPasswordAfterContainerStarts() throws Exception {
         givenIdentityIntegrationIsEnabled();
         givenTemporaryIdentityServiceProvidesPassword();
@@ -178,6 +190,19 @@ public class ContainerIdentityIntegrationTest {
 
         whenContainerInstanceIsActivatedUntilDisabled();
 
+        thenTemporaryPasswordIsCleared();
+    }
+
+    @Test
+    public void clearsTemporaryPasswordAfterCleanupTemporaryIdentity() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentityNameIsSet();
+        givenTemporaryPasswordIsSet();
+
+        whenTemporaryIdentityIsCleanedUp();
+
+        thenTemporaryPasswordArrayIsCleared();
         thenTemporaryPasswordIsCleared();
     }
 
@@ -237,6 +262,23 @@ public class ContainerIdentityIntegrationTest {
         }).when(this.containerOrchestrationService).startContainer(this.configurationCaptor.capture());
     }
 
+    private void givenTemporaryPasswordIsSet() throws Exception {
+        final Field field = ContainerInstance.class.getDeclaredField("currentTemporaryPassword");
+        field.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        final AtomicReference<char[]> passwordRef = (AtomicReference<char[]>) field.get(this.containerInstance);
+        this.lastTemporaryPassword = "temp-password".toCharArray();
+        passwordRef.set(this.lastTemporaryPassword);
+    }
+
+    private void givenTemporaryIdentityNameIsSet() throws Exception {
+        final Field field = ContainerInstance.class.getDeclaredField("currentTemporaryIdentityName");
+        field.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        final AtomicReference<String> identityRef = (AtomicReference<String>) field.get(this.containerInstance);
+        identityRef.set("temporary_identity");
+    }
+
     private void givenContainerOrchestratorFailsToStart() throws Exception {
         doAnswer(invocation -> {
             this.startCount.incrementAndGet();
@@ -265,6 +307,18 @@ public class ContainerIdentityIntegrationTest {
     private void whenContainerInstanceIsActivatedUntilDisabled() throws InterruptedException {
         this.containerInstance.activate(this.properties);
         thenWaitForContainerState("Disabled");
+    }
+
+    private void whenTemporaryPasswordIsCleared() throws Exception {
+        final Method method = ContainerInstance.class.getDeclaredMethod("clearTemporaryPassword");
+        method.setAccessible(true);
+        method.invoke(this.containerInstance);
+    }
+
+    private void whenTemporaryIdentityIsCleanedUp() throws Exception {
+        final Method method = ContainerInstance.class.getDeclaredMethod("cleanupTemporaryIdentity");
+        method.setAccessible(true);
+        method.invoke(this.containerInstance);
     }
 
     private void whenContainerConfigurationIsUpdatedWithNewName() throws InterruptedException {
@@ -370,6 +424,16 @@ public class ContainerIdentityIntegrationTest {
         final AtomicReference<char[]> passwordRef = (AtomicReference<char[]>) field.get(this.containerInstance);
 
         assertTrue("Temporary password should be cleared", passwordRef.get() == null);
+    }
+
+    private void thenTemporaryPasswordArrayIsCleared() throws Exception {
+        if (this.lastTemporaryPassword == null) {
+            return;
+        }
+
+        for (char value : this.lastTemporaryPassword) {
+            assertTrue("Temporary password array should be cleared", value == '\0');
+        }
     }
 
     private void thenWaitForContainerState(String expectedState) throws InterruptedException {

@@ -141,6 +141,27 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
     }
 
     @Test
+    public void shouldDeleteRegularAndTemporaryIdentityWithUnifiedDelete() {
+        givenIdentityName("regular_identity");
+        givenExistingIdentity();
+
+        whenIdentityIsDeleted();
+
+        thenNoExceptionIsThrown();
+        thenTemporaryIdentityServiceReportsDeleted(true);
+
+        givenIdentityName("temporary_identity");
+        givenPermissions("rest.asset.read");
+        givenExistingPermissions("rest.asset.read");
+        givenExistingTemporaryIdentity();
+
+        whenIdentityIsDeleted();
+
+        thenNoExceptionIsThrown();
+        thenTemporaryIdentityServiceReportsDeleted(true);
+    }
+
+    @Test
     public void shouldFailToCreateTemporaryIdentityWithNonexistentPermission() {
         givenIdentityName("container_test");
         givenPermissions("nonexistent.permission");
@@ -193,6 +214,15 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
             } catch (Exception e) {
                 fail("failed to create permission");
             }
+        }
+    }
+
+    private void givenExistingIdentity() {
+        try {
+            this.identityService.createIdentity(this.identityName);
+            this.createdIdentities.add(this.identityName);
+        } catch (Exception e) {
+            fail("Failed to create identity for test setup");
         }
     }
 
@@ -250,6 +280,10 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
 
     private void whenTemporaryIdentityIsDeleted(final String token) {
         call(() -> this.identityService.deleteIdentity(token));
+    }
+
+    private void whenIdentityIsDeleted() {
+        call(() -> this.identityService.deleteIdentity(this.identityName));
     }
 
     private void whenPermissionIsChecked(final String permissionName) {

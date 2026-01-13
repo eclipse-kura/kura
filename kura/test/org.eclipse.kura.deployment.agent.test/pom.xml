@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
+    Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
 
-This program and the accompanying materials are made
-available under the terms of the Eclipse Public License 2.0
-which is available at https://www.eclipse.org/legal/epl-2.0/
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
 
-SPDX-License-Identifier: EPL-2.0
+    SPDX-License-Identifier: EPL-2.0
 
-Contributors:
-Eurotech
+    Contributors:
+     Eurotech
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -37,16 +37,18 @@ Eurotech
         <groupId>org.mock-server</groupId>
         <artifactId>mockserver-client-java-no-dependencies</artifactId>
         <version>${mockserver.version}</version>
+        <scope>test</scope>
     </dependency>
     <dependency>
         <groupId>org.mock-server</groupId>
         <artifactId>mockserver-netty-no-dependencies</artifactId>
         <version>${mockserver.version}</version>
+        <scope>test</scope>
     </dependency>
     <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-inline</artifactId>
-        <version>4.8.1</version>
+        <scope>test</scope>
     </dependency>
 </dependencies>
 
@@ -62,21 +64,13 @@ Eurotech
                     <configuration>
                         <outputDirectory>${project.basedir}/lib</outputDirectory>
                         <stripVersion>true</stripVersion>
-                        <artifactItems>
-                            <artifactItem>
-                                <groupId>org.mock-server</groupId>
-                                <artifactId>mockserver-client-java-no-dependencies</artifactId>
-                                <version>${mockserver.version}</version>
-                            </artifactItem>
-                            <artifactItem>
-                                <groupId>org.mock-server</groupId>
-                                <artifactId>mockserver-netty-no-dependencies</artifactId>
-                                <version>${mockserver.version}</version>
-                            </artifactItem>
-                        </artifactItems>
+                        <includeArtifactIds>
+                            mockserver-client-java-no-dependencies,
+                            mockserver-netty-no-dependencies
+                        </includeArtifactIds>
                     </configuration>
                     <goals>
-                        <goal>copy</goal>
+                        <goal>copy-dependencies</goal>
                     </goals>
                 </execution>
             </executions>

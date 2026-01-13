@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
+    Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -32,72 +32,74 @@
         <grpc.version>1.76.0</grpc.version>
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
         <protoc.version>4.30.2</protoc.version>
-        <protobuf-java-util.version>4.30.2</protobuf-java-util.version>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf-lite</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.perfmark</groupId>
+            <artifactId>perfmark-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java-util</artifactId>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.8.1</version>
                 <executions>
                     <execution>
+                        <id>copy-dependencies</id>
                         <phase>generate-sources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
                         <configuration>
                             <outputDirectory>${project.basedir}/lib</outputDirectory>
+                            <includeArtifactIds>
+                                grpc-api,
+                                grpc-context,
+                                grpc-core,
+                                grpc-netty-shaded,
+                                grpc-protobuf,
+                                grpc-protobuf-lite,
+                                grpc-stub,
+                                perfmark-api,
+                                protobuf-java-util
+                            </includeArtifactIds>
                             <stripVersion>true</stripVersion>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>io.grpc</groupId>
-                                    <artifactId>grpc-api</artifactId>
-                                    <version>${grpc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.grpc</groupId>
-                                    <artifactId>grpc-context</artifactId>
-                                    <version>${grpc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.grpc</groupId>
-                                    <artifactId>grpc-core</artifactId>
-                                    <version>${grpc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.grpc</groupId>
-                                    <artifactId>grpc-netty-shaded</artifactId>
-                                    <version>${grpc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.grpc</groupId>
-                                    <artifactId>grpc-protobuf</artifactId>
-                                    <version>${grpc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.grpc</groupId>
-                                    <artifactId>grpc-protobuf-lite</artifactId>
-                                    <version>${grpc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.grpc</groupId>
-                                    <artifactId>grpc-stub</artifactId>
-                                    <version>${grpc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>io.perfmark</groupId>
-                                    <artifactId>perfmark-api</artifactId>
-                                    <version>0.26.0</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.google.protobuf</groupId>
-                                    <artifactId>protobuf-java-util</artifactId>
-                                    <version>${protobuf-java-util.version}</version>
-                                </artifactItem>
-                            </artifactItems>
                         </configuration>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>

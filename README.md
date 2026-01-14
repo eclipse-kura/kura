@@ -41,7 +41,7 @@ Documentation
 
 - [**User Documentation**](https://eclipse-kura.github.io/kura/latest/): here you'll find information on how to **use** Eclipse Kura™ i.e. installation instructions, informations on how to use the web UI and tutorials.
 - [**Developer Documentation**](https://github.com/eclipse-kura/kura/wiki): the Eclipse Kura™ Github Wiki serves as a reference for **developers** who want to contribute to the Eclipse Kura™ project and/or develop new add-ons. Here you'll find Eclipse Kura™ development/release model, guidelines on how to import internal packages, creating new bundles and development environment tips & tricks.
-- [**Docker Containers Documentation**](https://hub.docker.com/r/eclipse/kura/): the Eclipse Kura™ team also provides Docker containers for the project. Information on how to build and run them are available at https://github.com/eclipse-kura/kura-metapackage.
+- [**Docker Containers Documentation**](https://hub.docker.com/r/eclipsekura/kura/): the Eclipse Kura™ team also provides Docker containers for the project. Information on how to build and run them are available at https://github.com/eclipse-kura/kura-metapackage.
 - [**Developer Quickstart Guide**](https://github.com/eclipse-kura/kura#build): a quick guide on how to setup the development environment and build the project is also provided in this README.
 
 Additionally, we provide two channels for reporting any issue you find with the project
@@ -58,7 +58,7 @@ Eclipse Kura™ provides pre-built installers for common development boards. Che
 Take a look at [our documentation](https://eclipse-kura.github.io/kura/latest/getting-started/install-kura/) for further information on supported platforms and installer types.
 
 ### Docker Image
-Eclipse Kura™ is also available as a [Docker container](https://hub.docker.com/r/eclipse/kura/).
+Eclipse Kura™ is also available as a [Docker container](https://hub.docker.com/r/eclipsekura/kura/).
 
 Build
 -----

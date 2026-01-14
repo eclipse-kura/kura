@@ -221,7 +221,7 @@ public class SessionRestService {
 
             this.identityHelper.updatePassword(username.get(), newPassword.toCharArray(), false);
 
-            final HttpSession session = this.restSessionHelper.createNewAuthenticatedSession(request, newPassword);
+            final HttpSession session = this.restSessionHelper.createNewAuthenticatedSession(request, username.get());
             this.restSessionHelper.unlockSession(session);
 
         } catch (final WebApplicationException e) {

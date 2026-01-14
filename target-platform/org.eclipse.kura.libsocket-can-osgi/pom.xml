@@ -27,15 +27,14 @@
     <packaging>bundle</packaging>
     <name>libsocket-can-osgi</name>
     <description>Eclipse Kura wrapper for libsocket-can</description>
-    
+
     <dependencies>
         <dependency>
             <groupId>com.eurotech</groupId>
             <artifactId>libsocket-can-java</artifactId>
-            <version>1.0.1</version>
         </dependency>
     </dependencies>
-    
+
     <build>
         <resources>
             <resource>

@@ -31,6 +31,14 @@
         <kura.basedir>${project.basedir}/..</kura.basedir>
     </properties>
 
+    <repositories>
+        <!-- repository for moquette-broker -->
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -51,6 +59,66 @@
                 <version>4.13.2</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.junit</artifactId>
+                <version>4.13.2_1</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.hamcrest</artifactId>
+                <version>1.3_1</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.github.moquette-io.moquette</groupId>
+                <artifactId>moquette-broker</artifactId>
+                <version>0.18.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-core</artifactId>
+                <version>3.2.2</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>org.hamcrest.integration</artifactId>
+                <version>1.1.0.v201303031500</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>org.hamcrest.library</artifactId>
+                <version>1.1.0.v20090501071000</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>org.hamcrest.text</artifactId>
+                <version>1.1.0.v20090501071000</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>1.12.18</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy-agent</artifactId>
+                <version>1.12.18</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.objenesis</groupId>
+                <artifactId>objenesis</artifactId>
+                <version>3.3</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -63,6 +131,57 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- servicemix artifacts to have junit and hamcrest as OSGi bundles -->
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.hamcrest</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.moquette-io.moquette</groupId>
+            <artifactId>moquette-broker</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>org.hamcrest.integration</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>org.hamcrest.library</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>org.hamcrest.text</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-agent</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.objenesis</groupId>
+            <artifactId>objenesis</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -192,7 +311,7 @@
                             -Dmoquette.path=${project.basedir}/src/main/resources/moquette/config
                         </argLine>
                         <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> --> 
-                        <dependencies>
+                        <!-- <dependencies>
                             <dependency>
                                 <type>p2-installable-unit</type>
                                 <artifactId>moquette-broker</artifactId>
@@ -576,7 +695,7 @@
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
-                        </bundleStartLevel>
+                        </bundleStartLevel> -->
                     </configuration>
                 </plugin>
                 <plugin>
@@ -584,9 +703,9 @@
                     <artifactId>target-platform-configuration</artifactId>
                     <version>${tycho-version}</version>
                     <configuration>
-                        <argLine>-consoleLog</argLine>
-                        <resolver>p2</resolver>
-                        <dependency-resolution>
+                        <!-- <resolver>p2</resolver> -->
+                        <pomDependencies>consider</pomDependencies>
+                        <!-- <dependency-resolution>
                             <extraRequirements>
                                 <requirement>
                                     <type>eclipse-plugin</type>
@@ -769,7 +888,7 @@
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
                             </extraRequirements>
-                        </dependency-resolution>
+                        </dependency-resolution> -->
                     </configuration>
                 </plugin>
             </plugins>
@@ -798,6 +917,7 @@
     </build>
 
     <modules>
+        <module>test-util</module>
         <module>org.eclipse.kura.configuration.change.manager.test</module>
         <module>org.eclipse.kura.core.certificates.test</module>
         <module>org.eclipse.kura.core.comm.test</module>

@@ -121,7 +121,8 @@ node {
                                 ${analysisParameters} \
                                 -Dsonar.core.codeCoveragePlugin=jacoco \
                                 -Dsonar.projectKey=org.eclipse.kura:kura \
-                                -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*,org.eclipse.kura.nm/src/main/java/fi/w1/**/*
+                                -Dsonar.exclusions=**/*.xml,**/*.yml,test-util/**/*.java \
+                                -Dsonar.test.exclusions=**/*
                         """
                     }
                 }

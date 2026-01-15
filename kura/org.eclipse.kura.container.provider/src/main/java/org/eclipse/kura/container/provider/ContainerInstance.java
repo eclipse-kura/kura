@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -54,6 +53,7 @@ import org.eclipse.kura.identity.AssignedPermissions;
 import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.PasswordConfiguration;
+import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.identity.Permission;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
@@ -75,6 +75,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private ConfigurationService configurationService;
     private IdentityService identityService;
     private NetworkService networkService;
+    private PasswordStrengthVerificationService passwordStrengthVerificationService;
     private State state = new Disabled(new ContainerInstanceOptions(Collections.emptyMap()));
     private ContainerInstanceOptions currentOptions = null;
     private final AtomicReference<String> currentTemporaryIdentityName = new AtomicReference<>();
@@ -82,6 +83,11 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     public void setContainerOrchestrationService(final ContainerOrchestrationService containerOrchestrationService) {
         this.containerOrchestrationService = containerOrchestrationService;
+    }
+
+    public void setPasswordStrengthVerificationService(
+            final PasswordStrengthVerificationService passwordStrengthVerificationService) {
+        this.passwordStrengthVerificationService = passwordStrengthVerificationService;
     }
 
     public synchronized void setContainerSignatureValidationService(
@@ -408,8 +414,9 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
                     final String identityName = "container_" + options.getContainerName().replace("-", "_");
 
-                    // Generate password - String exists anyway from UUID.randomUUID().toString()
-                    final String password = UUID.randomUUID().toString();
+                    // Generate password
+                    final String password = new String(PasswordGenerator
+                            .generatePassword(passwordStrengthVerificationService.getPasswordStrengthRequirements()));
 
                     // Create identity configuration (computePasswordHash will clear this char[])
                     final PasswordConfiguration passwordConfiguration = new PasswordConfiguration(true, true,

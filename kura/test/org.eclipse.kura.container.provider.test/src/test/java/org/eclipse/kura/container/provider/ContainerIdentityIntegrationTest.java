@@ -46,6 +46,8 @@ import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.PasswordConfiguration;
 import org.eclipse.kura.identity.Permission;
+import org.eclipse.kura.identity.PasswordStrengthRequirements;
+import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -68,6 +70,7 @@ public class ContainerIdentityIntegrationTest {
     private ContainerInstance containerInstance;
     private ContainerOrchestrationService containerOrchestrationService;
     private IdentityService identityService;
+    private PasswordStrengthVerificationService passwordStrengthVerificationService;
     private ConfigurationService configurationService;
     private Map<String, Object> properties;
     private CountDownLatch startLatch;
@@ -87,6 +90,7 @@ public class ContainerIdentityIntegrationTest {
         this.containerInstance = new ContainerInstance();
         this.containerOrchestrationService = Mockito.mock(ContainerOrchestrationService.class);
         this.identityService = Mockito.mock(IdentityService.class);
+        this.passwordStrengthVerificationService = Mockito.mock(PasswordStrengthVerificationService.class);
         this.configurationService = Mockito.mock(ConfigurationService.class);
         this.properties = new HashMap<>();
         this.startLatch = new CountDownLatch(1);
@@ -100,9 +104,12 @@ public class ContainerIdentityIntegrationTest {
 
         this.containerInstance.setContainerOrchestrationService(this.containerOrchestrationService);
         this.containerInstance.setIdentityService(this.identityService);
+        this.containerInstance.setPasswordStrengthVerificationService(this.passwordStrengthVerificationService);
         this.containerInstance.setConfigurationService(this.configurationService);
 
         when(this.containerOrchestrationService.listContainerDescriptors()).thenReturn(Collections.emptyList());
+        when(this.passwordStrengthVerificationService.getPasswordStrengthRequirements())
+                .thenReturn(new PasswordStrengthRequirements(12, true, true, true));
     }
 
     @After

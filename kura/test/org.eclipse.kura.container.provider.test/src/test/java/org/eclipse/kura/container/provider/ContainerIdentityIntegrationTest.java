@@ -86,7 +86,7 @@ public class ContainerIdentityIntegrationTest {
     private char[] lastTemporaryPassword;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         this.containerInstance = new ContainerInstance();
         this.containerOrchestrationService = Mockito.mock(ContainerOrchestrationService.class);
         this.identityService = Mockito.mock(IdentityService.class);

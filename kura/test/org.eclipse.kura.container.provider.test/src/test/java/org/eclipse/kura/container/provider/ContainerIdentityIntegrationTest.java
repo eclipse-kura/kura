@@ -108,8 +108,8 @@ public class ContainerIdentityIntegrationTest {
         this.containerInstance.setConfigurationService(this.configurationService);
 
         when(this.containerOrchestrationService.listContainerDescriptors()).thenReturn(Collections.emptyList());
-        when(this.passwordStrengthVerificationService.getPasswordStrengthRequirements())
-                .thenReturn(new PasswordStrengthRequirements(12, true, true, true));
+        Mockito.doReturn(new PasswordStrengthRequirements(12, true, true, true))
+                .when(this.passwordStrengthVerificationService).getPasswordStrengthRequirements();
     }
 
     @After

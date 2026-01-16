@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -29,6 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.system.InternetConnectionStatus;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
@@ -323,6 +324,12 @@ public class SystemServiceTest {
     @Test
     public void shouldGetDefaultNetworkConfigurationTimeoutProperty() {
         assertEquals(30, systemService.getNetworkConfigurationTimeout());
+    }
+
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void shouldNotBeConnectedToInternet() {
+        assertEquals(InternetConnectionStatus.UNAVAILABLE, systemService.getInternetConnectionStatus());
     }
 
 }

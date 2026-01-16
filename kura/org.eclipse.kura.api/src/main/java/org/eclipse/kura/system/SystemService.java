@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -145,6 +145,15 @@ public interface SystemService {
      * @since 3.0
      */
     public static final String KEY_NETWORK_CONFIGURATION_TIMEOUT = "kura.network.configuration.timeout";
+
+    /**
+     * @since 3.0
+     */
+    public static final String KEY_INTERNET_CONNECTION_STATUS_CHECK_HOST = "kura.internet.check.hostname";
+    /**
+     * @since 3.0
+     */
+    public static final String KEY_INTERNET_CONNECTION_STATUS_CHECK_IP = "kura.internet.check.ip";
 
     /**
      * @deprecated
@@ -645,5 +654,31 @@ public interface SystemService {
      * @return the timeout value in seconds
      */
     public int getNetworkConfigurationTimeout();
+
+    /**
+     * Indicates whether or not the device is connected to the internet and the status.
+     * The status is updated every 30 second and the verification process uses an ICMP request.
+     * 
+     * @since 3.0
+     * @return the {@link InternetConnectionStatus}
+     */
+    public InternetConnectionStatus getInternetConnectionStatus();
+
+    /**
+     * Return the inet address used to check the internet connection. Must support ICMP protocol.
+     * 
+     * @since 3.0
+     * @return the inet address used to check the internet connection. Default value is 198.41.30.198 (eclipse.org ip
+     *         address at 2026-01-22)
+     */
+    public String getInternetConnectionStatusCheckIp();
+
+    /**
+     * Return the hostname used to check the internet connection. Must support ICMP protocol.
+     * 
+     * @since 3.0
+     * @return the hostname address used to check the internet connection. Default value is eclipse.org
+     */
+    public String getInternetConnectionStatusCheckHost();
 
 }

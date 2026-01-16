@@ -30,6 +30,7 @@
         "primaryNetworkInterfaceName",
         "fileSeparator",
         "firmwareVersion",
+        "internetConnectionStatus",
         "kuraDataDirectory",
         "kuraFrameworkConfigDirectory",
         "kuraHomeDirectory",

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -47,6 +47,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.StringJoiner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.Charsets;
@@ -57,6 +61,7 @@ import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.system.ExtendedProperties;
+import org.eclipse.kura.system.InternetConnectionStatus;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemResourceType;
 import org.eclipse.kura.system.SystemService;
@@ -68,6 +73,10 @@ import org.slf4j.LoggerFactory;
 
 public class SystemServiceImpl extends SuperSystemService implements SystemService {
 
+    private ScheduledExecutorService internetCheckerExecutor = Executors.newSingleThreadScheduledExecutor();
+
+    private static final String DEFAULT_INTERNET_CONNECTION_STATUS_CHECK_IP = "198.41.30.198";
+    private static final String DEFAULT_INTERNET_CONNECTION_STATUS_CHECK_HOST = "eclipse.org";
     private static final String SYS_CLASS_NET = "/sys/class/net/";
     private static final Logger logger = LoggerFactory.getLogger(SystemServiceImpl.class);
     private static final String PROPERTY_PROVIDER_SUFFIX = ".provider";
@@ -82,6 +91,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     private static final String KURA_PATH = "/opt/eclipse/kura";
     private static final String OS_WINDOWS = "windows";
 
+    private static final int INTERNET_CHECK_TIME_INTERVAL = 30000;
+
     private static boolean onCloudbees = false;
 
     private Properties kuraProperties;
@@ -90,6 +101,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     private CommandExecutorService executorService;
 
     private String primaryInterfaceMacAddress;
+
+    private AtomicReference<InternetConnectionStatus> currentInternetStatus = new AtomicReference<>(
+            InternetConnectionStatus.UNAVAILABLE);
 
     public void setExecutorService(CommandExecutorService executorService) {
         this.executorService = executorService;
@@ -440,6 +454,14 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             if (System.getProperty(KEY_COMMAND_USER) != null) {
                 this.kuraProperties.put(KEY_COMMAND_USER, System.getProperty(KEY_COMMAND_USER));
             }
+            if (System.getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_HOST) != null) {
+                this.kuraProperties.put(KEY_INTERNET_CONNECTION_STATUS_CHECK_HOST,
+                        System.getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_HOST));
+            }
+            if (System.getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_IP) != null) {
+                this.kuraProperties.put(KEY_INTERNET_CONNECTION_STATUS_CHECK_IP,
+                        System.getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_IP));
+            }
 
             if (getKuraHome() == null) {
                 logger.error("Did not initialize kura.home");
@@ -476,6 +498,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         } catch (IOException e) {
             throw new ComponentException("Error loading default properties", e);
         }
+
+        internetCheckerExecutor.scheduleAtFixedRate(this::checkInternetTask, 0, INTERNET_CHECK_TIME_INTERVAL,
+                TimeUnit.MILLISECONDS);
     }
 
     private void loadKuraCustom(Properties kuraCustomProps, String kuraCustomConfig) {
@@ -519,6 +544,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     protected void deactivate(ComponentContext componentContext) {
         this.componentContext = null;
         this.kuraProperties = null;
+        this.internetCheckerExecutor.shutdownNow();
     }
 
     public void updated(Map<String, Object> properties) {
@@ -1518,6 +1544,17 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         return getIntegerPropertyValue(KEY_NETWORK_CONFIGURATION_TIMEOUT, 30);
     }
 
+    @Override
+    public String getInternetConnectionStatusCheckHost() {
+        return getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_HOST)
+                .orElse(DEFAULT_INTERNET_CONNECTION_STATUS_CHECK_HOST);
+    }
+
+    @Override
+    public String getInternetConnectionStatusCheckIp() {
+        return getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_IP).orElse(DEFAULT_INTERNET_CONNECTION_STATUS_CHECK_IP);
+    }
+
     private int getIntegerPropertyValue(String propertyName, int defaultValue) {
         final Optional<String> propertyValue = getProperty(propertyName);
         if (propertyValue.isPresent() && !propertyValue.get().trim().isEmpty()) {
@@ -1529,6 +1566,30 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             }
         }
         return defaultValue;
+    }
+
+    @Override
+    public InternetConnectionStatus getInternetConnectionStatus() {
+        return this.currentInternetStatus.get();
+    }
+
+    private void checkInternetTask() {
+        CommandStatus status = this.executorService
+                .execute(new Command(new String[] { "ping", "-c", "1", getInternetConnectionStatusCheckHost() }));
+        if (status.getExitStatus().isSuccessful()) {
+            this.currentInternetStatus.set(InternetConnectionStatus.FULL);
+            return;
+        }
+
+        status = this.executorService
+                .execute(new Command(new String[] { "ping", "-c", "1", getInternetConnectionStatusCheckIp() }));
+
+        if (status.getExitStatus().isSuccessful()) {
+            this.currentInternetStatus.set(InternetConnectionStatus.IP_ONLY);
+            return;
+        }
+
+        this.currentInternetStatus.set(InternetConnectionStatus.UNAVAILABLE);
     }
 
 }

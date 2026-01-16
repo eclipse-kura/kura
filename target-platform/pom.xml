@@ -1177,24 +1177,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.cyclonedx</groupId>
-                <artifactId>cyclonedx-maven-plugin</artifactId>
-                <version>2.9.1</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>makeAggregateBom</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <verbose>true</verbose>
-                    <projectType>framework</projectType>
-                    <includeProvidedScope>false</includeProvidedScope>
-                </configuration>
-            </plugin>
         </plugins>
 
         <pluginManagement>

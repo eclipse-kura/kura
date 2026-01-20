@@ -419,7 +419,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                             .generatePassword(passwordStrengthVerificationService.getPasswordStrengthRequirements()));
 
                     // Create identity configuration (computePasswordHash will clear this char[])
-                    final PasswordConfiguration passwordConfiguration = new PasswordConfiguration(true, true,
+                    final PasswordConfiguration passwordConfiguration = new PasswordConfiguration(false, true,
                             Optional.of(password.toCharArray()), Optional.empty());
                     final AssignedPermissions assignedPermissions = new AssignedPermissions(permissions);
                     final IdentityConfiguration configuration = new IdentityConfiguration(identityName,

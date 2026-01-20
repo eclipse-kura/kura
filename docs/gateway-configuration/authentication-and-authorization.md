@@ -69,76 +69,75 @@ Starting from Kura 5.5 the following restrictions will be applied by the Identit
 
 ## Temporary Identities
 
-Kura 5.6 introduces the **TemporaryIdentityService**, a specialized service for creating and managing temporary, non-persistent identities. Temporary identities are designed for short-lived authentication scenarios where identity persistence is not required.
+Kura 6 introduces temporary identity support in the **IdentityService**, a set of APIs for creating and managing temporary, non-persistent identities. Temporary identities are designed for short-lived authentication scenarios where identity persistence is not required.
 
 ### Key Characteristics
 
 - **Non-Persistent**: Temporary identities exist only in memory and are never persisted to disk or configuration snapshots
-- **Token-Based Authentication**: Each temporary identity is associated with a unique authentication token
+- **Password-Based Authentication**: Each temporary identity uses a generated password for authentication
 - **Automatic Lifecycle Management**: Temporary identities can be programmatically created and deleted as needed
 - **Permission-Based Authorization**: Temporary identities support the same permission model as regular identities
-- **No Password Management**: Temporary identities use token-based authentication and do not require password management
 
 ### Primary Use Case: Container Identity Integration
 
 The main use case for temporary identities is the **Container Identity Integration** feature, which automatically provisions authentication credentials for containerized applications. When a container is configured with identity integration enabled:
 
 1. Kura creates a temporary identity with the specified permissions
-2. Generates a unique authentication token for the identity
-3. Provides the token to the container via environment variables
+2. Generates a temporary password for the identity
+3. Provides the identity name and password to the container via environment variables
 4. Automatically cleans up the temporary identity when the container stops
 
-This allows containers to securely access Kura's REST APIs without manual credential configuration or exposing persistent credentials.
+This allows containers to securely access Kura's REST APIs without manual credential configuration or exposing persistent credentials. Password-based REST authentication requires **Basic Authentication Enabled** in the **RestService** configuration.
 
-### TemporaryIdentityService API
+### Temporary Identity API
 
-The `TemporaryIdentityService` provides the following operations:
+Temporary identities are managed through the `IdentityService` APIs using an `IdentityConfiguration` and a lifetime:
 
 #### Create Temporary Identity
 ```java
-String createTemporaryIdentity(String identityName, Set<Permission> permissions)
+void createTemporaryIdentity(IdentityConfiguration configuration, Duration lifetime)
 ```
-Creates a temporary identity with the given name and permissions, returning an authentication token.
+Creates a temporary identity with the given configuration and lifetime.
 
 #### Delete Temporary Identity
 ```java
-boolean deleteTemporaryIdentity(String token)
+boolean deleteIdentity(String identityName)
 ```
-Deletes a temporary identity identified by its token.
-
-#### Validate Temporary Token
-```java
-String validateTemporaryToken(String token)
-```
-Validates a token and returns the associated identity name.
-
-#### Check Temporary Permission
-```java
-void checkTemporaryPermission(String token, Permission permission)
-```
-Verifies that a temporary identity has a specific permission.
+Deletes a temporary identity by name (also works for regular identities).
 
 ### Usage Example
 
 ```java
-import org.eclipse.kura.identity.TemporaryIdentityService;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Optional;
+import org.eclipse.kura.identity.IdentityConfiguration;
+import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.Permission;
+import org.eclipse.kura.identity.PasswordConfiguration;
+import org.eclipse.kura.identity.AssignedPermissions;
 
 // Create temporary identity with specific permissions
 Set<Permission> permissions = new HashSet<>();
 permissions.add(new Permission("rest.system"));
 permissions.add(new Permission("rest.configuration"));
 
-String token = temporaryIdentityService.createTemporaryIdentity(
-    "container_myapp",
-    permissions
+final String identityName = "container_myapp";
+final char[] password = "temporary-password".toCharArray();
+
+PasswordConfiguration passwordConfiguration = new PasswordConfiguration(false, true, Optional.of(password), Optional.empty());
+AssignedPermissions assignedPermissions = new AssignedPermissions(permissions);
+IdentityConfiguration configuration = new IdentityConfiguration(
+    identityName,
+    Arrays.asList(passwordConfiguration, assignedPermissions)
 );
 
-// Token can now be used for REST API authentication
-// ...
+identityService.createTemporaryIdentity(configuration, Duration.ofHours(1));
+
+// Identity name and password can now be used for REST API authentication
 
 // Clean up when no longer needed
-temporaryIdentityService.deleteTemporaryIdentity(token);
+identityService.deleteIdentity(identityName);
 ```
 
 ### Differences from Regular Identities
@@ -161,7 +160,7 @@ temporaryIdentityService.deleteTemporaryIdentity(token);
 ### Further Reading
 
 - [Container Identity Integration](../core-services/container-orchestration-provider-usage.md#container-identity-integration) - Detailed guide on using temporary identities with containers
-- [How to Use Temporary Identity Service](../java-application-development/how-to-use-temporary-identity-service.md) - Developer guide for using the TemporaryIdentityService API
+- [How to Use Temporary Identities](../java-application-development/how-to-use-temporary-identity-service.md) - Developer guide for using IdentityService temporary identity APIs
 - [REST Identity API](../references/rest-apis/rest-identity-api-v2.md) - REST APIs for identity management (regular identities only)
 
 ## UserAdmin persistence

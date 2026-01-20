@@ -77,7 +77,7 @@ Plese refer to the official NetworkManager [documentation](https://networkmanage
 ## Network Failover with PPP-based Modems
 
 When NetworkManager uses `ppp` technology to establish a cellular connection, a value of 20000 is always added to the modem interface causing an improper behavior of the failover feature.
-This is a NetworkManager known-issue presented [here](https://gitlab.freedesktop.org/NetworkManager/NetworkManager/-/issues/1867). The walkarounds for this issue depend on the desired behavior and they are presented in the following.
+This is a NetworkManager known-issue presented [here](https://gitlab.freedesktop.org/NetworkManager/NetworkManager/-/issues/1867). The workarounds for this issue depend on the desired behavior and they are presented in the following.
 
 ### Cellular connection as primary WAN interface
 If the cellular connection is intended to act as the primary WAN interface, all other WAN interfaces must be assigned a priority higher than `20000 + <primary WAN priority>`. For example, if the cellular interface (`ppp0`) uses a priority of 500, the other WAN interfaces (`eth1`, `end1`, etc.) should be configured with a priority greater than 20500.

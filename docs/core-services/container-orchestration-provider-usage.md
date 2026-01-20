@@ -147,7 +147,7 @@ The result should be a single line with all the existing options plus the new on
 
 ## Container Identity Integration
 
-The Container Identity Integration feature allows containers to securely authenticate and interact with Kura's REST APIs using temporary credentials. When enabled, Kura automatically manages authentication tokens for containers, eliminating the need for manual credential configuration.
+The Container Identity Integration feature allows containers to securely authenticate and interact with Kura's REST APIs using temporary credentials. When enabled, Kura automatically provisions a temporary identity and provides password-based credentials to the container, eliminating the need for manual credential configuration.
 
 ### Overview
 
@@ -157,17 +157,18 @@ When Identity Integration is enabled for a container instance, Kura performs the
 
 2. **Assigns Permissions**: The temporary identity is granted the permissions specified in the **Container Permissions** field.
 
-3. **Provides Credentials**: The container receives two environment variables:
-   - `KURA_IDENTITY_TOKEN`: The authentication token for accessing Kura's REST APIs
+3. **Provides Credentials**: The container receives the following environment variables:
+   - `KURA_IDENTITY_NAME`: The temporary identity name for accessing Kura's REST APIs
+   - `KURA_IDENTITY_PASSWORD`: The temporary password for accessing Kura's REST APIs
    - `KURA_REST_BASE_URL`: The complete base URL for Kura's REST API endpoints (e.g., `http://172.17.0.1:8080/services` or `https://172.17.0.1:443/services`)
 
-4. **Automatic Cleanup**: When the container stops or is deleted, Kura automatically removes the temporary identity and invalidates the token.
+4. **Automatic Cleanup**: When the container stops or is deleted, Kura automatically removes the temporary identity and invalidates its credentials.
 
 ### Features
 
 - **Zero Configuration**: Containers automatically receive the correct REST API URL based on the gateway's HTTPS configuration and network mode.
 - **Network-Aware**: The REST base URL is automatically adjusted based on the container's networking mode (bridge, host, etc.).
-- **Secure**: Tokens are temporary and automatically invalidated when containers stop.
+- **Secure**: Credentials are temporary and automatically invalidated when containers stop.
 - **Non-Persistent**: Temporary identities exist only in memory and are never persisted to disk.
 - **Permission-Based**: Fine-grained access control using Kura's existing permission system.
 
@@ -178,6 +179,8 @@ To enable Identity Integration for a container:
 1. Set **Identity Integration Enabled** to `true`
 2. Specify the required permissions in **Container Permissions** field (comma-separated)
 3. Apply the configuration
+
+To use the temporary credentials with REST APIs, ensure **Basic Authentication Enabled** is set to `true` in the **RestService** configuration.
 
 The framework will create the temporary identity when the container starts and clean it up when the container stops.
 
@@ -221,15 +224,15 @@ import os
 import requests
 
 # Read credentials from environment variables
-token = os.environ.get('KURA_IDENTITY_TOKEN')
+identity_name = os.environ.get('KURA_IDENTITY_NAME')
+identity_password = os.environ.get('KURA_IDENTITY_PASSWORD')
 base_url = os.environ.get('KURA_REST_BASE_URL')
 
 # Make authenticated request to get system information
-headers = {
-    'Authorization': f'Bearer {token}'
-}
-
-response = requests.get(f'{base_url}/system/info', headers=headers)
+response = requests.get(
+    f'{base_url}/system/info',
+    auth=(identity_name, identity_password)
+)
 if response.status_code == 200:
     system_info = response.json()
     print(f"System info: {system_info}")
@@ -249,14 +252,16 @@ A deployment automation container that can read and update configurations:
 ```javascript
 const axios = require('axios');
 
-const token = process.env.KURA_IDENTITY_TOKEN;
+const identityName = process.env.KURA_IDENTITY_NAME;
+const identityPassword = process.env.KURA_IDENTITY_PASSWORD;
 const baseUrl = process.env.KURA_REST_BASE_URL;
 
-// Configure axios with authentication header
+// Configure axios with basic authentication
 const api = axios.create({
   baseURL: baseUrl,
-  headers: {
-    'Authorization': `Bearer ${token}`
+  auth: {
+    username: identityName,
+    password: identityPassword
   }
 });
 
@@ -307,12 +312,13 @@ A network diagnostic container that monitors network status:
 #!/bin/bash
 
 # Read credentials from environment
-TOKEN="${KURA_IDENTITY_TOKEN}"
+IDENTITY_NAME="${KURA_IDENTITY_NAME}"
+IDENTITY_PASSWORD="${KURA_IDENTITY_PASSWORD}"
 BASE_URL="${KURA_REST_BASE_URL}"
 
 # Function to make authenticated API calls
 kura_api() {
-  curl -s -H "Authorization: Bearer ${TOKEN}" "${BASE_URL}$1"
+  curl -s -u "${IDENTITY_NAME}:${IDENTITY_PASSWORD}" "${BASE_URL}$1"
 }
 
 # Get network interfaces status
@@ -341,17 +347,15 @@ import json
 
 class KuraClient:
     def __init__(self):
-        self.token = os.environ.get('KURA_IDENTITY_TOKEN')
+        self.identity_name = os.environ.get('KURA_IDENTITY_NAME')
+        self.identity_password = os.environ.get('KURA_IDENTITY_PASSWORD')
         self.base_url = os.environ.get('KURA_REST_BASE_URL')
-        self.headers = {
-            'Authorization': f'Bearer {self.token}',
-            'Content-Type': 'application/json'
-        }
+        self.auth = (self.identity_name, self.identity_password)
 
     def get(self, endpoint):
         """Make authenticated GET request to Kura API"""
         url = f'{self.base_url}{endpoint}'
-        response = requests.get(url, headers=self.headers)
+        response = requests.get(url, auth=self.auth)
         response.raise_for_status()
         return response.json()
 
@@ -406,9 +410,9 @@ while True:
 
 1. **Principle of Least Privilege**: Only grant permissions that are absolutely necessary for the container's functionality.
 
-2. **Validate Environment Variables**: Always check that `KURA_IDENTITY_TOKEN` and `KURA_REST_BASE_URL` are present before making API calls.
+2. **Validate Environment Variables**: Always check that `KURA_IDENTITY_NAME`, `KURA_IDENTITY_PASSWORD`, and `KURA_REST_BASE_URL` are present before making API calls.
 
-3. **Handle Token Lifecycle**: Be prepared for the token to become invalid when the container is stopping or restarting.
+3. **Handle Credential Lifecycle**: Be prepared for credentials to become invalid when the container is stopping or restarting.
 
 4. **Error Handling**: Implement proper error handling for API calls, as permissions may be denied if the container doesn't have the required permission.
 
@@ -426,10 +430,11 @@ while True:
 - Ensure the container is reading the environment variables correctly
 - Check container logs for authentication errors
 
-**Token authentication fails:**
-- Verify the token is being sent in the `Authorization` header as `Bearer <token>`
+**Basic authentication fails:**
+- Verify the request includes valid Basic credentials (`KURA_IDENTITY_NAME` / `KURA_IDENTITY_PASSWORD`)
 - Check that the temporary identity was created successfully in Kura logs
 - Ensure the container is using the correct REST base URL
+- Verify **Basic Authentication Enabled** is set to `true` in **RestService**
 
 **Permission denied errors:**
 - Verify the permission name is correct (case-sensitive)

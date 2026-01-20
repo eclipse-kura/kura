@@ -76,7 +76,7 @@ Plese refer to the official NetworkManager [documentation](https://networkmanage
 
 ## Network Failover with PPP-based Modems
 
-When NetworkManager uses `ppp` technology to establish a cellular connection, a value of 20000 is always added to the modem interface causing an improper behavior of the failover feature.
+When NetworkManager uses `ppp` technology to establish a cellular connection, a value of 20000 is always added to the modem interface's route metric, causing an improper behavior of the failover feature.
 This is a NetworkManager known-issue presented [here](https://gitlab.freedesktop.org/NetworkManager/NetworkManager/-/issues/1867). The workarounds for this issue depend on the desired behavior and they are presented in the following.
 
 ### Cellular connection as primary WAN interface

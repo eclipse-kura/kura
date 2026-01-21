@@ -685,6 +685,39 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#network-failover-with-ppp-based-modems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Network Failover with PPP-based Modems
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Failover with PPP-based Modems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cellular-connection-as-primary-wan-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cellular connection as primary WAN interface
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cellular-connection-as-backup-wan-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cellular connection as backup WAN interface
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4115,6 +4148,39 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#network-failover-with-ppp-based-modems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Network Failover with PPP-based Modems
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Failover with PPP-based Modems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cellular-connection-as-primary-wan-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cellular connection as primary WAN interface
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cellular-connection-as-backup-wan-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cellular connection as backup WAN interface
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -4193,10 +4259,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>To <strong>disable</strong> the connectivity check feature:</p>
 <ul>
 <li>remove the <code>[connectivity]</code> section from the configuration file; or</li>
-<li>set <code>interval=0</code>; or</li>
-<li>remove <code>uri</code>; or</li>
-<li>set an empty URI, like <code>uri=</code></li>
+<li>set <code>enabled=false</code> in the <code>[connectivity]</code> section.</li>
 </ul>
+<h2 id="network-failover-with-ppp-based-modems">Network Failover with PPP-based Modems</h2>
+<p>When NetworkManager uses <code>ppp</code> technology to establish a cellular connection, a value of 20000 is always added to the modem interface's route metric, causing an improper behavior of the failover feature. This is a NetworkManager known-issue presented <a href="https://gitlab.freedesktop.org/NetworkManager/NetworkManager/-/issues/1867">here</a>. The workarounds for this issue depend on the desired behavior and they are presented below.</p>
+<h3 id="cellular-connection-as-primary-wan-interface">Cellular connection as primary WAN interface</h3>
+<p>If the cellular connection is intended to act as the primary WAN interface, all other WAN interfaces must be assigned a priority higher than <code>20000 + &lt;primary WAN priority&gt;</code>. For example, if the cellular interface (<code>ppp0</code>) uses a priority of 500, the other WAN interfaces (<code>eth1</code>, <code>end1</code>, etc.) should be configured with a priority greater than 20500.</p>
+<p>The main limitation of this approach is that the failover mechanism will not switch back to the secondary WAN interfaces when the cellular connection lacks global connectivity.</p>
+<h3 id="cellular-connection-as-backup-wan-interface">Cellular connection as backup WAN interface</h3>
+<p>If the cellular connection is used as a backup WAN interface, priorities can be configured as in normal operation. The modem interface will retain a high route metric and will only be used as a fallback when the primary connection becomes unavailable.</p>
 
 
 

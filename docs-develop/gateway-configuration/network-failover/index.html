@@ -4785,9 +4785,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>To <strong>disable</strong> the connectivity check feature:</p>
 <ul>
 <li>remove the <code>[connectivity]</code> section from the configuration file; or</li>
-<li>set <code>interval=0</code>; or</li>
-<li>remove <code>uri</code>; or</li>
-<li>set an empty URI, like <code>uri=</code></li>
+<li>set <code>enabled=false</code> in the <code>[connectivity]</code> section.</li>
 </ul>
 <h2 id="dns-priority">DNS Priority</h2>
 <p>The <strong>WAN Priority</strong> property determines which network interface is used as primary WAN interface. If a DNS server address is configured for the selected interface, it will be used as domain name resolver. </p>

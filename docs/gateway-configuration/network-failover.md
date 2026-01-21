@@ -63,9 +63,7 @@ The **response** should match what the URI is returning when probed. Some exampl
 To **disable** the connectivity check feature:
 
 - remove the `[connectivity]` section from the configuration file; or
-- set `interval=0`; or
-- remove `uri`; or
-- set an empty URI, like `uri=`
+- set `enabled=false` in the `[connectivity]` section.
 
 ## DNS Priority
 

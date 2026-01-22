@@ -2,7 +2,7 @@
 
 ## Installation
 
-Eclipse Kura is also available as a Docker container available in [Docker Hub](https://hub.docker.com/r/eclipse/kura/).
+Eclipse Kura is also available as a Docker container available in [Docker Hub](https://hub.docker.com/r/eclipsekura/kura/).
 
 To download and run, use the following command:
 

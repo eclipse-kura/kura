@@ -128,7 +128,7 @@ EnvironmentFile=/etc/kura-key.conf
 
 Specify the environment variable using the `--env` or `--env-file` command line option of the `docker`/`podman` `run` or `create` commands.
 
-For additional information about Eclipse Kura containers see: https://hub.docker.com/r/eclipse/kura/
+For additional information about Eclipse Kura containers see: https://hub.docker.com/r/eclipsekura/kura/
 
 ### Option 3: Using a custom storage implementation
 

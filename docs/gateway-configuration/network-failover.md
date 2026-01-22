@@ -63,9 +63,7 @@ The **response** should match what the URI is returning when probed. Some exampl
 To **disable** the connectivity check feature:
 
 - remove the `[connectivity]` section from the configuration file; or
-- set `interval=0`; or
-- remove `uri`; or
-- set an empty URI, like `uri=`
+- set `enabled=false` in the `[connectivity]` section.
 
 ## DNS Priority
 
@@ -73,3 +71,15 @@ The **WAN Priority** property determines which network interface is used as prim
 
 The list of available DNS addresses is written by NetworkManager in the `/etc/resolv.conf` file, where the first in the list take precedence. However, if NetworkManager is configured to use external tools to manage the DNS list (e.g. `dnsmasq` or `systemd-resolved`), the `/etc/resolv.conf` file is not used and the DNS are externally handled.
 Plese refer to the official NetworkManager [documentation](https://networkmanager.dev/docs/api/latest/settings-ipv4.html) for the `dns-priority` setting and [here](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/configuring_and_managing_networking/configuring-the-order-of-dns-servers_configuring-and-managing-networking#default-values-of-dns-priority-parameters_configuring-the-order-of-dns-servers) for an explanation about the external DNS tools.
+
+## Network Failover with PPP-based Modems
+
+When NetworkManager uses `ppp` technology to establish a cellular connection, a value of 20000 is always added to the modem interface's route metric, causing an improper behavior of the failover feature. This is a NetworkManager known-issue presented [here](https://gitlab.freedesktop.org/NetworkManager/NetworkManager/-/issues/1867). The workarounds for this issue depend on the desired behavior and they are presented below.
+
+### Cellular connection as primary WAN interface
+If the cellular connection is intended to act as the primary WAN interface, all other WAN interfaces must be assigned a priority higher than `20000 + <primary WAN priority>`. For example, if the cellular interface (`ppp0`) uses a priority of 500, the other WAN interfaces (`eth1`, `end1`, etc.) should be configured with a priority greater than 20500.
+
+The main limitation of this approach is that the failover mechanism will not switch back to the secondary WAN interfaces when the cellular connection lacks global connectivity.
+
+### Cellular connection as backup WAN interface
+If the cellular connection is used as a backup WAN interface, priorities can be configured as in normal operation. The modem interface will retain a high route metric and will only be used as a fallback when the primary connection becomes unavailable.

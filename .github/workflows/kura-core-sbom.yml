@@ -15,12 +15,12 @@ on:
     types:
       - completed
 
+# Product specific settings
 env:
   JAVA_VERSION: '17' # java version used by the product
   JAVA_DISTRO: 'temurin' # java distro used by the product
-  NODE_VERSION: "20.x"
-  REGISTRY_URL: "https://registry.npmjs.org"
-  PRODUCT_PATH: "./kura"
+  PRODUCT_PATH: "kura" # path within project repository for SBOM source
+  PLUGIN_VERSION: '2.9.1' # cyclonedx-maven-plugin version to use
   WORKFLOW_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
   INPUT_TARGET_BRANCH: ${{ github.event.inputs.target_branch }}
   EVENT_NAME: ${{ github.event_name }}
@@ -31,12 +31,11 @@ permissions:
 
 jobs:
   generate-sbom:
-    name: Generate SBOM
-    runs-on: ubuntu-22.04
+    name: Generate Kura core SBOM
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     outputs:
-      project-version: ${{ steps.version.outputs.PROJECT_VERSION }}
-    permissions:
-      packages: read
+      project-version: ${{ steps.version.outputs.PROJECT_VERSION }} # required for DependencyTrack upload
     steps:
       - name: Set checkout ref
         id: set-checkout-ref
@@ -69,55 +68,15 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRO }}
 
-      - name: Build target platform
+      - name: Generate sbom
         run: |
-          mvn -f target-platform/pom.xml clean install
-
-      - name: Build Kura core
-        run: |
-          mvn -f kura/pom.xml clean install -Dmaven.test.skip=true
-
-      - name: Get version
-        id: get-version
-        run: "echo \"resolved-version=\
-          $(mvn
-            --file ./kura/pom.xml
-            -Dexec.executable=echo
-            -Dexec.args='${project.version}'
-            --quiet exec:exec --non-recursive
-          )\" >> \"${GITHUB_OUTPUT}\""
-        shell: bash
-
-      - name: Setup Node SDK
-        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          registry-url: ${{ env.REGISTRY_URL }}
-
-      - name: Install cdxgen
-        run: |
-          npm install -g @cyclonedx/cdxgen
-
-      - name: Generate SBOM
-        working-directory: ${{ env.PRODUCT_PATH }}
-        run: |
-          FETCH_LICENSE=1 CDXGEN_DEBUG_MODE=debug cdxgen \
-            -r -o ./bom.json \
-            -t jar \
-            --exclude "**/test/**" \
-            --exclude "**/target-definition/**" \
-            --exclude "**/target/**" \
-            --exclude "**/distrib/**" \
-            --filter "kura" \
-            --project-version "${{ steps.get-version.outputs.resolved-version }}" \
-            --project-name "kura-core" \
-            --deep
+          mvn org.cyclonedx:cyclonedx-maven-plugin:${{ env.PLUGIN_VERSION }}:makeAggregateBom -DprojectType=framework -DexcludeArtifactId=target-definition,emulator,distrib,test,tools,kura-addon-archetype,kura-bom -f ${{ env.PRODUCT_PATH }}/pom.xml
 
       - name: Extract product version
-        id: version
+        id: get-version
         shell: bash
         run: |
-          VERSION="$(jq -r '.metadata.component.version' < ./${{ env.PRODUCT_PATH }}/bom.json)"
+          VERSION="$(jq -r '.metadata.component.version' < ./${{ env.PRODUCT_PATH }}/target/bom.json)"
 
           # Substitute "-SNAPSHOT" suffix with "@dev" if present
           VERSION="${VERSION/-SNAPSHOT/@dev}"

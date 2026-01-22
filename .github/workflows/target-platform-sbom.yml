@@ -19,7 +19,8 @@ on:
 env:
   JAVA_VERSION: '17' # java version used by the product
   JAVA_DISTRO: 'temurin' # java distro used by the product
-  PRODUCT_PATH: 'target-platform/target-platform-bom' # path within project repository for SBOM source
+  PRODUCT_PATH: 'target-platform' # path within project repository for SBOM source
+  PLUGIN_VERSION: '2.9.1' # cyclonedx-maven-plugin version to use
   WORKFLOW_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
   INPUT_TARGET_BRANCH: ${{ github.event.inputs.target_branch }}
   EVENT_NAME: ${{ github.event_name }}
@@ -30,6 +31,7 @@ permissions:
 
 jobs:
   generate-sbom:
+    name: Generate Kura target platform SBOM
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     outputs:
@@ -68,10 +70,10 @@ jobs:
 
       - name: Generate sbom
         run: |
-          mvn -f target-platform/pom.xml clean install
+          mvn org.cyclonedx:cyclonedx-maven-plugin:${{ env.PLUGIN_VERSION }}:makeAggregateBom -DprojectType=framework -f ${{ env.PRODUCT_PATH }}/pom.xml
 
       - name: Extract product version
-        id: version
+        id: get-version
         shell: bash
         run: |
           VERSION="$(jq -r '.metadata.component.version' < ./${{ env.PRODUCT_PATH }}/target/bom.json)"

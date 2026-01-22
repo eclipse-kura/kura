@@ -36,22 +36,17 @@ The **Wireless** tab contains the following configuration parameters:
     - WEP: 64-bit or 128-bit encryption key
     - WPA/WPA2: pre-shared key
 
-- **Pairwise Ciphers**: lists accepted pairwise (unicast) ciphers for WPA/WPA2.
-    - In _Access Point_ mode, this option is enabled only when WPA or WPA2 security is selected.
-    - In _Station_ mode,
-        - CCMP (AES-based encryption mode with strong security)
-        - TKIP (Temporal Key Integrity Protocol)
-        - CCMP and TKIP
+!!! warning
+    When the password is recovered from the snapshot configuration, it is not shown in the form, but replaced with the `Placeholder` text. To change the password, simply click on the textbox and enter a new one in the field.
+    It is possible to click on the eye icon to show/hide the password.
+
+- **Pairwise Ciphers**: lists accepted pairwise (unicast) ciphers for WPA/WPA2. The available options are:
+    - CCMP (AES-based encryption mode with strong security)
+    - TKIP (Temporal Key Integrity Protocol)
+    - CCMP and TKIP
 
 !!! warning
     The TKIP cipher is not compatible with WPA2 wireless security. Use it only with WPA.
-
-- **Group Ciphers**: lists accepted group (broadcast/multicast) ciphers for WPA/WPA2.
-    - In _Access Point_ mode, this option is disabled.
-    - In _Station_ mode,
-        - CCMP (AES-based encryption mode with strong security)
-        - TKIP (Temporal Key Integrity Protocol)
-        - CCMP and TKIP
 
 - **Ignore Broadcast SSID**: operates as follows if set to _true_:
     - In _Access Point_ mode, sends an empty SSID in beacons and ignores probe request frames that do not specify full SSID.
@@ -65,9 +60,9 @@ The **Wireless** tab contains the following configuration parameters:
 
 ## Wi-Fi Station Mode Configuration
 
-In addition to the options described above, the **Wireless** configuration display the **Access Point Scan** button that help to configure Wi-Fi in the _Station_ mode.
+In addition to the options described above, the **Wireless** configuration displays the controls that help to configure Wi-Fi in the _Station_ mode.
 
-- **Access Point Scan**: clicking this button triggers access point scan operations. Upon a successful scan, a table containing access points within range is presented. This table contains the following information:
+- **Access Point Scan**: the button under *Network Name* triggers access point scan operations. Upon a successful scan, a table containing access points within range is presented. This table contains the following information:
     - SSID
     - MAC Address
     - Signal Strength (in dBm)
@@ -76,6 +71,23 @@ In addition to the options described above, the **Wireless** configuration displ
     - Security
 
     If you select one of these access points, respective wireless controls (i.e., _Network Name_, _Wireless Security_, and _Channel_) are filled with information obtained during the scan operation. The _Force Wireless Network Scan_ button triggers a manual scan for available access points.
+
+- **Group Ciphers**: lists accepted group (broadcast/multicast) ciphers for WPA/WPA2. The available options are:
+    - CCMP (AES-based encryption mode with strong security)
+    - TKIP (Temporal Key Integrity Protocol)
+    - CCMP and TKIP
+
+- **Bgscan module**: specifies the background scan module to use. The available options are:
+    - none: disables background scanning.
+    - simple: a simple signal strength-based background scan module.
+    - learn: a background scan module that learns the access points in the environment.
+
+    If Simple or Learn is selected, additional configuration parameters are displayed:
+    - **Bgscan short interval**: specifies the minumum interval (in maximum) between background scans.
+    - **Bgscan long interval**: specifies the maximum interval (in maximum) between background scans (must be higher than the short interval).
+    - **Bgscan signal threshold**: specifies the bgscan signal threshold (in dBm).
+    
+![WiFi Station Mode Configuration](./images/station-mode-wireless.png)
 
 ## Notes about WPA3 security
 

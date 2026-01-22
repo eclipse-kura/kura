@@ -4696,16 +4696,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>WPA/WPA2: pre-shared key</li>
 </ul>
 </li>
-<li>
-<p><strong>Pairwise Ciphers</strong>: lists accepted pairwise (unicast) ciphers for WPA/WPA2.</p>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When the password is recovered from the snapshot configuration, it is not shown in the form, but replaced with the <code>Placeholder</code> text. To change the password, simply click on the textbox and enter a new one in the field.
+It is possible to click on the eye icon to show/hide the password.</p>
+</div>
 <ul>
-<li>In <em>Access Point</em> mode, this option is enabled only when WPA or WPA2 security is selected.</li>
-<li>In <em>Station</em> mode,<ul>
+<li><strong>Pairwise Ciphers</strong>: lists accepted pairwise (unicast) ciphers for WPA/WPA2. The available options are:<ul>
 <li>CCMP (AES-based encryption mode with strong security)</li>
 <li>TKIP (Temporal Key Integrity Protocol)</li>
 <li>CCMP and TKIP</li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -4714,18 +4715,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>The TKIP cipher is not compatible with WPA2 wireless security. Use it only with WPA.</p>
 </div>
 <ul>
-<li>
-<p><strong>Group Ciphers</strong>: lists accepted group (broadcast/multicast) ciphers for WPA/WPA2.</p>
-<ul>
-<li>In <em>Access Point</em> mode, this option is disabled.</li>
-<li>In <em>Station</em> mode,<ul>
-<li>CCMP (AES-based encryption mode with strong security)</li>
-<li>TKIP (Temporal Key Integrity Protocol)</li>
-<li>CCMP and TKIP</li>
-</ul>
-</li>
-</ul>
-</li>
 <li>
 <p><strong>Ignore Broadcast SSID</strong>: operates as follows if set to <em>true</em>:</p>
 <ul>
@@ -4743,10 +4732,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 <p><img alt="WiFi Configuration" src="../images/wifi-configuration.png" /></p>
 <h2 id="wi-fi-station-mode-configuration">Wi-Fi Station Mode Configuration</h2>
-<p>In addition to the options described above, the <strong>Wireless</strong> configuration display the <strong>Access Point Scan</strong> button that help to configure Wi-Fi in the <em>Station</em> mode.</p>
+<p>In addition to the options described above, the <strong>Wireless</strong> configuration displays the controls that help to configure Wi-Fi in the <em>Station</em> mode.</p>
 <ul>
 <li>
-<p><strong>Access Point Scan</strong>: clicking this button triggers access point scan operations. Upon a successful scan, a table containing access points within range is presented. This table contains the following information:</p>
+<p><strong>Access Point Scan</strong>: the button under <em>Network Name</em> triggers access point scan operations. Upon a successful scan, a table containing access points within range is presented. This table contains the following information:</p>
 <ul>
 <li>SSID</li>
 <li>MAC Address</li>
@@ -4757,7 +4746,28 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 <p>If you select one of these access points, respective wireless controls (i.e., <em>Network Name</em>, <em>Wireless Security</em>, and <em>Channel</em>) are filled with information obtained during the scan operation. The <em>Force Wireless Network Scan</em> button triggers a manual scan for available access points.</p>
 </li>
+<li>
+<p><strong>Group Ciphers</strong>: lists accepted group (broadcast/multicast) ciphers for WPA/WPA2. The available options are:</p>
+<ul>
+<li>CCMP (AES-based encryption mode with strong security)</li>
+<li>TKIP (Temporal Key Integrity Protocol)</li>
+<li>CCMP and TKIP</li>
 </ul>
+</li>
+<li>
+<p><strong>Bgscan module</strong>: specifies the background scan module to use. The available options are:</p>
+<ul>
+<li>none: disables background scanning.</li>
+<li>simple: a simple signal strength-based background scan module.</li>
+<li>learn: a background scan module that learns the access points in the environment.</li>
+</ul>
+<p>If Simple or Learn is selected, additional configuration parameters are displayed:
+- <strong>Bgscan short interval</strong>: specifies the minumum interval (in maximum) between background scans.
+- <strong>Bgscan long interval</strong>: specifies the maximum interval (in maximum) between background scans (must be higher than the short interval).
+- <strong>Bgscan signal threshold</strong>: specifies the bgscan signal threshold (in dBm).</p>
+</li>
+</ul>
+<p><img alt="WiFi Station Mode Configuration" src="../images/station-mode-wireless.png" /></p>
 <h2 id="notes-about-wpa3-security">Notes about WPA3 security</h2>
 <p>The support to WPA3 security feature is experimental and disabled by default. Before using it, update your system with the latest changes and check that the WiFi module installed on you device has the latest firmware. To check if an interface supports the new WPA3 security, run the following command:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>iw phy | grep -i sae

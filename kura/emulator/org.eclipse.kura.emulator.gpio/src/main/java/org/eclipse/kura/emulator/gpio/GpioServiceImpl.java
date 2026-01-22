@@ -1,21 +1,25 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
- *******************************************************************************/
+ ******************************************************************************/
 package org.eclipse.kura.emulator.gpio;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.gpio.GPIOService;
+import org.eclipse.kura.gpio.KuraGPIODescription;
 import org.eclipse.kura.gpio.KuraGPIODirection;
 import org.eclipse.kura.gpio.KuraGPIOMode;
 import org.eclipse.kura.gpio.KuraGPIOPin;
@@ -28,7 +32,8 @@ public class GpioServiceImpl implements GPIOService {
 
     private static final Logger logger = LoggerFactory.getLogger(GpioServiceImpl.class);
 
-    private final HashMap<Integer, String> pins = new HashMap<Integer, String>();
+    private final HashMap<Integer, String> pins = new HashMap<>();
+    private final List<KuraGPIODescription> pinDescriptions = new ArrayList<>();
 
     protected void activate(ComponentContext componentContext) {
         logger.debug("activating emulated GPIOService");
@@ -62,13 +67,42 @@ public class GpioServiceImpl implements GPIOService {
 
     @Override
     public Map<Integer, String> getAvailablePins() {
-        pins.clear();
+        this.pins.clear();
 
         for (int i = 1; i < 11; i++) {
-            pins.put(i, "Pin#" + String.valueOf(i));
+            this.pins.put(i, "Pin#" + i);
         }
 
-        return pins;
+        return this.pins;
+    }
+
+    @Override
+    public List<KuraGPIOPin> getPins(Map<String, String> description) {
+        return Arrays.asList(new EmulatedPin(description.get("name")));
+    }
+
+    @Override
+    public List<KuraGPIOPin> getPins(Map<String, String> description, KuraGPIODirection direction, KuraGPIOMode mode,
+            KuraGPIOTrigger trigger) {
+        return Arrays.asList(new EmulatedPin(description.get("name"), direction, mode, trigger));
+    }
+
+    @Override
+    public List<KuraGPIODescription> getAvailablePinDescriptions() {
+        this.pinDescriptions.clear();
+        for (int chip = 0; chip < 2; chip++) {
+            for (int line = 0; line < 5; line++) {
+                String name = "GPIOchip" + chip * 1000 + line;
+                Map<String, String> properties = new HashMap<>();
+                properties.put(KuraGPIODescription.DISPLAY_NAME_PROPERTY, name);
+                properties.put("controller", String.valueOf(chip));
+                properties.put("line", String.valueOf(line));
+                properties.put(KuraGPIODescription.DISPLAY_NAME_PROPERTY, name + ":" + chip + ":" + line);
+                KuraGPIODescription desc = new KuraGPIODescription(properties);
+                this.pinDescriptions.add(desc);
+            }
+        }
+        return this.pinDescriptions;
     }
 
 }

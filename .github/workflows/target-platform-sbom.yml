@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     outputs:
-      project-version: ${{ steps.version.outputs.PROJECT_VERSION }} # required for DependencyTrack upload
+      project-version: ${{ steps.get-version.outputs.PROJECT_VERSION }} # required for DependencyTrack upload
     steps:
       - name: Set checkout ref
         id: set-checkout-ref

@@ -150,6 +150,7 @@ public interface SystemService {
      * @since 3.0
      */
     public static final String KEY_INTERNET_CONNECTION_STATUS_CHECK_HOST = "kura.internet.check.hostname";
+
     /**
      * @since 3.0
      */
@@ -657,7 +658,7 @@ public interface SystemService {
 
     /**
      * Indicates whether or not the device is connected to the internet and the status.
-     * The status is updated every 30 second and the verification process uses an ICMP request.
+     * The status is updated every 30 seconds and the verification process uses an ICMP request.
      * 
      * @since 3.0
      * @return the {@link InternetConnectionStatus}

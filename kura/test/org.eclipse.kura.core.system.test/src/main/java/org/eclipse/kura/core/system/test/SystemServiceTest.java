@@ -332,4 +332,15 @@ public class SystemServiceTest {
         assertEquals(InternetConnectionStatus.UNAVAILABLE, systemService.getInternetConnectionStatus());
     }
 
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void shouldGetDefaultInternetConnectionStatusCheckHost() {
+        assertEquals("eclipse.org", systemService.getInternetConnectionStatusCheckHost());
+    }
+
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void shouldGetDefaultInternetConnectionStatusCheckIp() {
+        assertEquals("198.41.30.198", systemService.getInternetConnectionStatusCheckIp());
+    }
 }

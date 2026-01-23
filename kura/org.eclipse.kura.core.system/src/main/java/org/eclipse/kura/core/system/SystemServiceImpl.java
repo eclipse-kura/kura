@@ -53,7 +53,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.executor.Command;
@@ -73,7 +72,11 @@ import org.slf4j.LoggerFactory;
 
 public class SystemServiceImpl extends SuperSystemService implements SystemService {
 
-    private ScheduledExecutorService internetCheckerExecutor = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService internetCheckerExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+        final Thread result = Executors.defaultThreadFactory().newThread(r);
+        result.setName("internet-status-checker");
+        return result;
+    });
 
     private static final String DEFAULT_INTERNET_CONNECTION_STATUS_CHECK_IP = "198.41.30.198";
     private static final String DEFAULT_INTERNET_CONNECTION_STATUS_CHECK_HOST = "eclipse.org";
@@ -1242,8 +1245,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     private void parseSystemPackages(List<SystemResourceInfo> packagesInfo, CommandStatus status,
             SystemResourceType type) {
-        String[] packages = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8)
-                .split("\n");
+        String[] packages = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(),
+                StandardCharsets.UTF_8).split("\n");
         Arrays.asList(packages).stream().forEach(p -> {
             String[] fields = p.split("\\s+"); // this works for dpkg and rpm where separator for version and name is a
                                                // sequence of spaces
@@ -1307,8 +1310,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         CommandStatus status = this.executorService.execute(command);
         if (logger.isDebugEnabled()) {
             logger.debug("execute command {} :: exited with code - {}", command, status.getExitStatus().getExitCode());
-            logger.debug("execute stderr {}", new String(err.toByteArray(), Charsets.UTF_8));
-            logger.debug("execute stdout {}", new String(out.toByteArray(), Charsets.UTF_8));
+            logger.debug("execute stderr {}", new String(err.toByteArray(), StandardCharsets.UTF_8));
+            logger.debug("execute stdout {}", new String(out.toByteArray(), StandardCharsets.UTF_8));
         }
         return status;
     }
@@ -1574,6 +1577,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     }
 
     private void checkInternetTask() {
+        if (this.executorService == null) {
+            return;
+        }
         CommandStatus status = this.executorService
                 .execute(new Command(new String[] { "ping", "-c", "1", getInternetConnectionStatusCheckHost() }));
         if (status.getExitStatus().isSuccessful()) {

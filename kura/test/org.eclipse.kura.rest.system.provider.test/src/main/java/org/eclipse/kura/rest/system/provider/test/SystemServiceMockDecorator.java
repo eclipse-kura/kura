@@ -24,6 +24,7 @@ import java.util.Properties;
 
 import org.eclipse.kura.system.ExtendedProperties;
 import org.eclipse.kura.system.ExtendedPropertyGroup;
+import org.eclipse.kura.system.InternetConnectionStatus;
 import org.eclipse.kura.system.SystemService;
 
 public class SystemServiceMockDecorator {
@@ -122,7 +123,10 @@ public class SystemServiceMockDecorator {
         when(service.isLegacyBluetoothBeaconScan()).thenReturn(false);
         when(service.isLegacyPPPLoggingEnabled()).thenReturn(false);
         when(service.getKuraWebEnabled()).thenReturn(PROPERTIES_FALSE_STRING_VALUE);
-        
+        when(service.getInternetConnectionStatus()).thenReturn(InternetConnectionStatus.UNAVAILABLE);
+        when(service.getInternetConnectionStatusCheckHost()).thenReturn(PROPERTIES_VALUE);
+        when(service.getInternetConnectionStatusCheckIp()).thenReturn(PROPERTIES_VALUE);
+
         Properties kuraProperties = new Properties();
         kuraProperties.put(SystemService.KEY_KURA_HAVE_NET_ADMIN, false);
         when(service.getProperties()).thenReturn(kuraProperties);
@@ -130,7 +134,7 @@ public class SystemServiceMockDecorator {
 
     private static void initExtendedProperties(SystemService service) {
         ExtendedProperties extendedProperties = mock(ExtendedProperties.class);
-        
+
         List<ExtendedPropertyGroup> groups = new ArrayList<>();
         groups.add(createExtendedPropertyGroup("group1"));
         groups.add(createExtendedPropertyGroup("group2"));
@@ -218,7 +222,7 @@ public class SystemServiceMockDecorator {
         when(service.getKuraWebEnabled()).thenThrow(RuntimeException.class);
 
         when(service.getExtendedProperties()).thenThrow(RuntimeException.class);
-        
+
         when(service.getProperties()).thenThrow(RuntimeException.class);
     }
 

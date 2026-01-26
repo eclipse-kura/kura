@@ -49,6 +49,7 @@ import java.util.Properties;
 import java.util.StringJoiner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
@@ -107,6 +108,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     private AtomicReference<InternetConnectionStatus> currentInternetStatus = new AtomicReference<>(
             InternetConnectionStatus.UNAVAILABLE);
+
+    private ScheduledFuture<?> currentTask;
 
     public void setExecutorService(CommandExecutorService executorService) {
         this.executorService = executorService;
@@ -502,8 +505,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             throw new ComponentException("Error loading default properties", e);
         }
 
-        internetCheckerExecutor.scheduleAtFixedRate(this::checkInternetTask, 0, INTERNET_CHECK_TIME_INTERVAL,
-                TimeUnit.MILLISECONDS);
+        currentTask = internetCheckerExecutor.scheduleAtFixedRate(this::checkInternetTask, 5000,
+                INTERNET_CHECK_TIME_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
     private void loadKuraCustom(Properties kuraCustomProps, String kuraCustomConfig) {
@@ -547,7 +550,20 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     protected void deactivate(ComponentContext componentContext) {
         this.componentContext = null;
         this.kuraProperties = null;
-        this.internetCheckerExecutor.shutdownNow();
+
+        if (this.currentTask != null) {
+            this.currentTask.cancel(true);
+        }
+
+        if (this.internetCheckerExecutor != null) {
+            this.internetCheckerExecutor.shutdown();
+            try {
+                this.internetCheckerExecutor.awaitTermination(5000, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                currentThread().interrupt();
+                this.internetCheckerExecutor.shutdownNow();
+            }
+        }
     }
 
     public void updated(Map<String, Object> properties) {
@@ -1580,22 +1596,26 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         if (this.executorService == null) {
             return;
         }
-        CommandStatus status = this.executorService
-                .execute(new Command(new String[] { "ping", "-c", "1", getInternetConnectionStatusCheckHost() }));
-        if (status.getExitStatus().isSuccessful()) {
-            this.currentInternetStatus.set(InternetConnectionStatus.FULL);
-            return;
+        try {
+            CommandStatus status = this.executorService
+                    .execute(new Command(new String[] { "ping", "-c", "1", getInternetConnectionStatusCheckHost() }));
+            if (status.getExitStatus().isSuccessful()) {
+                this.currentInternetStatus.set(InternetConnectionStatus.FULL);
+                return;
+            }
+
+            status = this.executorService
+                    .execute(new Command(new String[] { "ping", "-c", "1", getInternetConnectionStatusCheckIp() }));
+
+            if (status.getExitStatus().isSuccessful()) {
+                this.currentInternetStatus.set(InternetConnectionStatus.IP_ONLY);
+                return;
+            }
+
+            this.currentInternetStatus.set(InternetConnectionStatus.UNAVAILABLE);
+        } catch (Exception e) {
+            logger.error("Error while checking internet connection status", e);
         }
-
-        status = this.executorService
-                .execute(new Command(new String[] { "ping", "-c", "1", getInternetConnectionStatusCheckIp() }));
-
-        if (status.getExitStatus().isSuccessful()) {
-            this.currentInternetStatus.set(InternetConnectionStatus.IP_ONLY);
-            return;
-        }
-
-        this.currentInternetStatus.set(InternetConnectionStatus.UNAVAILABLE);
     }
 
 }

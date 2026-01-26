@@ -675,7 +675,7 @@ public interface SystemService {
     public String getInternetConnectionStatusCheckIp();
 
     /**
-     * Return the hostname used to check the internet connection. Must support ICMP protocol.
+     * Returns the hostname used to check the internet connection. Must support ICMP protocol.
      * 
      * @since 3.0
      * @return the hostname address used to check the internet connection. Default value is eclipse.org

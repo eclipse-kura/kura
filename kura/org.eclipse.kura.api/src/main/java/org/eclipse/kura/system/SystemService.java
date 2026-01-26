@@ -669,8 +669,9 @@ public interface SystemService {
      * Return the inet address used to check the internet connection. Must support ICMP protocol.
      * 
      * @since 3.0
-     * @return the inet address used to check the internet connection. Default value is 198.41.30.198 (eclipse.org ip
-     *         address at 2026-01-22)
+     * @return the inet address used to check the internet connection. Default value is 198.41.30.198 (current
+     *         eclipse.org IP address, which may change over time; this value should be updated if the eclipse.org IP
+     *         changes)
      */
     public String getInternetConnectionStatusCheckIp();
 

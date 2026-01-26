@@ -195,7 +195,7 @@
         </AD>
         
         <AD id="container.permissions" name="Container Permissions"
-            description="Comma-separated list of permissions to grant to the container when identity integration is enabled. Example: rest.asset,rest.configuration" 
+            description="Comma-separated list of permissions to grant to the container when identity integration is enabled. Example: rest.assets,rest.configuration" 
             type="String" cardinality="1" required="false" default="" />
             
     </OCD>

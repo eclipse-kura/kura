@@ -152,7 +152,8 @@ public interface SystemService {
     public static final String KEY_INTERNET_CONNECTION_STATUS_CHECK_HOST = "kura.internet.check.hostname";
 
     /**
-     * @since 3.0
+     * @since 3.0 Address in a format according to system IP version available (e.g. 198.41.30.198 in IPv4 or
+     *        ::ffff:c629:1ec6 in IPv6)
      */
     public static final String KEY_INTERNET_CONNECTION_STATUS_CHECK_IP = "kura.internet.check.ip";
 

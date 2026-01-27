@@ -29,6 +29,7 @@ import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.StandardProtocolFamily;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
@@ -1599,17 +1600,15 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             return;
         }
         try {
-            CommandStatus status = this.executorService
-                    .execute(new Command(new String[] { "ping", "-c", "1", getInternetConnectionStatusCheckHost() }));
-            if (status.getExitStatus().isSuccessful()) {
+
+            if (isPingable(StandardProtocolFamily.INET, getInternetConnectionStatusCheckHost())
+                    || isPingable(StandardProtocolFamily.INET6, getInternetConnectionStatusCheckHost())) {
                 this.currentInternetStatus.set(InternetConnectionStatus.FULL);
                 return;
             }
 
-            status = this.executorService
-                    .execute(new Command(new String[] { "ping", "-c", "1", getInternetConnectionStatusCheckIp() }));
-
-            if (status.getExitStatus().isSuccessful()) {
+            if (isPingable(StandardProtocolFamily.INET, getInternetConnectionStatusCheckIp())
+                    || isPingable(StandardProtocolFamily.INET6, getInternetConnectionStatusCheckIp())) {
                 this.currentInternetStatus.set(InternetConnectionStatus.IP_ONLY);
                 return;
             }
@@ -1618,6 +1617,27 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         } catch (Exception e) {
             logger.error("Error while checking internet connection status", e);
         }
+    }
+
+    private boolean isPingable(StandardProtocolFamily protocol, String address) {
+        String version;
+
+        switch (protocol) {
+        case INET:
+            version = "-4";
+            break;
+
+        case INET6:
+            version = "-6";
+            break;
+        default:
+            throw new IllegalArgumentException("Unexpected protocol: " + protocol);
+        }
+
+        CommandStatus status = this.executorService
+                .execute(new Command(new String[] { "ping", version, address, "-c", "1" }));
+
+        return status.getExitStatus().isSuccessful();
     }
 
 }

@@ -73,11 +73,7 @@ import org.slf4j.LoggerFactory;
 
 public class SystemServiceImpl extends SuperSystemService implements SystemService {
 
-    private ScheduledExecutorService internetCheckerExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
-        final Thread result = Executors.defaultThreadFactory().newThread(r);
-        result.setName("internet-status-checker");
-        return result;
-    });
+    private ScheduledExecutorService internetCheckerExecutor;
 
     private static final String DEFAULT_INTERNET_CONNECTION_STATUS_CHECK_IP = "198.41.30.198";
     private static final String DEFAULT_INTERNET_CONNECTION_STATUS_CHECK_HOST = "eclipse.org";
@@ -505,7 +501,13 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             throw new ComponentException("Error loading default properties", e);
         }
 
-        currentTask = internetCheckerExecutor.scheduleAtFixedRate(this::checkInternetTask, 5000,
+        this.internetCheckerExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+            final Thread result = Executors.defaultThreadFactory().newThread(r);
+            result.setName("internet-status-checker");
+            return result;
+        });
+
+        this.currentTask = internetCheckerExecutor.scheduleAtFixedRate(this::checkInternetTask, 5000,
                 INTERNET_CHECK_TIME_INTERVAL, TimeUnit.MILLISECONDS);
     }
 

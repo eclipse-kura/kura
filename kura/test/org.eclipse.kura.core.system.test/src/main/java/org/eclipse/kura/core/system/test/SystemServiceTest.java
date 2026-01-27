@@ -23,6 +23,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -43,6 +45,7 @@ public class SystemServiceTest {
     private static CommandExecutorService executorService = null;
     private static CountDownLatch dependencyLatch = new CountDownLatch(2);    // initialize with number of dependencies
     private boolean onCloudbees = false;
+    private InternetConnectionStatus currentInternetStatus;
 
     @BeforeClass
     public static void setUp() {
@@ -328,8 +331,12 @@ public class SystemServiceTest {
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
-    public void shouldNotBeConnectedToInternet() {
-        assertEquals(InternetConnectionStatus.UNAVAILABLE, systemService.getInternetConnectionStatus());
+    public void shouldNotBeConnectedToInternetOnCi() {
+        givenFirstCheckInternetExecutorRun();
+
+        whenInternetConnectionStatusIsChecked();
+
+        thenInternetConnectionStatusIs(isCI() ? InternetConnectionStatus.UNAVAILABLE : InternetConnectionStatus.FULL);
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
@@ -343,4 +350,26 @@ public class SystemServiceTest {
     public void shouldGetDefaultInternetConnectionStatusCheckIp() {
         assertEquals("198.41.30.198", systemService.getInternetConnectionStatusCheckIp());
     }
+
+    private boolean isCI() {
+        return Files.exists(Path.of("/tmp/isJenkins.txt"));
+    }
+
+    private void givenFirstCheckInternetExecutorRun() {
+        try {
+            Thread.sleep(6000l);
+        } catch (InterruptedException e) {
+            fail(e.getMessage());
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void whenInternetConnectionStatusIsChecked() {
+        this.currentInternetStatus = systemService.getInternetConnectionStatus();
+    }
+
+    private void thenInternetConnectionStatusIs(InternetConnectionStatus status) {
+        assertEquals(status, systemService.getInternetConnectionStatus());
+    }
+
 }

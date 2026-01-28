@@ -108,7 +108,6 @@
         <kura.basedir>${project.basedir}</kura.basedir>
         <kura.build.version>${maven.build.timestamp}</kura.build.version>
         <bnd.baseline.continueOnError>false</bnd.baseline.continueOnError>
-        <kura.skip.can>true</kura.skip.can>
         <check.plugins.exist.remote>false</check.plugins.exist.remote>
         <kura.addons.url>https://artifactory.dev.everyware.io/artifactory/kura-addons</kura.addons.url>
 
@@ -164,7 +163,6 @@
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-codec.version>1.18.0</commons-codec.version>
         <httpclient5.version>5.5</httpclient5.version>
-        <libsocket-can-osgi.version>2.0.0-SNAPSHOT</libsocket-can-osgi.version>
     </properties>
 
     <distributionManagement>
@@ -428,19 +426,13 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>libsocket-can-osgi</artifactId>
-                <version>${libsocket-can-osgi.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>*</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
 
             <!-- Kura BOM -->
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.kura.ai.triton.server</artifactId>
+                <version>2.0.0-SNAPSHOT</version>
+            </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.api</artifactId>

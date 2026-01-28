@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+#  Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
 #
 #  This program and the accompanying materials are made
 #  available under the terms of the Eclipse Public License 2.0
@@ -86,8 +86,6 @@ then
     BOARD="raspberry"
     echo "Customizing installation for Raspberry PI"
 fi
-
-mv "/opt/eclipse/kura/install/jdk.dio.properties-${BOARD}" "/opt/eclipse/kura/framework/jdk.dio.properties"
 
 install_snapshot
 customize_kura_properties "${BOARD}"

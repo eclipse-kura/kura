@@ -97,8 +97,7 @@ KURA_CMD="${KURA_LAUNCH_COMMAND} -Xms${kura.mem.size} -Xmx${kura.mem.size} \
     -Ddpa.configuration=\${DIR}/packages/dpa.properties \
     -Dlog4j.configurationFile=file:\${DIR}/log4j/log4j.xml \
     -Dlog4j2.disable.jmx=true \
-    -Djava.security.policy=\${DIR}/framework/jdk.dio.policy \
-    -Djdk.dio.registry=\${DIR}/framework/jdk.dio.properties \
+    -Djava.security.policy=\${DIR}/framework/java.policy \
     -Djdk.tls.trustNameService=true \
     -Declipse.consoleLog=true \
     -jar \${DIR}/plugins/org.eclipse.equinox.launcher-${org.eclipse.equinox.launcher.version}.jar \

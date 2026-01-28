@@ -726,21 +726,6 @@
                                 </includeArtifactIds>
                             </configuration>
                         </execution>
-                        <execution>
-                            <id>linux-plugins-5s</id>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>copy-dependencies</goal>
-                            </goals>
-                            <configuration>
-                                <outputDirectory>${project.build.directory}/pkg/plugins/5s</outputDirectory>
-                                <skip>${exclude.linux.plugins}</skip>
-                                <includeArtifactIds>
-                                    <!-- gpio-plugins -->
-                                    org.eclipse.kura.linux.gpio
-                                </includeArtifactIds>
-                            </configuration>
-                        </execution>
                     </executions>
                 </plugin>
 

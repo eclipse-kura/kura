@@ -69,16 +69,6 @@
 
     <profiles>
         <profile>
-            <id>can</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <!-- <module>org.eclipse.kura.protocol.can.test</module> -->
-            </modules>
-        </profile>
-
-        <profile>
             <id>test-debug</id>
             <build>
                 <pluginManagement>
@@ -503,11 +493,6 @@
                             </bundle>
                             <bundle>
                                 <id>org.eclipse.kura.emulator.usb</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
-                                <id>org.eclipse.kura.protocol.can</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>

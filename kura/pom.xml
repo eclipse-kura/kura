@@ -443,11 +443,6 @@
             <!-- Kura BOM -->
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.ai.triton.server</artifactId>
-                <version>2.0.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.api</artifactId>
                 <version>3.0.0-SNAPSHOT</version>
             </dependency>
@@ -810,18 +805,6 @@
     </dependencyManagement>
 
     <profiles>
-        <profile>
-            <id>can</id>
-            <activation>
-                <property>
-                    <name>kura.skip.can</name>
-                    <value>false</value>
-                </property>
-            </activation>
-            <modules>
-                <module>org.eclipse.kura.protocol.can</module>
-            </modules>
-        </profile>
         <profile>
             <id>javadocs</id>
             <activation>

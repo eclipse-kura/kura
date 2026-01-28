@@ -45,8 +45,6 @@
         <kura.basedir>${project.basedir}</kura.basedir>
         <kura.build.version>${maven.build.timestamp}</kura.build.version>
 
-        <kura.skip.can>true</kura.skip.can>
-
         <kura.install.dir>/opt/eclipse</kura.install.dir>
         <kura.symlink>kura</kura.symlink>
 

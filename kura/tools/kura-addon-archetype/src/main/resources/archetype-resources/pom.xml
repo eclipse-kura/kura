@@ -23,23 +23,370 @@
     <version>${version}</version>
     <packaging>pom</packaging>
 
+    <!-- Change this if your metadata is different -->
+    <organization>
+        <name>Eclipse Kura</name>
+        <url>https://eclipse.dev/kura/</url>
+    </organization>
+    <developers>
+        <developer>
+            <name>Eclipse Kura Developers</name>
+            <email>kura-dev@eclipse.org</email>
+            <organization>Eclipse Foundation</organization>
+            <url>https://www.eclipse.org/</url>
+        </developer>
+    </developers>
+    <licenses>
+        <license>
+            <name>Eclipse Public License - v 2.0</name>
+            <url>https://www.eclipse.org/legal/epl-2.0/</url>
+        </license>
+    </licenses>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>21</maven.compiler.release>
+        <tycho.version>4.0.11</tycho.version>
+        <bnd.version>7.1.0</bnd.version>
+    </properties>
+
+    <modules>
+        <module>bom</module>
+        <module>target-definition</module>
+        <module>${package}</module>
+        <module>distrib</module>
+        <module>tests</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>${groupId}</groupId>
+                <artifactId>${artifactId}-bom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- All of the external dependencies that are needed for your bundle -->
+            <!-- If using non-Kura dependencies, try to match the ones that are defined in target platform-->
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>kura</artifactId>
+                <version>${kuraVersion}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>target-platform</artifactId>
+                <version>${kuraVersion}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>kura-releases</id>
+            <name>Eclipse Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+        <repository>
+            <id>kura-snapshots</id>
+            <name>Eclipse Kura Repository - Snapshots</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+        </repository>
+        <repository>
+            <id>kura-addons</id>
+            <name>Kura Addons Maven Repository</name>
+            <url>https://artifactory.dev.everyware.io/artifactory/kura-addons</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>kura-releases</id>
+            <name>Eclipse Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>kura-snapshots</id>
+            <name>Eclipse Kura Repository - Snapshots</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <distributionManagement>
+        <repository>
+            <id>repo.eclipse.org</id>
+            <name>Eclipse Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>repo.eclipse.org</id>
+            <name>Eclipse Kura Repository - Snapshots</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-compiler-plugin</artifactId>
+                    <version>${tycho.version}</version>
+                    <configuration>
+                        <source>17</source>
+                        <target>17</target>
+                        <showDeprecation>true</showDeprecation>
+                        <showWarnings>true</showWarnings>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-maven-plugin</artifactId>
+                    <version>${tycho.version}</version>
+                    <extensions>true</extensions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>target-platform-configuration</artifactId>
+                    <version>${tycho.version}</version>
+                    <configuration>
+                        <target>
+                            <artifact>
+                                <groupId>${groupId}</groupId>
+                                <artifactId>${artifactId}-target-definition</artifactId>
+                                <version>${project.version}</version>
+                            </artifact>
+                        </target>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-packaging-plugin</artifactId>
+                    <version>${tycho.version}</version>
+                    <configuration>
+                        <skipPomGeneration>true</skipPomGeneration>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-source-plugin</artifactId>
+                    <version>${tycho.version}</version>
+                    <executions>
+                        <execution>
+                            <id>plugin-source</id>
+                            <goals>
+                                <goal>plugin-source</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- Used for generating SCR descriptors in the Maven Build, supports M2E
+                Incremental builds as well -->
+                <plugin>
+                    <groupId>biz.aQute.bnd</groupId>
+                    <artifactId>bnd-maven-plugin</artifactId>
+                    <version>${bnd.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>bnd-process</goal>
+                            </goals>
+                            <configuration>
+                                <packagingTypes>eclipse-plugin,eclipse-test-plugin</packagingTypes>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>biz.aQute.bnd</groupId>
+                    <artifactId>bnd-baseline-maven-plugin</artifactId>
+                    <version>${bnd.version}</version>
+                    <configuration>
+                        <failOnMissing>false</failOnMissing>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>baseline</id>
+                            <goals>
+                                <goal>baseline</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.honton.chas</groupId>
+                    <artifactId>exists-maven-plugin</artifactId>
+                    <version>0.0.6</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>remote</goal>
+                            </goals>
+                            <configuration>
+                                <artifact>${project.artifactId}-${project.version}.jar</artifact>
+                                <skipIfSnapshot>true</skipIfSnapshot>
+                                <failIfExists>true</failIfExists>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- This plugin's configuration is used to store Eclipse m2e settings only. It has
+                no influence on the Maven build itself. -->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingFilters>
+                            <lifecycleMappingFilter>
+                                <symbolicName>org.eclipse.m2e.pde.connector</symbolicName>
+                                <versionRange>[2.1.2,)</versionRange>
+                                <packagingTypes>
+                                    <packagingType>eclipse-test-plugin</packagingType>
+                                    <packagingType>eclipse-plugin</packagingType>
+                                    <packagingType>eclipse-feature</packagingType>
+                                </packagingTypes>
+                            </lifecycleMappingFilter>
+                        </lifecycleMappingFilters>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>biz.aQute.bnd</groupId>
+                                        <artifactId>bnd-maven-plugin</artifactId>
+                                        <versionRange>[0.0.0,)</versionRange>
+                                        <goals>
+                                            <goal>bnd-process</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore />
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>flatten-maven-plugin</artifactId>
+                    <version>1.7.3</version>
+                    <configuration>
+                        <updatePomFile>true</updatePomFile>
+                        <flattenMode>oss</flattenMode>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>flatten</id>
+                            <phase>process-resources</phase>
+                            <goals>
+                                <goal>flatten</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>flatten.clean</id>
+                            <phase>clean</phase>
+                            <goals>
+                                <goal>clean</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.6.2</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.eclipse.kura</groupId>
+                            <artifactId>maven-enforcer-rules</artifactId>
+                            <version>1.0.0</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>enforce</id>
+                            <configuration>
+                                <rules>
+                                    <bannedPluginsAdvanced>
+                                        <message>Please use copy-dependencies goal instead of copy</message>
+                                        <bannedPlugins>
+                                            <bannedPlugin>
+                                                <groupId>org.apache.maven.plugins</groupId>
+                                                <artifactId>maven-dependency-plugin</artifactId>
+                                                <goal>copy</goal>
+                                            </bannedPlugin>
+                                        </bannedPlugins>
+                                    </bannedPluginsAdvanced>
+                                </rules>
+                            </configuration>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>target-platform-configuration</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-packaging-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-source-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
+            </plugin>
+            <!-- by default, skip deploy -->
+            <!-- bundles that want to deploy must override this configuration -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 
-    <modules>
-        <module>target-definition</module>
-        <module>bundles</module>
-        <module>distrib</module>
-        <module>tests</module>
-    </modules>
 </project>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
+
     Copyright (c) ${year} Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
@@ -10,6 +11,7 @@
 
     Contributors:
      Eurotech
+
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -19,12 +21,13 @@
 
     <parent>
         <groupId>${groupId}</groupId>
-        <artifactId>${artifactId}.tests</artifactId>
+        <artifactId>${artifactId}-tests</artifactId>
         <version>${version}</version>
     </parent>
 
-    <artifactId>${artifactId}.bundle.test</artifactId>
+    <artifactId>${package}.test</artifactId>
     <packaging>eclipse-test-plugin</packaging>
+    <description>Tests of ${package}</description>
 
     <build>
         <plugins>

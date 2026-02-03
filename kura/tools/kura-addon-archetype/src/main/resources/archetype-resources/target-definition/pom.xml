@@ -21,16 +21,14 @@
 
     <parent>
         <groupId>${groupId}</groupId>
-        <artifactId>${artifactId}.parent</artifactId>
+        <artifactId>${artifactId}</artifactId>
         <version>${version}</version>
-        <relativePath>../bundles/pom.xml</relativePath>
     </parent>
 
     <groupId>${groupId}</groupId>
     <artifactId>${artifactId}-target-definition</artifactId>
-    <version>${version}</version>
     <packaging>eclipse-target-definition</packaging>
-    <name>Target definition for ${artifactId}</name>
+    <description>Target definition for ${artifactId}</description>
 
     <build>
         <plugins>

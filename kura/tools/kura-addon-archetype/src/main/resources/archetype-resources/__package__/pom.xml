@@ -20,17 +20,31 @@
 
     <parent>
         <groupId>${groupId}</groupId>
-        <artifactId>${artifactId}.parent</artifactId>
+        <artifactId>${artifactId}</artifactId>
         <version>${version}</version>
     </parent>
 
+    <artifactId>${package}</artifactId>
+    <packaging>eclipse-plugin</packaging>
+    <description>${package} plugin</description>
+
     <properties>
         <sonar.coverage.jacoco.xmlReportPaths>
-            ${project.basedir}/../../tests/*/target/site/jacoco-aggregate/jacoco.xml
+            ${project.basedir}/../tests/*/target/site/jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
-    <artifactId>${artifactId}.bundle</artifactId>
-    <packaging>eclipse-plugin</packaging>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>false</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 
 </project>

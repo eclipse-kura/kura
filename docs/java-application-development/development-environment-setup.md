@@ -151,7 +151,7 @@ The import org.junit cannot be resolved
 
 Make sure the Java Runtime is set to Java 17. To do this, press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> (<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> for Mac users) and run the _"Java: Configure Java Runtime"_ command. Then, in the opened settings, set the "Default JDK" to the installed JDK 17. Example for the `org.eclipse.kura.nm.test` project:
 
-![](./imgs/configure_java_runtime.png)
+![](./images/configure_java_runtime.png)
 
 Repeat this process for each test project showing the error.
 

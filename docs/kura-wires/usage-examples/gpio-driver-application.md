@@ -8,7 +8,7 @@ Setup a Raspberry Pi as shown in [GPIO Driver](../../connect-field-devices/gpio-
 
 ## Configure Kura Wires GPIO Driver Application
 
-1. Install the GPIO Driver from the [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-45).
+1. Install the GPIO Driver as presented in the [GPIO Driver](../../connect-field-devices/gpio-driver.md) page.
 
 2. On the Kura web interface, instantiate a GPIO Driver:
     * Under "System", select "Drivers and Assets" and click on the "New Driver" button.
@@ -16,13 +16,13 @@ Setup a Raspberry Pi as shown in [GPIO Driver](../../connect-field-devices/gpio-
 
 3. From the "Drivers and Assets" tab, add a new asset bound to the GPIO driver:
     * Click on the "New Asset" button and fill the form with the "Asset Name" and selecting the driver created in step 2. as "Driver Name". Click "Apply" and a new asset will be listed under the GPIO driver.
-    * Click on the new asset and configure it, adding only one channel called **LED** as shown in the following picture:
+    * Click on the new asset and configure it, adding only one channel called **LED** as shown in the following picture. Change the gpio parameters accordingly to your setup.
 
     ![GPIO Example Led Asset](./images/gpio-example-led-asset.png)
 
     * Click "Apply".
 
-4. As in point 3., create a new asset as shown below:
+4. As in point 3., create a new asset as shown below. Change the gpio parameters accordingly to your setup.
 
     ![GPIO Example Led Feedback Asset](./images/gpio-example-led-feedback-asset.png)
 

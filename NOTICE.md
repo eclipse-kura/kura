@@ -250,7 +250,6 @@ This project leverages the following third party content.
 ### Additional Dependencies
 
 * maven/mavencentral/javax.usb/usb-api/1.0.2, MIT, approved, CQ7834
-* jdk.dio/1.0.0, GPL+CE, approved, CQ9194
 * javax.el_2.2.0.v201303151357, EPL-2.0, approved, eclipse.platform
 * org.tigris.mtoolkit.iagent.rpc_3.0.0.20110411-0918, EPL-1.0, approved, CQ7880
 * com.codeminders.hidapi natives 1.1, New BSD License, approved, CQ7871

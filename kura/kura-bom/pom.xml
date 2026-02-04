@@ -152,10 +152,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.driver.gpio.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.driver.helper.provider</artifactId>
         </dependency>
         <dependency>
@@ -209,10 +205,6 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.linux.clock</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.linux.gpio</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>

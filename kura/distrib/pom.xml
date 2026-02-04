@@ -497,12 +497,12 @@
                                     jakarta.validation-api, hk2-locator, bcpg-jdk18on,
                                     com.codeminders.hidapi.${native.tag}, hk2-utils,
                                     org.apache.servicemix.bundles.c3p0, jersey-media-multipart,
-                                    HikariCP, quartz, jersey-hk2, jdk.dio, jersey-common,
+                                    HikariCP, quartz, jersey-hk2, jersey-common,
                                     jersey-server, jakarta.inject-api, bctls-jdk18on,
                                     jersey-container-servlet, mimepull,
                                     org.eclipse.soda.dk.comm.${native.tag}, jersey-client, hk2-api,
                                     javassist, jersey-media-sse, protobuf-java, bcpkix-jdk18on,
-                                    jersey-entity-filtering, jdk.dio.${native.tag},
+                                    jersey-entity-filtering,
                                     jersey-media-jaxb, commons-csv, gson, aopalliance-repackaged,
                                     bcprov-jdk18on, jersey-container-servlet-core, 
                                     <!-- netty-plugins --> 
@@ -723,21 +723,6 @@
                                     <!-- container-orchestrator-plugins -->
                                     org.eclipse.kura.container.provider,
                                     org.eclipse.kura.container.orchestration.provider
-                                </includeArtifactIds>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>linux-plugins-5s</id>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>copy-dependencies</goal>
-                            </goals>
-                            <configuration>
-                                <outputDirectory>${project.build.directory}/pkg/plugins/5s</outputDirectory>
-                                <skip>${exclude.linux.plugins}</skip>
-                                <includeArtifactIds>
-                                    <!-- gpio-plugins -->
-                                    org.eclipse.kura.linux.gpio
                                 </includeArtifactIds>
                             </configuration>
                         </execution>

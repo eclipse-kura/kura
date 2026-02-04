@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (c) 2025 Eurotech and/or its affiliates and others
+#  Copyright (c) 2025, 2026 Eurotech and/or its affiliates and others
 #
 #  This program and the accompanying materials are made
 #  available under the terms of the Eclipse Public License 2.0
@@ -97,8 +97,7 @@ KURA_CMD="${KURA_LAUNCH_COMMAND} -Xms${kura.mem.size} -Xmx${kura.mem.size} \
     -Ddpa.configuration=\${DIR}/packages/dpa.properties \
     -Dlog4j.configurationFile=file:\${DIR}/log4j/log4j.xml \
     -Dlog4j2.disable.jmx=true \
-    -Djava.security.policy=\${DIR}/framework/jdk.dio.policy \
-    -Djdk.dio.registry=\${DIR}/framework/jdk.dio.properties \
+    -Djava.security.policy=\${DIR}/framework/java.policy \
     -Djdk.tls.trustNameService=true \
     -Declipse.consoleLog=true \
     -jar \${DIR}/plugins/org.eclipse.equinox.launcher-${org.eclipse.equinox.launcher.version}.jar \

@@ -2,7 +2,7 @@
 
 If it is not configured, the cellular interface is presented on the interface list either by modem USB address, or if serial modem is used, by modem name. This 'fake' interface name is replaced by 'proper' interface name (e.g., ppp0) when the first modem configuration is submitted.
 
-The cellular interface should be configured by first enabling it in the **TCP/IP** tab, and then setting the **Cellular** tab. Note that the cellular interface can only be set as _WAN using DHCP_. The cellular interface configuration options are described below.
+The cellular interface should be configured by first enabling it in the **TCP/IP** tab, and then setting the **Cellular** tab. Note that the cellular interface can only be set as _WAN using DHCP_ or *Not Managed*. The cellular interface configuration options are described below.
 
 ## Cellular Configuration
 
@@ -59,6 +59,20 @@ The **Cellular** tab contains the following configuration parameters:
 - **LCP Echo Interval**: sets the _lcp-echo-interval_ option of the PPP daemon. If set to a positive number, the modem sends LCP echo request to the peer at the specified number of seconds. To disable this option, set it to zero. This option may be used with the _lcp-echo-failure_ option to detect that the peer is no longer connected.
 
 - **LCP Echo Failure**: sets the _lcp-echo-failure_ option of the PPP daemon. If set to a positive number, the modem presumes the peer to be dead if a specified number of LCP echo-requests are sent without receiving a valid LCP echo-reply. To disable this option, set it to zero.
+
+!!! note
+    **Cellular Reconnection Management**
+
+    In specific profiles, cellular reconnections are handled by the _pppd_ daemon using the parameters described above. In generic profiles, this responsibility is delegated to ModemManager and NetworkManager. In this case, a connection attempt is made when the configuration is applied, when the modem has been reset and subsequently every five minutes.
+
+!!! note
+    **Initial EPS Bearer IP Type Configuration**
+
+    For some mobile network operators, it may be necessary to explicitly set the IP type of the initial EPS bearer. Since this operation is not currently supported by ESF, the user must configure it manually by running the following command on the device terminal:
+
+    ```shell
+    mmcli --3gpp-set-initial-eps-bearer-settings="apn=''" -m 0
+    ```
 
 ### GPS
 

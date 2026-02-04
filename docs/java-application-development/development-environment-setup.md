@@ -153,6 +153,10 @@ Make sure the Java Runtime is set to Java 17. To do this, press <kbd>Ctrl</kbd> 
 
 ![](./images/configure_java_runtime.png)
 
+Additionally, in the "Compiler" tab, set the "Source" and "Target compatibility" to 17 as well:
+
+![](./images/configure_java_compiler.png)
+
 Repeat this process for each test project showing the error.
 
 #### LSP Out of memory error:

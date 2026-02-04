@@ -100,18 +100,58 @@ public interface GPIOService {
     public Map<Integer, String> getAvailablePins();
     
     /**
-     * Get a list of GPIO pins described by the specified properties.
+     * Get the GPIO pins that match the given description properties.
      * 
-     * @param description a map of properties describing the pin
+     * The description map is interpreted as a set of filter criteria:
+     * only the properties present in the map are considered when selecting
+     * pins. Pins that match all provided properties are returned; properties
+     * that are not specified are ignored.
      * 
-     * @return a list of KuraGPIOPin instances
+     * For example, to get all pins with a specific name, you can call:
+     * <pre>
+     * Map<String, String> description = new HashMap<>();
+     * description.put("name", "GPIO22");
+     * List<KuraGPIOPin> pins = gpioService.getPins(description);
+     * </pre>
+     * 
+     * To get all pins on a specific name and line, you can call:
+     * <pre>
+     * Map<String, String> description = new HashMap<>();
+     * description.put("name", "GPIO22");
+     * description.put("line", "5");
+     * List<KuraGPIOPin> pins = gpioService.getPins(description);
+     * </pre>
+     * 
+     * @param description a map of property names to values used to filter pins; may contain
+     *        a subset of all supported properties
+     * 
+     * @return a list of {@code KuraGPIOPin} instances matching the specified properties
      * @since 3.0
      */
     public List<KuraGPIOPin> getPins(Map<String, String> description);
     
     /**
-     * Get a list of GPIO pins described by the specified properties, setting the direction, mode and trigger.
+     * Get the GPIO pins that match the given description properties, setting the direction, mode and trigger.
      * 
+     * The description map is interpreted as a set of filter criteria:
+     * only the properties present in the map are considered when selecting
+     * pins. Pins that match all provided properties are returned; properties
+     * that are not specified are ignored.
+     * 
+     * For example, to get all pins with a specific name, you can call:
+     * <pre>
+     * Map<String, String> description = new HashMap<>();
+     * description.put("name", "GPIO22");
+     * List<KuraGPIOPin> pins = gpioService.getPins(description, direction, mode, trigger);
+     * </pre>
+     * 
+     * To get all pins on a specific name and line, you can call:
+     * <pre>
+     * Map<String, String> description = new HashMap<>();
+     * description.put("name", "GPIO22");
+     * description.put("line", "5");
+     * List<KuraGPIOPin> pins = gpioService.getPins(description, direction, mode, trigger);
+     * </pre>
      * @param description a map of properties describing the pin
      * @param direction the direction of the pin
      * @param mode the mode of the pin

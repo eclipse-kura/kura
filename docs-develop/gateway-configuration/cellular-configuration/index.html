@@ -4742,6 +4742,13 @@ configured.</p>
 </code></pre></div>
 <p>So, if the <strong>Connection Attempts</strong> are set to 3 and the <strong>Connection Attempts Retry Delay</strong> to 15s, Kura will try to establish a connection for 3 times every 15s. If it fails, Kura will wait for 45s and restart the process. Be aware that the <strong>Connection Attempts Retry Delay</strong> should be carefully set in order to not prevent a successful connection to the selected APN. Please refer to the cellular connection provider.</p>
 <p>The cellular connection is delegated to NetworkManager and ModemManager, therefore Kura has not a direct control of the connection process. In some situations, depending on the status of the modem, the tools don't guarantee the configured number of reconnections and the delay between connection attempts can be higher.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Initial EPS Bearer IP Type Configuration</strong></p>
+<p>For some mobile network operators, it may be necessary to explicitly set the IP type of the initial EPS bearer. Since this operation is not currently supported by ESF, the user must configure it manually by running the following command on the device terminal:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mmcli<span class="w"> </span>--3gpp-set-initial-eps-bearer-settings<span class="o">=</span><span class="s2">&quot;apn=&#39;&#39;&quot;</span><span class="w"> </span>-m<span class="w"> </span><span class="m">0</span>
+</code></pre></div>
+</div>
 <h3 id="gps">GPS</h3>
 <p><img alt="" src="../images/IMG-14-10-2024-11-27-34.png" /></p>
 <p>The <strong>GPS</strong> tab allows the user to enable or disable the GPS module provided by the cellular modem. The available properties are:</p>

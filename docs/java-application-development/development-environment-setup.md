@@ -141,6 +141,24 @@ Finally, once the build completes, the workspace will be ready to use.
 
 ### Troubleshooting
 
+#### Tests import issues
+
+If you are seeing errors related to missing test dependencies like the following:
+
+```
+The import org.junit cannot be resolved
+```
+
+Make sure the Java Runtime is set to Java 17. To do this, press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> (<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> for Mac users) and run the _"Java: Configure Java Runtime"_ command. Then, in the opened settings, set the "Default JDK" to the installed JDK 17. Example for the `org.eclipse.kura.nm.test` project:
+
+![](./images/configure_java_runtime.png)
+
+Additionally, in the "Compiler" tab, set the "Source" and "Target compatibility" to 17 as well:
+
+![](./images/configure_java_compiler.png)
+
+Repeat this process for each test project showing the error.
+
 #### LSP Out of memory error:
 
 Looks like the JVM running the LSP server requires some additional RAM to parse through Kura. Add a `.vscode/settings.json` file in the root workspace directory containing the following:

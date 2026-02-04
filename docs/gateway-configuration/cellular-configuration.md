@@ -72,6 +72,15 @@ So, if the **Connection Attempts** are set to 3 and the **Connection Attempts Re
 
 The cellular connection is delegated to NetworkManager and ModemManager, therefore Kura has not a direct control of the connection process. In some situations, depending on the status of the modem, the tools don't guarantee the configured number of reconnections and the delay between connection attempts can be higher.
 
+!!! note
+    **Initial EPS Bearer IP Type Configuration**
+
+    For some mobile network operators, it may be necessary to explicitly set the IP type of the initial EPS bearer. Since this operation is not currently supported by ESF, the user must configure it manually by running the following command on the device terminal:
+
+    ```shell
+    mmcli --3gpp-set-initial-eps-bearer-settings="apn=''" -m 0
+    ```
+
 ### GPS
 
 ![](./images/IMG-14-10-2024-11-27-34.png)

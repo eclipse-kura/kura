@@ -103,7 +103,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     private String primaryInterfaceMacAddress;
 
-    private AtomicReference<InternetConnectionStatus> currentInternetStatus = new AtomicReference<>(
+    private final AtomicReference<InternetConnectionStatus> currentInternetStatus = new AtomicReference<>(
             InternetConnectionStatus.UNAVAILABLE);
 
     private ScheduledFuture<?> currentTask;
@@ -508,7 +508,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             return result;
         });
 
-        this.currentTask = internetCheckerExecutor.scheduleAtFixedRate(this::checkInternetTask, 5000,
+        this.currentTask = this.internetCheckerExecutor.scheduleAtFixedRate(this::checkInternetTask, 5000,
                 INTERNET_CHECK_TIME_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
@@ -1635,7 +1635,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         }
 
         CommandStatus status = this.executorService
-                .execute(new Command(new String[] { "ping", version, address, "-c", "1" }));
+                .execute(new Command(new String[] { "ping", version, address, "-c", "5" }));
 
         return status.getExitStatus().isSuccessful();
     }

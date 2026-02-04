@@ -58,7 +58,8 @@ public interface GPIOService {
      * @param trigger the trigger of the pin
      * 
      * @return the KuraGPIOPin instance
-     * @deprecated Use {@link #getPins(Map<String, String> description, KuraGPIODirection, KuraGPIOMode, KuraGPIOTrigger)} and select the desired pin from the returned list.
+     * @deprecated Use {@link #getPins(Map<String, String> description, KuraGPIODirection, KuraGPIOMode, KuraGPIOTrigger)} and 
+     * select the desired pin from the returned list.
      */
     @Deprecated(since = "3.0", forRemoval = true)
     public KuraGPIOPin getPinByName(String pinName, KuraGPIODirection direction, KuraGPIOMode mode,

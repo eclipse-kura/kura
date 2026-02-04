@@ -3579,6 +3579,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#tests-import-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests import issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#lsp-out-of-memory-error" class="md-nav__link">
     <span class="md-ellipsis">
       LSP Out of memory error:
@@ -4873,6 +4882,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#tests-import-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests import issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#lsp-out-of-memory-error" class="md-nav__link">
     <span class="md-ellipsis">
       LSP Out of memory error:
@@ -5032,11 +5050,20 @@ For Maven   </p>
 <p><img alt="" src="../images/vscode1.png" /></p>
 <p>Finally, once the build completes, the workspace will be ready to use.</p>
 <h3 id="troubleshooting">Troubleshooting</h3>
+<h4 id="tests-import-issues">Tests import issues</h4>
+<p>If you are seeing errors related to missing test dependencies like the following:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>The import org.junit cannot be resolved
+</code></pre></div>
+<p>Make sure the Java Runtime is set to Java 17. To do this, press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> (<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> for Mac users) and run the <em>"Java: Configure Java Runtime"</em> command. Then, in the opened settings, set the "Default JDK" to the installed JDK 17. Example for the <code>org.eclipse.kura.nm.test</code> project:</p>
+<p><img alt="" src="../images/configure_java_runtime.png" /></p>
+<p>Additionally, in the "Compiler" tab, set the "Source" and "Target compatibility" to 17 as well:</p>
+<p><img alt="" src="../images/configure_java_compiler.png" /></p>
+<p>Repeat this process for each test project showing the error.</p>
 <h4 id="lsp-out-of-memory-error">LSP Out of memory error:</h4>
 <p>Looks like the JVM running the LSP server requires some additional RAM to parse through Kura. Add a <code>.vscode/settings.json</code> file in the root workspace directory containing the following:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="p">{</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">    </span><span class="nt">&quot;java.jdt.ls.vmargs&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx8G -Xms500m -Xlog:disable&quot;</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="p">{</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">    </span><span class="nt">&quot;java.jdt.ls.vmargs&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx8G -Xms500m -Xlog:disable&quot;</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="p">}</span>
 </code></pre></div>
 <h4 id="vscode-build-gets-stuck">VSCode build gets stuck:</h4>
 <p>To fix this press: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> (<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> for Mac users) and run the <em>"Developer: Reload Window"</em> command. If the issue is bad enough you'll also need to clean the LSP workspace cache with <em>"Java: Clean Java Language Server Workspace"</em> and re-run the maven build.</p>
@@ -5080,20 +5107,20 @@ For Maven   </p>
 <li>In the Eclipse workspace modify the lifecycle mapping by adding these XML lines to the <code>lifecycle-mapping-metadata.xml</code> in Eclipse Kura workspace.
   You can find the file in the Windows -&gt; Preferences -&gt; Maven -&gt; Lifecycle Mappings -&gt; Open workspace lifecycle mappings metadata.
   After editing the file, reload it by pressing the "Reload workspace lifecycle mappings metadata" button.
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="nt">&lt;lifecycleMappingMetadata&gt;</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">    </span><span class="nt">&lt;lifecycleMappingFilters&gt;</span>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">        </span><span class="nt">&lt;lifecycleMappingFilter&gt;</span>
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">            </span><span class="nt">&lt;symbolicName&gt;</span>org.eclipse.m2e.pde.connector<span class="nt">&lt;/symbolicName&gt;</span>
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">            </span><span class="nt">&lt;versionRange&gt;</span>[2.1.2,)<span class="nt">&lt;/versionRange&gt;</span>
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">            </span><span class="nt">&lt;packagingTypes&gt;</span>
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-test-plugin<span class="nt">&lt;/packagingType&gt;</span>
-<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-plugin<span class="nt">&lt;/packagingType&gt;</span>
-<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-feature<span class="nt">&lt;/packagingType&gt;</span>
-<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">            </span><span class="nt">&lt;/packagingTypes&gt;</span>
-<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="w">        </span><span class="nt">&lt;/lifecycleMappingFilter&gt;</span>
-<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="w">    </span><span class="nt">&lt;/lifecycleMappingFilters&gt;</span>
-<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="nt">&lt;/lifecycleMappingMetadata&gt;</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nt">&lt;lifecycleMappingMetadata&gt;</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">    </span><span class="nt">&lt;lifecycleMappingFilters&gt;</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">        </span><span class="nt">&lt;lifecycleMappingFilter&gt;</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">            </span><span class="nt">&lt;symbolicName&gt;</span>org.eclipse.m2e.pde.connector<span class="nt">&lt;/symbolicName&gt;</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">            </span><span class="nt">&lt;versionRange&gt;</span>[2.1.2,)<span class="nt">&lt;/versionRange&gt;</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">            </span><span class="nt">&lt;packagingTypes&gt;</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-test-plugin<span class="nt">&lt;/packagingType&gt;</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-plugin<span class="nt">&lt;/packagingType&gt;</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-feature<span class="nt">&lt;/packagingType&gt;</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="w">            </span><span class="nt">&lt;/packagingTypes&gt;</span>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="w">        </span><span class="nt">&lt;/lifecycleMappingFilter&gt;</span>
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">    </span><span class="nt">&lt;/lifecycleMappingFilters&gt;</span>
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="nt">&lt;/lifecycleMappingMetadata&gt;</span>
 </code></pre></div></li>
 <li>Install the <code>eclipse-tycho</code> plugin by following these steps:<ol>
 <li>Menu Help -&gt; Install new software... -&gt; Paste the <a href="https://github.com/tesla/m2eclipse-tycho/releases/download/latest/">m2eclipse-tycho repository URL</a> in the <code>Work with:</code> text field -&gt; expand the category and select the <code>Tycho Project Configurators Feature</code> and proceed with the installation.</li>

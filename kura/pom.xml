@@ -151,9 +151,7 @@
 
         <!-- external dependencies, embedded in some bundles that are not available in target platform -->
         <org.eclipse.paho.client.mqttv3.version>1.2.1</org.eclipse.paho.client.mqttv3.version>
-        <grpc.version>1.76.0</grpc.version>
         <perfmark-api.version>0.26.0</perfmark-api.version>
-        <protobuf.version>4.30.2</protobuf.version>
         <protobuf.version>4.30.2</protobuf.version>
         <docker-java.version>3.5.3</docker-java.version>
         <httpcore5.version>5.3.4</httpcore5.version>

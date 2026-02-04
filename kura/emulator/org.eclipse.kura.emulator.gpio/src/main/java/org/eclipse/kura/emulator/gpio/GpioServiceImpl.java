@@ -94,7 +94,6 @@ public class GpioServiceImpl implements GPIOService {
             for (int line = 0; line < 5; line++) {
                 String name = "GPIOchip" + chip * 1000 + line;
                 Map<String, String> properties = new HashMap<>();
-                properties.put(KuraGPIODescription.DISPLAY_NAME_PROPERTY, name);
                 properties.put("controller", String.valueOf(chip));
                 properties.put("line", String.valueOf(line));
                 properties.put(KuraGPIODescription.DISPLAY_NAME_PROPERTY, name + ":" + chip + ":" + line);

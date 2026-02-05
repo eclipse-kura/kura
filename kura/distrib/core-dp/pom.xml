@@ -50,8 +50,8 @@
                                 org.eclipse.kura.driver.s7plc,
                                 org.eclipse.kura.driver.eddystone,
                                 org.eclipse.kura.driver.ibeacon,
+                                org.eclipse.kura.driver.gpio,
                                 org.eclipse.kura.driver.ble.xdk,
-                                org.eclipse.kura.ai.triton.server,
                                 org.eclipse.kura.db.sqlite.provider,
                                 org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider,
                                 org.eclipse.kura.cloudconnection.raw.mqtt.provider

@@ -13,6 +13,7 @@
 package org.eclipse.kura.gpio;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -37,11 +38,11 @@ public class KuraGPIODescription {
             throw new IllegalArgumentException("Missing mandatory property: " + DISPLAY_NAME_PROPERTY);
         }
 
-        this.properties = properties;
+        this.properties = Collections.unmodifiableMap(new HashMap<>(properties));
     }
     
     public Map<String, String> getProperties() {
-        return Collections.unmodifiableMap(this.properties);
+        return this.properties;
     }
 
     public String getDisplayName() {

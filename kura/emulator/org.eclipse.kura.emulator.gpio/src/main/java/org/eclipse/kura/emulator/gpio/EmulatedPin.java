@@ -48,7 +48,7 @@ public class EmulatedPin implements KuraGPIOPin {
 
     public EmulatedPin(int pinIndex) {
         super();
-        this.pinController =  pinIndex / 1000;
+        this.pinController = pinIndex / 1000;
         this.pinLine = pinIndex % 1000;
     }
 
@@ -57,7 +57,7 @@ public class EmulatedPin implements KuraGPIOPin {
         this.pinController = controller;
         this.pinLine = line;
     }
-    
+
     public EmulatedPin(String pinName, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
         super();
         this.pinName = pinName;
@@ -68,28 +68,29 @@ public class EmulatedPin implements KuraGPIOPin {
 
     public EmulatedPin(int pinIndex, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
         super();
-        this.pinController =  pinIndex / 1000;
+        this.pinController = pinIndex / 1000;
         this.pinLine = pinIndex % 1000;
         this.direction = direction;
         this.mode = mode;
         this.trigger = trigger;
     }
 
-    public EmulatedPin(int controller, int line, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
+    public EmulatedPin(int controller, int line, KuraGPIODirection direction, KuraGPIOMode mode,
+            KuraGPIOTrigger trigger) {
         super();
-        this.pinController =  controller;
+        this.pinController = controller;
         this.pinLine = line;
         this.direction = direction;
         this.mode = mode;
         this.trigger = trigger;
     }
-    
+
     @Override
     public void setValue(boolean active) throws KuraUnavailableDeviceException, KuraClosedDeviceException, IOException {
         this.internalValue = active;
 
-        logger.debug("Emulated GPIO Pin {} changed to {}", this.pinName != null ? this.pinName : this.pinController + ":" + this.pinLine,
-                active ? "on" : "off");
+        logger.debug("Emulated GPIO Pin {} changed to {}",
+                this.pinName != null ? this.pinName : this.pinController + ":" + this.pinLine, active ? "on" : "off");
     }
 
     @Override
@@ -98,28 +99,31 @@ public class EmulatedPin implements KuraGPIOPin {
     }
 
     @Override
-    public void addPinStatusListener(PinStatusListener listener) throws KuraClosedDeviceException, IOException { 
+    public void addPinStatusListener(PinStatusListener listener) throws KuraClosedDeviceException, IOException {
         // Do nothing
     }
 
     @Override
-    public void removePinStatusListener(PinStatusListener listener) throws KuraClosedDeviceException, IOException { 
+    public void removePinStatusListener(PinStatusListener listener) throws KuraClosedDeviceException, IOException {
         // Do nothing
     }
 
     @Override
     public void open() throws KuraGPIODeviceException, KuraUnavailableDeviceException, IOException {
-        logger.info("Emulated GPIO Pin {} open.", this.pinName != null ? this.pinName : this.pinController + ":" + this.pinLine);
+        logger.info("Emulated GPIO Pin {} open.",
+                this.pinName != null ? this.pinName : this.pinController + ":" + this.pinLine);
     }
 
     @Override
     public void close() throws IOException {
-        logger.info("Emulated GPIO Pin {} closed.", this.pinName != null ? this.pinName : this.pinController + ":" + this.pinLine);
+        logger.info("Emulated GPIO Pin {} closed.",
+                this.pinName != null ? this.pinName : this.pinController + ":" + this.pinLine);
     }
 
     @Override
     public String toString() {
-        return this.pinName != null ? "GPIO Pin: " + this.pinName : "Gpio PIN Controller #" + this.pinController + " Line #" + this.pinLine;
+        return this.pinName != null ? "GPIO Pin: " + this.pinName
+                : "Gpio Pin Controller #" + this.pinController + " Line #" + this.pinLine;
     }
 
     @Override
@@ -159,11 +163,13 @@ public class EmulatedPin implements KuraGPIOPin {
         properties.put("line", Integer.toString(this.pinLine));
         if (this.pinName != null) {
             properties.put("name", this.pinName);
-            properties.put(KuraGPIODescription.DISPLAY_NAME_PROPERTY, this.pinName + ":" + this.pinController + ":" + this.pinLine);
+            properties.put(KuraGPIODescription.DISPLAY_NAME_PROPERTY,
+                    this.pinName + ":" + this.pinController + ":" + this.pinLine);
         } else {
-            properties.put(KuraGPIODescription.DISPLAY_NAME_PROPERTY, "unknown:" + this.pinController + ":" + this.pinLine);
+            properties.put(KuraGPIODescription.DISPLAY_NAME_PROPERTY,
+                    "unknown:" + this.pinController + ":" + this.pinLine);
         }
         return new KuraGPIODescription(properties);
     }
-    
+
 }

@@ -39,7 +39,7 @@ public interface GPIOService {
      * @param pinName the name of the pin
      * 
      * @return the KuraGPIOPin instance
-     * @deprecated Use {@link #getPins(Map<String, String> description)} and select the desired pin from the returned list.
+     * @deprecated Use {@link #getPins(Map description)} and select the desired pin from the returned list.
      */
     @Deprecated(since = "3.0", forRemoval = true)
     public KuraGPIOPin getPinByName(String pinName);
@@ -58,7 +58,7 @@ public interface GPIOService {
      * @param trigger the trigger of the pin
      * 
      * @return the KuraGPIOPin instance
-     * @deprecated Use {@link #getPins(Map<String, String> description, KuraGPIODirection, KuraGPIOMode, KuraGPIOTrigger)} and 
+     * @deprecated Use {@link #getPins(Map description, KuraGPIODirection, KuraGPIOMode, KuraGPIOTrigger)} and 
      * select the desired pin from the returned list.
      */
     @Deprecated(since = "3.0", forRemoval = true)
@@ -71,7 +71,7 @@ public interface GPIOService {
      * @param terminal the terminal index of the pin
      * 
      * @return the KuraGPIOPin instance
-     * @deprecated Use {@link #getPins(Map<String, String> description)} instead.
+     * @deprecated Use {@link #getPins(Map description)} instead.
      */
     @Deprecated(since = "3.0", forRemoval = true)
     public KuraGPIOPin getPinByTerminal(int terminal);
@@ -85,7 +85,7 @@ public interface GPIOService {
      * @param trigger the trigger of the pin
      * 
      * @return the KuraGPIOPin instance
-     * @deprecated Use {@link #getPins(Map<String, String> description, KuraGPIODirection, KuraGPIOMode, KuraGPIOTrigger)} instead.
+     * @deprecated Use {@link #getPins(Map description, KuraGPIODirection, KuraGPIOMode, KuraGPIOTrigger)} instead.
      */
     @Deprecated(since = "3.0", forRemoval = true)
     public KuraGPIOPin getPinByTerminal(int terminal, KuraGPIODirection direction, KuraGPIOMode mode,

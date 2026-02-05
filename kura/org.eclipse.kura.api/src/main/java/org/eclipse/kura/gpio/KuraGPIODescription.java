@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.gpio;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
@@ -40,7 +41,7 @@ public class KuraGPIODescription {
     }
     
     public Map<String, String> getProperties() {
-        return this.properties;
+        return Collections.unmodifiableMap(this.properties);
     }
 
     public String getDisplayName() {

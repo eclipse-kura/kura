@@ -83,7 +83,7 @@
             ssh | openssh, openssl, busybox, libpam-modules,
             python3,
             openjdk-17-jre-headless | temurin-17-jdk | java-runtime-headless (= 17) | java-runtime-headless (= 21),
-            dos2unix, libtirpc3, chrony, chronyc | chrony
+            dos2unix, libtirpc3, chrony, chronyc | chrony, iputils-ping
         </deb.dependencies>
         <deb.recommendations></deb.recommendations>
         <deb.provides></deb.provides>

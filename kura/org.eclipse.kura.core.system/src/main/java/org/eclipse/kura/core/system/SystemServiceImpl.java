@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -29,6 +29,7 @@ import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.StandardProtocolFamily;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
@@ -47,9 +48,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.StringJoiner;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.executor.Command;
@@ -57,6 +62,7 @@ import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.system.ExtendedProperties;
+import org.eclipse.kura.system.InternetConnectionStatus;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemResourceType;
 import org.eclipse.kura.system.SystemService;
@@ -68,6 +74,10 @@ import org.slf4j.LoggerFactory;
 
 public class SystemServiceImpl extends SuperSystemService implements SystemService {
 
+    private ScheduledExecutorService internetCheckerExecutor;
+
+    private static final String DEFAULT_INTERNET_CONNECTION_STATUS_CHECK_IP = "198.41.30.198";
+    private static final String DEFAULT_INTERNET_CONNECTION_STATUS_CHECK_HOST = "eclipse.org";
     private static final String SYS_CLASS_NET = "/sys/class/net/";
     private static final Logger logger = LoggerFactory.getLogger(SystemServiceImpl.class);
     private static final String PROPERTY_PROVIDER_SUFFIX = ".provider";
@@ -82,6 +92,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     private static final String KURA_PATH = "/opt/eclipse/kura";
     private static final String OS_WINDOWS = "windows";
 
+    private static final int INTERNET_CHECK_TIME_INTERVAL = 30000;
+
     private static boolean onCloudbees = false;
 
     private Properties kuraProperties;
@@ -90,6 +102,11 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     private CommandExecutorService executorService;
 
     private String primaryInterfaceMacAddress;
+
+    private final AtomicReference<InternetConnectionStatus> currentInternetStatus = new AtomicReference<>(
+            InternetConnectionStatus.UNAVAILABLE);
+
+    private ScheduledFuture<?> currentTask;
 
     public void setExecutorService(CommandExecutorService executorService) {
         this.executorService = executorService;
@@ -440,6 +457,14 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             if (System.getProperty(KEY_COMMAND_USER) != null) {
                 this.kuraProperties.put(KEY_COMMAND_USER, System.getProperty(KEY_COMMAND_USER));
             }
+            if (System.getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_HOST) != null) {
+                this.kuraProperties.put(KEY_INTERNET_CONNECTION_STATUS_CHECK_HOST,
+                        System.getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_HOST));
+            }
+            if (System.getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_IP) != null) {
+                this.kuraProperties.put(KEY_INTERNET_CONNECTION_STATUS_CHECK_IP,
+                        System.getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_IP));
+            }
 
             if (getKuraHome() == null) {
                 logger.error("Did not initialize kura.home");
@@ -476,6 +501,15 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         } catch (IOException e) {
             throw new ComponentException("Error loading default properties", e);
         }
+
+        this.internetCheckerExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+            final Thread result = Executors.defaultThreadFactory().newThread(r);
+            result.setName("internet-status-checker");
+            return result;
+        });
+
+        this.currentTask = this.internetCheckerExecutor.scheduleAtFixedRate(this::checkInternetTask, 5000,
+                INTERNET_CHECK_TIME_INTERVAL, TimeUnit.MILLISECONDS);
     }
 
     private void loadKuraCustom(Properties kuraCustomProps, String kuraCustomConfig) {
@@ -519,6 +553,20 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     protected void deactivate(ComponentContext componentContext) {
         this.componentContext = null;
         this.kuraProperties = null;
+
+        if (this.currentTask != null) {
+            this.currentTask.cancel(true);
+        }
+
+        if (this.internetCheckerExecutor != null) {
+            this.internetCheckerExecutor.shutdown();
+            try {
+                this.internetCheckerExecutor.awaitTermination(5000, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                currentThread().interrupt();
+                this.internetCheckerExecutor.shutdownNow();
+            }
+        }
     }
 
     public void updated(Map<String, Object> properties) {
@@ -1216,8 +1264,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     private void parseSystemPackages(List<SystemResourceInfo> packagesInfo, CommandStatus status,
             SystemResourceType type) {
-        String[] packages = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8)
-                .split("\n");
+        String[] packages = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(),
+                StandardCharsets.UTF_8).split("\n");
         Arrays.asList(packages).stream().forEach(p -> {
             String[] fields = p.split("\\s+"); // this works for dpkg and rpm where separator for version and name is a
                                                // sequence of spaces
@@ -1281,8 +1329,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         CommandStatus status = this.executorService.execute(command);
         if (logger.isDebugEnabled()) {
             logger.debug("execute command {} :: exited with code - {}", command, status.getExitStatus().getExitCode());
-            logger.debug("execute stderr {}", new String(err.toByteArray(), Charsets.UTF_8));
-            logger.debug("execute stdout {}", new String(out.toByteArray(), Charsets.UTF_8));
+            logger.debug("execute stderr {}", new String(err.toByteArray(), StandardCharsets.UTF_8));
+            logger.debug("execute stdout {}", new String(out.toByteArray(), StandardCharsets.UTF_8));
         }
         return status;
     }
@@ -1518,6 +1566,17 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         return getIntegerPropertyValue(KEY_NETWORK_CONFIGURATION_TIMEOUT, 30);
     }
 
+    @Override
+    public String getInternetConnectionStatusCheckHost() {
+        return getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_HOST)
+                .orElse(DEFAULT_INTERNET_CONNECTION_STATUS_CHECK_HOST);
+    }
+
+    @Override
+    public String getInternetConnectionStatusCheckIp() {
+        return getProperty(KEY_INTERNET_CONNECTION_STATUS_CHECK_IP).orElse(DEFAULT_INTERNET_CONNECTION_STATUS_CHECK_IP);
+    }
+
     private int getIntegerPropertyValue(String propertyName, int defaultValue) {
         final Optional<String> propertyValue = getProperty(propertyName);
         if (propertyValue.isPresent() && !propertyValue.get().trim().isEmpty()) {
@@ -1529,6 +1588,56 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             }
         }
         return defaultValue;
+    }
+
+    @Override
+    public InternetConnectionStatus getInternetConnectionStatus() {
+        return this.currentInternetStatus.get();
+    }
+
+    private void checkInternetTask() {
+        if (this.executorService == null) {
+            return;
+        }
+        try {
+
+            if (isPingable(StandardProtocolFamily.INET, getInternetConnectionStatusCheckHost())
+                    || isPingable(StandardProtocolFamily.INET6, getInternetConnectionStatusCheckHost())) {
+                this.currentInternetStatus.set(InternetConnectionStatus.FULL);
+                return;
+            }
+
+            if (isPingable(StandardProtocolFamily.INET, getInternetConnectionStatusCheckIp())
+                    || isPingable(StandardProtocolFamily.INET6, getInternetConnectionStatusCheckIp())) {
+                this.currentInternetStatus.set(InternetConnectionStatus.IP_ONLY);
+                return;
+            }
+
+            this.currentInternetStatus.set(InternetConnectionStatus.UNAVAILABLE);
+        } catch (Exception e) {
+            logger.error("Error while checking internet connection status", e);
+        }
+    }
+
+    private boolean isPingable(StandardProtocolFamily protocol, String address) {
+        String version;
+
+        switch (protocol) {
+        case INET:
+            version = "-4";
+            break;
+
+        case INET6:
+            version = "-6";
+            break;
+        default:
+            throw new IllegalArgumentException("Unexpected protocol: " + protocol);
+        }
+
+        CommandStatus status = this.executorService
+                .execute(new Command(new String[] { "ping", version, address, "-c", "5" }));
+
+        return status.getExitStatus().isSuccessful();
     }
 
 }

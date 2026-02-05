@@ -29,6 +29,7 @@
     "primaryNetworkInterfaceName":"test",
     "fileSeparator":"test",
     "firmwareVersion":"test",
+    "internetConnectionStatus": "UNAVAILABLE",
     "kuraDataDirectory":"test",
     "kuraFrameworkConfigDirectory":"test",
     "kuraHomeDirectory":"test",

@@ -422,11 +422,6 @@
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
-                                <id>org.eclipse.kura.core.deployment</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
                                 <id>org.eclipse.kura.core.crypto</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
@@ -700,16 +695,6 @@
                                 </requirement>
                                 <requirement>
                                     <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.core.deployment</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.deployment.agent</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.rest.provider</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
@@ -789,7 +774,6 @@
         <module>org.eclipse.kura.core.configuration.test</module>
         <module>org.eclipse.kura.core.cloud.factory.test</module>
         <module>org.eclipse.kura.core.crypto.test</module>
-        <module>org.eclipse.kura.core.deployment.test</module>
         <module>org.eclipse.kura.core.identity.test</module>
         <module>org.eclipse.kura.core.inventory.test</module>
         <module>org.eclipse.kura.core.ssl.test</module>
@@ -797,7 +781,6 @@
         <module>org.eclipse.kura.core.system.test</module>
         <module>org.eclipse.kura.core.test</module>
         <module>org.eclipse.kura.core.util.test</module>
-        <module>org.eclipse.kura.deployment.agent.test</module>
         <module>org.eclipse.kura.driver.block.test</module>
         <module>org.eclipse.kura.driver.helper.test</module>
         <!-- <module>org.eclipse.kura.emulator.position.test</module> -->
@@ -824,7 +807,6 @@
         <module>org.eclipse.kura.rest.cloudconnection.provider.test</module>
         <module>org.eclipse.kura.rest.identity.provider.test</module>
         <module>org.eclipse.kura.rest.inventory.provider.test</module>
-        <module>org.eclipse.kura.rest.packages.provider.test</module>
         <module>org.eclipse.kura.rest.security.provider.test</module>
         <module>org.eclipse.kura.rest.service.listing.provider.test</module>
         <module>org.eclipse.kura.rest.system.provider.test</module>

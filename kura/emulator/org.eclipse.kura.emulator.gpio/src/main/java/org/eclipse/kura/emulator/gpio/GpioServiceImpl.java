@@ -14,6 +14,7 @@ package org.eclipse.kura.emulator.gpio;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +74,7 @@ public class GpioServiceImpl implements GPIOService {
             this.pins.put(i, "Pin#" + i);
         }
 
-        return this.pins;
+        return Collections.unmodifiableMap(this.pins);
     }
 
     @Override
@@ -98,7 +99,7 @@ public class GpioServiceImpl implements GPIOService {
         this.pinDescriptions.clear();
         for (int chip = 0; chip < 2; chip++) {
             for (int line = 0; line < 5; line++) {
-                String name = "GPIOchip" + chip * 1000 + line;
+                String name = "GPIOchip" + chip + "line" + line;
                 Map<String, String> properties = new HashMap<>();
                 properties.put("controller", String.valueOf(chip));
                 properties.put("line", String.valueOf(line));
@@ -107,7 +108,7 @@ public class GpioServiceImpl implements GPIOService {
                 this.pinDescriptions.add(desc);
             }
         }
-        return this.pinDescriptions;
+        return Collections.unmodifiableList(this.pinDescriptions);
     }
 
 }

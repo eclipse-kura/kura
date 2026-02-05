@@ -78,12 +78,18 @@ public class GpioServiceImpl implements GPIOService {
 
     @Override
     public List<KuraGPIOPin> getPins(Map<String, String> description) {
+        if (description == null) {
+            throw new IllegalArgumentException("description cannot be null");
+        }
         return Arrays.asList(new EmulatedPin(description.get("name")));
     }
 
     @Override
     public List<KuraGPIOPin> getPins(Map<String, String> description, KuraGPIODirection direction, KuraGPIOMode mode,
             KuraGPIOTrigger trigger) {
+        if (description == null) {
+            throw new IllegalArgumentException("description cannot be null");
+        }
         return Arrays.asList(new EmulatedPin(description.get("name"), direction, mode, trigger));
     }
 

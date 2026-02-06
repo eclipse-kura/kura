@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -132,13 +132,17 @@ public interface KuraGPIOPin {
     /**
      *
      * @return the name associated with the the pin
+     * @deprecated Use {@link #getDescription()} to retrieve pin information.
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public String getName();
 
     /**
      *
      * @return the numeric index of the pin's terminal
+     * @deprecated Use {@link #getDescription()} to retrieve pin information.
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public int getIndex();
 
     /**
@@ -146,4 +150,11 @@ public interface KuraGPIOPin {
      * @return true if the pin has been previously opened for use.
      */
     public boolean isOpen();
+    
+    /**
+     *
+     * @return the {@link KuraGPIODescription} associated with this pin.
+     * @since 3.0
+     */
+    public KuraGPIODescription getDescription();
 }

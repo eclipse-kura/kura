@@ -1,21 +1,26 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
- *******************************************************************************/
+ ******************************************************************************/
 package org.eclipse.kura.emulator.gpio;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.gpio.GPIOService;
+import org.eclipse.kura.gpio.KuraGPIODescription;
 import org.eclipse.kura.gpio.KuraGPIODirection;
 import org.eclipse.kura.gpio.KuraGPIOMode;
 import org.eclipse.kura.gpio.KuraGPIOPin;
@@ -28,10 +33,24 @@ public class GpioServiceImpl implements GPIOService {
 
     private static final Logger logger = LoggerFactory.getLogger(GpioServiceImpl.class);
 
-    private final HashMap<Integer, String> pins = new HashMap<Integer, String>();
+    private final HashMap<Integer, String> pins = new HashMap<>();
+    private final List<KuraGPIODescription> pinDescriptions = new ArrayList<>();
 
     protected void activate(ComponentContext componentContext) {
         logger.debug("activating emulated GPIOService");
+        for (int chip = 0; chip < 2; chip++) {
+            for (int line = 0; line < 5; line++) {
+                String name = "GPIOchip" + chip + "line" + line;
+                Map<String, String> properties = new HashMap<>();
+                properties.put("controller", String.valueOf(chip));
+                properties.put("line", String.valueOf(line));
+                properties.put(KuraGPIODescription.DISPLAY_NAME_PROPERTY, name + ":" + chip + ":" + line);
+                KuraGPIODescription desc = new KuraGPIODescription(properties);
+                this.pinDescriptions.add(desc);
+                
+                this.pins.put(chip * 1000 + line, name);
+            }
+        }
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -40,35 +59,63 @@ public class GpioServiceImpl implements GPIOService {
 
     @Override
     public KuraGPIOPin getPinByName(String pinName) {
+        if (pinName == null || pinName.isEmpty()) {
+            throw new IllegalArgumentException("pinName cannot be null");
+        }
         return new EmulatedPin(pinName);
     }
 
     @Override
     public KuraGPIOPin getPinByName(String pinName, KuraGPIODirection direction, KuraGPIOMode mode,
             KuraGPIOTrigger trigger) {
+        if (pinName == null || pinName.isEmpty()) {
+            throw new IllegalArgumentException("pinName cannot be null");
+        }
         return new EmulatedPin(pinName, direction, mode, trigger);
     }
 
     @Override
     public KuraGPIOPin getPinByTerminal(int terminal) {
+        if (terminal < 0) {
+            throw new IllegalArgumentException("terminal cannot be negative");
+        }
         return new EmulatedPin(terminal);
     }
 
     @Override
     public KuraGPIOPin getPinByTerminal(int terminal, KuraGPIODirection direction, KuraGPIOMode mode,
             KuraGPIOTrigger trigger) {
+        if (terminal < 0) {
+            throw new IllegalArgumentException("terminal cannot be negative");
+        }
         return new EmulatedPin(terminal, direction, mode, trigger);
     }
 
     @Override
     public Map<Integer, String> getAvailablePins() {
-        pins.clear();
+        return Collections.unmodifiableMap(this.pins);
+    }
 
-        for (int i = 1; i < 11; i++) {
-            pins.put(i, "Pin#" + String.valueOf(i));
+    @Override
+    public List<KuraGPIOPin> getPins(Map<String, String> description) {
+        if (description == null || description.isEmpty() || !description.containsKey("name")) {
+            throw new IllegalArgumentException("description cannot be null or empty and must contain 'name' key");
         }
+        return Arrays.asList(new EmulatedPin(description.get("name")));
+    }
 
-        return pins;
+    @Override
+    public List<KuraGPIOPin> getPins(Map<String, String> description, KuraGPIODirection direction, KuraGPIOMode mode,
+            KuraGPIOTrigger trigger) {
+        if (description == null || description.isEmpty() || !description.containsKey("name")) {
+            throw new IllegalArgumentException("description cannot be null or empty and must contain 'name' key");
+        }
+        return Arrays.asList(new EmulatedPin(description.get("name"), direction, mode, trigger));
+    }
+
+    @Override
+    public List<KuraGPIODescription> getAvailablePinDescriptions() {
+        return Collections.unmodifiableList(this.pinDescriptions);
     }
 
 }

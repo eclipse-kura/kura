@@ -768,55 +768,55 @@
     </build>
 
     <modules>
+        <module>org.eclipse.kura.cloud.base.provider.test</module>
+        <module>org.eclipse.kura.cloudconnection.kapua.mqtt.provider.test</module>
+        <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test</module>
         <module>org.eclipse.kura.configuration.change.manager.test</module>
+        <module>org.eclipse.kura.container.orchestration.provider.test</module>
+        <module>org.eclipse.kura.container.provider.test</module>
         <module>org.eclipse.kura.core.certificates.test</module>
+        <module>org.eclipse.kura.core.cloud.factory.test</module>
         <module>org.eclipse.kura.core.comm.test</module>
         <module>org.eclipse.kura.core.configuration.test</module>
-        <module>org.eclipse.kura.core.cloud.factory.test</module>
         <module>org.eclipse.kura.core.crypto.test</module>
         <module>org.eclipse.kura.core.identity.test</module>
         <module>org.eclipse.kura.core.inventory.test</module>
+        <module>org.eclipse.kura.core.keystore.test</module>
         <module>org.eclipse.kura.core.ssl.test</module>
         <module>org.eclipse.kura.core.status.test</module>
         <module>org.eclipse.kura.core.system.test</module>
         <module>org.eclipse.kura.core.test</module>
         <module>org.eclipse.kura.core.util.test</module>
+        <module>org.eclipse.kura.db.h2db.provider.test</module>
+        <module>org.eclipse.kura.db.sqlite.provider.test</module>
         <module>org.eclipse.kura.driver.block.test</module>
         <module>org.eclipse.kura.driver.helper.test</module>
         <!-- <module>org.eclipse.kura.emulator.position.test</module> -->
         <module>org.eclipse.kura.emulator.watchdog.test</module>
         <module>org.eclipse.kura.event.publisher.test</module>
+        <module>org.eclipse.kura.http.server.manager.test</module>
         <module>org.eclipse.kura.internal.driver.s7plc.test</module>
+        <module>org.eclipse.kura.json.marshaller.unmarshaller.provider.test</module>
         <module>org.eclipse.kura.linux.clock.test</module>
         <module>org.eclipse.kura.linux.usb.test</module>
         <module>org.eclipse.kura.linux.watchdog.test</module>
-        <module>org.eclipse.kura.protocol.modbus.test</module>
-        <module>org.eclipse.kura.stress.test</module>
-        <module>org.eclipse.kura.util.test</module>
-        <module>org.eclipse.kura.watchdog.criticaltest</module>
-        <module>org.eclipse.kura.json.marshaller.unmarshaller.provider.test</module>
-        <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider.test</module>
-        <module>org.eclipse.kura.http.server.manager.test</module>
-        <module>org.eclipse.kura.rest.tamper.detection.provider.test</module>
-        <module>org.eclipse.kura.useradmin.store.test</module>
-        <module>org.eclipse.kura.core.keystore.test</module>
-        <module>org.eclipse.kura.rest.keystore.provider.test</module>
         <module>org.eclipse.kura.log.filesystem.provider.test</module>
-        <module>org.eclipse.kura.rest.provider.test</module>
-        <module>org.eclipse.kura.rest.configuration.provider.test</module>
+        <module>org.eclipse.kura.message.store.provider.test</module>
+        <module>org.eclipse.kura.protocol.modbus.test</module>
         <module>org.eclipse.kura.rest.cloudconnection.provider.test</module>
+        <module>org.eclipse.kura.rest.configuration.provider.test</module>
         <module>org.eclipse.kura.rest.identity.provider.test</module>
         <module>org.eclipse.kura.rest.inventory.provider.test</module>
+        <module>org.eclipse.kura.rest.keystore.provider.test</module>
+        <module>org.eclipse.kura.rest.provider.test</module>
         <module>org.eclipse.kura.rest.security.provider.test</module>
         <module>org.eclipse.kura.rest.service.listing.provider.test</module>
         <module>org.eclipse.kura.rest.system.provider.test</module>
-        <module>org.eclipse.kura.container.orchestration.provider.test</module>
-        <module>org.eclipse.kura.container.provider.test</module>
-        <module>org.eclipse.kura.db.sqlite.provider.test</module>
-        <module>org.eclipse.kura.db.h2db.provider.test</module>
-        <module>org.eclipse.kura.message.store.provider.test</module>
-        <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test</module>
-        <module>org.eclipse.kura.cloudconnection.kapua.mqtt.provider.test</module>
-        <module>org.eclipse.kura.cloud.base.provider.test</module>
+        <module>org.eclipse.kura.rest.tamper.detection.provider.test</module>
+        <module>org.eclipse.kura.stress.test</module>
+        <module>org.eclipse.kura.useradmin.store.test</module>
+        <module>org.eclipse.kura.util.test</module>
+        <module>org.eclipse.kura.watchdog.criticaltest</module>
+        <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider.test</module>
     </modules>
 </project>

@@ -186,26 +186,6 @@ The framework will create the temporary identity when the container starts and c
 
 ### Available Permissions
 
-The following permissions can be assigned to container identities. Use the exact permission names as shown below:
-
-| Permission | Description |
-|------------|-------------|
-| `rest.configuration` | Access to configuration management APIs |
-| `rest.system` | Access to system information and management APIs |
-| `rest.network.configuration` | Access to network configuration APIs |
-| `rest.network.status` | Access to network status information |
-| `rest.deploy` | Access to deployment package management |
-| `rest.cloudconnection` | Access to cloud connection management |
-| `rest.assets` | Access to asset management (Wires) |
-| `rest.wires.admin` | Administrative access to Wires framework |
-| `rest.identity` | Access to identity and permission management |
-| `rest.security` | Access to security-related APIs |
-| `rest.keystores` | Access to keystore management |
-| `rest.command` | Access to command execution APIs |
-| `rest.inventory` | Access to inventory information |
-| `rest.position` | Access to position/GPS information |
-| `kura.admin` | Full administrative access (use with caution) |
-
 For a complete list of available permissions, use the [REST Identity API](/references/rest-apis/rest-identity-api-v2/#get-defined-permissions) to query defined permissions in your system.
 
 ### Usage Examples
@@ -428,6 +408,7 @@ while True:
 - Verify that **Identity Integration Enabled** is set to `true`
 - Check that the container has been granted the necessary permissions in **Container Permissions**
 - Ensure the container is reading the environment variables correctly
+- If Kura firewall is installed and enabled, allow traffic from container networks (for example `docker0` or user-defined Docker bridges) to the Kura REST API port
 - Check container logs for authentication errors
 
 **Basic authentication fails:**

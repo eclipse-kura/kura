@@ -452,7 +452,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                     final IdentityConfiguration configuration = new IdentityConfiguration(candidateName,
                             Arrays.asList(passwordConfiguration, assignedPermissions));
 
-                    ContainerInstance.this.identityService.createTemporaryIdentity(configuration, Duration.ofDays(365));
+                    ContainerInstance.this.identityService.createTemporaryIdentity(candidateName, Duration.ofDays(365));
+                    ContainerInstance.this.identityService.updateIdentityConfiguration(configuration);
                     return candidateName;
 
                 } catch (final KuraException e) {

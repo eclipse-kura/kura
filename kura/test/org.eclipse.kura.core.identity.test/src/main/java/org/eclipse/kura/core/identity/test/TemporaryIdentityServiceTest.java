@@ -233,7 +233,8 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
             final IdentityConfiguration identityConfiguration = new IdentityConfiguration(this.identityName,
                     List.of(assignedPermissions));
 
-            this.identityService.createTemporaryIdentity(identityConfiguration, Duration.ofHours(1));
+            this.identityService.createTemporaryIdentity(this.identityName, Duration.ofHours(1));
+            this.identityService.updateIdentityConfiguration(identityConfiguration);
             this.createdIdentities.add(this.identityName);
         } catch (KuraException e) {
             fail("Failed to create temporary identity for test setup");
@@ -253,7 +254,8 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
             final IdentityConfiguration identityConfiguration = new IdentityConfiguration(this.identityName,
                     List.of(assignedPermissions, passwordConfiguration));
 
-            this.identityService.createTemporaryIdentity(identityConfiguration, Duration.ofHours(1));
+            this.identityService.createTemporaryIdentity(this.identityName, Duration.ofHours(1));
+            this.identityService.updateIdentityConfiguration(identityConfiguration);
             this.createdIdentities.add(this.identityName);
         } catch (KuraException e) {
             fail("Failed to create temporary identity for test setup: " + e.getMessage());
@@ -268,7 +270,8 @@ public class TemporaryIdentityServiceTest extends IdentityServiceTestBase {
             final IdentityConfiguration identityConfiguration = new IdentityConfiguration(this.identityName,
                     List.of(assignedPermissions));
 
-            this.identityService.createTemporaryIdentity(identityConfiguration, Duration.ofHours(1));
+            this.identityService.createTemporaryIdentity(this.identityName, Duration.ofHours(1));
+            this.identityService.updateIdentityConfiguration(identityConfiguration);
             this.createdIdentities.add(this.identityName);
             return null;
         });

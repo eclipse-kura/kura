@@ -261,16 +261,21 @@ public class ContainerIdentityIntegrationTest {
         doAnswer(invocation -> {
             this.createCount.incrementAndGet();
 
-            // Extract identity name and password from configuration (first argument)
-            IdentityConfiguration config = invocation.getArgument(0);
-            this.capturedIdentityNames.add(config.getName());
+            final String identityName = invocation.getArgument(0);
+            this.capturedIdentityNames.add(identityName);
+
+            return null; // API returns void
+        }).when(this.identityService).createTemporaryIdentity(
+                this.identityNameCaptor.capture(), this.durationCaptor.capture());
+
+        doAnswer(invocation -> {
+            final IdentityConfiguration config = invocation.getArgument(0);
             final char[] newPassword = config.getComponent(PasswordConfiguration.class).orElseThrow()
                     .getNewPassword().orElseThrow();
             this.capturedPasswords.add(new String(newPassword));
 
-            return null; // API returns void
-        }).when(this.identityService).createTemporaryIdentity(
-                this.identityConfigCaptor.capture(), this.durationCaptor.capture());
+            return null;
+        }).when(this.identityService).updateIdentityConfiguration(this.identityConfigCaptor.capture());
 
         doAnswer(invocation -> {
             this.deleteCount.incrementAndGet();
@@ -305,22 +310,27 @@ public class ContainerIdentityIntegrationTest {
         doAnswer(invocation -> {
             this.createCount.incrementAndGet();
 
-            final IdentityConfiguration config = invocation.getArgument(0);
-            this.capturedIdentityNames.add(config.getName());
-            final char[] newPassword = config.getComponent(PasswordConfiguration.class).orElseThrow()
-                    .getNewPassword().orElseThrow();
-            this.capturedPasswords.add(new String(newPassword));
+            final String identityName = invocation.getArgument(0);
+            this.capturedIdentityNames.add(identityName);
 
             final String expectedBaseName = "container_" + CONTAINER_NAME.replace("-", "_");
-            if (!conflictRaised.get() && expectedBaseName.equals(config.getName())) {
+            if (!conflictRaised.get() && expectedBaseName.equals(identityName)) {
                 conflictRaised.set(true);
                 throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
-                        "An identity with name '" + config.getName() + "' already exists");
+                        "An identity with name '" + identityName + "' already exists");
             }
 
             return null;
         }).when(this.identityService).createTemporaryIdentity(
-                this.identityConfigCaptor.capture(), this.durationCaptor.capture());
+                this.identityNameCaptor.capture(), this.durationCaptor.capture());
+
+        doAnswer(invocation -> {
+            final IdentityConfiguration config = invocation.getArgument(0);
+            final char[] newPassword = config.getComponent(PasswordConfiguration.class).orElseThrow()
+                    .getNewPassword().orElseThrow();
+            this.capturedPasswords.add(new String(newPassword));
+            return null;
+        }).when(this.identityService).updateIdentityConfiguration(this.identityConfigCaptor.capture());
 
         doAnswer(invocation -> {
             this.deleteCount.incrementAndGet();
@@ -416,12 +426,16 @@ public class ContainerIdentityIntegrationTest {
 
         final String expectedIdentityName = "container_" + CONTAINER_NAME.replace("-", "_");
         verify(this.identityService).createTemporaryIdentity(
-                this.identityConfigCaptor.capture(), this.durationCaptor.capture());
+                this.identityNameCaptor.capture(), this.durationCaptor.capture());
+
+        final String createdIdentityName = this.identityNameCaptor.getValue();
+        assertEquals("Identity name should match expected", expectedIdentityName, createdIdentityName);
+
+        verify(this.identityService).updateIdentityConfiguration(this.identityConfigCaptor.capture());
 
         // Verify identity name from configuration
         IdentityConfiguration config = this.identityConfigCaptor.getValue();
-        assertTrue("Identity name should match expected",
-                config.getName().equals(expectedIdentityName));
+        assertEquals("Identity name should match expected", expectedIdentityName, config.getName());
 
         // Verify permissions from IdentityConfiguration
         AssignedPermissions assignedPermissions = config.getComponent(AssignedPermissions.class).orElseThrow();
@@ -437,10 +451,9 @@ public class ContainerIdentityIntegrationTest {
         awaitCounterAtLeast(this.createCount, 1);
 
         verify(this.identityService).createTemporaryIdentity(
-                this.identityConfigCaptor.capture(), this.durationCaptor.capture());
+                this.identityNameCaptor.capture(), this.durationCaptor.capture());
 
-        final IdentityConfiguration config = this.identityConfigCaptor.getValue();
-        assertEquals("Identity name should be normalized", expectedIdentityName, config.getName());
+        assertEquals("Identity name should be normalized", expectedIdentityName, this.identityNameCaptor.getValue());
     }
 
     private void thenStartContainerReceivesTokenEnvironment() throws Exception {

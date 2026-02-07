@@ -120,7 +120,14 @@ public class IdentityServiceImpl implements IdentityService {
 
     @Override
     public synchronized boolean createIdentity(final String name) throws KuraException {
-        if (this.userAdminHelper.getUser(name).isPresent()) {
+        return createIdentity(new IdentityConfiguration(name, Collections.emptyList()));
+    }
+
+    @Override
+    public synchronized boolean createIdentity(final IdentityConfiguration configuration) throws KuraException {
+        final String name = configuration.getName();
+
+        if (this.temporaryIdentityStore.exists(name) || this.userAdminHelper.getUser(name).isPresent()) {
             return false;
         }
 
@@ -128,6 +135,11 @@ public class IdentityServiceImpl implements IdentityService {
             ValidationUtil.validateNewIdentityName(name);
 
             this.userAdminHelper.createUser(name);
+
+            if (!configuration.getComponents().isEmpty()) {
+                validateIdentityConfiguration(configuration);
+                this.userAdminIdentityStore.updateIdentityConfiguration(configuration);
+            }
         }, "Create identity " + name);
 
         return true;
@@ -394,13 +406,9 @@ public class IdentityServiceImpl implements IdentityService {
         }
     }
 
-    // New unified temporary identity methods (IdentityService interface)
-
     @Override
-    public synchronized void createTemporaryIdentity(IdentityConfiguration configuration,
-            Duration lifetime) throws KuraException {
-
-        final String identityName = configuration.getName();
+    public synchronized void createTemporaryIdentity(final String identityName, final Duration lifetime)
+            throws KuraException {
 
         // Check if identity already exists (temporary or regular)
         if (this.temporaryStore.exists(identityName)) {
@@ -420,10 +428,8 @@ public class IdentityServiceImpl implements IdentityService {
                         "Temporary identity lifetime must be positive");
             }
 
-            validateIdentityConfiguration(configuration);
-
-            // Process the configuration to hash passwords before storage
-            this.temporaryIdentityStore.createIdentity(configuration, lifetime);
+            this.temporaryIdentityStore.createIdentity(new IdentityConfiguration(identityName, Collections.emptyList()),
+                    lifetime);
 
         }, "Create temporary identity " + identityName);
     }

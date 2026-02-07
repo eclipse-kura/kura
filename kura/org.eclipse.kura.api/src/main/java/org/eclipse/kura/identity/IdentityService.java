@@ -34,76 +34,101 @@ public interface IdentityService {
     /**
      * Creates a new identity with the given name.
      * 
-     * @param identityName the name of the identity to be created.
+     * @param identityName
+     *            the name of the identity to be created.
      * @return {@code true} if the identity with the given name has been created as
      *         part of the method call or {@code false} if the identity already
-     *         exist.
-     * @throws KuraException if a failure occurs in creating the identity.
+     *         exists.
+     * @throws KuraException
+     *             if a failure occurs in creating the identity.
      */
     public boolean createIdentity(final String identityName) throws KuraException;
 
     /**
+     * Creates a new identity using the provided configuration.
+     * 
+     * @param identityConfiguration
+     *            the identity configuration including identity
+     *            name and optional configuration components.
+     * @return {@code true} if the identity with the given name has been created as
+     *         part of the method call or {@code false} if the identity already
+     *         exists.
+     * @throws KuraException
+     *             if a failure occurs in creating the identity.
+     * @since 2.8.0
+     */
+    public boolean createIdentity(final IdentityConfiguration identityConfiguration) throws KuraException;
+
+    /**
      * Deletes the identity with the given name, including temporary identities.
      * 
-     * @param identityName the name of the identity to be deleted.
+     * @param identityName
+     *            the name of the identity to be deleted.
      * @return {@code true} if the identity with the given name has been deleted as
      *         part of the method call or {@code false} if the identity does not
      *         exist.
-     * @throws KuraException if a failure occurs in deleting the identity.
+     * @throws KuraException
+     *             if a failure occurs in deleting the identity.
      */
     public boolean deleteIdentity(final String identityName) throws KuraException;
 
     /**
      * Returns the configuration of all existing identities.
      * 
-     * @param componentsToReturn the set of {@link IdentityConfigurationComponent}
-     *                           types to be returned. If the set is empty a
-     *                           {@link IdentityConfiguration} will be returned for
-     *                           each defined identity with an empty component list.
-     *                           This can be used to get the name for all defined
-     *                           identities.
+     * @param componentsToReturn
+     *            the set of {@link IdentityConfigurationComponent}
+     *            types to be returned. If the set is empty a
+     *            {@link IdentityConfiguration} will be returned for
+     *            each defined identity with an empty component list.
+     *            This can be used to get the name for all defined
+     *            identities.
      * 
      * @return the list of {@link IdentityConfiguration}s. An empty list will be
      *         returned if no identities are defined.
-     * @throws KuraException if a failure occurs in retrieving identity
-     *                       configurations.
+     * @throws KuraException
+     *             if a failure occurs in retrieving identity
+     *             configurations.
      */
     public List<IdentityConfiguration> getIdentitiesConfiguration(
-            Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn)
-            throws KuraException;
+            Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws KuraException;
 
     /**
      * Returns the configuration of the identity with the given name.
      * 
-     * @param identityName       the identity name.
-     * @param componentsToReturn the set of {@link IdentityConfigurationComponent}
-     *                           types to be returned.
+     * @param identityName
+     *            the identity name.
+     * @param componentsToReturn
+     *            the set of {@link IdentityConfigurationComponent}
+     *            types to be returned.
      * @return the configuration of the requested identity or an empty optional if
      *         the identity does not exist.
-     * @throws KuraException if a failure occurs in retrieving identity
-     *                       configuration.
+     * @throws KuraException
+     *             if a failure occurs in retrieving identity
+     *             configuration.
      */
     public Optional<IdentityConfiguration> getIdentityConfiguration(final String identityName,
-            Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn)
-            throws KuraException;
+            Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws KuraException;
 
     /**
      * Returns the default configuration for the identity with the given name, this
      * method should succeed even if the identity does not exist. The result should
      * be the same configuration returned by the
-     * {@link IdentityService#getIdentityConfiguration(String, List)}
+     * {@link IdentityService#getIdentityConfiguration(String, Set)}
      * method for an identity that has just been created with the
      * {@link IdentityService#createIdentity(String)} method.
      * 
      * This method can be useful for example to allow a user interface to show the
      * initial identity configuration to the user before creating it.
      *
-     * @param identityName       the identity name.
-     * @param componentsToReturn the set of {@link IdentityConfigurationComponent}
-     *                           types to be returned.
+     * @param identityName
+     *            the identity name.
+     * @param componentsToReturn
+     *            the set of {@link IdentityConfigurationComponent}
+     *            types to be returned.
      * @return the default configuration for the requested identity
-     * @throws KuraException if a failure occurs in retrieving identity
-     *                       configuration.
+     * @throws KuraException
+     *             if a failure occurs in retrieving identity
+     *             configuration.
      */
     public IdentityConfiguration getIdentityDefaultConfiguration(final String identityName,
             Set<Class<? extends IdentityConfigurationComponent>> componentsToReturn) throws KuraException;
@@ -112,13 +137,14 @@ public interface IdentityService {
      * Validates the provided identity configuration without performing any
      * change to the system.
      * 
-     * @param identityConfiguration the identity configuration that should be
-     *                              validated.
-     * @throws KuraException if the provided identity configuration is not
-     *                       valid.
+     * @param identityConfiguration
+     *            the identity configuration that should be
+     *            validated.
+     * @throws KuraException
+     *             if the provided identity configuration is not
+     *             valid.
      */
-    public void validateIdentityConfiguration(final IdentityConfiguration identityConfiguration)
-            throws KuraException;
+    public void validateIdentityConfiguration(final IdentityConfiguration identityConfiguration) throws KuraException;
 
     /**
      * Updates the configuration of the given identity for the provided
@@ -126,22 +152,25 @@ public interface IdentityService {
      * The configuration of the identities or identity
      * components that have not been provided will not be modified.
      * 
-     * @param identityConfiguration the identity configuration that should be
-     *                              updated.
-     * @throws KuraException if a failure occurs updating identity
-     *                       configuration.
+     * @param identityConfiguration
+     *            the identity configuration that should be
+     *            updated.
+     * @throws KuraException
+     *             if a failure occurs updating identity
+     *             configuration.
      */
-    public void updateIdentityConfiguration(final IdentityConfiguration identityConfiguration)
-            throws KuraException;
+    public void updateIdentityConfiguration(final IdentityConfiguration identityConfiguration) throws KuraException;
 
     /**
      * Defines a new permission.
      * 
-     * @param permission the permission to be created.
+     * @param permission
+     *            the permission to be created.
      * @return {@code true} if the permission has been created as
      *         part of the method call or {@code false} if the permission already
      *         exist.
-     * @throws KuraException if a failure occurs creating the permission.
+     * @throws KuraException
+     *             if a failure occurs creating the permission.
      */
     public boolean createPermission(final Permission permission) throws KuraException;
 
@@ -149,11 +178,13 @@ public interface IdentityService {
      * Removes an existing permission. The permission will also be removed from all
      * identities assigned to it.
      * 
-     * @param permission the permission to be deleted.
+     * @param permission
+     *            the permission to be deleted.
      * @return {@code true} if the permission has been deleted as
      *         part of the method call or {@code false} if the permission does not
      *         exist.
-     * @throws KuraException if a failure occurs deleting the permission.
+     * @throws KuraException
+     *             if a failure occurs deleting the permission.
      */
     public boolean deletePermission(final Permission permission) throws KuraException;
 
@@ -163,7 +194,8 @@ public interface IdentityService {
      * 
      * @return the set of permissions that are currently defined within the
      *         framework.
-     * @throws KuraException if a failure occurs retrieving the permission set.
+     * @throws KuraException
+     *             if a failure occurs retrieving the permission set.
      */
     public Set<Permission> getPermissions() throws KuraException;
 
@@ -171,9 +203,11 @@ public interface IdentityService {
      * Computes a {@link PasswordHash} for the given plaintext password. The
      * password array will be overwritten at the end of the operation.
      * 
-     * @param password the plaintext password.
+     * @param password
+     *            the plaintext password.
      * @return the computed password hash.
-     * @throws KuraException if a failure occurs computing the password hash
+     * @throws KuraException
+     *             if a failure occurs computing the password hash
      */
     public PasswordHash computePasswordHash(final char[] password) throws KuraException;
 
@@ -183,9 +217,10 @@ public interface IdentityService {
      * 
      * @param identityName
      * @param password
-     * @throws KuraException if the passwords do not match of if a failure occurs
-     *                       while
-     *                       performing the check.
+     * @throws KuraException
+     *             if the passwords do not match of if a failure occurs
+     *             while
+     *             performing the check.
      */
     public void checkPassword(final String identityName, final char[] password) throws KuraException;
 
@@ -195,30 +230,31 @@ public interface IdentityService {
      *
      * @param identityName
      * @param permission
-     * @throws KuraException if the provided permissio is not currently assigned to
-     *                       the given identity or if occurs while performing the
-     *                       check.
+     * @throws KuraException
+     *             if the provided permissio is not currently assigned to
+     *             the given identity or if occurs while performing the
+     *             check.
      *
      */
     public void checkPermission(final String identityName, final Permission permission) throws KuraException;
 
     /**
-     * Creates a temporary identity that is not persisted and has automatic expiration.
-     * Temporary identities behave like regular identities but are stored in-memory only
-     * and will be automatically removed after the specified lifetime period.
-     * The identity name is extracted from {@link IdentityConfiguration#getName()}.
-     * If a {@link PasswordConfiguration} with a new password is provided, the password
-     * will be validated and hashed before storage.
+     * Creates a temporary identity that is not persisted and has automatic
+     * expiration. Temporary identities behave like regular identities but are
+     * stored in-memory only and are automatically removed after the specified
+     * lifetime period.
      *
-     * @param configuration the identity configuration including the identity name, passwords,
-     *                      certificates, tokens, permissions, etc.
-     * @param lifetime the duration before automatic expiration. The identity will be automatically
-     *                 removed after this period.
-     * @throws KuraException if a failure occurs in creating the temporary identity or if an identity
-     *                       with the given name already exists (either regular or temporary).
+     * @param identityName
+     *            the name of the temporary identity to create.
+     * @param lifetime
+     *            the duration before automatic expiration. The identity
+     *            will be automatically removed after this period.
+     * @throws KuraException
+     *             if a failure occurs in creating the temporary identity
+     *             or if an identity with the given name already exists
+     *             (either regular or temporary).
      * @since 2.8.0
      */
-    public void createTemporaryIdentity(final IdentityConfiguration configuration,
-            final Duration lifetime) throws KuraException;
+    public void createTemporaryIdentity(final String identityName, final Duration lifetime) throws KuraException;
 
 }

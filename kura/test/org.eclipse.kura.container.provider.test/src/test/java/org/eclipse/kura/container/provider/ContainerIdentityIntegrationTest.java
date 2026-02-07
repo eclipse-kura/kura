@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -66,6 +67,7 @@ public class ContainerIdentityIntegrationTest {
     private static final String CONTAINER_ID = "container-id";
     private static final String SECOND_CONTAINER_ID = "container-id-2";
     private static final String UPDATED_CONTAINER_NAME = CONTAINER_NAME + "-v2";
+    private static final String INVALID_CONTAINER_NAME = "....@@@....";
 
     private ContainerInstance containerInstance;
     private ContainerOrchestrationService containerOrchestrationService;
@@ -213,14 +215,42 @@ public class ContainerIdentityIntegrationTest {
         thenTemporaryPasswordIsCleared();
     }
 
+    @Test
+    public void generatesValidTemporaryIdentityNameFromInvalidContainerName() throws Exception {
+        givenIdentityIntegrationIsEnabled(INVALID_CONTAINER_NAME);
+        givenTemporaryIdentityServiceProvidesPassword();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivated();
+
+        thenTemporaryIdentityUsesName("container_auto");
+        thenStartContainerReceivesTokenEnvironment();
+    }
+
+    @Test
+    public void retriesTemporaryIdentityCreationWhenNameAlreadyExists() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentityServiceRetriesNameConflict();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivated();
+
+        thenTemporaryIdentityCreationIsRetriedWithSuffixedName();
+        thenStartContainerReceivesTokenEnvironment();
+    }
+
     /*
      * GIVEN
      */
 
     private void givenIdentityIntegrationIsEnabled() {
+        givenIdentityIntegrationIsEnabled(CONTAINER_NAME);
+    }
+
+    private void givenIdentityIntegrationIsEnabled(final String containerName) {
         this.properties.put("container.enabled", true);
-        this.properties.put("container.name", CONTAINER_NAME);
-        this.properties.put("kura.service.pid", CONTAINER_NAME);
+        this.properties.put("container.name", containerName);
+        this.properties.put("kura.service.pid", containerName);
         this.properties.put("container.image", CONTAINER_IMAGE);
         this.properties.put("container.image.tag", CONTAINER_TAG);
         this.properties.put("container.identity.enabled", true);
@@ -267,6 +297,35 @@ public class ContainerIdentityIntegrationTest {
             final int current = Math.min(index.getAndIncrement(), containerIds.length - 1);
             return containerIds[current];
         }).when(this.containerOrchestrationService).startContainer(this.configurationCaptor.capture());
+    }
+
+    private void givenTemporaryIdentityServiceRetriesNameConflict() throws Exception {
+        final AtomicBoolean conflictRaised = new AtomicBoolean(false);
+
+        doAnswer(invocation -> {
+            this.createCount.incrementAndGet();
+
+            final IdentityConfiguration config = invocation.getArgument(0);
+            this.capturedIdentityNames.add(config.getName());
+            final char[] newPassword = config.getComponent(PasswordConfiguration.class).orElseThrow()
+                    .getNewPassword().orElseThrow();
+            this.capturedPasswords.add(new String(newPassword));
+
+            final String expectedBaseName = "container_" + CONTAINER_NAME.replace("-", "_");
+            if (!conflictRaised.get() && expectedBaseName.equals(config.getName())) {
+                conflictRaised.set(true);
+                throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
+                        "An identity with name '" + config.getName() + "' already exists");
+            }
+
+            return null;
+        }).when(this.identityService).createTemporaryIdentity(
+                this.identityConfigCaptor.capture(), this.durationCaptor.capture());
+
+        doAnswer(invocation -> {
+            this.deleteCount.incrementAndGet();
+            return true;
+        }).when(this.identityService).deleteIdentity(anyString());
     }
 
     private void givenTemporaryPasswordIsSet() throws Exception {
@@ -374,16 +433,28 @@ public class ContainerIdentityIntegrationTest {
                 permissions.stream().anyMatch(permission -> "rest.write".equals(permission.getName())));
     }
 
+    private void thenTemporaryIdentityUsesName(final String expectedIdentityName) throws Exception {
+        awaitCounterAtLeast(this.createCount, 1);
+
+        verify(this.identityService).createTemporaryIdentity(
+                this.identityConfigCaptor.capture(), this.durationCaptor.capture());
+
+        final IdentityConfiguration config = this.identityConfigCaptor.getValue();
+        assertEquals("Identity name should be normalized", expectedIdentityName, config.getName());
+    }
+
     private void thenStartContainerReceivesTokenEnvironment() throws Exception {
         assertTrue("Container start was not invoked", this.startLatch.await(2, TimeUnit.SECONDS));
 
         final ContainerConfiguration configuration = this.configurationCaptor.getValue();
         final List<String> envVars = configuration.getContainerEnvVars();
+        final String latestIdentityName = this.capturedIdentityNames.get(this.capturedIdentityNames.size() - 1);
+        final String latestPassword = this.capturedPasswords.get(this.capturedPasswords.size() - 1);
 
         assertTrue("Identity name var missing",
-                envVars.contains("KURA_IDENTITY_NAME=" + this.capturedIdentityNames.get(0)));
+                envVars.contains("KURA_IDENTITY_NAME=" + latestIdentityName));
         assertTrue("Password var missing",
-                envVars.contains("KURA_IDENTITY_PASSWORD=" + this.capturedPasswords.get(0)));
+                envVars.contains("KURA_IDENTITY_PASSWORD=" + latestPassword));
         // Check that KURA_REST_BASE_URL is set (now dynamic, not hardcoded to localhost:8080)
         assertTrue("Base URL env var missing",
                 envVars.stream().anyMatch(envVar -> envVar.startsWith("KURA_REST_BASE_URL=")));
@@ -422,6 +493,15 @@ public class ContainerIdentityIntegrationTest {
 
         assertTrue("Latest start should include refreshed token",
                 envVars.contains("KURA_IDENTITY_PASSWORD=" + latestPassword));
+    }
+
+    private void thenTemporaryIdentityCreationIsRetriedWithSuffixedName() throws Exception {
+        awaitCounterAtLeast(this.createCount, 2);
+
+        final String expectedBaseName = "container_" + CONTAINER_NAME.replace("-", "_");
+        assertEquals("First identity creation should use base name", expectedBaseName, this.capturedIdentityNames.get(0));
+        assertEquals("Second identity creation should use suffixed name", expectedBaseName + "_1",
+                this.capturedIdentityNames.get(1));
     }
 
     private void thenTemporaryPasswordIsCleared() throws Exception {

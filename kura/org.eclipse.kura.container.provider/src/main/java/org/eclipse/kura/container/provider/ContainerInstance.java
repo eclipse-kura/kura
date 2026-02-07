@@ -39,6 +39,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -67,6 +68,9 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private static final Logger logger = LoggerFactory.getLogger(ContainerInstance.class);
 
     private static final ValidationResult FAILED_VALIDATION = new ValidationResult();
+    private static final String CONTAINER_IDENTITY_PREFIX = "container_";
+    private static final int MAX_IDENTITY_NAME_LENGTH = 255;
+    private static final int MAX_IDENTITY_NAME_GENERATION_ATTEMPTS = 10;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -412,23 +416,11 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                     final Set<Permission> permissions = options.getContainerPermissions().stream().map(Permission::new)
                             .collect(Collectors.toSet());
 
-                    final String identityName = "container_" + options.getContainerName().replace("-", "_");
-
                     // Generate password
                     final String password = new String(PasswordGenerator
                             .generatePassword(passwordStrengthVerificationService.getPasswordStrengthRequirements()));
 
-                    // Create identity configuration (computePasswordHash will clear this char[])
-                    final PasswordConfiguration passwordConfiguration = new PasswordConfiguration(false, true,
-                            Optional.of(password.toCharArray()), Optional.empty());
-                    final AssignedPermissions assignedPermissions = new AssignedPermissions(permissions);
-                    final IdentityConfiguration configuration = new IdentityConfiguration(identityName,
-                            Arrays.asList(passwordConfiguration, assignedPermissions));
-
-                    // Create temporary identity with very long lifetime (365 days)
-                    // The identity lifetime matches the container lifecycle - cleanup happens when container stops
-                    // The duration is a safety net for cases where cleanup fails
-                    ContainerInstance.this.identityService.createTemporaryIdentity(configuration, Duration.ofDays(365));
+                    final String identityName = createTemporaryIdentityWithValidName(options, permissions, password);
 
                     // Store identity name and password for env injection (fresh char[] from same string)
                     ContainerInstance.this.currentTemporaryIdentityName.set(identityName);
@@ -443,6 +435,76 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                     clearTemporaryPassword();
                 }
             }
+        }
+
+        private String createTemporaryIdentityWithValidName(final ContainerInstanceOptions options,
+                final Set<Permission> permissions, final String password) throws KuraException {
+
+            final String baseIdentityName = sanitizeContainerIdentityName(options.getContainerName());
+
+            for (int attempt = 0; attempt < MAX_IDENTITY_NAME_GENERATION_ATTEMPTS; attempt++) {
+                final String candidateName = buildIdentityNameCandidate(baseIdentityName, attempt);
+
+                try {
+                    final PasswordConfiguration passwordConfiguration = new PasswordConfiguration(false, true,
+                            Optional.of(password.toCharArray()), Optional.empty());
+                    final AssignedPermissions assignedPermissions = new AssignedPermissions(permissions);
+                    final IdentityConfiguration configuration = new IdentityConfiguration(candidateName,
+                            Arrays.asList(passwordConfiguration, assignedPermissions));
+
+                    ContainerInstance.this.identityService.createTemporaryIdentity(configuration, Duration.ofDays(365));
+                    return candidateName;
+
+                } catch (final KuraException e) {
+                    if (!shouldRetryIdentityNameGeneration(e, attempt)) {
+                        throw e;
+                    }
+                }
+            }
+
+            throw new KuraException(KuraErrorCode.INTERNAL_ERROR,
+                    "Unable to generate a valid temporary identity name for container " + options.getContainerName());
+        }
+
+        private String sanitizeContainerIdentityName(final String containerName) {
+            String safeName = containerName.replaceAll("[^a-zA-Z0-9._]", "_");
+            safeName = safeName.replaceAll("[._]{2,}", "_");
+            safeName = safeName.replaceAll("^[._]+", "").replaceAll("[._]+$", "");
+
+            if (safeName.isEmpty()) {
+                safeName = "auto";
+            }
+
+            return CONTAINER_IDENTITY_PREFIX + safeName;
+        }
+
+        private String buildIdentityNameCandidate(final String baseIdentityName, final int attempt) {
+            final String candidate = attempt == 0 ? baseIdentityName : baseIdentityName + "_" + attempt;
+
+            if (candidate.length() <= MAX_IDENTITY_NAME_LENGTH) {
+                return candidate;
+            }
+
+            if (attempt == 0) {
+                return candidate.substring(0, MAX_IDENTITY_NAME_LENGTH);
+            }
+
+            final String suffix = "_" + attempt;
+            return candidate.substring(0, MAX_IDENTITY_NAME_LENGTH - suffix.length()) + suffix;
+        }
+
+        private boolean shouldRetryIdentityNameGeneration(final KuraException e, final int attempt) {
+            if (attempt == MAX_IDENTITY_NAME_GENERATION_ATTEMPTS - 1) {
+                return false;
+            }
+
+            if (!KuraErrorCode.INVALID_PARAMETER.equals(e.getCode())) {
+                return false;
+            }
+
+            final String message = e.getMessage();
+            return message != null && (message.contains("Identity name") || message.contains("identity with name")
+                    || message.contains("already exists"));
         }
 
         @Override

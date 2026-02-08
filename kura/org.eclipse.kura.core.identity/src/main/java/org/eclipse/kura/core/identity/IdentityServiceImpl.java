@@ -120,6 +120,7 @@ public class IdentityServiceImpl implements IdentityService {
 
     @Override
     public synchronized boolean createIdentity(final String name) throws KuraException {
+        ValidationUtil.validateNewIdentityName(name);
         return createIdentity(new IdentityConfiguration(name, Collections.emptyList()));
     }
 
@@ -127,13 +128,13 @@ public class IdentityServiceImpl implements IdentityService {
     public synchronized boolean createIdentity(final IdentityConfiguration configuration) throws KuraException {
         final String name = configuration.getName();
 
+        ValidationUtil.validateNewIdentityName(name);
+
         if (this.temporaryIdentityStore.exists(name) || this.userAdminHelper.getUser(name).isPresent()) {
             return false;
         }
 
         audit(() -> {
-            ValidationUtil.validateNewIdentityName(name);
-
             this.userAdminHelper.createUser(name);
 
             if (!configuration.getComponents().isEmpty()) {
@@ -410,6 +411,8 @@ public class IdentityServiceImpl implements IdentityService {
     public synchronized void createTemporaryIdentity(final String identityName, final Duration lifetime)
             throws KuraException {
 
+        ValidationUtil.validateNewIdentityName(identityName);
+
         // Check if identity already exists (temporary or regular)
         if (this.temporaryStore.exists(identityName)) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
@@ -421,8 +424,6 @@ public class IdentityServiceImpl implements IdentityService {
         }
 
         audit(() -> {
-            ValidationUtil.validateNewIdentityName(identityName);
-
             if (lifetime == null || lifetime.isZero() || lifetime.isNegative()) {
                 throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
                         "Temporary identity lifetime must be positive");

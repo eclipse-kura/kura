@@ -22,7 +22,7 @@ Setup a Raspberry Pi as shown in [GPIO Driver](../../connect-field-devices/gpio-
 
     * Click "Apply".
 
-4. As in point 3., create a new asset as shown below. Change the gpio parameters accordingly to your setup.
+4. As in point 3., create a new asset as shown below. Change the GPIO parameters according to your setup.
 
     ![GPIO Example Led Feedback Asset](./images/gpio-example-led-feedback-asset.png)
 

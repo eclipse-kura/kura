@@ -12,7 +12,7 @@ The GPIO Driver includes the following features:
 
 ## Installation
 
-As the other Drivers supported by Eclipse Kura, it is distributed as a deployment package on the Eclipse Marketplace for Kura [3.x](https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-3xy) and [4.x/5.x](https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](/kura/administration/application-management.md).
+Like other drivers supported by Eclipse Kura, it is distributed as a Debian package and can be installed by following the instructions provided [here](/kura/administration/application-management.md).
 
 ## Instance creation
 
@@ -30,6 +30,7 @@ The GPIO Driver channel can be configured with the following parameters:
 - **listen**: when selected, a listener will be attached to this channel. Any event on the channel will be reported using a callback and the value will be emitted.
 - **resource.name**: the name of the GPIO resource as reported by the GPIO Service. The `#select resource` selection has no effect on the channel.
 - **resource.direction**: the direction of the GPIO. Possible values are `INPUT`and `OUTPUT`. The `#select direction` selection has no effect on the channel.
+- **resource.mode**: the mode of the GPIO. Possible values are `INPUT_PULL_UP` and `INPUT_PULL_DOWN` for input pins and `OUTPUT_OPEN_DRAIN` and `OUTPUT_PUSH_PULL` for output ones. The `#select mode` selection has no effect on the channel.
 - **resource.trigger**: the type of event that triggers the listener, if selected. Possible values are:
 
   - `NONE`: no event will trigger the listener.

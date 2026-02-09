@@ -32,7 +32,7 @@ Setup a Raspberry Pi as shown in [GPIO Driver](../../connect-field-devices/gpio-
 
 6. Add a new "Timer" component and configure the interval at which the LED will be toggled.
 
-7. Add a new "Script Filter" (it can installed as Debian package) and configure it with the following script:
+7. Add a new "Script Filter" (which can be installed as a Debian package) and configure it with the following script:
 
     ```javascript
     // create a persistent counter

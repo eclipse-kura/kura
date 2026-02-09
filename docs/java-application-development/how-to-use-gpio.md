@@ -14,7 +14,7 @@ public List<KuraGPIODescription> getAvailablePinDescriptions();
 
 The **KuraGPIODescription** class contains a map of GPIO properties (such as name, controller, line, etc.) and provides a human-readable name for the pin through the `getDisplayName` method.
 
-To acquiore one or more GPIO pins, use one of the following methods:
+To acquire one or more GPIO pins, use one of the following methods:
 
 ```java
 public List<KuraGPIOPin> getPins(Map<String, String> description);

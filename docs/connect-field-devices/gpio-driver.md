@@ -12,7 +12,7 @@ The GPIO Driver includes the following features:
 
 ## Installation
 
-As the other Drivers supported by Eclipse Kura, it is distributed as a Debian package. It can be installed following the instructions provided [here](/kura/administration/application-management.md).
+Like other drivers supported by Eclipse Kura, it is distributed as a Debian package and can be installed by following the instructions provided [here](/kura/administration/application-management.md).
 
 ## Instance creation
 

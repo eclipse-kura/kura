@@ -82,7 +82,7 @@ List<KuraGPIOPin> pins = this.gpioService.getPins(description);
 
 If one or more properties (_controller_, _line_ or _name_) are omitted, all GPIOs matching the specified criteria are returned. For example, if only the _controller_ property is set, all the GPIOs belonging to that gpiochip are retrieved.
 
-For backword compatibility, the deprecated `getPinByTerminal` can be still used. In this case, the pin is identified by a numeric value calculated as follows:
+For backward compatibility, the deprecated `getPinByTerminal` can still be used. In this case, the pin is identified by a numeric value calculated as follows:
 
 ```
 terminal = gpiochip * 1000 + line

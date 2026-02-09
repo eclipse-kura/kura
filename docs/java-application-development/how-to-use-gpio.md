@@ -4,7 +4,7 @@ Eclipse Kura provides a **GPIO Service** that allows applications to interact wi
 
 ## GPIO Service
 
-Access to GPIO resources is granted by the [`GPIOService`](https://github.com/eclipse-kura/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/gpio/GPIOService.java). Once obtained, this service can be used to list the GPIOs available in the system and to acquire sets or individual GPIO Pins, configuring them either as digital inputs or a digital outputs.
+Access to GPIO resources is granted by the [`GPIOService`](https://github.com/eclipse-kura/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/gpio/GPIOService.java). Once obtained, this service can be used to list the GPIOs available in the system and to acquire sets or individual GPIO Pins, configuring them either as digital inputs or digital outputs.
 
 To retrieve the list of GPIOs available on the system, this method is provided by the `GPIOService`:
 

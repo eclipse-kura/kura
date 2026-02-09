@@ -23,7 +23,7 @@ public List<KuraGPIOPin> getPins(Map<String, String> description, KuraGPIODirect
 
 The description map includes the properties used to identify the pin and they are implementation specific. The second method additionally attempts to configure the pin using the given [direction](https://github.com/eclipse-kura/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/gpio/KuraGPIODirection.java), [mode](https://github.com/eclipse-kura/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/gpio/KuraGPIOMode.java) and [trigger](https://github.com/eclipse-kura/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/gpio/KuraGPIOTrigger.java).
 
-The [`KuraGpioPin`](https://github.com/eclipse-kura/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/gpio/KuraGPIOPin.java) object is used to manipulate GPIO Pins and exposes methods to read the status of an input, or set the status of digital output as shown below.
+The [`KuraGPIOPin`](https://github.com/eclipse-kura/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/gpio/KuraGPIOPin.java) object is used to manipulate GPIO Pins and exposes methods to read the status of an input, or set the status of digital output as shown below.
 ```java
 //sets digital output value to high
 thePin.setValue(true);

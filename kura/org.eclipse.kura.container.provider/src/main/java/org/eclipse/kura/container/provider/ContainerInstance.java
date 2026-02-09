@@ -470,13 +470,32 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         private String sanitizeContainerIdentityName(final String containerName) {
             String safeName = containerName.replaceAll("[^a-zA-Z0-9._]", "_");
             safeName = safeName.replaceAll("[._]{2,}", "_");
-            safeName = safeName.replaceAll("^[._]+", "").replaceAll("[._]+$", "");
+            safeName = trimIdentityDelimiters(safeName);
 
             if (safeName.isEmpty()) {
                 safeName = "auto";
             }
 
             return CONTAINER_IDENTITY_PREFIX + safeName;
+        }
+
+        private String trimIdentityDelimiters(final String value) {
+            int start = 0;
+            int end = value.length();
+
+            while (start < end && isIdentityDelimiter(value.charAt(start))) {
+                start++;
+            }
+
+            while (end > start && isIdentityDelimiter(value.charAt(end - 1))) {
+                end--;
+            }
+
+            return value.substring(start, end);
+        }
+
+        private boolean isIdentityDelimiter(final char value) {
+            return value == '.' || value == '_';
         }
 
         private String buildIdentityNameCandidate(final String baseIdentityName, final int attempt) {
@@ -759,7 +778,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             return null;
         }
 
-        private String findSuitableNetworkAddress(Enumeration<NetworkInterface> nifs) throws Exception {
+        private String findSuitableNetworkAddress(Enumeration<NetworkInterface> nifs) throws SocketException {
             while (nifs.hasMoreElements()) {
                 NetworkInterface nif = nifs.nextElement();
                 String address = getAddressFromInterface(nif);
@@ -770,7 +789,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             return null;
         }
 
-        private String getAddressFromInterface(NetworkInterface nif) throws Exception {
+        private String getAddressFromInterface(NetworkInterface nif) throws SocketException {
             if (!isValidNetworkInterface(nif)) {
                 return null;
             }
@@ -786,7 +805,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             return null;
         }
 
-        private boolean isValidNetworkInterface(NetworkInterface nif) throws Exception {
+        private boolean isValidNetworkInterface(NetworkInterface nif) throws SocketException {
             return !nif.isLoopback() && nif.isUp() && !nif.isVirtual() && nif.getHardwareAddress() != null;
         }
 

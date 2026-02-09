@@ -83,13 +83,13 @@ public class TemporaryIdentityStore {
      * @param lifetime      the duration before automatic expiration
      */
     public void createIdentity(String name, IdentityConfiguration configuration, Duration lifetime) {
-        TemporaryIdentityRecord record = new TemporaryIdentityRecord(configuration, lifetime);
-        identities.put(name, record);
+        TemporaryIdentityRecord identityRecord = new TemporaryIdentityRecord(configuration, lifetime);
+        identities.put(name, identityRecord);
 
         // Schedule individual expiration
         scheduleExpiration(name, lifetime);
 
-        logger.info("Created temporary identity '{}' with expiration at {}", name, record.expiration);
+        logger.info("Created temporary identity '{}' with expiration at {}", name, identityRecord.expiration);
     }
 
     /**
@@ -99,20 +99,20 @@ public class TemporaryIdentityStore {
      * @return the identity configuration if found and not expired, empty otherwise
      */
     public Optional<IdentityConfiguration> getIdentity(String name) {
-        TemporaryIdentityRecord record = identities.get(name);
+        TemporaryIdentityRecord identityRecord = identities.get(name);
 
-        if (record == null) {
+        if (identityRecord == null) {
             return Optional.empty();
         }
 
-        if (record.isExpired()) {
+        if (identityRecord.isExpired()) {
             // Auto-cleanup expired identity
             identities.remove(name);
             logger.debug("Temporary identity '{}' has expired and was removed", name);
             return Optional.empty();
         }
 
-        return Optional.of(record.configuration);
+        return Optional.of(identityRecord.configuration);
     }
 
     /**
@@ -147,18 +147,18 @@ public class TemporaryIdentityStore {
      * @return true if the identity existed and was updated
      */
     public boolean updateIdentity(String name, IdentityConfiguration configuration) {
-        final TemporaryIdentityRecord record = identities.get(name);
-        if (record == null) {
+        final TemporaryIdentityRecord identityRecord = identities.get(name);
+        if (identityRecord == null) {
             return false;
         }
 
-        if (record.isExpired()) {
+        if (identityRecord.isExpired()) {
             identities.remove(name);
             logger.debug("Temporary identity '{}' has expired and was removed", name);
             return false;
         }
 
-        identities.put(name, new TemporaryIdentityRecord(configuration, record.expiration));
+        identities.put(name, new TemporaryIdentityRecord(configuration, identityRecord.expiration));
         return true;
     }
 

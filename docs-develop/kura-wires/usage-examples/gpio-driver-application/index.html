@@ -4615,7 +4615,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h2 id="configure-kura-wires-gpio-driver-application">Configure Kura Wires GPIO Driver Application</h2>
 <ol>
 <li>
-<p>Install the GPIO Driver from the <a href="https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-45">Eclipse Kura Marketplace</a>.</p>
+<p>Install the GPIO Driver as presented in the <a href="../../../connect-field-devices/gpio-driver/">GPIO Driver</a> page.</p>
 </li>
 <li>
 <p>On the Kura web interface, instantiate a GPIO Driver:</p>
@@ -4628,7 +4628,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>From the "Drivers and Assets" tab, add a new asset bound to the GPIO driver:</p>
 <ul>
 <li>Click on the "New Asset" button and fill the form with the "Asset Name" and selecting the driver created in step 2. as "Driver Name". Click "Apply" and a new asset will be listed under the GPIO driver.</li>
-<li>Click on the new asset and configure it, adding only one channel called <strong>LED</strong> as shown in the following picture:</li>
+<li>Click on the new asset and configure it, adding only one channel called <strong>LED</strong> as shown in the following picture. Change the gpio parameters accordingly to your setup.</li>
 </ul>
 <p><img alt="GPIO Example Led Asset" src="../images/gpio-example-led-asset.png" /></p>
 <ul>
@@ -4636,7 +4636,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 </li>
 <li>
-<p>As in point 3., create a new asset as shown below:</p>
+<p>As in point 3., create a new asset as shown below. Change the GPIO parameters according to your setup.</p>
 <p><img alt="GPIO Example Led Feedback Asset" src="../images/gpio-example-led-feedback-asset.png" /></p>
 <ul>
 <li>Click "Apply".</li>
@@ -4649,7 +4649,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>Add a new "Timer" component and configure the interval at which the LED will be toggled.</p>
 </li>
 <li>
-<p>Add a new "Script Filter" (it can be downloaded from the <a href="https://marketplace.eclipse.org/content/wires-script-filter-kura-45">Eclipse Marketplace</a> and configure it with the following script:</p>
+<p>Add a new "Script Filter" (which can be installed as a Debian package) and configure it with the following script:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">// create a persistent counter</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nx">counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">typeof</span><span class="p">(</span><span class="nx">counter</span><span class="p">)</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;undefined&#39;</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">0</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">counter</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nx">counter</span><span class="o">++</span>

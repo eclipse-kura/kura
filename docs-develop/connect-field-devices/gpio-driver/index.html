@@ -4691,7 +4691,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li>the trigger event can be configured directly through the Driver</li>
 </ul>
 <h2 id="installation">Installation</h2>
-<p>As the other Drivers supported by Eclipse Kura, it is distributed as a deployment package on the Eclipse Marketplace for Kura <a href="https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-3xy">3.x</a> and <a href="https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-4xy">4.x/5.x</a>. It can be installed following the instructions provided <a href="/kura/administration/application-management.md">here</a>.</p>
+<p>Like other drivers supported by Eclipse Kura, it is distributed as a Debian package and can be installed by following the instructions provided <a href="/kura/administration/application-management.md">here</a>.</p>
 <h2 id="instance-creation">Instance creation</h2>
 <p>A new GPIO Driver instance can be created either by clicking the <strong>New Driver</strong> button in the dedicated <strong>Drivers and Assets</strong> Web UI section or by clicking on the <strong>+</strong> button under <strong>Services</strong>. In both cases, the <code>org.eclipse.kura.driver.gpio</code> factory must be selected and a unique name must be provided for the new instance. 
 Once instantiated, the GPIO Driver is ready to use and no configuration is needed.</p>
@@ -4705,6 +4705,7 @@ Once instantiated, the GPIO Driver is ready to use and no configuration is neede
 <li><strong>listen</strong>: when selected, a listener will be attached to this channel. Any event on the channel will be reported using a callback and the value will be emitted.</li>
 <li><strong>resource.name</strong>: the name of the GPIO resource as reported by the GPIO Service. The <code>#select resource</code> selection has no effect on the channel.</li>
 <li><strong>resource.direction</strong>: the direction of the GPIO. Possible values are <code>INPUT</code>and <code>OUTPUT</code>. The <code>#select direction</code> selection has no effect on the channel.</li>
+<li><strong>resource.mode</strong>: the mode of the GPIO. Possible values are <code>INPUT_PULL_UP</code> and <code>INPUT_PULL_DOWN</code> for input pins and <code>OUTPUT_OPEN_DRAIN</code> and <code>OUTPUT_PUSH_PULL</code> for output ones. The <code>#select mode</code> selection has no effect on the channel.</li>
 <li>
 <p><strong>resource.trigger</strong>: the type of event that triggers the listener, if selected. Possible values are:</p>
 </li>

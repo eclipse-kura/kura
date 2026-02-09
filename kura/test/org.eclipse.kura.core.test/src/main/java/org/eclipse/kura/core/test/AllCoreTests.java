@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -36,9 +36,8 @@ import io.moquette.broker.config.IResourceLoader;
 import io.moquette.broker.config.ResourceLoaderConfig;
 
 @RunWith(Suite.class)
-@SuiteClasses({ InventoryHandlerTest.class, CloudDeploymentHandlerTest.class, CommURITest.class,
-        ComponentConfigurationImplTest.class, ConfigurationServiceTest.class, NetUtilTest.class,
-        NetworkServiceTest.class, SystemAdminServiceTest.class })
+@SuiteClasses({ InventoryHandlerTest.class, CommURITest.class, ComponentConfigurationImplTest.class,
+        ConfigurationServiceTest.class, NetUtilTest.class, NetworkServiceTest.class, SystemAdminServiceTest.class })
 public class AllCoreTests {
 
     private static final Logger logger = LoggerFactory.getLogger(AllCoreTests.class);

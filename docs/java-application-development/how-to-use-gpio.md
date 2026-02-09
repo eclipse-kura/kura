@@ -75,7 +75,7 @@ For example, to get the `KuraGPIOPin` of the gpio with controller 3, line 5 and 
 Map<String, String> description = new HashMap<>();
 description.put("name", "PIN1");
 description.put("controller", "3");
-description.put("line", 5);
+description.put("line", "5");
 
 List<KuraGPIOPin> pins = this.gpioService.getPins(description);
 ```

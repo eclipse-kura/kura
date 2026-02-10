@@ -8,6 +8,14 @@ The **Profile** tab shows several information about the gateway, organized under
 
 ![Device Profile](./images/device-profile.png)
 
+**Internet connection status**: Displays the status of the internet connection. This is updated every 30 seconds through an ICMP request to a configured IP address and host. By default, these are 198.41.30.198 and eclipse.org. The IP address can be in IPv4 or IPv6 format. 
+
+The status can be:
+- `FULL`: The internet connection is fully available.
+- `IP_ONLY`: The system can ping the configured address, but cannot resolve the host name.
+- `UNAVAILABLE`: The internet connection is unavailable.
+
+
 ## Bundles
 
 This tab lists all the bundles installed on Kura, with details about the name, version, id, state and signature status. The signature value will be **true** if the corresponding bundle is signed, **false** otherwise.

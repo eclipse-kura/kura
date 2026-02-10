@@ -8,7 +8,7 @@ The **Profile** tab shows several information about the gateway, organized under
 
 ![Device Profile](./images/device-profile.png)
 
-**Internet connection status**: Displays the status of the internet connection. This is updated every 30 seconds through an ICMP request to a configured IP address and host. By default, these are 198.41.30.198 and eclipse.org. The IP address can be in IPv4 or IPv6 format. 
+**Internet connection status**: Displays the status of the internet connection. This is updated every 30 seconds through an ICMP request to a configured IP address and host. By default, these are 198.41.30.198 and eclipse.org. The IP address can be in IPv4 or IPv6 format.
 
 The status can be:
 

@@ -4738,6 +4738,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h2 id="profile">Profile</h2>
 <p>The <strong>Profile</strong> tab shows several information about the gateway, organized under the Device, Hardware, Software and Java Information.</p>
 <p><img alt="Device Profile" src="../images/device-profile.png" /></p>
+<p><strong>Internet connection status</strong>: Displays the status of the internet connection. This is updated every 30 seconds through an ICMP request to a configured IP address and host. By default, these are 198.41.30.198 and eclipse.org. The IP address can be in IPv4 or IPv6 format. </p>
+<p>The status can be:
+- <code>FULL</code>: The internet connection is fully available.
+- <code>IP_ONLY</code>: The system can ping the configured address, but cannot resolve the host name.
+- <code>UNAVAILABLE</code>: The internet connection is unavailable.</p>
 <h2 id="bundles">Bundles</h2>
 <p>This tab lists all the bundles installed on Kura, with details about the name, version, id, state and signature status. The signature value will be <strong>true</strong> if the corresponding bundle is signed, <strong>false</strong> otherwise.</p>
 <p>The buttons in the upper part of the tab allows the user to manage the listed bundles:</p>

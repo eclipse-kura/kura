@@ -1606,28 +1606,26 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
             if (isPingable(StandardProtocolFamily.INET, getInternetConnectionStatusCheckHost())
                     || isPingable(StandardProtocolFamily.INET6, getInternetConnectionStatusCheckHost())) {
-                this.currentInternetStatus.set(InternetConnectionStatus.FULL);
-                if (this.currentInternetStatus.get() != oldStatus) {
-                    logger.debug("Internet connection status changed to FULL");
-                }
+                updateStatus(oldStatus, InternetConnectionStatus.FULL);
                 return;
             }
 
             if (isPingable(StandardProtocolFamily.INET, getInternetConnectionStatusCheckIp())
                     || isPingable(StandardProtocolFamily.INET6, getInternetConnectionStatusCheckIp())) {
-                this.currentInternetStatus.set(InternetConnectionStatus.IP_ONLY);
-                if (this.currentInternetStatus.get() != oldStatus) {
-                    logger.debug("Internet connection status changed to IP_ONLY");
-                }
+                updateStatus(oldStatus, InternetConnectionStatus.IP_ONLY);
                 return;
             }
 
-            this.currentInternetStatus.set(InternetConnectionStatus.UNAVAILABLE);
-            if (this.currentInternetStatus.get() != oldStatus) {
-                logger.debug("Internet connection status changed to UNAVAILABLE");
-            }
+            updateStatus(oldStatus, InternetConnectionStatus.UNAVAILABLE);
         } catch (Exception e) {
             logger.error("Error while checking internet connection status", e);
+        }
+    }
+
+    private void updateStatus(InternetConnectionStatus oldStatus, InternetConnectionStatus newStatus) {
+        this.currentInternetStatus.set(newStatus);
+        if (newStatus != oldStatus) {
+            logger.debug("Internet connection status changed to {}", newStatus);
         }
     }
 

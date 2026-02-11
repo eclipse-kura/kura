@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -498,22 +499,45 @@ public class ComponentUtil {
      */
     public static void encryptConfigurationProperties(Map<String, Object> propertiesToUpdate,
             final CryptoService cryptoService) {
-        if (propertiesToUpdate == null) {
-            return;
+        encryptConfigurationProperties(propertiesToUpdate, cryptoService, false);
+    }
+
+    public static Map<String, Object> encryptConfigurationProperties(final Map<String, Object> original,
+            final CryptoService cryptoService, final boolean clone) {
+        if (original == null) {
+            return null;
         }
 
-        for (Entry<String, Object> property : propertiesToUpdate.entrySet()) {
+        Optional<Map<String, Object>> result = Optional.empty();
+
+        if (!clone) {
+            result = Optional.of(original);
+        }
+
+        for (Entry<String, Object> property : original.entrySet()) {
             Object configValue = property.getValue();
             if (configValue instanceof Password || configValue instanceof Password[]) {
+
+                final Map<String, Object> resultProperties;
+
+                if (result.isPresent()) {
+                    resultProperties = result.get();
+                } else {
+                    resultProperties = new HashMap<>(original);
+                    result = Optional.of(resultProperties);
+                }
+
                 try {
                     Object encryptedValue = encryptPasswordProperties(configValue, cryptoService);
-                    propertiesToUpdate.put(property.getKey(), encryptedValue);
+                    resultProperties.put(property.getKey(), encryptedValue);
                 } catch (KuraException e) {
                     logger.warn("Failed to encrypt Password property: {}", property.getKey());
-                    propertiesToUpdate.remove(property.getKey());
+                    resultProperties.remove(property.getKey());
                 }
             }
         }
+
+        return result.orElse(original);
     }
 
     private static Object encryptPasswordProperties(Object configValue, final CryptoService cryptoService)

@@ -28,6 +28,14 @@
             max="20"
             description="Field for test"/>
 
+        <AD id="password.test"
+            name="password.test"
+            type="Password"
+            cardinality="0"
+            required="true"
+            default="foobar"
+            description="Password for test"/>
+
     </OCD>
     <Designate pid="org.eclipse.kura.core.configuration.CfgSvcTestComponent">
         <Object ocdref="org.eclipse.kura.core.configuration.CfgSvcTestComponent"/>

@@ -16,6 +16,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://eclipse-kura.github.io/kura/docs-develop/administration/logging-level/</loc>
+         <lastmod>2026-02-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://eclipse-kura.github.io/kura/docs-develop/administration/remote-management-kapua/</loc>
          <lastmod>2026-02-11</lastmod>
          <changefreq>daily</changefreq>

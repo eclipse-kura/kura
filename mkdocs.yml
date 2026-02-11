@@ -40,6 +40,7 @@ nav:
       - Authentication and Authorization: gateway-configuration/authentication-and-authorization.md
     - Administration:
       - Directory Layout: administration/directory-layout.md
+      - Logging Level: administration/logging-level.md
       - Snapshot Management: administration/snapshot-management.md
       - Application Management: administration/application-management.md
       - Remote Management with Eclipse Kapua: administration/remote-management-kapua.md

@@ -1646,9 +1646,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
         try {
             // -c 5: send 5 ping requests,
-            // -W 5: wait for 5 seconds max for each reply
+            // -W 5: wait for 1 seconds max for each reply
             CommandStatus status = this.executorService
-                    .execute(new Command(new String[] { "ping", version, address, "-c", "5", "-W", "5" }));
+                    .execute(new Command(new String[] { "ping", version, address, "-c", "5", "-W", "1" }));
             return status.getExitStatus().isSuccessful();
         } catch (Exception e) {
             logger.trace("Error while executing ping command", e);

@@ -43,6 +43,7 @@ Identities with `rest.system` permissions can access these APIs.
 | primaryNetworkInterfaceName | String |
 | fileSeparator | String |
 | firmwareVersion | String |
+| internetConnectionStatus | String |
 | kuraDataDirectory | String |
 | kuraFrameworkConfigDirectory | String |
 | kuraHomeDirectory | String |
@@ -174,6 +175,7 @@ Identities with `rest.system` permissions can access these APIs.
     "primaryNetworkInterfaceName": "eth0",
     "fileSeparator": "/",
     "firmwareVersion": "N/A",
+    "internetConnectionStatus": "UNAVAILABLE"
     "kuraDataDirectory": "/opt/eclipse/kura/data",
     "kuraFrameworkConfigDirectory": "/opt/eclipse/kura/framework",
     "kuraHomeDirectory": "/opt/eclipse/kura",

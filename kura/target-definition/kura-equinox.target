@@ -22,13 +22,13 @@
             <dependencies>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
-                    <artifactId>target-platform-tycho-deps</artifactId>
+                    <artifactId>target-platform-pde-deps</artifactId>
                     <version>6.0.0-SNAPSHOT</version>
                     <type>pom</type>
                 </dependency>
                 <dependency>
                     <groupId>org.eclipse.kura</groupId>
-                    <artifactId>kura-tycho-deps</artifactId>
+                    <artifactId>kura-pde-deps</artifactId>
                     <version>6.0.0-SNAPSHOT</version>
                     <type>pom</type>
                 </dependency>

@@ -27,7 +27,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>kura-tycho-deps</module>
+        <module>kura-pde-deps</module>
         <module>target-definition</module>
         <module>org.eclipse.kura.api</module>
         <module>org.eclipse.kura.camel</module>

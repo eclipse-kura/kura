@@ -27,7 +27,7 @@
     <groupId>org.eclipse.kura</groupId>
     <artifactId>kura-pde-deps</artifactId>
     <packaging>pom</packaging>
-    <name>Kura BOM</name>
+    <name>Kura PDE Dependencies</name>
 
     <dependencies>
         <dependency>

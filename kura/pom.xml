@@ -331,7 +331,7 @@
                 </exclusions>
             </dependency>
 
-            <!-- Kura BOM -->
+            <!-- Kura PDE Dependencies -->
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.api</artifactId>

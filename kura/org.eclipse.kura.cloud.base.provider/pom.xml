@@ -32,7 +32,7 @@
 
     <!--
     The dependency is committed in lib/.
-    Adding to the dependencies section for tracking it and make it parsable from PDE Dependencies tools
+    Adding to the dependencies section for tracking it and make it parsable from BOM tools
     -->
     <dependencies>
         <dependency>

@@ -353,7 +353,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.ON);
 
         } catch (MqttException e) {
-            logger.warn("xxxxx  Connect failed. Forcing disconnect. xxxxx");
+            logger.error("Cannot connect to broker {}: cause {}", this.clientConf.getBrokerUrl(), e.getMessage());
             closeMqttClient();
 
             // Update status notification service
@@ -1061,12 +1061,12 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     private static String getMqttVersionLabel(int mqttVersion) {
 
         switch (mqttVersion) {
-            case MqttConnectOptions.MQTT_VERSION_3_1:
-                return "3.1";
-            case MqttConnectOptions.MQTT_VERSION_3_1_1:
-                return "3.1.1";
-            default:
-                return String.valueOf(mqttVersion);
+        case MqttConnectOptions.MQTT_VERSION_3_1:
+            return "3.1";
+        case MqttConnectOptions.MQTT_VERSION_3_1_1:
+            return "3.1.1";
+        default:
+            return String.valueOf(mqttVersion);
         }
     }
 }

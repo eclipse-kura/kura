@@ -353,7 +353,12 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             this.cloudConnectionStatusService.updateStatus(this, CloudConnectionStatusEnum.ON);
 
         } catch (MqttException e) {
-            logger.error("Cannot connect to broker {}: cause {}", this.clientConf.getBrokerUrl(), e.getMessage());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Cannot connect to broker {}: cause {}", this.clientConf.getBrokerUrl(), e.getMessage(),
+                        e);
+            } else {
+                logger.error("Cannot connect to broker {}: cause {}", this.clientConf.getBrokerUrl(), e.getMessage());
+            }
             closeMqttClient();
 
             // Update status notification service

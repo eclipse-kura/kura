@@ -828,14 +828,17 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         if (this.sslManagerService == null) {
             logger.warn("SSL Manager Service not yet initialized.");
         } else {
-            if (isSSL(brokerUrl) && this.sslManagerService.isPresent()) {
-                try {
-                    SSLSocketFactory ssf = this.sslManagerService.get().getSSLSocketFactory();
-
-                    conOpt.setSocketFactory(ssf);
-                } catch (Exception e) {
-                    logger.error("SSL setup failed", e);
-                    throw new IllegalStateException("SSL setup failed");
+            if (isSSL(brokerUrl)) {
+                if(this.sslManagerService.isPresent()) {
+                    try {
+                        SSLSocketFactory ssf = this.sslManagerService.get().getSSLSocketFactory();
+                        conOpt.setSocketFactory(ssf);
+                    } catch (Exception e) {
+                        logger.error("SSL setup failed", e);
+                        throw new IllegalStateException("SSL setup failed");
+                    } 
+                } else {
+                    logger.error("SSL Manager Service not selected.");
                 }
             }
 

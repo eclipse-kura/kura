@@ -156,7 +156,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
     public void unsetSslManagerService(SslManagerService sslManagerService) {
         synchronized (this.updateLock) {
-            if (Optional.of(sslManagerService).equals(Optional.of(this.sslManagerService))) {
+            if (Optional.of(sslManagerService).equals(this.sslManagerService)) {
                 this.sslManagerService = Optional.empty();
             }
         }

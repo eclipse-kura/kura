@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -396,8 +396,15 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     }
 
     @Override
-    public synchronized void createFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
+    public void createFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
             boolean takeSnapshot) throws KuraException {
+
+        createFactoryConfigurationInternal(factoryPid, pid,
+                ComponentUtil.encryptConfigurationProperties(properties, this.cryptoService, true), takeSnapshot);
+    }
+
+    private synchronized void createFactoryConfigurationInternal(String factoryPid, String pid,
+            Map<String, Object> properties, boolean takeSnapshot) throws KuraException {
         if (pid == null) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "pid cannot be null");
         } else if (this.servicePidByPid.containsKey(pid)) {
@@ -753,7 +760,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 String pid = config.getPid();
                 logger.info("Creating configuration with pid: {} and factory pid: {}", pid, factoryPid);
                 try {
-                    createFactoryConfiguration(factoryPid, pid, properties, false);
+                    createFactoryConfigurationInternal(factoryPid, pid, properties, false);
                     configs.add(config);
                 } catch (KuraException e) {
                     logger.warn("Error creating configuration with pid: {} and factory pid: {}", pid, factoryPid, e);
@@ -1036,7 +1043,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     private void finalizeSnapshotWrite(File fSnapshot, File tempSnapshotFile) throws KuraIOException {
         try {
             setSnapshotFilePermissions(fSnapshot, tempSnapshotFile);
-            
+
             // Consolidate snapshot writing
             Files.move(tempSnapshotFile.toPath(), fSnapshot.toPath(), StandardCopyOption.REPLACE_EXISTING,
                     StandardCopyOption.ATOMIC_MOVE);
@@ -1053,8 +1060,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         } catch (UnsupportedOperationException e1) {
             // POSIX permissions not supported on this file system, log and continue
-            logger.warn("Unable to set POSIX file permissions for snapshot file: {}", fSnapshot.getAbsolutePath(),
-                    e1);
+            logger.warn("Unable to set POSIX file permissions for snapshot file: {}", fSnapshot.getAbsolutePath(), e1);
         }
     }
 
@@ -1283,7 +1289,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                     String factoryPid = (String) props.get(ConfigurationAdmin.SERVICE_FACTORYPID);
 
                     if (factoryPid != null) {
-                        createFactoryConfiguration(config, props, factoryPid);
+                        createFactoryConfigurationInternal(factoryPid, config.getPid(), props, false);
                     } else {
                         loadConfiguration(config, props);
                     }
@@ -1309,17 +1315,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         } catch (IOException e) {
             logger.warn("Error seeding initial properties to ConfigAdmin for pid: {}", config.getPid(), e);
-        }
-    }
-
-    private void createFactoryConfiguration(ComponentConfiguration config, Map<String, Object> props,
-            String factoryPid) {
-        String pid = config.getPid();
-        logger.info("Creating configuration with pid: {} and factory pid: {}", pid, factoryPid);
-        try {
-            createFactoryConfiguration(factoryPid, pid, props, false);
-        } catch (KuraException e) {
-            logger.warn("Error creating configuration with pid: {} and factory pid: {}", pid, factoryPid, e);
         }
     }
 
@@ -1627,7 +1622,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
      * Convert property value to string
      *
      * @param value
-     *              the input value
+     *            the input value
      * @return the string property value, or {@code null}
      */
     private static String makeString(Object value) {

@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.rest.tamper.detection.provider.test
 Bundle-SymbolicName: org.eclipse.kura.rest.tamper.detection.provider.test;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=21))"
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.kura.rest.tamper.detection.provider;bundle-version="1.0.0",
  org.eclipse.kura.http.server.manager;bundle-version="1.1.0"

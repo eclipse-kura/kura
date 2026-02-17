@@ -93,7 +93,7 @@
     <properties>
         <!-- SCM: Note that we are in the "kura" sub-dir here already -->
         <tycho.scmUrl>scm:git:ssh://github.com/eclipse/kura/kura</tycho.scmUrl>
-        <tycho-version>4.0.11</tycho-version>
+        <tycho-version>5.0.2</tycho-version>
         <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -104,8 +104,8 @@
         <check.plugins.exist.remote>false</check.plugins.exist.remote>
         <kura.addons.url>https://artifactory.dev.everyware.io/artifactory/kura-addons</kura.addons.url>
 
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
 
         <bnd.baseline.version>6.3.1</bnd.baseline.version>
         <exists-maven-plugin.version>0.0.3</exists-maven-plugin.version>
@@ -125,7 +125,8 @@
         <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
         <bnd.version>7.1.0</bnd.version>
         <tycho.surefire.testenv.args>
-            -DbuildingWithTycho=true -Dosgi.locking=none
+            -DbuildingWithTycho=true
+            -Dosgi.locking=none
             -Dds.showtrace=true
             -Djava.io.tmpdir=/tmp
             -Dorg.osgi.framework.storage=${project.basedir}/target/osgi/framework_storage

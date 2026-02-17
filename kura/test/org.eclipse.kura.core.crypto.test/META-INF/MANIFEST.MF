@@ -8,5 +8,5 @@ Import-Package: org.apache.commons.io;version="2.18.0",
   org.mockito;version="[4.0.0,5.0.0)",
   org.mockito.invocation;version="[4.0.0,5.0.0)",
   org.mockito.stubbing;version="[4.0.0,5.0.0)"
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=21))"
 Require-Bundle: org.junit;bundle-version="4.10.0"

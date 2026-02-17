@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.eclipse.kura.rest.provider.test
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v2.0
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=21))"
 Bundle-ActivationPolicy: lazy
 Fragment-Host: org.eclipse.kura.rest.provider
 Import-Package: com.eclipsesource.json;version="0.9.5",

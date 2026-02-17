@@ -38,7 +38,7 @@
     </modules>
 
     <properties>
-        <tycho-version>4.0.11</tycho-version>
+        <tycho-version>5.0.2</tycho-version>
         <jdeb-version>1.14</jdeb-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -82,7 +82,7 @@
             polkit | policykit-1 | polkitd,
             ssh | openssh, openssl, busybox, libpam-modules,
             python3,
-            openjdk-17-jre-headless | temurin-17-jdk | java-runtime-headless (= 17) | java-runtime-headless (= 21),
+            openjdk-21-jre-headless | temurin-21-jdk | java-runtime-headless (= 21),
             dos2unix, libtirpc3, chrony, chronyc | chrony, iputils-ping
         </deb.dependencies>
         <deb.recommendations></deb.recommendations>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@ package org.eclipse.kura.core.data.transport.mqtt;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -103,7 +104,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     private static final long MQTT_DISCONNECT_TIMEOUT = 2000;
 
     private SystemService systemService;
-    private SslManagerService sslManagerService;
+    private Optional<SslManagerService> sslManagerService;
     private CloudConnectionStatusService cloudConnectionStatusService;
 
     private CloudConnectionStatusEnum notificationStatus = CloudConnectionStatusEnum.OFF;
@@ -144,7 +145,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         final boolean update;
 
         synchronized (this.updateLock) {
-            this.sslManagerService = sslManagerService;
+            this.sslManagerService = Optional.of(sslManagerService);
             update = this.clientConf != null;
         }
 
@@ -155,8 +156,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
     public void unsetSslManagerService(SslManagerService sslManagerService) {
         synchronized (this.updateLock) {
-            if (sslManagerService == this.sslManagerService) {
-                this.sslManagerService = null;
+            if (Optional.of(sslManagerService).equals(Optional.of(this.sslManagerService))) {
+                this.sslManagerService = Optional.empty();
             }
         }
     }
@@ -824,15 +825,20 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
         //
         // SSL
-        if (isSSL(brokerUrl)) {
-            try {
-                SSLSocketFactory ssf = this.sslManagerService.getSSLSocketFactory();
+        if (this.sslManagerService == null) {
+            logger.warn("SSL Manager Service not yet initialized.");
+        } else {
+            if (isSSL(brokerUrl) && this.sslManagerService.isPresent()) {
+                try {
+                    SSLSocketFactory ssf = this.sslManagerService.get().getSSLSocketFactory();
 
-                conOpt.setSocketFactory(ssf);
-            } catch (Exception e) {
-                logger.error("SSL setup failed", e);
-                throw new IllegalStateException("SSL setup failed");
+                    conOpt.setSocketFactory(ssf);
+                } catch (Exception e) {
+                    logger.error("SSL setup failed", e);
+                    throw new IllegalStateException("SSL setup failed");
+                }
             }
+
         }
 
         String sType = (String) properties.get(PERSISTENCE_TYPE_PROP_NAME);

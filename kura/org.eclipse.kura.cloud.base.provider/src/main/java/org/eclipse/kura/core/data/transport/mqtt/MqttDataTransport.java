@@ -1070,12 +1070,12 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     private static String getMqttVersionLabel(int mqttVersion) {
 
         switch (mqttVersion) {
-            case MqttConnectOptions.MQTT_VERSION_3_1:
-                return "3.1";
-            case MqttConnectOptions.MQTT_VERSION_3_1_1:
-                return "3.1.1";
-            default:
-                return String.valueOf(mqttVersion);
+        case MqttConnectOptions.MQTT_VERSION_3_1:
+            return "3.1";
+        case MqttConnectOptions.MQTT_VERSION_3_1_1:
+            return "3.1.1";
+        default:
+            return String.valueOf(mqttVersion);
         }
     }
 }

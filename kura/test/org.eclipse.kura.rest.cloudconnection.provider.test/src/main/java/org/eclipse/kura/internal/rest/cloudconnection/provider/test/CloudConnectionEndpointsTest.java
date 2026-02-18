@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -188,7 +188,8 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void shouldDeletePublisherInstance() {
+    public void shouldDeletePublisherInstance()
+            throws KuraException, InterruptedException, ExecutionException, TimeoutException {
         givenPubSubInstance("pub-to-delete-" + this.getTransportType(),
                 "org.eclipse.kura.cloud.publisher.CloudPublisher", CLOUD_ENDPOINT_INSTANCE_TEST);
         givenPid("pub-to-delete-" + this.getTransportType());
@@ -199,7 +200,8 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void shouldDeleteSubscriberInstance() {
+    public void shouldDeleteSubscriberInstance()
+            throws KuraException, InterruptedException, ExecutionException, TimeoutException {
         givenPubSubInstance("sub-to-delete-" + this.getTransportType(),
                 "org.eclipse.kura.cloud.subscriber.CloudSubscriber", CLOUD_ENDPOINT_INSTANCE_TEST);
         givenPid("sub-to-delete-" + this.getTransportType());
@@ -309,15 +311,14 @@ public class CloudConnectionEndpointsTest extends AbstractRequestHandlerTest {
         trackFuture.get(5, TimeUnit.SECONDS);
     }
 
-    private void givenPubSubInstance(String pid, String factoryPid, String cloudEndpointPid) {
-        try {
-            configurationService.createFactoryConfiguration(factoryPid, pid, Collections.singletonMap(
-                    CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), cloudEndpointPid), true);
-        } catch (KuraException e) {
-            e.printStackTrace();
-            fail("Unable to create pubSub instance");
-        }
-
+    private void givenPubSubInstance(String pid, String factoryPid, String cloudEndpointPid)
+            throws KuraException, InterruptedException, ExecutionException, TimeoutException {
+        configurationService.createFactoryConfiguration(factoryPid, pid, Collections.singletonMap(
+                CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), cloudEndpointPid), true);
+        CompletableFuture<Object> trackFuture = ServiceUtil.trackService(
+                "org.eclipse.kura.configuration.ConfigurableComponent",
+                Optional.of(String.format("(kura.service.pid=%s)", pid)));
+        trackFuture.get(5, TimeUnit.SECONDS);
     }
 
 }

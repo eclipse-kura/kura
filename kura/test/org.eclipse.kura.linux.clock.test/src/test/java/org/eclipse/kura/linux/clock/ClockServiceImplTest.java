@@ -1,25 +1,24 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.linux.clock;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -27,17 +26,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.clock.ClockEvent;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.core.util.IOUtil;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
@@ -106,13 +105,19 @@ public class ClockServiceImplTest {
     }
 
     @Test
-    public void testActivateDeactivateChronyProviderWithConfiguration() throws NoSuchFieldException, IOException {
+    public void testActivateDeactivateChronyProviderWithConfiguration()
+            throws NoSuchFieldException, IOException, NoSuchAlgorithmException {
         CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         CommandExecutorService serviceMock = mock(CommandExecutorService.class);
         when(serviceMock.execute(any())).thenReturn(status);
 
+        CryptoService cryptoServiceMock = mock(CryptoService.class);
+        when(cryptoServiceMock.sha256Hash(anyString()))
+                .thenReturn("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+
         ClockServiceImpl clockService = new ClockServiceImpl();
         clockService.setExecutorService(serviceMock);
+        clockService.setCryptoService(cryptoServiceMock);
 
         Map<String, Object> properties = new HashMap<>();
 

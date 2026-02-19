@@ -29,11 +29,23 @@ mvn archetype:generate \
 -DarchetypeVersion="<kura-version>"
 ```
 
-The command will start the generation of the archetype in interactive mode. Maven will ask for a few parameters on the command line:
+The command will start the generation of the archetype in interactive mode.
 
-- **groupId** : the Maven group id of the generated pom files, usually `org.eclipse.kura`
-- **artifactId**: the Maven artifact id of the generated parent pom file and the name of the generated top level project folder, usually something like `org.eclipse.kura.myartifact`
-- **package**: the Java package to be used for the main bundle, usually something like `org.eclipse.kura.myartifact`
+![](./images/kura-addon-archetype/archetype-generate.png)
+
+Maven will ask for a few parameters on the command line:
+
+- **groupId** : the Maven group id of the generated POM files
+- **artifactId**: the Maven artifact id of the generated parent pom file, and the name of the generated top level project folder
+- **package**: the base Java package and the main artifact of the project
+
+The official Kura addons naming rule is:
+
+- **groupId** = `org.eclipse.kura`
+- **artifactId** = repository name: `kura-<feature>` (e.g. `kura-wires`)
+- **package** = `org.eclipse.kura.<feature>` (e.g. `org.eclipse.kura.wires`)
+
+**It is not allowed to generate a project with artifactId = package**.
 
 The following optional parameters can be changed by answering `n` after the `Confirm properties configuration` prompt, which appears after editing the properties above:
 
@@ -49,13 +61,7 @@ The project _requires_ source control management via `git` to correctly build. T
 
 ```bash
 git init
-```
-
-```bash
 git add .
-```
-
-```bash
 git commit -m "initial commit"
 ```
 
@@ -63,15 +69,15 @@ Once this steps are completed you can safely build the project.
 
 ## Project structure
 
-At the end of the procedure, the archetype will generate a subfolder in the working directory containing the following subfolders:
+At the end of the procedure, the generated project is organized as follows:
 
-- **bundles**: the directory where developed bundles can be placed. After the first archetype execution, this directory contains a single project, named as `artifactId.bundle`
+![](./images/kura-addon-archetype/project-structure.png)
 
-- **distrib**: contains a project that builds a DEB package that installs the JAR produced in `bundles` in Kura's plugins folder `/opt/eclipse/kura/plugins`. It is recommended to configure this project to customize the target package architecture and other parameters. The project code is commented with hints on the configurable options
+- **parent**: the main reactor project. It aggregates this project’s OSGi bundles, integration and unit tests, and the target platform definition. Immediately after generation, it includes a single OSGi bundle named after the `{package}` value (for example, `org.eclipse.kura.myfeature`)
+    - **target-definition**: contains the `.target` file that defines the target platform dependencies. Dependencies are declared as Maven artifacts; Tycho then wraps them as OSGi bundles and adds them to the target platform. Because Maven Central only hosts released artifacts, it is recommended to build Kura locally if you need *-SNAPSHOT* dependencies
+    - **tests**: contains OSGi integration tests executed via the `tycho-surefire-plugin`
 
-- **target-definition**: The `.target` file contained in the project is the way to specify the project dependencies as maven artifacts, Tycho will then wrap them as bundles and make them available in the target platform. Since only released artifacts are published on Maven central, it is recommeded to perform a local Kura build to have the SNAPSHOT versions available
-
-- **tests**: contains OSGi integration tests executed by the `tycho-surefire-plugin`
+- **distrib**: a packaging project that builds a Debian (`.deb`) package. The package installs the JAR produced by the bundles into Kura’s plugins directory at `/opt/eclipse/kura/plugins`. You should review and adjust this project to match your target architecture and packaging requirements; the source is annotated with comments indicating the main configuration points
 
 ## Compile and run
 
@@ -123,6 +129,12 @@ Example:
 ```bash
 mvn clean install -Dpackage.revision=6 -DreleaseBuild
 ```
+
+### Deploy artifacts
+
+As default, the `distrib` project and the projects under `parent` are not deployed (they are configured to skip the execution of the `maven-deploy-plugin`). Only the BOM POM (the root `pom.xml`) and the single OSGi bundles are meant to be deployed.
+
+Please add the proper `maven-deploy-plugin` configuration for the bundles that need to be deployed. See the archetype's generated bundle for details.
 
 ## IDE setup
 

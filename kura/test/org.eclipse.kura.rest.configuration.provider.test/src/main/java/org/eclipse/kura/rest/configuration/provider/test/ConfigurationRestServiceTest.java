@@ -1207,11 +1207,11 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         Mockito.reset(configurationService);
         Mockito.doAnswer(i -> {
             Optional.of(i.getArgument(0, List.class));
-            return (Void) null;
+            return null;
         }).when(configurationService).updateConfigurations(ArgumentMatchers.any());
         final Answer<?> configurationUpdateAnswer = i -> {
             this.receivedConfigsByPid.put(i.getArgument(0, String.class), i.getArgument(1, Map.class));
-            return (Void) null;
+            return null;
         };
         Mockito.doAnswer(configurationUpdateAnswer).when(configurationService)
                 .updateConfiguration(ArgumentMatchers.any(), ArgumentMatchers.any());

@@ -162,6 +162,7 @@
                                     ${tycho.testArgLine}
                                     --add-opens=java.base/java.lang=ALL-UNNAMED
                                     --add-opens=java.base/java.util=ALL-UNNAMED
+                                    -javaagent:${settings.localRepository}/org/mockito/mockito-core/5.21.0/mockito-core-5.21.0.jar
                                 </argLine>
                             </configuration>
                         </execution>
@@ -180,6 +181,7 @@
                             ${tycho.testArgLine}
                             ${tycho.surefire.testenv.args}
                             -Dmoquette.path=${project.basedir}/src/main/resources/moquette/config
+                            -javaagent:${settings.localRepository}/org/mockito/mockito-core/5.21.0/mockito-core-5.21.0.jar
                         </argLine>
                         <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> --> 
                         <dependencies>

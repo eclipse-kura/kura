@@ -161,8 +161,6 @@
                     <version>${tycho-version}</version>
                     <configuration>
                         <providerHint>junit4</providerHint>
-                        <parallel>classes</parallel>
-                        <useUnlimitedThreads>true</useUnlimitedThreads>
                         <argLine>
                             ${tycho.testArgLine}
                             -Dosgi.console=5002
@@ -175,6 +173,7 @@
                             -Dkura.data=${kura.workdir}/data
                             -Dkura.snapshots=${kura.workdir}/user/snapshots
                             -Dlog4j.configurationFile=file:${kura.workdir}/log4j/log4j.xml
+                            -javaagent:${settings.localRepository}/org/mockito/mockito-core/5.21.0/
                         </argLine>
                         <!--
                         uncomment for gogo shell, usage: telnet localhost 5002
@@ -210,7 +209,10 @@
                                 <goal>test</goal>
                             </goals>
                             <configuration>
-                                <argLine>${tycho.testArgLine}</argLine>
+                                <argLine>
+                                    ${tycho.testArgLine}
+                                    -javaagent:${settings.localRepository}/org/mockito/mockito-core/5.21.0/
+                                </argLine>
                             </configuration>
                         </execution>
                     </executions>

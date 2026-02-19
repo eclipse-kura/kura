@@ -84,10 +84,6 @@
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-surefire-plugin</artifactId>
-                <configuration>
-                    <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <parallel>classes</parallel>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -565,8 +565,6 @@
                     <artifactId>target-platform-configuration</artifactId>
                     <version>${tycho-version}</version>
                     <configuration>
-                        <argLine>-consoleLog</argLine>
-                        <resolver>p2</resolver>
                         <dependency-resolution>
                             <extraRequirements>
                                 <requirement>

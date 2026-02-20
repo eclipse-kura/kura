@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,10 +15,8 @@ package org.eclipse.kura.core.keystore;
 import static org.eclipse.kura.core.keystore.FilesystemKeystoreServiceOptions.KEY_KEYSTORE_PASSWORD;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.KeyStore;
@@ -343,15 +341,7 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
 
         private KeyStore loadKeystore(final String path, final char[] password)
                 throws NoSuchAlgorithmException, CertificateException, IOException, KeyStoreException {
-            KeyStore ks = null;
-            try (InputStream tsReadStream = new FileInputStream(path)) {
-                ks = KeyStore.getInstance(KeyStore.getDefaultType());
-                char[] keystorePassword = password;
-
-                ks.load(tsReadStream, keystorePassword);
-            }
-
-            return ks;
+            return KeyStore.getInstance(new File(path), password);
         }
 
         KeystoreInstance loadKeystore() throws KuraException {

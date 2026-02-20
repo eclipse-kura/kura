@@ -73,9 +73,11 @@ At the end of the procedure, the generated project is organized as follows:
 
 ![](./images/kura-addon-archetype/project-structure.png)
 
-- **parent**: the main reactor project. It aggregates this project’s OSGi bundles, integration and unit tests, and the target platform definition. Immediately after generation, it includes a single OSGi bundle named after the `{package}` value (for example, `org.eclipse.kura.myfeature`)
-    - **target-definition**: contains the `.target` file that defines the target platform dependencies. Dependencies are declared as Maven artifacts; Tycho then wraps them as OSGi bundles and adds them to the target platform. Because Maven Central only hosts released artifacts, it is recommended to build Kura locally if you need *-SNAPSHOT* dependencies
-    - **tests**: contains OSGi integration tests executed via the `tycho-surefire-plugin`
+- **bom**: this project's bill-of-materials, containing the list of all the bundles that this project will deploy. It is intended to be consumed by other projects
+
+- **target-definition**: contains the `.target` file that defines the target platform dependencies. Dependencies are declared as Maven artifacts; Tycho then wraps them as OSGi bundles and adds them to the target platform. Because Maven Central only hosts released artifacts, it is recommended to build Kura locally if you need *-SNAPSHOT* dependencies
+
+- **tests**: contains OSGi integration tests executed via the `tycho-surefire-plugin`
 
 - **distrib**: a packaging project that builds a Debian (`.deb`) package. The package installs the JAR produced by the bundles into Kura’s plugins directory at `/opt/eclipse/kura/plugins`. You should review and adjust this project to match your target architecture and packaging requirements; the source is annotated with comments indicating the main configuration points
 
@@ -129,6 +131,18 @@ Example:
 ```bash
 mvn clean install -Dpackage.revision=6 -DreleaseBuild
 ```
+
+### Versions uptick
+
+Using the following command it is possible to update the version of the project:
+
+```bash
+mvn versions:set -DnewVersion=<new-version> -DprocessAllModules=true
+```
+
+The BOM project and the bundles defined in the dependency management section are updated as well.
+
+Don't forget to update the version in the various `MANIFEST.MF` of the bundles and tests.
 
 ### Deploy artifacts
 

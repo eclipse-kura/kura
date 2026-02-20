@@ -173,7 +173,7 @@
                             -Dkura.data=${kura.workdir}/data
                             -Dkura.snapshots=${kura.workdir}/user/snapshots
                             -Dlog4j.configurationFile=file:${kura.workdir}/log4j/log4j.xml
-                            -javaagent:${settings.localRepository}/org/mockito/mockito-core/5.21.0/
+                            -javaagent:${settings.localRepository}/org/mockito/mockito-core/5.21.0/mockito-core-5.21.0.jar
                         </argLine>
                         <!--
                         uncomment for gogo shell, usage: telnet localhost 5002
@@ -211,7 +211,7 @@
                             <configuration>
                                 <argLine>
                                     ${tycho.testArgLine}
-                                    -javaagent:${settings.localRepository}/org/mockito/mockito-core/5.21.0/
+                                    -javaagent:${settings.localRepository}/org/mockito/mockito-core/5.21.0/mockito-core-5.21.0.jar
                                 </argLine>
                             </configuration>
                         </execution>

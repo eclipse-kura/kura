@@ -16,6 +16,7 @@ package org.eclipse.kura.container.provider;
 
 import static java.util.Objects.isNull;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -56,6 +57,7 @@ import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.PasswordConfiguration;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.identity.Permission;
+import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
@@ -754,34 +756,60 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                 return null;
             }
 
-            List<? extends NetInterfaceAddress> addresses = netInterface.getNetInterfaceAddresses();
-            if (addresses.isEmpty()) {
+            return getAddressNetworkService(netInterface.getNetInterfaceAddresses());
+        }
+
+        private String getAddressNetworkService(List<? extends NetInterfaceAddress> addresses) {
+            if (addresses == null) {
                 return null;
             }
 
-            IPAddress ipAddress = addresses.get(0).getAddress();
-            if (ipAddress != null) {
-                logger.debug("Found docker0 interface with address: {}", ipAddress.getHostAddress());
-                return ipAddress.getHostAddress();
+            IPAddress candidate = null;
+
+            for (final NetInterfaceAddress address : addresses) {
+                candidate = address.getAddress();
+
+                if (candidate instanceof IP4Address) {
+                    break;
+                }
             }
-            return null;
+
+            return candidate != null ? candidate.getHostAddress() : null;
         }
 
         private String getDockerBridgeViaJavaApi() {
             try {
                 NetworkInterface dockerInterface = NetworkInterface.getByName("docker0");
                 if (dockerInterface != null) {
-                    Enumeration<InetAddress> addresses = dockerInterface.getInetAddresses();
-                    if (addresses.hasMoreElements()) {
-                        String address = addresses.nextElement().getHostAddress();
-                        logger.debug("Found docker0 interface with address (via Java API): {}", address);
-                        return address;
-                    }
+                    return getAddressJavaAPI(dockerInterface);
                 }
             } catch (Exception e) {
                 logger.debug("Failed to detect docker0 interface using Java NetworkInterface API", e);
             }
             return null;
+        }
+
+        private String getAddressJavaAPI(NetworkInterface nif) throws SocketException {
+            final Enumeration<? extends InetAddress> addresses = nif.getInetAddresses();
+
+            InetAddress candidate = null;
+
+            while (addresses.hasMoreElements()) {
+                final InetAddress addr = addresses.nextElement();
+
+                if (!isValidAddress(addr, nif)) {
+                    continue;
+                }
+
+                candidate = addr;
+
+                if (candidate instanceof Inet4Address) {
+                    break;
+                }
+            }
+
+            return candidate != null ? candidate.getHostAddress() : null;
+
         }
 
         private String getHostPrimaryIpAddress() {
@@ -812,15 +840,14 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                 return null;
             }
 
-            Enumeration<InetAddress> nadrs = nif.getInetAddresses();
-            while (nadrs.hasMoreElements()) {
-                InetAddress adr = nadrs.nextElement();
-                if (isValidAddress(adr, nif)) {
-                    logger.debug("Using host primary IP address: {}", adr.getHostAddress());
-                    return adr.getHostAddress();
-                }
+            final String result = getAddressJavaAPI(nif);
+
+            if (result != null) {
+                logger.debug("Using host primary IP address: {}", result);
             }
-            return null;
+
+            return result;
+
         }
 
         private boolean isValidNetworkInterface(NetworkInterface nif) throws SocketException {

@@ -163,7 +163,7 @@
                                     ${tycho.testArgLine}
                                     --add-opens=java.base/java.lang=ALL-UNNAMED
                                     --add-opens=java.base/java.util=ALL-UNNAMED
-                                    -javaagent:${settings.localRepository}/org/mockito/mockito-core//mockito-core-${mockito.version}.jar
+                                    -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/(mockito-core-${mockito.version}.jar
                                 </argLine>
                             </configuration>
                         </execution>

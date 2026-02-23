@@ -29,6 +29,7 @@
 
     <properties>
         <kura.basedir>${project.basedir}/..</kura.basedir>
+        <mockito.version>5.21.0</mockito.version>
     </properties>
 
     <dependencyManagement>
@@ -36,13 +37,13 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>5.21.0</version>
+                <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-inline</artifactId>
-                <version>5.21.0</version>
+                <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -162,7 +163,7 @@
                                     ${tycho.testArgLine}
                                     --add-opens=java.base/java.lang=ALL-UNNAMED
                                     --add-opens=java.base/java.util=ALL-UNNAMED
-                                    -javaagent:${settings.localRepository}/org/mockito/mockito-core/5.21.0/mockito-core-5.21.0.jar
+                                    -javaagent:${settings.localRepository}/org/mockito/mockito-core//mockito-core-${mockito.version}.jar
                                 </argLine>
                             </configuration>
                         </execution>
@@ -180,7 +181,7 @@
                             ${tycho.testArgLine}
                             ${tycho.surefire.testenv.args}
                             -Dmoquette.path=${project.basedir}/src/main/resources/moquette/config
-                            -javaagent:${settings.localRepository}/org/mockito/mockito-core/5.21.0/mockito-core-5.21.0.jar
+                            -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
                         </argLine>
                         <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> --> 
                         <dependencies>

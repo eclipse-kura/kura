@@ -65,7 +65,7 @@
     </properties>
 
     <modules>
-        <module>target-platform-bom</module>
+        <module>target-platform-pde-deps</module>
         <module>org.eclipse.kura.camel.sun.misc</module>
         <module>org.eclipse.kura.sun.misc</module>
         <module>com.codeminders.hidapi-parent</module>

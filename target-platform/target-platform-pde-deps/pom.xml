@@ -25,9 +25,9 @@
     </parent>
 
     <groupId>org.eclipse.kura</groupId>
-    <artifactId>target-platform-bom</artifactId>
+    <artifactId>target-platform-pde-deps</artifactId>
     <packaging>pom</packaging>
-    <name>Kura target platform BOM</name>
+    <name>Kura target platform PDE Dependencies</name>
 
     <!-- dependencies available in target definition -->
     <dependencies>
@@ -730,7 +730,7 @@
             <scope>test</scope>
         </dependency>
         <!-- END test dependencies -->
-        <!-- START Kura target platform BOM -->
+        <!-- START Kura target platform PDE Dependencies -->
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>com.codeminders.hidapi</artifactId>
@@ -779,6 +779,6 @@
             <groupId>org.eclipse.kura</groupId>
             <artifactId>usb4java-javax</artifactId>
         </dependency>
-        <!-- END Kura target platform BOM -->
+        <!-- END Kura target platform PDE Dependencies -->
     </dependencies>
 </project>

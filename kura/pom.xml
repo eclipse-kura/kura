@@ -27,7 +27,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>kura-bom</module>
+        <module>kura-pde-deps</module>
         <module>target-definition</module>
         <module>org.eclipse.kura.api</module>
         <module>org.eclipse.kura.camel</module>
@@ -41,13 +41,10 @@
         <module>org.eclipse.kura.core.comm</module>
         <module>org.eclipse.kura.core.configuration</module>
         <module>org.eclipse.kura.core.crypto</module>
-        <module>org.eclipse.kura.core.deployment</module>
         <module>org.eclipse.kura.core.identity</module>
         <module>org.eclipse.kura.core.inventory</module>
         <module>org.eclipse.kura.core.status</module>
         <module>org.eclipse.kura.core.system</module>
-        <module>org.eclipse.kura.deployment.agent</module>
-        <module>org.eclipse.kura.hook.file.move.provider</module>
         <module>org.eclipse.kura.driver.helper.provider</module>
         <module>org.eclipse.kura.driver.block</module>
         <module>org.eclipse.kura.driver.s7plc.provider</module>
@@ -74,7 +71,6 @@
         <module>org.eclipse.kura.rest.configuration.provider</module>
         <module>org.eclipse.kura.rest.identity.provider</module>
         <module>org.eclipse.kura.rest.inventory.provider</module>
-        <module>org.eclipse.kura.rest.packages.provider</module>
         <module>org.eclipse.kura.rest.keystore.provider</module>
         <module>org.eclipse.kura.rest.security.provider</module>
         <module>org.eclipse.kura.rest.service.listing.provider</module>
@@ -428,11 +424,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.core.deployment</artifactId>
-                <version>2.0.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.core.identity</artifactId>
                 <version>2.0.0-SNAPSHOT</version>
             </dependency>
@@ -471,11 +462,7 @@
                 <artifactId>org.eclipse.kura.db.sqlite.provider</artifactId>
                 <version>2.0.0-SNAPSHOT</version>
             </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.deployment.agent</artifactId>
-                <version>2.0.0-SNAPSHOT</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.driver.block</artifactId>
@@ -529,11 +516,6 @@
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.event.publisher</artifactId>
-                <version>2.0.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.hook.file.move.provider</artifactId>
                 <version>2.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
@@ -615,11 +597,6 @@
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.rest.keystore.provider</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.rest.packages.provider</artifactId>
-                <version>2.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>

@@ -1,18 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2025 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -21,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
+import org.eclipse.kura.configuration.Password;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -59,7 +61,9 @@ public class ConfigurationServiceTest {
     private static final String TEST_SELF_COMPONENT_PID = "org.eclipse.kura.core.configuration.CfgSvcTestSelfComponent";
     private static final String TEST_COMPONENT_FPID = "org.eclipse.kura.core.configuration.TestFactoryComponent";
     private static final String TEST_COMPONENT_PROPERTY_KEY = "field.test";
+    private static final String TEST_COMPONENT_PASSWORD_PROPERTY_KEY = "password.test";
     private static final int TEST_COMPONENT_PROPERTY_VALUE = 1;
+    private static final String TEST_COMPONENT_PASSWORD_PROPERTY_DEFAULT = "foobar";
     private static final String TEST_SELF_COMPONENT_PROPERTY_KEY = "TestADId";
     private static final String TEST_SELF_COMPONENT_PROPERTY_VALUE = "TestADDefaultValue";
     private static final String KURA_SNAPSHOTS_DIR = "/tmp/kura/snapshots";
@@ -134,15 +138,11 @@ public class ConfigurationServiceTest {
     private Optional<Exception> exceptionOccurred;
 
     private Set<String> factoryComponentPids;
-    private Map<String, Object> exampleProperties = new HashMap<String, Object>() {
+    private Map<String, Object> exampleProperties = map("key1", "value1", "key2", "value2");
 
-        private static final long serialVersionUID = 1L;
+    private Map<String, Object> defaultProperties = map("field.test", 1, "password.test",
+            new Password(TEST_COMPONENT_PASSWORD_PROPERTY_DEFAULT.toCharArray()));
 
-        {
-            put("key1", "value1");
-            put("key2", "value2");
-        }
-    };
     private Set<Long> snapshotsBefore;
     private Set<Long> snapshotsAfter;
     private Set<String> configurableComponentPids;
@@ -198,6 +198,28 @@ public class ConfigurationServiceTest {
 
         thenSnapshotsIncreasedBy(1);
         thenLastSnapshotContainsProperties("cfcmp_pid_1", this.exampleProperties);
+    }
+
+    @Test
+    public void testCreateFactoryConfigurationWithDefaultPassword() {
+        // positive test; the created snapshot contains the properties
+
+        whenCreateFactoryConfiguration(TEST_COMPONENT_FPID, "cfcmp_pid_2", null, true);
+
+        thenSnapshotsIncreasedBy(1);
+        thenLastSnapshotContainsProperties("cfcmp_pid_2", this.defaultProperties);
+    }
+
+    @Test
+    public void testCreateFactoryConfigurationWithCustomPassword() {
+        // positive test; the created snapshot contains the properties
+
+        whenCreateFactoryConfiguration(TEST_COMPONENT_FPID, "cfcmp_pid_3",
+                map(TEST_COMPONENT_PASSWORD_PROPERTY_KEY, new Password("bar".toCharArray())), true);
+
+        thenSnapshotsIncreasedBy(1);
+        thenLastSnapshotContainsProperties("cfcmp_pid_3",
+                map(TEST_COMPONENT_PASSWORD_PROPERTY_KEY, new Password("bar".toCharArray())));
     }
 
     @Test
@@ -350,7 +372,9 @@ public class ConfigurationServiceTest {
         whenGetDefaultComponentConfiguration(TEST_COMPONENT_PID);
 
         thenDefaultConfigurationIs(TEST_COMPONENT_PID, false, false);
-        thenDefaultConfigurationPropertiesHas(1, TEST_COMPONENT_PROPERTY_KEY, TEST_COMPONENT_PROPERTY_VALUE);
+        thenDefaultConfigurationPropertiesHas(2, TEST_COMPONENT_PROPERTY_KEY, TEST_COMPONENT_PROPERTY_VALUE);
+        thenDefaultConfigurationPropertiesHas(2, TEST_COMPONENT_PASSWORD_PROPERTY_KEY,
+                new Password(TEST_COMPONENT_PASSWORD_PROPERTY_DEFAULT.toCharArray()));
         thenDefaultConfigurationDefinitionIsPopulated();
         thenNoExceptionOccurred();
     }
@@ -876,7 +900,7 @@ public class ConfigurationServiceTest {
         try {
             List<ComponentConfiguration> lastSnapshot = ConfigurationServiceTest.configurationService
                     .getSnapshot(after.iterator().next().longValue());
-            assertTrue(snapshotContains(lastSnapshot, pid, expectedProperties));
+            assertSnapshotContains(lastSnapshot, pid, expectedProperties);
         } catch (Exception e) {
             this.exceptionOccurred = Optional.of(e);
         }
@@ -987,7 +1011,8 @@ public class ConfigurationServiceTest {
     private void thenDefaultConfigurationPropertiesHas(int size, String expectedKey, Object expectedValue) {
         assertNotNull(this.defaultConfiguration.getConfigurationProperties());
         assertEquals(size, this.defaultConfiguration.getConfigurationProperties().size());
-        assertEquals(expectedValue, this.defaultConfiguration.getConfigurationProperties().get(expectedKey));
+        assertPropertyEquals(expectedKey, expectedValue,
+                this.defaultConfiguration.getConfigurationProperties().get(expectedKey));
     }
 
     private void thenDefaultConfigurationDefinitionIsPopulated() {
@@ -1001,12 +1026,12 @@ public class ConfigurationServiceTest {
     }
 
     private void thenConfigurationPropertiesHaveNotChanged() {
-        assertTrue(propertiesEquals(this.configuration.getConfigurationProperties(),
-                this.updatedConfiguration.getConfigurationProperties()));
+        assertPropertiesContain(this.configuration.getConfigurationProperties(),
+                this.updatedConfiguration.getConfigurationProperties());
     }
 
     private void thenUpdatedConfigurationPropertiesContains(Map<String, Object> expectedProps) {
-        assertTrue(propertiesEquals(expectedProps, this.updatedConfiguration.getConfigurationProperties()));
+        assertPropertiesContain(expectedProps, this.updatedConfiguration.getConfigurationProperties());
     }
 
     private void thenComponentConfigurationsContainPidsWithExampleProperties(String... pids) {
@@ -1016,7 +1041,7 @@ public class ConfigurationServiceTest {
                 ComponentConfiguration cc = ConfigurationServiceTest.configurationService
                         .getComponentConfiguration(pid);
 
-                assertTrue(propertiesEquals(this.exampleProperties, cc.getConfigurationProperties()));
+                assertPropertiesContain(this.exampleProperties, cc.getConfigurationProperties());
 
             } catch (Exception e) {
                 // ignore
@@ -1109,6 +1134,19 @@ public class ConfigurationServiceTest {
         return found;
     }
 
+    private void assertSnapshotContains(List<ComponentConfiguration> snapshot, String pid,
+            Map<String, Object> expectedProperties) throws KuraException {
+        for (ComponentConfiguration cc : snapshot) {
+            if (pid.equals(cc.getPid())) {
+                if (expectedProperties == null) {
+                    return;
+                }
+
+                assertPropertiesContain(expectedProperties, cc.getConfigurationProperties());
+            }
+        }
+    }
+
     private void cleanSnapshots() {
         if (systemService != null) {
             this.kuraSnapshotsCount = systemService.getKuraSnapshotsCount();
@@ -1133,14 +1171,32 @@ public class ConfigurationServiceTest {
         return pids1.containsAll(pids2) && pids2.containsAll(pids1);
     }
 
-    private boolean propertiesEquals(Map<String, Object> p1, Map<String, Object> p2) {
-        for (Entry<String, Object> e1 : p1.entrySet()) {
-            if (!p2.entrySet().stream()
-                    .anyMatch(e2 -> e2.getKey().equals(e1.getKey()) && e2.getValue().equals(e1.getValue()))) {
-                return false;
-            }
+    private void assertPropertiesContain(Map<String, Object> contained, Map<String, Object> container) {
+        for (Entry<String, Object> e1 : contained.entrySet()) {
+
+            final Object expected = e1.getValue();
+            final Object value = container.get(e1.getKey());
+
+            assertPropertyEquals(e1.getKey(), expected, value);
+        }
+    }
+
+    private void assertPropertyEquals(final String key, final Object expected, final Object actual) {
+        if (expected instanceof Password && actual instanceof Password) {
+            assertArrayEquals("property " + key + " does not match", ((Password) expected).getPassword(),
+                    ((Password) actual).getPassword());
+        } else {
+            assertEquals("property " + key + " does not match", expected, actual);
+        }
+    }
+
+    private static Map<String, Object> map(final Object... values) {
+        final Map<String, Object> result = new HashMap<>();
+
+        for (int i = 0; i < values.length; i += 2) {
+            result.put((String) values[i], values[i + 1]);
         }
 
-        return true;
+        return result;
     }
 }

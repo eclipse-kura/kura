@@ -1599,23 +1599,33 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         if (this.executorService == null) {
             return;
         }
+
+        InternetConnectionStatus oldStatus = this.currentInternetStatus.get();
+
         try {
 
             if (isPingable(StandardProtocolFamily.INET, getInternetConnectionStatusCheckHost())
                     || isPingable(StandardProtocolFamily.INET6, getInternetConnectionStatusCheckHost())) {
-                this.currentInternetStatus.set(InternetConnectionStatus.FULL);
+                updateStatus(oldStatus, InternetConnectionStatus.FULL);
                 return;
             }
 
             if (isPingable(StandardProtocolFamily.INET, getInternetConnectionStatusCheckIp())
                     || isPingable(StandardProtocolFamily.INET6, getInternetConnectionStatusCheckIp())) {
-                this.currentInternetStatus.set(InternetConnectionStatus.IP_ONLY);
+                updateStatus(oldStatus, InternetConnectionStatus.IP_ONLY);
                 return;
             }
 
-            this.currentInternetStatus.set(InternetConnectionStatus.UNAVAILABLE);
+            updateStatus(oldStatus, InternetConnectionStatus.UNAVAILABLE);
         } catch (Exception e) {
             logger.error("Error while checking internet connection status", e);
+        }
+    }
+
+    private void updateStatus(InternetConnectionStatus oldStatus, InternetConnectionStatus newStatus) {
+        this.currentInternetStatus.set(newStatus);
+        if (newStatus != oldStatus) {
+            logger.debug("Internet connection status changed to {}", newStatus);
         }
     }
 
@@ -1634,10 +1644,16 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             throw new IllegalArgumentException("Unexpected protocol: " + protocol);
         }
 
-        CommandStatus status = this.executorService
-                .execute(new Command(new String[] { "ping", version, address, "-c", "5" }));
-
-        return status.getExitStatus().isSuccessful();
+        try {
+            // -c 5: send 5 ping requests,
+            // -W 5: wait for 1 seconds max for each reply
+            CommandStatus status = this.executorService
+                    .execute(new Command(new String[] { "ping", version, address, "-c", "5", "-W", "1" }));
+            return status.getExitStatus().isSuccessful();
+        } catch (Exception e) {
+            logger.trace("Error while executing ping command", e);
+            return false;
+        }
     }
 
 }

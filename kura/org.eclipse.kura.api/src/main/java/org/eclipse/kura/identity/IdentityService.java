@@ -257,4 +257,25 @@ public interface IdentityService {
      */
     public void createTemporaryIdentity(final String identityName, final Duration lifetime) throws KuraException;
 
+
+    /**
+     * Creates a temporary identity that is not persisted and has automatic
+     * expiration. Temporary identities behave like regular identities but are
+     * stored in-memory only and are automatically removed after the specified
+     * lifetime period.
+     *
+     * @param identityConfiguration
+     *            the identity configuration including identity
+     *            name and optional configuration components.
+     * @param lifetime
+     *            the duration before automatic expiration. The identity
+     *            will be automatically removed after this period.
+     * @throws KuraException
+     *             if a failure occurs in creating the temporary identity,
+     *             if an identity with the given name already exists
+     *             (either regular or temporary) or if the provided configuration
+     *             is not valied.
+     * @since 2.8.0
+     */
+    public void createTemporaryIdentity(final IdentityConfiguration identityConfiguration, final Duration lifetime) throws KuraException;
 }

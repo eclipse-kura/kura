@@ -354,7 +354,6 @@ public class IdentityServiceImpl implements IdentityService {
         return new AdditionalConfigurations(additionalConfigurations);
     }
 
-
     private void validatePasswordConfiguration(final IdentityConfiguration identityConfiguration,
             final PasswordConfiguration passwordCofiguration) throws KuraException {
         if (!passwordCofiguration.isPasswordAuthEnabled()) {
@@ -373,8 +372,7 @@ public class IdentityServiceImpl implements IdentityService {
                     .filter(u -> u.getCredentials().get(PASSWORD_PROPERTY) != null).isPresent();
             final boolean hasTemporaryPasswordHash = this.temporaryStore.getIdentity(identityConfiguration.getName())
                     .flatMap(config -> config.getComponent(PasswordConfiguration.class))
-                    .flatMap(PasswordConfiguration::getPasswordHash)
-                    .isPresent();
+                    .flatMap(PasswordConfiguration::getPasswordHash).isPresent();
             if (!hasPersistedPasswordHash && !hasTemporaryPasswordHash) {
                 throw new KuraException(KuraErrorCode.INVALID_PARAMETER,
                         "Password authentication is enabled but no password has been provided or is currently assigned");
@@ -411,6 +409,15 @@ public class IdentityServiceImpl implements IdentityService {
     public synchronized void createTemporaryIdentity(final String identityName, final Duration lifetime)
             throws KuraException {
 
+        createTemporaryIdentity(new IdentityConfiguration(identityName, Collections.emptyList()), lifetime);
+    }
+
+    @Override
+    public synchronized void createTemporaryIdentity(final IdentityConfiguration identityConfiguration,
+            final Duration lifetime) throws KuraException {
+
+        final String identityName = identityConfiguration.getName();
+
         ValidationUtil.validateNewIdentityName(identityName);
 
         // Check if identity already exists (temporary or regular)
@@ -429,8 +436,8 @@ public class IdentityServiceImpl implements IdentityService {
                         "Temporary identity lifetime must be positive");
             }
 
-            this.temporaryIdentityStore.createIdentity(new IdentityConfiguration(identityName, Collections.emptyList()),
-                    lifetime);
+            validateIdentityConfiguration(identityConfiguration);
+            this.temporaryIdentityStore.createIdentity(identityConfiguration, lifetime);
 
         }, "Create temporary identity " + identityName);
     }

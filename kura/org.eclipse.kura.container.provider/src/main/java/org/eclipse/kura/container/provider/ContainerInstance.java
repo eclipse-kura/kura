@@ -618,9 +618,27 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             boolean useHttps = isHttpsEnabled();
             String protocol = useHttps ? "https" : "http";
             String host = getHostAddressForNetworkMode(options.getContainerNetworkingMode().orElse("bridge"));
+            String formattedHost = formatHostForUrl(host);
             int port = getRestServicePort(useHttps);
 
-            return String.format("%s://%s:%d/services", protocol, host, port);
+            return String.format("%s://%s:%d/services", protocol, formattedHost, port);
+        }
+
+        private String formatHostForUrl(String host) {
+            if (host == null || host.isEmpty()) {
+                return host;
+            }
+
+            if (host.startsWith("[") && host.endsWith("]")) {
+                return host;
+            }
+
+            if (!host.contains(":")) {
+                return host;
+            }
+
+            String encodedHost = host.contains("%25") ? host : host.replace("%", "%25");
+            return "[" + encodedHost + "]";
         }
 
         private int getRestServicePort(boolean useHttps) {

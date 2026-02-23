@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
@@ -49,6 +50,10 @@ import org.eclipse.kura.identity.PasswordConfiguration;
 import org.eclipse.kura.identity.Permission;
 import org.eclipse.kura.identity.PasswordStrengthRequirements;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
+import org.eclipse.kura.net.IPAddress;
+import org.eclipse.kura.net.NetInterface;
+import org.eclipse.kura.net.NetInterfaceAddress;
+import org.eclipse.kura.net.NetworkService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -239,6 +244,19 @@ public class ContainerIdentityIntegrationTest {
         thenStartContainerReceivesTokenEnvironment();
     }
 
+    @Test
+    public void injectsUrlEncodedIpv6RestBaseUrlForDockerBridge() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentityServiceProvidesPassword();
+        givenContainerOrchestratorStartsSuccessfully();
+        givenHttpsServiceIsEnabledOnPort(443);
+        givenDockerBridgeAddressIs("fe80::7024:e3ff:feb9:997d%docker0");
+
+        whenContainerInstanceIsActivated();
+
+        thenRestBaseUrlIs("https://[fe80::7024:e3ff:feb9:997d%25docker0]:443/services");
+    }
+
     /*
      * GIVEN
      */
@@ -365,6 +383,31 @@ public class ContainerIdentityIntegrationTest {
     private void givenFastRetryConfiguration() {
         this.properties.put("container.image.download.retries", 1);
         this.properties.put("container.image.download.interval", 0);
+    }
+
+    private void givenHttpsServiceIsEnabledOnPort(final int port) throws Exception {
+        final ComponentConfiguration componentConfiguration = Mockito.mock(ComponentConfiguration.class);
+        final Map<String, Object> properties = new HashMap<>();
+        properties.put("https.ports", new Integer[] { port });
+        when(componentConfiguration.getConfigurationProperties()).thenReturn(properties);
+        when(this.configurationService.getComponentConfiguration("org.eclipse.kura.http.server.manager.HttpService"))
+                .thenReturn(componentConfiguration);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void givenDockerBridgeAddressIs(final String address) throws Exception {
+        final NetworkService networkService = Mockito.mock(NetworkService.class);
+        final NetInterface<NetInterfaceAddress> docker0 = Mockito.mock(NetInterface.class);
+        final NetInterfaceAddress interfaceAddress = Mockito.mock(NetInterfaceAddress.class);
+        final IPAddress ipAddress = Mockito.mock(IPAddress.class);
+
+        when(docker0.getName()).thenReturn("docker0");
+        when(docker0.getNetInterfaceAddresses()).thenReturn(Collections.singletonList(interfaceAddress));
+        when(interfaceAddress.getAddress()).thenReturn(ipAddress);
+        when(ipAddress.getHostAddress()).thenReturn(address);
+        when(networkService.getNetworkInterfaces()).thenReturn(Collections.singletonList(docker0));
+
+        this.containerInstance.setNetworkService(networkService);
     }
 
     /*
@@ -515,6 +558,16 @@ public class ContainerIdentityIntegrationTest {
         assertEquals("First identity creation should use base name", expectedBaseName, this.capturedIdentityNames.get(0));
         assertEquals("Second identity creation should use suffixed name", expectedBaseName + "_1",
                 this.capturedIdentityNames.get(1));
+    }
+
+    private void thenRestBaseUrlIs(final String expectedBaseUrl) throws Exception {
+        assertTrue("Container start was not invoked", this.startLatch.await(2, TimeUnit.SECONDS));
+
+        final ContainerConfiguration configuration = this.configurationCaptor.getValue();
+        final List<String> envVars = configuration.getContainerEnvVars();
+        final String expectedEnvVar = "KURA_REST_BASE_URL=" + expectedBaseUrl;
+
+        assertTrue("Base URL env var did not match expected value", envVars.contains(expectedEnvVar));
     }
 
     private void thenTemporaryPasswordIsCleared() throws Exception {

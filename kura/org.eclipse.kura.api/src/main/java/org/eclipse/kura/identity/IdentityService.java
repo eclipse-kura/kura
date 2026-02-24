@@ -274,7 +274,7 @@ public interface IdentityService {
      *             if a failure occurs in creating the temporary identity,
      *             if an identity with the given name already exists
      *             (either regular or temporary) or if the provided configuration
-     *             is not valied.
+     *             is not valid.
      * @since 2.8.0
      */
     public void createTemporaryIdentity(final IdentityConfiguration identityConfiguration, final Duration lifetime) throws KuraException;

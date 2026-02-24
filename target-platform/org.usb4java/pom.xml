@@ -122,7 +122,7 @@
                             org.usb4java;uses:="org.apache.commons.lang3.builder,org.apache.commons.lang3.tuple";version="${usb4java.version}"
                         </Export-Package>
                         <Require-Capability>
-                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"
+                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=21))"
                         </Require-Capability>
                     </instructions>
                 </configuration>

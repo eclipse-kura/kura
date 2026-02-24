@@ -28,8 +28,8 @@
         <check.plugins.exist.remote>false</check.plugins.exist.remote>
         <kura.addons.url>https://artifactory.dev.everyware.io/artifactory/kura-addons</kura.addons.url>
 
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
 
         <!-- Plugins versions -->
         <exists-maven-plugin.version>0.0.3</exists-maven-plugin.version>
@@ -37,7 +37,7 @@
         <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
         <maven-bundle-plugin.version>5.1.8</maven-bundle-plugin.version>
         <maven-clean-plugin.version>2.4.1</maven-clean-plugin.version>
-        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
         <maven-checkstyle-plugin.version>2.17</maven-checkstyle-plugin.version>
         <maven-dependency-plugin.version>3.0.0</maven-dependency-plugin.version>
         <maven-deploy-plugin.version>2.8.1</maven-deploy-plugin.version>

@@ -53,7 +53,7 @@
                         <instructions>
                             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                             <Require-Capability>
-                                osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"
+                                osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=21))"
                             </Require-Capability>
                         </instructions>
                     </configuration>
@@ -77,6 +77,7 @@
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
+                    <release>${maven.compiler.release}</release>
                 </configuration>
             </plugin>
         </plugins>

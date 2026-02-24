@@ -74,7 +74,7 @@ Kura 6 introduces temporary identity support in the **IdentityService**, a set o
 ### Key Characteristics
 
 - **Non-Persistent**: Temporary identities exist only in memory and are never persisted to disk or configuration snapshots
-- **Password-Based Authentication**: Each temporary identity uses a generated password for authentication
+- **Authentication Flexibility**: Temporary identities can be used with the same authentication mechanisms supported by regular identities (for example password-based and certificate-based REST authentication, depending on RestService configuration)
 - **Automatic Lifecycle Management**: Temporary identities can be programmatically created and deleted as needed
 - **Permission-Based Authorization**: Temporary identities support the same permission model as regular identities
 
@@ -87,7 +87,7 @@ The main use case for temporary identities is the **Container Identity Integrati
 3. Provides the identity name and password to the container via environment variables
 4. Automatically cleans up the temporary identity when the container stops
 
-This allows containers to securely access Kura's REST APIs without manual credential configuration or exposing persistent credentials. Password-based REST authentication requires **Basic Authentication Enabled** in the **RestService** configuration.
+This allows containers to securely access Kura's REST APIs without manual credential configuration or exposing persistent credentials. Container Identity Integration provisions password credentials, so password-based REST authentication requires **Basic Authentication Enabled** in the **RestService** configuration. Temporary identities can also be used with certificate-based REST authentication when certificate authentication is enabled and the certificate CN matches the identity name.
 
 ### Temporary Identity API
 
@@ -145,7 +145,7 @@ identityService.deleteIdentity(identityName);
 | Aspect | Regular Identity | Temporary Identity |
 |--------|-----------------|-------------------|
 | Persistence | Stored in configuration snapshots | Memory only, never persisted |
-| Authentication | Password-based | Token-based |
+| Authentication | Password-based and certificate-based | Password-based and certificate-based |
 | Lifecycle | Manual creation/deletion via UI or API | Programmatic creation/deletion |
 | Use Case | Long-term user accounts | Short-lived service authentication |
 | Management | Web UI, REST API, MQTT | Java API only |
@@ -153,7 +153,7 @@ identityService.deleteIdentity(identityName);
 ### Security Considerations
 
 - Temporary identities follow the same permission model as regular identities
-- Tokens should be treated as sensitive credentials and not logged or persisted
+- Passwords and client certificates should be treated as sensitive credentials and not logged or persisted
 - Temporary identities are automatically removed from memory when deleted
 - Best practice: delete temporary identities as soon as they are no longer needed
 

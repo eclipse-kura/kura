@@ -6,9 +6,9 @@ Temporary identities are short-lived, non-persistent identities created in memor
 
 Temporary identities are managed through the `IdentityService` using an `IdentityConfiguration` and a lifetime:
 
-- A temporary identity is created with a generated password and assigned permissions.
+- A temporary identity is created with an `IdentityConfiguration` and assigned permissions.
 - The identity exists only in memory and is removed explicitly or when the lifetime expires.
-- REST access uses Basic authentication with the temporary identity name and password.
+- REST access can use password-based or certificate-based authentication, depending on RestService configuration.
 
 ## API Reference
 
@@ -86,7 +86,7 @@ curl -k -u "${KURA_IDENTITY_NAME}:${KURA_IDENTITY_PASSWORD}" \
   "${KURA_REST_BASE_URL}/system/info"
 ```
 
-Basic authentication must be enabled in the **RestService** configuration for password-based access.
+Basic authentication must be enabled in the **RestService** configuration for password-based access. Certificate-based access requires certificate authentication to be enabled and a client certificate whose CN matches the temporary identity name.
 
 ## Best Practices
 

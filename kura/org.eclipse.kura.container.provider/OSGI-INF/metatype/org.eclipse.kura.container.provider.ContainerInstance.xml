@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2022, 2025 Eurotech and/or its affiliates and others
+    Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -189,6 +189,14 @@
         <AD id="container.restart.onfailure" name="Restart Container On Failure" type="Boolean" cardinality="1" required="true" default="false"
             description="Automatically restart the container when it has failed. Default: false">
         </AD>
+
+        <AD id="container.identity.enabled" name="Enable Identity Integration" type="Boolean" cardinality="1" required="true" default="false"
+            description="Enable integration with Kura Identity Service to provide temporary credentials to the container. Default: false">
+        </AD>
+        
+        <AD id="container.permissions" name="Container Permissions"
+            description="Comma-separated list of permissions to grant to the container when identity integration is enabled. Example: rest.assets,rest.configuration" 
+            type="String" cardinality="1" required="false" default="" />
             
     </OCD>
     <Designate pid="org.eclipse.kura.container.provider.ContainerInstance"

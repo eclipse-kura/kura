@@ -231,7 +231,7 @@ public interface IdentityService {
      * @param identityName
      * @param permission
      * @throws KuraException
-     *             if the provided permissio is not currently assigned to
+     *             if the provided permission is not currently assigned to
      *             the given identity or if occurs while performing the
      *             check.
      *

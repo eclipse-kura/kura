@@ -1635,6 +1635,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Container Orchestration Provider
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -1645,6 +1657,34 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Features
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -3831,6 +3871,28 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
+      <a href="../../java-application-development/how-to-use-temporary-identity-service/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    How to Use Temporary Identity Service
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../java-application-development/how-to-use-dummy-signature-service/" class="md-nav__link">
         
   
@@ -4560,6 +4622,23 @@ You are viewing the documentation relative to the develop branch or to an outdat
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Features
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -4577,6 +4656,16 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h1 id="container-orchestration-provider">Container Orchestration Provider</h1>
 <p>The Container Orchestration Provider allows Kura to manage Docker. With this tool, you can arbitrarily pull and deploy containerized software packages and run them on your gateway. This Service allows the user to create, configure, start, and stop containers all from the browser. The bundle will also restart containers if the gateway is restarted.</p>
 <p>The feature is composed of two bundles, one that exposes APIs for container management and one that implements those APIs. This API is exposed so that you can leverage it to implement containerization in your own Kura plugins.</p>
+<h2 id="key-features">Key Features</h2>
+<ul>
+<li><strong>Container Lifecycle Management</strong>: Create, start, stop, and manage Docker containers through Kura's web interface</li>
+<li><strong>Image Management</strong>: Pull images from Docker Hub or authenticated registries with automatic retry and timeout configuration</li>
+<li><strong>Resource Control</strong>: Configure CPU, memory, GPU allocation, and cgroup settings for containers</li>
+<li><strong>Network Configuration</strong>: Support for various Docker networking modes (bridge, host, custom networks)</li>
+<li><strong>Security</strong>: Container image signature verification and allowlist enforcement</li>
+<li><strong>Identity Integration</strong>: Automatic provisioning of temporary credentials for containers to securely access Kura's REST APIs</li>
+<li><strong>Persistence</strong>: Automatic container restart after gateway reboot if configured</li>
+</ul>
 
 
 

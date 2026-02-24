@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://eclipse-kura.github.io/kura/docs-develop/administration/directory-layout/">
+        <link rel="canonical" href="https://eclipse-kura.github.io/kura/docs-develop/java-application-development/how-to-use-temporary-identity-service/">
       
       
-        <link rel="prev" href="../../gateway-configuration/authentication-and-authorization/">
+        <link rel="prev" href="../how-to-use-beacon-apis/">
       
       
-        <link rel="next" href="../logging-level/">
+        <link rel="next" href="../how-to-use-dummy-signature-service/">
       
       
       <link rel="icon" href="../../assets/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Directory Layout - Eclipse Kura™ Documentation</title>
+        <title>How to Use Temporary Identity Service - Eclipse Kura™ Documentation</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#directory-layout" class="md-skip">
+        <a href="#how-to-use-temporary-identities" class="md-skip">
           Skip to content
         </a>
       
@@ -135,7 +135,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Directory Layout
+              How to Use Temporary Identity Service
             
           </span>
         </div>
@@ -1152,19 +1152,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
       
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -1179,7 +1177,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Administration
@@ -1190,31 +1188,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Directory Layout
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../administration/directory-layout/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1224,44 +1201,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#kura-file-structure" class="md-nav__link">
-    <span class="md-ellipsis">
-      Kura File Structure
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#log-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      Log Files
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1274,7 +1213,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../logging-level/" class="md-nav__link">
+      <a href="../../administration/logging-level/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1296,7 +1235,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../snapshot-management/" class="md-nav__link">
+      <a href="../../administration/snapshot-management/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1318,7 +1257,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../application-management/" class="md-nav__link">
+      <a href="../../administration/application-management/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1340,7 +1279,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../remote-management-kapua/" class="md-nav__link">
+      <a href="../../administration/remote-management-kapua/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1362,7 +1301,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../system-component-inventory/" class="md-nav__link">
+      <a href="../../administration/system-component-inventory/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3451,17 +3390,19 @@ You are viewing the documentation relative to the develop branch or to an outdat
       
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
         
           
           <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
@@ -3476,7 +3417,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             Java Application Development
@@ -3490,7 +3431,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/development-environment-setup/" class="md-nav__link">
+      <a href="../development-environment-setup/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3512,7 +3453,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/target-platform-dependencies/" class="md-nav__link">
+      <a href="../target-platform-dependencies/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3534,7 +3475,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/kura-addon-archetype/" class="md-nav__link">
+      <a href="../kura-addon-archetype/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3556,7 +3497,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/hello-world-application/" class="md-nav__link">
+      <a href="../hello-world-application/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3578,7 +3519,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/deploy-and-debug-applications/" class="md-nav__link">
+      <a href="../deploy-and-debug-applications/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3600,7 +3541,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/remote-debugging-on-target-platform/" class="md-nav__link">
+      <a href="../remote-debugging-on-target-platform/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3622,7 +3563,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/configurable-application/" class="md-nav__link">
+      <a href="../configurable-application/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3644,7 +3585,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/connected-application/" class="md-nav__link">
+      <a href="../connected-application/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3663,17 +3604,19 @@ You are viewing the documentation relative to the develop branch or to an outdat
                 
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_9" checked>
         
           
           <label class="md-nav__link" for="__nav_9_9" id="__nav_9_9_label" tabindex="0">
@@ -3688,7 +3631,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_9_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_9_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_9_9">
             <span class="md-nav__icon md-icon"></span>
             How-tos
@@ -3702,7 +3645,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/how-to-serial-ports/" class="md-nav__link">
+      <a href="../how-to-serial-ports/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3724,7 +3667,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/how-to-use-gpio/" class="md-nav__link">
+      <a href="../how-to-use-gpio/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3746,7 +3689,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/how-to-use-modbus/" class="md-nav__link">
+      <a href="../how-to-use-modbus/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3768,7 +3711,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/how-to-use-can-bus/" class="md-nav__link">
+      <a href="../how-to-use-can-bus/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3790,7 +3733,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/how-to-use-watchdog/" class="md-nav__link">
+      <a href="../how-to-use-watchdog/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3812,7 +3755,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/how-to-manage-network-settings/" class="md-nav__link">
+      <a href="../how-to-manage-network-settings/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3834,7 +3777,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/how-to-use-bt-le-apis/" class="md-nav__link">
+      <a href="../how-to-use-bt-le-apis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3856,7 +3799,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/how-to-use-beacon-apis/" class="md-nav__link">
+      <a href="../how-to-use-beacon-apis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3875,10 +3818,31 @@ You are viewing the documentation relative to the develop branch or to an outdat
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../java-application-development/how-to-use-temporary-identity-service/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    How to Use Temporary Identity Service
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -3888,6 +3852,95 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Reference
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-temporary-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create Temporary Identity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delete Identity
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage Example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rest-authentication-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      REST Authentication Example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -3900,7 +3953,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/how-to-use-dummy-signature-service/" class="md-nav__link">
+      <a href="../how-to-use-dummy-signature-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3930,7 +3983,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/ram-usage-considerations/" class="md-nav__link">
+      <a href="../ram-usage-considerations/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -3952,7 +4005,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../java-application-development/contributing/" class="md-nav__link">
+      <a href="../contributing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4636,18 +4689,69 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#kura-file-structure" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Kura File Structure
+      Overview
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#log-files" class="md-nav__link">
+  <a href="#api-reference" class="md-nav__link">
     <span class="md-ellipsis">
-      Log Files
+      API Reference
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-temporary-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create Temporary Identity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delete Identity
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage Example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rest-authentication-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      REST Authentication Example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
     </span>
   </a>
   
@@ -4669,115 +4773,84 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 
 
-<h1 id="directory-layout">Directory Layout</h1>
-<p>This section describes the default Kura directory layout that is created upon installation. The default installation directory is as follows:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>/opt/eclipse
-</code></pre></div>
-<p>The <strong>kura</strong> sub-directory is a logical link on the actual Kura release directory:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>kura -&gt; /opt/eclipse/kura_3.0.0_raspberry-pi-2
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>kura_3.0.0_raspberry-pi-2
-</code></pre></div>
-<h2 id="kura-file-structure">Kura File Structure</h2>
-<p>The idea behind the Kura file and folder structure is to separate user and framework configuration files, that is files that can be modified by the user to customize Kura behavior and files that are used by Kura to persist configurations. Moreover, some files are generated at runtime by Kura (i.e. database) and they are kept in specific folders.</p>
-<p>The <code>user</code>, <code>console</code>, <code>log4j</code> and <code>packages</code> directories contain files that can be modified by the user (i.e. the configuration for the logging or custom Kura properties).
-The <code>framework</code> folder keeps the configuration files used by Kura and that shouldn't be modified by the user. 
-The <code>data</code> directory is used to persist files that are generated by Kura. 
-Finally, the <code>plugins</code> folder contains all the jar files needed by Kura.
-All of the Kura files are located within <code>/opt/eclipse/kura</code> folder using the structure shown in the following table:</p>
-<table>
-<thead>
-<tr>
-<th>Directory</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>bin</code></td>
-<td>Scripts that start Kura.</td>
-</tr>
-<tr>
-<td><code>console</code></td>
-<td>This folder contains files that are used to customise the Kura Web UI appearance.</td>
-</tr>
-<tr>
-<td><code>data</code></td>
-<td>Data files generated by the Kura runtime.</td>
-</tr>
-<tr>
-<td><code>data/persistance</code></td>
-<td>Embedded Database files.</td>
-</tr>
-<tr>
-<td><code>packages</code></td>
-<td>Deployment package files that are not part of the standard Kura framework, but are installed at a later time.</td>
-</tr>
-<tr>
-<td><code>framework</code></td>
-<td>Configuration data for Kura framework. The user shouldn't directly modify these files.</td>
-</tr>
-<tr>
-<td><code>log</code></td>
-<td>Log file from the latest Kura installation.</td>
-</tr>
-<tr>
-<td><code>log4j</code></td>
-<td>Logger framework configuration</td>
-</tr>
-<tr>
-<td><code>plugins</code></td>
-<td>All of the libraries and Kura specific jar files needed for the framework execution.</td>
-</tr>
-<tr>
-<td><code>user</code></td>
-<td>Configuration files generated by the user or by Kura at runtime. These files can be modified by the user to customise the Kura behavior.</td>
-</tr>
-<tr>
-<td><code>user/snapshots</code></td>
-<td>XML snapshot files; up to 10 successive configurations including the original.</td>
-</tr>
-<tr>
-<td><code>user/security</code></td>
-<td>Files used by Kura to configure security.</td>
-</tr>
-<tr>
-<td><code>.data</code></td>
-<td>Backup files needed to restore factory configuration</td>
-</tr>
-</tbody>
-</table>
-<h2 id="log-files">Log Files</h2>
-<p>Kura regularly updates three log sources:</p>
+<h1 id="how-to-use-temporary-identities">How to Use Temporary Identities</h1>
+<p>Temporary identities are short-lived, non-persistent identities created in memory. They are intended for scenarios such as containerized applications that need limited access to Kura REST APIs without storing long-term credentials.</p>
+<h2 id="overview">Overview</h2>
+<p>Temporary identities are managed through the <code>IdentityService</code> using an <code>IdentityConfiguration</code> and a lifetime:</p>
 <ul>
-<li>
-<p><strong>standard out</strong> - Kura logs on the standard output the Eclipse console output of the application. This log contains the eventual errors that are thrown upon Kura startup and can be viewed by executing the following command: <code>journalctl -f -u kura</code> (the command may vary depending on the Linux distribution used).</p>
-</li>
-<li>
-<p><strong>/var/log/kura-audit.log</strong> - stores all of the UI access information, including login attempts and configuration changes.</p>
-</li>
-<li>
-<p><strong>/var/log/kura.log</strong> - stores all of the logging information from Kura bundles. The logger levels are defined in the <strong>log4j.xml</strong> configuration file as shown below:</p>
-</li>
+<li>A temporary identity is created with an <code>IdentityConfiguration</code> and assigned permissions.</li>
+<li>The identity exists only in memory and is removed explicitly or when the lifetime expires.</li>
+<li>REST access can use password-based or certificate-based authentication, depending on RestService configuration.</li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>/opt/eclipse/kura/log4j/log4j.xml
+<h2 id="api-reference">API Reference</h2>
+<h3 id="create-temporary-identity">Create Temporary Identity</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kt">void</span><span class="w"> </span><span class="nf">createTemporaryIdentity</span><span class="p">(</span><span class="n">IdentityConfiguration</span><span class="w"> </span><span class="n">configuration</span><span class="p">,</span><span class="w"> </span><span class="n">Duration</span><span class="w"> </span><span class="n">lifetime</span><span class="p">)</span>
 </code></pre></div>
-<p>The default logger level in this file is set to INFO. This level may be modified for the whole application or for a specific package as shown in the following example:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">&lt;Loggers&gt;</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;org.eclipse&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;info&quot;</span><span class="w"> </span><span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">        </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;RollingFile&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="nt">&lt;/Logger&gt;</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="nt">&lt;Logger</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;org.eclipse.kura.net.admin&quot;</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;debug&quot;</span><span class="w"> </span><span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">        </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;RollingFile&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="nt">&lt;/Logger&gt;</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">    </span><span class="nt">&lt;Root</span><span class="w"> </span><span class="na">level=</span><span class="s">&quot;info&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">        </span><span class="nt">&lt;AppenderRef</span><span class="w"> </span><span class="na">ref=</span><span class="s">&quot;RollingFile&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">    </span><span class="nt">&lt;/Root&gt;</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="nt">&lt;/Loggers&gt;</span>
+<p>Creates a temporary identity with the given configuration and lifetime.</p>
+<h3 id="delete-identity">Delete Identity</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kt">boolean</span><span class="w"> </span><span class="nf">deleteIdentity</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">identityName</span><span class="p">)</span>
 </code></pre></div>
-<p>In this example, the logger level is set to DEBUG only for the <strong>net.admin</strong> bundle. Additionally, more specific, properties may be defined as required for your particular logging needs. The logger levels are hierarchical, so that those in a deeper level of the hierarchy will apply; otherwise, the more general logger level will override them.</p>
-<p>Once the logger levels are modified as needed and the <strong>log4j.xml</strong> configuration file is saved, Kura automatically loads the new configuration. By default Kura checks the file every 30 seconds.</p>
+<p>Deletes a temporary identity by name (also works for regular identities).</p>
+<h2 id="usage-example">Usage Example</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.time.Duration</span><span class="p">;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Arrays</span><span class="p">;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.HashSet</span><span class="p">;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Optional</span><span class="p">;</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Set</span><span class="p">;</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.kura.identity.AssignedPermissions</span><span class="p">;</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.kura.identity.IdentityConfiguration</span><span class="p">;</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.kura.identity.IdentityService</span><span class="p">;</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.kura.identity.Permission</span><span class="p">;</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.kura.identity.PasswordConfiguration</span><span class="p">;</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">TemporaryIdentityExample</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">IdentityService</span><span class="w"> </span><span class="n">identityService</span><span class="p">;</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">createTemporaryIdentity</span><span class="p">()</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">        </span><span class="n">Set</span><span class="o">&lt;</span><span class="n">Permission</span><span class="o">&gt;</span><span class="w"> </span><span class="n">permissions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashSet</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">        </span><span class="n">permissions</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Permission</span><span class="p">(</span><span class="s">&quot;rest.system&quot;</span><span class="p">));</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">        </span><span class="n">permissions</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Permission</span><span class="p">(</span><span class="s">&quot;rest.configuration&quot;</span><span class="p">));</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">identityName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;container_myapp&quot;</span><span class="p">;</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="w">        </span><span class="kt">char</span><span class="o">[]</span><span class="w"> </span><span class="n">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;temporary-password&quot;</span><span class="p">.</span><span class="na">toCharArray</span><span class="p">();</span>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">        </span><span class="n">PasswordConfiguration</span><span class="w"> </span><span class="n">passwordConfiguration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PasswordConfiguration</span><span class="p">(</span>
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="w">            </span><span class="kc">false</span><span class="p">,</span>
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">            </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="w">            </span><span class="n">Optional</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">password</span><span class="p">),</span>
+<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="w">            </span><span class="n">Optional</span><span class="p">.</span><span class="na">empty</span><span class="p">()</span>
+<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="w">        </span><span class="p">);</span>
+<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>
+<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="w">        </span><span class="n">AssignedPermissions</span><span class="w"> </span><span class="n">assignedPermissions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AssignedPermissions</span><span class="p">(</span><span class="n">permissions</span><span class="p">);</span>
+<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a><span class="w">        </span><span class="n">IdentityConfiguration</span><span class="w"> </span><span class="n">configuration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IdentityConfiguration</span><span class="p">(</span>
+<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a><span class="w">            </span><span class="n">identityName</span><span class="p">,</span>
+<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a><span class="w">            </span><span class="n">Arrays</span><span class="p">.</span><span class="na">asList</span><span class="p">(</span><span class="n">passwordConfiguration</span><span class="p">,</span><span class="w"> </span><span class="n">assignedPermissions</span><span class="p">)</span>
+<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a><span class="w">        </span><span class="p">);</span>
+<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a>
+<a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a><span class="w">        </span><span class="n">identityService</span><span class="p">.</span><span class="na">createTemporaryIdentity</span><span class="p">(</span><span class="n">configuration</span><span class="p">,</span><span class="w"> </span><span class="n">Duration</span><span class="p">.</span><span class="na">ofHours</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span>
+<a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a>
+<a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a><span class="w">        </span><span class="c1">// Use identityName and password to access REST APIs via Basic auth</span>
+<a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a>
+<a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">cleanupTemporaryIdentity</span><span class="p">()</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a><span class="w">        </span><span class="n">identityService</span><span class="p">.</span><span class="na">deleteIdentity</span><span class="p">(</span><span class="s">&quot;container_myapp&quot;</span><span class="p">);</span>
+<a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="rest-authentication-example">REST Authentication Example</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>curl<span class="w"> </span>-k<span class="w"> </span>-u<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">KURA_IDENTITY_NAME</span><span class="si">}</span><span class="s2">:</span><span class="si">${</span><span class="nv">KURA_IDENTITY_PASSWORD</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">KURA_REST_BASE_URL</span><span class="si">}</span><span class="s2">/system/info&quot;</span>
+</code></pre></div>
+<p>Basic authentication must be enabled in the <strong>RestService</strong> configuration for password-based access. Certificate-based access requires certificate authentication to be enabled and a client certificate whose CN matches the temporary identity name.</p>
+<h2 id="best-practices">Best Practices</h2>
+<ol>
+<li><strong>Least Privilege</strong>: Grant only the permissions required by the application.</li>
+<li><strong>Short Lifetimes</strong>: Use the minimum lifetime needed for the use case.</li>
+<li><strong>Cleanup</strong>: Delete temporary identities when they are no longer needed.</li>
+<li><strong>Secrets Handling</strong>: Do not log or persist temporary passwords.</li>
+</ol>
 
 
 
@@ -4823,7 +4896,7 @@ All of the Kura files are located within <code>/opt/eclipse/kura</code> folder u
               
                 
               
-              Thanks for your feedback! Help us improve this page by using our <a href="https://github.com/eclipse-kura/kura/issues/new/?title=[Feedback]+/administration/directory-layout/+-+" target="_blank" rel="noopener">feedback form</a>.
+              Thanks for your feedback! Help us improve this page by using our <a href="https://github.com/eclipse-kura/kura/issues/new/?title=[Feedback]+/java-application-development/how-to-use-temporary-identity-service/+-+" target="_blank" rel="noopener">feedback form</a>.
             </div>
           
         </div>

@@ -418,15 +418,17 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                     final Set<Permission> permissions = options.getContainerPermissions().stream().map(Permission::new)
                             .collect(Collectors.toSet());
 
-                    // Generate password
-                    final String password = new String(PasswordGenerator
-                            .generatePassword(passwordStrengthVerificationService.getPasswordStrengthRequirements()));
+                    // Generate password as char[] to minimize exposure
+                    final char[] password = PasswordGenerator
+                            .generatePassword(passwordStrengthVerificationService.getPasswordStrengthRequirements());
 
-                    final String identityName = createTemporaryIdentityWithValidName(options, permissions, password);
+                    final String identityName = createTemporaryIdentityWithValidName(options, permissions,
+                            new String(password));
 
-                    // Store identity name and password for env injection (fresh char[] from same string)
+                    // Store identity name and a copy of the password for env injection
                     ContainerInstance.this.currentTemporaryIdentityName.set(identityName);
-                    ContainerInstance.this.currentTemporaryPassword.set(password.toCharArray());
+                    ContainerInstance.this.currentTemporaryPassword.set(Arrays.copyOf(password, password.length));
+                    Arrays.fill(password, '\0');
 
                     logger.info("Created temporary identity {} for container {} with {} permissions", identityName,
                             options.getContainerName(), permissions.size());

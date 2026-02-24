@@ -1,5 +1,5 @@
 <!--
-     Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
+     Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
 
      This program and the accompanying materials are made
      available under the terms of the Eclipse Public License 2.0
@@ -7,10 +7,11 @@
 
  	SPDX-License-Identifier: EPL-2.0
 
- 	Contributors:
- 	 Eurotech
+	Contributors:
+	 Eurotech
  -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" activate="activate" configuration-policy="require" deactivate="deactivate" modified="updated" name="org.eclipse.kura.container.provider.ContainerInstance">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" immediate="true" activate="activate"
+    configuration-policy="require" deactivate="deactivate" modified="updated" name="org.eclipse.kura.container.provider.ContainerInstance">
    <implementation class="org.eclipse.kura.container.provider.ContainerInstance"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
@@ -19,4 +20,11 @@
    <reference bind="setContainerOrchestrationService" cardinality="1..1" interface="org.eclipse.kura.container.orchestration.ContainerOrchestrationService" name="ContainerOrchestrationService" policy="static"/>
    <reference bind="setContainerSignatureValidationService" cardinality="0..n" interface="org.eclipse.kura.container.signature.ContainerSignatureValidationService" name="ContainerSignatureValidationService" policy="dynamic" unbind="unsetContainerSignatureValidationService"/>
    <reference bind="setConfigurationService" cardinality="1..1" interface="org.eclipse.kura.configuration.ConfigurationService" name="ConfigurationService" policy="static"/>
+   <reference bind="setIdentityService" cardinality="1..1" interface="org.eclipse.kura.identity.IdentityService" name="IdentityService" policy="static"/>
+   <reference bind="setPasswordStrengthVerificationService" cardinality="1..1" interface="org.eclipse.kura.identity.PasswordStrengthVerificationService" name="PasswordStrengthVerificationService" policy="static"/>
+   <reference name="NetworkService" 
+              policy="static" 
+              cardinality="0..1" 
+              bind="setNetworkService"
+              interface="org.eclipse.kura.net.NetworkService"/>
 </scr:component>

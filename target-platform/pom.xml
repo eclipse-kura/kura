@@ -28,8 +28,7 @@
         <check.plugins.exist.remote>false</check.plugins.exist.remote>
         <kura.addons.url>https://artifactory.dev.everyware.io/artifactory/kura-addons</kura.addons.url>
 
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.release>21</maven.compiler.release>
 
         <!-- Plugins versions -->
         <exists-maven-plugin.version>0.0.3</exists-maven-plugin.version>

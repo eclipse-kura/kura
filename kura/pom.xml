@@ -104,8 +104,6 @@
         <check.plugins.exist.remote>false</check.plugins.exist.remote>
         <kura.addons.url>https://artifactory.dev.everyware.io/artifactory/kura-addons</kura.addons.url>
 
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
         <maven.compiler.release>21</maven.compiler.release>
 
         <bnd.baseline.version>6.3.1</bnd.baseline.version>
@@ -802,8 +800,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
                     <release>${maven.compiler.release}</release>
                 </configuration>
             </plugin>

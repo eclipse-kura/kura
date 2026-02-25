@@ -50,7 +50,7 @@ public class Password {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + Arrays.hashCode(this.value);
+        result = prime * result + Arrays.hashCode(this.passwordVal);
         return result;
     }
 
@@ -66,7 +66,7 @@ public class Password {
             return false;
         }
         Password other = (Password) obj;
-        if (!Arrays.equals(this.value, other.value)) {
+        if (!Arrays.equals(this.passwordVal, other.passwordVal)) {
             return false;
         }
         return true;

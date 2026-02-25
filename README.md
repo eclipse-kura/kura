@@ -49,7 +49,7 @@ Additionally, we provide two channels for reporting any issue you find with the 
 Install
 -------
 
-Eclipse Kura™ is compatible with Java 17.
+Eclipse Kura™ is compatible with Java 21.
 
 ### Target Gateways Installers
 Eclipse Kura™ provides pre-built installers for common development boards. Check the following [link](https://www.eclipse.org/kura/downloads.php) to download the desired installers.
@@ -74,7 +74,7 @@ In order to be able to build Eclipse Kura™ on your development machine, you ne
 
 </summary>
 
-To install Java 17, download the JDK tar archive from the [Adoptium Project Repository](https://adoptium.net/en-GB/temurin/releases/?variant=openjdk8&jvmVariant=hotspot&version=17).
+To install Java 21, download the JDK tar archive from the [Adoptium Project Repository](https://adoptium.net/temurin/releases?version=21&os=any&arch=any).
 
 Once downloaded, copy the tar archive in `/Library/Java/JavaVirtualMachines/` and cd into it. Unpack the archive with the following command:
 
@@ -114,11 +114,11 @@ export PATH="/usr/local/opt/maven@3.9/bin:$PATH"
 
 For Java
 ```bash
-sudo apt install openjdk-17-jdk
+sudo apt install openjdk-21-jdk
 ```
 For Maven   
 
-You can follow the tutorial from the official [Maven](http://maven.apache.org/install.html) site. Remember that you need to install the 3.9.x version.
+You can follow the tutorial from the official [Maven](http://maven.apache.org/install.html) site. Remember that you need to install the 3.9.9 version.
 
 </details>
 

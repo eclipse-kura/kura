@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -422,8 +422,15 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     }
 
     @Override
-    public synchronized void createFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
+    public void createFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
             boolean takeSnapshot) throws KuraException {
+
+        createFactoryConfigurationInternal(factoryPid, pid, encryptConfigurationProperties(properties, true),
+                takeSnapshot);
+    }
+
+    private synchronized void createFactoryConfigurationInternal(String factoryPid, String pid,
+            Map<String, Object> properties, boolean takeSnapshot) throws KuraException {
         if (pid == null) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "pid cannot be null");
         } else if (this.servicePidByPid.containsKey(pid)) {
@@ -843,7 +850,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 String pid = config.getPid();
                 logger.info("Creating configuration with pid: {} and factory pid: {}", pid, factoryPid);
                 try {
-                    createFactoryConfiguration(factoryPid, pid, properties, false);
+                    createFactoryConfigurationInternal(factoryPid, pid, properties, false);
                     configs.add(config);
                 } catch (KuraException e) {
                     logger.warn("Error creating configuration with pid: {} and factory pid: {}", pid, factoryPid, e);
@@ -997,22 +1004,45 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     }
 
     private void encryptConfigurationProperties(Map<String, Object> propertiesToUpdate) {
-        if (propertiesToUpdate == null) {
-            return;
+        encryptConfigurationProperties(propertiesToUpdate, false);
+    }
+
+    private Map<String, Object> encryptConfigurationProperties(final Map<String, Object> original,
+            final boolean clone) {
+        if (original == null) {
+            return null;
         }
 
-        for (Entry<String, Object> property : propertiesToUpdate.entrySet()) {
+        Optional<Map<String, Object>> result = Optional.empty();
+
+        if (!clone) {
+            result = Optional.of(original);
+        }
+
+        for (Entry<String, Object> property : original.entrySet()) {
             Object configValue = property.getValue();
             if (configValue instanceof Password || configValue instanceof Password[]) {
+
+                final Map<String, Object> resultProperties;
+
+                if (result.isPresent()) {
+                    resultProperties = result.get();
+                } else {
+                    resultProperties = new HashMap<>(original);
+                    result = Optional.of(resultProperties);
+                }
+
                 try {
                     Object encryptedValue = encryptPasswordProperties(configValue);
-                    propertiesToUpdate.put(property.getKey(), encryptedValue);
+                    resultProperties.put(property.getKey(), encryptedValue);
                 } catch (KuraException e) {
                     logger.warn("Failed to encrypt Password property: {}", property.getKey());
-                    propertiesToUpdate.remove(property.getKey());
+                    resultProperties.remove(property.getKey());
                 }
             }
         }
+
+        return result.orElse(original);
     }
 
     private Object encryptPasswordProperties(Object configValue) throws KuraException {
@@ -1183,7 +1213,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         // Write the snapshot
         try {
             try (FileOutputStream fos = new FileOutputStream(tempSnapshotFile);
-                OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+                    OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
                 logger.debug("Writing temp snapshot - Saving {}...", tempSnapshotFile.getAbsolutePath());
                 osw.append(new String(encryptedXML));
                 osw.flush();
@@ -1212,7 +1242,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     private void moveTempFile(File fSnapshot, File tempSnapshotFile) throws KuraIOException {
         try {
             setSnapshotFilePermissions(fSnapshot, tempSnapshotFile);
-            
+
             // Consolidate snapshot writing
             Files.move(tempSnapshotFile.toPath(), fSnapshot.toPath(), StandardCopyOption.REPLACE_EXISTING,
                     StandardCopyOption.ATOMIC_MOVE);
@@ -1228,8 +1258,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         } catch (UnsupportedOperationException e1) {
             // POSIX permissions not supported on this file system, log and continue
-            logger.warn("Unable to set POSIX file permissions for snapshot file: {}", fSnapshot.getAbsolutePath(),
-                    e1);
+            logger.warn("Unable to set POSIX file permissions for snapshot file: {}", fSnapshot.getAbsolutePath(), e1);
         }
     }
 
@@ -1447,7 +1476,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                         String pid = config.getPid();
                         logger.info("Creating configuration with pid: {} and factory pid: {}", pid, factoryPid);
                         try {
-                            createFactoryConfiguration(factoryPid, pid, props, false);
+                            createFactoryConfigurationInternal(factoryPid, pid, props, false);
                         } catch (KuraException e) {
                             logger.warn("Error creating configuration with pid: {} and factory pid: {}", pid,
                                     factoryPid, e);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -124,7 +124,7 @@ public class KeystoreRestServiceTest {
 
         List<KeystoreInfo> keystores = krs.listKeystores();
 
-        List<String> types = Arrays.asList("jks", "pkcs12");
+        List<String> types = Arrays.asList("JKS", "PKCS12");
         assertEquals(1, keystores.size());
         assertTrue(types.contains(keystores.get(0).getType()));
         assertEquals(0, keystores.get(0).getSize());

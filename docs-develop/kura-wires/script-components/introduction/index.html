@@ -4611,6 +4611,33 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <li><a href="../graalvm-conditional-component/">GraalVM&trade; Conditional Component</a></li>
 </ul>
 <p>The input scripts for these components are not compatible with the Nashorn implementations <em>Script Filter</em> and <em>Conditional Component</em>. Both components are shipped as a single DP named <em>org.eclipse.kura.wire.script.tools</em>. Since the JS engine dependency is shipped along with the DP, these components will work on both Java 8 and Java 17 devices but the DP is bigger in size (~18,6 MB).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Installing the deprecated components on a Java 17-based instance of Kura will cause the following error in the logs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>    !SESSION 2026-02-12 11:07:47.324 -----------------------------------------------
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    eclipse.buildId=unknown
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    java.version=17.0.12
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    java.vendor=Azul Systems, Inc.
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    BootLoader constants: OS=linux, ARCH=aarch64, WS=gtk, NL=en_US
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    Command-line arguments:  -console 5002 -consoleLog
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    !ENTRY org.eclipse.kura.wire.component.conditional.provider 4 0 2026-02-12 11:08:16.340
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    !MESSAGE FrameworkEvent ERROR
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    !STACK 0
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    org.osgi.framework.BundleException: Could not resolve module: org.eclipse.kura.wire.component.conditional.provider [117]
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    Unresolved requirement: Require-Capability: osgi.ee; filter:=&quot;(&amp; (&amp;(osgi.ee=JavaSE)(version=1.8)) (!(&amp;(osgi.ee=JavaSE)(version&gt;=15))) )&quot;
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>            at org.eclipse.osgi.container.Module.start(Module.java:463)
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>            at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel$2.run(ModuleContainer.java:1845)
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>            at org.eclipse.osgi.internal.framework.EquinoxContainerAdaptor$1$1.execute(EquinoxContainerAdaptor.java:136)
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>            at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel.incStartLevel(ModuleContainer.java:1838)
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>            at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel.incStartLevel(ModuleContainer.java:1781)
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>            at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel.doContainerStartLevel(ModuleContainer.java:1743)
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>            at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel.dispatchEvent(ModuleContainer.java:1665)
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>            at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel.dispatchEvent(ModuleContainer.java:1)
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>            at org.eclipse.osgi.framework.eventmgr.EventManager.dispatchEvent(EventManager.java:234)
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>            at org.eclipse.osgi.framework.eventmgr.EventManager$EventThread.run(EventManager.java:345)
+</code></pre></div>
+<p>This is expected, and doesn't compromise the stability of the Kura instance, but it is recommended to avoid installing the deprecated components on Java 17-based instances of Kura.</p>
+</div>
 
 
 

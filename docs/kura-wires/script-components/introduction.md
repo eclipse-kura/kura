@@ -19,7 +19,7 @@ The following components instead have the [GraalVM&trade; JavaScript Engine](htt
 The input scripts for these components are not compatible with the Nashorn implementations *Script Filter* and *Conditional Component*. Both components are shipped as a single DP named *org.eclipse.kura.wire.script.tools*. Since the JS engine dependency is shipped along with the DP, these components will work on both Java 8 and Java 17 devices but the DP is bigger in size (~18,6 MB).
 
 !!! warning
-    Installing the deprecated components on a Java 17 based instance of Kura will cause the following error in the logs:
+    Installing the deprecated components on a Java 17-based instance of Kura will cause the following error in the logs:
 
     ```
         !SESSION 2026-02-12 11:07:47.324 -----------------------------------------------
@@ -46,4 +46,4 @@ The input scripts for these components are not compatible with the Nashorn imple
 
     ```
 
-    This is expected, and doesn't compromise the stability of the Kura instance, but it is recommended to avoid installing the deprecated components on Java 17 based instances of Kura.
+    This is expected, and doesn't compromise the stability of the Kura instance, but it is recommended to avoid installing the deprecated components on Java 17-based instances of Kura.

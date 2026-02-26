@@ -17,3 +17,33 @@ The following components instead have the [GraalVM&trade; JavaScript Engine](htt
 - [GraalVM&trade; Conditional Component](graalvm-conditional-component.md)
 
 The input scripts for these components are not compatible with the Nashorn implementations *Script Filter* and *Conditional Component*. Both components are shipped as a single DP named *org.eclipse.kura.wire.script.tools*. Since the JS engine dependency is shipped along with the DP, these components will work on both Java 8 and Java 17 devices but the DP is bigger in size (~18,6 MB).
+
+!!! warning
+    Installing the deprecated components on a Java 17-based instance of Kura will cause the following error in the logs:
+
+    ```
+        !SESSION 2026-02-12 11:07:47.324 -----------------------------------------------
+        eclipse.buildId=unknown
+        java.version=17.0.12
+        java.vendor=Azul Systems, Inc.
+        BootLoader constants: OS=linux, ARCH=aarch64, WS=gtk, NL=en_US
+        Command-line arguments:  -console 5002 -consoleLog
+        !ENTRY org.eclipse.kura.wire.component.conditional.provider 4 0 2026-02-12 11:08:16.340
+        !MESSAGE FrameworkEvent ERROR
+        !STACK 0
+        org.osgi.framework.BundleException: Could not resolve module: org.eclipse.kura.wire.component.conditional.provider [117]
+        Unresolved requirement: Require-Capability: osgi.ee; filter:="(& (&(osgi.ee=JavaSE)(version=1.8)) (!(&(osgi.ee=JavaSE)(version>=15))) )"
+                at org.eclipse.osgi.container.Module.start(Module.java:463)
+                at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel$2.run(ModuleContainer.java:1845)
+                at org.eclipse.osgi.internal.framework.EquinoxContainerAdaptor$1$1.execute(EquinoxContainerAdaptor.java:136)
+                at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel.incStartLevel(ModuleContainer.java:1838)
+                at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel.incStartLevel(ModuleContainer.java:1781)
+                at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel.doContainerStartLevel(ModuleContainer.java:1743)
+                at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel.dispatchEvent(ModuleContainer.java:1665)
+                at org.eclipse.osgi.container.ModuleContainer$ContainerStartLevel.dispatchEvent(ModuleContainer.java:1)
+                at org.eclipse.osgi.framework.eventmgr.EventManager.dispatchEvent(EventManager.java:234)
+                at org.eclipse.osgi.framework.eventmgr.EventManager$EventThread.run(EventManager.java:345)
+
+    ```
+
+    This is expected, and doesn't compromise the stability of the Kura instance, but it is recommended to avoid installing the deprecated components on Java 17-based instances of Kura.

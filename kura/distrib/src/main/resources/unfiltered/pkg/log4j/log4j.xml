@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2018, 2025 Eurotech and/or its affiliates and others
+    Copyright (c) 2018, 2026 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -34,15 +34,15 @@
         </RollingFile>
         <RollingFile name="audit" fileName="${log_dir}/${log_name}-audit.log"
             filePattern="${log_dir}/${log_name}-audit-%i.log.gz">
-            <RFC5424Layout enterpriseNumber="28392" includeMDC="true" mdcId="RequestContext"
-                appName="EclipseKura" mdcPrefix="" newLine="true">
+            <Rfc5424Layout enterpriseNumber="28392" includeMDC="true" mdcId="RequestContext"
+                appName="EclipseKura" mdcPrefix="" includeNL="true">
                 <LoggerFields>
                     <KeyValuePair key="thread" value="%t" />
                     <KeyValuePair key="priority" value="%p" />
                     <KeyValuePair key="category" value="%c" />
                     <KeyValuePair key="exception" value="%ex" />
                 </LoggerFields>
-            </RFC5424Layout>
+            </Rfc5424Layout>
             <Policies>
                 <SizeBasedTriggeringPolicy size="10 MB" />
             </Policies>

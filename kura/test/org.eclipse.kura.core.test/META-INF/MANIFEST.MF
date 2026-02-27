@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.core.test
 Bundle-SymbolicName: org.eclipse.kura.core.test;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=21))"
 Import-Package: javax.comm,
  javax.xml.parsers,
  javax.xml.stream,
@@ -35,9 +35,9 @@ Import-Package: javax.comm,
  org.h2.jdbcx;version="2.1.210",
  org.h2.tools;version="2.1.210",
  org.junit,
- org.mockito;version="[4.0.0,5.0.0)",
- org.mockito.invocation;version="[4.0.0,5.0.0)",
- org.mockito.stubbing;version="[4.0.0,5.0.0)",
+ org.mockito;version="5.0.0",
+ org.mockito.invocation;version="5.0.0",
+ org.mockito.stubbing;version="5.0.0",
  org.mockito.verification;version="4.8.1",
  org.osgi.framework,
  org.osgi.service.cm,

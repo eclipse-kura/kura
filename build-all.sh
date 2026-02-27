@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-#  Copyright (c) 2016, 2020 Red Hat and others
+#  Copyright (c) 2016, 2026 Red Hat and others
 #
 #  This program and the accompanying materials are made
 #  available under the terms of the Eclipse Public License 2.0
@@ -22,7 +22,7 @@ MAVEN_PROPS="-B"
 
 [ -z "$RUN_TESTS" ] && MAVEN_PROPS="$MAVEN_PROPS -Dmaven.test.skip=true"
 
-mvn "$@" -f target-platform/pom.xml clean install $MAVEN_PROPS &&
-mvn "$@" -f kura/pom.xml clean install $MAVEN_PROPS &&
-mvn "$@" -f kura/distrib/pom.xml clean install $MAVEN_PROPS
+mvn "$@" --color=always -f target-platform/pom.xml clean install $MAVEN_PROPS &&
+mvn "$@" --color=always -f kura/pom.xml clean install $MAVEN_PROPS &&
+mvn "$@" --color=always -f kura/distrib/pom.xml clean install $MAVEN_PROPS
 

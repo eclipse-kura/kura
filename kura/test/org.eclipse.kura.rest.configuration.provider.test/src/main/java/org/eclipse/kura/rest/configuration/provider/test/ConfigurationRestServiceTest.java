@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,6 +21,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -112,7 +113,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testListFactoryComponentsPidsEmpty() throws KuraException {
+    public void testListFactoryComponentsPidsEmpty() {
         givenMockGetFactoryComponentPidsReturnEmpty();
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/factoryComponents");
@@ -132,7 +133,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testListConfigurableComponentsPidsEmpty() throws KuraException {
+    public void testListConfigurableComponentsPidsEmpty() {
         givenMockGetConfigurableComponentPidsReturnEmpty();
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents");
@@ -465,7 +466,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateConfigurationBooleanPropertyTrue() throws KuraException {
+    public void testUpdateConfigurationBooleanPropertyTrue() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"BOOLEAN\",\"value\":true}}" + "}" + "]}");
@@ -475,7 +476,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateConfigurationBooleanPropertyFalse() throws KuraException {
+    public void testUpdateConfigurationBooleanPropertyFalse() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"BOOLEAN\",\"value\":false}}" + "}" + "]}");
@@ -485,7 +486,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateByteProperty() throws KuraException {
+    public void testUpdateByteProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"BYTE\",\"value\":15}}" + "}" + "]}");
 
@@ -494,7 +495,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateCharProperty() throws KuraException {
+    public void testUpdateCharProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":\"a\"}}" + "}" + "]}");
 
@@ -503,7 +504,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateDoubleProperty() throws KuraException {
+    public void testUpdateDoubleProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"DOUBLE\",\"value\":2.0}}" + "}" + "]}");
 
@@ -512,7 +513,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateFloatProperty() throws KuraException {
+    public void testUpdateFloatProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"FLOAT\",\"value\":2.0}}" + "}" + "]}");
 
@@ -521,7 +522,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateIntegerProperty() throws KuraException {
+    public void testUpdateIntegerPropert() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"INTEGER\",\"value\":123}}" + "}" + "]}");
 
@@ -530,7 +531,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateShortProperty() throws KuraException {
+    public void testUpdateShortProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"SHORT\",\"value\":123}}" + "}" + "]}");
 
@@ -539,7 +540,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateLongProperty() throws KuraException {
+    public void testUpdateLongProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"LONG\",\"value\":123}}" + "}" + "]}");
 
@@ -548,7 +549,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdatePasswordProperty() throws KuraException {
+    public void testUpdatePasswordProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"PASSWORD\",\"value\":\"foobar\"}}" + "}" + "]}");
@@ -558,7 +559,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateStringProperty() throws KuraException {
+    public void testUpdateStringProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"STRING\",\"value\":\"test string\"}}" + "}" + "]}");
@@ -568,7 +569,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateBooleanArrayProperty() throws KuraException {
+    public void testUpdateBooleanArrayProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"BOOLEAN\",\"value\":[false,true,false]}}" + "}"
@@ -579,7 +580,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateByteArrayProperty() throws KuraException {
+    public void testUpdateByteArrayProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"BYTE\",\"value\":[15,12]}}" + "}" + "]}");
@@ -589,7 +590,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateCharArrayProperty() throws KuraException {
+    public void testUpdateCharArrayProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":[\"a\",\"b\",\"c\"]}}" + "}" + "]}");
@@ -599,7 +600,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateDoubleArrayProperty() throws KuraException {
+    public void testUpdateDoubleArrayProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"DOUBLE\",\"value\":[2.0,3.0]}}" + "}" + "]}");
@@ -609,7 +610,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateFloatArrayProperty() throws KuraException {
+    public void testUpdateFloatArrayProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"FLOAT\",\"value\":[2.0,4.0]}}" + "}" + "]}");
@@ -619,7 +620,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateIntegerArrayProperty() throws KuraException {
+    public void testUpdateIntegerArrayProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"INTEGER\",\"value\":[1,2,3]}}" + "}" + "]}");
@@ -629,7 +630,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateShortArrayProperty() throws KuraException {
+    public void testUpdateShortArrayProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"SHORT\",\"value\":[1,2,3]}}" + "}" + "]}");
@@ -639,7 +640,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateLongArrayProperty() throws KuraException {
+    public void testUpdateLongArrayProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"LONG\",\"value\":[1,2,3]}}" + "}" + "]}");
@@ -649,7 +650,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdatePasswordArrayProperty() throws KuraException {
+    public void testUpdatePasswordArrayProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"PASSWORD\",\"value\":[\"foobar\",\"a\"]}}" + "}"
@@ -660,7 +661,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateStringArrayProperty() throws KuraException {
+    public void testUpdateStringArrayProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"STRING\",\"value\":[\"test string\",\"foo\"]}}" + "}"
@@ -671,7 +672,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateNullProperty() throws KuraException {
+    public void testUpdateNullProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\","
                 + "properties: {\"testProp\":{\"type\":\"STRING\"},\"otherProp\":{\"type\":\"STRING\",\"value\":null}}"
@@ -683,7 +684,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateNullsInArrayProperty() throws KuraException {
+    public void testUpdateNullsInArrayProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"STRING\",value:[null,\"foo\",null]}}" + "}" + "]}");
@@ -693,7 +694,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateTypeMismatchNumericProperty() throws KuraException {
+    public void testUpdateTypeMismatchNumericProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"INTEGER\",\"value\":\"foo\"}}" + "}" + "]}");
@@ -703,7 +704,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateTypeMismatchStringProperty() throws KuraException {
+    public void testUpdateTypeMismatchStringProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"STRING\",\"value\":12}}" + "}" + "]}");
 
@@ -712,7 +713,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateTypeMismatchPasswordProperty() throws KuraException {
+    public void testUpdateTypeMismatchPasswordProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"PASSWORD\",\"value\":12}}" + "}" + "]}");
 
@@ -721,7 +722,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateTypeMismatchCharProperty() throws KuraException {
+    public void testUpdateTypeMismatchCharProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":12}}" + "}" + "]}");
 
@@ -730,7 +731,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateInvalidLengthCharProperty() throws KuraException {
+    public void testUpdateInvalidLengthCharProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":\"foo\"}}" + "}" + "]}");
@@ -740,7 +741,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateTypeMismatchNumericArrayProperty() throws KuraException {
+    public void testUpdateTypeMismatchNumericArrayProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"INTEGER\",\"value\":[\"foo\"]}}" + "}" + "]}");
@@ -750,7 +751,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateTypeMismatchStringArrayProperty() throws KuraException {
+    public void testUpdateTypeMismatchStringArrayProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"STRING\",\"value\":[12]}}" + "}" + "]}");
 
@@ -759,7 +760,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateTypeMismatchPasswordArrayProperty() throws KuraException {
+    public void testUpdateTypeMismatchPasswordArrayProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"PASSWORD\",\"value\":[12]}}" + "}" + "]}");
@@ -769,7 +770,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateTypeMismatchCharArrayProperty() throws KuraException {
+    public void testUpdateTypeMismatchCharArrayProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
                 + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":[12]}}" + "}" + "]}");
 
@@ -778,7 +779,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateInvalidLengthCharArrayProperty() throws KuraException {
+    public void testUpdateInvalidLengthCharArrayProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":[\"foo\"]}}" + "}" + "]}");
@@ -788,7 +789,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void testUpdateTypeMismatchBooleanProperty() throws KuraException {
+    public void testUpdateTypeMismatchBooleanProperty() {
         whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
                 "{\"configs\":[" + "{\"pid\":\"foo\","
                         + "properties: {\"testProp\":{\"type\":\"BOOLEAN\",\"value\":\"foo\"}}" + "}" + "]}");
@@ -1205,13 +1206,10 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         super(transport);
         this.cryptoService = WireTestUtil.trackService(CryptoService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
         Mockito.reset(configurationService);
-        Mockito.doAnswer(i -> {
-            Optional.of(i.getArgument(0, List.class));
-            return (Void) null;
-        }).when(configurationService).updateConfigurations(ArgumentMatchers.any());
+
         final Answer<?> configurationUpdateAnswer = i -> {
             this.receivedConfigsByPid.put(i.getArgument(0, String.class), i.getArgument(1, Map.class));
-            return (Void) null;
+            return null;
         };
         Mockito.doAnswer(configurationUpdateAnswer).when(configurationService)
                 .updateConfiguration(ArgumentMatchers.any(), ArgumentMatchers.any());
@@ -1262,7 +1260,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         when(configurationService.getSnapshots()).thenThrow(new KuraException(KuraErrorCode.CONFIGURATION_ERROR));
     }
 
-    private void givenMockGetFactoryComponentPidsReturnEmpty() throws KuraException {
+    private void givenMockGetFactoryComponentPidsReturnEmpty() {
         when(configurationService.getFactoryComponentPids()).thenReturn(Collections.emptySet());
     }
 
@@ -1274,7 +1272,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         when(configurationService.getFactoryComponentPids()).thenReturn(components);
     }
 
-    private void givenMockGetConfigurableComponentPidsReturnEmpty() throws KuraException {
+    private void givenMockGetConfigurableComponentPidsReturnEmpty() {
         when(configurationService.getConfigurableComponentPids()).thenReturn(new HashSet<String>());
     }
 
@@ -1464,8 +1462,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         final Map<String, ComponentConfiguration> byPid = Arrays.stream(configurations)
                 .collect(Collectors.toMap(c -> c.getPid(), c -> c));
 
-        Mockito.when(configurationService.getComponentConfigurations())
-                .thenReturn(byPid.values().stream().collect(Collectors.toList()));
+        Mockito.when(configurationService.getComponentConfigurations()).thenReturn(byPid.values().stream().toList());
 
         Mockito.when(configurationService.getComponentConfiguration(ArgumentMatchers.any())).thenAnswer(i -> {
             final String pid = i.getArgument(0, String.class);
@@ -1479,8 +1476,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
         givenMockGetSnapshotsReturnSome(5);
 
-        Mockito.when(configurationService.getSnapshot(Mockito.anyLong()))
-                .thenReturn(byPid.values().stream().collect(Collectors.toList()));
+        Mockito.when(configurationService.getSnapshot(anyLong())).thenReturn(byPid.values().stream().toList());
     }
 
     private void givenATestConfigurationPropertyWithAdTypeAndValue(final Scalar type, final Object value)

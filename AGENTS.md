@@ -7,7 +7,7 @@
 - **Checkstyle**: Runs automatically during `process-sources` phase with config in `checkstyle_checks.xml`
 
 ## Code Style
-- **Java Version**: Java 17 (source/target)
+- **Java Version**: Java 21 (source/target)
 - **Formatting**: Use profiles in `kura/setup/formatting/` (KuraFormatter.xml, KuraCleanupProfile.xml)
 - **Line Length**: Max 150 characters
 - **Imports**: No star imports, remove unused imports

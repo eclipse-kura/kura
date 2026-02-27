@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.rest.keystore.provider.test
 Bundle-SymbolicName: org.eclipse.kura.rest.keystore.provider.test;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=21))"
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Import-Package: com.eclipsesource.json;version="0.9.5",
@@ -23,9 +23,9 @@ Import-Package: com.eclipsesource.json;version="0.9.5",
  org.eclipse.kura.security.keystore;version="[1.0,2.0)",
  org.junit;version="[4.12.0,5.0.0)",
  org.junit.runners;version="[4.12.0,5.0.0)",
- org.mockito;version="[4.0.0,5.0.0)",
- org.mockito.invocation;version="[4.0.0,5.0.0)",
- org.mockito.stubbing;version="[4.0.0,5.0.0)",
+ org.mockito;version="5.0.0",
+ org.mockito.invocation;version="5.0.0",
+ org.mockito.stubbing;version="5.0.0",
  org.slf4j;version="1.6.4"
 Fragment-Host: org.eclipse.kura.rest.keystore.provider
 Require-Bundle: org.eclipse.kura.http.server.manager;bundle-version="1.4.0",

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2025 Eurotech and/or its affiliates and others
+    Copyright (c) ${year} Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -35,7 +35,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <tycho-version>4.0.11</tycho-version>
+        <tycho-version>5.0.2</tycho-version>
         <bnd-version>7.1.0</bnd-version>
         <maven.jarsigner.plugin.version>1.4</maven.jarsigner.plugin.version>
         <skip.artifact.signing>true</skip.artifact.signing>
@@ -50,8 +50,8 @@
                     <artifactId>tycho-compiler-plugin</artifactId>
                     <version>${tycho-version}</version>
                     <configuration>
-                        <source>17</source>
-                        <target>17</target>
+                        <source>21</source>
+                        <target>21</target>
                         <showDeprecation>true</showDeprecation>
                         <showWarnings>true</showWarnings>
                         <requireJREPackageImports>true</requireJREPackageImports>

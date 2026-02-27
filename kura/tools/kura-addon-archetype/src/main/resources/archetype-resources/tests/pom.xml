@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2025 Eurotech and/or its affiliates and others
+    Copyright (c) ${year} Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -36,13 +36,13 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.8.1</version>
+            <version>5.21.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
-            <version>4.8.1</version>
+            <version>5.21.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -161,13 +161,9 @@
                     <version>${tycho-version}</version>
                     <configuration>
                         <providerHint>junit4</providerHint>
-                        <parallel>classes</parallel>
-                        <useUnlimitedThreads>true</useUnlimitedThreads>
                         <argLine>
                             ${tycho.testArgLine}
                             -Dosgi.console=5002
-                            -Declipse.security=osgi
-                            -Dorg.osgi.framework.security=osgi
                             -Dosgi.signedcontent.support=all
                             -XX:HeapDumpPath=/dev/null
                             -Dorg.eclipse.kura.mode=emulator
@@ -177,6 +173,7 @@
                             -Dkura.data=${kura.workdir}/data
                             -Dkura.snapshots=${kura.workdir}/user/snapshots
                             -Dlog4j.configurationFile=file:${kura.workdir}/log4j/log4j.xml
+                            -javaagent:${settings.localRepository}/org/mockito/mockito-core/5.21.0/mockito-core-5.21.0.jar
                         </argLine>
                         <!--
                         uncomment for gogo shell, usage: telnet localhost 5002
@@ -212,7 +209,10 @@
                                 <goal>test</goal>
                             </goals>
                             <configuration>
-                                <argLine>${tycho.testArgLine}</argLine>
+                                <argLine>
+                                    ${tycho.testArgLine}
+                                    -javaagent:${settings.localRepository}/org/mockito/mockito-core/5.21.0/mockito-core-5.21.0.jar
+                                </argLine>
                             </configuration>
                         </execution>
                     </executions>

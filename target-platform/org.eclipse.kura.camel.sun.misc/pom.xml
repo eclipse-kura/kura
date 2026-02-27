@@ -64,8 +64,8 @@
 					<instructions>
 						<Fragment-Host>org.apache.camel.camel-core;bundle-version="[2.16.0,2.26.0)"</Fragment-Host>>
 						<Require-Capability>
-                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=1.8))"
-                        </Require-Capability>
+							osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=21))"
+						</Require-Capability>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -74,8 +74,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
+					<release>${maven.compiler.release}</release>
 				</configuration>
 			</plugin>
 			<plugin>

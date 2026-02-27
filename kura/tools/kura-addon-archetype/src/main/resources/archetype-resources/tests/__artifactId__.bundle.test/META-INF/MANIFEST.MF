@@ -4,7 +4,7 @@ Bundle-Name: Example component tests
 Bundle-SymbolicName: ${artifactId}.bundle.test;singleton:=true
 Bundle-Version: ${version.replace("-SNAPSHOT", ".qualifier")}
 Bundle-Vendor: EUROTECH
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=21))"
 Fragment-Host: ${artifactId}.bundle
 Require-Bundle: org.junit,
  org.mockito.mockito-core,

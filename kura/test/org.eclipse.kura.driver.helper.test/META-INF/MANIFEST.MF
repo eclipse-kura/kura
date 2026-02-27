@@ -4,7 +4,7 @@ Bundle-Name: org.eclipse.kura.driver.helper.test
 Bundle-SymbolicName: org.eclipse.kura.driver.helper.test;singleton:=true
 Bundle-Version: 6.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=17))"
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=21))"
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.kura.configuration.metatype;version="[1.1,2.0)",
@@ -13,8 +13,8 @@ Import-Package: org.eclipse.kura.configuration.metatype;version="[1.1,2.0)",
  org.eclipse.kura.driver.descriptor;version="[1.0,2.0)",
  org.junit;version="[4.12.0,5.0.0)",
  org.junit.runners;version="[4.12.0,5.0.0)",
- org.mockito;version="[4.0.0,5.0.0)",
- org.mockito.invocation;version="[4.0.0,5.0.0)",
- org.mockito.stubbing;version="[4.0.0,5.0.0)",
+ org.mockito;version="5.0.0",
+ org.mockito.invocation;version="5.0.0",
+ org.mockito.stubbing;version="5.0.0",
  org.slf4j;version="1.7.21"
 Fragment-Host: org.eclipse.kura.driver.helper.provider;bundle-version="[2.0,3.0)"

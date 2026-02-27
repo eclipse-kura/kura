@@ -67,6 +67,7 @@ public class IdentityServiceImpl implements IdentityService {
     private PasswordStrengthVerificationService passwordStrengthVerificationService;
 
     private final Map<String, IdentityConfigurationExtension> extensions = new ConcurrentHashMap<>();
+    private final Map<String, Long> identityRevisions = new ConcurrentHashMap<>();
     private final TemporaryIdentityStore temporaryStore = new TemporaryIdentityStore();
     private TemporaryIdentityStoreAdapter temporaryIdentityStore;
     private UserAdminIdentityStore userAdminIdentityStore;
@@ -141,6 +142,7 @@ public class IdentityServiceImpl implements IdentityService {
                 validateIdentityConfiguration(configuration);
                 this.userAdminIdentityStore.updateIdentityConfiguration(configuration);
             }
+            this.identityRevisions.put(name, 1L);
         }, "Create identity " + name);
 
         return true;
@@ -149,11 +151,19 @@ public class IdentityServiceImpl implements IdentityService {
     @Override
     public synchronized boolean deleteIdentity(final String name) throws KuraException {
         if (this.temporaryIdentityStore.exists(name)) {
-            return audit(() -> this.temporaryIdentityStore.deleteIdentity(name), "Delete temporary identity " + name);
+            return audit(() -> {
+                final boolean deleted = this.temporaryIdentityStore.deleteIdentity(name);
+                this.identityRevisions.remove(name);
+                return deleted;
+            }, "Delete temporary identity " + name);
         }
 
         if (this.userAdminIdentityStore.exists(name)) {
-            return audit(() -> this.userAdminIdentityStore.deleteIdentity(name), "Delete identity " + name);
+            return audit(() -> {
+                final boolean deleted = this.userAdminIdentityStore.deleteIdentity(name);
+                this.identityRevisions.remove(name);
+                return deleted;
+            }, "Delete identity " + name);
         }
 
         return false;
@@ -239,6 +249,7 @@ public class IdentityServiceImpl implements IdentityService {
             if (this.temporaryIdentityStore.exists(identityConfiguration.getName())) {
                 validateIdentityConfiguration(identityConfiguration);
                 this.temporaryIdentityStore.updateIdentityConfiguration(identityConfiguration);
+                incrementIdentityRevision(identityConfiguration.getName());
                 return;
             }
 
@@ -249,6 +260,7 @@ public class IdentityServiceImpl implements IdentityService {
             validateIdentityConfiguration(identityConfiguration);
 
             this.userAdminIdentityStore.updateIdentityConfiguration(identityConfiguration);
+            incrementIdentityRevision(identityConfiguration.getName());
         }, "Update configuration for identity " + identityConfiguration.getName());
 
     }
@@ -438,8 +450,22 @@ public class IdentityServiceImpl implements IdentityService {
 
             validateIdentityConfiguration(identityConfiguration);
             this.temporaryIdentityStore.createIdentity(identityConfiguration, lifetime);
+            this.identityRevisions.put(identityName, 1L);
 
         }, "Create temporary identity " + identityName);
+    }
+
+    @Override
+    public synchronized long getIdentityRevision(final String identityName) throws KuraException {
+        if (!this.temporaryIdentityStore.exists(identityName) && !this.userAdminIdentityStore.exists(identityName)) {
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Identity does not exist");
+        }
+
+        return this.identityRevisions.computeIfAbsent(identityName, ignored -> 1L);
+    }
+
+    private void incrementIdentityRevision(final String identityName) {
+        this.identityRevisions.merge(identityName, 1L, Long::sum);
     }
 
     public static <T, E extends Throwable> T audit(final FallibleSupplier<T, E> task, final String message) throws E {

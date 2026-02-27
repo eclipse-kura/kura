@@ -46,10 +46,11 @@ import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.identity.AssignedPermissions;
 import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityService;
-import org.eclipse.kura.identity.PasswordConfiguration;
+import org.eclipse.kura.identity.IdentityTokenService;
 import org.eclipse.kura.identity.Permission;
 import org.eclipse.kura.identity.PasswordStrengthRequirements;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
+import org.eclipse.kura.identity.TokenPair;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
@@ -77,6 +78,7 @@ public class ContainerIdentityIntegrationTest {
     private ContainerInstance containerInstance;
     private ContainerOrchestrationService containerOrchestrationService;
     private IdentityService identityService;
+    private IdentityTokenService identityTokenService;
     private PasswordStrengthVerificationService passwordStrengthVerificationService;
     private ConfigurationService configurationService;
     private Map<String, Object> properties;
@@ -88,15 +90,16 @@ public class ContainerIdentityIntegrationTest {
     private ArgumentCaptor<String> identityNameCaptor;
     private ArgumentCaptor<IdentityConfiguration> identityConfigCaptor;
     private ArgumentCaptor<Duration> durationCaptor;
-    private List<String> capturedPasswords = new ArrayList<>();
     private List<String> capturedIdentityNames = new ArrayList<>();
     private char[] lastTemporaryPassword;
+    private final AtomicInteger tokenCounter = new AtomicInteger(0);
 
     @Before
     public void setUp() throws Exception {
         this.containerInstance = new ContainerInstance();
         this.containerOrchestrationService = Mockito.mock(ContainerOrchestrationService.class);
         this.identityService = Mockito.mock(IdentityService.class);
+        this.identityTokenService = Mockito.mock(IdentityTokenService.class);
         this.passwordStrengthVerificationService = Mockito.mock(PasswordStrengthVerificationService.class);
         this.configurationService = Mockito.mock(ConfigurationService.class);
         this.properties = new HashMap<>();
@@ -111,6 +114,7 @@ public class ContainerIdentityIntegrationTest {
 
         this.containerInstance.setContainerOrchestrationService(this.containerOrchestrationService);
         this.containerInstance.setIdentityService(this.identityService);
+        this.containerInstance.setIdentityTokenService(this.identityTokenService);
         this.containerInstance.setPasswordStrengthVerificationService(this.passwordStrengthVerificationService);
         this.containerInstance.setConfigurationService(this.configurationService);
 
@@ -127,7 +131,7 @@ public class ContainerIdentityIntegrationTest {
     @Test
     public void createsTemporaryIdentityAndInjectsToken() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentityServiceProvidesTokens();
         givenContainerOrchestratorStartsSuccessfully();
 
         whenContainerInstanceIsActivated();
@@ -139,7 +143,7 @@ public class ContainerIdentityIntegrationTest {
     @Test
     public void deletesTemporaryIdentityWhenContainerIsDisabled() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentityServiceProvidesTokens();
         givenContainerOrchestratorStartsSuccessfully();
 
         whenContainerInstanceIsActivatedUntilCreated();
@@ -151,20 +155,20 @@ public class ContainerIdentityIntegrationTest {
     @Test
     public void recreatesTemporaryIdentityOnConfigurationChange() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentityServiceProvidesTokens();
         givenContainerOrchestratorStartsSuccessfullyWithIds(CONTAINER_ID, SECOND_CONTAINER_ID);
 
         whenContainerInstanceIsActivatedUntilCreated();
         whenContainerConfigurationIsUpdatedWithNewName();
 
         thenTemporaryIdentityIsRecreated();
-        thenLatestContainerStartReceivesRefreshedPassword();
+        thenLatestContainerStartReceivesTokenEnvironment();
     }
 
     @Test
     public void cleansUpTemporaryIdentityOnceAcrossMultipleShutdowns() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentityServiceProvidesTokens();
         givenContainerOrchestratorStartsSuccessfully();
 
         whenContainerInstanceIsActivatedUntilCreated();
@@ -187,7 +191,7 @@ public class ContainerIdentityIntegrationTest {
     @Test
     public void clearsTemporaryPasswordAfterContainerStarts() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentityServiceProvidesTokens();
         givenContainerOrchestratorStartsSuccessfully();
 
         whenContainerInstanceIsActivatedUntilCreated();
@@ -198,7 +202,7 @@ public class ContainerIdentityIntegrationTest {
     @Test
     public void clearsTemporaryPasswordAfterStartupFailure() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentityServiceProvidesTokens();
         givenContainerOrchestratorFailsToStart();
         givenFastRetryConfiguration();
 
@@ -210,7 +214,7 @@ public class ContainerIdentityIntegrationTest {
     @Test
     public void clearsTemporaryPasswordAfterCleanupTemporaryIdentity() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentityServiceProvidesTokens();
         givenTemporaryIdentityNameIsSet();
         givenTemporaryPasswordIsSet();
 
@@ -223,7 +227,7 @@ public class ContainerIdentityIntegrationTest {
     @Test
     public void generatesValidTemporaryIdentityNameFromInvalidContainerName() throws Exception {
         givenIdentityIntegrationIsEnabled(INVALID_CONTAINER_NAME);
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentityServiceProvidesTokens();
         givenContainerOrchestratorStartsSuccessfully();
 
         whenContainerInstanceIsActivated();
@@ -247,7 +251,7 @@ public class ContainerIdentityIntegrationTest {
     @Test
     public void injectsUrlEncodedIpv6RestBaseUrlForDockerBridge() throws Exception {
         givenIdentityIntegrationIsEnabled();
-        givenTemporaryIdentityServiceProvidesPassword();
+        givenTemporaryIdentityServiceProvidesTokens();
         givenContainerOrchestratorStartsSuccessfully();
         givenHttpsServiceIsEnabledOnPort(443);
         givenDockerBridgeAddressIs("fe80::7024:e3ff:feb9:997d%docker0");
@@ -275,7 +279,7 @@ public class ContainerIdentityIntegrationTest {
         this.properties.put("container.permissions", PERMISSIONS);
     }
 
-    private void givenTemporaryIdentityServiceProvidesPassword() throws Exception {
+    private void givenTemporaryIdentityServiceProvidesTokens() throws Exception {
         doAnswer(invocation -> {
             this.createCount.incrementAndGet();
 
@@ -286,19 +290,18 @@ public class ContainerIdentityIntegrationTest {
         }).when(this.identityService).createTemporaryIdentity(
                 this.identityNameCaptor.capture(), this.durationCaptor.capture());
 
-        doAnswer(invocation -> {
-            final IdentityConfiguration config = invocation.getArgument(0);
-            final char[] newPassword = config.getComponent(PasswordConfiguration.class).orElseThrow()
-                    .getNewPassword().orElseThrow();
-            this.capturedPasswords.add(new String(newPassword));
-
-            return null;
-        }).when(this.identityService).updateIdentityConfiguration(this.identityConfigCaptor.capture());
+        doAnswer(invocation -> null).when(this.identityService).updateIdentityConfiguration(this.identityConfigCaptor.capture());
 
         doAnswer(invocation -> {
             this.deleteCount.incrementAndGet();
             return true; // New API returns boolean
         }).when(this.identityService).deleteIdentity(anyString());
+
+        doAnswer(invocation -> {
+            final int value = this.tokenCounter.incrementAndGet();
+            return new TokenPair("access-token-" + value, "refresh-token-" + value, 1000L + value, 2000L + value,
+                    "family-" + value);
+        }).when(this.identityTokenService).issueTokenPair(anyString());
     }
 
     private void givenContainerOrchestratorStartsSuccessfully() throws Exception {
@@ -342,18 +345,18 @@ public class ContainerIdentityIntegrationTest {
         }).when(this.identityService).createTemporaryIdentity(
                 this.identityNameCaptor.capture(), this.durationCaptor.capture());
 
-        doAnswer(invocation -> {
-            final IdentityConfiguration config = invocation.getArgument(0);
-            final char[] newPassword = config.getComponent(PasswordConfiguration.class).orElseThrow()
-                    .getNewPassword().orElseThrow();
-            this.capturedPasswords.add(new String(newPassword));
-            return null;
-        }).when(this.identityService).updateIdentityConfiguration(this.identityConfigCaptor.capture());
+        doAnswer(invocation -> null).when(this.identityService).updateIdentityConfiguration(this.identityConfigCaptor.capture());
 
         doAnswer(invocation -> {
             this.deleteCount.incrementAndGet();
             return true;
         }).when(this.identityService).deleteIdentity(anyString());
+
+        doAnswer(invocation -> {
+            final int value = this.tokenCounter.incrementAndGet();
+            return new TokenPair("access-token-" + value, "refresh-token-" + value, 1000L + value, 2000L + value,
+                    "family-" + value);
+        }).when(this.identityTokenService).issueTokenPair(anyString());
     }
 
     private void givenTemporaryPasswordIsSet() throws Exception {
@@ -504,14 +507,19 @@ public class ContainerIdentityIntegrationTest {
 
         final ContainerConfiguration configuration = this.configurationCaptor.getValue();
         final List<String> envVars = configuration.getContainerEnvVars();
+        final Map<String, String> volumes = configuration.getContainerVolumes();
         final String latestIdentityName = this.capturedIdentityNames.get(this.capturedIdentityNames.size() - 1);
-        final String latestPassword = this.capturedPasswords.get(this.capturedPasswords.size() - 1);
 
         assertTrue("Identity name var missing",
                 envVars.contains("KURA_IDENTITY_NAME=" + latestIdentityName));
-        assertTrue("Password var missing",
-                envVars.contains("KURA_IDENTITY_PASSWORD=" + latestPassword));
-        // Check that KURA_REST_BASE_URL is set (now dynamic, not hardcoded to localhost:8080)
+        assertTrue("Access token file var missing",
+                envVars.contains("KURA_IDENTITY_ACCESS_TOKEN_FILE=/run/secrets/kura/access.jwt"));
+        assertTrue("Refresh token file var missing",
+                envVars.contains("KURA_IDENTITY_REFRESH_TOKEN_FILE=/run/secrets/kura/refresh.jwt"));
+        assertTrue("Legacy password var should not be set",
+                envVars.stream().noneMatch(envVar -> envVar.startsWith("KURA_IDENTITY_PASSWORD=")));
+        assertTrue("JWT secret volume should be mounted",
+                volumes.values().contains("/run/secrets/kura"));
         assertTrue("Base URL env var missing",
                 envVars.stream().anyMatch(envVar -> envVar.startsWith("KURA_REST_BASE_URL=")));
     }
@@ -538,17 +546,16 @@ public class ContainerIdentityIntegrationTest {
         assertTrue("Container was not started twice", this.startLatch.await(5, TimeUnit.SECONDS));
     }
 
-    private void thenLatestContainerStartReceivesRefreshedPassword() {
-        // Extract the latest token from captured IdentityConfiguration
-        final String latestPassword = this.capturedPasswords.get(this.capturedPasswords.size() - 1);
-
-        // Verify the latest container start received this password
+    private void thenLatestContainerStartReceivesTokenEnvironment() throws Exception {
         final List<ContainerConfiguration> configurations = this.configurationCaptor.getAllValues();
         final ContainerConfiguration latestConfiguration = configurations.get(configurations.size() - 1);
         final List<String> envVars = latestConfiguration.getContainerEnvVars();
 
-        assertTrue("Latest start should include refreshed token",
-                envVars.contains("KURA_IDENTITY_PASSWORD=" + latestPassword));
+        assertTrue("Latest start should expose access token file path",
+                envVars.contains("KURA_IDENTITY_ACCESS_TOKEN_FILE=/run/secrets/kura/access.jwt"));
+        assertTrue("Latest start should expose refresh token file path",
+                envVars.contains("KURA_IDENTITY_REFRESH_TOKEN_FILE=/run/secrets/kura/refresh.jwt"));
+        verify(this.identityTokenService, times(2)).issueTokenPair(anyString());
     }
 
     private void thenTemporaryIdentityCreationIsRetriedWithSuffixedName() throws Exception {

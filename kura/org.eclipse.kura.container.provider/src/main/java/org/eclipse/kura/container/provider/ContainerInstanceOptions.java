@@ -77,7 +77,10 @@ public class ContainerInstanceOptions {
     private static final Property<String> ENFORCEMENT_DIGEST = new Property<>("container.signature.enforcement.digest",
             "");
     
-    private static final Property<Boolean> IDENTITY_INTEGRATION_ENABLED = new Property<>("container.identity.enabled", false);
+    private static final Property<Boolean> IDENTITY_INTEGRATION_ENABLED = new Property<>("container.identity.enabled",
+            false);
+    private static final Property<String> CONTAINER_IDENTITY_AUTH_MODE = new Property<>("container.identity.auth.mode",
+            "jwt");
     private static final Property<String> CONTAINER_PERMISSIONS = new Property<>("container.permissions", "");
 
     private boolean enabled;
@@ -114,6 +117,7 @@ public class ContainerInstanceOptions {
     private final Optional<String> enforcementDigest;
     
     private final boolean identityIntegrationEnabled;
+    private final String containerIdentityAuthMode;
     private final List<String> containerPermissions;
 
     public ContainerInstanceOptions(final Map<String, Object> properties) {
@@ -152,6 +156,7 @@ public class ContainerInstanceOptions {
         this.signatureVerifyTransparencyLog = SIGNATURE_VERIFY_TLOG.get(properties);
         this.enforcementDigest = parseOptionalString(ENFORCEMENT_DIGEST.getOptional(properties));
         this.identityIntegrationEnabled = IDENTITY_INTEGRATION_ENABLED.get(properties);
+        this.containerIdentityAuthMode = CONTAINER_IDENTITY_AUTH_MODE.get(properties);
         this.containerPermissions = parseStringListSplitByComma(CONTAINER_PERMISSIONS.get(properties));
     }
 
@@ -389,6 +394,10 @@ public class ContainerInstanceOptions {
         return this.containerPermissions;
     }
 
+    public String getContainerIdentityAuthMode() {
+        return this.containerIdentityAuthMode;
+    }
+
     private ImageConfiguration buildImageConfig() {
         return new ImageConfiguration.ImageConfigurationBuilder().setImageName(this.image).setImageTag(this.imageTag)
                 .setImageDownloadTimeoutSeconds(this.imageDownloadTimeout)
@@ -466,7 +475,8 @@ public class ContainerInstanceOptions {
         return Objects.hash(containerCpus, containerDevice, containerEntryPoint, containerEnv, containerGpus,
                 containerLoggerType, containerLoggingParameters, containerMemory, containerName,
                 containerNetworkingMode, containerPermissions, containerPortProtocol, containerRuntime, containerVolumeString,
-                containerVolumes, enabled, enforcementDigest, externalPorts, identityIntegrationEnabled, image, imageDownloadTimeout, imageTag,
+                containerVolumes, enabled, enforcementDigest, externalPorts, identityIntegrationEnabled,
+                containerIdentityAuthMode, image, imageDownloadTimeout, imageTag,
                 internalPorts, maxDownloadRetries, privilegedMode, registryPassword, registryURL, registryUsername,
                 restartOnFailure, retryInterval, signatureTrustAnchor, signatureVerifyTransparencyLog);
     }
@@ -500,6 +510,7 @@ public class ContainerInstanceOptions {
                 && Objects.equals(enforcementDigest, other.enforcementDigest)
                 && Objects.equals(externalPorts, other.externalPorts) 
                 && identityIntegrationEnabled == other.identityIntegrationEnabled
+                && Objects.equals(containerIdentityAuthMode, other.containerIdentityAuthMode)
                 && Objects.equals(image, other.image)
                 && imageDownloadTimeout == other.imageDownloadTimeout && Objects.equals(imageTag, other.imageTag)
                 && Objects.equals(internalPorts, other.internalPorts) && maxDownloadRetries == other.maxDownloadRetries

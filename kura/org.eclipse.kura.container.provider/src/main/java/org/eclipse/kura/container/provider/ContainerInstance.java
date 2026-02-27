@@ -16,10 +16,17 @@ package org.eclipse.kura.container.provider;
 
 import static java.util.Objects.isNull;
 
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.PosixFilePermission;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +42,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -54,9 +63,11 @@ import org.eclipse.kura.container.signature.ValidationResult;
 import org.eclipse.kura.identity.AssignedPermissions;
 import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityService;
+import org.eclipse.kura.identity.IdentityTokenService;
 import org.eclipse.kura.identity.PasswordConfiguration;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.identity.Permission;
+import org.eclipse.kura.identity.TokenPair;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterface;
@@ -75,17 +86,23 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private static final int MAX_IDENTITY_NAME_GENERATION_ATTEMPTS = 10;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ScheduledExecutorService tokenRenewalExecutor = Executors.newSingleThreadScheduledExecutor();
 
     private ContainerOrchestrationService containerOrchestrationService;
     private Set<ContainerSignatureValidationService> availableContainerSignatureValidationService = new HashSet<>();
     private ConfigurationService configurationService;
     private IdentityService identityService;
+    private IdentityTokenService identityTokenService;
     private NetworkService networkService;
     private PasswordStrengthVerificationService passwordStrengthVerificationService;
     private State state = new Disabled(new ContainerInstanceOptions(Collections.emptyMap()));
     private ContainerInstanceOptions currentOptions = null;
     private final AtomicReference<String> currentTemporaryIdentityName = new AtomicReference<>();
     private final AtomicReference<char[]> currentTemporaryPassword = new AtomicReference<>();
+    private final AtomicReference<String> currentTemporaryAccessToken = new AtomicReference<>();
+    private final AtomicReference<String> currentTemporaryRefreshToken = new AtomicReference<>();
+    private final AtomicReference<Path> currentTemporaryTokenDirectory = new AtomicReference<>();
+    private final AtomicReference<Future<?>> tokenRenewalFuture = new AtomicReference<>();
 
     public void setContainerOrchestrationService(final ContainerOrchestrationService containerOrchestrationService) {
         this.containerOrchestrationService = containerOrchestrationService;
@@ -116,6 +133,10 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     public synchronized void setIdentityService(final IdentityService identityService) {
         this.identityService = identityService;
+    }
+
+    public synchronized void setIdentityTokenService(final IdentityTokenService identityTokenService) {
+        this.identityTokenService = identityTokenService;
     }
 
     public synchronized void setNetworkService(final NetworkService networkService) {
@@ -202,6 +223,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         cleanupTemporaryIdentity();
 
         this.executor.shutdown();
+        this.tokenRenewalExecutor.shutdownNow();
         this.containerOrchestrationService.unregisterListener(this);
 
         logger.info("deactivate...done");
@@ -378,36 +400,62 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
         private ContainerConfiguration getContainerConfigurationWithCredentials(
                 final ContainerInstanceOptions options) {
-            ContainerConfiguration baseConfig = options.getContainerConfiguration();
+            final ContainerConfiguration baseConfig = options.getContainerConfiguration();
 
-            final String identityName = ContainerInstance.this.currentTemporaryIdentityName.get();
-            final char[] password = ContainerInstance.this.currentTemporaryPassword.get();
-
-            if (options.isIdentityIntegrationEnabled() && password != null && identityName != null) {
-                final List<String> envVars = new ArrayList<>(baseConfig.getContainerEnvVars());
-                envVars.add("KURA_IDENTITY_NAME=" + identityName);
-                envVars.add("KURA_IDENTITY_PASSWORD=" + new String(password));
-
-                String restBaseUrl = buildRestBaseUrl(options);
-                envVars.add("KURA_REST_BASE_URL=" + restBaseUrl);
-                logger.info("Setting container REST base URL to: {}", restBaseUrl);
-
-                return ContainerConfiguration.builder().setContainerName(baseConfig.getContainerName())
-                        .setImageConfiguration(baseConfig.getImageConfiguration())
-                        .setContainerPorts(baseConfig.getContainerPorts()).setEnvVars(envVars)
-                        .setVolumes(baseConfig.getContainerVolumes())
-                        .setPrivilegedMode(baseConfig.isContainerPrivileged())
-                        .setDeviceList(baseConfig.getContainerDevices())
-                        .setFrameworkManaged(baseConfig.isFrameworkManaged())
-                        .setLoggingType(baseConfig.getContainerLoggingType())
-                        .setContainerNetowrkConfiguration(baseConfig.getContainerNetworkConfiguration())
-                        .setLoggerParameters(baseConfig.getLoggerParameters()).setEntryPoint(baseConfig.getEntryPoint())
-                        .setRestartOnFailure(baseConfig.getRestartOnFailure()).setMemory(baseConfig.getMemory())
-                        .setCpus(baseConfig.getCpus()).setGpus(baseConfig.getGpus()).setRuntime(baseConfig.getRuntime())
-                        .setEnforcementDigest(baseConfig.getEnforcementDigest()).build();
+            if (!options.isIdentityIntegrationEnabled()) {
+                return baseConfig;
             }
 
-            return baseConfig;
+            final String identityName = ContainerInstance.this.currentTemporaryIdentityName.get();
+            if (identityName == null) {
+                return baseConfig;
+            }
+
+            final List<String> envVars = new ArrayList<>(baseConfig.getContainerEnvVars());
+            final Map<String, String> volumes = new HashMap<>(baseConfig.getContainerVolumes());
+
+            if (isJwtMode(options)) {
+                final String accessToken = ContainerInstance.this.currentTemporaryAccessToken.get();
+                final String refreshToken = ContainerInstance.this.currentTemporaryRefreshToken.get();
+                if (accessToken == null || refreshToken == null) {
+                    return baseConfig;
+                }
+
+                try {
+                    final Path tokenDir = ensureJwtTokenFiles(accessToken, refreshToken);
+                    volumes.put(tokenDir.toString(), "/run/secrets/kura");
+                    envVars.add("KURA_IDENTITY_NAME=" + identityName);
+                    envVars.add("KURA_IDENTITY_ACCESS_TOKEN_FILE=/run/secrets/kura/access.jwt");
+                    envVars.add("KURA_IDENTITY_REFRESH_TOKEN_FILE=/run/secrets/kura/refresh.jwt");
+                } catch (IOException e) {
+                    logger.error("Failed to provision JWT token files for container {}", options.getContainerName(), e);
+                    throw new IllegalStateException("Unable to provision container JWT token files", e);
+                }
+            } else {
+                final char[] password = ContainerInstance.this.currentTemporaryPassword.get();
+                if (password == null) {
+                    return baseConfig;
+                }
+                envVars.add("KURA_IDENTITY_NAME=" + identityName);
+                envVars.add("KURA_IDENTITY_PASSWORD=" + new String(password));
+            }
+
+            final String restBaseUrl = buildRestBaseUrl(options);
+            envVars.add("KURA_REST_BASE_URL=" + restBaseUrl);
+            logger.info("Setting container REST base URL to: {}", restBaseUrl);
+
+            return ContainerConfiguration.builder().setContainerName(baseConfig.getContainerName())
+                    .setImageConfiguration(baseConfig.getImageConfiguration())
+                    .setContainerPorts(baseConfig.getContainerPorts()).setEnvVars(envVars).setVolumes(volumes)
+                    .setPrivilegedMode(baseConfig.isContainerPrivileged())
+                    .setDeviceList(baseConfig.getContainerDevices())
+                    .setFrameworkManaged(baseConfig.isFrameworkManaged())
+                    .setLoggingType(baseConfig.getContainerLoggingType())
+                    .setContainerNetowrkConfiguration(baseConfig.getContainerNetworkConfiguration())
+                    .setLoggerParameters(baseConfig.getLoggerParameters()).setEntryPoint(baseConfig.getEntryPoint())
+                    .setRestartOnFailure(baseConfig.getRestartOnFailure()).setMemory(baseConfig.getMemory())
+                    .setCpus(baseConfig.getCpus()).setGpus(baseConfig.getGpus()).setRuntime(baseConfig.getRuntime())
+                    .setEnforcementDigest(baseConfig.getEnforcementDigest()).build();
         }
 
         private void createTemporaryIdentityIfEnabled(final ContainerInstanceOptions options) {
@@ -417,18 +465,24 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
                     final Set<Permission> permissions = options.getContainerPermissions().stream().map(Permission::new)
                             .collect(Collectors.toSet());
+                    final String identityName;
+                    if (isJwtMode(options)) {
+                        identityName = createTemporaryIdentityWithValidName(options, permissions, Optional.empty());
+                        final TokenPair tokenPair = ContainerInstance.this.identityTokenService
+                                .issueTokenPair(identityName);
+                        ContainerInstance.this.currentTemporaryAccessToken.set(tokenPair.getAccessToken());
+                        ContainerInstance.this.currentTemporaryRefreshToken.set(tokenPair.getRefreshToken());
+                    } else {
+                        final char[] password = PasswordGenerator
+                                .generatePassword(passwordStrengthVerificationService.getPasswordStrengthRequirements());
 
-                    // Generate password as char[] to minimize exposure
-                    final char[] password = PasswordGenerator
-                            .generatePassword(passwordStrengthVerificationService.getPasswordStrengthRequirements());
+                        identityName = createTemporaryIdentityWithValidName(options, permissions,
+                                Optional.of(new String(password)));
+                        ContainerInstance.this.currentTemporaryPassword.set(Arrays.copyOf(password, password.length));
+                        Arrays.fill(password, '\0');
+                    }
 
-                    final String identityName = createTemporaryIdentityWithValidName(options, permissions,
-                            new String(password));
-
-                    // Store identity name and a copy of the password for env injection
                     ContainerInstance.this.currentTemporaryIdentityName.set(identityName);
-                    ContainerInstance.this.currentTemporaryPassword.set(Arrays.copyOf(password, password.length));
-                    Arrays.fill(password, '\0');
 
                     logger.info("Created temporary identity {} for container {} with {} permissions", identityName,
                             options.getContainerName(), permissions.size());
@@ -442,7 +496,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         }
 
         private String createTemporaryIdentityWithValidName(final ContainerInstanceOptions options,
-                final Set<Permission> permissions, final String password) throws KuraException {
+                final Set<Permission> permissions, final Optional<String> password) throws KuraException {
 
             final String baseIdentityName = sanitizeContainerIdentityName(options.getContainerName());
 
@@ -450,11 +504,12 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                 final String candidateName = buildIdentityNameCandidate(baseIdentityName, attempt);
 
                 try {
-                    final PasswordConfiguration passwordConfiguration = new PasswordConfiguration(false, true,
-                            Optional.of(password.toCharArray()), Optional.empty());
                     final AssignedPermissions assignedPermissions = new AssignedPermissions(permissions);
-                    final IdentityConfiguration configuration = new IdentityConfiguration(candidateName,
-                            Arrays.asList(passwordConfiguration, assignedPermissions));
+                    final List<org.eclipse.kura.identity.IdentityConfigurationComponent> components = new ArrayList<>();
+                    password.ifPresent(value -> components.add(new PasswordConfiguration(false, true,
+                            Optional.of(value.toCharArray()), Optional.empty())));
+                    components.add(assignedPermissions);
+                    final IdentityConfiguration configuration = new IdentityConfiguration(candidateName, components);
 
                     ContainerInstance.this.identityService.createTemporaryIdentity(candidateName, Duration.ofDays(365));
                     ContainerInstance.this.identityService.updateIdentityConfiguration(configuration);
@@ -469,6 +524,82 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR,
                     "Unable to generate a valid temporary identity name for container " + options.getContainerName());
+        }
+
+        private boolean isJwtMode(final ContainerInstanceOptions options) {
+            return "jwt".equalsIgnoreCase(options.getContainerIdentityAuthMode());
+        }
+
+        private Path ensureJwtTokenFiles(final String accessToken, final String refreshToken) throws IOException {
+            Path tokenDir = ContainerInstance.this.currentTemporaryTokenDirectory.get();
+            if (tokenDir == null) {
+                tokenDir = createJwtTokenDirectory();
+                ContainerInstance.this.currentTemporaryTokenDirectory.set(tokenDir);
+            }
+
+            writeTokenFile(tokenDir.resolve("access.jwt"), accessToken);
+            writeTokenFile(tokenDir.resolve("refresh.jwt"), refreshToken);
+            return tokenDir;
+        }
+
+        private Path createJwtTokenDirectory() throws IOException {
+            final Path baseDirectory = getTokenBaseDirectory();
+            Files.createDirectories(baseDirectory);
+            return Files.createTempDirectory(baseDirectory, "kura-jwt-");
+        }
+
+        private Path getTokenBaseDirectory() {
+            final Path shmPath = Paths.get("/dev/shm");
+            if (Files.isDirectory(shmPath) && Files.isWritable(shmPath)) {
+                return shmPath.resolve("kura-tokens");
+            }
+
+            return Paths.get(System.getProperty("java.io.tmpdir"), "kura-tokens");
+        }
+
+        private void writeTokenFile(final Path tokenFile, final String tokenValue) throws IOException {
+            Files.write(tokenFile, tokenValue.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING);
+
+            try {
+                Files.setPosixFilePermissions(tokenFile,
+                        Set.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE));
+            } catch (UnsupportedOperationException e) {
+                logger.debug("POSIX permissions not supported for {}", tokenFile, e);
+            }
+        }
+
+        private void scheduleTokenRenewalIfNeeded(final ContainerInstanceOptions options) {
+            if (!options.isIdentityIntegrationEnabled() || !isJwtMode(options)
+                    || ContainerInstance.this.identityTokenService == null) {
+                return;
+            }
+
+            final Future<?> existing = ContainerInstance.this.tokenRenewalFuture.getAndSet(null);
+            if (existing != null) {
+                existing.cancel(true);
+            }
+
+            final Future<?> renewalFuture = ContainerInstance.this.tokenRenewalExecutor.scheduleWithFixedDelay(() -> {
+                try {
+                    final String refreshToken = ContainerInstance.this.currentTemporaryRefreshToken.get();
+                    final Path tokenDirectory = ContainerInstance.this.currentTemporaryTokenDirectory.get();
+                    if (refreshToken == null || tokenDirectory == null) {
+                        return;
+                    }
+
+                    final TokenPair renewed = ContainerInstance.this.identityTokenService.refreshTokenPair(refreshToken);
+                    ContainerInstance.this.currentTemporaryAccessToken.set(renewed.getAccessToken());
+                    ContainerInstance.this.currentTemporaryRefreshToken.set(renewed.getRefreshToken());
+
+                    writeTokenFile(tokenDirectory.resolve("access.jwt"), renewed.getAccessToken());
+                    writeTokenFile(tokenDirectory.resolve("refresh.jwt"), renewed.getRefreshToken());
+                } catch (Exception e) {
+                    logger.warn("Failed to renew container JWT credentials", e);
+                }
+            }, 60, 60, TimeUnit.SECONDS);
+
+            ContainerInstance.this.tokenRenewalFuture.set(renewalFuture);
         }
 
         private String sanitizeContainerIdentityName(final String containerName) {
@@ -550,6 +681,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         @Override
         public State onContainerReady(final String containerId) {
             clearTemporaryPassword();
+            scheduleTokenRenewalIfNeeded(this.options);
             return new Created(this.options, containerId);
         }
 
@@ -933,7 +1065,13 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     private void cleanupTemporaryIdentity() {
         final String identityName = this.currentTemporaryIdentityName.getAndSet(null);
+        final Future<?> renewalFuture = this.tokenRenewalFuture.getAndSet(null);
+        if (renewalFuture != null) {
+            renewalFuture.cancel(true);
+        }
+
         clearTemporaryPassword();
+        clearTemporaryTokens();
 
         if (identityName != null && this.identityService != null) {
             try {
@@ -949,6 +1087,22 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         final char[] password = this.currentTemporaryPassword.getAndSet(null);
         if (password != null) {
             Arrays.fill(password, '\0');
+        }
+    }
+
+    private void clearTemporaryTokens() {
+        this.currentTemporaryAccessToken.set(null);
+        this.currentTemporaryRefreshToken.set(null);
+
+        final Path tokenDirectory = this.currentTemporaryTokenDirectory.getAndSet(null);
+        if (tokenDirectory != null) {
+            try {
+                Files.deleteIfExists(tokenDirectory.resolve("access.jwt"));
+                Files.deleteIfExists(tokenDirectory.resolve("refresh.jwt"));
+                Files.deleteIfExists(tokenDirectory);
+            } catch (IOException e) {
+                logger.warn("Failed to cleanup temporary JWT token files in {}", tokenDirectory, e);
+            }
         }
     }
 

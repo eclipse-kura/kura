@@ -278,4 +278,18 @@ public interface IdentityService {
      * @since 2.8.0
      */
     public void createTemporaryIdentity(final IdentityConfiguration identityConfiguration, final Duration lifetime) throws KuraException;
+
+    /**
+     * Returns the current revision for the specified identity.
+     * The revision is incremented whenever identity credentials or assigned
+     * permissions are modified or the identity is recreated.
+     *
+     * @param identityName
+     *            the identity name.
+     * @return current revision for the identity.
+     * @throws KuraException
+     *             if the identity does not exist or on internal failures.
+     * @since 2.9.0
+     */
+    public long getIdentityRevision(final String identityName) throws KuraException;
 }

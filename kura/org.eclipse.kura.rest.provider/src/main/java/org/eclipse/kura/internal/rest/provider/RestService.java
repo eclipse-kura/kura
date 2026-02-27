@@ -33,8 +33,10 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.identity.LoginBannerService;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.identity.IdentityService;
+import org.eclipse.kura.identity.IdentityTokenService;
 import org.eclipse.kura.internal.rest.auth.BasicAuthenticationProvider;
 import org.eclipse.kura.internal.rest.auth.CertificateAuthenticationProvider;
+import org.eclipse.kura.internal.rest.auth.JwtAuthenticationProvider;
 import org.eclipse.kura.internal.rest.auth.RestIdentityHelper;
 import org.eclipse.kura.internal.rest.auth.RestSessionHelper;
 import org.eclipse.kura.internal.rest.auth.SessionAuthProvider;
@@ -78,6 +80,7 @@ public class RestService implements ConfigurableComponent {
 
     private AuthenticationProvider basicAuthProvider;
     private AuthenticationProvider certificateAuthProvider;
+    private AuthenticationProvider jwtAuthenticationProvider;
 
     private SessionAuthProvider sessionAuthenticationProvider;
     private SessionRestService authRestService;
@@ -86,6 +89,7 @@ public class RestService implements ConfigurableComponent {
     private final AuthenticationFilter authenticationFilter = new AuthenticationFilter();
     private PasswordStrengthVerificationService passwordStrengthVerificationService;
     private LoginBannerService loginBannerService;
+    private IdentityTokenService identityTokenService;
 
     @Reference
     public void setIdentityService(final IdentityService identityService) {
@@ -107,6 +111,37 @@ public class RestService implements ConfigurableComponent {
     @Reference
     public void setLoginBannerService(LoginBannerService loginBannerService) {
         this.loginBannerService = loginBannerService;
+    }
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
+    public void setIdentityTokenService(final IdentityTokenService identityTokenService) {
+        this.identityTokenService = identityTokenService;
+        this.jwtAuthenticationProvider = new JwtAuthenticationProvider(identityTokenService);
+
+        if (this.authRestService != null) {
+            this.authRestService.setIdentityTokenService(identityTokenService);
+        }
+
+        if (this.options != null && this.options.isJwtAuthenticationEnabled()) {
+            bindAuthenticationProvider(this.jwtAuthenticationProvider);
+        }
+    }
+
+    public void unsetIdentityTokenService(final IdentityTokenService identityTokenService) {
+        if (this.identityTokenService != identityTokenService) {
+            return;
+        }
+
+        if (this.jwtAuthenticationProvider != null) {
+            unbindAuthenticationProvider(this.jwtAuthenticationProvider);
+        }
+
+        this.identityTokenService = null;
+        this.jwtAuthenticationProvider = null;
+
+        if (this.authRestService != null) {
+            this.authRestService.setIdentityTokenService(null);
+        }
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -142,13 +177,16 @@ public class RestService implements ConfigurableComponent {
 
         this.basicAuthProvider = new BasicAuthenticationProvider(bundleContext, identityHelper);
         this.certificateAuthProvider = new CertificateAuthenticationProvider(identityHelper);
+        this.jwtAuthenticationProvider = this.identityTokenService != null
+                ? new JwtAuthenticationProvider(this.identityTokenService)
+                : null;
         this.sessionAuthenticationProvider = new SessionAuthProvider(//
                 restSessionHelper,
                 new HashSet<>(Arrays.asList(BASE_PATH + CHANGE_PASSWORD_PATH, BASE_PATH + XSRF_TOKEN_PATH)),
                 Collections.singleton(BASE_PATH + XSRF_TOKEN_PATH));
 
         this.authRestService = new SessionRestService(identityHelper, restSessionHelper, this.configurationAdmin,
-                this.passwordStrengthVerificationService, this.loginBannerService);
+                this.passwordStrengthVerificationService, this.loginBannerService, this.identityTokenService);
 
         this.registeredServices.add(bundleContext.registerService(SessionRestService.class, this.authRestService,
                 RestServiceUtils.resourceProperties()));
@@ -230,6 +268,14 @@ public class RestService implements ConfigurableComponent {
 
         if (options.isSessionManagementEnabled()) {
             bindAuthenticationProvider(this.sessionAuthenticationProvider);
+        }
+
+        if (options.isJwtAuthenticationEnabled() && this.jwtAuthenticationProvider != null) {
+            bindAuthenticationProvider(this.jwtAuthenticationProvider);
+        } else {
+            if (this.jwtAuthenticationProvider != null) {
+                unbindAuthenticationProvider(this.jwtAuthenticationProvider);
+            }
         }
     }
 

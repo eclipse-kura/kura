@@ -193,6 +193,10 @@
         <AD id="container.identity.enabled" name="Enable Identity Integration" type="Boolean" cardinality="1" required="true" default="false"
             description="Enable integration with Kura Identity Service to provide temporary credentials to the container. Default: false">
         </AD>
+
+        <AD id="container.identity.auth.mode" name="Container Identity Auth Mode"
+            description="Authentication mode used for temporary identity integration. Supported values: jwt,password. Default: jwt"
+            type="String" cardinality="1" required="true" default="jwt" />
         
         <AD id="container.permissions" name="Container Permissions"
             description="Comma-separated list of permissions to grant to the container when identity integration is enabled. Example: rest.assets,rest.configuration" 

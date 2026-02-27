@@ -28,9 +28,13 @@ import org.eclipse.kura.identity.LoginBannerService;
 import org.eclipse.kura.identity.PasswordHash;
 import org.eclipse.kura.identity.PasswordStrengthRequirements;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
+import org.eclipse.kura.identity.IdentityTokenService;
+import org.eclipse.kura.identity.TokenPair;
 import org.eclipse.kura.internal.rest.auth.dto.AuthenticationInfoDTO;
 import org.eclipse.kura.internal.rest.auth.dto.AuthenticationResponseDTO;
 import org.eclipse.kura.internal.rest.auth.dto.IdentityInfoDTO;
+import org.eclipse.kura.internal.rest.auth.dto.RefreshTokenDTO;
+import org.eclipse.kura.internal.rest.auth.dto.TokenAuthenticationResponseDTO;
 import org.eclipse.kura.internal.rest.auth.dto.UpdatePasswordDTO;
 import org.eclipse.kura.internal.rest.auth.dto.UsernamePasswordDTO;
 import org.eclipse.kura.internal.rest.auth.dto.XsrfTokenDTO;
@@ -73,21 +77,28 @@ public class SessionRestService {
     private final ConfigurationAdmin configAdmin;
     private final PasswordStrengthVerificationService passwordStrengthVerificationService;
     private final LoginBannerService loginBannerService;
+    private IdentityTokenService identityTokenService;
     private RestServiceOptions options;
 
     public SessionRestService(final RestIdentityHelper identityHelper, final RestSessionHelper restSessionHelper,
             final ConfigurationAdmin configurationAdmin,
             final PasswordStrengthVerificationService passwordStrengthVerificationService,
-            final LoginBannerService loginBannerService) {
+            final LoginBannerService loginBannerService,
+            final IdentityTokenService identityTokenService) {
         this.identityHelper = identityHelper;
         this.restSessionHelper = restSessionHelper;
         this.configAdmin = configurationAdmin;
         this.passwordStrengthVerificationService = passwordStrengthVerificationService;
         this.loginBannerService = loginBannerService;
+        this.identityTokenService = identityTokenService;
     }
 
     public void setOptions(final RestServiceOptions options) {
         this.options = options;
+    }
+
+    public void setIdentityTokenService(final IdentityTokenService identityTokenService) {
+        this.identityTokenService = identityTokenService;
     }
 
     @POST
@@ -313,6 +324,105 @@ public class SessionRestService {
             return new AuthenticationInfoDTO(isPasswordAuthEnabled, false, null, preLoginBannerMessage);
         }
 
+    }
+
+    @POST
+    @Path("/v2/login/password")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public TokenAuthenticationResponseDTO authenticateWithUsernameAndPasswordV2(
+            final UsernamePasswordDTO usernamePassword) {
+        if (!options.isPasswordAuthEnabled() || !options.isJwtAuthenticationEnabled()
+                || this.identityTokenService == null) {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+
+        usernamePassword.validate();
+        final String username = usernamePassword.getUsername();
+
+        try {
+            this.identityHelper.checkPassword(username, usernamePassword.getPassword().toCharArray());
+            if (this.identityHelper.isPasswordChangeRequired(username)) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
+                        "Password change required before token authentication");
+            }
+
+            final TokenPair tokenPair = this.identityTokenService.issueTokenPair(username);
+            final Optional<String> message = this.loginBannerService.getPostLoginBanner();
+            return message.map(m -> new TokenAuthenticationResponseDTO(tokenPair, false, m))
+                    .orElseGet(() -> new TokenAuthenticationResponseDTO(tokenPair, false));
+        } catch (final WebApplicationException e) {
+            throw e;
+        } catch (final KuraException e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    @POST
+    @Path("/v2/login/certificate")
+    @Produces(MediaType.APPLICATION_JSON)
+    public TokenAuthenticationResponseDTO authenticateWithCertificateV2(
+            @Context final ContainerRequestContext requestContext) {
+        if (!options.isCertificateAuthEnabled() || !options.isJwtAuthenticationEnabled()
+                || this.identityTokenService == null) {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+
+        final CertificateAuthenticationProvider certificateAuthProvider = new CertificateAuthenticationProvider(
+                identityHelper);
+
+        final Optional<Principal> principal = certificateAuthProvider.authenticate(requestContext,
+                "Create JWT token pair via certificate authentication");
+
+        if (!principal.isPresent()) {
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED,
+                    "Certificate authentication failed");
+        }
+
+        try {
+            final TokenPair tokenPair = this.identityTokenService.issueTokenPair(principal.get().getName());
+            final Optional<String> message = this.loginBannerService.getPostLoginBanner();
+            return message.map(m -> new TokenAuthenticationResponseDTO(tokenPair, false, m))
+                    .orElseGet(() -> new TokenAuthenticationResponseDTO(tokenPair, false));
+        } catch (final KuraException e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    @POST
+    @Path("/v2/token/refresh")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public TokenAuthenticationResponseDTO refreshTokenPair(final RefreshTokenDTO refreshTokenDTO) {
+        if (!options.isJwtAuthenticationEnabled() || this.identityTokenService == null) {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+
+        refreshTokenDTO.validate();
+
+        try {
+            final TokenPair tokenPair = this.identityTokenService.refreshTokenPair(refreshTokenDTO.getRefreshToken());
+            return new TokenAuthenticationResponseDTO(tokenPair, false);
+        } catch (final KuraException e) {
+            throw DefaultExceptionHandler.toWebApplicationException(e);
+        }
+    }
+
+    @POST
+    @Path("/v2/logout")
+    public void logoutV2(@Context final ContainerRequestContext requestContext) {
+        if (!options.isJwtAuthenticationEnabled() || this.identityTokenService == null) {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+
+        final String authorization = requestContext.getHeaderString("Authorization");
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED, "Invalid bearer token");
+        }
+
+        final String accessToken = authorization.substring("Bearer ".length()).trim();
+        this.identityTokenService.verifyAccessToken(accessToken)
+                .ifPresent(token -> this.identityTokenService.revokeTokenFamily(token.getTokenFamilyId()));
     }
 
     private void validatePasswordStrength(final String newPassword) {

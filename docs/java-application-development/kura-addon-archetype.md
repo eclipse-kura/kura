@@ -203,6 +203,8 @@ After all the recommended extensions are installed, the project will start build
 
 Finally, once the build completes, the workspace will be ready to use.
 
+For more information and troubleshooting, see [IDE setup: Visual Studio Code](./development-environment-setup.md#ide-setup-visual-studio-code).
+
 ### Importing Projects in Eclipse IDE
 
 In Eclipse IDE , create a new workspace (it is not necessary to have the workspace in the root of the project) and import the projects with _File | Import | Maven | Existing Maven Projects_.

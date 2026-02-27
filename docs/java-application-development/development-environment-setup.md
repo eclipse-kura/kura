@@ -87,6 +87,34 @@ pip3 install https://github.com/eclipse-kura/metadata-generator/releases/downloa
 
 See [latest release](https://github.com/eclipse-kura/metadata-generator/releases/latest) for updated installation instructions. Please note that the metadata generator needs to be run only once after cloning the Kura repository.
 
+### Limitations
+
+Currently, Tycho integration tests are not fully supported on this editor. You will see the following error messages on projects that execute the **tycho-surefire-plugin**:
+
+```
+The import org.junit cannot be resolved
+```
+
+Maven unit tests are supported. On test projects that do not contain integration tests, you can disable the Tycho test plugin and replace it with Maven one with a configuration similar to:
+
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <configuration>
+        <testSourceDirectory>${basedir}/src/test/java/</testSourceDirectory>
+        <testClassesDirectory>${project.build.directory}/test-classes/</testClassesDirectory>
+    </configuration>
+</plugin>
+<plugin>
+    <groupId>org.eclipse.tycho</groupId>
+    <artifactId>tycho-surefire-plugin</artifactId>
+    <configuration>
+        <skip>true</skip>
+    </configuration>
+</plugin>
+```
+
 ### Instructions
 
 #### 1. Clone the Kura repository in a new folder (Eclipse IDE gets angry if it shares the sources with VSCode)

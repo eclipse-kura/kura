@@ -83,7 +83,7 @@ At the end of the procedure, the generated project is organized as follows:
 
 ## Compile and run
 
-The minimum supported Java version for compiling is Java 17. Compile the project with:
+The minimum supported Java version for compiling is Java 21. Requires Maven 3.9.9+. Compile the project with:
 
 ```shell
 mvn clean install

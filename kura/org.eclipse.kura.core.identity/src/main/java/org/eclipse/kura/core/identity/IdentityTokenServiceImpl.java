@@ -24,9 +24,9 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -65,7 +65,7 @@ public class IdentityTokenServiceImpl implements IdentityTokenService {
     private final Base64.Encoder base64UrlEncoder = Base64.getUrlEncoder().withoutPadding();
     private final Base64.Decoder base64UrlDecoder = Base64.getUrlDecoder();
     private final Map<String, RefreshTokenRecord> refreshTokens = new ConcurrentHashMap<>();
-    private final Set<String> revokedFamilies = ConcurrentHashMap.newKeySet();
+    private final Map<String, Long> revokedFamilies = new ConcurrentHashMap<>();
 
     private IdentityService identityService;
     private KeystoreService keystoreService;
@@ -106,32 +106,30 @@ public class IdentityTokenServiceImpl implements IdentityTokenService {
         cleanupExpiredRefreshTokens();
 
         final DecodedJwt decoded = decodeAndVerify(refreshToken);
-        if (!TOKEN_USE_REFRESH.equals(decoded.payload.get("token_use").getAsString())) {
+        if (!TOKEN_USE_REFRESH.equals(payloadValue(decoded.payload, "token_use"))) {
             throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Invalid token use");
         }
 
-        final String tokenId = decoded.payload.get("jti").getAsString();
-        final String familyId = decoded.payload.get("sid").getAsString();
-        final String identityName = decoded.payload.get("sub").getAsString();
-        final long revision = decoded.payload.get("rev").getAsLong();
-        final long expiration = decoded.payload.get("exp").getAsLong();
+        final String tokenId = payloadValue(decoded.payload, "jti");
+        final String familyId = payloadValue(decoded.payload, "sid");
+        final String identityName = payloadValue(decoded.payload, "sub");
+        final long revision = payloadLongValue(decoded.payload, "rev");
 
         final RefreshTokenRecord existingRecord = this.refreshTokens.get(tokenId);
-        if (existingRecord == null || existingRecord.isUsed || isExpired(existingRecord.expiresAt)) {
+        if (existingRecord == null || isExpired(existingRecord.expiresAt)
+                || !existingRecord.isUsed.compareAndSet(false, true)) {
             throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Refresh token has already been consumed");
         }
 
-        if (!isExpired(expiration) && this.revokedFamilies.contains(familyId)) {
+        if (this.revokedFamilies.containsKey(familyId)) {
             throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Token family revoked");
         }
 
         final long currentRevision = this.identityService.getIdentityRevision(identityName);
         if (revision != currentRevision) {
-            this.revokedFamilies.add(familyId);
+            revokeTokenFamilyWithExpiry(familyId);
             throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Token revision does not match current identity");
         }
-
-        existingRecord.isUsed = true;
 
         return issueTokenPair(identityName, revision, familyId);
     }
@@ -142,23 +140,23 @@ public class IdentityTokenServiceImpl implements IdentityTokenService {
 
         try {
             final DecodedJwt decoded = decodeAndVerify(accessToken);
-            if (!TOKEN_USE_ACCESS.equals(decoded.payload.get("token_use").getAsString())) {
+            if (!TOKEN_USE_ACCESS.equals(payloadValue(decoded.payload, "token_use"))) {
                 return Optional.empty();
             }
 
-            final String identityName = decoded.payload.get("sub").getAsString();
-            final long revision = decoded.payload.get("rev").getAsLong();
-            final String tokenId = decoded.payload.get("jti").getAsString();
-            final String tokenFamilyId = decoded.payload.get("sid").getAsString();
-            final long expiresAt = decoded.payload.get("exp").getAsLong();
+            final String identityName = payloadValue(decoded.payload, "sub");
+            final long revision = payloadLongValue(decoded.payload, "rev");
+            final String tokenId = payloadValue(decoded.payload, "jti");
+            final String tokenFamilyId = payloadValue(decoded.payload, "sid");
+            final long expiresAt = payloadLongValue(decoded.payload, "exp");
 
-            if (this.revokedFamilies.contains(tokenFamilyId)) {
+            if (this.revokedFamilies.containsKey(tokenFamilyId)) {
                 return Optional.empty();
             }
 
             final long currentRevision = this.identityService.getIdentityRevision(identityName);
             if (revision != currentRevision) {
-                this.revokedFamilies.add(tokenFamilyId);
+                revokeTokenFamilyWithExpiry(tokenFamilyId);
                 return Optional.empty();
             }
 
@@ -170,7 +168,7 @@ public class IdentityTokenServiceImpl implements IdentityTokenService {
 
     @Override
     public void revokeTokenFamily(final String tokenFamilyId) {
-        this.revokedFamilies.add(tokenFamilyId);
+        revokeTokenFamilyWithExpiry(tokenFamilyId);
     }
 
     private TokenPair issueTokenPair(final String identityName, final long identityRevision, final String familyId)
@@ -245,9 +243,9 @@ public class IdentityTokenServiceImpl implements IdentityTokenService {
 
     private void validateClaims(final JsonObject payload) throws KuraException {
         final long now = Instant.now().getEpochSecond();
-        final long exp = payload.get("exp").getAsLong();
-        final long nbf = payload.get("nbf").getAsLong();
-        final long iat = payload.get("iat").getAsLong();
+        final long exp = payloadLongValue(payload, "exp");
+        final long nbf = payloadLongValue(payload, "nbf");
+        final long iat = payloadLongValue(payload, "iat");
 
         if (isExpired(exp)) {
             throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Token expired");
@@ -275,6 +273,13 @@ public class IdentityTokenServiceImpl implements IdentityTokenService {
             throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Missing JWT claim: " + key);
         }
         return payload.get(key).getAsString();
+    }
+
+    private long payloadLongValue(final JsonObject payload, final String key) throws KuraException {
+        if (!payload.has(key) || payload.get(key).isJsonNull()) {
+            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, "Missing JWT claim: " + key);
+        }
+        return payload.get(key).getAsLong();
     }
 
     private String encodeJsonObject(final JsonObject object) {
@@ -347,6 +352,11 @@ public class IdentityTokenServiceImpl implements IdentityTokenService {
     private void cleanupExpiredRefreshTokens() {
         final long now = Instant.now().getEpochSecond();
         this.refreshTokens.entrySet().removeIf(entry -> entry.getValue().expiresAt + CLOCK_SKEW_SECONDS < now);
+        this.revokedFamilies.entrySet().removeIf(entry -> entry.getValue() + CLOCK_SKEW_SECONDS < now);
+    }
+
+    private void revokeTokenFamilyWithExpiry(final String familyId) {
+        this.revokedFamilies.put(familyId, Instant.now().getEpochSecond() + REFRESH_TTL_SECONDS);
     }
 
     private boolean isExpired(final long epochSeconds) {
@@ -363,11 +373,10 @@ public class IdentityTokenServiceImpl implements IdentityTokenService {
 
     private static final class RefreshTokenRecord {
         private final long expiresAt;
-        private volatile boolean isUsed;
+        private final AtomicBoolean isUsed = new AtomicBoolean(false);
 
         private RefreshTokenRecord(final long expiresAt) {
             this.expiresAt = expiresAt;
-            this.isUsed = false;
         }
     }
 

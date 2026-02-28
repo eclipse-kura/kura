@@ -22,11 +22,14 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +47,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -100,6 +104,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private final AtomicReference<String> currentTemporaryIdentityName = new AtomicReference<>();
     private final AtomicReference<char[]> currentTemporaryPassword = new AtomicReference<>();
     private final AtomicReference<String> currentTemporaryAccessToken = new AtomicReference<>();
+    private final AtomicLong currentTemporaryAccessTokenExpiresAt = new AtomicLong();
     private final AtomicReference<String> currentTemporaryRefreshToken = new AtomicReference<>();
     private final AtomicReference<Path> currentTemporaryTokenDirectory = new AtomicReference<>();
     private final AtomicReference<Future<?>> tokenRenewalFuture = new AtomicReference<>();
@@ -471,6 +476,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                         final TokenPair tokenPair = ContainerInstance.this.identityTokenService
                                 .issueTokenPair(identityName);
                         ContainerInstance.this.currentTemporaryAccessToken.set(tokenPair.getAccessToken());
+                        ContainerInstance.this.currentTemporaryAccessTokenExpiresAt
+                                .set(tokenPair.getAccessTokenExpiresAt());
                         ContainerInstance.this.currentTemporaryRefreshToken.set(tokenPair.getRefreshToken());
                     } else {
                         final char[] password = PasswordGenerator
@@ -558,15 +565,19 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         }
 
         private void writeTokenFile(final Path tokenFile, final String tokenValue) throws IOException {
-            Files.write(tokenFile, tokenValue.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE,
-                    StandardOpenOption.TRUNCATE_EXISTING);
+            final Set<PosixFilePermission> permissions = Set.of(PosixFilePermission.OWNER_READ,
+                    PosixFilePermission.OWNER_WRITE);
 
             try {
-                Files.setPosixFilePermissions(tokenFile,
-                        Set.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE));
+                Files.createFile(tokenFile, PosixFilePermissions.asFileAttribute(permissions));
+            } catch (FileAlreadyExistsException e) {
+                Files.setPosixFilePermissions(tokenFile, permissions);
             } catch (UnsupportedOperationException e) {
                 logger.debug("POSIX permissions not supported for {}", tokenFile, e);
             }
+
+            Files.write(tokenFile, tokenValue.getBytes(StandardCharsets.UTF_8),
+                    StandardOpenOption.TRUNCATE_EXISTING);
         }
 
         private void scheduleTokenRenewalIfNeeded(final ContainerInstanceOptions options) {
@@ -580,7 +591,16 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                 existing.cancel(true);
             }
 
-            final Future<?> renewalFuture = ContainerInstance.this.tokenRenewalExecutor.scheduleWithFixedDelay(() -> {
+            final long expiresAt = ContainerInstance.this.currentTemporaryAccessTokenExpiresAt.get();
+            if (expiresAt == 0) {
+                return;
+            }
+
+            scheduleNextTokenRenewal(computeRenewalDelaySeconds(expiresAt));
+        }
+
+        private void scheduleNextTokenRenewal(final long delaySeconds) {
+            final Future<?> renewalFuture = ContainerInstance.this.tokenRenewalExecutor.schedule(() -> {
                 try {
                     final String refreshToken = ContainerInstance.this.currentTemporaryRefreshToken.get();
                     final Path tokenDirectory = ContainerInstance.this.currentTemporaryTokenDirectory.get();
@@ -590,16 +610,27 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
                     final TokenPair renewed = ContainerInstance.this.identityTokenService.refreshTokenPair(refreshToken);
                     ContainerInstance.this.currentTemporaryAccessToken.set(renewed.getAccessToken());
+                    ContainerInstance.this.currentTemporaryAccessTokenExpiresAt
+                            .set(renewed.getAccessTokenExpiresAt());
                     ContainerInstance.this.currentTemporaryRefreshToken.set(renewed.getRefreshToken());
 
                     writeTokenFile(tokenDirectory.resolve("access.jwt"), renewed.getAccessToken());
                     writeTokenFile(tokenDirectory.resolve("refresh.jwt"), renewed.getRefreshToken());
+
+                    scheduleNextTokenRenewal(computeRenewalDelaySeconds(renewed.getAccessTokenExpiresAt()));
                 } catch (Exception e) {
                     logger.warn("Failed to renew container JWT credentials", e);
+                    scheduleNextTokenRenewal(30);
                 }
-            }, 60, 60, TimeUnit.SECONDS);
+            }, delaySeconds, TimeUnit.SECONDS);
 
             ContainerInstance.this.tokenRenewalFuture.set(renewalFuture);
+        }
+
+        private static long computeRenewalDelaySeconds(final long accessTokenExpiresAt) {
+            final long now = Instant.now().getEpochSecond();
+            final long remainingSeconds = accessTokenExpiresAt - now;
+            return Math.max(30, remainingSeconds * 4 / 5);
         }
 
         private String sanitizeContainerIdentityName(final String containerName) {
@@ -1092,6 +1123,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     private void clearTemporaryTokens() {
         this.currentTemporaryAccessToken.set(null);
+        this.currentTemporaryAccessTokenExpiresAt.set(0);
         this.currentTemporaryRefreshToken.set(null);
 
         final Path tokenDirectory = this.currentTemporaryTokenDirectory.getAndSet(null);

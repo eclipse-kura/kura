@@ -30,6 +30,7 @@ import org.eclipse.kura.identity.PasswordStrengthRequirements;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.identity.IdentityTokenService;
 import org.eclipse.kura.identity.TokenPair;
+import org.eclipse.kura.identity.VerifiedAccessToken;
 import org.eclipse.kura.internal.rest.auth.dto.AuthenticationInfoDTO;
 import org.eclipse.kura.internal.rest.auth.dto.AuthenticationResponseDTO;
 import org.eclipse.kura.internal.rest.auth.dto.IdentityInfoDTO;
@@ -424,8 +425,16 @@ public class SessionRestService {
         }
 
         final String accessToken = authorization.substring("Bearer ".length()).trim();
-        this.identityTokenService.verifyAccessToken(accessToken)
-                .ifPresent(token -> this.identityTokenService.revokeTokenFamily(token.getTokenFamilyId()));
+        final Optional<VerifiedAccessToken> verified = this.identityTokenService.verifyAccessToken(accessToken);
+
+        if (verified.isPresent()) {
+            final VerifiedAccessToken token = verified.get();
+            this.identityTokenService.revokeTokenFamily(token.getTokenFamilyId());
+
+            final AuditContext auditContext = AuditContext.currentOrInternal();
+            auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), token.getIdentityName());
+            auditLogger.info("{} Rest - Success - JWT logout succeeded", auditContext);
+        }
     }
 
     private void validatePasswordStrength(final String newPassword) {

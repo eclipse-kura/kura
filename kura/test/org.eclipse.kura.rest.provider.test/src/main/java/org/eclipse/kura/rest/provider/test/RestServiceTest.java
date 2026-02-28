@@ -75,6 +75,7 @@ import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -364,13 +365,13 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     @Test
     public void shouldSupportDisablingBuiltInJwtAuthentication() {
         givenIdentityTokenService();
-        givenRestServiceConfiguration(Collections.singletonMap("auth.jwt.enabled", false));
         givenService(new RequiresAssetsRole());
         givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
         givenNoBasicCredentials();
         givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v2/login/password",
                 "{\"username\":\"foo\",\"password\":\"bar\"}");
         givenCurrentAccessTokenAsBearerHeader();
+        givenRestServiceConfiguration(Collections.singletonMap("auth.jwt.enabled", false));
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/requireAssets");
 
@@ -1507,6 +1508,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     private void givenIdentityTokenService() {
         final BundleContext bundleContext = FrameworkUtil.getBundle(RestServiceTest.class).getBundleContext();
         try {
+            disableComponent(bundleContext, "org.eclipse.kura.core.identity.IdentityTokenServiceImpl");
+
             final Bundle restProviderBundle = Arrays.stream(bundleContext.getBundles())
                     .filter(b -> "org.eclipse.kura.rest.provider".equals(b.getSymbolicName())).findFirst()
                     .orElseThrow(() -> new IllegalStateException("Cannot find org.eclipse.kura.rest.provider bundle"));
@@ -1555,6 +1558,47 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         }
 
         fail("IdentityTokenService was not bound to RestService (last status: " + lastStatus + ")");
+    }
+
+    private void disableComponent(final BundleContext bundleContext, final String componentName) {
+        final ServiceReference<?> scrRef = bundleContext
+                .getServiceReference("org.osgi.service.component.runtime.ServiceComponentRuntime");
+        if (scrRef == null) {
+            return;
+        }
+        try {
+            final Object scr = bundleContext.getService(scrRef);
+            if (scr == null) {
+                return;
+            }
+            final java.lang.reflect.Method getDescs = scr.getClass().getMethod("getComponentDescriptionDTOs",
+                    Bundle[].class);
+            final Object dtos = getDescs.invoke(scr, (Object) new Bundle[0]);
+            if (dtos instanceof java.util.Collection) {
+                for (final Object dto : (java.util.Collection<?>) dtos) {
+                    final java.lang.reflect.Field nameField = dto.getClass().getField("name");
+                    if (componentName.equals(nameField.get(dto))) {
+                        java.lang.reflect.Method disableMethod = null;
+                        for (final java.lang.reflect.Method m : scr.getClass().getMethods()) {
+                            if ("disableComponent".equals(m.getName()) && m.getParameterCount() == 1) {
+                                disableMethod = m;
+                                break;
+                            }
+                        }
+                        if (disableMethod != null) {
+                            disableMethod.invoke(scr, dto);
+                            synchronized (this) {
+                                this.wait(1000);
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            bundleContext.ungetService(scrRef);
+        } catch (final Exception e) {
+            // best effort - component may not be present in test environment
+        }
     }
 
     private void givenSuccessfulRequest(final String proto, final int port, final MethodSpec method,

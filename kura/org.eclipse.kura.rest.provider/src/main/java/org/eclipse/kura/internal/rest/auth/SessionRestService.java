@@ -404,6 +404,9 @@ public class SessionRestService {
             final TokenPair tokenPair = this.identityTokenService.refreshTokenPair(refreshTokenDTO.getRefreshToken());
             return new TokenAuthenticationResponseDTO(tokenPair, false);
         } catch (final KuraException e) {
+            if (e.getCode() == KuraErrorCode.SECURITY_EXCEPTION) {
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.UNAUTHORIZED, e.getMessage());
+            }
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
     }

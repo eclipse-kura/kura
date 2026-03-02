@@ -162,7 +162,7 @@ public interface LibGpiodV1Native extends Library {
 
         public TimeSpec ts;
         public int event_type;
-
+        
         @Override
         protected List<String> getFieldOrder() {
             return Arrays.asList("ts", "event_type");
@@ -183,6 +183,12 @@ public interface LibGpiodV1Native extends Library {
         }
     }
 
+    public default TimeSpec createTimeSpec(long sec) {
+		TimeSpec ts = new TimeSpec();
+		ts.tv_sec = sec;
+		return ts;
+	}
+    
     /**
      * Helper structure for the contextless event loop poll callback
      */

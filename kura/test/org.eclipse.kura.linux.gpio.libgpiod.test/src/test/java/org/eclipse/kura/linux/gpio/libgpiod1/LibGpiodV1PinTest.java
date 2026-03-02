@@ -18,14 +18,19 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.gpio.KuraClosedDeviceException;
 import org.eclipse.kura.gpio.KuraGPIODirection;
@@ -51,6 +56,7 @@ public class LibGpiodV1PinTest extends CommonSteps {
     private Boolean v1PinValue;
     private PinStatusListener pinStatusListener;
     private String message;
+    private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
     @Before
     public void setup() {        
@@ -72,6 +78,8 @@ public class LibGpiodV1PinTest extends CommonSteps {
 	    when(this.nativeInterfaceMock.gpiod_line_request(eq(line4), any(), eq(0))).thenReturn(0);
 	    when(this.nativeInterfaceMock.gpiod_line_get_value(line4)).thenReturn(1);
 	    when(this.nativeInterfaceMock.gpiod_line_request_both_edges_events(line4, "KuraGPIOPin")).thenReturn(1);
+	    when(this.nativeInterfaceMock.gpiod_line_event_wait(eq(line4), any())).thenReturn(1);
+	    when(this.nativeInterfaceMock.gpiod_line_event_read_multiple(eq(line4), any(), anyInt())).thenReturn(1);
 	    Pointer line8 = Pointer.createConstant(8);
 	    when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, 8)).thenReturn(line8);
 	    when(this.nativeInterfaceMock.gpiod_line_is_used(line8)).thenReturn(false);
@@ -394,6 +402,20 @@ public class LibGpiodV1PinTest extends CommonSteps {
                 "LibGpiodPin{chip=/dev/gpiochip0, offset=18, name=GPIO18, direction=OUTPUT, mode=OUTPUT_PUSH_PULL, trigger=NONE}");
     }
 
+    @Test
+    public void testMonitorEvents() throws InterruptedException {
+        givenV1Pin("GPIO_01", 2004, KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.BOTH_EDGES);
+        givenPinStatusListener();
+        
+        whenV1PinIsOpened();
+        whenV1PinAddPinStatusListener(this.pinStatusListener);
+        whenV1PinRemovePinStatusListenerAfterSeconds(this.pinStatusListener,2);
+        whenV1PinMonitorEvents();
+        
+        thenNoExceptionOccurred();
+        thenListenerIsInvockedTimes(0);
+    }
+    
     /*
      * Given
      */
@@ -476,6 +498,23 @@ public class LibGpiodV1PinTest extends CommonSteps {
         }
     }
 
+    private void whenV1PinRemovePinStatusListenerAfterSeconds(PinStatusListener listener, int seconds) {
+        this.executor.schedule(new Runnable() {
+            @Override
+            public void run() {
+          	  whenV1PinRemovePinStatusListener(LibGpiodV1PinTest.this.pinStatusListener);
+            }
+          }, 2, TimeUnit.SECONDS);    
+	}
+    
+    private void whenV1PinMonitorEvents() {
+		try {
+			this.v1Pin.monitorEvents();
+		} catch (Exception e) {
+			this.occurredException = e;
+		}
+	}
+    
     /*
      * Then
      */
@@ -518,5 +557,9 @@ public class LibGpiodV1PinTest extends CommonSteps {
     private void thenMessageIs(String expectedMessage) {
         assertEquals(expectedMessage, this.message);
     }
+    
+    private void thenListenerIsInvockedTimes(int times) {
+		verify(this.pinStatusListener, times(times)).pinStatusChange(anyBoolean());
+	}
 
 }

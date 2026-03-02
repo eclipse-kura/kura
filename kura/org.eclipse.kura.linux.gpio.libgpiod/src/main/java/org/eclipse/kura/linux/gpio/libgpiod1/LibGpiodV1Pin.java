@@ -137,8 +137,7 @@ public class LibGpiodV1Pin extends LibGpiodPin implements KuraGPIOPin {
             return;
         }
 
-        TimeSpec timeout = new TimeSpec();
-        timeout.tv_sec = DEFAULT_TIMEOUT_SEC;
+        TimeSpec timeout = LibGpiodV1NativeWrapper.getInstance().createTimeSpec(DEFAULT_TIMEOUT_SEC);
 
         while (this.isMonitoring.get()) {
             manageEvents(timeout);

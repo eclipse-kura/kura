@@ -409,7 +409,7 @@ public class LibGpiodV1PinTest extends CommonSteps {
         
         whenV1PinIsOpened();
         whenV1PinAddPinStatusListener(this.pinStatusListener);
-        whenV1PinRemovePinStatusListenerAfterSeconds(this.pinStatusListener,2);
+        whenV1PinRemovePinStatusListenerAfterSeconds(2);
         whenV1PinMonitorEvents();
         
         thenNoExceptionOccurred();
@@ -498,13 +498,13 @@ public class LibGpiodV1PinTest extends CommonSteps {
         }
     }
 
-    private void whenV1PinRemovePinStatusListenerAfterSeconds(PinStatusListener listener, int seconds) {
+    private void whenV1PinRemovePinStatusListenerAfterSeconds(int seconds) {
         this.executor.schedule(new Runnable() {
             @Override
             public void run() {
           	  whenV1PinRemovePinStatusListener(LibGpiodV1PinTest.this.pinStatusListener);
             }
-          }, 2, TimeUnit.SECONDS);    
+          }, seconds, TimeUnit.SECONDS);    
 	}
     
     private void whenV1PinMonitorEvents() {

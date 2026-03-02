@@ -168,7 +168,7 @@ public interface LibGpiodV1Native extends Library {
             return Arrays.asList("ts", "event_type");
         }
     }
-
+    
     /**
      * Timespec structure
      */

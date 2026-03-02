@@ -60,55 +60,55 @@ public class LibGpiodV1PinTest extends CommonSteps {
         this.nativeInterfaceWrapperMock = mockStatic(LibGpiodV1NativeWrapper.class);
         this.nativeInterfaceWrapperMock.when(LibGpiodV1NativeWrapper::getInstance).thenReturn(this.nativeInterfaceMock);
         
-      Pointer chip0 = Pointer.createConstant(1);
-      when(this.nativeInterfaceMock.gpiod_chip_open("/dev/gpiochip0")).thenReturn(chip0);
-      when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip0)).thenReturn(16);
-      Pointer chip2 = Pointer.createConstant(2);
-      when(this.nativeInterfaceMock.gpiod_chip_open("/dev/gpiochip2")).thenReturn(chip2);
-      when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip2)).thenReturn(32);
-      Pointer line4 = Pointer.createConstant(4);
-      when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, 4)).thenReturn(line4);
-      when(this.nativeInterfaceMock.gpiod_line_is_used(line4)).thenReturn(false);
-      when(this.nativeInterfaceMock.gpiod_line_request(eq(line4), any(), eq(0))).thenReturn(0);
-      when(this.nativeInterfaceMock.gpiod_line_get_value(line4)).thenReturn(1);
-      when(this.nativeInterfaceMock.gpiod_line_request_both_edges_events(line4, "KuraGPIOPin")).thenReturn(1);
-      Pointer line8 = Pointer.createConstant(8);
-      when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, 8)).thenReturn(line8);
-      when(this.nativeInterfaceMock.gpiod_line_is_used(line8)).thenReturn(false);
-      when(this.nativeInterfaceMock.gpiod_line_request(eq(line8), any(),
-      		eq(0))).thenReturn(0);
-      when(this.nativeInterfaceMock.gpiod_line_get_value(line8)).thenReturn(-1);
-      Pointer line9 = Pointer.createConstant(9);
-      when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, 9)).thenReturn(line9);
-      when(this.nativeInterfaceMock.gpiod_line_is_used(line9)).thenReturn(false);
-      when(this.nativeInterfaceMock.gpiod_line_request(eq(line9), any(),
-      		eq(0))).thenReturn(0);
-      when(this.nativeInterfaceMock.gpiod_line_get_value(line9)).thenThrow(new Error());
-      Pointer chip5 = Pointer.createConstant(5);
-      when(this.nativeInterfaceMock.gpiod_chip_open("/dev/gpiochip5")).thenReturn(chip5);
-      when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip5)).thenReturn(64);
-      Pointer line6 = Pointer.createConstant(6);
-      when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 6)).thenReturn(line6);
-      when(this.nativeInterfaceMock.gpiod_line_request(eq(line6), any(),
-      		eq(0))).thenReturn(0);
-      Pointer line7 = Pointer.createConstant(7);
-      when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 7)).thenReturn(line7);
-      when(this.nativeInterfaceMock.gpiod_line_request(eq(line7), any(),
-      		eq(0))).thenReturn(0);
-      Pointer line10 = Pointer.createConstant(10);
-      when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 10)).thenReturn(line10);
-      when(this.nativeInterfaceMock.gpiod_line_is_used(line10)).thenReturn(false);
-      when(this.nativeInterfaceMock.gpiod_line_request(eq(line10), any(),
-      		eq(0))).thenReturn(0);
-      when(this.nativeInterfaceMock.gpiod_line_set_value(line10, 1)).thenReturn(-1);
-      Pointer line11 = Pointer.createConstant(11);
-      when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 11)).thenReturn(line11);
-      when(this.nativeInterfaceMock.gpiod_line_is_used(line11)).thenReturn(false);
-      when(this.nativeInterfaceMock.gpiod_line_request(eq(line11), any(),
-      		eq(0))).thenReturn(0);
-      when(this.nativeInterfaceMock.gpiod_line_set_value(line11, 1)).thenThrow(new Error());
-      
-      when(this.nativeInterfaceMock.createLineRequestConfig(anyString(), anyInt(), anyInt())).thenReturn(null);
+	    Pointer chip0 = Pointer.createConstant(1);
+	    when(this.nativeInterfaceMock.gpiod_chip_open("/dev/gpiochip0")).thenReturn(chip0);
+	    when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip0)).thenReturn(16);
+	    Pointer chip2 = Pointer.createConstant(2);
+	    when(this.nativeInterfaceMock.gpiod_chip_open("/dev/gpiochip2")).thenReturn(chip2);
+	    when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip2)).thenReturn(32);
+	    Pointer line4 = Pointer.createConstant(4);
+	    when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, 4)).thenReturn(line4);
+	    when(this.nativeInterfaceMock.gpiod_line_is_used(line4)).thenReturn(false);
+	    when(this.nativeInterfaceMock.gpiod_line_request(eq(line4), any(), eq(0))).thenReturn(0);
+	    when(this.nativeInterfaceMock.gpiod_line_get_value(line4)).thenReturn(1);
+	    when(this.nativeInterfaceMock.gpiod_line_request_both_edges_events(line4, "KuraGPIOPin")).thenReturn(1);
+	    Pointer line8 = Pointer.createConstant(8);
+	    when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, 8)).thenReturn(line8);
+	    when(this.nativeInterfaceMock.gpiod_line_is_used(line8)).thenReturn(false);
+	    when(this.nativeInterfaceMock.gpiod_line_request(eq(line8), any(),
+	  		eq(0))).thenReturn(0);
+	    when(this.nativeInterfaceMock.gpiod_line_get_value(line8)).thenReturn(-1);
+	    Pointer line9 = Pointer.createConstant(9);
+	    when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, 9)).thenReturn(line9);
+	    when(this.nativeInterfaceMock.gpiod_line_is_used(line9)).thenReturn(false);
+	    when(this.nativeInterfaceMock.gpiod_line_request(eq(line9), any(),
+	  		eq(0))).thenReturn(0);
+	    when(this.nativeInterfaceMock.gpiod_line_get_value(line9)).thenThrow(new Error());
+	    Pointer chip5 = Pointer.createConstant(5);
+	    when(this.nativeInterfaceMock.gpiod_chip_open("/dev/gpiochip5")).thenReturn(chip5);
+	    when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip5)).thenReturn(64);
+	    Pointer line6 = Pointer.createConstant(6);
+	    when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 6)).thenReturn(line6);
+	    when(this.nativeInterfaceMock.gpiod_line_request(eq(line6), any(),
+	  		eq(0))).thenReturn(0);
+	    Pointer line7 = Pointer.createConstant(7);
+	    when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 7)).thenReturn(line7);
+	    when(this.nativeInterfaceMock.gpiod_line_request(eq(line7), any(),
+	  		eq(0))).thenReturn(0);
+	    Pointer line10 = Pointer.createConstant(10);
+	    when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 10)).thenReturn(line10);
+	    when(this.nativeInterfaceMock.gpiod_line_is_used(line10)).thenReturn(false);
+	    when(this.nativeInterfaceMock.gpiod_line_request(eq(line10), any(),
+	  		eq(0))).thenReturn(0);
+	    when(this.nativeInterfaceMock.gpiod_line_set_value(line10, 1)).thenReturn(-1);
+	    Pointer line11 = Pointer.createConstant(11);
+	    when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 11)).thenReturn(line11);
+	    when(this.nativeInterfaceMock.gpiod_line_is_used(line11)).thenReturn(false);
+	    when(this.nativeInterfaceMock.gpiod_line_request(eq(line11), any(),
+	  		eq(0))).thenReturn(0);
+	    when(this.nativeInterfaceMock.gpiod_line_set_value(line11, 1)).thenThrow(new Error());
+	  
+	    when(this.nativeInterfaceMock.createLineRequestConfig(anyString(), anyInt(), anyInt())).thenReturn(null);
     }
 
     @After

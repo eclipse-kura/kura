@@ -403,7 +403,7 @@ public class LibGpiodV1PinTest extends CommonSteps {
     }
 
     @Test
-    public void testMonitorEvents() throws InterruptedException {
+    public void testMonitorEvents() {
         givenV1Pin("GPIO_01", 2004, KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.BOTH_EDGES);
         givenPinStatusListener();
         

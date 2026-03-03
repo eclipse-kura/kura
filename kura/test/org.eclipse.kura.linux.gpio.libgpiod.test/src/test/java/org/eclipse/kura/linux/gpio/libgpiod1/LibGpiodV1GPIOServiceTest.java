@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2025, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -60,7 +60,7 @@ public class LibGpiodV1GPIOServiceTest extends CommonSteps {
         this.nativeInterfaceMock = mock(LibGpiodV1Native.class);
         this.nativeMock.when(() -> Native.load("gpiod", LibGpiodV1Native.class)).thenReturn(this.nativeInterfaceMock);
         this.nativeInterfaceWrapperMock = mockStatic(LibGpiodV1NativeWrapper.class);
-        this.nativeInterfaceWrapperMock.when(() -> LibGpiodV1NativeWrapper.getInstance())
+        this.nativeInterfaceWrapperMock.when(LibGpiodV1NativeWrapper::getInstance)
                 .thenReturn(this.nativeInterfaceMock);
 
         Pointer chip0 = Pointer.createConstant(0);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -73,6 +73,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
     private static final Logger logger = LoggerFactory.getLogger(GPIODriver.class);
     private static final String WRITE_FAILED_MESSAGE = "GPIO write operation failed";
     private static final String READ_FAILED_MESSAGE = "GPIO read operation failed";
+    private static final String CONVERSION_ERROR_MESSAGE = "Error while converting the retrieved value to the defined typed";
 
     private Set<String> gpioNames;
     private Set<GPIOListener> gpioListeners;
@@ -149,8 +150,8 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
 
     @Override
     public synchronized void read(final List<ChannelRecord> records) throws ConnectionException {
-        for (final ChannelRecord record : records) {
-            Optional<GPIORequestInfo> requestInfo = GPIORequestInfo.extract(record);
+        for (final ChannelRecord channelRecord : records) {
+            Optional<GPIORequestInfo> requestInfo = GPIORequestInfo.extract(channelRecord);
             if (requestInfo.isPresent()) {
                 this.gpioNames.add(requestInfo.get().resourceName);
                 runReadRequest(requestInfo.get());
@@ -160,8 +161,8 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
 
     @Override
     public synchronized void write(final List<ChannelRecord> records) throws ConnectionException {
-        for (final ChannelRecord record : records) {
-            GPIORequestInfo.extract(record).ifPresent(this::runWriteRequest);
+        for (final ChannelRecord channelRecord : records) {
+            GPIORequestInfo.extract(channelRecord).ifPresent(this::runWriteRequest);
         }
     }
 
@@ -172,8 +173,8 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
         try (GPIOPreparedRead preparedRead = new GPIOPreparedRead()) {
             preparedRead.channelRecords = channelRecords;
 
-            for (ChannelRecord record : channelRecords) {
-                Optional<GPIORequestInfo> requestInfo = GPIORequestInfo.extract(record);
+            for (ChannelRecord channelRecord : channelRecords) {
+                Optional<GPIORequestInfo> requestInfo = GPIORequestInfo.extract(channelRecord);
                 if (requestInfo.isPresent()) {
                     preparedRead.requestInfos.add(requestInfo.get());
                     this.gpioNames.add(requestInfo.get().resourceName);
@@ -195,7 +196,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                 pin = getPin(name, direction, KuraGPIOMode.INPUT_PULL_UP,
                         GPIOChannelDescriptor.getResourceTrigger(channelConfig));
             } else {
-                pin = getPin(name, direction, KuraGPIOMode.OUTPUT_OPEN_DRAIN,
+                pin = getPin(name, direction, KuraGPIOMode.OUTPUT_PUSH_PULL,
                         GPIOChannelDescriptor.getResourceTrigger(channelConfig));
             }
             if (pin != null) {
@@ -228,30 +229,30 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
     }
 
     private synchronized void runWriteRequest(GPIORequestInfo requestInfo) {
-        ChannelRecord record = requestInfo.channelRecord;
+        ChannelRecord channelRecord = requestInfo.channelRecord;
         if (!GPIOChannelDescriptor.DEFAULT_RESOURCE_NAME.equals(requestInfo.resourceName)
                 && requestInfo.resourceDirection != null) {
             try {
-                final TypedValue<Boolean> value = getBooleanValue(record.getValue());
+                final TypedValue<Boolean> value = getBooleanValue(channelRecord.getValue());
                 this.gpioNames.add(requestInfo.resourceName);
                 KuraGPIOPin pin = getPin(requestInfo.resourceName, requestInfo.resourceDirection,
                         requestInfo.resourceMode, requestInfo.resourceTrigger);
                 if (pin != null) {
-                    pin.setValue((boolean) value.getValue());
-                    record.setChannelStatus(new ChannelStatus(SUCCESS));
-                    record.setTimestamp(System.currentTimeMillis());
+                    pin.setValue(value.getValue());
+                    channelRecord.setChannelStatus(new ChannelStatus(SUCCESS));
+                    channelRecord.setTimestamp(System.currentTimeMillis());
                 }
             } catch (IOException | KuraUnavailableDeviceException | KuraClosedDeviceException e) {
-                setFailureRecord(record, WRITE_FAILED_MESSAGE);
+                setFailureRecord(channelRecord, WRITE_FAILED_MESSAGE);
             }
         } else {
-            setFailureRecord(record, WRITE_FAILED_MESSAGE);
+            setFailureRecord(channelRecord, WRITE_FAILED_MESSAGE);
         }
     }
 
-    private void setFailureRecord(ChannelRecord record, String errorMessage) {
-        record.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, errorMessage, null));
-        record.setTimestamp(System.currentTimeMillis());
+    private void setFailureRecord(ChannelRecord channelRecord, String errorMessage) {
+        channelRecord.setChannelStatus(new ChannelStatus(ChannelFlag.FAILURE, errorMessage, null));
+        channelRecord.setTimestamp(System.currentTimeMillis());
         logger.warn(errorMessage);
     }
 
@@ -274,7 +275,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
         return pin;
     }
 
-    private Optional<TypedValue<?>> getTypedValue(final DataType expectedValueType, final Boolean containedValue) {
+    private Optional<TypedValue<?>> getTypedValue(final DataType expectedValueType, final boolean containedValue) {
         try {
             switch (expectedValueType) {
             case LONG:
@@ -297,7 +298,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                 return Optional.empty();
             }
         } catch (final Exception ex) {
-            logger.error("Error while converting the retrieved value to the defined typed", ex);
+            logger.error(CONVERSION_ERROR_MESSAGE, ex);
             return Optional.empty();
         }
     }
@@ -319,7 +320,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                 String valueString = (String) value.getValue();
                 if (valueString != null && !valueString.isEmpty()) {
                     return TypedValues
-                            .newBooleanValue(((String) value.getValue()).equalsIgnoreCase("true") ? true : false);
+                            .newBooleanValue(((String) value.getValue()).equalsIgnoreCase("true"));
                 } else {
                     return TypedValues.newBooleanValue(false);
                 }
@@ -332,13 +333,13 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                 return TypedValues.newBooleanValue(false);
             }
         } catch (final Exception ex) {
-            logger.error("Error while converting the retrieved value to the defined typed", ex);
+            logger.error(CONVERSION_ERROR_MESSAGE, ex);
             return TypedValues.newBooleanValue(false);
         }
     }
 
     private synchronized void runReadRequest(GPIORequestInfo requestInfo) {
-        ChannelRecord record = requestInfo.channelRecord;
+        ChannelRecord channelRecord = requestInfo.channelRecord;
         if (!GPIOChannelDescriptor.DEFAULT_RESOURCE_NAME.equals(requestInfo.resourceName)
                 && requestInfo.resourceDirection != null) {
             try {
@@ -348,21 +349,21 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
                     Boolean value = pin.getValue();
                     final Optional<TypedValue<?>> typedValue = getTypedValue(requestInfo.dataType, value);
                     if (!typedValue.isPresent()) {
-                        record.setChannelStatus(new ChannelStatus(FAILURE,
-                                "Error while converting the retrieved value to the defined typed", null));
-                        record.setTimestamp(System.currentTimeMillis());
+                        channelRecord.setChannelStatus(new ChannelStatus(FAILURE,
+                                CONVERSION_ERROR_MESSAGE, null));
+                        channelRecord.setTimestamp(System.currentTimeMillis());
                         return;
                     }
 
-                    record.setValue(typedValue.get());
-                    record.setChannelStatus(new ChannelStatus(SUCCESS));
-                    record.setTimestamp(System.currentTimeMillis());
+                    channelRecord.setValue(typedValue.get());
+                    channelRecord.setChannelStatus(new ChannelStatus(SUCCESS));
+                    channelRecord.setTimestamp(System.currentTimeMillis());
                 }
             } catch (IOException | KuraUnavailableDeviceException | KuraClosedDeviceException e) {
-                setFailureRecord(record, READ_FAILED_MESSAGE);
+                setFailureRecord(channelRecord, READ_FAILED_MESSAGE);
             }
         } else {
-            setFailureRecord(record, READ_FAILED_MESSAGE);
+            setFailureRecord(channelRecord, READ_FAILED_MESSAGE);
         }
     }
 
@@ -380,28 +381,28 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
             this.channelRecord = channelRecord;
         }
 
-        private static void fail(final ChannelRecord record, final String message) {
-            record.setChannelStatus(new ChannelStatus(FAILURE, message, null));
-            record.setTimestamp(System.currentTimeMillis());
+        private static void fail(final ChannelRecord channelRecord, final String message) {
+            channelRecord.setChannelStatus(new ChannelStatus(FAILURE, message, null));
+            channelRecord.setTimestamp(System.currentTimeMillis());
         }
 
-        public static Optional<GPIORequestInfo> extract(final ChannelRecord record) {
-            final Map<String, Object> channelConfig = record.getChannelConfig();
-            final DataType dataType = record.getValueType();
+        public static Optional<GPIORequestInfo> extract(final ChannelRecord channelRecord) {
+            final Map<String, Object> channelConfig = channelRecord.getChannelConfig();
+            final DataType dataType = channelRecord.getValueType();
 
             if (isNull(dataType)) {
-                fail(record, "Error while retrieving value type");
+                fail(channelRecord, "Error while retrieving value type");
                 return Optional.empty();
             }
 
-            GPIORequestInfo request = new GPIORequestInfo(record, dataType);
+            GPIORequestInfo request = new GPIORequestInfo(channelRecord, dataType);
             request.resourceName = GPIOChannelDescriptor.getResourceName(channelConfig);
             request.resourceDirection = GPIOChannelDescriptor.getResourceDirection(channelConfig);
             request.resourceTrigger = GPIOChannelDescriptor.getResourceTrigger(channelConfig);
             if (KuraGPIODirection.INPUT.equals(request.resourceDirection)) {
                 request.resourceMode = KuraGPIOMode.INPUT_PULL_UP;
             } else {
-                request.resourceMode = KuraGPIOMode.OUTPUT_OPEN_DRAIN;
+                request.resourceMode = KuraGPIOMode.OUTPUT_PUSH_PULL;
             }
 
             return Optional.of(request);
@@ -411,7 +412,7 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
     private class GPIOPreparedRead implements PreparedRead {
 
         private final List<GPIORequestInfo> requestInfos = new ArrayList<>();
-        private volatile List<ChannelRecord> channelRecords;
+        private List<ChannelRecord> channelRecords;
 
         @Override
         public synchronized List<ChannelRecord> execute() throws ConnectionException {
@@ -457,19 +458,19 @@ public final class GPIODriver implements Driver, ConfigurableComponent {
 
         @Override
         public void pinStatusChange(boolean value) {
-            ChannelRecord record = ChannelRecord.createReadRecord(this.channelName, this.dataType);
+            ChannelRecord channelRecord = ChannelRecord.createReadRecord(this.channelName, this.dataType);
             final Optional<TypedValue<?>> typedValue = getTypedValue(this.dataType, value);
             if (!typedValue.isPresent()) {
-                record.setChannelStatus(new ChannelStatus(FAILURE,
-                        "Error while converting the retrieved value to the defined typed", null));
-                record.setTimestamp(System.currentTimeMillis());
+                channelRecord.setChannelStatus(new ChannelStatus(FAILURE,
+                        CONVERSION_ERROR_MESSAGE, null));
+                channelRecord.setTimestamp(System.currentTimeMillis());
                 return;
             }
 
-            record.setValue(typedValue.get());
-            record.setChannelStatus(new ChannelStatus(SUCCESS));
-            record.setTimestamp(System.currentTimeMillis());
-            this.listener.onChannelEvent(new ChannelEvent(record));
+            channelRecord.setValue(typedValue.get());
+            channelRecord.setChannelStatus(new ChannelStatus(SUCCESS));
+            channelRecord.setTimestamp(System.currentTimeMillis());
+            this.listener.onChannelEvent(new ChannelEvent(channelRecord));
         }
 
     }

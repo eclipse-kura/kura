@@ -14,6 +14,7 @@
 package org.eclipse.kura.linux.gpio.libgpiod;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,11 +27,15 @@ import org.eclipse.kura.gpio.KuraGPIODirection;
 import org.eclipse.kura.gpio.KuraGPIOMode;
 import org.eclipse.kura.gpio.KuraGPIOPin;
 import org.eclipse.kura.gpio.KuraGPIOTrigger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Common methods for libgpiod-based GPIO services
  */
 public abstract class LibGpiodGPIOService {
+
+    private static final Logger logger = LoggerFactory.getLogger(LibGpiodGPIOService.class);
 
     private static final String GPIO_CHIP_NAME = "gpiochip";
     private static final Pattern GPIO_CHIP_PATTERN = Pattern.compile("^" + GPIO_CHIP_NAME + "\\d+$");
@@ -102,9 +107,9 @@ public abstract class LibGpiodGPIOService {
 
         initialize();
 
-        KuraGPIOPin cachedPin = this.pinCache.get(pinName);
-        if (cachedPin != null && pinHasSameConfiguration(cachedPin, direction, mode, trigger)) {
-            return cachedPin;
+        Optional<KuraGPIOPin> cachedPin = getCachedPin(pinName, direction, mode, trigger);
+        if (cachedPin.isPresent()) {
+            return cachedPin.get();
         }
 
         Integer globalPinNumber = this.availablePins.get(pinName);
@@ -119,6 +124,23 @@ public abstract class LibGpiodGPIOService {
         this.pinCache.put(pinName, pin);
 
         return pin;
+    }
+
+    private Optional<KuraGPIOPin> getCachedPin(String pinName, KuraGPIODirection direction, KuraGPIOMode mode, KuraGPIOTrigger trigger) {
+        KuraGPIOPin cachedPin = this.pinCache.get(pinName);
+        if (cachedPin != null) {
+            if (pinHasSameConfiguration(cachedPin, direction, mode, trigger)) {
+                return Optional.of(cachedPin);
+            } else {
+                try {
+                    cachedPin.close();
+                } catch (IOException e) {
+                    logger.error("Error closing pin {}", pinName, e);
+                }
+                this.pinCache.remove(pinName);
+            }
+        }
+        return Optional.empty();
     }
 
     private boolean pinHasSameConfiguration(KuraGPIOPin pin, KuraGPIODirection direction, KuraGPIOMode mode,
@@ -144,9 +166,9 @@ public abstract class LibGpiodGPIOService {
             throw new IllegalArgumentException("Terminal not found: " + terminal);
         }
 
-        KuraGPIOPin cachedPin = this.pinCache.get(pinName.get());
-        if (cachedPin != null && pinHasSameConfiguration(cachedPin, direction, mode, trigger)) {
-            return cachedPin;
+        Optional<KuraGPIOPin> cachedPin = getCachedPin(pinName.get(), direction, mode, trigger);
+        if (cachedPin.isPresent()) {
+            return cachedPin.get();
         }
 
         int chipNumber = terminal / 1000;

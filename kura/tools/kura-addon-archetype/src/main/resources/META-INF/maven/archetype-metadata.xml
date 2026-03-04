@@ -26,6 +26,9 @@
         <requiredProperty key="kuraVersion">
             <defaultValue>${project.version}</defaultValue>
         </requiredProperty>
+        <requiredProperty key="year">
+            <defaultValue>${year}</defaultValue>
+        </requiredProperty>
     </requiredProperties>
 
     <fileSets>

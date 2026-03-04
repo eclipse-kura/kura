@@ -30,6 +30,7 @@
     </organization>
     <developers>
         <developer>
+            <id>kura-dev</id>
             <name>Eclipse Kura Developers</name>
             <email>kura-dev@eclipse.org</email>
             <organization>Eclipse Foundation</organization>

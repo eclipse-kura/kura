@@ -64,8 +64,8 @@ Build
 ### Prerequisites
 
 In order to be able to build Eclipse Kura™ on your development machine, you need to have the following programs installed in your system:
-* JDK 17
-* Maven 3.9.x
+* JDK 21
+* Maven 3.9.9+
 
 <details>
 <summary>

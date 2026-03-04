@@ -46,7 +46,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>21</maven.compiler.release>
-        <tycho.version>4.0.11</tycho.version>
+        <tycho.version>5.0.2</tycho.version>
         <bnd.version>7.1.0</bnd.version>
     </properties>
 
@@ -138,8 +138,8 @@
                     <artifactId>tycho-compiler-plugin</artifactId>
                     <version>${tycho.version}</version>
                     <configuration>
-                        <source>17</source>
-                        <target>17</target>
+                        <source>${maven.compiler.release}</source>
+                        <target>${maven.compiler.release}</target>
                         <showDeprecation>true</showDeprecation>
                         <showWarnings>true</showWarnings>
                     </configuration>

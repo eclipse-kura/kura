@@ -76,7 +76,7 @@ In order to be able to build Eclipse Kura™ on your development machine, you ne
 
 To install Java 21, download the JDK tar archive from the [Adoptium Project Repository](https://adoptium.net/temurin/releases?version=21&os=any&arch=any).
 
-Once downloaded, copy the tar archive in `/Library/Java/JavaVirtualMachines/` and cd into it. Unpack the archive with the following command:
+Once downloaded, copy the tar archive in `/Library/Java/JavaVirtualMachines/` and `cd` into it. Unpack the archive with the following command:
 
 ```bash
 sudo tar -xzf <archive-name>.tar.gz
@@ -84,7 +84,7 @@ sudo tar -xzf <archive-name>.tar.gz
 
 The tar archive can be deleted afterwards.
 
-Depending on which terminal you are using, edit the profiles (.zshrc, .profile, .bash_profile) to contain:
+Depending on which terminal you are using, edit the profiles (`.zshrc`, `.profile`, `.bash_profile`) to contain:
 
 ```bash
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/<archive-name>/Contents/Home
@@ -97,6 +97,7 @@ Using [Brew](https://brew.sh/) you can easily install Maven from the command lin
 ```bash
 brew install maven@3.9
 ```
+
 Run `mvn -version` to ensure that Maven has been added to the PATH. If Maven cannot be found, try running `brew link maven@3.9 --force` or manually add it to your path with:
 
 ```bash
@@ -113,12 +114,12 @@ export PATH="/usr/local/opt/maven@3.9/bin:$PATH"
 </summary>
 
 For Java
+
 ```bash
 sudo apt install openjdk-21-jdk
 ```
-For Maven   
 
-You can follow the tutorial from the official [Maven](http://maven.apache.org/install.html) site. Remember that you need to install the 3.9.9 version.
+To install Maven you can follow the tutorial from the official [Maven](http://maven.apache.org/install.html) site. Remember that you need to install the 3.9.9 version.
 
 </details>
 

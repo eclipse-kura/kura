@@ -52,6 +52,19 @@ The following optional parameters can be changed by answering `n` after the `Con
 - **version**: the generated project's version. Defaults to *1.0.0-SNAPSHOT*
 - **mainBundleVendor**: the name of the vendor to use in the metadata. Defaults to *Eclipse Kura*
 - **kuraVersion**: the version of the Kura bill-of-materials, used to resolve dependencies. Defaults to *6.0.0[-SNAPSHOT]*
+- **year**: the year to use in the copyright headers, which by default have the following format:
+    ```
+    Copyright (c) ${year} Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+    ```
 
 A `.gitignore` file is automatically added with a default configuration. The `OSGI-INF` folder is omitted because it will be generated during tests at compile-time (this is necessary to make the PDE launcher work).
 

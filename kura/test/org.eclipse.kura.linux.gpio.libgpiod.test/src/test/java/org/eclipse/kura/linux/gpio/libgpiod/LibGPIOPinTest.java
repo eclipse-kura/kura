@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2025, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -25,7 +25,7 @@ import org.junit.runners.Parameterized.Parameters;
 public class LibGPIOPinTest {
 
     @Parameters
-    public static Collection<Object[]> BearerIpFamilyParams() {
+    public static Collection<Object[]> ChipNameParams() {
         List<Object[]> params = new ArrayList<>();
         params.add(new Object[] { "/dev/gpiochip0", 0 });
         params.add(new Object[] { "/dev/gpiochip1", 1 });
@@ -46,7 +46,7 @@ public class LibGPIOPinTest {
     }
 
     @Test
-    public void testExtractPinNumber() {
+    public void testExtractChipNumber() {
         whenChipNumberIsExtracted();
 
         thenTheCorrectPinNumberIsReturned();

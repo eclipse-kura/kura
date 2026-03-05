@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2025, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,6 @@
 package org.eclipse.kura.linux.gpio.libgpiod2;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import org.eclipse.kura.gpio.KuraClosedDeviceException;
 import org.eclipse.kura.gpio.KuraGPIODeviceException;
@@ -200,7 +199,7 @@ public class LibGpiodV2Pin extends LibGpiodPin implements KuraGPIOPin {
             }
 
             stopEventMonitoring();
-            this.listener = Optional.empty();
+            this.listeners.clear();
 
             try {
                 cleanup();
@@ -334,7 +333,9 @@ public class LibGpiodV2Pin extends LibGpiodPin implements KuraGPIOPin {
                             int eventType = LibGpiodV2NativeWrapper.getInstance()
                                     .gpiod_edge_event_get_event_type(event);
                             boolean newValue = eventType == LibGpiodV2Native.GPIOD_EDGE_EVENT_TYPE_RISING_EDGE;
-                            this.listener.ifPresent(l -> l.pinStatusChange(newValue));
+                            synchronized (this.listeners) {
+                                this.listeners.forEach(l -> l.pinStatusChange(newValue));
+                            }
                         }
                     }
                 }

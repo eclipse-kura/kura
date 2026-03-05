@@ -14,7 +14,6 @@
 package org.eclipse.kura.linux.gpio.libgpiod1;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.gpio.KuraClosedDeviceException;
@@ -70,7 +69,7 @@ public class LibGpiodV1Pin extends LibGpiodPin implements KuraGPIOPin {
             }
 
             stopEventMonitoring();
-            this.listener = Optional.empty();
+            this.listeners.clear();
 
             try {
                 releaseGpioLine();
@@ -168,16 +167,20 @@ public class LibGpiodV1Pin extends LibGpiodPin implements KuraGPIOPin {
 
     private void notifyPinStatusChange(LineEvent event) {
         boolean newValue = event.event_type == LibGpiodV1Native.GPIOD_LINE_EVENT_RISING_EDGE;
-        if (this.trigger.equals(KuraGPIOTrigger.BOTH_EDGES)) {
-            this.listener.ifPresent(l -> l.pinStatusChange(newValue));
-            return;
-        }
-        if (this.trigger.equals(KuraGPIOTrigger.RAISING_EDGE) && newValue) {
-            this.listener.ifPresent(l -> l.pinStatusChange(newValue));
-            return;
-        }
-        if (this.trigger.equals(KuraGPIOTrigger.FALLING_EDGE) && !newValue) {
-            this.listener.ifPresent(l -> l.pinStatusChange(newValue));
+        synchronized (this.listeners) {
+            this.listeners.forEach(listener -> {
+                if (this.trigger.equals(KuraGPIOTrigger.BOTH_EDGES)) {
+                    listener.pinStatusChange(newValue);
+                    return;
+                }
+                if (this.trigger.equals(KuraGPIOTrigger.RAISING_EDGE) && newValue) {
+                    listener.pinStatusChange(newValue);
+                    return;
+                }
+                if (this.trigger.equals(KuraGPIOTrigger.FALLING_EDGE) && !newValue) {
+                    listener.pinStatusChange(newValue);
+                }
+            });
         }
     }
     

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2025, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,8 @@
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.linux.gpio.libgpiod;
+
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,7 +27,7 @@ import org.junit.runners.Parameterized.Parameters;
 public class LibGPIOPinTest {
 
     @Parameters
-    public static Collection<Object[]> BearerIpFamilyParams() {
+    public static Collection<Object[]> ChipNameParams() {
         List<Object[]> params = new ArrayList<>();
         params.add(new Object[] { "/dev/gpiochip0", 0 });
         params.add(new Object[] { "/dev/gpiochip1", 1 });
@@ -46,10 +48,10 @@ public class LibGPIOPinTest {
     }
 
     @Test
-    public void testExtractPinNumber() {
+    public void testExtractChipNumber() {
         whenChipNumberIsExtracted();
 
-        thenTheCorrectPinNumberIsReturned();
+        thenTheCorrectChipNumberIsReturned();
     }
 
     /*
@@ -64,7 +66,7 @@ public class LibGPIOPinTest {
      * Then
      */
 
-    public void thenTheCorrectPinNumberIsReturned() {
-        assert (this.calculatedChipNumber == this.expectedChipNumber);
+    public void thenTheCorrectChipNumberIsReturned() {
+        assertEquals(this.expectedChipNumber, this.calculatedChipNumber);
     }
 }

@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.gpio.libgpiod;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -49,7 +51,7 @@ public class LibGPIOPinTest {
     public void testExtractChipNumber() {
         whenChipNumberIsExtracted();
 
-        thenTheCorrectPinNumberIsReturned();
+        thenTheCorrectChipNumberIsReturned();
     }
 
     /*
@@ -64,7 +66,7 @@ public class LibGPIOPinTest {
      * Then
      */
 
-    public void thenTheCorrectPinNumberIsReturned() {
-        assert (this.calculatedChipNumber == this.expectedChipNumber);
+    public void thenTheCorrectChipNumberIsReturned() {
+        assertEquals(this.expectedChipNumber, this.calculatedChipNumber);
     }
 }

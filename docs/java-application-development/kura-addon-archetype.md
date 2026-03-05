@@ -29,17 +29,42 @@ mvn archetype:generate \
 -DarchetypeVersion="<kura-version>"
 ```
 
-The command will start the generation of the archetype in interactive mode. Maven will ask for a few parameters on the command line:
+The command will start the generation of the archetype in interactive mode.
 
-- **groupId** : the Maven group id of the generated pom files, usually `org.eclipse.kura`
-- **artifactId**: the Maven artifact id of the generated parent pom file and the name of the generated top level project folder, usually something like `org.eclipse.kura.myartifact`
-- **package**: the Java package to be used for the main bundle, usually something like `org.eclipse.kura.myartifact`
+![](./images/kura-addon-archetype/archetype-generate.png)
+
+Maven will ask for a few parameters on the command line:
+
+- **groupId** : the Maven group id of the generated POM files
+- **artifactId**: the Maven artifact id of the generated parent pom file, and the name of the generated top level project folder
+- **package**: the base Java package and the main artifact of the project
+
+The official Kura addons naming rule is:
+
+- **groupId** = `org.eclipse.kura`
+- **artifactId** = repository name: `kura-<feature>` (e.g. `kura-wires`)
+- **package** = `org.eclipse.kura.<feature>` (e.g. `org.eclipse.kura.wires`)
+
+**It is not allowed to generate a project with artifactId = package**.
 
 The following optional parameters can be changed by answering `n` after the `Confirm properties configuration` prompt, which appears after editing the properties above:
 
 - **version**: the generated project's version. Defaults to *1.0.0-SNAPSHOT*
 - **mainBundleVendor**: the name of the vendor to use in the metadata. Defaults to *Eclipse Kura*
 - **kuraVersion**: the version of the Kura bill-of-materials, used to resolve dependencies. Defaults to *6.0.0[-SNAPSHOT]*
+- **year**: the year to use in the copyright headers, which by default have the following format:
+    ```
+    Copyright (c) ${year} Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+    ```
 
 A `.gitignore` file is automatically added with a default configuration. The `OSGI-INF` folder is omitted because it will be generated during tests at compile-time (this is necessary to make the PDE launcher work).
 
@@ -49,13 +74,7 @@ The project _requires_ source control management via `git` to correctly build. T
 
 ```bash
 git init
-```
-
-```bash
 git add .
-```
-
-```bash
 git commit -m "initial commit"
 ```
 
@@ -63,19 +82,21 @@ Once this steps are completed you can safely build the project.
 
 ## Project structure
 
-At the end of the procedure, the archetype will generate a subfolder in the working directory containing the following subfolders:
+At the end of the procedure, the generated project is organized as follows:
 
-- **bundles**: the directory where developed bundles can be placed. After the first archetype execution, this directory contains a single project, named as `artifactId.bundle`
+![](./images/kura-addon-archetype/project-structure.png)
 
-- **distrib**: contains a project that builds a DEB package that installs the JAR produced in `bundles` in Kura's plugins folder `/opt/eclipse/kura/plugins`. It is recommended to configure this project to customize the target package architecture and other parameters. The project code is commented with hints on the configurable options
+- **bom**: this project's bill-of-materials, containing the list of all the bundles that this project will deploy. It is intended to be consumed by other projects
 
-- **target-definition**: The `.target` file contained in the project is the way to specify the project dependencies as maven artifacts, Tycho will then wrap them as bundles and make them available in the target platform. Since only released artifacts are published on Maven central, it is recommeded to perform a local Kura build to have the SNAPSHOT versions available
+- **target-definition**: contains the `.target` file that defines the target platform dependencies. Dependencies are declared as Maven artifacts; Tycho then wraps them as OSGi bundles and adds them to the target platform. Because Maven Central only hosts released artifacts, it is recommended to build Kura locally if you need *-SNAPSHOT* dependencies
 
-- **tests**: contains OSGi integration tests executed by the `tycho-surefire-plugin`
+- **tests**: contains OSGi integration tests executed via the `tycho-surefire-plugin`
+
+- **distrib**: a packaging project that builds a Debian (`.deb`) package. The package installs the JAR produced by the bundles into Kura’s plugins directory at `/opt/eclipse/kura/plugins`. You should review and adjust this project to match your target architecture and packaging requirements; the source is annotated with comments indicating the main configuration points
 
 ## Compile and run
 
-The minimum supported Java version for compiling is Java 17. Compile the project with:
+The minimum supported Java version for compiling is Java 21. Requires Maven 3.9.9+. Compile the project with:
 
 ```shell
 mvn clean install
@@ -123,6 +144,24 @@ Example:
 ```bash
 mvn clean install -Dpackage.revision=6 -DreleaseBuild
 ```
+
+### Versions uptick
+
+Using the following command it is possible to update the version of the project:
+
+```bash
+mvn versions:set -DnewVersion=<new-version> -DprocessAllModules=true
+```
+
+The BOM project and the bundles defined in the dependency management section are updated as well.
+
+Don't forget to update the version in the various `MANIFEST.MF` of the bundles and tests.
+
+### Deploy artifacts
+
+As default, the `distrib` project and the projects under `parent` are not deployed (they are configured to skip the execution of the `maven-deploy-plugin`). Only the BOM POM (the root `pom.xml`) and the single OSGi bundles are meant to be deployed.
+
+Please add the proper `maven-deploy-plugin` configuration for the bundles that need to be deployed. See the archetype's generated bundle for details.
 
 ## IDE setup
 
@@ -176,6 +215,8 @@ After all the recommended extensions are installed, the project will start build
 ![](./images/vscode1.png)
 
 Finally, once the build completes, the workspace will be ready to use.
+
+For more information and troubleshooting, see [IDE setup: Visual Studio Code](./development-environment-setup.md#ide-setup-visual-studio-code).
 
 ### Importing Projects in Eclipse IDE
 

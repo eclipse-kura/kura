@@ -21,40 +21,25 @@
 
     <parent>
         <groupId>${groupId}</groupId>
-        <artifactId>${artifactId}.parent</artifactId>
+        <artifactId>${artifactId}</artifactId>
         <version>${version}</version>
-        <relativePath>../bundles/pom.xml</relativePath>
     </parent>
 
-    <artifactId>${artifactId}.distrib</artifactId>
+    <artifactId>${artifactId}-distrib</artifactId>
     <packaging>pom</packaging>
+    <description>${artifactId} distribution packaging</description>
 
     <!-- Insert your bundles as dependencies -->
     <dependencies>
         <dependency>
             <groupId>${groupId}</groupId>
-            <artifactId>${artifactId}.bundle</artifactId>
-            <version>${version}</version>
+            <artifactId>${package}</artifactId>
+            <type>eclipse-plugin</type>
         </dependency>
     </dependencies>
 
-    <!-- Change this if your org is different -->
-    <organization>
-        <name>Eclipse Kura</name>
-        <url>https://eclipse.dev/kura/</url>
-    </organization>
-
     <properties>
-    	
-        <!--
-            With n being the start level, config.ini will be populated depending on which plugins directory the bundle is put:
-            n => bundle.name:@n;
-            ns => bundle.name:@n:start;
-        -->
-        <addon.installation.dir>/opt/eclipse/kura/plugins/6s</addon.installation.dir>
-
-        <!-- name of the JAR produced in bundles/target -->
-        <jar.name>${artifactId}.bundle-${version}.jar</jar.name>
+        <addon.installation.dir>/opt/eclipse/kura/plugins</addon.installation.dir>
 
         <!--
             Available DEB architectures:
@@ -64,6 +49,7 @@
 
         <!-- final name of the generated debian package -->
         <package.name>${artifactId}</package.name>
+        <package.revision>1</package.revision>
 
         <!-- properties used for artifact upload on artifactory repository -->
         <kura.repo.distribution>CHANGEME</kura.repo.distribution>
@@ -88,7 +74,6 @@
                 <package.snapshot>git${maven.build.timestamp}.${git.commit.id.abbrev}</package.snapshot>
 
                 <package.version>${release.version}~${package.snapshot}</package.version>
-                <package.revision>1</package.revision>
             </properties>
         </profile>
         <!-- Internal profile: FOR INTERNAL USE ONLY - active if -DreleaseBuild *is* specified. -->
@@ -101,14 +86,12 @@
             </activation>
             <properties>
                 <package.version>${release.version}</package.version>
-                <package.revision>1</package.revision>
             </properties>
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-enforcer-plugin</artifactId>
-                        <version>3.5.0</version>
                         <executions>
                             <execution>
                                 <id>enforce-no-snapshots</id>
@@ -179,12 +162,21 @@
                 </configuration>
             </plugin>
             
-            <!-- Responsible for copying the dependencies into a known location -->
+            <!--
+                Responsible for copying the dependencies into a known location.
+
+                If multiple bundles need to be installed in separate start levels,
+                repeat this section to cover all start levels
+
+                With n being the start level, config.ini will be populated depending on which plugins directory the bundle is put:
+                n => bundle.name:@n;
+                ns => bundle.name:@n:start;
+            -->
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>get-bundles-to-distrib</id>
+                        <id>copy-deps</id>
                         <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
@@ -193,7 +185,10 @@
                             <excludeTypes>pom</excludeTypes>
                             <excludeClassifiers>sources</excludeClassifiers>
                             <excludeTransitive>true</excludeTransitive>
-                            <outputDirectory>${project.build.directory}/plugins</outputDirectory>
+                            <outputDirectory>${project.build.directory}/plugins/6s</outputDirectory>
+                            <includeArtifactIds>
+                                ${package}
+                            </includeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
@@ -202,7 +197,7 @@
             <plugin>
                 <groupId>org.vafer</groupId>
                 <artifactId>jdeb</artifactId>
-                <version>1.12</version>
+                <version>1.14</version>
                 <executions>
                     <execution>
                         <id>generate-deb</id>
@@ -213,53 +208,34 @@
                         <configuration>
                             <verbose>true</verbose>
                             <deb>${basedir}/target/deb/${package.name}_${package.version}-${package.revision}_${deb.architecture}.deb</deb>
-                            <snapshotExpand>true</snapshotExpand>
-                            <snapshotTemplate>${package.snapshot}</snapshotTemplate>
                             <controlDir>${project.basedir}/deb/control</controlDir>
                             <skipPOMs>false</skipPOMs>
                             <dataSet>
-                                <!--
-                                Repeate the 'data' schema multiple time if you want to manage
-                                different files indipendentely, specifying for each one the mapper:
-                                it is usefull if different files require different prefix (aka:
-                                different destination location) or specific user, group and filemode
-                                -->
+                                <!-- Repeat this section for each start level -->
                                 <data>
-                                    <src>${project.build.directory}/plugins/${jar.name}</src>
-                                    <type>file</type>
-                                    <mapper>
-                                        <type>perm</type>
-                                        <prefix>${addon.installation.dir}</prefix>
-                                        <user>kurad</user>
-                                        <group>kurad</group>
-                                        <filemode>600</filemode>
-                                    </mapper>
-                                </data>
-
-                                <!--
-                                If all the source file are managed in the same way, it is also
-                                possible to specify a 'directory' data type to include all the files
-                                present in the specify path
-                                -->
-                                <!--
-                                <data>
-                                    <src>${project.build.directory}/plugins</src>
+                                    <src>${project.build.directory}/plugins/6s</src>
                                     <type>directory</type>
                                     <mapper>
                                         <type>perm</type>
-                                        <prefix>${addon.installation.dir}</prefix>
+                                        <prefix>${addon.installation.dir}/6s</prefix>
                                         <user>kurad</user>
                                         <group>kurad</group>
                                         <filemode>600</filemode>
                                     </mapper>
                                 </data>
-                                -->
                             </dataSet>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

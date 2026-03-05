@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) ${year} Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>${groupId}</groupId>
+    <artifactId>${artifactId}-bom</artifactId>
+    <version>${version}</version>
+    <packaging>pom</packaging>
+    <description>${artifactId} bill of materials</description>
+
+    <!-- bundles of this project that will be deployed -->
+    <!-- on release/rc build: use latest released version, do not use -SNAPSHOT artifacts -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>${groupId}</groupId>
+                <artifactId>${package}</artifactId>
+                <version>${version}</version>
+                <type>eclipse-plugin</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>repo.eclipse.org</id>
+            <name>Eclipse Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>repo.eclipse.org</id>
+            <name>Eclipse Kura Repository - Snapshots</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.7.3</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>bom</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

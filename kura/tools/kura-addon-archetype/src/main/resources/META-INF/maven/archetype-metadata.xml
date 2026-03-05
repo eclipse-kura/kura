@@ -1,5 +1,5 @@
 <!--
-    Copyright (c) 2025 Eurotech and/or its affiliates and others
+    Copyright (c) 2026 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -26,9 +26,15 @@
         <requiredProperty key="kuraVersion">
             <defaultValue>${project.version}</defaultValue>
         </requiredProperty>
+        <requiredProperty key="year">
+            <defaultValue>${year}</defaultValue>
+        </requiredProperty>
     </requiredProperties>
 
     <fileSets>
+        <fileSet filtered="true" encoding="UTF-8">
+            <directory>bom</directory>
+        </fileSet>
         <fileSet filtered="true" encoding="UTF-8">
             <directory>target-definition</directory>
         </fileSet>
@@ -51,13 +57,13 @@
         </fileSet>
         <!-- include bundles and tests without java file, they are selected as packaged below -->
         <fileSet filtered="true" encoding="UTF-8">
-            <directory>bundles</directory>
+            <directory>__package__</directory>
             <excludes>
                 <exclude>**/*.java</exclude>
             </excludes>
         </fileSet>
         <fileSet filtered="true" encoding="UTF-8">
-            <directory>tests</directory>
+            <!-- <directory>./</directory> -->
             <excludes>
                 <exclude>**/*.java</exclude>
                 <exclude>**/src/main/java/test</exclude>
@@ -65,13 +71,13 @@
             </excludes>
         </fileSet>
         <fileSet filtered="true" packaged="true">
-            <directory>bundles/__artifactId__.bundle/src/main/java</directory>
+            <directory>__package__/src/main/java</directory>
         </fileSet>
         <fileSet filtered="true" packaged="true">
-            <directory>tests/__artifactId__.bundle.test/src/main/java</directory>
+            <directory>tests/__package__.test/src/main/java</directory>
         </fileSet>
         <fileSet filtered="true" packaged="true">
-            <directory>tests/__artifactId__.bundle.test/src/test/java</directory>
+            <directory>tests/__package__.test/src/test/java</directory>
         </fileSet>
         <fileSet encoding="UTF-8">
             <directory></directory>

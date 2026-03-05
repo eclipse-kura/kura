@@ -11,3 +11,6 @@ RemoteSystemsTempFiles
 .settings
 .vscode
 OSGI-INF
+.flattened-pom.xml
+.tycho-consumer-pom.xml
+lib/

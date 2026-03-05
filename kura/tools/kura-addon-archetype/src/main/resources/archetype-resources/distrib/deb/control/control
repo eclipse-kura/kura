@@ -1,5 +1,5 @@
 Package: [[package.name]]
-Version: [[version]]-[[package.revision]]
+Version: [[package.version]]-[[package.revision]]
 Section: admin
 Priority: optional
 Depends: kura-core (>= 6.0.0~), kura-core(<< 7.0.0~)

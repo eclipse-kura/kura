@@ -3531,6 +3531,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
         
           <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limitations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#instructions" class="md-nav__link">
     <span class="md-ellipsis">
       Instructions
@@ -4856,6 +4865,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
         
           <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limitations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#instructions" class="md-nav__link">
     <span class="md-ellipsis">
       Instructions
@@ -5064,28 +5082,49 @@ For Maven   </p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>pip3 install https://github.com/eclipse-kura/metadata-generator/releases/download/&lt;version&gt;/metadata_generator-&lt;version&gt;-py3-none-any.whl
 </code></pre></div>
 <p>See <a href="https://github.com/eclipse-kura/metadata-generator/releases/latest">latest release</a> for updated installation instructions. Please note that the metadata generator needs to be run only once after cloning the Kura repository.</p>
+<h3 id="limitations">Limitations</h3>
+<p>Currently, Tycho integration tests are not fully supported on this editor. You will see the following error messages on projects that execute the <strong>tycho-surefire-plugin</strong>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>The import org.junit cannot be resolved
+</code></pre></div>
+<p>Maven unit tests are supported. On test projects that do not contain integration tests, you can disable the Tycho test plugin and replace it with Maven one with a configuration similar to:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nt">&lt;plugin&gt;</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="nt">&lt;/groupId&gt;</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>maven-surefire-plugin<span class="nt">&lt;/artifactId&gt;</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="nt">&lt;configuration&gt;</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">        </span><span class="nt">&lt;testSourceDirectory&gt;</span>${basedir}/src/test/java/<span class="nt">&lt;/testSourceDirectory&gt;</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">        </span><span class="nt">&lt;testClassesDirectory&gt;</span>${project.build.directory}/test-classes/<span class="nt">&lt;/testClassesDirectory&gt;</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="nt">&lt;/configuration&gt;</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="nt">&lt;/plugin&gt;</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="nt">&lt;plugin&gt;</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.eclipse.tycho<span class="nt">&lt;/groupId&gt;</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>tycho-surefire-plugin<span class="nt">&lt;/artifactId&gt;</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">    </span><span class="nt">&lt;configuration&gt;</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">        </span><span class="nt">&lt;skip&gt;</span>true<span class="nt">&lt;/skip&gt;</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">    </span><span class="nt">&lt;/configuration&gt;</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="nt">&lt;/plugin&gt;</span>
+</code></pre></div>
 <h3 id="instructions">Instructions</h3>
 <h4 id="1-clone-the-kura-repository-in-a-new-folder-eclipse-ide-gets-angry-if-it-shares-the-sources-with-vscode">1. Clone the Kura repository in a new folder (Eclipse IDE gets angry if it shares the sources with VSCode)</h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:eclipse/kura.git<span class="w"> </span>vscode-kura<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>vscode-kura
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:eclipse/kura.git<span class="w"> </span>vscode-kura<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>vscode-kura
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The remainder of the commands in these instructions need to be run from the <code>vscode-kura</code> folder</p>
 </div>
 <h4 id="2-build-the-code-following-the-readme-or-with">2. Build the code <a href="https://github.com/eclipse/kura#build-eclipse-kura">following the README</a> or with:</h4>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>mvn<span class="w"> </span>-f<span class="w"> </span>target-platform/pom.xml<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-B
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mvn<span class="w"> </span>-f<span class="w"> </span>target-platform/pom.xml<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-B
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>mvn<span class="w"> </span>-f<span class="w"> </span>kura/pom.xml<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-Dmaven.test.skip<span class="o">=</span><span class="nb">true</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>mvn<span class="w"> </span>-f<span class="w"> </span>kura/pom.xml<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-Dmaven.test.skip<span class="o">=</span><span class="nb">true</span>
 </code></pre></div></p>
 <h4 id="3-run-the-kura-metadata-generator-tool">3. Run the Kura metadata generator tool</h4>
 <p>Change the current working directory to the <code>kura</code> folder</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nb">cd</span><span class="w"> </span>kura/
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nb">cd</span><span class="w"> </span>kura/
 </code></pre></div>
 <p>and then run the tool with the following command</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>kura-gen<span class="w"> </span>-t<span class="w"> </span>target-definition/kura-equinox.target
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>kura-gen<span class="w"> </span>-t<span class="w"> </span>target-definition/kura-equinox.target
 </code></pre></div>
 <h4 id="4-open-vscode-in-the-kura-directory">4. Open VSCode in the <code>kura</code> directory</h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>code<span class="w"> </span>.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>code<span class="w"> </span>.
 </code></pre></div>
 <h4 id="5-follow-the-on-screen-instructions">5. Follow the on-screen instructions</h4>
 <p>VS Code prompts the user to install the recommended extensions when a workspace is opened for the first time. The list of recommended extensions can be reviewed with the <code>Extensions: Show Recommended Extensions</code> command. </p>
@@ -5096,7 +5135,7 @@ For Maven   </p>
 <h3 id="troubleshooting">Troubleshooting</h3>
 <h4 id="tests-import-issues">Tests import issues</h4>
 <p>If you are seeing errors related to missing test dependencies like the following:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>The import org.junit cannot be resolved
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>The import org.junit cannot be resolved
 </code></pre></div>
 <p>Make sure the Java Runtime is set to Java 17. To do this, press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> (<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> for Mac users) and run the <em>"Java: Configure Java Runtime"</em> command. Then, in the opened settings, set the "Default JDK" to the installed JDK 17. Example for the <code>org.eclipse.kura.nm.test</code> project:</p>
 <p><img alt="" src="../images/configure_java_runtime.png" /></p>
@@ -5105,9 +5144,9 @@ For Maven   </p>
 <p>Repeat this process for each test project showing the error.</p>
 <h4 id="lsp-out-of-memory-error">LSP Out of memory error:</h4>
 <p>Looks like the JVM running the LSP server requires some additional RAM to parse through Kura. Add a <code>.vscode/settings.json</code> file in the root workspace directory containing the following:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="p">{</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">    </span><span class="nt">&quot;java.jdt.ls.vmargs&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx8G -Xms500m -Xlog:disable&quot;</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="p">{</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">    </span><span class="nt">&quot;java.jdt.ls.vmargs&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx8G -Xms500m -Xlog:disable&quot;</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="p">}</span>
 </code></pre></div>
 <h4 id="vscode-build-gets-stuck">VSCode build gets stuck:</h4>
 <p>To fix this press: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> (<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> for Mac users) and run the <em>"Developer: Reload Window"</em> command. If the issue is bad enough you'll also need to clean the LSP workspace cache with <em>"Java: Clean Java Language Server Workspace"</em> and re-run the maven build.</p>
@@ -5151,20 +5190,20 @@ For Maven   </p>
 <li>In the Eclipse workspace modify the lifecycle mapping by adding these XML lines to the <code>lifecycle-mapping-metadata.xml</code> in Eclipse Kura workspace.
   You can find the file in the Windows -&gt; Preferences -&gt; Maven -&gt; Lifecycle Mappings -&gt; Open workspace lifecycle mappings metadata.
   After editing the file, reload it by pressing the "Reload workspace lifecycle mappings metadata" button.
-  <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nt">&lt;lifecycleMappingMetadata&gt;</span>
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">    </span><span class="nt">&lt;lifecycleMappingFilters&gt;</span>
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">        </span><span class="nt">&lt;lifecycleMappingFilter&gt;</span>
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">            </span><span class="nt">&lt;symbolicName&gt;</span>org.eclipse.m2e.pde.connector<span class="nt">&lt;/symbolicName&gt;</span>
-<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">            </span><span class="nt">&lt;versionRange&gt;</span>[2.1.2,)<span class="nt">&lt;/versionRange&gt;</span>
-<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">            </span><span class="nt">&lt;packagingTypes&gt;</span>
-<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-test-plugin<span class="nt">&lt;/packagingType&gt;</span>
-<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-plugin<span class="nt">&lt;/packagingType&gt;</span>
-<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-feature<span class="nt">&lt;/packagingType&gt;</span>
-<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="w">            </span><span class="nt">&lt;/packagingTypes&gt;</span>
-<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="w">        </span><span class="nt">&lt;/lifecycleMappingFilter&gt;</span>
-<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">    </span><span class="nt">&lt;/lifecycleMappingFilters&gt;</span>
-<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="nt">&lt;/lifecycleMappingMetadata&gt;</span>
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="nt">&lt;lifecycleMappingMetadata&gt;</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">    </span><span class="nt">&lt;lifecycleMappingFilters&gt;</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">        </span><span class="nt">&lt;lifecycleMappingFilter&gt;</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">            </span><span class="nt">&lt;symbolicName&gt;</span>org.eclipse.m2e.pde.connector<span class="nt">&lt;/symbolicName&gt;</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">            </span><span class="nt">&lt;versionRange&gt;</span>[2.1.2,)<span class="nt">&lt;/versionRange&gt;</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="w">            </span><span class="nt">&lt;packagingTypes&gt;</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-test-plugin<span class="nt">&lt;/packagingType&gt;</span>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-plugin<span class="nt">&lt;/packagingType&gt;</span>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="w">                </span><span class="nt">&lt;packagingType&gt;</span>eclipse-feature<span class="nt">&lt;/packagingType&gt;</span>
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="w">            </span><span class="nt">&lt;/packagingTypes&gt;</span>
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="w">        </span><span class="nt">&lt;/lifecycleMappingFilter&gt;</span>
+<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a><span class="w">    </span><span class="nt">&lt;/lifecycleMappingFilters&gt;</span>
+<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="nt">&lt;/lifecycleMappingMetadata&gt;</span>
 </code></pre></div></li>
 <li>Install the <code>eclipse-tycho</code> plugin by following these steps:<ol>
 <li>Menu Help -&gt; Install new software... -&gt; Paste the <a href="https://github.com/tesla/m2eclipse-tycho/releases/download/latest/">m2eclipse-tycho repository URL</a> in the <code>Work with:</code> text field -&gt; expand the category and select the <code>Tycho Project Configurators Feature</code> and proceed with the installation.</li>

@@ -3559,6 +3559,24 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#versions-uptick" class="md-nav__link">
+    <span class="md-ellipsis">
+      Versions uptick
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deploy-artifacts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deploy artifacts
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -4828,6 +4846,24 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#versions-uptick" class="md-nav__link">
+    <span class="md-ellipsis">
+      Versions uptick
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deploy-artifacts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Deploy artifacts
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -5004,47 +5040,67 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>-DarchetypeGroupId<span class="o">=</span>org.eclipse.kura<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>-DarchetypeVersion<span class="o">=</span><span class="s2">&quot;&lt;kura-version&gt;&quot;</span>
 </code></pre></div>
-<p>The command will start the generation of the archetype in interactive mode. Maven will ask for a few parameters on the command line:</p>
+<p>The command will start the generation of the archetype in interactive mode.</p>
+<p><img alt="" src="../images/kura-addon-archetype/archetype-generate.png" /></p>
+<p>Maven will ask for a few parameters on the command line:</p>
 <ul>
-<li><strong>groupId</strong> : the Maven group id of the generated pom files, usually <code>org.eclipse.kura</code></li>
-<li><strong>artifactId</strong>: the Maven artifact id of the generated parent pom file and the name of the generated top level project folder, usually something like <code>org.eclipse.kura.myartifact</code></li>
-<li><strong>package</strong>: the Java package to be used for the main bundle, usually something like <code>org.eclipse.kura.myartifact</code></li>
+<li><strong>groupId</strong> : the Maven group id of the generated POM files</li>
+<li><strong>artifactId</strong>: the Maven artifact id of the generated parent pom file, and the name of the generated top level project folder</li>
+<li><strong>package</strong>: the base Java package and the main artifact of the project</li>
 </ul>
+<p>The official Kura addons naming rule is:</p>
+<ul>
+<li><strong>groupId</strong> = <code>org.eclipse.kura</code></li>
+<li><strong>artifactId</strong> = repository name: <code>kura-&lt;feature&gt;</code> (e.g. <code>kura-wires</code>)</li>
+<li><strong>package</strong> = <code>org.eclipse.kura.&lt;feature&gt;</code> (e.g. <code>org.eclipse.kura.wires</code>)</li>
+</ul>
+<p><strong>It is not allowed to generate a project with artifactId = package</strong>.</p>
 <p>The following optional parameters can be changed by answering <code>n</code> after the <code>Confirm properties configuration</code> prompt, which appears after editing the properties above:</p>
 <ul>
 <li><strong>version</strong>: the generated project's version. Defaults to <em>1.0.0-SNAPSHOT</em></li>
 <li><strong>mainBundleVendor</strong>: the name of the vendor to use in the metadata. Defaults to <em>Eclipse Kura</em></li>
 <li><strong>kuraVersion</strong>: the version of the Kura bill-of-materials, used to resolve dependencies. Defaults to <em>6.0.0[-SNAPSHOT]</em></li>
+<li><strong>year</strong>: the year to use in the copyright headers, which by default have the following format:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Copyright (c) ${year} Eurotech and/or its affiliates and others
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>This program and the accompanying materials are made
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>available under the terms of the Eclipse Public License 2.0
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>which is available at https://www.eclipse.org/legal/epl-2.0/
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>SPDX-License-Identifier: EPL-2.0
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>Contributors:
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a> Eurotech
+</code></pre></div></li>
 </ul>
 <p>A <code>.gitignore</code> file is automatically added with a default configuration. The <code>OSGI-INF</code> folder is omitted because it will be generated during tests at compile-time (this is necessary to make the PDE launcher work).</p>
 <h3 id="add-the-generated-sources-to-git">Add the generated sources to <code>git</code></h3>
 <p>The project <em>requires</em> source control management via <code>git</code> to correctly build. To add the project to <code>git</code> run the following:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>git<span class="w"> </span>init
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>git<span class="w"> </span>add<span class="w"> </span>.
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;initial commit&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>git<span class="w"> </span>init
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>git<span class="w"> </span>add<span class="w"> </span>.
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;initial commit&quot;</span>
 </code></pre></div>
 <p>Once this steps are completed you can safely build the project.</p>
 <h2 id="project-structure">Project structure</h2>
-<p>At the end of the procedure, the archetype will generate a subfolder in the working directory containing the following subfolders:</p>
+<p>At the end of the procedure, the generated project is organized as follows:</p>
+<p><img alt="" src="../images/kura-addon-archetype/project-structure.png" /></p>
 <ul>
 <li>
-<p><strong>bundles</strong>: the directory where developed bundles can be placed. After the first archetype execution, this directory contains a single project, named as <code>artifactId.bundle</code></p>
+<p><strong>bom</strong>: this project's bill-of-materials, containing the list of all the bundles that this project will deploy. It is intended to be consumed by other projects</p>
 </li>
 <li>
-<p><strong>distrib</strong>: contains a project that builds a DEB package that installs the JAR produced in <code>bundles</code> in Kura's plugins folder <code>/opt/eclipse/kura/plugins</code>. It is recommended to configure this project to customize the target package architecture and other parameters. The project code is commented with hints on the configurable options</p>
+<p><strong>target-definition</strong>: contains the <code>.target</code> file that defines the target platform dependencies. Dependencies are declared as Maven artifacts; Tycho then wraps them as OSGi bundles and adds them to the target platform. Because Maven Central only hosts released artifacts, it is recommended to build Kura locally if you need <em>-SNAPSHOT</em> dependencies</p>
 </li>
 <li>
-<p><strong>target-definition</strong>: The <code>.target</code> file contained in the project is the way to specify the project dependencies as maven artifacts, Tycho will then wrap them as bundles and make them available in the target platform. Since only released artifacts are published on Maven central, it is recommeded to perform a local Kura build to have the SNAPSHOT versions available</p>
+<p><strong>tests</strong>: contains OSGi integration tests executed via the <code>tycho-surefire-plugin</code></p>
 </li>
 <li>
-<p><strong>tests</strong>: contains OSGi integration tests executed by the <code>tycho-surefire-plugin</code></p>
+<p><strong>distrib</strong>: a packaging project that builds a Debian (<code>.deb</code>) package. The package installs the JAR produced by the bundles into Kura’s plugins directory at <code>/opt/eclipse/kura/plugins</code>. You should review and adjust this project to match your target architecture and packaging requirements; the source is annotated with comments indicating the main configuration points</p>
 </li>
 </ul>
 <h2 id="compile-and-run">Compile and run</h2>
-<p>The minimum supported Java version for compiling is Java 17. Compile the project with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mvn<span class="w"> </span>clean<span class="w"> </span>install
+<p>The minimum supported Java version for compiling is Java 21. Requires Maven 3.9.9+. Compile the project with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>mvn<span class="w"> </span>clean<span class="w"> </span>install
 </code></pre></div>
 <p>The build will produce the following system packages in <code>distrib/target</code>:</p>
 <ul>
@@ -5052,14 +5108,14 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </ul>
 <p>Installer properties like the architecture, organization name, package dependencies, and others can be configured in the <code>distrib</code> project.</p>
 <p>Depending on the system, the packages can be installed with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>apt<span class="w"> </span>install<span class="w"> </span>&lt;artifactId&gt;_&lt;version&gt;_&lt;debian-architecture&gt;.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>apt<span class="w"> </span>install<span class="w"> </span>&lt;artifactId&gt;_&lt;version&gt;_&lt;debian-architecture&gt;.deb
 </code></pre></div>
 <p>After having installed the package, restart kura with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>systemctl<span class="w"> </span>restart<span class="w"> </span>kura
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>systemctl<span class="w"> </span>restart<span class="w"> </span>kura
 </code></pre></div>
 <p>During startup Kura will scan the plugins folder to pick up the installed JARs and include them in the framework's runtime.</p>
 <p>It is possible to remove the installed plugins with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>apt<span class="w"> </span>purge<span class="w"> </span>&lt;artifactId&gt;<span class="w"> </span><span class="c1"># or apt remove &lt;artifactId&gt;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>apt<span class="w"> </span>purge<span class="w"> </span>&lt;artifactId&gt;<span class="w"> </span><span class="c1"># or apt remove &lt;artifactId&gt;</span>
 </code></pre></div>
 <h3 id="debug-builds-and-release-builds">Debug builds and Release builds</h3>
 <p>Since version 6.0.0 of the archetype, two type of builds are supported:</p>
@@ -5070,8 +5126,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>The build defaults to the <code>debugBuild</code> profile, if the <code>-DreleaseBuild</code> parameter is specified, the build selects the <code>releaseBuild</code> profile.</p>
 <p>By default the <code>package.revision</code> is set to <code>1</code>. It can be overridden via CLI using the <code>-Dpackage.revision=N</code> parameters.</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mvn<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-Dpackage.revision<span class="o">=</span><span class="m">6</span><span class="w"> </span>-DreleaseBuild
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>mvn<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-Dpackage.revision<span class="o">=</span><span class="m">6</span><span class="w"> </span>-DreleaseBuild
 </code></pre></div>
+<h3 id="versions-uptick">Versions uptick</h3>
+<p>Using the following command it is possible to update the version of the project:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mvn<span class="w"> </span>versions:set<span class="w"> </span>-DnewVersion<span class="o">=</span>&lt;new-version&gt;<span class="w"> </span>-DprocessAllModules<span class="o">=</span><span class="nb">true</span>
+</code></pre></div>
+<p>The BOM project and the bundles defined in the dependency management section are updated as well.</p>
+<p>Don't forget to update the version in the various <code>MANIFEST.MF</code> of the bundles and tests.</p>
+<h3 id="deploy-artifacts">Deploy artifacts</h3>
+<p>As default, the <code>distrib</code> project and the projects under <code>parent</code> are not deployed (they are configured to skip the execution of the <code>maven-deploy-plugin</code>). Only the BOM POM (the root <code>pom.xml</code>) and the single OSGi bundles are meant to be deployed.</p>
+<p>Please add the proper <code>maven-deploy-plugin</code> configuration for the bundles that need to be deployed. See the archetype's generated bundle for details.</p>
 <h2 id="ide-setup">IDE setup</h2>
 <p>We officially support two IDEs for developing Kura Addons: <strong>Eclipse IDE</strong> and <strong>Visual Studio Code</strong>. The following sections describe how to set up the projects in these IDEs.</p>
 <h3 id="importing-projects-in-visual-studio-code">Importing Projects in Visual Studio Code</h3>
@@ -5102,6 +5167,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>After all the recommended extensions are installed, the project will start building</p>
 <p><img alt="" src="../images/vscode1.png" /></p>
 <p>Finally, once the build completes, the workspace will be ready to use.</p>
+<p>For more information and troubleshooting, see <a href="../development-environment-setup/#ide-setup-visual-studio-code">IDE setup: Visual Studio Code</a>.</p>
 <h3 id="importing-projects-in-eclipse-ide">Importing Projects in Eclipse IDE</h3>
 <p>In Eclipse IDE , create a new workspace (it is not necessary to have the workspace in the root of the project) and import the projects with <em>File | Import | Maven | Existing Maven Projects</em>.</p>
 <p><img alt="" src="../images/kura-addon-archetype/eclipse-import-maven-projects-1.png" /></p>

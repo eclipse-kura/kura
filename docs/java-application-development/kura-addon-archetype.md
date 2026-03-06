@@ -159,7 +159,7 @@ Don't forget to update the version in the various `MANIFEST.MF` of the bundles a
 
 ### Deploy artifacts
 
-As default, the `distrib` project and the projects under `parent` are not deployed (they are configured to skip the execution of the `maven-deploy-plugin`). Only the BOM POM (the root `pom.xml`) and the single OSGi bundles are meant to be deployed.
+As default, the projects are not deployed (they are configured to skip the execution of the `maven-deploy-plugin`). Only the BOM POM (the root `pom.xml`) and the single OSGi bundles are meant to be deployed.
 
 Please add the proper `maven-deploy-plugin` configuration for the bundles that need to be deployed. See the archetype's generated bundle for details.
 
@@ -262,23 +262,21 @@ In the following sections we will see how this can be accomplished for the DEB p
 
 ```
 org.eclipse.kura.myartifact
-├── bundles
-│   ├── org.eclipse.kura.myartifact.bundle
-│   ├── org.eclipse.kura.myartifact.bundle.aarch64
-│   ├── org.eclipse.kura.myartifact.bundle.x86_64
+org.eclipse.kura.myartifact.aarch64
+org.eclipse.kura.myartifact.x86_64
 ....
 ```
 
-The `org.eclipse.kura.myartifact.bundle` folder contains the agnostic code, while the `org.eclipse.kura.myartifact.bundle.aarch64` and `org.eclipse.kura.myartifact.bundle.x86_64` fragments contain the architecture-specific code.
+The `org.eclipse.kura.myartifact.bundle` contains the agnostic code, while the `org.eclipse.kura.myartifact.aarch64` and `org.eclipse.kura.myartifact.x86_64` fragments contain the architecture-specific code.
 
 The objective is to produce two debian packages, one for each of the supported architectures. It is possible to modify the `pom.xml` in `distrib` to produce the correct metadata for the installers (see section below). Each debian package will install the main bundle and the relative fragment that matches the target environment. For example, the *aarch64* deb package will install:
 
 ```
-/opt/eclipse/kura/plugins/<start-level>s/org.eclipse.kura.myartifact.bundle-<version>.jar
-/opt/eclipse/kura/plugins/<start-level>/org.eclipse.kura.myartifact.bundle.aarch64-<version>.jar
+/opt/eclipse/kura/plugins/<start-level>s/org.eclipse.kura.myartifact-<version>.jar
+/opt/eclipse/kura/plugins/<start-level>/org.eclipse.kura.myartifact.aarch64-<version>.jar
 ```
 
-Note that the fragment `org.eclipse.kura.myartifact.bundle.aarch64-<version>.jar` is put in a plugins folder that is not ending with `s` since fragments can never be started as they don't have their own lifecycle.
+Note that the fragment `org.eclipse.kura.myartifact.aarch64-<version>.jar` is put in a plugins folder that is not ending with `s` since fragments can never be started as they don't have their own lifecycle.
 
 ### Create architecture dependant installers
 
@@ -291,10 +289,10 @@ Section: admin
 Priority: optional
 Depends: kura
 Architecture: [[deb.architecture]]
-Maintainer: Eclipse Kura Developers <kura-dev@eclipse.org>
+Maintainer: [[deb.maintainer]]
 Description: [[summary]]
   [[long.description]]
-Homepage: https://eclipse-kura.github.io/kura/ (add correct link to documentation here)
+Homepage: [[deb.docs]]
 ```
 
 The Architecture field is the one responsible to specify the architecture of the package. The value is set in the `/distrib/pom.xml` file, by the property `<deb.architecture>all</deb.architecture>`. The value `all` means that the package can be installed on any architecture. This is the recommended value for packages that do not contain architecture-specific files.
@@ -318,10 +316,10 @@ Section: admin
 Priority: optional
 Depends: kura
 Architecture: [[deb.arm64.architecture]]
-Maintainer: Eclipse Kura Developers <kura-dev@eclipse.org>
+Maintainer: [[deb.maintainer]]
 Description: [[summary]]
   [[long.description]]
-Homepage: https://eclipse-kura.github.io/kura/
+Homepage: [[deb.docs]]
 ```
 
 The same file for the `amd64` architecture will just change the `Architecture` field to `[[deb.amd64.architecture]]`.

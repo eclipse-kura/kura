@@ -240,11 +240,6 @@
                                 </requirement>
                                 <requirement>
                                     <type>p2-installable-unit</type>
-                                    <id>org.eclipse.equinox.console</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
                                     <id>org.apache.felix.gogo.command</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>

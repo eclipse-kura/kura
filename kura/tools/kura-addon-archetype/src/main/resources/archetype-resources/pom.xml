@@ -45,7 +45,7 @@
         </license>
     </licenses>
     <!-- Documentation URL -->
-    <url>https://www.eurotech.com/</url>
+    <url>https://eclipse-kura.github.io/kura</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

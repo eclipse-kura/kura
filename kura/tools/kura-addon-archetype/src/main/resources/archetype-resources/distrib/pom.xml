@@ -46,6 +46,8 @@
             all, amd64, arm64
         -->
         <deb.architecture>all</deb.architecture>
+        <deb.maintainer>${project.organization.name} &lt;${project.developers[0].email}&gt;</deb.maintainer>
+        <deb.docs>${project.url}</deb.docs>
 
         <!-- final name of the generated debian package -->
         <package.name>${artifactId}</package.name>

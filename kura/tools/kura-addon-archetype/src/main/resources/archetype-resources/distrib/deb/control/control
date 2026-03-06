@@ -4,7 +4,7 @@ Section: admin
 Priority: optional
 Depends: kura-core (>= 6.0.0~), kura-core(<< 7.0.0~)
 Architecture: [[deb.architecture]]
-Maintainer: Eclipse Kura Developers <kura-dev@eclipse.org>
+Maintainer: [[deb.maintainer]]
 Description: [[summary]]
   [[long.description]]
-Homepage: https://eclipse-kura.github.io/kura/ (add correct link to documentation here)
+Homepage: [[deb.docs]]

@@ -5135,7 +5135,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>The BOM project and the bundles defined in the dependency management section are updated as well.</p>
 <p>Don't forget to update the version in the various <code>MANIFEST.MF</code> of the bundles and tests.</p>
 <h3 id="deploy-artifacts">Deploy artifacts</h3>
-<p>As default, the <code>distrib</code> project and the projects under <code>parent</code> are not deployed (they are configured to skip the execution of the <code>maven-deploy-plugin</code>). Only the BOM POM (the root <code>pom.xml</code>) and the single OSGi bundles are meant to be deployed.</p>
+<p>As default, the projects are not deployed (they are configured to skip the execution of the <code>maven-deploy-plugin</code>). Only the BOM POM (the root <code>pom.xml</code>) and the single OSGi bundles are meant to be deployed.</p>
 <p>Please add the proper <code>maven-deploy-plugin</code> configuration for the bundles that need to be deployed. See the archetype's generated bundle for details.</p>
 <h2 id="ide-setup">IDE setup</h2>
 <p>We officially support two IDEs for developing Kura Addons: <strong>Eclipse IDE</strong> and <strong>Visual Studio Code</strong>. The following sections describe how to set up the projects in these IDEs.</p>
@@ -5190,18 +5190,16 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>However, it is possible to customise the files in the <code>distrib</code> folder to develop architecture-dependant installers: this might be necessary when a bundle contains native code (C/C++ libraries, jars that use JNI, etc.) or architecture-specific files (e.g. a systemd service file).</p>
 <p>In the following sections we will see how this can be accomplished for the DEB packages. These steps assume that architecture-specific jars are built in the form of fragments of the architecture-agnostic java code. The architecture-specific jars will then be copied in the <code>distrib</code> folder and included in the package. For example, given the following bundles structure:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>org.eclipse.kura.myartifact
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>├── bundles
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>│   ├── org.eclipse.kura.myartifact.bundle
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>│   ├── org.eclipse.kura.myartifact.bundle.aarch64
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>│   ├── org.eclipse.kura.myartifact.bundle.x86_64
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>....
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>org.eclipse.kura.myartifact.aarch64
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>org.eclipse.kura.myartifact.x86_64
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>....
 </code></pre></div>
-<p>The <code>org.eclipse.kura.myartifact.bundle</code> folder contains the agnostic code, while the <code>org.eclipse.kura.myartifact.bundle.aarch64</code> and <code>org.eclipse.kura.myartifact.bundle.x86_64</code> fragments contain the architecture-specific code.</p>
+<p>The <code>org.eclipse.kura.myartifact.bundle</code> contains the agnostic code, while the <code>org.eclipse.kura.myartifact.aarch64</code> and <code>org.eclipse.kura.myartifact.x86_64</code> fragments contain the architecture-specific code.</p>
 <p>The objective is to produce two debian packages, one for each of the supported architectures. It is possible to modify the <code>pom.xml</code> in <code>distrib</code> to produce the correct metadata for the installers (see section below). Each debian package will install the main bundle and the relative fragment that matches the target environment. For example, the <em>aarch64</em> deb package will install:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>/opt/eclipse/kura/plugins/&lt;start-level&gt;s/org.eclipse.kura.myartifact.bundle-&lt;version&gt;.jar
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>/opt/eclipse/kura/plugins/&lt;start-level&gt;/org.eclipse.kura.myartifact.bundle.aarch64-&lt;version&gt;.jar
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>/opt/eclipse/kura/plugins/&lt;start-level&gt;s/org.eclipse.kura.myartifact-&lt;version&gt;.jar
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>/opt/eclipse/kura/plugins/&lt;start-level&gt;/org.eclipse.kura.myartifact.aarch64-&lt;version&gt;.jar
 </code></pre></div>
-<p>Note that the fragment <code>org.eclipse.kura.myartifact.bundle.aarch64-&lt;version&gt;.jar</code> is put in a plugins folder that is not ending with <code>s</code> since fragments can never be started as they don't have their own lifecycle.</p>
+<p>Note that the fragment <code>org.eclipse.kura.myartifact.aarch64-&lt;version&gt;.jar</code> is put in a plugins folder that is not ending with <code>s</code> since fragments can never be started as they don't have their own lifecycle.</p>
 <h3 id="create-architecture-dependant-installers">Create architecture dependant installers</h3>
 <p>The <code>/distrib/deb/control/control</code> file contains the DEB package metadata. The standard file is configured as follows:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>Package: [[package.name]]
@@ -5210,10 +5208,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>Priority: optional
 <a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>Depends: kura
 <a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>Architecture: [[deb.architecture]]
-<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>Maintainer: Eclipse Kura Developers &lt;kura-dev@eclipse.org&gt;
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>Maintainer: [[deb.maintainer]]
 <a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>Description: [[summary]]
 <a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>  [[long.description]]
-<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>Homepage: https://eclipse-kura.github.io/kura/ (add correct link to documentation here)
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>Homepage: [[deb.docs]]
 </code></pre></div>
 <p>The Architecture field is the one responsible to specify the architecture of the package. The value is set in the <code>/distrib/pom.xml</code> file, by the property <code>&lt;deb.architecture&gt;all&lt;/deb.architecture&gt;</code>. The value <code>all</code> means that the package can be installed on any architecture. This is the recommended value for packages that do not contain architecture-specific files.</p>
 <p>To build a package that contains architecture-specific files, it is necessary to separate the control files of the different architectures (namely, <code>aarch64</code> and <code>amd64</code>). To do so, create two directories in the <code>distrib/deb/</code> folder with this structure:</p>
@@ -5230,10 +5228,10 @@ Each <code>control</code> file must be created in the <code>distrib/deb/&lt;arch
 <a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>Priority: optional
 <a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>Depends: kura
 <a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>Architecture: [[deb.arm64.architecture]]
-<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>Maintainer: Eclipse Kura Developers &lt;kura-dev@eclipse.org&gt;
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>Maintainer: [[deb.maintainer]]
 <a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>Description: [[summary]]
 <a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>  [[long.description]]
-<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>Homepage: https://eclipse-kura.github.io/kura/
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>Homepage: [[deb.docs]]
 </code></pre></div>
 <p>The same file for the <code>amd64</code> architecture will just change the <code>Architecture</code> field to <code>[[deb.amd64.architecture]]</code>.</p>
 <p>Finally, the plugin responsible of generating the DEB package is the <code>jdeb</code> plugin. To build the architecture-dependant installers, the execution must change to:</p>

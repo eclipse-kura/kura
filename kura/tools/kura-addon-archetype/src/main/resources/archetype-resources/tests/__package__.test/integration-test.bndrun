@@ -63,7 +63,7 @@ Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.rest.provider)',\
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.useradmin.store)',\
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.xml.marshaller.unmarshaller.provider)',\
-    osgi.identity;filter:='(osgi.identity=${project.artifactId})',\
+    osgi.identity;filter:='(osgi.identity=${project.artifactId})',\ # Testing bundle
 
 #
 # Runbundles automatically populated by bnd-resolver

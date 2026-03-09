@@ -68,3 +68,4 @@ Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
 #
 # Runbundles automatically populated by bnd-resolver
 #
+-runbundles: ${error;You must resolve the bndrun files before you can run the integration tests}

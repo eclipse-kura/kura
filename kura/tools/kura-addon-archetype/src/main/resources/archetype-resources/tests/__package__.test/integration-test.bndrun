@@ -1,9 +1,12 @@
-# https://bnd.bndtools.org/plugins/localindexrepo.html
 index: target/index.xml
 
 -standalone: ${index}
 
 -resolve.effective: active
+
+-runfw: org.eclipse.osgi
+
+-runee: JavaSE-21
 
 # Run all integration tests which are named xyzTest
 Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
@@ -26,11 +29,8 @@ Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
 # Used by Objenesis/Mockito and not actually optional
 -runsystempackages: sun.reflect
 
--runfw: org.eclipse.osgi
-
--runee: JavaSE-21
-
--runrequires: \
+# Require Kura Emulator
+-runrequires.emulator: \
     osgi.identity;filter:='(osgi.identity=moquette-broker)',\
     osgi.identity;filter:='(osgi.identity=org.apache.logging.log4j.api)',\
     osgi.identity;filter:='(osgi.identity=org.apache.logging.log4j.core)',\
@@ -63,6 +63,9 @@ Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.rest.provider)',\
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.useradmin.store)',\
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.xml.marshaller.unmarshaller.provider)',\
+
+# Require Testing bundle
+-runrequires: \
     osgi.identity;filter:='(osgi.identity=${project.artifactId})',\
 
 #

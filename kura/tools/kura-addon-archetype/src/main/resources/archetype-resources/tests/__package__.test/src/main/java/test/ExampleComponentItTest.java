@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.example.test;
+package ${package}.test;
 
 import static org.junit.Assert.assertNotNull;
 

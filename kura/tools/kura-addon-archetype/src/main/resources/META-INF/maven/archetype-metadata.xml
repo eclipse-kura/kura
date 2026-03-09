@@ -71,6 +71,14 @@
                 <exclude>**/src/test/java/test</exclude>
             </excludes>
         </fileSet>
+
+        <fileSet filtered="false" packaged="false">
+            <directory>tests</directory>
+            <includes>
+                <include>__package__.test/integration-test.bndrun</include>
+            </includes>
+        </fileSet>
+
         <fileSet filtered="true" packaged="true">
             <directory>__package__/src/main/java</directory>
         </fileSet>

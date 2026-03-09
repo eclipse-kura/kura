@@ -50,13 +50,11 @@
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.junit</artifactId>
             <version>4.13.2_1</version>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.github.moquette-io.moquette</groupId>
             <artifactId>moquette-broker</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -64,7 +62,6 @@
             <artifactId>kura-pde-deps</artifactId>
             <version>6.0.0-SNAPSHOT</version>
             <type>pom</type>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -72,7 +69,6 @@
             <artifactId>target-platform-pde-deps</artifactId>
             <version>6.0.0-SNAPSHOT</version>
             <type>pom</type>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

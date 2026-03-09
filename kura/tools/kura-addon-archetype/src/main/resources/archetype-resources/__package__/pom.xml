@@ -25,7 +25,7 @@
     </parent>
 
     <artifactId>${package}</artifactId>
-    <packaging>eclipse-plugin</packaging>
+    <packaging>jar</packaging>
     <description>${package} plugin</description>
 
     <properties>
@@ -34,8 +34,47 @@
         </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.framework</artifactId>
+            <version>1.10.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.component.annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.metatype.annotations</artifactId>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
+                <configuration>
+                    <includeClassesDir>true</includeClassesDir>
+                    <bnd><![CDATA[
+                        Bundle-SymbolicName: ${project.artifactId};singleton:=true
+                        Bundle-ActivationPolicy: lazy
+                        ]]></bnd>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>

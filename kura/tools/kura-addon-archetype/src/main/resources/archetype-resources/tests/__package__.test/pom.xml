@@ -26,8 +26,17 @@
     </parent>
 
     <artifactId>${package}.test</artifactId>
-    <packaging>eclipse-test-plugin</packaging>
     <description>Tests of ${package}</description>
+
+    <!-- Insert your bundles as dependencies -->
+    <dependencies>
+        <dependency>
+            <groupId>${groupId}</groupId>
+            <artifactId>${artifactId}</artifactId>
+            <type>jar</type>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -51,19 +60,44 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
-            
+
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
 
             <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-surefire-plugin</artifactId>
-            </plugin>
-
-            <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-maven-plugin</artifactId>
+                <configuration>
+                    <bndfile>integration-test.bndrun</bndfile>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-indexer-maven-plugin</artifactId>
+                <version>${bnd.version}</version>
+                <configuration>
+                    <includeJar>true</includeJar>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-testing-maven-plugin</artifactId>
+                <version>${bnd.version}</version>
+                <configuration>
+                    <bndruns>
+                        <bndrun>integration-test.bndrun</bndrun>
+                    </bndruns>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-resolver-maven-plugin</artifactId>
+                <configuration>
+                    <bndruns>
+                        <bndrun>integration-test.bndrun</bndrun>
+                    </bndruns>
+                </configuration>
             </plugin>
 
         </plugins>

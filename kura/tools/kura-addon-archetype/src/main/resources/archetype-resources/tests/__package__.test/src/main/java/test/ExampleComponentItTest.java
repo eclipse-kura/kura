@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) ${year} Eurotech and/or its affiliates and others
+ * Copyright (c) 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package ${package}.test;
+package org.eclipse.kura.example.test;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -18,8 +18,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -36,10 +41,16 @@ public class ExampleComponentItTest {
 
     // needs to be static for being available to JUnit Runner
     private static ConfigurableComponent exampleComponent;
+    private static BundleContext bundleContext;
+
+    @Activate
+    public void activate(BundleContext context) {
+        bundleContext = context;
+    }
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY, //
         policy = ReferencePolicy.STATIC, //
-        target = "(kura.service.pid=${package}.ExampleComponent)" //
+        target = "(kura.service.pid=org.eclipse.kura.example.ExampleComponent)" //
     )
     public void setExampleComponent(final ConfigurableComponent componentUnderTest) {
         exampleComponent = componentUnderTest;
@@ -51,6 +62,19 @@ public class ExampleComponentItTest {
     public static void awaitDependencies() throws InterruptedException {
         if (!dependencies.await(30, TimeUnit.SECONDS)) {
             throw new IllegalStateException("dependencies not resolved in 30 seconds");
+        }
+    }
+
+    @AfterClass
+    public static void cleanupFramework() {
+        logger.info("Shutting down OSGi framework...");
+        if (bundleContext != null) {
+            try {
+                Bundle systemBundle = bundleContext.getBundle(0);
+                systemBundle.stop();
+            } catch (BundleException e) {
+                logger.error("Error stopping framework", e);
+            }
         }
     }
 

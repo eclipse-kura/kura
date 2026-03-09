@@ -65,6 +65,7 @@
         <fileSet filtered="true" encoding="UTF-8">
             <!-- <directory>./</directory> -->
             <excludes>
+                <exclude>**/*.bndrun</exclude>
                 <exclude>**/*.java</exclude>
                 <exclude>**/src/main/java/test</exclude>
                 <exclude>**/src/test/java/test</exclude>

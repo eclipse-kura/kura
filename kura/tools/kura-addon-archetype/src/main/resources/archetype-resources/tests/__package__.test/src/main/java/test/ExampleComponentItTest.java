@@ -50,7 +50,7 @@ public class ExampleComponentItTest {
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY, //
         policy = ReferencePolicy.STATIC, //
-        target = "(kura.service.pid=org.eclipse.kura.example.ExampleComponent)" //
+        target = "(kura.service.pid=${package}.ExampleComponent)" //
     )
     public void setExampleComponent(final ConfigurableComponent componentUnderTest) {
         exampleComponent = componentUnderTest;

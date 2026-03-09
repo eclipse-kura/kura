@@ -32,7 +32,7 @@
     <dependencies>
         <dependency>
             <groupId>${groupId}</groupId>
-            <artifactId>${artifactId}</artifactId>
+            <artifactId>${package}</artifactId>
             <type>jar</type>
             <version>${project.version}</version>
         </dependency>

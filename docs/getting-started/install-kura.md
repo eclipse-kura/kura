@@ -24,7 +24,7 @@ To install Eclipse Kura&trade; using the APT repository, perform the following s
 3. Add the Kura APT repository to your system's software sources list:
 
     ```bash
-    echo "deb https://repo3.eclipse.org/repository/kura-apt/ stable main" | tee /etc/apt/sources.list.d/kura.list
+    echo "deb https://repo.eclipse.org/repository/kura-apt/ stable main" | tee /etc/apt/sources.list.d/kura.list
     ```
 
 4. Update the package list:
@@ -52,7 +52,7 @@ To install Eclipse Kura&trade; using the APT repository, perform the following s
     To use the development repository instead of the stable repository, replace step 3 in the above instructions with:
 
     ```bash
-    echo "deb https://repo3.eclipse.org/repository/kura-apt-dev/ unstable main" | tee /etc/apt/sources.list.d/kura-unstable.list
+    echo "deb https://repo.eclipse.org/repository/kura-apt-dev/ unstable main" | tee /etc/apt/sources.list.d/kura-unstable.list
     ```
 
     !!! warning

@@ -89,21 +89,13 @@
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-resolver-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>osgi-integration-resolving</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>resolve</goal>
-                        </goals>
-                        <configuration>
-                            <bndruns>
-                                <bndrun>integration-test.bndrun</bndrun>
-                            </bndruns>
-                        </configuration>
-                    </execution>
-                </executions>
+                <configuration>
+                    <bndruns>
+                        <bndrun>integration-test.bndrun</bndrun>
+                    </bndruns>
+                </configuration>
             </plugin>
+
         </plugins>
     </build>
 </project>

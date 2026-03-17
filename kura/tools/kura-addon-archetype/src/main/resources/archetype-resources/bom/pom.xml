@@ -32,7 +32,6 @@
                 <groupId>${groupId}</groupId>
                 <artifactId>${package}</artifactId>
                 <version>${version}</version>
-                <type>eclipse-plugin</type>
             </dependency>
         </dependencies>
     </dependencyManagement>

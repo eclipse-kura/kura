@@ -74,7 +74,6 @@
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-indexer-maven-plugin</artifactId>
-                <version>${bnd.version}</version>
                 <configuration>
                     <includeJar>true</includeJar>
                 </configuration>
@@ -82,7 +81,6 @@
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-testing-maven-plugin</artifactId>
-                <version>${bnd.version}</version>
                 <configuration>
                     <bndruns>
                         <bndrun>integration-test.bndrun</bndrun>

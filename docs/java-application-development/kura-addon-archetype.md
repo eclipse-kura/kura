@@ -4,7 +4,7 @@ The Kura Addon Archetype is a [Maven Archetype](https://maven.apache.org/guides/
 
 - Maven-based build
 - Template project for creating DEB packages
-- Tycho-surefire based integration test template
+- [bnd](https://bnd.bndtools.org/chapters/310-testing.html) based integration test template
 
 The Kura Archetype JAR (`kura-addon-archetype-<kura-version>.jar`) is available in the released artifacts and can be installed in the local maven repository with the following command:
 
@@ -84,29 +84,54 @@ Once this steps are completed you can safely build the project.
 
 At the end of the procedure, the generated project is organized as follows:
 
-![](./images/kura-addon-archetype/project-structure.png)
+```
+kura-myfeature
+├── .gitignore
+├── pom.xml
+├── bom
+│   └── pom.xml
+├── distrib
+│   ├── deb
+│   └── pom.xml
+├── org.eclipse.kura.myfeature
+│   ├── pom.xml
+│   └── src
+└── tests
+    ├── org.eclipse.kura.myfeature.test
+    ├── pom.xml
+    └── test-env
+```
 
 - **bom**: this project's bill-of-materials, containing the list of all the bundles that this project will deploy. It is intended to be consumed by other projects
 
-- **target-definition**: contains the `.target` file that defines the target platform dependencies. Dependencies are declared as Maven artifacts; Tycho then wraps them as OSGi bundles and adds them to the target platform. Because Maven Central only hosts released artifacts, it is recommended to build Kura locally if you need *-SNAPSHOT* dependencies
-
-- **tests**: contains OSGi integration tests executed via the `tycho-surefire-plugin`
+- **tests**: contains unit tests and OSGi integration tests executed via the `bnd-testing-maven-plugin`.
 
 - **distrib**: a packaging project that builds a Debian (`.deb`) package. The package installs the JAR produced by the bundles into Kura’s plugins directory at `/opt/eclipse/kura/plugins`. You should review and adjust this project to match your target architecture and packaging requirements; the source is annotated with comments indicating the main configuration points
 
-## Compile and run
+## Project build
 
-The minimum supported Java version for compiling is Java 21. Requires Maven 3.9.9+. Compile the project with:
+Requirements:
 
-```shell
-mvn clean install
+- Java 21
+- Maven 3.9.9 or higher
+
+The first build will require running the `resolve-integration-tests` profile to resolve the dependencies of the integration tests. This is necessary to populate the `bndrun` files with the correct versions of the dependencies.
+
+Run the following command to execute the first build:
+
+```bash
+mvn clean install -P resolve-integration-tests
 ```
+
+The `resolve-integration-tests` profile is only required to run when building the project for the first time and any time the `runrequires` field of the `bndrun` file changes. We suggest adding the `bndrun` files to the source control to avoid losing changes and to have a clear history of the changes made to the test dependencies.
 
 The build will produce the following system packages in `distrib/target`:
 
 - DEB installer (`<artifactId>_<version>_<debian-architecture>.deb`)
 
 Installer properties like the architecture, organization name, package dependencies, and others can be configured in the `distrib` project.
+
+### Install and run the generated packages
 
 Depending on the system, the packages can be installed with:
 
@@ -165,76 +190,31 @@ Please add the proper `maven-deploy-plugin` configuration for the bundles that n
 
 ## IDE setup
 
-We officially support two IDEs for developing Kura Addons: **Eclipse IDE** and **Visual Studio Code**. The following sections describe how to set up the projects in these IDEs.
+Since the introduction of the bnd archetype, no specific IDE configuration is required to work with the generated projects. The project can be imported in any IDE that supports Maven projects, such as Visual Studio Code, IntelliJ Idea and Eclipse IDE.
 
 ### Importing Projects in Visual Studio Code
 
-#### Requirements
+To import the project in Visual Studio Code, open the root folder of the project. Refer to the [VSCode documentation](https://code.visualstudio.com/docs/java/java-project) for more details on how to work with Java projects in VSCode.
 
-**VSCode extensions**: the following extensions will be automatically installed during the setup
+**Suggested extensions**:
 
-- [Eclipse PDE support for VS Code](https://marketplace.visualstudio.com/items?itemName=yaozheng.vscode-pde)
 - [Language Support for Java by Red Hat](https://marketplace.visualstudio.com/items?itemName=redhat.java)
 - [Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug)
 - [Java Test Runner](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-test)
 
-[**Kura metadata generator**](https://github.com/eclipse-kura/metadata-generator): this tool is used to generate the metadata required by VSCode to correctly load the Kura project. It is a Python tool that can be installed via `pip` with the following command:
+### Importing Projects in IntelliJ Idea
 
-```
-pip3 install https://github.com/eclipse-kura/metadata-generator/releases/download/<version>/metadata_generator-<version>-py3-none-any.whl
-```
-
-See [latest release](https://github.com/eclipse-kura/metadata-generator/releases/latest) for updated installation instructions.
-
-#### Instructions
-
-#### 1. Run the Kura metadata generator tool
-
-After building the project with maven as described in the previous section, the next step is to generate the metadata required by VSCode to correctly load the Kura project.
-
-Change the current working directory to the root of the add on archetype project (the one containing the `pom.xml` file) and run the metadata generator tool with the following command:
-
-```bash
-kura-gen
-```
-
-#### 2. Open VSCode
-
-```bash
-code .
-```
-
-#### 3. Follow the on-screen instructions
-
-VS Code prompts the user to install the recommended extensions when a workspace is opened for the first time. The list of recommended extensions can be reviewed with the `Extensions: Show Recommended Extensions` command.
-
-![](./images/vscode0.png)
-
-After all the recommended extensions are installed, the project will start building
-
-![](./images/vscode1.png)
-
-Finally, once the build completes, the workspace will be ready to use.
-
-For more information and troubleshooting, see [IDE setup: Visual Studio Code](./development-environment-setup.md#ide-setup-visual-studio-code).
+To import the project in IntelliJ Idea, open the root folder of the project and select the `pom.xml` file. Refer to the [IntelliJ documentation](https://www.jetbrains.com/help/idea/maven-support.html#maven_import_project_start) for more details on how to work with Maven projects in IntelliJ.
 
 ### Importing Projects in Eclipse IDE
 
-In Eclipse IDE , create a new workspace (it is not necessary to have the workspace in the root of the project) and import the projects with _File | Import | Maven | Existing Maven Projects_.
+In Eclipse IDE, create a new workspace (it is not necessary to have the workspace in the root of the project) and import the projects with _File | Import | Maven | Existing Maven Projects_.
 
 ![](./images/kura-addon-archetype/eclipse-import-maven-projects-1.png)
 
 ![](./images/kura-addon-archetype/eclipse-import-maven-projects-2.png)
 
 Note that if the workspace resides in the root of the project the parent POM file cannot be selected.
-
-#### Load target platform
-
-Open the _.target_ file in the _target-definition_ project and click on _Set as Active Target Platform_. Note that this will download all the dependencies declared in the target platform it may take a while to complete.
-
-![](./images/kura-addon-archetype/eclipse-ide-reload-platform.png)
-
-Eclipse IDE should rebuild the workspace automatically and show no errors. If errors appear, see next section.
 
 #### (Optional) IDE errors resolution
 
@@ -249,8 +229,6 @@ Then, from the _Java Build Path_ configure the correct source folder as in pictu
 Finally, configure the external **Classpath** dependencies by selecting the plugin dependencies from the _Add Library_.
 
 ![](./images/kura-addon-archetype/eclipse-add-library.png)
-
-On old Eclipse IDE installations it might be necessary to uninstall the Tycho configurator 0.1.0 plugin from _Help | Install new software... | What is already installed?_.
 
 ## Architecture-specific development
 

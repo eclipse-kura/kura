@@ -71,4 +71,4 @@ Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
 #
 # Runbundles automatically populated by bnd-resolver
 #
--runbundles: ${error;You must resolve the bndrun files before you can run the integration tests}
+-runbundles: ${error;Integration test bundles must be resolved. Enable the resolve-integration-tests Maven profile and rebuild.}

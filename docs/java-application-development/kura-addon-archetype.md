@@ -112,18 +112,13 @@ kura-myfeature
 
 The minimum supported Java version for compiling is Java 21. Requires Maven 3.9.9+. Compile the project with:
 
-```shell
-mvn clean install
+The first build will require running the `resolve-integration-tests` profile to resolve the dependencies of the integration tests. This is necessary to populate the `bndrun` files with the correct versions of the dependencies. Run the following command to execute the first build:
+
+```bash
+mvn clean install -P resolve-integration-tests
 ```
 
-!!! note
-    The first build will require running the `resolve-integration-tests` profile to resolve the dependencies of the integration tests. This is necessary to populate the `bndrun` files with the correct versions of the dependencies. Run the following command to execute the first build:
-
-    ```bash
-    mvn clean install -P resolve-integration-tests
-    ```
-
-    The resolve-integration-tests profile is only required to run when building the project for the first time and any time the runrequires field of the bndrun file changes.
+The resolve-integration-tests profile is only required to run when building the project for the first time and any time the runrequires field of the bndrun file changes. We suggest adding the `bndrun` files to the source control to avoid losing changes and to have a clear history of the changes made to the test dependencies.
 
 The build will produce the following system packages in `distrib/target`:
 

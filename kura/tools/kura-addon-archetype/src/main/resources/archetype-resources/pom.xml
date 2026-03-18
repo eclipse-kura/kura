@@ -200,19 +200,6 @@
                                 <indexName>${project.artifactId}</indexName>
                             </configuration>
                         </execution>
-                        <execution>
-                            <id>test-index</id>
-                            <goals>
-                                <goal>index</goal>
-                            </goals>
-                            <configuration>
-                                <indexName>${project.artifactId}</indexName>
-                                <outputFile>${project.build.directory}/test-index.xml</outputFile>
-                                <scopes>
-                                    <scope>test</scope>
-                                </scopes>
-                            </configuration>
-                        </execution>
                     </executions>
                 </plugin>
 

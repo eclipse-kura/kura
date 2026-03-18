@@ -4,7 +4,7 @@ The Kura Addon Archetype is a [Maven Archetype](https://maven.apache.org/guides/
 
 - Maven-based build
 - Template project for creating DEB packages
-- Tycho-surefire based integration test template
+- [bnd](https://bnd.bndtools.org/chapters/310-testing.html) based integration test template
 
 The Kura Archetype JAR (`kura-addon-archetype-<kura-version>.jar`) is available in the released artifacts and can be installed in the local maven repository with the following command:
 
@@ -84,13 +84,27 @@ Once this steps are completed you can safely build the project.
 
 At the end of the procedure, the generated project is organized as follows:
 
-![](./images/kura-addon-archetype/project-structure.png)
+```
+kura-myfeature
+├── .gitignore
+├── pom.xml
+├── bom
+│   └── pom.xml
+├── distrib
+│   ├── deb
+│   └── pom.xml
+├── org.eclipse.kura.myfeature
+│   ├── pom.xml
+│   └── src
+└── tests
+    ├── org.eclipse.kura.myfeature.test
+    ├── pom.xml
+    └── test-env
+```
 
 - **bom**: this project's bill-of-materials, containing the list of all the bundles that this project will deploy. It is intended to be consumed by other projects
 
-- **target-definition**: contains the `.target` file that defines the target platform dependencies. Dependencies are declared as Maven artifacts; Tycho then wraps them as OSGi bundles and adds them to the target platform. Because Maven Central only hosts released artifacts, it is recommended to build Kura locally if you need *-SNAPSHOT* dependencies
-
-- **tests**: contains OSGi integration tests executed via the `tycho-surefire-plugin`
+- **tests**: contains unit tests and OSGi integration tests executed via the `bnd-testing-maven-plugin`.
 
 - **distrib**: a packaging project that builds a Debian (`.deb`) package. The package installs the JAR produced by the bundles into Kura’s plugins directory at `/opt/eclipse/kura/plugins`. You should review and adjust this project to match your target architecture and packaging requirements; the source is annotated with comments indicating the main configuration points
 
@@ -101,6 +115,15 @@ The minimum supported Java version for compiling is Java 21. Requires Maven 3.9.
 ```shell
 mvn clean install
 ```
+
+!!! note
+    The first build will require running the `resolve-integration-tests` profile to resolve the dependencies of the integration tests. This is necessary to populate the `bndrun` files with the correct versions of the dependencies. Run the following command to execute the first build:
+
+    ```bash
+    mvn clean install -P resolve-integration-tests
+    ```
+
+    The resolve-integration-tests profile is only required to run when building the project for the first time and any time the runrequires field of the bndrun file changes.
 
 The build will produce the following system packages in `distrib/target`:
 
@@ -173,32 +196,13 @@ We officially support two IDEs for developing Kura Addons: **Eclipse IDE** and *
 
 **VSCode extensions**: the following extensions will be automatically installed during the setup
 
-- [Eclipse PDE support for VS Code](https://marketplace.visualstudio.com/items?itemName=yaozheng.vscode-pde)
 - [Language Support for Java by Red Hat](https://marketplace.visualstudio.com/items?itemName=redhat.java)
 - [Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug)
 - [Java Test Runner](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-test)
 
-[**Kura metadata generator**](https://github.com/eclipse-kura/metadata-generator): this tool is used to generate the metadata required by VSCode to correctly load the Kura project. It is a Python tool that can be installed via `pip` with the following command:
-
-```
-pip3 install https://github.com/eclipse-kura/metadata-generator/releases/download/<version>/metadata_generator-<version>-py3-none-any.whl
-```
-
-See [latest release](https://github.com/eclipse-kura/metadata-generator/releases/latest) for updated installation instructions.
-
 #### Instructions
 
-#### 1. Run the Kura metadata generator tool
-
-After building the project with maven as described in the previous section, the next step is to generate the metadata required by VSCode to correctly load the Kura project.
-
-Change the current working directory to the root of the add on archetype project (the one containing the `pom.xml` file) and run the metadata generator tool with the following command:
-
-```bash
-kura-gen
-```
-
-#### 2. Open VSCode
+#### 1. Open VSCode
 
 ```bash
 code .

@@ -108,23 +108,30 @@ kura-myfeature
 
 - **distrib**: a packaging project that builds a Debian (`.deb`) package. The package installs the JAR produced by the bundles into Kura’s plugins directory at `/opt/eclipse/kura/plugins`. You should review and adjust this project to match your target architecture and packaging requirements; the source is annotated with comments indicating the main configuration points
 
-## Compile and run
+## Project build
 
-The minimum supported Java version for compiling is Java 21. Requires Maven 3.9.9+. Compile the project with:
+Requirements:
 
-The first build will require running the `resolve-integration-tests` profile to resolve the dependencies of the integration tests. This is necessary to populate the `bndrun` files with the correct versions of the dependencies. Run the following command to execute the first build:
+- Java 21
+- Maven 3.9.9 or higher
+
+The first build will require running the `resolve-integration-tests` profile to resolve the dependencies of the integration tests. This is necessary to populate the `bndrun` files with the correct versions of the dependencies.
+
+Run the following command to execute the first build:
 
 ```bash
 mvn clean install -P resolve-integration-tests
 ```
 
-The resolve-integration-tests profile is only required to run when building the project for the first time and any time the runrequires field of the bndrun file changes. We suggest adding the `bndrun` files to the source control to avoid losing changes and to have a clear history of the changes made to the test dependencies.
+The `resolve-integration-tests` profile is only required to run when building the project for the first time and any time the `runrequires` field of the `bndrun` file changes. We suggest adding the `bndrun` files to the source control to avoid losing changes and to have a clear history of the changes made to the test dependencies.
 
 The build will produce the following system packages in `distrib/target`:
 
 - DEB installer (`<artifactId>_<version>_<debian-architecture>.deb`)
 
 Installer properties like the architecture, organization name, package dependencies, and others can be configured in the `distrib` project.
+
+### Install and run the generated packages
 
 Depending on the system, the packages can be installed with:
 

@@ -188,57 +188,31 @@ Please add the proper `maven-deploy-plugin` configuration for the bundles that n
 
 ## IDE setup
 
-We officially support two IDEs for developing Kura Addons: **Eclipse IDE** and **Visual Studio Code**. The following sections describe how to set up the projects in these IDEs.
+Since the introduction of the bnd archetype, no specific IDE configuration is required to work with the generated projects. The project can be imported in any IDE that supports Maven projects, such as Visual Studio Code, IntelliJ Idea and Eclipse IDE.
 
 ### Importing Projects in Visual Studio Code
 
-#### Requirements
+To import the project in Visual Studio Code, open the root folder of the project. Refer to the [VSCode documentation](https://code.visualstudio.com/docs/java/java-project) for more details on how to work with Java projects in VSCode.
 
-**VSCode extensions**: the following extensions will be automatically installed during the setup
+**Suggested extensions**:
 
 - [Language Support for Java by Red Hat](https://marketplace.visualstudio.com/items?itemName=redhat.java)
 - [Debugger for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug)
 - [Java Test Runner](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-test)
 
-#### Instructions
+### Importing Projects in IntelliJ Idea
 
-#### 1. Open VSCode
-
-```bash
-code .
-```
-
-#### 3. Follow the on-screen instructions
-
-VS Code prompts the user to install the recommended extensions when a workspace is opened for the first time. The list of recommended extensions can be reviewed with the `Extensions: Show Recommended Extensions` command.
-
-![](./images/vscode0.png)
-
-After all the recommended extensions are installed, the project will start building
-
-![](./images/vscode1.png)
-
-Finally, once the build completes, the workspace will be ready to use.
-
-For more information and troubleshooting, see [IDE setup: Visual Studio Code](./development-environment-setup.md#ide-setup-visual-studio-code).
+To import the project in IntelliJ Idea, open the root folder of the project and select the `pom.xml` file. Refer to the [IntelliJ documentation](https://www.jetbrains.com/help/idea/maven-support.html#maven_import_project_start) for more details on how to work with Maven projects in IntelliJ.
 
 ### Importing Projects in Eclipse IDE
 
-In Eclipse IDE , create a new workspace (it is not necessary to have the workspace in the root of the project) and import the projects with _File | Import | Maven | Existing Maven Projects_.
+In Eclipse IDE, create a new workspace (it is not necessary to have the workspace in the root of the project) and import the projects with _File | Import | Maven | Existing Maven Projects_.
 
 ![](./images/kura-addon-archetype/eclipse-import-maven-projects-1.png)
 
 ![](./images/kura-addon-archetype/eclipse-import-maven-projects-2.png)
 
 Note that if the workspace resides in the root of the project the parent POM file cannot be selected.
-
-#### Load target platform
-
-Open the _.target_ file in the _target-definition_ project and click on _Set as Active Target Platform_. Note that this will download all the dependencies declared in the target platform it may take a while to complete.
-
-![](./images/kura-addon-archetype/eclipse-ide-reload-platform.png)
-
-Eclipse IDE should rebuild the workspace automatically and show no errors. If errors appear, see next section.
 
 #### (Optional) IDE errors resolution
 
@@ -253,8 +227,6 @@ Then, from the _Java Build Path_ configure the correct source folder as in pictu
 Finally, configure the external **Classpath** dependencies by selecting the plugin dependencies from the _Add Library_.
 
 ![](./images/kura-addon-archetype/eclipse-add-library.png)
-
-On old Eclipse IDE installations it might be necessary to uninstall the Tycho configurator 0.1.0 plugin from _Help | Install new software... | What is already installed?_.
 
 ## Architecture-specific development
 

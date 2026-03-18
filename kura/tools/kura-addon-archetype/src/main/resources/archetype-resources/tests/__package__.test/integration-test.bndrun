@@ -1,0 +1,74 @@
+index: target/index.xml
+
+-standalone: ${index}
+
+-resolve.effective: active
+
+-runfw: org.eclipse.osgi
+
+-runee: JavaSE-21
+
+# Run all integration tests which are named xyzTest
+Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
+
+-runproperties: \
+    osgi.console=5002,\
+    osgi.signedcontent.support=all,\
+    org.eclipse.kura.mode=emulator,\
+    org.osgi.framework.trust.repositories=${kura.workdir}/user/security/.certificates.ks,\
+    kura.configuration=file:${kura.workdir}/framework/kura.properties,\
+    dpa.configuration=${kura.workdir}/data/dpa.properties,\
+    kura.data=${kura.workdir}/data,\
+    kura.snapshots=${kura.workdir}/user/snapshots,\
+    log4j.configurationFile=file:${kura.workdir}/log4j/log4j.xml
+
+# Inject JaCoCo agent args produced by maven (prepare-agent)
+-runvm: \
+	${argLine}
+
+# Used by Objenesis/Mockito and not actually optional
+-runsystempackages: sun.reflect
+
+# Require Kura Emulator
+-runrequires.emulator: \
+    osgi.identity;filter:='(osgi.identity=moquette-broker)',\
+    osgi.identity;filter:='(osgi.identity=org.apache.logging.log4j.api)',\
+    osgi.identity;filter:='(osgi.identity=org.apache.logging.log4j.core)',\
+    osgi.identity;filter:='(osgi.identity=org.apache.logging.log4j.slf4j2.impl)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.equinox.cm)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.equinox.common)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.equinox.console)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.equinox.event)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.equinox.metatype)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.equinox.registry)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.api)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core.configuration)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core.crypto)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core.identity)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core.inventory)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core.status)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core.system)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core.testutil)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.clock)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.gpio)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.gpio)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.net)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.net)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.position)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.usb)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.watchdog)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.json.marshaller.unmarshaller.provider)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.rest.provider)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.useradmin.store)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.xml.marshaller.unmarshaller.provider)',\
+
+# Require Testing bundle
+-runrequires: \
+    osgi.identity;filter:='(osgi.identity=${project.artifactId})',\
+
+#
+# Runbundles automatically populated by bnd-resolver
+#
+-runbundles: ${error;Integration test bundles must be resolved. Enable the resolve-integration-tests Maven profile and rebuild.}

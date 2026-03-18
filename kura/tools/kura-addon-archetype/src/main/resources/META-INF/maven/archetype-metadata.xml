@@ -36,9 +36,6 @@
             <directory>bom</directory>
         </fileSet>
         <fileSet filtered="true" encoding="UTF-8">
-            <directory>target-definition</directory>
-        </fileSet>
-        <fileSet filtered="true" encoding="UTF-8">
             <directory>distrib</directory>
         </fileSet>
         <!-- exclude keystores from filtering, otherwise they get corrupted -->
@@ -65,11 +62,20 @@
         <fileSet filtered="true" encoding="UTF-8">
             <!-- <directory>./</directory> -->
             <excludes>
+                <exclude>**/*.bndrun</exclude>
                 <exclude>**/*.java</exclude>
                 <exclude>**/src/main/java/test</exclude>
                 <exclude>**/src/test/java/test</exclude>
             </excludes>
         </fileSet>
+
+        <fileSet filtered="false" packaged="false">
+            <directory>tests</directory>
+            <includes>
+                <include>__package__.test/integration-test.bndrun</include>
+            </includes>
+        </fileSet>
+
         <fileSet filtered="true" packaged="true">
             <directory>__package__/src/main/java</directory>
         </fileSet>

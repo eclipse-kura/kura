@@ -38,13 +38,37 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.2</version>
-            <scope>test</scope>
+        </dependency>
+
+        <!-- This OSGi bundle wraps junit 4.13.2 jar file. -->
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.junit</artifactId>
+            <version>4.13.2_1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.moquette-io.moquette</groupId>
+            <artifactId>moquette-broker</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>kura-pde-deps</artifactId>
+            <version>6.0.0-SNAPSHOT</version>
+            <type>pom</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>target-platform-pde-deps</artifactId>
+            <version>6.0.0-SNAPSHOT</version>
+            <type>pom</type>
         </dependency>
     </dependencies>
 
@@ -74,28 +98,6 @@
                                             <include>log4j/*</include>
                                             <include>user/**/*</include>
                                         </includes>
-                                        <filtering>false</filtering>
-                                    </resource>
-                                </resources>
-                            </configuration>
-                        </execution>
-
-                        <!--
-                            copy the OSGI-INF directory to a place where it is being detected and
-                            picked up by PDE Launcher as well, supported by M2E in incremental builds
-                            natively
-                        -->
-                        <execution>
-                            <id>prepare-tycho-runtime</id>
-                            <phase>prepare-package</phase>
-                            <goals>
-                                <goal>copy-resources</goal>
-                            </goals>
-                            <configuration>
-                                <outputDirectory>${basedir}/OSGI-INF</outputDirectory>
-                                <resources>
-                                    <resource>
-                                        <directory>${project.build.outputDirectory}/OSGI-INF</directory>
                                         <filtering>false</filtering>
                                     </resource>
                                 </resources>
@@ -151,49 +153,6 @@
                 </plugin>
 
                 <plugin>
-                    <groupId>org.eclipse.tycho</groupId>
-                    <artifactId>tycho-surefire-plugin</artifactId>
-                    <version>${tycho.version}</version>
-                    <configuration>
-                        <providerHint>junit4</providerHint>
-                        <argLine>
-                            ${tycho.testArgLine}
-                            -Dosgi.console=5002
-                            -Dosgi.signedcontent.support=all
-                            -XX:HeapDumpPath=/dev/null
-                            -Dorg.eclipse.kura.mode=emulator
-                            -Dorg.osgi.framework.trust.repositories=${kura.workdir}/user/security/.certificates.ks
-                            -Dkura.configuration=file:${kura.workdir}/framework/kura.properties
-                            -Ddpa.configuration=${kura.workdir}/data/dpa.properties
-                            -Dkura.data=${kura.workdir}/data
-                            -Dkura.snapshots=${kura.workdir}/user/snapshots
-                            -Dlog4j.configurationFile=file:${kura.workdir}/log4j/log4j.xml
-                            -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
-                        </argLine>
-                        <!--
-                        uncomment for gogo shell, usage: telnet localhost 5002
-                        <appArgLine>-consoleLog -console 5002 -noExit</appArgLine>
-                        -->
-                        <defaultStartLevel>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </defaultStartLevel>
-                        <bundleStartLevel>
-                            <bundle>
-                                <id>org.apache.logging.log4j.slf4j2.impl</id>
-                                <level>2</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
-                                <id>org.apache.aries.spifly.dynamic.bundle</id>
-                                <level>2</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                        </bundleStartLevel>
-                    </configuration>
-                </plugin>
-                
-                <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.22.2</version>
                     <executions>
@@ -203,168 +162,42 @@
                             <goals>
                                 <goal>test</goal>
                             </goals>
-                            <configuration>
-                                <argLine>
-                                    ${tycho.testArgLine}
-                                    -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
-                                </argLine>
-                            </configuration>
                         </execution>
                     </executions>
                     <configuration/>
                 </plugin>
 
                 <plugin>
-                    <groupId>org.eclipse.tycho</groupId>
-                    <artifactId>target-platform-configuration</artifactId>
-                    <configuration>
-                        <target>
-                            <artifact>
-                                <groupId>${groupId}</groupId>
-                                <artifactId>${artifactId}-target-definition</artifactId>
-                                <version>${project.version}</version>
-                            </artifact>
-                        </target>
-                        <!--
-                            Some bundles are not available in standard test target platform,
-                            only bundles dependent on the tested ones and some equinox standard ones are loaded by default.
-                            Other additional bundles from target definition can be made available from here
-                        -->
-                        <dependency-resolution>
-                            <extraRequirements>
-                                <!-- gogo shell console -->
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.eclipse.equinox.console</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.apache.felix.gogo.command</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.apache.felix.gogo.runtime</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.apache.felix.gogo.shell</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <!-- logging -->
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.apache.logging.log4j.core</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <!-- kura emulator and other deps -->
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.apache.felix.scr</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.eclipse.kura.emulator</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.eclipse.kura.emulator.net</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.eclipse.kura.emulator.position</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.eclipse.kura.emulator.watchdog</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.eclipse.kura.emulator.clock</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.eclipse.kura.emulator.usb</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.eclipse.kura.core.system</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.eclipse.kura.core.crypto</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.eclipse.kura.core.keystore</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.eclipse.kura.json.marshaller.unmarshaller.provider</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.eclipse.equinox.event</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.useradmin.store</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
-                                    <id>org.apache.felix.useradmin</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
-                                    <id>org.eclipse.equinox.cm</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>p2-installable-unit</type>
-                                    <id>org.eclipse.equinox.metatype</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                            </extraRequirements>
-                        </dependency-resolution>
-                    </configuration>
+                    <groupId>biz.aQute.bnd</groupId>
+                    <artifactId>bnd-resolver-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>osgi-integration-resolving</id>
+                            <phase>none</phase>
+                        </execution>
+                    </executions>
                 </plugin>
+
             </plugins>
         </pluginManagement>
     </build>
 
+    <!-- This profile is used to resolve the OSGi integration test dependencies before running the tests. -->
     <profiles>
         <profile>
-            <id>test-debug</id>
+            <id>resolve-integration-tests</id>
             <build>
                 <pluginManagement>
                     <plugins>
                         <plugin>
-                            <groupId>org.eclipse.tycho</groupId>
-                            <artifactId>tycho-surefire-plugin</artifactId>
-                            <configuration>
-                                <debugPort>8000</debugPort>
-                            </configuration>
+                            <groupId>biz.aQute.bnd</groupId>
+                            <artifactId>bnd-resolver-maven-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <id>osgi-integration-resolving</id>
+                                    <phase>pre-integration-test</phase>
+                                </execution>
+                            </executions>
                         </plugin>
                     </plugins>
                 </pluginManagement>

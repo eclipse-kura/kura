@@ -50,7 +50,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>21</maven.compiler.release>
-        <bnd.version>7.1.0</bnd.version>
+        <bnd.version>7.2.2</bnd.version>
     </properties>
 
     <modules>
@@ -158,7 +158,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.0.2</version>
+                    <version>3.5.0</version>
                     <configuration>
                         <archive>
                             <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
@@ -261,7 +261,7 @@
                 <plugin>
                     <groupId>org.honton.chas</groupId>
                     <artifactId>exists-maven-plugin</artifactId>
-                    <version>0.0.6</version>
+                    <version>0.15.2</version>
                     <executions>
                         <execution>
                             <goals>

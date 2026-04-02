@@ -51,6 +51,30 @@ Install
 
 Eclipse Kura™ is compatible with Java 21.
 
+### Quick Linux installation
+
+The APT repository provides packages for both **x86‑64** and **arm64** architectures.
+To install the latest stable version of **Eclipse Kura™**, run the following commands in a terminal:
+
+```bash
+# Install required tools
+sudo apt update
+sudo apt install -y curl gpg
+
+# Add the Eclipse Kura APT repository key
+curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xBA7E3DF5EDC3FC36" \
+  | gpg --dearmor \
+  | sudo tee /etc/apt/trusted.gpg.d/kura.gpg > /dev/null
+
+# Add the Eclipse Kura APT repository
+echo "deb https://repo.eclipse.org/repository/kura-apt/ stable main" | sudo tee /etc/apt/sources.list.d/kura.list
+
+# Update package index and install Eclipse Kura
+sudo apt update
+sudo apt install -y kura
+```
+> **Note:** You may need `sudo` privileges to run these commands.
+
 ### Target Gateways Installers
 Eclipse Kura™ provides pre-built installers for common development boards. Check the following [link](https://www.eclipse.org/kura/downloads.php) to download the desired installers.
 Take a look at [our documentation](https://eclipse-kura.github.io/kura/latest/getting-started/install-kura/) for further information on supported platforms and installer types.

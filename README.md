@@ -64,10 +64,16 @@ sudo apt install -y curl gpg
 # Add the Eclipse Kura APT repository key
 curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xBA7E3DF5EDC3FC36" \
   | gpg --dearmor \
-  | sudo tee /etc/apt/trusted.gpg.d/kura.gpg > /dev/null
+  | sudo tee /etc/apt/keyrings/kura.gpg > /dev/null
 
 # Add the Eclipse Kura APT repository
-echo "deb https://repo.eclipse.org/repository/kura-apt/ stable main" | sudo tee /etc/apt/sources.list.d/kura.list
+sudo tee /etc/apt/sources.list.d/kura.sources > /dev/null << 'EOF'
+Types: deb
+URIs: https://repo.eclipse.org/repository/kura-apt/
+Suites: stable
+Components: main
+Signed-By: /etc/apt/keyrings/kura.gpg
+EOF
 
 # Update package index and install Eclipse Kura
 sudo apt update

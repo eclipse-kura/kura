@@ -12,25 +12,36 @@ To install Eclipse Kura&trade; using the APT repository, perform the following s
 1. Install the required packages:
 
     ```bash
-    apt install -y curl gpg
+    sudo apt update
+    sudo apt install -y curl gpg
     ```
 
 2. Download the GPG key and add it to the list of trusted keys:
 
     ```bash
-    curl -L "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xba7e3df5edc3fc36" | gpg --dearmor | tee /etc/apt/trusted.gpg.d/kura.gpg > /dev/null
+    # Add the Eclipse Kura APT repository key
+    curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xBA7E3DF5EDC3FC36" \
+      | gpg --dearmor \
+      | sudo tee /etc/apt/keyrings/kura.gpg > /dev/null
     ```
 
 3. Add the Kura APT repository to your system's software sources list:
 
     ```bash
-    echo "deb https://repo.eclipse.org/repository/kura-apt/ stable main" | tee /etc/apt/sources.list.d/kura.list
+    # Add the Eclipse Kura APT repository
+    sudo tee /etc/apt/sources.list.d/kura.sources > /dev/null << 'EOF'
+    Types: deb
+    URIs: https://repo.eclipse.org/repository/kura-apt/
+    Suites: stable
+    Components: main
+    Signed-By: /etc/apt/keyrings/kura.gpg
+    EOF
     ```
 
 4. Update the package list:
 
     ```bash
-    apt update
+    apt update -y
     ```
 
 5. Install Kura package:

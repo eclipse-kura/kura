@@ -63,7 +63,13 @@ To install Eclipse Kura&trade; using the APT repository, perform the following s
     To use the development repository instead of the stable repository, replace step 3 in the above instructions with:
 
     ```bash
-    echo "deb https://repo.eclipse.org/repository/kura-apt-dev/ unstable main" | tee /etc/apt/sources.list.d/kura-unstable.list
+    sudo tee /etc/apt/sources.list.d/kura.sources > /dev/null << 'EOF'
+    Types: deb
+    URIs: https://repo.eclipse.org/repository/kura-apt-dev/
+    Suites: unstable
+    Components: main
+    Signed-By: /etc/apt/keyrings/kura.gpg
+    EOF
     ```
 
     !!! warning

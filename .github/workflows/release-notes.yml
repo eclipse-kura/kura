@@ -24,12 +24,12 @@ jobs:
     steps:
 
     - name: Checkout ${{ github.ref }} branch in ${{ github.repository }} repository.
-      uses: actions/checkout@v3
+      uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
       with:
         fetch-depth: '0'
 
     - name: Setup Java
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4.8.0
       with:
         distribution: 'temurin' # See 'Supported distributions' for available options
         java-version: '11' # Required by the git-changelog-command-line tool
@@ -49,7 +49,7 @@ jobs:
     - name: Check file existence
       id: check_files
       continue-on-error: true
-      uses: thebinaryfelix/check-file-existence-action@1.0.0
+      uses: thebinaryfelix/check-file-existence-action@436223737a098725b8d10ab1950a03efba5e6fc6 # 1.0.0
       with:
         files: './kura/distrib/RELEASE_NOTES.txt'
 
@@ -64,7 +64,7 @@ jobs:
 
     - name: Download git-changelog-command-line tool
       id: download-changelog-cli
-      uses: clausnz/github-action-download-maven-artifact@master
+      uses: clausnz/github-action-download-maven-artifact@bad2e2130cb9d8c86412124298e5ba22ab9cfb66 # 0.0.4
       with:
         url: 'https://repo1.maven.org'
         repository: 'maven2'
@@ -102,7 +102,7 @@ jobs:
         rm known-issues.txt
 
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v4
+      uses: peter-evans/create-pull-request@38e0b6e68b4c852a5500a94740f0e535e0d7ba54 # v4.2.4
       with:
         title: "chore: add Kura ${{ steps.get-version.outputs.resolved-version }} release notes"
         commit-message: "chore: add Kura ${{ steps.get-version.outputs.resolved-version }} release notes"

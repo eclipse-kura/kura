@@ -92,7 +92,7 @@ jobs:
 
   store-sbom-data:
     needs: ['generate-sbom']
-    uses: eclipse-csi/workflows/.github/workflows/store-sbom-data.yml@main
+    uses: eclipse-csi/workflows/.github/workflows/store-sbom-data.yml@88508d92f2638d942a88744431f017225ed8c14c # main@08/04/2026
     with:
       projectName: 'kura-target-platform'
       projectVersion: ${{ needs.generate-sbom.outputs.project-version }}

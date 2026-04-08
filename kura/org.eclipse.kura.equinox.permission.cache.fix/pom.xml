@@ -19,12 +19,12 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.eclipse.kura.equinox.permission.cache.fix</artifactId>
     <packaging>eclipse-plugin</packaging>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
 
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>kura</artifactId>
-        <version>5.6.1</version>
+        <version>5.6.2-SNAPSHOT</version>
     </parent>
 
     <properties>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -45,6 +45,7 @@ import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
+import org.eclipse.kura.core.configuration.util.StringUtil;
 import org.eclipse.kura.driver.descriptor.DriverDescriptor;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.rest.configuration.api.ComponentConfigurationList;
@@ -122,35 +123,35 @@ public final class GwtServerUtil {
         } else if (strValue != null && !strValue.trim().isEmpty()) {
             final String trimmedValue = strValue.trim();
             switch (gwtType) {
-                case LONG:
-                    objValue = Long.parseLong(trimmedValue);
-                    break;
-                case DOUBLE:
-                    objValue = Double.parseDouble(trimmedValue);
-                    break;
-                case FLOAT:
-                    objValue = Float.parseFloat(trimmedValue);
-                    break;
-                case INTEGER:
-                    objValue = Integer.parseInt(trimmedValue);
-                    break;
-                case SHORT:
-                    objValue = Short.parseShort(trimmedValue);
-                    break;
-                case BYTE:
-                    objValue = Byte.parseByte(trimmedValue);
-                    break;
-                case BOOLEAN:
-                    objValue = Boolean.parseBoolean(trimmedValue);
-                    break;
-                case PASSWORD:
-                    objValue = new Password(trimmedValue);
-                    break;
-                case CHAR:
-                    objValue = Character.valueOf(trimmedValue.charAt(0));
-                    break;
-                default:
-                    break;
+            case LONG:
+                objValue = Long.parseLong(trimmedValue);
+                break;
+            case DOUBLE:
+                objValue = Double.parseDouble(trimmedValue);
+                break;
+            case FLOAT:
+                objValue = Float.parseFloat(trimmedValue);
+                break;
+            case INTEGER:
+                objValue = Integer.parseInt(trimmedValue);
+                break;
+            case SHORT:
+                objValue = Short.parseShort(trimmedValue);
+                break;
+            case BYTE:
+                objValue = Byte.parseByte(trimmedValue);
+                break;
+            case BOOLEAN:
+                objValue = Boolean.parseBoolean(trimmedValue);
+                break;
+            case PASSWORD:
+                objValue = new Password(trimmedValue);
+                break;
+            case CHAR:
+                objValue = Character.valueOf(trimmedValue.charAt(0));
+                break;
+            default:
+                break;
             }
         }
         return objValue;
@@ -163,117 +164,151 @@ public final class GwtServerUtil {
         List<String> trimmedValues = Stream.of(defaultValues).map(String::trim).collect(Collectors.toList());
 
         switch (type) {
-            case BOOLEAN:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(Boolean.valueOf(value));
-                    }
+        case BOOLEAN:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(Boolean.valueOf(value));
                 }
-                return values.toArray(new Boolean[] {});
+            }
+            return values.toArray(new Boolean[] {});
 
-            case BYTE:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(Byte.valueOf(value));
-                    }
+        case BYTE:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(Byte.valueOf(value));
                 }
-                return values.toArray(new Byte[] {});
+            }
+            return values.toArray(new Byte[] {});
 
-            case CHAR:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(new Character(value.charAt(0)));
-                    }
+        case CHAR:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(new Character(value.charAt(0)));
                 }
-                return values.toArray(new Character[] {});
+            }
+            return values.toArray(new Character[] {});
 
-            case DOUBLE:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(Double.valueOf(value));
-                    }
+        case DOUBLE:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(Double.valueOf(value));
                 }
-                return values.toArray(new Double[] {});
+            }
+            return values.toArray(new Double[] {});
 
-            case FLOAT:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(Float.valueOf(value));
-                    }
+        case FLOAT:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(Float.valueOf(value));
                 }
-                return values.toArray(new Float[] {});
+            }
+            return values.toArray(new Float[] {});
 
-            case INTEGER:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(Integer.valueOf(value));
-                    }
+        case INTEGER:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(Integer.valueOf(value));
                 }
-                return values.toArray(new Integer[] {});
+            }
+            return values.toArray(new Integer[] {});
 
-            case LONG:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(Long.valueOf(value));
-                    }
+        case LONG:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(Long.valueOf(value));
                 }
-                return values.toArray(new Long[] {});
+            }
+            return values.toArray(new Long[] {});
 
-            case SHORT:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(Short.valueOf(value));
-                    }
+        case SHORT:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(Short.valueOf(value));
                 }
-                return values.toArray(new Short[] {});
+            }
+            return values.toArray(new Short[] {});
 
-            case PASSWORD:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(new Password(value));
-                    }
+        case PASSWORD:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(new Password(value));
                 }
-                return values.toArray(new Password[] {});
+            }
+            return values.toArray(new Password[] {});
 
-            case STRING:
-                for (String value : trimmedValues) {
-                    if (!value.isEmpty()) {
-                        values.add(value);
-                    }
+        case STRING:
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
+                    values.add(value);
                 }
-                return values.toArray(new String[] {});
-            default:
-                return null;
+            }
+            return values.toArray(new String[] {});
+        default:
+            return null;
         }
     }
 
     public static Object getUserDefinedObject(GwtConfigParameter param, Object currentObjValue) {
-        Object objValue;
 
         final int cardinality = param.getCardinality();
         if (cardinality == 0 || cardinality == 1 || cardinality == -1) {
-            String strValue = param.getValue();
-
-            if (currentObjValue instanceof Password && PASSWORD_PLACEHOLDER.equals(strValue)) {
-                objValue = currentObjValue;
-            } else {
-                objValue = getObjectValue(param);
-            }
+            return getUserDefinedObjectScalar(param, currentObjValue);
         } else {
-            String[] strValues = param.getValues();
+            return getUserDefinedObjectArray(param, currentObjValue);
+        }
+    }
+
+    private static Object getUserDefinedObjectScalar(GwtConfigParameter param, Object currentObjValue) {
+        String strValue = param.getValue();
+
+        if (param.getType() == GwtConfigParameterType.PASSWORD && PASSWORD_PLACEHOLDER.equals(strValue)) {
+
+            if (currentObjValue instanceof Password) {
+                return currentObjValue;
+            }
+
+            if (param.isRequired()) {
+                final String defaultValue = param.getDefault();
+
+                if (defaultValue != null && !defaultValue.trim().isEmpty()) {
+                    final GwtConfigParameter cloned = new GwtConfigParameter(param);
+                    cloned.setValue(defaultValue);
+                    return getObjectValue(cloned);
+                }
+            }
+        }
+
+        return getObjectValue(param);
+    }
+
+    private static Object getUserDefinedObjectArray(GwtConfigParameter param, Object currentObjValue) {
+        String[] strValues = param.getValues();
+
+        if (param.getType() == GwtConfigParameterType.PASSWORD) {
+
+            Optional<String[]> current = Optional.empty();
 
             if (currentObjValue instanceof Password[]) {
-                Password[] currentPasswordValue = (Password[]) currentObjValue;
-                for (int i = 0; i < strValues.length; i++) {
-                    if (PASSWORD_PLACEHOLDER.equals(strValues[i])) {
-                        strValues[i] = new String(currentPasswordValue[i].getPassword());
-                    }
+                current = Optional.of(Arrays.stream((Password[]) currentObjValue).map(p -> new String(p.getPassword()))
+                        .collect(Collectors.toList()).toArray(new String[] {}));
+            } else if (param.isRequired()) {
+                final String defaultValue = param.getDefault();
+
+                if (defaultValue != null && !defaultValue.trim().isEmpty()) {
+                    current = Optional.of(StringUtil.splitValues(defaultValue));
                 }
             }
 
-            objValue = getObjectValues(param, strValues);
+            if (current.isPresent()) {
+                for (int i = 0; i < strValues.length; i++) {
+                    if (PASSWORD_PLACEHOLDER.equals(strValues[i]) && i < current.get().length) {
+                        strValues[i] = current.get()[i];
+                    }
+                }
+            }
         }
-        return objValue;
+
+        return getObjectValues(param, strValues);
     }
 
     /**

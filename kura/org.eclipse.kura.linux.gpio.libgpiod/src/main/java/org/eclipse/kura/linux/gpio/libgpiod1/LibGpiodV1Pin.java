@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2025, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,6 @@
 package org.eclipse.kura.linux.gpio.libgpiod1;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.gpio.KuraClosedDeviceException;
@@ -26,6 +25,7 @@ import org.eclipse.kura.gpio.KuraGPIOTrigger;
 import org.eclipse.kura.gpio.KuraUnavailableDeviceException;
 import org.eclipse.kura.linux.gpio.libgpiod.LibGpiodPin;
 import org.eclipse.kura.linux.gpio.libgpiod1.LibGpiodV1Native.LineEvent;
+import org.eclipse.kura.linux.gpio.libgpiod1.LibGpiodV1Native.LineRequestConfig;
 import org.eclipse.kura.linux.gpio.libgpiod1.LibGpiodV1Native.TimeSpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,6 @@ import com.sun.jna.Pointer;
 public class LibGpiodV1Pin extends LibGpiodPin implements KuraGPIOPin {
 
     private static final Logger logger = LoggerFactory.getLogger(LibGpiodV1Pin.class);
-    private static final String LIB_GPIOD_V1_PIN_EVENT_MONITOR = "LibGpiodV1PinEventMonitor";
 
     private Pointer line;
     private final AtomicBoolean isReserved = new AtomicBoolean(false);
@@ -70,7 +69,7 @@ public class LibGpiodV1Pin extends LibGpiodPin implements KuraGPIOPin {
             }
 
             stopEventMonitoring();
-            this.listener = Optional.empty();
+            this.listeners.clear();
 
             try {
                 releaseGpioLine();
@@ -127,42 +126,20 @@ public class LibGpiodV1Pin extends LibGpiodPin implements KuraGPIOPin {
     }
 
     protected void monitorEvents() {
-        if (!this.isMonitoring.get() || !this.isOpen.get()) {
+        if (!this.isMonitoring.get()) {
             return;
         }
-        TimeSpec timeout = new TimeSpec();
-        timeout.tv_sec = DEFAULT_TIMEOUT_SEC;
-
         try {
-            int triggerResult = 0;
-            switch (this.trigger) {
-            case RAISING_EDGE:
-                triggerResult = LibGpiodV1NativeWrapper.getInstance().gpiod_line_request_rising_edge_events(this.line,
-                        LIB_GPIOD_V1_PIN_EVENT_MONITOR);
-                break;
-            case FALLING_EDGE:
-                triggerResult = LibGpiodV1NativeWrapper.getInstance().gpiod_line_request_falling_edge_events(this.line,
-                        LIB_GPIOD_V1_PIN_EVENT_MONITOR);
-                break;
-            case BOTH_EDGES:
-                triggerResult = LibGpiodV1NativeWrapper.getInstance().gpiod_line_request_both_edges_events(this.line,
-                        LIB_GPIOD_V1_PIN_EVENT_MONITOR);
-                break;
-            default:
-                logger.error("Unsupported trigger mode for event monitoring: {}", this.trigger);
-                this.isMonitoring.set(false);
-                return;
-            }
-            if (triggerResult < 0) {
-                logger.error("Failed to request line for events");
-                return;
-            }
+            ensureOpenAndReserved();
+        } catch (KuraGPIODeviceException | KuraClosedDeviceException e) {
+            logger.error("Error ensuring pin is open and reserved", e);
+            return;
+        }
 
-            while (this.isMonitoring.get() && this.isOpen.get()) {
-                manageEvents(timeout);
-            }
-        } catch (Error e) {
-            logger.error("Exception in GPIO event monitoring: {}", e.getMessage());
+        TimeSpec timeout = LibGpiodV1NativeWrapper.getInstance().createTimeSpec(DEFAULT_TIMEOUT_SEC);
+
+        while (this.isMonitoring.get()) {
+            manageEvents(timeout);
         }
     }
 
@@ -170,14 +147,13 @@ public class LibGpiodV1Pin extends LibGpiodPin implements KuraGPIOPin {
         try {
             int waitResult = LibGpiodV1NativeWrapper.getInstance().gpiod_line_event_wait(this.line, timeout);
             if (waitResult > 0) {
-                LineEvent[] events = new LineEvent[10];
+                LineEvent[] events = new LineEvent[64];
                 int numEvents = LibGpiodV1NativeWrapper.getInstance().gpiod_line_event_read_multiple(this.line, events,
                         64);
                 if (numEvents > 0) {
                     for (int i = 0; i < numEvents; i++) {
                         if (events[i] != null) {
-                            boolean newValue = events[i].event_type == LibGpiodV1Native.GPIOD_LINE_EVENT_RISING_EDGE;
-                            this.listener.ifPresent(l -> l.pinStatusChange(newValue));
+                        	notifyPinStatusChange(events[i]);
                         }
                     }
                 }
@@ -189,6 +165,25 @@ public class LibGpiodV1Pin extends LibGpiodPin implements KuraGPIOPin {
         }
     }
 
+    private void notifyPinStatusChange(LineEvent event) {
+        boolean newValue = event.event_type == LibGpiodV1Native.GPIOD_LINE_EVENT_RISING_EDGE;
+        synchronized (this.listeners) {
+            this.listeners.forEach(listener -> {
+                if (this.trigger.equals(KuraGPIOTrigger.BOTH_EDGES)) {
+                    listener.pinStatusChange(newValue);
+                    return;
+                }
+                if (this.trigger.equals(KuraGPIOTrigger.RAISING_EDGE) && newValue) {
+                    listener.pinStatusChange(newValue);
+                    return;
+                }
+                if (this.trigger.equals(KuraGPIOTrigger.FALLING_EDGE) && !newValue) {
+                    listener.pinStatusChange(newValue);
+                }
+            });
+        }
+    }
+    
     private void openGpioChip() throws KuraUnavailableDeviceException {
         try {
             this.chip = LibGpiodV1NativeWrapper.getInstance().gpiod_chip_open(this.chipPath);
@@ -259,22 +254,11 @@ public class LibGpiodV1Pin extends LibGpiodPin implements KuraGPIOPin {
             }
 
             try {
-                int flags = calculateFlags();
                 int result;
 
-                switch (this.direction) {
-                case INPUT:
-                    result = LibGpiodV1NativeWrapper.getInstance().gpiod_line_request_input_flags(this.line,
-                            "LibGpiodV1PinDriver", flags);
-                    break;
-                case OUTPUT:
-                    int defaultValue = LibGpiodV1Native.GPIOD_LINE_ACTIVE_STATE_LOW;
-                    result = LibGpiodV1NativeWrapper.getInstance().gpiod_line_request_output_flags(this.line,
-                            "LibGpiodV1PinDriver", flags, defaultValue);
-                    break;
-                default:
-                    throw new KuraGPIODeviceException("Unsupported direction: " + this.direction);
-                }
+                LineRequestConfig config = LibGpiodV1NativeWrapper.getInstance().createLineRequestConfig("KuraGPIOPin", 
+                		calculateRequestType(), calculateFlags());
+                result = LibGpiodV1NativeWrapper.getInstance().gpiod_line_request(this.line, config, 0);
 
                 if (result < 0) {
                     throw new KuraGPIODeviceException("Failed to reserve GPIO line");
@@ -286,6 +270,7 @@ public class LibGpiodV1Pin extends LibGpiodPin implements KuraGPIOPin {
                 throw new KuraGPIODeviceException(e, "Failed to reserve GPIO pin");
             }
         }
+        
     }
 
     private int calculateFlags() {
@@ -306,6 +291,19 @@ public class LibGpiodV1Pin extends LibGpiodPin implements KuraGPIOPin {
         }
 
         return flags;
+    }
+    
+    private int calculateRequestType() {
+        switch (this.direction) {
+            case INPUT:
+                // If direction is INPUT, set the request type to both edges by default, 
+                // as it will be further filtered in the event handler
+                return LibGpiodV1Native.GPIOD_LINE_REQUEST_EVENT_BOTH_EDGES;
+            case OUTPUT:
+                return LibGpiodV1Native.GPIOD_LINE_REQUEST_DIRECTION_OUTPUT;
+            default:
+                throw new IllegalArgumentException("Unsupported direction: " + this.direction);
+        }
     }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2025, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,9 @@
 package org.eclipse.kura.linux.gpio.libgpiod;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -52,7 +54,7 @@ public abstract class LibGpiodPin {
     protected final AtomicBoolean isOpen = new AtomicBoolean(false);
     protected final AtomicBoolean isMonitoring = new AtomicBoolean(false);
 
-    protected Optional<PinStatusListener> listener = Optional.empty();
+    protected List<PinStatusListener> listeners = Collections.synchronizedList(new ArrayList<>());
     private Future<?> monitoringTask;
 
     protected LibGpiodPin(String chipPath, int offset, KuraGPIODirection direction, KuraGPIOMode mode,
@@ -98,7 +100,12 @@ public abstract class LibGpiodPin {
             throw new KuraClosedDeviceException(this.pinName);
         }
 
-        this.listener = Optional.of(listener);
+        synchronized (this.listeners) {
+            if (this.listeners.contains(listener)) {
+                return;
+            }
+            this.listeners.add(listener);
+        }
 
         if (shouldMonitorEvents()) {
             startEventMonitoring();
@@ -136,8 +143,16 @@ public abstract class LibGpiodPin {
             throw new IllegalArgumentException("Listener cannot be null");
         }
 
-        stopEventMonitoring();
-        this.listener = Optional.empty();
+        synchronized (this.listeners) {
+            if (!this.listeners.contains(listener)) {
+                return;
+            }
+            this.listeners.remove(listener);
+
+            if (this.listeners.isEmpty()) {
+                stopEventMonitoring();
+            }
+        }
     }
 
     public static int extractChipNumber(String chipName) {

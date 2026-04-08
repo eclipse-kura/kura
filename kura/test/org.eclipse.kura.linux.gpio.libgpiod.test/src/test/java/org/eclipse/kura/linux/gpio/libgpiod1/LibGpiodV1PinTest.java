@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2025, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,17 +17,25 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.gpio.KuraClosedDeviceException;
 import org.eclipse.kura.gpio.KuraGPIODirection;
 import org.eclipse.kura.gpio.KuraGPIOMode;
 import org.eclipse.kura.gpio.KuraGPIOTrigger;
-import org.eclipse.kura.gpio.KuraUnavailableDeviceException;
 import org.eclipse.kura.gpio.PinStatusListener;
 import org.eclipse.kura.linux.gpio.libgpiod.CommonSteps;
 import org.junit.After;
@@ -48,72 +56,68 @@ public class LibGpiodV1PinTest extends CommonSteps {
     private Boolean v1PinValue;
     private PinStatusListener pinStatusListener;
     private String message;
+    private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
     @Before
-    public void setup() {
+    public void setup() {        
         this.nativeMock = mockStatic(Native.class);
         this.nativeInterfaceMock = mock(LibGpiodV1Native.class);
         this.nativeMock.when(() -> Native.load("gpiod", LibGpiodV1Native.class)).thenReturn(this.nativeInterfaceMock);
         this.nativeInterfaceWrapperMock = mockStatic(LibGpiodV1NativeWrapper.class);
         this.nativeInterfaceWrapperMock.when(LibGpiodV1NativeWrapper::getInstance).thenReturn(this.nativeInterfaceMock);
-
-        Pointer chip0 = Pointer.createConstant(1);
-        when(this.nativeInterfaceMock.gpiod_chip_open("/dev/gpiochip0")).thenReturn(chip0);
-        when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip0)).thenReturn(16);
-        Pointer chip2 = Pointer.createConstant(2);
-        when(this.nativeInterfaceMock.gpiod_chip_open("/dev/gpiochip2")).thenReturn(chip2);
-        when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip2)).thenReturn(32);
-        Pointer line4 = Pointer.createConstant(4);
-        when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, 4)).thenReturn(line4);
-        when(this.nativeInterfaceMock.gpiod_line_is_used(line4)).thenReturn(false);
-        when(this.nativeInterfaceMock.gpiod_line_request_input_flags(line4, "LibGpiodV1PinDriver", 32)).thenReturn(1);
-        when(this.nativeInterfaceMock.gpiod_line_request_output_flags(line4, "LibGpiodV1PinDriver", 1, 2))
-                .thenReturn(1);
-        when(this.nativeInterfaceMock.gpiod_line_get_value(line4)).thenReturn(1);
-        when(this.nativeInterfaceMock.gpiod_line_request_both_edges_events(line4, "LibGpiodV1PinEventMonitor"))
-                .thenReturn(1);
-        when(this.nativeInterfaceMock.gpiod_line_request_rising_edge_events(line4, "LibGpiodV1PinEventMonitor"))
-                .thenReturn(1);
-        when(this.nativeInterfaceMock.gpiod_line_request_falling_edge_events(line4, "LibGpiodV1PinEventMonitor"))
-                .thenReturn(1);
-        Pointer line8 = Pointer.createConstant(8);
-        when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, 8)).thenReturn(line8);
-        when(this.nativeInterfaceMock.gpiod_line_is_used(line8)).thenReturn(false);
-        when(this.nativeInterfaceMock.gpiod_line_request_input_flags(line8, "LibGpiodV1PinDriver", 32)).thenReturn(1);
-        when(this.nativeInterfaceMock.gpiod_line_get_value(line8)).thenReturn(-1);
-        Pointer line9 = Pointer.createConstant(9);
-        when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, 9)).thenReturn(line9);
-        when(this.nativeInterfaceMock.gpiod_line_is_used(line9)).thenReturn(false);
-        when(this.nativeInterfaceMock.gpiod_line_request_input_flags(line9, "LibGpiodV1PinDriver", 32)).thenReturn(1);
-        when(this.nativeInterfaceMock.gpiod_line_get_value(line9)).thenThrow(new Error());
-        Pointer chip5 = Pointer.createConstant(5);
-        when(this.nativeInterfaceMock.gpiod_chip_open("/dev/gpiochip5")).thenReturn(chip5);
-        when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip5)).thenReturn(64);
-        Pointer line6 = Pointer.createConstant(6);
-        when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 6)).thenReturn(line6);
-        when(this.nativeInterfaceMock.gpiod_line_request_input_flags(line6, "LibGpiodV1PinDriver", 32)).thenReturn(-1);
-        Pointer line7 = Pointer.createConstant(7);
-        when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 7)).thenReturn(line7);
-        when(this.nativeInterfaceMock.gpiod_line_request_output_flags(line7, "LibGpiodV1PinDriver", 0, 2))
-                .thenReturn(-1);
-        Pointer line10 = Pointer.createConstant(10);
-        when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 10)).thenReturn(line10);
-        when(this.nativeInterfaceMock.gpiod_line_is_used(line10)).thenReturn(false);
-        when(this.nativeInterfaceMock.gpiod_line_request_output_flags(line10, "LibGpiodV1PinDriver", 0, 2))
-                .thenReturn(1);
-        when(this.nativeInterfaceMock.gpiod_line_set_value(line10, 1)).thenReturn(-1);
-        Pointer line11 = Pointer.createConstant(11);
-        when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 11)).thenReturn(line11);
-        when(this.nativeInterfaceMock.gpiod_line_is_used(line11)).thenReturn(false);
-        when(this.nativeInterfaceMock.gpiod_line_request_output_flags(line11, "LibGpiodV1PinDriver", 0, 2))
-                .thenReturn(1);
-        when(this.nativeInterfaceMock.gpiod_line_set_value(line11, 1)).thenThrow(new Error());
+        
+	    Pointer chip0 = Pointer.createConstant(1);
+	    when(this.nativeInterfaceMock.gpiod_chip_open("/dev/gpiochip0")).thenReturn(chip0);
+	    when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip0)).thenReturn(16);
+	    Pointer chip2 = Pointer.createConstant(2);
+	    when(this.nativeInterfaceMock.gpiod_chip_open("/dev/gpiochip2")).thenReturn(chip2);
+	    when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip2)).thenReturn(32);
+	    Pointer line4 = Pointer.createConstant(4);
+	    when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, 4)).thenReturn(line4);
+	    when(this.nativeInterfaceMock.gpiod_line_is_used(line4)).thenReturn(false);
+	    when(this.nativeInterfaceMock.gpiod_line_request(eq(line4), any(), eq(0))).thenReturn(0);
+	    when(this.nativeInterfaceMock.gpiod_line_get_value(line4)).thenReturn(1);
+	    when(this.nativeInterfaceMock.gpiod_line_request_both_edges_events(line4, "KuraGPIOPin")).thenReturn(1);
+	    when(this.nativeInterfaceMock.gpiod_line_event_wait(eq(line4), any())).thenReturn(1);
+	    when(this.nativeInterfaceMock.gpiod_line_event_read_multiple(eq(line4), any(), anyInt())).thenReturn(1);
+	    Pointer line8 = Pointer.createConstant(8);
+	    when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, 8)).thenReturn(line8);
+	    when(this.nativeInterfaceMock.gpiod_line_is_used(line8)).thenReturn(false);
+	    when(this.nativeInterfaceMock.gpiod_line_request(eq(line8), any(), eq(0))).thenReturn(0);
+	    when(this.nativeInterfaceMock.gpiod_line_get_value(line8)).thenReturn(-1);
+	    Pointer line9 = Pointer.createConstant(9);
+	    when(this.nativeInterfaceMock.gpiod_chip_get_line(chip2, 9)).thenReturn(line9);
+	    when(this.nativeInterfaceMock.gpiod_line_is_used(line9)).thenReturn(false);
+	    when(this.nativeInterfaceMock.gpiod_line_request(eq(line9), any(), eq(0))).thenReturn(0);
+	    when(this.nativeInterfaceMock.gpiod_line_get_value(line9)).thenThrow(new Error());
+	    Pointer chip5 = Pointer.createConstant(5);
+	    when(this.nativeInterfaceMock.gpiod_chip_open("/dev/gpiochip5")).thenReturn(chip5);
+	    when(this.nativeInterfaceMock.gpiod_chip_num_lines(chip5)).thenReturn(64);
+	    Pointer line6 = Pointer.createConstant(6);
+	    when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 6)).thenReturn(line6);
+	    when(this.nativeInterfaceMock.gpiod_line_request(eq(line6), any(), eq(0))).thenReturn(0);
+	    Pointer line7 = Pointer.createConstant(7);
+	    when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 7)).thenReturn(line7);
+	    when(this.nativeInterfaceMock.gpiod_line_request(eq(line7), any(), eq(0))).thenReturn(0);
+	    Pointer line10 = Pointer.createConstant(10);
+	    when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 10)).thenReturn(line10);
+	    when(this.nativeInterfaceMock.gpiod_line_is_used(line10)).thenReturn(false);
+	    when(this.nativeInterfaceMock.gpiod_line_request(eq(line10), any(), eq(0))).thenReturn(0);
+	    when(this.nativeInterfaceMock.gpiod_line_set_value(line10, 1)).thenReturn(-1);
+	    Pointer line11 = Pointer.createConstant(11);
+	    when(this.nativeInterfaceMock.gpiod_chip_get_line(chip5, 11)).thenReturn(line11);
+	    when(this.nativeInterfaceMock.gpiod_line_is_used(line11)).thenReturn(false);
+	    when(this.nativeInterfaceMock.gpiod_line_request(eq(line11), any(), eq(0))).thenReturn(0);
+	    when(this.nativeInterfaceMock.gpiod_line_set_value(line11, 1)).thenThrow(new Error());
+	  
+	    when(this.nativeInterfaceMock.createLineRequestConfig(anyString(), anyInt(), anyInt())).thenReturn(null);
     }
 
     @After
     public void cleanup() {
-        this.nativeMock.close();
+    	this.nativeMock.close();
         this.nativeInterfaceWrapperMock.close();
+        this.executor.shutdownNow();
     }
 
     @Test
@@ -162,7 +166,6 @@ public class LibGpiodV1PinTest extends CommonSteps {
 
         thenNoExceptionOccurred();
         thenV1PinIsNotOpen();
-
     }
 
     @Test
@@ -184,16 +187,6 @@ public class LibGpiodV1PinTest extends CommonSteps {
         whenV1PinGetValue();
 
         thenExceptionOccurred(KuraClosedDeviceException.class);
-    }
-
-    @Test
-    public void testGetValueFromPinNotReserved() {
-        givenV1Pin("GPIO_01", 5006, KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.NONE);
-
-        whenV1PinIsOpened();
-        whenV1PinGetValue();
-
-        thenExceptionOccurred(KuraUnavailableDeviceException.class);
     }
 
     @Test
@@ -247,16 +240,6 @@ public class LibGpiodV1PinTest extends CommonSteps {
     }
 
     @Test
-    public void testSetValueOnPinNotReserved() {
-        givenV1Pin("GPIO_01", 5007, KuraGPIODirection.OUTPUT, KuraGPIOMode.OUTPUT_PUSH_PULL, KuraGPIOTrigger.NONE);
-
-        whenV1PinIsOpened();
-        whenV1PinSetValue(true);
-
-        thenExceptionOccurred(KuraUnavailableDeviceException.class);
-    }
-
-    @Test
     public void testSetValueOnPinFailed() {
         givenV1Pin("GPIO_01", 5010, KuraGPIODirection.OUTPUT, KuraGPIOMode.OUTPUT_PUSH_PULL, KuraGPIOTrigger.NONE);
 
@@ -303,11 +286,14 @@ public class LibGpiodV1PinTest extends CommonSteps {
 
         whenV1PinIsOpened();
         whenV1PinAddPinStatusListener(this.pinStatusListener);
+        // Call monitorEvents() explicitly, since we need to statically mock the
+        // LibGpiodV1NativeWrapper class and this is possible only in the current
+        // thread.
+        whenV1PinRemovePinStatusListenerAfterMilliseconds(20);
+        whenV1PinMonitorEvents();
 
-        // Check only if no exception occurred,
-        // since we need to statically mock the LibGpiodV1NativeWrapper class
-        // and this is possible only in the current thread.
         thenNoExceptionOccurred();
+        thenListenerIsInvokedTimes(0);
     }
 
     @Test
@@ -317,11 +303,14 @@ public class LibGpiodV1PinTest extends CommonSteps {
 
         whenV1PinIsOpened();
         whenV1PinAddPinStatusListener(this.pinStatusListener);
+        whenV1PinRemovePinStatusListenerAfterMilliseconds(20);
+        // Call monitorEvents() explicitly, since we need to statically mock the
+        // LibGpiodV1NativeWrapper class and this is possible only in the current
+        // thread.
+        whenV1PinMonitorEvents();
 
-        // Check only if no exception occurred,
-        // since we need to statically mock the LibGpiodV1NativeWrapper class
-        // and this is possible only in the current thread.
         thenNoExceptionOccurred();
+        thenListenerIsInvokedTimes(0);
     }
 
     @Test
@@ -331,11 +320,14 @@ public class LibGpiodV1PinTest extends CommonSteps {
 
         whenV1PinIsOpened();
         whenV1PinAddPinStatusListener(this.pinStatusListener);
+        whenV1PinRemovePinStatusListenerAfterMilliseconds(20);
+        // Call monitorEvents() explicitly, since we need to statically mock the
+        // LibGpiodV1NativeWrapper class and this is possible only in the current
+        // thread.
+        whenV1PinMonitorEvents();
 
-        // Check only if no exception occurred,
-        // since we need to statically mock the LibGpiodV1NativeWrapper class
-        // and this is possible only in the current thread.
         thenNoExceptionOccurred();
+        thenListenerIsInvokedTimes(0);
     }
 
     @Test
@@ -345,11 +337,14 @@ public class LibGpiodV1PinTest extends CommonSteps {
 
         whenV1PinIsOpened();
         whenV1PinAddPinStatusListener(this.pinStatusListener);
+        whenV1PinRemovePinStatusListenerAfterMilliseconds(20);
+        // Call monitorEvents() explicitly, since we need to statically mock the
+        // LibGpiodV1NativeWrapper class and this is possible only in the current
+        // thread.
+        whenV1PinMonitorEvents();
 
-        // Check only if no exception occurred,
-        // since we need to statically mock the LibGpiodV1NativeWrapper class
-        // and this is possible only in the current thread.
         thenNoExceptionOccurred();
+        thenListenerIsInvokedTimes(0);
     }
 
     @Test
@@ -371,6 +366,19 @@ public class LibGpiodV1PinTest extends CommonSteps {
         thenNoExceptionOccurred();
     }
 
+
+    @Test
+    public void testAddPinStatusListenerMultipleTimes() {
+        givenV1Pin("GPIO_01", 2004, KuraGPIODirection.INPUT, KuraGPIOMode.INPUT_PULL_UP, KuraGPIOTrigger.BOTH_EDGES);
+        givenPinStatusListener();
+
+        whenV1PinIsOpened();
+        whenV1PinAddPinStatusListener(this.pinStatusListener);
+        whenV1PinAddPinStatusListener(this.pinStatusListener);
+
+        thenNoExceptionOccurred();
+    }
+    
     @Test
     public void testPinIndexCalculation() {
         givenV1Pin("GPIO_01", 2004);
@@ -412,7 +420,7 @@ public class LibGpiodV1PinTest extends CommonSteps {
         thenMessageIs(
                 "LibGpiodPin{chip=/dev/gpiochip0, offset=18, name=GPIO18, direction=OUTPUT, mode=OUTPUT_PUSH_PULL, trigger=NONE}");
     }
-
+    
     /*
      * Given
      */
@@ -495,6 +503,23 @@ public class LibGpiodV1PinTest extends CommonSteps {
         }
     }
 
+    private void whenV1PinRemovePinStatusListenerAfterMilliseconds(int milliseconds) {
+        this.executor.schedule(new Runnable() {
+            @Override
+            public void run() {
+                whenV1PinRemovePinStatusListener(LibGpiodV1PinTest.this.pinStatusListener);
+            }
+        }, milliseconds, TimeUnit.MILLISECONDS);
+    }
+    
+    private void whenV1PinMonitorEvents() {
+		try {
+			this.v1Pin.monitorEvents();
+		} catch (Exception e) {
+			this.occurredException = e;
+		}
+	}
+    
     /*
      * Then
      */
@@ -537,4 +562,9 @@ public class LibGpiodV1PinTest extends CommonSteps {
     private void thenMessageIs(String expectedMessage) {
         assertEquals(expectedMessage, this.message);
     }
+    
+    private void thenListenerIsInvokedTimes(int times) {
+		verify(this.pinStatusListener, times(times)).pinStatusChange(anyBoolean());
+	}
+
 }

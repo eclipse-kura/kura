@@ -63,7 +63,7 @@ jobs:
 
     - name: Download git-changelog-command-line tool
       id: download-changelog-cli
-      uses: clausnz/github-action-download-maven-artifact@master
+      uses: clausnz/github-action-download-maven-artifact@bad2e2130cb9d8c86412124298e5ba22ab9cfb66 # 0.0.4
       with:
         url: 'https://repo1.maven.org'
         repository: 'maven2'

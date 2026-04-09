@@ -257,7 +257,6 @@ public interface IdentityService {
      */
     public void createTemporaryIdentity(final String identityName, final Duration lifetime) throws KuraException;
 
-
     /**
      * Creates a temporary identity that is not persisted and has automatic
      * expiration. Temporary identities behave like regular identities but are
@@ -277,7 +276,8 @@ public interface IdentityService {
      *             is not valid.
      * @since 2.8.0
      */
-    public void createTemporaryIdentity(final IdentityConfiguration identityConfiguration, final Duration lifetime) throws KuraException;
+    public void createTemporaryIdentity(final IdentityConfiguration identityConfiguration, final Duration lifetime)
+            throws KuraException;
 
     /**
      * Returns the current revision for the specified identity.
@@ -289,7 +289,7 @@ public interface IdentityService {
      * @return current revision for the identity.
      * @throws KuraException
      *             if the identity does not exist or on internal failures.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public long getIdentityRevision(final String identityName) throws KuraException;
 }

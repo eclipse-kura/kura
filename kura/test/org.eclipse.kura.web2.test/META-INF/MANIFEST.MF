@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.web2.test
+Bundle-SymbolicName: org.eclipse.kura.web2.test;singleton:=true
+Bundle-Version: 5.6.2.qualifier
+Bundle-Vendor: Eclipse Kura
+Bundle-License: Eclipse Public License v2.0
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
+Fragment-Host: org.eclipse.kura.web2
+Bundle-ActivationPolicy: lazy
+Import-Package: org.junit;version="[4.12.0,5.0.0)",
+ org.mockito;version="[4.0.0,5.0.0)",
+ org.mockito.invocation;version="[4.0.0,5.0.0)",
+ org.mockito.stubbing;version="[4.0.0,5.0.0)"

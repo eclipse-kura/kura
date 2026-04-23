@@ -1011,6 +1011,7 @@
         <module>org.eclipse.kura.core.keystore.test</module>
         <module>org.eclipse.kura.log.filesystem.provider.test</module>
         <module>org.eclipse.kura.rest.provider.test</module>
+        <module>org.eclipse.kura.web2.test</module>
         <module>org.eclipse.kura.rest.asset.provider.test</module>
         <module>org.eclipse.kura.rest.configuration.provider.test</module>
         <module>org.eclipse.kura.rest.network.configuration.provider.test</module>

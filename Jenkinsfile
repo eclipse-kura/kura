@@ -56,7 +56,7 @@ spec:
         stage('Sonar') {
             timeout(time: 2, unit: 'HOURS') {
                 dir("kura") {
-                    withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
+                    withMaven(jdk: 'temurin-jdk21-latest', maven: 'apache-maven-3.9.6') {
                         withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONARCLOUD_TOKEN')]) {
                             withSonarQubeEnv {
                                 sh '''

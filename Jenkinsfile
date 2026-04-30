@@ -113,7 +113,7 @@ node {
                         }
 
                         sh """
-                            mvn -f kura/pom.xml org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+                            mvn -f kura/pom.xml org.sonarsource.scanner.maven:sonar-maven-plugin:5.6.0.6792:sonar \
                                 -Dmaven.test.failure.ignore=true \
                                 -Dsonar.organization=eclipse \
                                 -Dsonar.host.url=${SONAR_HOST_URL} \

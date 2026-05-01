@@ -41,6 +41,83 @@ node {
         }
     }
 
+    stage('Generate aggregate coverage report') {
+        dir("kura") {
+            withMaven(jdk: 'temurin-jdk17-latest', maven: 'apache-maven-3.9.6') {
+                sh '''
+                    set -eu
+
+                    REPORT_DIR="kura/target/site/jacoco-aggregate"
+                    JACOCO_CLI_DIR="kura/target/jacoco-cli"
+                    JACOCO_CLI_JAR="${JACOCO_CLI_DIR}/org.jacoco.cli-nodeps.jar"
+                    UNIQUE_CLASSES_DIR="${REPORT_DIR}/classes"
+
+                    mkdir -p "${REPORT_DIR}" "${JACOCO_CLI_DIR}"
+
+                    mvn -q org.apache.maven.plugins:maven-dependency-plugin:3.0.0:copy \
+                        -Dartifact=org.jacoco:org.jacoco.cli:0.8.8:jar:nodeps \
+                        -DoutputDirectory="${JACOCO_CLI_DIR}" \
+                        -Dmdep.stripVersion=true
+
+                    find kura/test kura/examples/test -name jacoco.exec -type f | sort > "${REPORT_DIR}/jacoco-exec-files.txt"
+
+                    if [ ! -s "${REPORT_DIR}/jacoco-exec-files.txt" ]; then
+                        echo "No JaCoCo execution data found, skipping aggregate coverage report generation."
+                        exit 0
+                    fi
+
+                    git ls-files 'kura/**/src/main/java/**' \
+                        | sed 's#/src/main/java/.*#/src/main/java#' \
+                        | grep -v '^kura/test/' \
+                        | grep -v '^kura/examples/test/' \
+                        | sort -u > "${REPORT_DIR}/jacoco-source-dirs.txt"
+
+                    while IFS= read -r source_dir; do
+                        class_dir="${source_dir%/src/main/java}/target/classes"
+                        if [ -d "${class_dir}" ]; then
+                            echo "${class_dir}"
+                        fi
+                    done < "${REPORT_DIR}/jacoco-source-dirs.txt" > "${REPORT_DIR}/jacoco-class-dirs.txt"
+
+                    rm -rf "${UNIQUE_CLASSES_DIR}"
+                    mkdir -p "${UNIQUE_CLASSES_DIR}"
+
+                    while IFS= read -r class_dir; do
+                        find "${class_dir}" -name '*.class' -type f | sort
+                    done < "${REPORT_DIR}/jacoco-class-dirs.txt" | while IFS= read -r class_file; do
+                        relative_class_file="${class_file#*/target/classes/}"
+                        unique_class_file="${UNIQUE_CLASSES_DIR}/${relative_class_file}"
+
+                        if [ ! -e "${unique_class_file}" ]; then
+                            mkdir -p "$(dirname "${unique_class_file}")"
+                            ln -s "$(pwd)/${class_file}" "${unique_class_file}"
+                        fi
+                    done
+
+                    find kura -path '*/generated-sources/src/main/java' -type d \
+                        ! -path 'kura/test/*' \
+                        ! -path 'kura/examples/test/*' \
+                        | sort >> "${REPORT_DIR}/jacoco-source-dirs.txt"
+
+                    set -- report
+
+                    while IFS= read -r exec_file; do
+                        set -- "$@" "${exec_file}"
+                    done < "${REPORT_DIR}/jacoco-exec-files.txt"
+
+                    set -- "$@" --xml "${REPORT_DIR}/jacoco.xml" --html "${REPORT_DIR}/html"
+                    set -- "$@" --classfiles "${UNIQUE_CLASSES_DIR}"
+
+                    while IFS= read -r source_dir; do
+                        set -- "$@" --sourcefiles "${source_dir}"
+                    done < "${REPORT_DIR}/jacoco-source-dirs.txt"
+
+                    java -jar "${JACOCO_CLI_JAR}" "$@"
+                '''
+            }
+        }
+    }
+
     stage('Sonar') {
         timeout(time: 2, unit: 'HOURS') {
             dir("kura") {
@@ -58,8 +135,9 @@ node {
                                     -Dsonar.java.source=8 \
                                     -Dsonar.java.binaries='target/' \
                                     -Dsonar.core.codeCoveragePlugin=jacoco \
+                                    -Dsonar.coverage.jacoco.xmlReportPaths="$(pwd)/kura/target/site/jacoco-aggregate/jacoco.xml" \
                                     -Dsonar.projectKey=org.eclipse.kura:kura \
-                                    -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*,org.eclipse.kura.nm/src/main/java/fi/w1/**/*,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod1/LibGpiodV1Native.java,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod2/LibGpiodV2Native.java
+                                    -Dsonar.exclusions=**/target/**,**/bin/**,**/node_modules/**,test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*,org.eclipse.kura.nm/src/main/java/fi/w1/**/*,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod1/LibGpiodV1Native.java,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod2/LibGpiodV2Native.java
                             '''
                         }
                     }

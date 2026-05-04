@@ -48,7 +48,7 @@ node {
                     withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONARCLOUD_TOKEN')]) {
                         withSonarQubeEnv {
                             sh '''
-                                mvn -f kura/pom.xml org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+                                mvn -f kura/pom.xml org.sonarsource.scanner.maven:sonar-maven-plugin:5.5.0.6356:sonar \
                                     -Dmaven.test.failure.ignore=true \
                                     -Dsonar.organization=eclipse \
                                     -Dsonar.host.url=${SONAR_HOST_URL} \
@@ -56,7 +56,7 @@ node {
                                     -Dsonar.branch.name=${BRANCH_NAME} \
                                     -Dsonar.branch.target=${CHANGE_TARGET} \
                                     -Dsonar.java.source=8 \
-                                    -Dsonar.java.binaries='target/' \
+                                    -Dsonar.java.binaries='target/classes' \
                                     -Dsonar.core.codeCoveragePlugin=jacoco \
                                     -Dsonar.projectKey=org.eclipse.kura:kura \
                                     -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*,org.eclipse.kura.nm/src/main/java/fi/w1/**/*,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod1/LibGpiodV1Native.java,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod2/LibGpiodV2Native.java

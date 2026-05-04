@@ -57,7 +57,7 @@ node {
                                     -Dsonar.branch.name=${BRANCH_NAME} \
                                     -Dsonar.branch.target=${CHANGE_TARGET} \
                                     -Dsonar.java.source=8 \
-                                    -Dsonar.java.binaries='target/' \
+                                    -Dsonar.java.binaries='**/target/classes' \
                                     -Dsonar.core.codeCoveragePlugin=jacoco \
                                     -Dsonar.projectKey=org.eclipse.kura:kura \
                                     -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java,org.eclipse.kura.nm/src/main/java/org/freedesktop/**/*,org.eclipse.kura.nm/src/main/java/fi/w1/**/*,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod1/LibGpiodV1Native.java,org.eclipse.kura.linux.gpio.libgpiod/src/main/java/org/eclipse/kura/linux/gpio/libgpiod2/LibGpiodV2Native.java

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
 package org.eclipse.kura.rest.provider.test;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -53,8 +54,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 
 import org.bouncycastle.asn1.x500.X500Name;
+import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.testutil.pki.TestCA;
 import org.eclipse.kura.core.testutil.pki.TestCA.CertificateCreationOptions;
@@ -1089,6 +1092,28 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         thenResponseCodeIs(401);
     }
 
+    @Test
+    public void auditContextIpIsNotInfluencedByXffHeader() {
+        givenService(new AuditContextCapturingService());
+        givenXForwardedForHeader("6.6.6.6");
+
+        whenRequestIsPerformed(new MethodSpec("GET"), "/auditIp");
+
+        thenResponseCodeIs(200);
+        thenAuditContextIpIsNotXffSpoofedValue("6.6.6.6");
+        thenAuditContextIpIsLoopback();
+    }
+
+    @Test
+    public void auditContextIpIsRemoteAddrWhenXffHeaderIsAbsent() {
+        givenService(new AuditContextCapturingService());
+
+        whenRequestIsPerformed(new MethodSpec("GET"), "/auditIp");
+
+        thenResponseCodeIs(200);
+        thenAuditContextIpIsLoopback();
+    }
+
     private List<ServiceRegistration<?>> registeredServices = new ArrayList<>();
     private CompletableFuture<Void> providerEnabled = new CompletableFuture<>();
     private CompletableFuture<Void> providerDisabled = new CompletableFuture<>();
@@ -1620,5 +1645,38 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
                 String targetIdentity) {
             super(expectedUsername, expectedPassword, targetIdentity);
         }
+    }
+
+    @Path("testservice")
+    public static class AuditContextCapturingService extends TestService {
+
+        @GET
+        @Path("/auditIp")
+        public String getAuditContextIp(@Context ContainerRequestContext requestContext) {
+            final Object rawContext = requestContext.getProperty("org.eclipse.kura.rest.audit.context");
+            if (rawContext instanceof AuditContext) {
+                return ((AuditContext) rawContext).getProperties().getOrDefault("ip", "no-ip");
+            }
+            return "no-audit-context";
+        }
+    }
+
+    private void givenXForwardedForHeader(final String ip) {
+        ((RestTransport) this.transport).setHeader("X-Forwarded-For", ip);
+    }
+
+    private void thenAuditContextIpIsNotXffSpoofedValue(final String xffValue) {
+        final String body = expectResponse().getBody()
+                .orElseThrow(() -> new IllegalStateException("no response body"));
+        assertFalse("Audit context ip must not be the XFF-spoofed value '" + xffValue + "', got: " + body,
+                body.contains(xffValue));
+    }
+
+    private void thenAuditContextIpIsLoopback() {
+        final String body = expectResponse().getBody()
+                .orElseThrow(() -> new IllegalStateException("no response body"));
+        final boolean isLoopback = body.contains("127.0.0.1") || body.contains("::1")
+                || body.contains("0:0:0:0:0:0:0:1");
+        assertTrue("Expected loopback address in audit context ip, got: " + body, isLoopback);
     }
 }

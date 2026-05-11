@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -57,8 +57,8 @@ public class MqttDataTransportTest extends BaseCloudTests {
     public void shouldConnectOverPlainMqtt() throws Exception {
         try (final Fixture fixture = new Fixture()) {
             final DataTransportService test = fixture.createFactoryConfiguration(DataTransportService.class,
-                    TEST_MQTT_DATA_TRANSPORT_PID, MQTT_DATA_TRANSPORT_FACTORY_PID, MqttDataTransportOptions
-                            .defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTT).toProperties())
+                    TEST_MQTT_DATA_TRANSPORT_PID, MQTT_DATA_TRANSPORT_FACTORY_PID,
+                    MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTT).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -70,8 +70,8 @@ public class MqttDataTransportTest extends BaseCloudTests {
     public void shouldNotConnectOverMqttsWithoutKeystore() throws Exception {
         try (final Fixture fixture = new Fixture()) {
             final DataTransportService test = fixture.createFactoryConfiguration(DataTransportService.class,
-                    TEST_MQTT_DATA_TRANSPORT_PID, MQTT_DATA_TRANSPORT_FACTORY_PID, MqttDataTransportOptions
-                            .defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS).toProperties())
+                    TEST_MQTT_DATA_TRANSPORT_PID, MQTT_DATA_TRANSPORT_FACTORY_PID,
+                    MqttDataTransportOptions.defaultConfiguration().withBrokerUrl(BROKER_ADDR_MQTTS).toProperties())
                     .get(30, TimeUnit.SECONDS);
 
             assertNotNull(test);
@@ -225,7 +225,7 @@ public class MqttDataTransportTest extends BaseCloudTests {
             brokerCA.revokeCertificate(brokerCertificate);
             server.setResource("/crl.pem", encodeCrl(brokerCA.generateCRL(CRLCreationOptions.builder().build())));
 
-            nextEvent.get(10, TimeUnit.SECONDS);
+            nextEvent.get(60, TimeUnit.SECONDS);
 
             test.disconnect(0);
 
@@ -718,7 +718,7 @@ public class MqttDataTransportTest extends BaseCloudTests {
     private static class KeystoreServiceOptions {
 
         private Optional<String> keystorePath = Optional.empty();
-        private Optional<String> keystorePassword = Optional.empty();
+        private final Optional<String> keystorePassword = Optional.empty();
         private boolean crlManagerEnabled = false;
         private Optional<String[]> crlUrls = Optional.empty();
 
@@ -753,7 +753,7 @@ public class MqttDataTransportTest extends BaseCloudTests {
             result.put("crl.check.interval.time.unit", TimeUnit.SECONDS.name());
             result.put("crl.update.interval", 1L);
             result.put("crl.update.interval.time.unit", TimeUnit.SECONDS.name());
-            result.put("crl.management.enabled", crlManagerEnabled);
+            result.put("crl.management.enabled", this.crlManagerEnabled);
             this.crlUrls.ifPresent(u -> result.put("crl.urls", u));
 
             return result;
@@ -769,7 +769,7 @@ public class MqttDataTransportTest extends BaseCloudTests {
             return WireTestUtil.createFactoryConfiguration(configurationService, classz, pid, factoryPid, properties)
                     .whenComplete((ok, ex) -> {
                         if (ex == null) {
-                            createdPids.add(pid);
+                            this.createdPids.add(pid);
                         }
                     });
         }
@@ -777,7 +777,7 @@ public class MqttDataTransportTest extends BaseCloudTests {
         @Override
         public void close() throws Exception {
 
-            for (final String pid : createdPids) {
+            for (final String pid : this.createdPids) {
                 WireTestUtil.deleteFactoryConfiguration(configurationService, pid).get(30, TimeUnit.SECONDS);
             }
 

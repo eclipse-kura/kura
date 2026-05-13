@@ -67,6 +67,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
 
     private static final String DEFAULT_KEYSTORE_PASSWORD = "foo";
     private static final String DEFAULT_KEYSTORE_PID = "foo";
+    private static final long DEFAULT_MIN_RESCHEDULE_DELAY_S = 30;
 
     private static int jettyPort = 8085;
 
@@ -482,7 +483,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
             fixture.setCrl("/foo.crl", newCrl);
 
             nextDownload = fixture.nextDownloadRelativeURI();
-            assertEquals("/foo.crl", nextDownload.get(15, TimeUnit.SECONDS));
+            assertEquals("/foo.crl", nextDownload.get(DEFAULT_MIN_RESCHEDULE_DELAY_S + 10, TimeUnit.SECONDS));
         }
     }
 

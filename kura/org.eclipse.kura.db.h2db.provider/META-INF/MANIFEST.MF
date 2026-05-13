@@ -30,4 +30,5 @@ Import-Package: org.eclipse.kura;version="[1.7,2.0)",
  org.h2.tools;version="2.4.240",
  org.osgi.framework;version="1.10.0",
  org.osgi.service.component;version="1.4.0",
- org.slf4j;version="1.7.32"
+ org.slf4j;version="1.7.32",
+ javax.sql

@@ -32,6 +32,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.core.keystore.util.CRLUtil;
 import org.slf4j.Logger;
@@ -128,10 +129,10 @@ public class CRLManager implements Closeable {
     }
 
     public synchronized List<X509CRL> getCrls() {
-        return this.store.getCRLs() //
-                .stream() //
-                .map(StoredCRL::getCrl) //
-                .toList();
+        return this.store.getCRLs()
+                .stream()
+                .map(StoredCRL::getCrl)
+                .collect(Collectors.toList());
     }
 
     public CertStore getCertStore() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {

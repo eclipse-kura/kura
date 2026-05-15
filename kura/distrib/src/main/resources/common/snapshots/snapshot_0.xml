@@ -323,7 +323,7 @@ NETWORK_CONFIGURATION
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="crl.management.enabled" type="Boolean">
-                <esf:value>true</esf:value>
+                <esf:value>false</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
                 <esf:value>org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl</esf:value>
@@ -345,7 +345,7 @@ NETWORK_CONFIGURATION
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="crl.management.enabled" type="Boolean">
-                <esf:value>true</esf:value>
+                <esf:value>false</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
                 <esf:value>org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl</esf:value>

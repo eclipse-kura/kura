@@ -170,7 +170,7 @@
     <esf:configuration pid="org.eclipse.kura.internal.rest.provider.RestService">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="auth.basic.enabled" type="Boolean">
-                <esf:value>false</esf:value>
+                <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="auth.certificate.stateless.enabled"
                 type="Boolean">

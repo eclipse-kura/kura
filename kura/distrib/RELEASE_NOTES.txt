@@ -23,6 +23,8 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * 723ef076b8 - [core.keystore] Improve CRL management (#6230) [backport release-5.6.0] (#6237) (Salvatore Coppola)
+  * 0ba7612f99 - [target-platform] Updated Kura version in target-platform config (#6239) (Pierantonio Merlino)
   * 35c65ff6d9 - Correctly handle X-Forwarded-For header for audit logging [backport release-5.6.0] (#6218) (Matteo Maiero)
   * a669473c20 - [linux.gpio.libgpiod] Fix GPIO events behavior in libgpiod v1 (#6184) (Pierantonio Merlino)
   * f7456aca86 - Fixed password encryption in ConfigurationService.createFactoryConfiguration [backport release-5.6.0] (#6182) (nicolatimeus)
@@ -91,6 +93,10 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 723ef076b8 - fix(core.keystore): Improve CRL management (#6230) [backport release-5.6.0] (#6237) (Salvatore Coppola)
+  * 0ba7612f99 - fix(target-platform): Updated Kura version in target-platform config (#6239) (Pierantonio Merlino)
+  * 7179d2fa8c - ci(automation): avoid branch name collision on Release Notes workflow [backport release-5.6.0] (#6238) (Mattia Dal Ben)
+  * d1a611ef47 - chore: add Kura 5.6.2 release notes (#6235) (Pierantonio Merlino)
   * 1ef6e8c141 - chore: automated uptick to 5.6.2 (#6232) (eclipse-kura-bot)
   * 35c65ff6d9 - fix: Correctly handle X-Forwarded-For header for audit logging [backport release-5.6.0] (#6218) (Matteo Maiero)
   * 745cd6df2d - chore: update netty to 4.1.132.Final [backport release-5.6.0] (#6216) (Matteo Maiero)

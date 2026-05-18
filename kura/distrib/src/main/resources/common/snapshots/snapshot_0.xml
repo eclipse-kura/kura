@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
 
-    Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+    Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -268,6 +268,9 @@ NETWORK_CONFIGURATION
             <esf:property name="ssl.hostname.verification" array="false" encrypted="false" type="Boolean">
                 <esf:value>true</esf:value>
             </esf:property>
+            <esf:property name="ssl.revocation.check.enabled" array="false" encrypted="false" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
             <esf:property array="false" encrypted="false" name="KeystoreService.target" type="String">
                 <esf:value>(kura.service.pid=SSLKeystore)</esf:value>
             </esf:property>
@@ -319,6 +322,9 @@ NETWORK_CONFIGURATION
             <esf:property array="false" encrypted="false" name="randomize.password" type="Boolean">
                 <esf:value>true</esf:value>
             </esf:property>
+            <esf:property array="false" encrypted="false" name="crl.management.enabled" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
             <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
                 <esf:value>org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl</esf:value>
             </esf:property>
@@ -337,6 +343,9 @@ NETWORK_CONFIGURATION
             </esf:property>
             <esf:property array="false" encrypted="false" name="randomize.password" type="Boolean">
                 <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="crl.management.enabled" type="Boolean">
+                <esf:value>false</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
                 <esf:value>org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl</esf:value>

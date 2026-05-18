@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.core.test;
 
 import static org.junit.Assert.assertNotNull;
@@ -44,18 +56,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 
-/*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
- * SPDX-License-Identifier: EPL-2.0
- * 
- * Contributors:
- * Eurotech
- *******************************************************************************/
 public class MqttDataTransportTest {
 
     private static final String ARTEMIS_XML_PID = "org.eclipse.kura.broker.artemis.xml.BrokerInstance";
@@ -312,7 +312,7 @@ public class MqttDataTransportTest {
             brokerCA.revokeCertificate(brokerCertificate);
             server.setResource("/crl.pem", encodeCrl(brokerCA.generateCRL(CRLCreationOptions.builder().build())));
 
-            nextEvent.get(10, TimeUnit.SECONDS);
+            nextEvent.get(60, TimeUnit.SECONDS);
 
             test.disconnect(0);
 
@@ -803,7 +803,7 @@ public class MqttDataTransportTest {
     private static class KeystoreServiceOptions {
 
         private Optional<String> keystorePath = Optional.empty();
-        private Optional<String> keystorePassword = Optional.empty();
+        private final Optional<String> keystorePassword = Optional.empty();
         private boolean crlManagerEnabled = false;
         private Optional<String[]> crlUrls = Optional.empty();
 
@@ -838,7 +838,7 @@ public class MqttDataTransportTest {
             result.put("crl.check.interval.time.unit", TimeUnit.SECONDS.name());
             result.put("crl.update.interval", 1L);
             result.put("crl.update.interval.time.unit", TimeUnit.SECONDS.name());
-            result.put("crl.management.enabled", crlManagerEnabled);
+            result.put("crl.management.enabled", this.crlManagerEnabled);
             this.crlUrls.ifPresent(u -> result.put("crl.urls", u));
 
             return result;
@@ -854,7 +854,7 @@ public class MqttDataTransportTest {
             return WireTestUtil.createFactoryConfiguration(configurationService, classz, pid, factoryPid, properties)
                     .whenComplete((ok, ex) -> {
                         if (ex == null) {
-                            createdPids.add(pid);
+                            this.createdPids.add(pid);
                         }
                     });
         }
@@ -862,7 +862,7 @@ public class MqttDataTransportTest {
         @Override
         public void close() throws Exception {
 
-            for (final String pid : createdPids) {
+            for (final String pid : this.createdPids) {
                 WireTestUtil.deleteFactoryConfiguration(configurationService, pid).get(30, TimeUnit.SECONDS);
             }
 

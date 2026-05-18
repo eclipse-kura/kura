@@ -66,6 +66,8 @@
                     <bnd><![CDATA[
                         Bundle-SymbolicName: ${project.artifactId};singleton:=true
                         Bundle-ActivationPolicy: lazy
+                        -includeresource: about_files=about_files/,\
+                            about.html
                         ]]></bnd>
                 </configuration>
             </plugin>

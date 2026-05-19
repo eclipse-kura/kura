@@ -2,7 +2,7 @@ index: target/index.xml
 
 -standalone: ${index}
 
--resolve.effective: resolve
+-resolve.effective: active
 
 -runfw: org.eclipse.osgi
 
@@ -69,9 +69,8 @@ Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
 	osgi.identity;filter:='(osgi.identity=org.eclipse.kura.cloudconnection.kapua.mqtt.provider)',\
 	osgi.identity;filter:='(osgi.identity=org.eclipse.kura.db.h2db.provider)',\
 
-# Require tested and testing bundle
+# Require testing bundle
 -runrequires: \
-    osgi.identity;filter:='(osgi.identity=${replace;${project.artifactId};\\.test$;})',\
     osgi.identity;filter:='(osgi.identity=${project.artifactId})',\
 
 #

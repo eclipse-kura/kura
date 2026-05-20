@@ -170,7 +170,7 @@
     <esf:configuration pid="org.eclipse.kura.internal.rest.provider.RestService">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="auth.basic.enabled" type="Boolean">
-                <esf:value>false</esf:value>
+                <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="auth.certificate.stateless.enabled"
                 type="Boolean">
@@ -203,6 +203,63 @@
             </esf:property>
             <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
                 <esf:value>org.eclipse.kura.db.H2DbService</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.identity.PasswordStrengthVerificationService">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="new.password.require.digits" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="new.password.require.special.characters" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="new.password.min.length" type="Integer">
+                <esf:value>1</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="new.password.require.both.cases" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
+                <esf:value>org.eclipse.kura.identity.PasswordStrengthVerificationService</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.pid" type="String">
+                <esf:value>org.eclipse.kura.identity.PasswordStrengthVerificationService</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.identity.LoginBannerService">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="post.login.banner.content" type="String">
+                <esf:value>Sample Banner Content</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="post.login.banner.enabled" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="pre.login.banner.content" type="String">
+                <esf:value></esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="pre.login.banner.enabled" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
+                <esf:value>org.eclipse.kura.identity.LoginBannerService</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.pid" type="String">
+                <esf:value>org.eclipse.kura.identity.LoginBannerService</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.watchdog.WatchdogService">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="pingInterval" type="Integer">
+                <esf:value>10000</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="enabled" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.pid" type="String">
+                <esf:value>org.eclipse.kura.watchdog.WatchdogService</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

@@ -36,8 +36,9 @@
             description="Type of message to be published.">
             <Option label="Telemetry QoS 0" value="telemetryQos0" />
             <Option label="Telemetry QoS 1" value="telemetryQos1" />
-            <Option label="Event" value="events" />
-            <Option label="Alert" value="alerts" />
+            <Option label="Event" value="event" />
+            <Option label="Alert" value="alert" />
+            <Option label="Control" value="control" />
         </AD>
     </OCD>
     

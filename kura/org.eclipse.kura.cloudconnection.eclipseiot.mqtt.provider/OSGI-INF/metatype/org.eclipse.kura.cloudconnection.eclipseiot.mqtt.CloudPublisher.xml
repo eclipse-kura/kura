@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
-  
+    Copyright (c) 2018, 2026 Eurotech and/or its affiliates and others
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
-	SPDX-License-Identifier: EPL-2.0
-	
-	Contributors:
-	 Eurotech
 
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher" 
@@ -36,8 +35,8 @@
             description="Type of message to be published.">
             <Option label="Telemetry QoS 0" value="telemetryQos0" />
             <Option label="Telemetry QoS 1" value="telemetryQos1" />
-            <Option label="Event" value="events" />
-            <Option label="Alert" value="alerts" />
+            <Option label="Event" value="event" />
+            <Option label="Alert" value="alert" />
         </AD>
     </OCD>
     

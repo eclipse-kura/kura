@@ -30,7 +30,7 @@ public class RestExceptionMapper implements ExceptionMapper<Throwable> {
     @Override
     public Response toResponse(Throwable exception) {
         if (exception instanceof WebApplicationException) {
-            // Do not shallow JAX-RS responses (NotFoundException, ForbiddenException, etc.)
+            // Do not swallow JAX-RS responses (NotFoundException, ForbiddenException, etc.)
             return ((WebApplicationException) exception).getResponse();
         }
 

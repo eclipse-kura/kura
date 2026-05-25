@@ -18,17 +18,18 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.JsonParseException;
 
-/**
- * Purpose of this mapper is to capture all the Exceptions that might happen when handling the request, so that they are
- * properly logged and handled in RestService
- */
 @Provider
-public class RestExceptionMapper implements ExceptionMapper<Throwable> {
+public class RestExceptionMapper implements ExceptionMapper<Exception> {
+
+    private static final Logger logger = LoggerFactory.getLogger(RestExceptionMapper.class);
 
     @Override
-    public Response toResponse(Throwable exception) {
+    public Response toResponse(Exception exception) {
         if (exception instanceof WebApplicationException) {
             // Do not swallow JAX-RS responses (NotFoundException, ForbiddenException, etc.)
             return ((WebApplicationException) exception).getResponse();
@@ -37,6 +38,12 @@ public class RestExceptionMapper implements ExceptionMapper<Throwable> {
         if (exception instanceof JsonParseException) {
             return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON)
                     .entity("{\"message\":\"Error parsing request body\"}").build();
+        }
+
+        logger.error("Unhandled exception while processing REST request", exception);
+
+        if (exception instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
         }
 
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON)

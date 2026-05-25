@@ -31,7 +31,7 @@ public class RestExceptionMapper implements ExceptionMapper<Exception> {
     @Override
     public Response toResponse(Exception exception) {
         if (exception instanceof WebApplicationException) {
-            processWebApplicationException((WebApplicationException) exception);
+            return processWebApplicationException((WebApplicationException) exception);
         }
 
         if (exception instanceof JsonParseException) {

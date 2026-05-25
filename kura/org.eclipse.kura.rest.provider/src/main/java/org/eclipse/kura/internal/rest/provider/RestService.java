@@ -30,9 +30,9 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.identity.LoginBannerService;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
-import org.eclipse.kura.identity.IdentityService;
 import org.eclipse.kura.internal.rest.auth.BasicAuthenticationProvider;
 import org.eclipse.kura.internal.rest.auth.CertificateAuthenticationProvider;
 import org.eclipse.kura.internal.rest.auth.RestIdentityHelper;
@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseFilter;
+import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 
@@ -128,15 +129,18 @@ public class RestService implements ConfigurableComponent {
         final RestSessionHelper restSessionHelper = new RestSessionHelper(identityHelper);
         final Dictionary<String, Object> serviceProperties = RestServiceUtils.extensionProperties();
 
-        registeredServices.add(bundleContext.registerService(ContainerRequestFilter.class, this.incomingPortCheckFilter,
+        this.registeredServices
+                .add(bundleContext.registerService(ContainerRequestFilter.class, this.incomingPortCheckFilter,
                 serviceProperties));
-        registeredServices.add(bundleContext.registerService(ContainerRequestFilter.class, this.authenticationFilter,
+        this.registeredServices
+                .add(bundleContext.registerService(ContainerRequestFilter.class, this.authenticationFilter,
                 serviceProperties));
-        registeredServices.add(bundleContext.registerService(ContainerRequestFilter.class, new AuthorizationFilter(),
+        this.registeredServices
+                .add(bundleContext.registerService(ContainerRequestFilter.class, new AuthorizationFilter(),
                 serviceProperties));
-        registeredServices.add(
+        this.registeredServices.add(
                 bundleContext.registerService(ContainerResponseFilter.class, new AuditFilter(), serviceProperties));
-        registeredServices.add(bundleContext.registerService(
+        this.registeredServices.add(bundleContext.registerService(
                 new String[] { MessageBodyReader.class.getName(), MessageBodyWriter.class.getName() },
                 new GsonSerializer<Object>(), serviceProperties));
 
@@ -152,6 +156,8 @@ public class RestService implements ConfigurableComponent {
 
         this.registeredServices.add(bundleContext.registerService(SessionRestService.class, this.authRestService,
                 RestServiceUtils.resourceProperties()));
+        this.registeredServices.add(
+                bundleContext.registerService(ExceptionMapper.class, new RestExceptionMapper(), serviceProperties));
 
         update(properties);
 

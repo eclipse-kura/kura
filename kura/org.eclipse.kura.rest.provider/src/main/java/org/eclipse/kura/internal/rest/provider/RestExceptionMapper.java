@@ -31,8 +31,7 @@ public class RestExceptionMapper implements ExceptionMapper<Exception> {
     @Override
     public Response toResponse(Exception exception) {
         if (exception instanceof WebApplicationException) {
-            // Do not swallow JAX-RS responses (NotFoundException, ForbiddenException, etc.)
-            return ((WebApplicationException) exception).getResponse();
+            processWebApplicationException((WebApplicationException) exception);
         }
 
         if (exception instanceof JsonParseException) {
@@ -40,7 +39,15 @@ public class RestExceptionMapper implements ExceptionMapper<Exception> {
                     .entity("{\"message\":\"Error parsing request body\"}").build();
         }
 
-        logger.error("Unhandled exception while processing REST request", exception);
+        return processDefaultException(exception);
+    }
+
+    private static Response processWebApplicationException(WebApplicationException exception) {
+        return (exception.getResponse() == null) ? processDefaultException(exception) : exception.getResponse();
+    }
+
+    private static Response processDefaultException(Exception exception) {
+        logger.error("Uncaught Exception while processing REST request", exception);
 
         if (exception instanceof InterruptedException) {
             Thread.currentThread().interrupt();

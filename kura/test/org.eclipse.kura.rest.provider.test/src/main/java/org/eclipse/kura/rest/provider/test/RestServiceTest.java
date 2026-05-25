@@ -1124,7 +1124,7 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password", "}");
 
         thenResponseCodeIs(400);
-        thenResponseBodyEqualsJson("{\"message\":\"Malformed JSON request body\"}");
+        thenResponseBodyEqualsJson("{\"message\":\"Error parsing request body\"}");
     }
 
     @Test

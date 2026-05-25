@@ -36,7 +36,7 @@ public class RestExceptionMapper implements ExceptionMapper<Throwable> {
 
         if (exception instanceof JsonParseException) {
             return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON)
-                    .entity("{\"message\":\"Malformed JSON request body\"}").build();
+                    .entity("{\"message\":\"Error parsing request body\"}").build();
         }
 
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON)

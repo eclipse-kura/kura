@@ -1640,8 +1640,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
         @GET
         @Path("/noAuth")
-        public String noAuth() throws Throwable {
-            throw new Throwable("Some error");
+        public String noAuth() throws Exception {
+            throw new Exception("Some error");
         }
     }
 

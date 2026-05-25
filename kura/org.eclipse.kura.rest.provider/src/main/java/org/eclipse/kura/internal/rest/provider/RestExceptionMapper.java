@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.provider;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.JsonParseException;
 
 import jakarta.ws.rs.WebApplicationException;
@@ -20,23 +23,34 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 
-/**
- * Purpose of this mapper is to capture all the Exceptions that might happen when handling the request,
- * so that they are properly handled as Response
- */
 @Provider
-public class RestExceptionMapper implements ExceptionMapper<Throwable> {
+public class RestExceptionMapper implements ExceptionMapper<Exception> {
+
+    private static final Logger logger = LoggerFactory.getLogger(RestExceptionMapper.class);
 
     @Override
-    public Response toResponse(Throwable exception) {
+    public Response toResponse(Exception exception) {
         if (exception instanceof WebApplicationException) {
-            // Do not swallow JAX-RS responses (NotFoundException, ForbiddenException, etc.)
-            return ((WebApplicationException) exception).getResponse();
+            return processWebApplicationException((WebApplicationException) exception);
         }
 
         if (exception instanceof JsonParseException) {
             return Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON)
                     .entity("{\"message\":\"Error parsing request body\"}").build();
+        }
+
+        return processDefaultException(exception);
+    }
+
+    private static Response processWebApplicationException(WebApplicationException exception) {
+        return (exception.getResponse() == null) ? processDefaultException(exception) : exception.getResponse();
+    }
+
+    private static Response processDefaultException(Exception exception) {
+        logger.error("Uncaught Exception while processing REST request", exception);
+
+        if (exception instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
         }
 
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).type(MediaType.APPLICATION_JSON)

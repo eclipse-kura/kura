@@ -111,7 +111,7 @@ node {
                         if (env.CHANGE_ID) {
                             analysisParameters = "-Dsonar.pullrequest.branch=${changeBranch} -Dsonar.pullrequest.base=${env.CHANGE_TARGET} -Dsonar.pullrequest.key=${env.CHANGE_ID}"
                         } else {
-                            analysisParameters = "-Dsonar.branch.name=${changeBranch}"
+                            analysisParameters = "-Dsonar.branch.name=${env.BRANCH_NAME}"
                         }
 
                         sh """

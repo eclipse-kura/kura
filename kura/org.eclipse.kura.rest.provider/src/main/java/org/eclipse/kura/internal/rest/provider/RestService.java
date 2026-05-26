@@ -43,6 +43,7 @@ import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import org.eclipse.kura.audit.AuditConstants;
@@ -148,7 +149,7 @@ public class RestService
         this.userAdminHelper = new UserAdminHelper(this.userAdmin, this.cryptoService);
         final RestSessionHelper restSessionHelper = new RestSessionHelper(this.userAdminHelper);
 
-        registeredServices
+        this.registeredServices
                 .add(bundleContext.registerService(ContainerRequestFilter.class, new IncomingPortCheckFilter(), null));
 
         this.basicAuthProvider = new BasicAuthenticationProvider(bundleContext, this.userAdminHelper);
@@ -160,6 +161,9 @@ public class RestService
 
         this.registeredServices
                 .add(bundleContext.registerService(SessionRestService.class, this.authRestService, null));
+
+        this.registeredServices
+                .add(bundleContext.registerService(ExceptionMapper.class, new RestExceptionMapper(), null));
 
         update(properties);
 

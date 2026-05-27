@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -105,16 +105,19 @@ public class KeystoreUtilsTest {
             + "o135W+7AWr+dYRLx1FcvgMU9SbF9cwUU5Zutbrv+Kl8xGPyfx09MJ6BNxTkkr09J\n"
             + "BpbrbOZsUDjMjojyQYL4Ll9rLohk+Pq73xXJjtTRIXZVXJg27pEEqzcVB4o9vgli\n" + "yzOqhyTKM9JP7Uda6Fv6DA==\n"
             + "-----END PRIVATE KEY-----";
+    private static String privateKeyEC = "-----BEGIN EC PRIVATE KEY-----\n"
+            + "MHcCAQEEINPxE19vkUFNwfy99v6DSZcMSTRUAHYQhZ3CsUZadQ1woAoGCCqGSM49\n"
+            + "AwEHoUQDQgAESOVg3CaDAgtXzhrv0whx8aLFcDzbz7Cuhug+FER8JAwYBjWgW1TW\n"
+            + "TmYxwyPOgzIFMW31dqgIWl/EeE2qYvKQTA==\n" + "-----END EC PRIVATE KEY-----";
     private static String publicKeyEC = "-----BEGIN CERTIFICATE-----\n"
-            + "MIIBqjCCAU2gAwIBAgIELVNe7DAMBggqhkjOPQQDAgUAMEkxCzAJBgNVBAYTAnRy\n"
-            + "MQowCAYDVQQIEwE1MQowCAYDVQQHEwE0MQowCAYDVQQKEwEzMQowCAYDVQQLEwEy\n"
-            + "MQowCAYDVQQDEwExMB4XDTIxMDQxOTE1MDM0M1oXDTIxMDcxODE1MDM0M1owSTEL\n"
-            + "MAkGA1UEBhMCdHIxCjAIBgNVBAgTATUxCjAIBgNVBAcTATQxCjAIBgNVBAoTATMx\n"
-            + "CjAIBgNVBAsTATIxCjAIBgNVBAMTATEwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNC\n"
-            + "AARdxv7a46GcCcGrbbl9EolhfvKPJN4q8vfX8soAMFQ/7AOuKkz/2voFJ5kMK+gK\n"
-            + "31kbILrPnZa8IFmOB0d6qwLToyEwHzAdBgNVHQ4EFgQU0K3b/8VqxtBxW2dD81CB\n"
-            + "x9PyGUcwDAYIKoZIzj0EAwIFAANJADBGAiEAwN0V4/m/MAtEModdE27xB2bMC13i\n"
-            + "7KN7y088ENIykpICIQCjE9XItmBa405Bki9xe+n7T0eFhoCzAPk6lceZLzeFTQ==\n" + "-----END CERTIFICATE-----";
+            + "MIIBUjCB+aADAgECAhR2D5UAzcbk6uY/27htO/fqQCwXsDAKBggqhkjOPQQDAjAY\n"
+            + "MRYwFAYDVQQDDA1leGFtcGxlLmxvY2FsMB4XDTI2MDUyNzA5MjQyOFoXDTM2MDUy\n"
+            + "NDA5MjQyOFowGDEWMBQGA1UEAwwNZXhhbXBsZS5sb2NhbDBZMBMGByqGSM49AgEG\n"
+            + "CCqGSM49AwEHA0IABEjlYNwmgwILV84a79MIcfGixXA828+wroboPhREfCQMGAY1\n"
+            + "oFtU1k5mMcMjzoMyBTFt9XaoCFpfxHhNqmLykEyjITAfMB0GA1UdDgQWBBQ7+U8z\n"
+            + "ckKFekolxpHO4AilU6cihjAKBggqhkjOPQQDAgNIADBFAiEA1tDV9l7l/ese0a0x\n"
+            + "ZeOPu/IRArZpoPvqa0n8lgs//0ICIGXYJxv68y2zlgFyyqgFN6wevdxnfDGIhhap\n" + "kaJuLYnq\n"
+            + "-----END CERTIFICATE-----";
 
     @Test
     public void createCertificateDSAEntryTest() throws CertificateException {
@@ -148,6 +151,17 @@ public class KeystoreUtilsTest {
         assertEquals(256,
                 ((ECPublicKey) entry.getTrustedCertificate().getPublicKey()).getParams().getOrder().bitLength());
         assertEquals("X.509", entry.getTrustedCertificate().getType());
+
+    }
+
+    @Test
+    public void createPrivateKeyECEntryTest() throws IOException, GeneralSecurityException {
+        PrivateKeyEntry entry = KeystoreUtils.createPrivateKey(privateKeyEC, publicKeyEC);
+
+        assertNotNull(entry);
+        assertEquals("EC", entry.getCertificate().getPublicKey().getAlgorithm());
+        assertEquals(256, ((ECPublicKey) entry.getCertificate().getPublicKey()).getParams().getOrder().bitLength());
+        assertEquals("X.509", entry.getCertificate().getType());
 
     }
 

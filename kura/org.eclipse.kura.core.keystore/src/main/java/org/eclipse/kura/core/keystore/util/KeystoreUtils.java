@@ -29,6 +29,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
@@ -36,21 +37,18 @@ import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 public class KeystoreUtils {
 
     private KeystoreUtils() {
-        // Empty constructor
     }
 
     public static PrivateKeyEntry createPrivateKey(String privateKey, String publicKey)
             throws IOException, GeneralSecurityException {
-        // Works with RSA and DSA. EC is not supported since the certificate is encoded
-        // with ECDSA while the corresponding private key with EC.
-        // This cause an error when the PrivateKeyEntry is generated.
-        Certificate[] certs = parsePublicCertificates(publicKey);
 
+        Certificate[] certs = parsePublicCertificates(publicKey);
         Security.addProvider(new BouncyCastleProvider());
         PEMParser pemParser = new PEMParser(new StringReader(privateKey));
         Object object = pemParser.readObject();
         pemParser.close();
-        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC")
+                .setAlgorithmMapping(X9ObjectIdentifiers.id_ecPublicKey, "EC");
         PrivateKey privkey = null;
         if (object instanceof org.bouncycastle.asn1.pkcs.PrivateKeyInfo) {
             privkey = converter.getPrivateKey((org.bouncycastle.asn1.pkcs.PrivateKeyInfo) object);

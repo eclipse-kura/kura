@@ -6,11 +6,14 @@ Bundle-Version: 2.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=21))"
 Import-Package: com.eclipsesource.json;version="0.9.5",
+ javax.net.ssl,
+ javax.security.auth.x500,
  org.bouncycastle.asn1;version="1.78.1",
  org.bouncycastle.asn1.cms;version="1.78.1",
  org.bouncycastle.asn1.pkcs;version="1.78.1",
  org.bouncycastle.asn1.x500;version="1.78.1",
  org.bouncycastle.asn1.x509;version="1.78.1",
+ org.bouncycastle.asn1.x9;version="1.78.1",
  org.bouncycastle.cert;version="1.78.1",
  org.bouncycastle.cert.jcajce;version="1.78.1",
  org.bouncycastle.cms;version="1.78.1",
@@ -40,9 +43,7 @@ Import-Package: com.eclipsesource.json;version="0.9.5",
  org.osgi.service.event;version="1.4.0",
  org.osgi.service.useradmin;version="1.1.0",
  org.osgi.util.tracker;version="1.5.2",
- org.slf4j;version="1.7.32",
- javax.net.ssl,
- javax.security.auth.x500
+ org.slf4j;version="1.7.32"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.kura.core.keystore.util;version="1.1.0"

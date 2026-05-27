@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.core.keystore.util.test;
+package org.eclipse.kura.core.keystore.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -27,11 +27,9 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-import org.eclipse.kura.core.keystore.util.KeystoreRemoteService;
-import org.eclipse.kura.core.keystore.util.KeystoreUtils;
 import org.junit.Test;
 
-public class KeystoreRemoteServiceTest {
+public class KeystoreUtilsTest {
 
     private final String publicKeyDSA = "-----BEGIN CERTIFICATE-----\n"
             + "MIIEjjCCBDmgAwIBAgIED6yGqzANBglghkgBZQMEAwIFADBJMQswCQYDVQQGEwJm\n"
@@ -123,7 +121,7 @@ public class KeystoreRemoteServiceTest {
 
     @Test
     public void createCertificateDSAEntryTest() throws CertificateException {
-        TrustedCertificateEntry entry = KeystoreRemoteService.createCertificateEntry(publicKeyDSA);
+        TrustedCertificateEntry entry = KeystoreUtils.createCertificateEntry(publicKeyDSA);
 
         assertNotNull(entry);
         assertEquals("DSA", entry.getTrustedCertificate().getPublicKey().getAlgorithm());
@@ -135,7 +133,7 @@ public class KeystoreRemoteServiceTest {
 
     @Test
     public void createCertificateRSAEntryTest() throws CertificateException {
-        TrustedCertificateEntry entry = KeystoreRemoteService.createCertificateEntry(publicKeyRSA);
+        TrustedCertificateEntry entry = KeystoreUtils.createCertificateEntry(publicKeyRSA);
 
         assertNotNull(entry);
         assertEquals("RSA", entry.getTrustedCertificate().getPublicKey().getAlgorithm());
@@ -146,7 +144,7 @@ public class KeystoreRemoteServiceTest {
 
     @Test
     public void createCertificateECEntryTest() throws CertificateException {
-        TrustedCertificateEntry entry = KeystoreRemoteService.createCertificateEntry(publicKeyEC);
+        TrustedCertificateEntry entry = KeystoreUtils.createCertificateEntry(publicKeyEC);
 
         assertNotNull(entry);
         assertEquals("EC", entry.getTrustedCertificate().getPublicKey().getAlgorithm());
@@ -169,7 +167,7 @@ public class KeystoreRemoteServiceTest {
 
     @Test
     public void createPrivateKeyDSAEntryTest() throws IOException, GeneralSecurityException {
-        PrivateKeyEntry entry = KeystoreRemoteService.createPrivateKey(privateKeyDSA, publicKeyDSA);
+        PrivateKeyEntry entry = KeystoreUtils.createPrivateKey(privateKeyDSA, publicKeyDSA);
 
         assertNotNull(entry);
         assertEquals("DSA", entry.getCertificate().getPublicKey().getAlgorithm());
@@ -180,7 +178,7 @@ public class KeystoreRemoteServiceTest {
 
     @Test
     public void createPrivateKeyRSAEntryTest() throws IOException, GeneralSecurityException {
-        PrivateKeyEntry entry = KeystoreRemoteService.createPrivateKey(privateKeyRSA, publicKeyRSA);
+        PrivateKeyEntry entry = KeystoreUtils.createPrivateKey(privateKeyRSA, publicKeyRSA);
 
         assertNotNull(entry);
         assertEquals("RSA", entry.getCertificate().getPublicKey().getAlgorithm());
@@ -221,7 +219,7 @@ public class KeystoreRemoteServiceTest {
     }
 
     private void whenCertificatesAreDecoded() throws CertificateException {
-        this.result = KeystoreRemoteService.parsePublicCertificates(toBeDecoded);
+        this.result = KeystoreUtils.parsePublicCertificates(toBeDecoded);
     }
 
     private void thenDecodedCertificateCountIs(final int expectedCount) {
@@ -241,3 +239,4 @@ public class KeystoreRemoteServiceTest {
         assertEquals(encoded + '\n', resultPEM);
     }
 }
+

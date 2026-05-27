@@ -72,6 +72,7 @@ Types: deb
 URIs: https://repo.eclipse.org/repository/kura-apt/
 Suites: stable
 Components: main
+Architectures: all
 Signed-By: /etc/apt/keyrings/kura.gpg
 EOF
 

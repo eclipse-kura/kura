@@ -50,6 +50,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
 import org.bouncycastle.asn1.x500.X500Name;
+import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.testutil.pki.TestCA;
 import org.eclipse.kura.core.testutil.pki.TestCA.CertificateCreationOptions;
@@ -83,8 +84,6 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
-
-import org.eclipse.kura.audit.AuditContext;
 
 public class RestServiceTest extends AbstractRequestHandlerTest {
 
@@ -1165,6 +1164,30 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         thenAuditContextIpIsLoopback();
     }
 
+    @Test
+    public void shouldReturnBadRequestOnMalformedJSON() {
+        givenConfiguration("org.eclipse.kura.web.Console", //
+                "access.banner.enabled", false);
+        givenIdentity("foo", Optional.of("bar"), Collections.emptyList());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed("http", 8080, new MethodSpec("POST"), "/session/v1/login/password", "}");
+
+        thenResponseCodeIs(400);
+        thenResponseBodyEqualsJson("{\"message\":\"Error parsing request body\"}");
+    }
+
+    @Test
+    public void shouldReturnInternalServerErrorWithMessage() {
+        givenService(new NoAuthBroken());
+        givenNoBasicCredentials();
+
+        whenRequestIsPerformed(new MethodSpec("GET"), "/noAuth");
+
+        thenResponseCodeIs(500);
+        thenResponseBodyEqualsJson("{\"message\":\"Something went wrong\"}");
+    }
+
     private List<ServiceRegistration<?>> registeredServices = new ArrayList<>();
     private CompletableFuture<Void> providerEnabled = new CompletableFuture<>();
     private CompletableFuture<Void> providerDisabled = new CompletableFuture<>();
@@ -1609,6 +1632,16 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
         @Path("/noAuth")
         public String noAuth() {
             return "Hello";
+        }
+    }
+
+    @Path("testservice")
+    public static class NoAuthBroken extends TestService {
+
+        @GET
+        @Path("/noAuth")
+        public String noAuth() throws Exception {
+            throw new Exception("Some error");
         }
     }
 

@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.nm;
 
 import java.util.ArrayList;
@@ -15,6 +27,7 @@ import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.exceptions.DBusExecutionException;
 import org.freedesktop.dbus.interfaces.Properties;
 import org.freedesktop.dbus.types.UInt32;
+import org.freedesktop.dbus.types.UInt64;
 import org.freedesktop.dbus.types.Variant;
 import org.freedesktop.networkmanager.Device;
 import org.freedesktop.networkmanager.Settings;
@@ -196,6 +209,17 @@ public class NetworkManagerDbusWrapper {
                 new DBusPath(device.getObjectPath()), new DBusPath("/"));
     }
 
+    protected boolean reapplySettings(Device device, Map<String, Map<String, Variant<?>>> settings) {
+        try {
+            device.Reapply(settings, new UInt64(0), new UInt32(0));
+            return true;
+        } catch (DBusExecutionException e) {
+            logger.info("Could not reapply settings to device {}", device.getObjectPath());
+            logger.debug("Caused by", e);
+        }
+        return false;
+    }
+    
     protected List<Properties> getAllAccessPoints(Wireless wirelessDevice) throws DBusException {
         List<DBusPath> accessPointPaths = wirelessDevice.GetAllAccessPoints();
 

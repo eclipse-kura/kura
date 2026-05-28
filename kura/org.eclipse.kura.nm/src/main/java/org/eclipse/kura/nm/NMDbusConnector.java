@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@ package org.eclipse.kura.nm;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.util.IwCapabilityTool;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.wifi.WifiChannel;
+import org.eclipse.kura.nm.configuration.NMSettingsComparator;
 import org.eclipse.kura.nm.configuration.NMSettingsConverter;
 import org.eclipse.kura.nm.enums.MMModemLocationSource;
 import org.eclipse.kura.nm.enums.NMDeviceState;
@@ -505,7 +507,19 @@ public class NMDbusConnector {
                 NMDeviceState.NM_DEVICE_STATE_CONFIG);
 
         if (connection.isPresent()) {
-            connection.get().Update(newConnectionSettings);
+            // Compare old and new settings. Given that NetworkManager may remove parameters
+            // from the settings if they are set to the default value (e.g., removing mtu
+            // settings when set to the default value), we need NM to pre-ingest the new settings
+            Map<String, Map<String, Variant<?>>> oldConnectionSettings = getAllSettings(connection.get(), deviceType);
+            connection.get().UpdateUnsaved(newConnectionSettings);
+            Map<String, Map<String, Variant<?>>> cmpConnectionSettings = getAllSettings(connection.get(), deviceType);
+
+            if (NMSettingsComparator.areSettingsEqual(cmpConnectionSettings, oldConnectionSettings)) {
+                logger.info("No changes in connection settings for device {}", deviceId);
+            } else {
+                logger.info("Updated connection settings for device {}", deviceId);
+                connection.get().Save();
+            }
         } else {
             Settings settings = this.dbusConnection.getRemoteObject(NM_BUS_NAME, NM_SETTINGS_BUS_PATH, Settings.class);
             DBusPath createdConnectionPath = settings.AddConnection(newConnectionSettings);
@@ -514,11 +528,17 @@ public class NMDbusConnector {
             connection = Optional.of(createdConnection);
         }
 
-        try {
-            this.networkManager.activateConnection(connection.get(), device);
-            dsLock.waitForSignal();
-        } catch (DBusExecutionException e) {
-            logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);
+        // Reapply settings anyway to let NM reconfigure the device if needed (e.g. Modem connection failures)
+        boolean isReapplySuccessful = this.networkManager.reapplySettings(device, newConnectionSettings);
+        
+        if (!isReapplySuccessful) {
+            try {
+                logger.info("Activating connection for device {}", deviceId);
+                this.networkManager.activateConnection(connection.get(), device);
+                dsLock.waitForSignal();
+            } catch (DBusExecutionException e) {
+                logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);
+            }
         }
 
         // Housekeeping
@@ -540,6 +560,42 @@ public class NMDbusConnector {
 
     }
 
+    private Map<String, Map<String, Variant<?>>> getAllSettings(Connection connection, NMDeviceType deviceType) {
+        Map<String, Map<String, Variant<?>>> allSettings = new HashMap<>();
+        allSettings.putAll(connection.GetSettings());
+
+        if (!CONFIGURATION_SUPPORTED_DEVICE_TYPES.contains(deviceType)) {
+            // This check here is just to ensure that if a new device type is added to the
+            // supported list but not added here, we don't end up with an empty secrets map
+            // which would cause wrong comparison results in enableInterface method
+            throw new IllegalArgumentException(
+                    String.format("Device type %s not supported for secret settings retrieval", deviceType));
+        }
+
+        // Note: when adding a new device type among the supported ones make sure to add
+        // the related settings keys here in order to properly retrieve secrets for
+        // comparison in enableInterface method
+        String[] settingKeys;
+        if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_WIFI)) {
+            settingKeys = new String[] {"802-11-wireless", "802-11-wireless-security", "802-1x"};
+        } else if (deviceType.equals(NMDeviceType.NM_DEVICE_TYPE_MODEM)) {
+            settingKeys = new String[] {"gsm", "cdma", "ppp"};
+        } else {
+            settingKeys = new String[]{};
+        }
+
+        for (String settingKey : settingKeys) {
+            try {
+                Map<String, Map<String, Variant<?>>> secrets = connection.GetSecrets(settingKey);
+                allSettings.put(settingKey, secrets.get(settingKey));
+            } catch (DBusExecutionException e) {
+                // Ignore exception, it means that there are no secrets for this setting, which is fine
+            }
+        }
+
+        return allSettings;
+    }
+    
     private void createVirtualInterface(String deviceId, NetworkProperties properties, NMDeviceType deviceType)
             throws DBusException {
         Map<String, Map<String, Variant<?>>> newConnectionSettings = NMSettingsConverter.buildSettings(properties,

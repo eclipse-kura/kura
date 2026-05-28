@@ -516,7 +516,7 @@ public class NMDbusConnector {
 
         boolean isReapplySuccessful = this.networkManager.reapplySettings(device, newConnectionSettings);
         
-        if(!isReapplySuccessful) {
+        if (!isReapplySuccessful) {
             try {
                 this.networkManager.activateConnection(connection.get(), device);
                 dsLock.waitForSignal();

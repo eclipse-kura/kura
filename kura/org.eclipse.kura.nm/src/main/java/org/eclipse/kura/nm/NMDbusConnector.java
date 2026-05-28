@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -514,11 +514,15 @@ public class NMDbusConnector {
             connection = Optional.of(createdConnection);
         }
 
-        try {
-            this.networkManager.activateConnection(connection.get(), device);
-            dsLock.waitForSignal();
-        } catch (DBusExecutionException e) {
-            logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);
+        boolean isReapplySuccessful = this.networkManager.reapplySettings(device, newConnectionSettings);
+        
+        if(!isReapplySuccessful) {
+            try {
+                this.networkManager.activateConnection(connection.get(), device);
+                dsLock.waitForSignal();
+            } catch (DBusExecutionException e) {
+                logger.warn("Couldn't complete activation of {} interface, caused by:", deviceId, e);
+            }
         }
 
         // Housekeeping

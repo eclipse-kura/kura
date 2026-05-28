@@ -1280,7 +1280,8 @@ public class NMDbusConnectorTest {
         if (hasAssociatedConnection) {
             this.mockConnection = mock(Connection.class, RETURNS_SMART_NULLS);
             when(this.mockConnection.GetSettings()).thenReturn(mockedDevice1ConnectionSetting);
-
+            when(this.mockConnection.GetSecrets(any())).thenThrow(new DBusExecutionException("No secrets available"));
+            
             doReturn(this.mockConnection).when(this.dbusConnection).getRemoteObject("org.freedesktop.NetworkManager",
                     "/mock/device/" + interfaceId, Connection.class);
         } else {
@@ -1710,7 +1711,7 @@ public class NMDbusConnectorTest {
     private void thenConnectionUpdateIsCalledFor(String netInterface) throws DBusException {
         Connection connect = this.dbusConnection.getRemoteObject("org.freedesktop.NetworkManager",
                 "/mock/device/" + netInterface, Connection.class);
-        verify(connect).Update(any());
+        verify(connect).UpdateUnsaved(any());
     }
 
     private void thenActivateConnectionIsCalledFor(String netInterface) throws DBusException {

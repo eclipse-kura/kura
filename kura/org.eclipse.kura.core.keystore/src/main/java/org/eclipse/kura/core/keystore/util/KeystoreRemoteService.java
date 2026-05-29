@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 import javax.security.auth.x500.X500Principal;
 import javax.ws.rs.WebApplicationException;
 
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
@@ -108,7 +109,7 @@ public class KeystoreRemoteService {
         Object object = pemParser.readObject();
         pemParser.close();
         JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC")
-            .setAlgorithmMapping(X9ObjectIdentifiers.id_ecPublicKey, "EC");
+                .setAlgorithmMapping(X9ObjectIdentifiers.id_ecPublicKey, "EC");
         PrivateKey privkey = null;
         if (object instanceof org.bouncycastle.asn1.pkcs.PrivateKeyInfo) {
             privkey = converter.getPrivateKey((org.bouncycastle.asn1.pkcs.PrivateKeyInfo) object);
@@ -325,8 +326,7 @@ public class KeystoreRemoteService {
         final PrivateKeyEntry privateKeyEntry = createPrivateKey(writeRequest.getPrivateKey(),
                 Arrays.stream(writeRequest.getCertificateChain()).collect(Collectors.joining("\n")));
 
-        targetKeystore.setEntry(writeRequest.getAlias(),
-                privateKeyEntry);
+        targetKeystore.setEntry(writeRequest.getAlias(), privateKeyEntry);
     }
 
     protected void deleteKeyEntryInternal(String keystoreServicePid, String alias) {

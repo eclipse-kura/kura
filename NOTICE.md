@@ -124,11 +124,11 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-expression/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16242
 * maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jms/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16243
 * maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-tx/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16244
-* maven/mavencentral/org.bouncycastle/bcpg-jdk18on/1.78.1, Apache-2.0, approved, #14432
-* maven/mavencentral/org.bouncycastle/bcpkix-jdk18on/1.78.1, MIT, approved, #14434
-* maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.78.1, MIT AND CC0-1.0, approved, #14433
-* maven/mavencentral/org.bouncycastle/bctls-jdk18on/1.78.1, MIT, approved, #14676
-* maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.78.1, MIT, approved, #14435
+* maven/mavencentral/org.bouncycastle/bcpg-jdk18on/1.84, Apache-2.0, approved, #27145
+* maven/mavencentral/org.bouncycastle/bcpkix-jdk18on/1.84, MIT, approved, #27142
+* maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.84, MIT AND CC0-1.0, approved, #27143
+* maven/mavencentral/org.bouncycastle/bctls-jdk18on/1.84, , restricted, clearlydefined
+* maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.84, MIT, approved, #27144
 * maven/mavencentral/org.eclipse.jetty/jetty-continuation/9.4.58.v20250814, EPL-2.0 OR Apache-2.0, approved, rt.jetty
 * maven/mavencentral/org.eclipse.jetty/jetty-http/9.4.58.v20250814, EPL-2.0 OR Apache-2.0, approved, rt.jetty
 * maven/mavencentral/org.eclipse.jetty/jetty-io/9.4.58.v20250814, EPL-2.0 OR Apache-2.0, approved, rt.jetty

@@ -40,6 +40,7 @@ import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -487,10 +488,54 @@ public class FilesystemKeystoreServiceImplCrlTest {
         }
     }
 
+    @Test
+    public void getCrlsShouldNotBlockWhileDownloadIsInProgress() throws Exception {
+        final X500Name name = new X500Name("cn=Test CA, dc=bar.com");
+
+        try (final Fixture fixture = new Fixture()) {
+
+            final TestCA ca = new TestCA(CertificateCreationOptions.builder(name)
+                    .withCRLDownloadURI(new URI(fixture.getCrlDownloadURL("/stall.crl"))).build());
+
+            fixture.activate();
+
+            final X509CRL crl = ca.generateCRL(CRLCreationOptions.builder().build());
+            fixture.setCrl("/stall.crl", crl);
+
+            fixture.keystoreService.setEntry("foo", new TrustedCertificateEntry(ca.getCertificate()));
+
+            final CountDownLatch downloadStall = fixture.server.stallNextRequest();
+
+            fixture.update(fixture.getOptions().setCrlManagerEnabled(true));
+
+            givenDownloadHasStarted(fixture);
+
+            whenGetCrlsIsCalledWhileDownloadIsStalled(fixture, downloadStall);
+        }
+    }
+
+    private void givenDownloadHasStarted(final Fixture fixture) throws Exception {
+        fixture.nextDownloadRelativeURI().get(30, TimeUnit.SECONDS);
+    }
+
+    private void whenGetCrlsIsCalledWhileDownloadIsStalled(final Fixture fixture, final CountDownLatch stall)
+            throws Exception {
+        final CompletableFuture<Integer> getCrlsResult = CompletableFuture
+                .supplyAsync(() -> fixture.keystoreService.getCRLs().size());
+
+        thenGetCrlsReturnsWithinOneSecond(getCrlsResult);
+
+        stall.countDown();
+    }
+
+    private void thenGetCrlsReturnsWithinOneSecond(final CompletableFuture<Integer> getCrlsResult) throws Exception {
+        getCrlsResult.get(1, TimeUnit.SECONDS);
+    }
+
     private static class Fixture implements AutoCloseable {
 
         private final FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
-        private TestServer server;
+        TestServer server;
         private final EventAdmin eventAdmin = Mockito.mock(EventAdmin.class);
         private final ConfigurationService configurationService = Mockito.mock(ConfigurationService.class);
         private final CryptoService cryptoService = Mockito.mock(CryptoService.class);

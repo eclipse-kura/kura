@@ -26,7 +26,7 @@
 	</parent>
 
 	<artifactId>org.eclipse.kura.ai.triton.server</artifactId>
-	<version>1.5.1-SNAPSHOT</version>
+	<version>1.5.1</version>
 	<packaging>eclipse-feature</packaging>
 
 	<build>

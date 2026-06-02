@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -45,12 +45,12 @@
             default="username" 
             description="Username to be used when connecting to the MQTT broker."/>
 
-        <AD id="password"  
+        <AD id="password"
             name="Password"
             type="Password"
-            cardinality="0" 
+            cardinality="0"
             required="false"
-            default="password" 
+            default=""
             description="Password to be used when connecting to the MQTT broker."/>
 
         <AD id="client-id"

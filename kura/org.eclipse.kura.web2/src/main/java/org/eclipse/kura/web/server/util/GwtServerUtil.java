@@ -276,6 +276,8 @@ public final class GwtServerUtil {
                     return getObjectValue(cloned);
                 }
             }
+
+            return new Password("");
         }
 
         return getObjectValue(param);
@@ -357,7 +359,7 @@ public final class GwtServerUtil {
             for (final GwtConfigParameter gwtConfigParam : config.getParameters()) {
                 final Map<String, Object> currentConfigProp = currentCC.getConfigurationProperties();
                 properties.put(gwtConfigParam.getId(),
-                        getUserDefinedObject(gwtConfigParam, currentConfigProp.get(gwtConfigParam.getName())));
+                        getUserDefinedObject(gwtConfigParam, currentConfigProp.get(gwtConfigParam.getId())));
             }
 
             // Force kura.service.pid into properties, if originally present

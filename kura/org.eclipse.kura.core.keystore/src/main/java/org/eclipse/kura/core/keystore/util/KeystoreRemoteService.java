@@ -12,9 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.core.keystore.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.Key;
@@ -23,12 +21,9 @@ import java.security.KeyStore.Entry;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.KeyStoreException;
-import java.security.PrivateKey;
-import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPublicKey;
@@ -38,7 +33,6 @@ import java.security.spec.ECParameterSpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,10 +42,6 @@ import java.util.stream.Collectors;
 import javax.security.auth.x500.X500Principal;
 import javax.ws.rs.WebApplicationException;
 
-import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.keystore.request.CsrReadRequest;
@@ -94,50 +84,19 @@ public class KeystoreRemoteService {
     }
 
     public static TrustedCertificateEntry createCertificateEntry(String certificate) throws CertificateException {
-        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-        ByteArrayInputStream is = new ByteArrayInputStream(certificate.getBytes(StandardCharsets.UTF_8));
-        X509Certificate cert = (X509Certificate) certFactory.generateCertificate(is);
-        return new TrustedCertificateEntry(cert);
+
+        return KeystoreUtils.createCertificateEntry(certificate);
     }
 
     public static PrivateKeyEntry createPrivateKey(String privateKey, String publicKey)
             throws IOException, GeneralSecurityException {
-        Certificate[] certs = parsePublicCertificates(publicKey);
 
-        Security.addProvider(new BouncyCastleProvider());
-        PEMParser pemParser = new PEMParser(new StringReader(privateKey));
-        Object object = pemParser.readObject();
-        pemParser.close();
-        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC")
-                .setAlgorithmMapping(X9ObjectIdentifiers.id_ecPublicKey, "EC");
-        PrivateKey privkey = null;
-        if (object instanceof org.bouncycastle.asn1.pkcs.PrivateKeyInfo) {
-            privkey = converter.getPrivateKey((org.bouncycastle.asn1.pkcs.PrivateKeyInfo) object);
-        } else if (object instanceof org.bouncycastle.openssl.PEMKeyPair) {
-            privkey = converter.getKeyPair((org.bouncycastle.openssl.PEMKeyPair) object).getPrivate();
-        } else {
-            throw new IOException("PrivateKey not recognized.");
-        }
-        return new PrivateKeyEntry(privkey, certs);
+        return KeystoreUtils.createPrivateKey(privateKey, publicKey);
     }
 
     public static X509Certificate[] parsePublicCertificates(String certificates) throws CertificateException {
-        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-        ByteArrayInputStream is = new ByteArrayInputStream(certificates.getBytes(StandardCharsets.UTF_8));
 
-        final Collection<? extends Certificate> decodedCertificates = certFactory.generateCertificates(is);
-
-        final ArrayList<X509Certificate> result = new ArrayList<>();
-
-        for (final Certificate cert : decodedCertificates) {
-            if (!(cert instanceof X509Certificate)) {
-                throw new CertificateException("Provided certificate is not a X509Certificate");
-            }
-
-            result.add((X509Certificate) cert);
-        }
-
-        return result.toArray(new X509Certificate[result.size()]);
+        return KeystoreUtils.parsePublicCertificates(certificates);
     }
 
     protected List<KeystoreInfo> listKeystoresInternal() {

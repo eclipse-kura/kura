@@ -40,6 +40,8 @@ public class CloudServiceTest extends TestCase implements CloudClientListener {
     private boolean controlConfirmed;
     private boolean controlArrived;
 
+    private CountDownLatch eventLatch;
+
     @Override
     @BeforeClass
     public void setUp() {
@@ -71,8 +73,13 @@ public class CloudServiceTest extends TestCase implements CloudClientListener {
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testService() throws Exception {
+        this.publishPublished = false;
+        this.publishConfirmed = false;
         this.publishArrived = false;
+        this.controlPublished = false;
+        this.controlConfirmed = false;
         this.controlArrived = false;
+        this.eventLatch = new CountDownLatch(6);
 
         CloudClient cloudAppClient = CloudServiceTest.cloudService.newCloudClient("testService");
         cloudAppClient.addCloudClientListener(this);
@@ -99,7 +106,7 @@ public class CloudServiceTest extends TestCase implements CloudClientListener {
         controlPayload.setBody("control_payload".getBytes());
         this.controlMsgId = cloudAppClient.controlPublish("control_test", controlPayload, 1, false, priority);
 
-        Thread.sleep(1000);
+        this.eventLatch.await(30, TimeUnit.SECONDS);
 
         assertTrue("publish not published!", this.publishPublished);
         assertTrue("publish not confirmed!", this.publishConfirmed);
@@ -127,6 +134,9 @@ public class CloudServiceTest extends TestCase implements CloudClientListener {
         assertEquals("control_test", appTopic);
         assertEquals("control_payload", new String(msg.getBody()));
         this.controlArrived = true;
+        if (this.eventLatch != null) {
+            this.eventLatch.countDown();
+        }
     }
 
     @Override
@@ -134,6 +144,9 @@ public class CloudServiceTest extends TestCase implements CloudClientListener {
         assertEquals("test", appTopic);
         assertEquals("payload", new String(msg.getBody()));
         this.publishArrived = true;
+        if (this.eventLatch != null) {
+            this.eventLatch.countDown();
+        }
     }
 
     @Override
@@ -141,10 +154,16 @@ public class CloudServiceTest extends TestCase implements CloudClientListener {
         if (messageId == this.publishedMsgId) {
             assertEquals("test", appTopic);
             this.publishConfirmed = true;
+            if (this.eventLatch != null) {
+                this.eventLatch.countDown();
+            }
         }
         if (messageId == this.controlMsgId) {
             assertEquals("control_test", appTopic);
             this.controlConfirmed = true;
+            if (this.eventLatch != null) {
+                this.eventLatch.countDown();
+            }
         }
     }
 
@@ -153,10 +172,16 @@ public class CloudServiceTest extends TestCase implements CloudClientListener {
         if (messageId == this.publishedMsgId) {
             assertEquals("test", appTopic);
             this.publishPublished = true;
+            if (this.eventLatch != null) {
+                this.eventLatch.countDown();
+            }
         }
         if (messageId == this.controlMsgId) {
             assertEquals("control_test", appTopic);
             this.controlPublished = true;
+            if (this.eventLatch != null) {
+                this.eventLatch.countDown();
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,9 @@ package org.eclipse.kura.core.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.cloud.CloudClientListener;
@@ -33,6 +36,8 @@ public class CloudServiceTest extends BaseCloudTests implements CloudClientListe
     private boolean controlPublished;
     private boolean controlConfirmed;
     private boolean controlArrived;
+    
+    private CountDownLatch eventLatch;
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
@@ -43,8 +48,13 @@ public class CloudServiceTest extends BaseCloudTests implements CloudClientListe
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testService() throws Exception {
+    	this.publishPublished = false;
+        this.publishConfirmed = false;
         this.publishArrived = false;
+        this.controlPublished = false;
+        this.controlConfirmed = false;
         this.controlArrived = false;
+        this.eventLatch = new CountDownLatch(6);
 
         CloudClient cloudAppClient = CloudServiceTest.cloudService.newCloudClient("testService");
         cloudAppClient.addCloudClientListener(this);
@@ -71,7 +81,7 @@ public class CloudServiceTest extends BaseCloudTests implements CloudClientListe
         controlPayload.setBody("control_payload".getBytes());
         this.controlMsgId = cloudAppClient.controlPublish("control_test", controlPayload, 1, false, priority);
 
-        Thread.sleep(1000);
+        this.eventLatch.await(30, TimeUnit.SECONDS);
 
         assertTrue("publish not published!", this.publishPublished);
         assertTrue("publish not confirmed!", this.publishConfirmed);
@@ -99,6 +109,9 @@ public class CloudServiceTest extends BaseCloudTests implements CloudClientListe
         assertEquals("control_test", appTopic);
         assertEquals("control_payload", new String(msg.getBody()));
         this.controlArrived = true;
+        if (this.eventLatch != null) {
+            this.eventLatch.countDown();
+        }
     }
 
     @Override
@@ -106,6 +119,9 @@ public class CloudServiceTest extends BaseCloudTests implements CloudClientListe
         assertEquals("test", appTopic);
         assertEquals("payload", new String(msg.getBody()));
         this.publishArrived = true;
+        if (this.eventLatch != null) {
+            this.eventLatch.countDown();
+        }
     }
 
     @Override
@@ -113,10 +129,16 @@ public class CloudServiceTest extends BaseCloudTests implements CloudClientListe
         if (messageId == this.publishedMsgId) {
             assertEquals("test", appTopic);
             this.publishConfirmed = true;
+            if (this.eventLatch != null) {
+                this.eventLatch.countDown();
+            }
         }
         if (messageId == this.controlMsgId) {
             assertEquals("control_test", appTopic);
             this.controlConfirmed = true;
+            if (this.eventLatch != null) {
+                this.eventLatch.countDown();
+            }
         }
     }
 
@@ -125,10 +147,16 @@ public class CloudServiceTest extends BaseCloudTests implements CloudClientListe
         if (messageId == this.publishedMsgId) {
             assertEquals("test", appTopic);
             this.publishPublished = true;
+            if (this.eventLatch != null) {
+                this.eventLatch.countDown();
+            }
         }
         if (messageId == this.controlMsgId) {
             assertEquals("control_test", appTopic);
             this.controlPublished = true;
+            if (this.eventLatch != null) {
+                this.eventLatch.countDown();
+            }
         }
     }
 }

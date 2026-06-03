@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -42,6 +42,7 @@ import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
@@ -178,7 +179,7 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     @Test(expected = KuraException.class)
-    public void testDoGetOtherwise() throws KuraException, NoSuchFieldException {
+    public void testDoGetOtherwise() throws KuraException {
         KeystoreServiceRequestHandlerV1 handler = new KeystoreServiceRequestHandlerV1();
 
         List<String> resourcesList = new ArrayList<>();
@@ -194,7 +195,7 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     @Test
-    public void testDoGetKeystores() throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+    public void testDoGetKeystores() throws KuraException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -227,7 +228,7 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     @Test
-    public void testDoGetAllKeys() throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+    public void testDoGetAllKeys() throws KuraException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -270,8 +271,7 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     @Test
-    public void testDoGetKeysByKeystore()
-            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+    public void testDoGetKeysByKeystore() throws KuraException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -323,8 +323,7 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     @Test
-    public void testDoGetKeyByAlias()
-            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+    public void testDoGetKeyByAlias() throws KuraException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -379,8 +378,7 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     @Test
-    public void testDoGetKeyByKeystoreAlias()
-            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+    public void testDoGetKeyByKeystoreAlias() throws KuraException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -431,8 +429,7 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     @Test
-    public void testDoPostTrustedCertificate()
-            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+    public void testDoPostTrustedCertificate() throws KuraException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -475,8 +472,7 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     @Test(expected = KuraException.class)
-    public void testDoPostPrivateKey()
-            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+    public void testDoPostPrivateKey() throws KuraException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -516,7 +512,7 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     @Test
-    public void testDoPostKeyPair() throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+    public void testDoPostKeyPair() throws KuraException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -561,7 +557,7 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     @Test
-    public void getCSRTest() throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+    public void getCSRTest() throws KuraException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -608,7 +604,7 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     @Test
-    public void testDoDel() throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+    public void testDoDel() throws KuraException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -648,17 +644,15 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     private PrivateKeyEntry createPrivateKey(String alias, String privateKey, String[] certificateChain)
-            throws IOException, GeneralSecurityException, KuraException {
-        // Works with RSA and DSA. EC is not supported since the certificate is encoded
-        // with ECDSA while the corresponding private key with EC.
-        // This cause an error when the PrivateKeyEntry is generated.
+            throws IOException, GeneralSecurityException {
         Certificate[] certs = parsePublicCertificates(certificateChain);
 
         Security.addProvider(new BouncyCastleProvider());
         PEMParser pemParser = new PEMParser(new StringReader(privateKey));
         Object object = pemParser.readObject();
         pemParser.close();
-        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC")
+                .setAlgorithmMapping(X9ObjectIdentifiers.id_ecPublicKey, "EC");
         PrivateKey privkey = null;
         if (object instanceof org.bouncycastle.asn1.pkcs.PrivateKeyInfo) {
             privkey = converter.getPrivateKey((org.bouncycastle.asn1.pkcs.PrivateKeyInfo) object);

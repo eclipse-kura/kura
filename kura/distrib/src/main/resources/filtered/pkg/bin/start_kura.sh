@@ -90,6 +90,7 @@ KURA_CMD="${KURA_LAUNCH_COMMAND} -Xms${kura.mem.size} -Xmx${kura.mem.size} \
     -Dkura.os.version=${kura.os.version} \
     -Dkura.arch=${kura.arch} \
     -Dtarget.device=${target.device} \
+    -Dorg.eclipse.kura.core.crypto.secretKey="$KURA_CRYPTO_SECRET_KEY" \
     -Declipse.ignoreApp=true \
     -Dkura.home=\${DIR} \
     -Dkura.configuration=file:\${DIR}/framework/kura.properties \

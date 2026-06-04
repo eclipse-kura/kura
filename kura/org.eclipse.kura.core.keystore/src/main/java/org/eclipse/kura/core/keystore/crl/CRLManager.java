@@ -190,40 +190,78 @@ public class CRLManager implements Closeable {
         }, scheduleDelayMs, TimeUnit.MILLISECONDS));
     }
 
-    private synchronized void update() {
-
-        boolean changed = false;
+    private void update() {
         final long now = System.nanoTime();
 
-        for (final DistributionPointState state : this.referencedDistributionPoints) {
-            changed |= updateDistributionPoint(state, now);
-        }
+        final List<PendingDownload> pendingDownloads = collectPendingDownloads(now);
 
-        changed |= this.store.removeCRLs(c -> this.referencedDistributionPoints.stream()
-                .noneMatch(p -> p.distributionPoints.equals(c.getDistributionPoints())));
+        final List<DownloadResult> results = executeDownloads(pendingDownloads);
+
+        final boolean changed = applyDownloadResults(results, now);
 
         if (changed) {
             this.listener.ifPresent(Listener::onCRLCacheChanged);
         }
     }
 
-    private boolean updateDistributionPoint(final DistributionPointState state, final long now) {
-        final Optional<StoredCRL> storedCrl = this.store.getCRLs().stream()
-                .filter(c -> c.getDistributionPoints().equals(state.distributionPoints)).findAny();
+    private synchronized List<PendingDownload> collectPendingDownloads(final long now) {
+        final List<PendingDownload> pending = new ArrayList<>();
 
-        if (storedCrl.isPresent() && storedCrl.get().isExpired()) {
-            logger.warn("CRL expired for distribution points: {}", state.distributionPoints);
+        for (final DistributionPointState state : this.referencedDistributionPoints) {
+            final Optional<StoredCRL> storedCrl = this.store.getCRLs().stream()
+                    .filter(c -> c.getDistributionPoints().equals(state.distributionPoints)).findAny();
+
+            if (storedCrl.isPresent() && storedCrl.get().isExpired()) {
+                logger.warn("CRL expired for distribution points: {}", state.distributionPoints);
+            }
+            if (!storedCrl.isPresent()) {
+                logger.warn("local CRL not accessible from distribution points: {}", state.distributionPoints);
+            }
+
+            if (needsDownload(state, storedCrl, now)) {
+                pending.add(new PendingDownload(state, storedCrl,
+                        CRLUtil.fetchCRL(state.distributionPoints, this.downloadExecutor)));
+            }
         }
 
-        if (!storedCrl.isPresent()) {
-            logger.warn("local CRL not accessible from distribution points: {}", state.distributionPoints);
+        return pending;
+    }
+
+    private List<DownloadResult> executeDownloads(final List<PendingDownload> pendingDownloads) {
+        final List<DownloadResult> results = new ArrayList<>();
+
+        for (final PendingDownload pending : pendingDownloads) {
+            try {
+                final X509CRL crl = pending.future.get(1, TimeUnit.MINUTES);
+                results.add(new DownloadResult(pending, crl, null));
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.warn("failed to download CRL from {}", pending.state.distributionPoints, e);
+                pending.future.cancel(true);
+                results.add(new DownloadResult(pending, null, e));
+            } catch (final Exception e) {
+                logger.warn("failed to download CRL from {}", pending.state.distributionPoints, e);
+                pending.future.cancel(true);
+                results.add(new DownloadResult(pending, null, e));
+            }
         }
 
-        if (!needsDownload(state, storedCrl, now)) {
-            return false;
+        return results;
+    }
+
+    private synchronized boolean applyDownloadResults(final List<DownloadResult> results, final long now) {
+        boolean changed = false;
+
+        for (final DownloadResult result : results) {
+            if (result.crl != null) {
+                changed |= validateAndStoreCRL(now, result.pending.state, result.pending.storedCrl, result.crl);
+            }
         }
 
-        return downloadAndStoreCRL(state, storedCrl, now);
+        changed |= this.store.removeCRLs(c -> this.referencedDistributionPoints.stream()
+                .noneMatch(p -> p.distributionPoints.equals(c.getDistributionPoints())));
+
+        return changed;
     }
 
     private boolean needsDownload(final DistributionPointState state, final Optional<StoredCRL> storedCrl,
@@ -241,21 +279,31 @@ public class CRLManager implements Closeable {
         return storedCrl.get().isNearingExpiry(this.forceUpdateIntervalMs);
     }
 
-    private boolean downloadAndStoreCRL(final DistributionPointState state, final Optional<StoredCRL> storedCrl,
-            final long now) {
-        final CompletableFuture<X509CRL> future = CRLUtil.fetchCRL(state.distributionPoints, this.downloadExecutor);
-        try {
-            final X509CRL crl = future.get(1, TimeUnit.MINUTES);
-            return validateAndStoreCRL(now, state, storedCrl, crl);
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-            logger.warn("failed to download CRL from {}", state.distributionPoints, e);
-            future.cancel(true);
-            return false;
-        } catch (final Exception e) {
-            logger.warn("failed to download CRL from {}", state.distributionPoints, e);
-            future.cancel(true);
-            return false;
+    private static class PendingDownload {
+
+        final DistributionPointState state;
+        final Optional<StoredCRL> storedCrl;
+        final CompletableFuture<X509CRL> future;
+
+        PendingDownload(final DistributionPointState state, final Optional<StoredCRL> storedCrl,
+                final CompletableFuture<X509CRL> future) {
+            this.state = state;
+            this.storedCrl = storedCrl;
+            this.future = future;
+        }
+    }
+
+    private static class DownloadResult {
+
+        final PendingDownload pending;
+        final X509CRL crl;
+        @SuppressWarnings("unused")
+        final Exception error;
+
+        DownloadResult(final PendingDownload pending, final X509CRL crl, final Exception error) {
+            this.pending = pending;
+            this.crl = crl;
+            this.error = error;
         }
     }
 

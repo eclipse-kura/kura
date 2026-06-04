@@ -1,4 +1,4 @@
-Eclipse Kura - 5.6.2 - May 2026
+Eclipse Kura - 5.6.2 - June 2026
 -------------------------------------------------------------------------------------------------
 Description:
 This patch release of Eclipse Kura, compatible with Java 8 and OSGi R7 includes:
@@ -8,6 +8,7 @@ This patch release of Eclipse Kura, compatible with Java 8 and OSGi R7 includes:
 
 
 Features:
+  * 378f7f327f - [nm] prevent unnecessary network deactivation and configuration updates [backport release-5.6] (#6254) (Pierantonio Merlino)
   * f961ca425e - [linux.gpio.libgpiod] Added support to multiple pin listeners (#6197) (Pierantonio Merlino)
 
 Target Environments:
@@ -23,12 +24,23 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * 7c24725b6b - [core.keystore] prevent CRL downloads from blocking UI load [backport release-5.6.0] (#6264) (Pierantonio Merlino)
+  * e5be465135 - [core.keystore] Fixed the addition of EC keypair [backport release-5.6.0] (#6253) (Salvatore Coppola)
+  * 6bea317e29 - Fixed cacerts.ks default password [backport release-5.6.0] (#6262) (Salvatore Coppola)
+  * c17b44004a - [ai.triton.server] Fixed feature version mismatch causing distrib build failure (#6258) (Matteo Maiero)
+  * b90190b42f - [rest] map unhandled exceptions so failed requests are audited (#6246) (Marcello Rinaldo Martina)
+  * 5706b1d779 - misalignment between metatype and code in eclipseiot.mqtt bundle [backport release-5.6.0] (#6244) (github-actions[bot])
   * 723ef076b8 - [core.keystore] Improve CRL management (#6230) [backport release-5.6.0] (#6237) (Salvatore Coppola)
   * 0ba7612f99 - [target-platform] Updated Kura version in target-platform config (#6239) (Pierantonio Merlino)
   * 35c65ff6d9 - Correctly handle X-Forwarded-For header for audit logging [backport release-5.6.0] (#6218) (Matteo Maiero)
   * a669473c20 - [linux.gpio.libgpiod] Fix GPIO events behavior in libgpiod v1 (#6184) (Pierantonio Merlino)
   * f7456aca86 - Fixed password encryption in ConfigurationService.createFactoryConfiguration [backport release-5.6.0] (#6182) (nicolatimeus)
   * 255b68934d - Fixed placeholder handling for password defaults [backport release-5.6.0] (#6189) (nicolatimeus)
+
+Target Platform Updates:
+  * 501e6d4c10 - Updated io.netty version to 4.1.135.Final  (#6265) (Pierantonio Merlino)
+  * 98131d6050 - updated bouncycastle from 1.78.1 to 1.84 (#6251) (Marcello Rinaldo Martina)
+  * 56be0dcfb5 - Updated io.netty version to 4.1.134.Final (#6250) (Pierantonio Merlino)
 
 Known Issues:
   * On certain systems the IPv6 rt match module (-m rt) is not available, causing Kura to fail when applying IPv6 mangle table rules related to Routing Header Type 0 filtering.
@@ -93,6 +105,18 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 501e6d4c10 - build: Updated io.netty version to 4.1.135.Final  (#6265) (Pierantonio Merlino)
+  * 7c24725b6b - fix(core.keystore): prevent CRL downloads from blocking UI load [backport release-5.6.0] (#6264) (Pierantonio Merlino)
+  * e5be465135 - fix(core.keystore): Fixed the addition of EC keypair [backport release-5.6.0] (#6253) (Salvatore Coppola)
+  * 6bea317e29 - fix: Fixed cacerts.ks default password [backport release-5.6.0] (#6262) (Salvatore Coppola)
+  * c17b44004a - fix(ai.triton.server): Fixed feature version mismatch causing distrib build failure (#6258) (Matteo Maiero)
+  * 98131d6050 - build(deps): updated bouncycastle from 1.78.1 to 1.84 (#6251) (Marcello Rinaldo Martina)
+  * 378f7f327f - feat(nm): prevent unnecessary network deactivation and configuration updates [backport release-5.6] (#6254) (Pierantonio Merlino)
+  * 56be0dcfb5 - build: Updated io.netty version to 4.1.134.Final (#6250) (Pierantonio Merlino)
+  * b90190b42f - fix(rest): map unhandled exceptions so failed requests are audited (#6246) (Marcello Rinaldo Martina)
+  * 5706b1d779 - fix: misalignment between metatype and code in eclipseiot.mqtt bundle [backport release-5.6.0] (#6244) (github-actions[bot])
+  * b992922034 - chore: Updated SSLKeystore with the latest Eclipse Marketplace certificate [backport release-5.6.0] (#6245) (Salvatore Coppola)
+  * 63938fc7ff - chore: update Kura 5.6.2 release notes (#6240) (eclipse-kura-bot)
   * 723ef076b8 - fix(core.keystore): Improve CRL management (#6230) [backport release-5.6.0] (#6237) (Salvatore Coppola)
   * 0ba7612f99 - fix(target-platform): Updated Kura version in target-platform config (#6239) (Pierantonio Merlino)
   * 7179d2fa8c - ci(automation): avoid branch name collision on Release Notes workflow [backport release-5.6.0] (#6238) (Mattia Dal Ben)

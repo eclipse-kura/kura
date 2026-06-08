@@ -24,6 +24,7 @@ Target Environments:
  Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * c0a8fb3e9a - [distrib] wrong version number for installed BC artifacts (#6268) (Marcello Rinaldo Martina)
   * 7c24725b6b - [core.keystore] prevent CRL downloads from blocking UI load [backport release-5.6.0] (#6264) (Pierantonio Merlino)
   * e5be465135 - [core.keystore] Fixed the addition of EC keypair [backport release-5.6.0] (#6253) (Salvatore Coppola)
   * 6bea317e29 - Fixed cacerts.ks default password [backport release-5.6.0] (#6262) (Salvatore Coppola)

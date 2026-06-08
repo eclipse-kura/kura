@@ -105,6 +105,7 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * c0a8fb3e9a - fix(distrib): wrong version number for installed BC artifacts (#6268) (Marcello Rinaldo Martina)
   * 501e6d4c10 - build: Updated io.netty version to 4.1.135.Final  (#6265) (Pierantonio Merlino)
   * 7c24725b6b - fix(core.keystore): prevent CRL downloads from blocking UI load [backport release-5.6.0] (#6264) (Pierantonio Merlino)
   * e5be465135 - fix(core.keystore): Fixed the addition of EC keypair [backport release-5.6.0] (#6253) (Salvatore Coppola)

@@ -22,7 +22,6 @@
     </parent>
     <artifactId>org.usb4java</artifactId>
     <version>2.0.0-SNAPSHOT</version>
-    <packaging>bundle</packaging>
     <name>usb4java</name>
     <description>usb4java libraries using libusb</description>
     <url>usb4java.org/</url>
@@ -99,33 +98,24 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.3.5</version> <!-- This exact version is required to be built properly -->
-                <extensions>true</extensions>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
                 <configuration>
-                    <manifestLocation>META-INF</manifestLocation>
-                    <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Name>${project.name}</Bundle-Name>
-                        <Bundle-Version>${project.version}</Bundle-Version>
-                        <Bundle-ClassPath>
-                            .,libusb4java-linux-aarch64.jar,libusb4java-linux-x86-64.jar,usb4java.jar</Bundle-ClassPath>
-                        <Include-Resource>
-                            ${project.basedir}/lib,
-                            ${project.basedir}/about.html,
-                            about_files=${project.basedir}/about_files/
-                        </Include-Resource>
-                        <Export-Package>
-                            org.usb4java.linux-aarch64;version="${usb4java.version}",
-                            org.usb4java.linux-x86-64;version="${usb4java.version}",
-                            org.usb4java;uses:="org.apache.commons.lang3.builder,org.apache.commons.lang3.tuple";version="${usb4java.version}"
-                        </Export-Package>
-                        <Require-Capability>
-                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=21))"
-                        </Require-Capability>
-                    </instructions>
+                    <bnd><![CDATA[
+                        Bundle-SymbolicName: ${project.artifactId}
+                        Bundle-Name: ${project.name}
+                        Bundle-ClassPath: .,libusb4java-linux-aarch64.jar,libusb4java-linux-x86-64.jar,usb4java.jar
+                        -includeresource: lib,\
+                            about.html,\
+                            about_files=about_files/
+                        Export-Package: org.usb4java;version="${usb4java.version}"
+                        ]]></bnd>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
             </plugin>
 
             <plugin>

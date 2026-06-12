@@ -2,17 +2,17 @@
 
 <!--
 
-    Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
- 
+    Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
-    
+
     SPDX-License-Identifier: EPL-2.0
-  
+
     Contributors:
      Eurotech
- 
+
 -->
 
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
@@ -26,7 +26,6 @@
     </parent>
 
     <artifactId>com.codeminders.hidapi</artifactId>
-    <packaging>bundle</packaging>
 
     <name>Java API for working with Human Interface USB Devices (HID)</name>
     <description>JNI wrapper around C/C++ HIDAPI library providing simple java API to work with devices such as USB gamepads, joysticks, keyboards etc.</description>
@@ -64,10 +63,9 @@
 
     <dependencies>
         <dependency>
-			<groupId>org.eclipse.platform</groupId>
-			<artifactId>org.eclipse.osgi</artifactId>
-			<version>3.12.50</version>
-		</dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.osgi</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -84,77 +82,21 @@
         </resources>
         <plugins>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>${maven-bundle-plugin.version}</version>
-                <extensions>true</extensions>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
                 <configuration>
-                    <manifestLocation>META-INF</manifestLocation>
-                    <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Version>${project.version}</Bundle-Version>
-                        <Include-Resource>
-                            ${project.basedir}/about.html,
-                            about_files=${project.basedir}/about_files/
-                        </Include-Resource>
-                        <Export-Package>
-                            com.codeminders.hidapi
-                        </Export-Package>
-                    </instructions>
+                    <bnd><![CDATA[
+                        Bundle-SymbolicName: ${project.artifactId}
+                        -includeresource: about.html,\
+                            about_files=about_files/
+                        Export-Package: com.codeminders.hidapi
+                        ]]></bnd>
                 </configuration>
             </plugin>
-
             <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>${maven-dependency-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
             </plugin>
-
         </plugins>
-        <pluginManagement>
-            <plugins>
-                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-                <plugin>
-                    <groupId>org.eclipse.m2e</groupId>
-                    <artifactId>lifecycle-mapping</artifactId>
-                    <version>${lifecycle-mapping.version}</version>
-                    <configuration>
-                        <lifecycleMappingMetadata>
-                            <pluginExecutions>
-                                <pluginExecution>
-                                    <pluginExecutionFilter>
-                                        <groupId>
-                                            org.apache.maven.plugins
-                                        </groupId>
-                                        <artifactId>
-                                            maven-dependency-plugin
-                                        </artifactId>
-                                        <versionRange>
-                                            [2.1,)
-                                        </versionRange>
-                                        <goals>
-                                            <goal>
-                                                copy-dependencies
-                                            </goal>
-                                        </goals>
-                                    </pluginExecutionFilter>
-                                    <action>
-                                        <ignore></ignore>
-                                    </action>
-                                </pluginExecution>
-                            </pluginExecutions>
-                        </lifecycleMappingMetadata>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
 </project>

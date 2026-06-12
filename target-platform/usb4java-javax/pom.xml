@@ -22,7 +22,6 @@
     </parent>
     <artifactId>usb4java-javax</artifactId>
     <version>2.0.0-SNAPSHOT</version>
-    <packaging>bundle</packaging>
     <name>usb4java-javax</name>
     <description>javax.usb API using usb4java</description>
 
@@ -83,39 +82,32 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.3.5</version> <!-- This exact version is required to be built properly -->
-                <extensions>true</extensions>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
                 <configuration>
-                    <manifestLocation>META-INF</manifestLocation>
-                    <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Name>${project.name}</Bundle-Name>
-                        <Bundle-Version>${project.version}</Bundle-Version>
-                        <Bundle-ClassPath>.,usb-api.jar,usb4java-javax.jar</Bundle-ClassPath>
-                        <Include-Resource>
-                            ${project.basedir}/lib,
-                            ${project.basedir}/src/main/resources/,
-                            ${project.basedir}/about.html,
-                            about_files=${project.basedir}/about_files/
-                        </Include-Resource>
-                        <Export-Package>
-                            javax.usb;version="${usb-api.version}",
-                            javax.usb.event;version="${usb-api.version}",
+                    <bnd><![CDATA[
+                        Bundle-SymbolicName: ${project.artifactId}
+                        Bundle-Name: ${project.name}
+                        Bundle-ClassPath: .,usb-api.jar,usb4java-javax.jar
+                        -includeresource: lib,\
+                            src/main/resources/,\
+                            about.html,\
+                            about_files=about_files/
+                        Export-Package: javax.usb;version="${usb-api.version}",\
+                            javax.usb.event;version="${usb-api.version}",\
                             javax.usb.util;version="${usb-api.version}"
-                        </Export-Package>
-                        <Require-Capability>
-                            osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=21))"
-                        </Require-Capability>
-                    </instructions>
+                        ]]></bnd>
                 </configuration>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${maven-checkstyle-plugin.version}</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>

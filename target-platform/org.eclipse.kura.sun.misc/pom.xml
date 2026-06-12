@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2016, 2024 Red Hat Inc
- 
+    Copyright (c) 2016, 2026 Red Hat Inc and others
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
-    
+
     SPDX-License-Identifier: EPL-2.0
 
     Contributors:
@@ -16,7 +16,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	
+
 	<parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>target-platform</artifactId>
@@ -30,62 +30,27 @@
 
 	<name>System extension fragment for 'sun.misc'</name>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
-
 	<build>
 		<plugins>
+			<!-- Metadata-only system extension fragment: the exported packages
+				(sun.misc, com.sun) live in the JRE, not in this jar, so the
+				manifest is written directly instead of being computed by bnd. -->
 			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.0.0</version><!-- must stay below 3.0.1 due to an issue with m2eclipse -->
 				<configuration>
 					<forceCreation>true</forceCreation>
-					<archive>
-						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+					<archive combine.self="override">
 						<manifestEntries>
+							<Bundle-ManifestVersion>2</Bundle-ManifestVersion>
+							<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+							<Bundle-Name>${project.name}</Bundle-Name>
+							<Bundle-Version>2.0.0.SNAPSHOT</Bundle-Version>
+							<Bundle-Vendor>Eclipse Kura</Bundle-Vendor>
+							<Fragment-Host>system.bundle; extension:=framework</Fragment-Host>
 							<Export-Package>sun.misc, com.sun</Export-Package>
+							<Require-Capability>osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=21))"</Require-Capability>
 						</manifestEntries>
 					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<version>${maven-bundle-plugin.version}</version>
-				<executions>
-					<execution>
-						<id>bundle-manifest</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>manifest</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<instructions>
-						<Fragment-Host>system.bundle; extension:=framework</Fragment-Host>
-						<Bundle-Vendor>Eclipse Kura</Bundle-Vendor>
-						<Require-Capability>
-              osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=21))"
-            </Require-Capability>
-					</instructions>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven-compiler-plugin.version}</version>
-				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>${maven-deploy-plugin.version}</version>
-				<configuration>
 				</configuration>
 			</plugin>
 		</plugins>

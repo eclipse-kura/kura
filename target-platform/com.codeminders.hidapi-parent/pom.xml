@@ -2,14 +2,14 @@
 
 <!--
 
-    Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
- 
+    Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
-    
+
     SPDX-License-Identifier: EPL-2.0
-  
+
     Contributors:
      Eurotech
      Cavium
@@ -37,45 +37,13 @@
         <module>com.codeminders.hidapi.aarch64</module>
     </modules>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-bundle-plugin</artifactId>
-                    <version>${maven-bundle-plugin.version}</version>
-                    <extensions>true</extensions>
-                    <configuration>
-                        <instructions>
-                            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                            <Require-Capability>
-                                osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=21))"
-                            </Require-Capability>
-                        </instructions>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
         <plugins>
-        	<plugin>
-         		<groupId>org.apache.maven.plugins</groupId>
-         		<artifactId>maven-checkstyle-plugin</artifactId>
-                <version>${maven-checkstyle-plugin.version}</version>
-         		<configuration>
-         			<skip>true</skip>
-         		</configuration>
-         	</plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
+                <artifactId>maven-checkstyle-plugin</artifactId>
                 <configuration>
-                    <release>${maven.compiler.release}</release>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>

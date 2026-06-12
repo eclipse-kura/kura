@@ -2,4 +2,5 @@ Bundle-SymbolicName: ${project.artifactId}
 Bundle-Name: org.eclipse.kura.rest.system.provider.test
 Bundle-Vendor: Eclipse Kura
 Fragment-Host: org.eclipse.kura.rest.system.provider
-Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
+Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;org.eclipse.kura.*Test}
+Import-Package: org.eclipse.kura, *

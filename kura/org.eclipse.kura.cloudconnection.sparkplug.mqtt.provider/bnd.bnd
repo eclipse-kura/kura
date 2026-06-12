@@ -7,3 +7,11 @@ Bundle-ClassPath: .,lib/org.eclipse.paho.client.mqttv3-1.2.1.k2.jar
     OSGI-INF=OSGI-INF,\
     about.html,\
     lib=lib
+Export-Package: \
+    org.eclipse.kura.cloudconnection.sparkplug.mqtt.device;version="2.0.0";x-internal:=true,\
+    org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint;version="2.0.0";x-internal:=true,\
+    org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory;version="2.0.0";x-internal:=true,\
+    org.eclipse.kura.cloudconnection.sparkplug.mqtt.message;version="2.0.0";x-internal:=true,\
+    org.eclipse.kura.cloudconnection.sparkplug.mqtt.subscriber;version="2.0.0";x-internal:=true,\
+    org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport;version="2.0.0";x-internal:=true,\
+    org.eclipse.tahu.protobuf;version="2.0.0";x-internal:=true

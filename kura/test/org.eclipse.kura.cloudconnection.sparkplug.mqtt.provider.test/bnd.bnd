@@ -1,6 +1,5 @@
 Bundle-SymbolicName: ${project.artifactId}
 Bundle-Name: org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test
 Bundle-Vendor: Eclipse Kura
-Fragment-Host: org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider
-Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
+Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;org.eclipse.kura.*Test}
 -includeresource: OSGI-INF=OSGI-INF, about.html

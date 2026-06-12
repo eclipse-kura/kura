@@ -22,17 +22,10 @@
         <version>6.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.eclipse.kura.util.test</artifactId>
-    <description>Integration tests for org.eclipse.kura.util</description>
+    <artifactId>org.eclipse.kura.useradmin.store.test</artifactId>
+    <description>Integration tests for org.eclipse.kura.useradmin.storeorg.eclipse.kura.useradmin.store.test</description>
 
     <build>
-        <!-- some tests read the compressed sample files from
-             target/test-classes on the local filesystem -->
-        <testResources>
-            <testResource>
-                <directory>src/main/resources</directory>
-            </testResource>
-        </testResources>
         <plugins>
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>

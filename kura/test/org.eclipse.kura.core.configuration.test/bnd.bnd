@@ -1,0 +1,6 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Name: org.eclipse.kura.core.configuration.test
+Bundle-Vendor: Eclipse Kura
+Fragment-Host: org.eclipse.kura.core.configuration
+Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
+-includeresource: OSGI-INF=OSGI-INF, about.html

@@ -1168,6 +1168,11 @@
                 <version>${org.hamcrest.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>org.hamcrest.text</artifactId>
+                <version>${org.hamcrest.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
                 <version>${mockito.version}</version>
@@ -1579,6 +1584,11 @@
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.util.test.driver</artifactId>
+                <version>6.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.kura</groupId>
+                <artifactId>org.eclipse.kura.util.wire.test</artifactId>
                 <version>6.0.0-SNAPSHOT</version>
             </dependency>
             <!-- END Kura BOM -->

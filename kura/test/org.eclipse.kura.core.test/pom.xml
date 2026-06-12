@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-
-    Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2026 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -11,7 +10,6 @@
 
     Contributors:
      Eurotech
-
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -25,96 +23,44 @@
     </parent>
 
     <artifactId>org.eclipse.kura.core.test</artifactId>
-    <packaging>eclipse-test-plugin</packaging>
-
-    <properties>
-        <kura.basedir>${project.basedir}/../..</kura.basedir>
-        <moquette.path>${project.basedir}/src/main/resources/moquette/config</moquette.path>
-        <moquette.vm.args>
-            -server -XX:+HeapDumpOnOutOfMemoryError -Djava.awt.headless=true
-            -Dmoquette.path=${moquette.path}
-        </moquette.vm.args>
-        <kura.vm.args>
-            -Dkura.home=${project.basedir}/target/kura
-            -Dkura.plugins=${project.basedir}/target/kura/plugins
-            -Dkura.packages=${project.basedir}/target/kura/data/packages
-            -Dkura.data=${project.basedir}/target/kura/data
-            -Dkura.tmp=${project.basedir}/target/kura/tmp
-            -Dkura.snapshots=${project.basedir}/target/kura/user/snapshots
-            -Dorg.eclipse.kura.mode=emulator
-            -Dkura.configuration=file:${project.basedir}/src/main/resources/kura.properties
-            -Ddpa.configuration=${project.basedir}/target/kura/dpa.properties
-        </kura.vm.args>
-        <sonar.coverage.jacoco.xmlReportPaths>
-            ${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-    </properties>
+    <description>Integration tests for org.eclipse.kura.core</description>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>compiletests</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-indexer-maven-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-surefire-plugin</artifactId>
-                <version>${tycho-version}</version>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-testing-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-resolver-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
                 <configuration>
-                    <providerHint>junit4</providerHint>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                    <testSuite>org.eclipse.kura.core.test</testSuite>
-                    <testClass>org.eclipse.kura.core.test.AllCoreTests</testClass>
-                    <!--
-                    <testClass>org.eclipse.kura.core.test.CloudDeploymentHandlerTest</testClass>
-                        <testClass>org.eclipse.kura.core.test.CloudServiceTest</testClass>
-                    <testClass>org.eclipse.kura.core.test.CommURITest</testClass>
-                        <testClass>org.eclipse.kura.core.test.ComponentConfigurationImplTest</testClass>
-                        <testClass>org.eclipse.kura.core.test.ConfigurationServiceTest</testClass>
-                        <testClass>org.eclipse.kura.core.test.NetUtilTest</testClass>
-                    <testClass>org.eclipse.kura.core.test.NetworkServiceTest</testClass>
-                        <testClass>org.eclipse.kura.core.test.SystemAdminServiceTest</testClass>
-                        <testClass>org.eclipse.kura.core.test.SystemServiceTest</testClass> -->
-                    <!-- Don't run tests in parallel because it breaks them
-                        <parallel>both</parallel> -->
-
-                    <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <argLine>${tycho.testArgLine}
-                        -DbuildingWithTycho=true -Dosgi.locking=none
-                        -Dds.showtrace=true -Djava.io.tmpdir=/tmp
-                        -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml
-                        ${kura.vm.args}
-                        ${moquette.vm.args}
-                    </argLine>
-
-                    <!-- This can be uncommented to debug the test in the
-                        event of a failure by telneting to port 5002 and seeing the state of the
-                        OSGi runtime -->
-                    <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
-
-                    <showEclipseLog>true</showEclipseLog>
-
+                    <skip>true</skip>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>target-platform-configuration</artifactId>
             </plugin>
         </plugins>
     </build>

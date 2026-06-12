@@ -9,3 +9,6 @@ Export-Package: \
     org.eclipse.kura.core.util;version="2.0.0";x-internal:=true
 -includeresource: \
     about.html
+
+# Pick up test components contributed by the attached test fragment, if any
+Service-Component: OSGI-INF/test-*.xml

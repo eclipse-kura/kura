@@ -1,0 +1,5 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Name: org.eclipse.kura.rest.service.listing.provider.test
+Bundle-Vendor: Eclipse Kura
+Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
+-includeresource: OSGI-INF=OSGI-INF

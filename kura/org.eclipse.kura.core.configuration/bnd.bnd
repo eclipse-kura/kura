@@ -11,3 +11,6 @@ Export-Package: \
     about.html,\
     about_files=about_files/
 -dsannotations-options: inherit
+
+# Pick up test components contributed by the attached test fragment, if any
+Service-Component: OSGI-INF/test-*.xml

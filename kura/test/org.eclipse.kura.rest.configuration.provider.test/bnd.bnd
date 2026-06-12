@@ -1,0 +1,5 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Name: org.eclipse.kura.rest.configuration.provider.test
+Bundle-Vendor: Eclipse Kura
+Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
+-includeresource: about.html

@@ -1,0 +1,6 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Name: org.eclipse.kura.util.test
+Bundle-Vendor: Eclipse Kura
+Fragment-Host: org.eclipse.kura.util;bundle-version="1.0.0"
+Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
+-includeresource: about.html

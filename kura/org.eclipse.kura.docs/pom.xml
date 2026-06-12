@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2016, 2024 Eurotech and/or its affiliates and others
-  
+    Copyright (c) 2016, 2026 Eurotech and/or its affiliates and others
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
+
 	SPDX-License-Identifier: EPL-2.0
-	
+
 	Contributors:
 	 Eurotech
-	 
+
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -27,36 +27,41 @@
 
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
-		<tycho.extras.version>1.6.0</tycho.extras.version>
 	</properties>
-	
+
+	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.kura</groupId>
+			<artifactId>org.eclipse.kura.api</artifactId>
+		</dependency>
+	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>
-				<!-- Append to jars.extra.classpath in build.properties
-					 file to add bundle to Javadocs creation -->
-				<groupId>org.eclipse.tycho.extras</groupId>
-			    <artifactId>tycho-document-bundle-plugin</artifactId>
-			    <version>${tycho.extras.version}</version>
-			    <executions>
-				     <execution>
-				     	<id>eclipse-javadoc</id>
-				      	<phase>generate-resources</phase>
-				      	<goals>
-				       		<goal>javadoc</goal>
-				      	</goals>
-				      	<configuration>
-				       		<skipTocGen>true</skipTocGen>
-				       		<javadocOptions>
-				       			<additionalArguments>
-				       				<additionalArgument>-windowtitle "Eclipse Kura ${project.parent.version}"</additionalArgument>
-				       				<additionalArgument>-doctitle "Eclipse Kura ${project.parent.version}"</additionalArgument>
-				       			</additionalArguments>
-				       		</javadocOptions>
-				      	</configuration>
-			     	</execution>
-			    </executions>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.11.2</version>
+				<executions>
+					<execution>
+						<id>kura-javadoc</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<includeDependencySources>true</includeDependencySources>
+							<dependencySourceIncludes>
+								<dependencySourceInclude>org.eclipse.kura:org.eclipse.kura.api</dependencySourceInclude>
+							</dependencySourceIncludes>
+							<windowtitle>Eclipse Kura ${project.parent.version}</windowtitle>
+							<doctitle>Eclipse Kura ${project.parent.version}</doctitle>
+							<doclint>none</doclint>
+							<failOnError>false</failOnError>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
-		</plugins>	
+		</plugins>
 	</build>
 </project>

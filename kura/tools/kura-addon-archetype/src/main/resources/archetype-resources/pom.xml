@@ -73,14 +73,7 @@
             <!-- If using non-Kura dependencies, try to match the ones that are defined in target platform-->
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
-                <artifactId>kura</artifactId>
-                <version>${kuraVersion}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>target-platform</artifactId>
+                <artifactId>kura-parent</artifactId>
                 <version>${kuraVersion}</version>
                 <type>pom</type>
                 <scope>import</scope>

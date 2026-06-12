@@ -1,4 +1,0 @@
-Bundle-SymbolicName: ${project.artifactId}
-Bundle-Name: org.eclipse.kura.docs
--includeresource: \
-    about.html

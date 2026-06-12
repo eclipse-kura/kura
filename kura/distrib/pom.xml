@@ -297,13 +297,11 @@
                                 <checksum algorithm="MD5">
                                     <fileset dir="${basedir}/target">
                                         <include name="*.deb" />
-                                        <include name="*.dp" />
                                     </fileset>
                                 </checksum>
                                 <checksum algorithm="SHA-1">
                                     <fileset dir="${basedir}/target">
                                         <include name="*.deb" />
-                                        <include name="*.dp" />
                                     </fileset>
                                 </checksum>
                             </target>
@@ -1007,14 +1005,6 @@
             </build>
         </profile>
 
-        <!-- dp -->
-        <!-- TODO: this will be removed, DPs are deprecated -->
-        <profile>
-            <id>core-dp</id>
-            <modules>
-                <module>core-dp</module>
-            </modules>
-        </profile>
     </profiles>
 
 </project>

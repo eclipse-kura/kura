@@ -57,18 +57,17 @@
             <artifactId>moquette-broker</artifactId>
         </dependency>
 
+        <!-- Since Kura 6 there is no aggregate runtime artifact: list here the
+             Kura bundles your integration tests need at runtime, so that the
+             bnd indexer can offer them to the bndrun resolver (see the
+             kura/test parent pom in the Kura repository for a reference). -->
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>kura-pde-deps</artifactId>
-            <version>${kuraVersion}</version>
-            <type>pom</type>
+            <artifactId>org.eclipse.kura.api</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>target-platform-pde-deps</artifactId>
-            <version>${kuraVersion}</version>
-            <type>pom</type>
+            <artifactId>org.eclipse.kura.core</artifactId>
         </dependency>
     </dependencies>
 

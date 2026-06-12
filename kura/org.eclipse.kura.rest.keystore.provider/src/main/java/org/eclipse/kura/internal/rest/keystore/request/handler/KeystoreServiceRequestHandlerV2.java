@@ -26,6 +26,12 @@ import org.eclipse.kura.message.KuraResponsePayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Component;
+@Component(
+    name = "org.eclipse.kura.internal.rest.keystore.request.handler.KeystoreRequestHandlerV2",
+    immediate = true,
+    service = {},
+    property = { "service.pid=org.eclipse.kura.internal.rest.keystore.request.handler.KeystoreServiceRequestHandlerV2" })
 public class KeystoreServiceRequestHandlerV2 extends KeystoreServiceRequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(KeystoreServiceRequestHandlerV2.class);

@@ -78,6 +78,19 @@ import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
 import com.google.common.collect.ImmutableList;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+@Component(
+    name = "org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
+            org.eclipse.kura.container.orchestration.ContainerOrchestrationService.class },
+    property = { "service.pid=org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService" })
 public class ContainerOrchestrationServiceImpl implements ConfigurableComponent, ContainerOrchestrationService {
 
     private static final String PARAMETER_CANNOT_BE_NULL = "The provided parameter cannot be null";
@@ -101,10 +114,12 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         this.dockerClient = dockerClient;
     }
 
+    @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "-")
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
 
+    @Activate
     public void activate(Map<String, Object> properties) {
         logger.info("Bundle {} is starting with config!", APP_ID);
         if (!isNull(properties)) {
@@ -113,6 +128,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         logger.info("Bundle {} has started with config!", APP_ID);
     }
 
+    @Deactivate
     public void deactivate() {
         logger.info("Bundle {} is stopping!", APP_ID);
         if (testConnection()) {
@@ -121,6 +137,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         logger.info("Bundle {} has stopped!", APP_ID);
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.info("Bundle {} is updating with config!", APP_ID);
         ContainerOrchestrationServiceOptions newProps = new ContainerOrchestrationServiceOptions(properties);

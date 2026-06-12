@@ -30,6 +30,15 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentConstants;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+@Component(
+    name = "org.eclipse.kura.cloudconnection.raw.mqtt.factory.RawMqttCloudConnectionFactory",
+    service = { org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory.class },
+    property = {
+        "kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.raw.mqtt.CloudEndpoint",
+        "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.raw.mqtt.CloudEndpoint(\\-[a-zA-Z0-9]+)?$",
+        "service.pid=org.eclipse.kura.cloudconnection.raw.mqtt.factory.RawMqttCloudConnectionFactory" })
 public class RawMqttCloudConnectionFactory implements CloudConnectionFactory {
 
     private static final String FACTORY_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.factory.RawMqttCloudConnectionFactory";
@@ -53,6 +62,9 @@ public class RawMqttCloudConnectionFactory implements CloudConnectionFactory {
 
     private ConfigurationService configurationService;
 
+    @Reference(name = "ConfigurationService",
+            service = org.eclipse.kura.configuration.ConfigurationService.class,
+            unbind = "unsetConfigurationService")
     protected void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }

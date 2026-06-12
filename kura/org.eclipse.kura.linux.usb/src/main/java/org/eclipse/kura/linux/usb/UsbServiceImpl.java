@@ -40,6 +40,16 @@ import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+@Component(
+    name = "org.eclipse.kura.usb.UsbService",
+    immediate = true,
+    service = { org.eclipse.kura.usb.UsbService.class },
+    property = { "service.pid=org.eclipse.kura.usb.UsbService" })
 public class UsbServiceImpl implements UsbService, LinuxUdevListener {
 
     private static final Logger logger = LoggerFactory.getLogger(UsbServiceImpl.class);
@@ -47,6 +57,7 @@ public class UsbServiceImpl implements UsbService, LinuxUdevListener {
     private LinuxUdevNative linuxUdevNative;
     private EventAdmin eventAdmin;
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         // only support Linux
         String osName = System.getProperty("os.name");
@@ -63,11 +74,13 @@ public class UsbServiceImpl implements UsbService, LinuxUdevListener {
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         this.linuxUdevNative.unbind();
         this.linuxUdevNative = null;
     }
 
+    @Reference(name = "EventAdmin", service = org.osgi.service.event.EventAdmin.class, policy = ReferencePolicy.DYNAMIC, unbind = "unsetEventAdmin")
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }

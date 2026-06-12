@@ -1,0 +1,12 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: org.eclipse.kura.cloud.base.provider
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .,lib/org.eclipse.paho.client.mqttv3-1.2.1.k2.jar
+Export-Package: \
+    org.eclipse.kura.core.data;version="1.0.0",\
+    org.eclipse.kura.core.data.util;version="1.0.0";x-internal:=true
+-includeresource: \
+    OSGI-INF=OSGI-INF,\
+    about.html,\
+    lib/org.eclipse.paho.client.mqttv3-1.2.1.k2.jar

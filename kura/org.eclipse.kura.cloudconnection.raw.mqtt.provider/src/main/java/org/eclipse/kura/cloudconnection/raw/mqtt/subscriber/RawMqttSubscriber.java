@@ -27,6 +27,18 @@ import org.eclipse.kura.cloudconnecton.raw.mqtt.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+@Component(
+    name = "org.eclipse.kura.cloudconnection.raw.mqtt.subscriber.RawMqttSubscriber",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = {
+        "service.pid=org.eclipse.kura.cloudconnection.raw.mqtt.subscriber.RawMqttSubscriber",
+        "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint",
+        "kura.ui.service.hide:Boolean=true",
+        "kura.ui.factory.hide=true" })
 public class RawMqttSubscriber extends AbstractStackComponent<SubscribeOptions>
         implements CloudSubscriber, CloudSubscriberListener {
 

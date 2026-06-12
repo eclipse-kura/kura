@@ -33,6 +33,18 @@ import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+@Component(
+    name = "org.eclipse.kura.clock.ClockService",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.clock.ClockService.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = { "service.pid=org.eclipse.kura.clock.ClockService" })
 public class ClockServiceImpl implements ConfigurableComponent, ClockService, ClockSyncListener {
 
     private static final ClockEvent EMPTY_EVENT = new ClockEvent(Collections.<String, Object>emptyMap());
@@ -53,6 +65,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
     //
     // ----------------------------------------------------------------
 
+    @Reference(name = "EventAdmin", service = org.osgi.service.event.EventAdmin.class, unbind = "unsetEventAdmin")
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }
@@ -61,6 +74,9 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         this.eventAdmin = null;
     }
 
+    @Reference(name = "PrivilegedExecutorService",
+            service = org.eclipse.kura.executor.PrivilegedExecutorService.class,
+            unbind = "unsetExecutorService")
     public void setExecutorService(CommandExecutorService executorService) {
         this.executorService = executorService;
     }
@@ -69,6 +85,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         this.executorService = null;
     }
 
+    @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "-")
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
@@ -79,6 +96,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
     //
     // ----------------------------------------------------------------
 
+    @Activate
     protected void activate(Map<String, Object> properties) {
         logger.info("Activate. Current Time: {}", new Date());
 
@@ -95,6 +113,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         }
     }
 
+    @Deactivate
     protected void deactivate() {
         logger.info("Deactivate...");
         try {
@@ -114,6 +133,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         }
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.info("Updated...");
 

@@ -1,0 +1,10 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: org.eclipse.kura.cloudconnection.kapua.mqtt.provider
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .,lib/protobuf-java.jar
+-includeresource: \
+    OSGI-INF=OSGI-INF,\
+    about.html,\
+    about_files=about_files/,\
+    lib/protobuf-java.jar

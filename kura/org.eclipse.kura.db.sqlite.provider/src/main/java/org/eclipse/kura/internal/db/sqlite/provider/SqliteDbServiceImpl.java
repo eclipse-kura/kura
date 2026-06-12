@@ -45,6 +45,20 @@ import org.slf4j.LoggerFactory;
 import org.sqlite.SQLiteDataSource;
 import org.sqlite.SQLiteJDBCLoader;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+@Component(
+    name = "org.eclipse.kura.db.SQLiteDbService",
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
+            org.eclipse.kura.db.BaseDbService.class,
+            org.eclipse.kura.message.store.provider.MessageStoreProvider.class,
+            org.eclipse.kura.wire.store.provider.WireRecordStoreProvider.class,
+            org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider.class })
 public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent, MessageStoreProvider,
         WireRecordStoreProvider, QueryableWireRecordStoreProvider {
 
@@ -58,14 +72,17 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
     private Optional<DbState> state = Optional.empty();
     private ConnectionListenerManager listenerManager = new ConnectionListenerManager();
 
+    @Reference(name = "SqliteDebugShell", service = org.eclipse.kura.internal.db.sqlite.provider.SqliteDebugShell.class, unbind = "-")
     public void setDebugShell(final SqliteDebugShell debugShell) {
         this.debugShell = debugShell;
     }
 
+    @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "-")
     public void setCryptoService(final CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
 
+    @Activate
     public void activate(final Map<String, Object> properties) {
 
         logger.info("activating...");
@@ -80,6 +97,7 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
         logger.info("activating...done");
     }
 
+    @Modified
     public synchronized void updated(final Map<String, Object> properties) {
         logger.info("updating...");
 
@@ -100,6 +118,7 @@ public class SqliteDbServiceImpl implements BaseDbService, ConfigurableComponent
         logger.info("updating...done");
     }
 
+    @Deactivate
     public synchronized void deactivate() {
         logger.info("deactivating...");
 

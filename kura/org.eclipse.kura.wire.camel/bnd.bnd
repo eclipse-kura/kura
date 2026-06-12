@@ -1,0 +1,8 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: org.eclipse.kura.wire.camel
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+-includeresource: \
+    about.html,\
+    OSGI-INF=OSGI-INF
+-dsannotations-options: inherit

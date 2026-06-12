@@ -23,6 +23,16 @@ import org.eclipse.kura.wire.WireRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+@Component(
+    name = "org.eclipse.kura.wire.camel.CamelConsume",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
+            org.eclipse.kura.wire.WireEmitter.class,
+            org.eclipse.kura.wire.WireComponent.class,
+            org.osgi.service.wireadmin.Producer.class })
 public class CamelConsume extends AbstractEndpointWireComponent implements WireEmitter {
 
     private static final Logger logger = LoggerFactory.getLogger(CamelConsume.class);

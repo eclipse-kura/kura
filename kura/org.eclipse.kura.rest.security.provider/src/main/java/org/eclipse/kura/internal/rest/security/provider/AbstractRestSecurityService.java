@@ -20,6 +20,9 @@ import org.eclipse.kura.internal.rest.security.provider.dto.DebugEnabledDTO;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.eclipse.kura.security.SecurityService;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
@@ -47,14 +50,21 @@ public abstract class AbstractRestSecurityService {
     protected SecurityService security;
     protected final RequestHandler requestHandler = new JaxRsRequestHandlerProxy(this);
 
+    @Reference(name = "SecurityService", service = SecurityService.class, cardinality = ReferenceCardinality.OPTIONAL, unbind = "-")
     public void bindSecurityService(SecurityService securityService) {
         this.security = securityService;
     }
 
+    @Reference(name = "UserAdmin", service = UserAdmin.class, unbind = "-")
     public void bindUserAdmin(UserAdmin userAdmin) {
         userAdmin.createRole(KURA_PERMISSION_REST_ROLE, Role.GROUP);
     }
 
+    @Reference(name = "RequestHandlerRegistry",
+            service = RequestHandlerRegistry.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unbindRequestHandlerRegistry")
     public void bindRequestHandlerRegistry(RequestHandlerRegistry registry) {
         try {
             registry.registerRequestHandler(getMqttAppId(), this.requestHandler);

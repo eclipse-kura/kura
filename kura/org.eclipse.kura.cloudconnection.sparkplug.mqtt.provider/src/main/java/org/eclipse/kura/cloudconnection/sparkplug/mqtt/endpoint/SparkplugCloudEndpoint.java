@@ -49,6 +49,22 @@ import org.slf4j.LoggerFactory;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+@Component(
+    name = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint",
+    immediate = false,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
+            org.eclipse.kura.cloudconnection.CloudConnectionManager.class,
+            org.eclipse.kura.cloudconnection.CloudEndpoint.class },
+    property = {
+        "kura.ui.service.hide:Boolean=true",
+        "kura.ui.factory.hide:Boolean=true" })
 public class SparkplugCloudEndpoint
         implements ConfigurableComponent, CloudEndpoint, CloudConnectionManager, DataServiceListener {
 
@@ -71,14 +87,17 @@ public class SparkplugCloudEndpoint
     private DataService dataService;
     private EventAdmin eventAdmin;
 
+    @Reference(name = "DataService", service = org.eclipse.kura.data.DataService.class, unbind = "-")
     public void setDataService(final DataService dataService) {
         this.dataService = dataService;
     }
 
+    @Reference(name = "EventAdmin", service = org.osgi.service.event.EventAdmin.class, unbind = "-")
     public void setEventAdmin(final EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }
 
+    @Activate
     public void activate(final Map<String, Object> properties) {
         this.kuraServicePid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
         logger.info("{} - Activating", this.kuraServicePid);
@@ -89,6 +108,7 @@ public class SparkplugCloudEndpoint
         logger.info("{} - Activated", this.kuraServicePid);
     }
 
+    @Modified
     public void update() {
         logger.info("{} - Updating", this.kuraServicePid);
 
@@ -98,6 +118,7 @@ public class SparkplugCloudEndpoint
         logger.info("{} - Updated", this.kuraServicePid);
     }
 
+    @Deactivate
     public void deactivate() {
         logger.info("{} - Deactivating", this.kuraServicePid);
 

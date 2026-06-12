@@ -64,6 +64,19 @@ import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+@Component(
+    name = "org.eclipse.kura.core.inventory.InventoryHandlerV1",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.OPTIONAL,
+    service = { org.eclipse.kura.core.inventory.InventoryHandlerV1.class },
+    property = { "service.pid=org.eclipse.kura.core.inventory.InventoryHandlerV1" })
 public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(InventoryHandlerV1.class);
@@ -106,6 +119,11 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     //
     // ----------------------------------------------------------------
 
+    @Reference(name = "ContainerOrchestrationService",
+            service = org.eclipse.kura.container.orchestration.ContainerOrchestrationService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetContainerOrchestrationService")
     public void setContainerOrchestrationService(ContainerOrchestrationService containerOrchestrationService) {
         this.containerOrchestrationService = containerOrchestrationService;
     }
@@ -116,6 +134,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         }
     }
 
+    @Reference(name = "DeploymentAdmin", service = org.osgi.service.deploymentadmin.DeploymentAdmin.class, unbind = "unsetDeploymentAdmin")
     protected void setDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
         this.deploymentAdmin = deploymentAdmin;
     }
@@ -126,6 +145,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         }
     }
 
+    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "unsetSystemService")
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -136,6 +156,11 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         }
     }
 
+    @Reference(name = "RequestHandlerRegistry",
+            service = org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRequestHandlerRegistry")
     public void setRequestHandlerRegistry(RequestHandlerRegistry requestHandlerRegistry) {
         try {
             requestHandlerRegistry.registerRequestHandler(APP_ID, this);
@@ -158,11 +183,13 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     //
     // ----------------------------------------------------------------
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         logger.info("Inventory v1 is starting");
         this.bundleContext = componentContext.getBundleContext();
     }
 
+    @Deactivate
     protected void deactivate() {
         logger.info("Bundle {} is deactivating!", APP_ID);
         this.bundleContext = null;

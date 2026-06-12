@@ -34,6 +34,14 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+@Component(
+    name = "org.eclipse.kura.cloud.CloudCallService",
+    service = { org.eclipse.kura.cloud.CloudCallService.class },
+    property = { "service.pid=org.eclipse.kura.cloud.CloudCallService" })
 public class CloudCallServiceImpl implements CloudCallService, DataServiceListener {
 
     private static final Logger s_logger = LoggerFactory.getLogger(CloudCallServiceImpl.class);
@@ -59,6 +67,7 @@ public class CloudCallServiceImpl implements CloudCallService, DataServiceListen
     //
     // ----------------------------------------------------------------
 
+    @Reference(name = "DataService", service = org.eclipse.kura.data.DataService.class, unbind = "unsetDataService")
     public void setDataService(DataService dataService) {
         this.m_dataService = dataService;
     }
@@ -73,12 +82,14 @@ public class CloudCallServiceImpl implements CloudCallService, DataServiceListen
     //
     // ----------------------------------------------------------------
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         s_logger.info("Activating...");
         this.m_lock = new Object();
         this.m_dataService.addDataServiceListener(this);
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         s_logger.info("Deactivating...");
         this.m_dataService.removeDataServiceListener(this);

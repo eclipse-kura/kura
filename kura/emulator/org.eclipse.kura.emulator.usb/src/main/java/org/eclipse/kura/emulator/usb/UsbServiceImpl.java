@@ -26,11 +26,21 @@ import org.eclipse.kura.usb.UsbService;
 import org.eclipse.kura.usb.UsbTtyDevice;
 import org.osgi.service.component.ComponentContext;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+@Component(
+    name = "org.eclipse.kura.usb.UsbService",
+    immediate = true,
+    service = { org.eclipse.kura.usb.UsbService.class },
+    property = { "service.pid=org.eclipse.kura.usb.UsbService" })
 public class UsbServiceImpl implements UsbService {
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
     }
 

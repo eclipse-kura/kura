@@ -31,6 +31,17 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+@Component(
+    name = "org.eclipse.kura.watchdog.WatchdogService",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.watchdog.WatchdogService.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = { "service.pid=org.eclipse.kura.watchdog.WatchdogService" })
 public class WatchdogServiceImpl implements WatchdogService, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(WatchdogServiceImpl.class);
@@ -44,6 +55,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private boolean configEnabled = false; // initialized in properties, if false -> no watchdog
     private boolean enabled;
 
+    @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         this.properties = properties;
         if (properties == null) {
@@ -78,6 +90,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         }, 0, this.pingInterval, TimeUnit.MILLISECONDS);
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         this.executor.shutdown();
         while (!this.executor.isTerminated()) {
@@ -92,6 +105,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         criticalServiceList = null;
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.debug("updated...");
         this.properties = properties;

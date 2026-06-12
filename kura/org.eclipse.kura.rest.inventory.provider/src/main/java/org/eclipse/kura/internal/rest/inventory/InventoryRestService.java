@@ -40,7 +40,17 @@ import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 @Path("/inventory/v1")
+@Component(
+    name = "org.eclipse.kura.internal.rest.inventory.InventoryRestService",
+    immediate = true,
+    service = { org.eclipse.kura.internal.rest.inventory.InventoryRestService.class },
+    property = {
+        "kura.service.pid=org.eclipse.kura.internal.rest.inventory.InventoryRestService",
+        "service.pid=org.eclipse.kura.internal.rest.inventory.InventoryRestService",
+        "osgi.jakartars.resource=true" })
 public class InventoryRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(InventoryRestService.class);
@@ -49,10 +59,12 @@ public class InventoryRestService {
 
     private InventoryHandlerV1 inventoryHandlerV1;
 
+    @Reference(name = "UserAdmin", service = org.osgi.service.useradmin.UserAdmin.class, unbind = "-")
     public void setUserAdmin(UserAdmin userAdmin) {
         userAdmin.createRole(KURA_PERMISSION_REST_CONFIGURATION_ROLE, Role.GROUP);
     }
 
+    @Reference(name = "InventoryHandlerV1", service = org.eclipse.kura.core.inventory.InventoryHandlerV1.class, unbind = "-")
     public void setInventoryHandlerV1(InventoryHandlerV1 inventoryHandlerV1) {
         this.inventoryHandlerV1 = inventoryHandlerV1;
 

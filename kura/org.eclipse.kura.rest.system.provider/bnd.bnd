@@ -1,0 +1,7 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: System REST Service
+Bundle-ActivationPolicy: lazy
+-includeresource: \
+    OSGI-INF=OSGI-INF,\
+    about.html,\
+    about_files=about_files/

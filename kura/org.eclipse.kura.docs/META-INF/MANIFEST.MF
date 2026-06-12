@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: org.eclipse.kura.docs
-Bundle-SymbolicName: org.eclipse.kura.docs
-Bundle-Version: 1.0.0.qualifier
-Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=21))"

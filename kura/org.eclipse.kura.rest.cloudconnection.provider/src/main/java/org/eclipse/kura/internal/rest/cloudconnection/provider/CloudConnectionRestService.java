@@ -50,7 +50,20 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 @Path("cloudconnection/v1")
+@Component(
+    name = "org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService",
+    immediate = true,
+    service = { org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService.class },
+    property = {
+        "kura.service.pid=org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService",
+        "service.pid=org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService",
+        "osgi.jakartars.resource=true" })
 public class CloudConnectionRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudConnectionRestService.class);
@@ -66,14 +79,21 @@ public class CloudConnectionRestService {
     private ConfigurationService configurationService;
     private CryptoService cryptoService;
 
+    @Reference(name = "UserAdmin", service = org.osgi.service.useradmin.UserAdmin.class, unbind = "-")
     public void bindUserAdmin(UserAdmin userAdmin) {
         userAdmin.createRole(KURA_PERMISSION_REST_ROLE, Role.GROUP);
     }
 
+    @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "-")
     public void bindCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
 
+    @Reference(name = "RequestHandlerRegistry",
+            service = org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unbindRequestHandlerRegistry")
     public void bindRequestHandlerRegistry(RequestHandlerRegistry registry) {
         try {
             registry.registerRequestHandler(MQTT_APP_ID, this.requestHandler);
@@ -82,6 +102,7 @@ public class CloudConnectionRestService {
         }
     }
 
+    @Reference(name = "ConfigurationService", service = org.eclipse.kura.configuration.ConfigurationService.class, unbind = "-")
     public void bindConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
@@ -94,6 +115,7 @@ public class CloudConnectionRestService {
         }
     }
 
+    @Activate
     public void activate() {
         this.cloudConnectionService = new CloudConnectionService(this.configurationService);
         this.cloudConnectionManagerBridge = new CloudConnectionManagerBridge();

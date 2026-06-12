@@ -31,12 +31,20 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+@Component(
+    name = "org.eclipse.kura.driver.descriptor.DriverDescriptorService",
+    immediate = true,
+    service = { org.eclipse.kura.driver.descriptor.DriverDescriptorService.class },
+    property = { "service.pid=org.eclipse.kura.driver.descriptor.DriverDescriptorService" })
 public class DriverDescriptorServiceImpl implements DriverDescriptorService {
 
     private static final Logger logger = LoggerFactory.getLogger(DriverDescriptorServiceImpl.class);
 
     private BundleContext bundleContext;
 
+    @Activate
     public void activate(ComponentContext componentContext) {
         this.bundleContext = componentContext.getBundleContext();
     }

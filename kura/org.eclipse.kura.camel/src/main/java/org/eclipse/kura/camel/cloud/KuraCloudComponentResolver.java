@@ -20,6 +20,7 @@ import org.eclipse.kura.cloud.CloudService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Reference;
 /**
  * A resolver for "kura-cloud"
  * <p>
@@ -30,12 +31,17 @@ import org.slf4j.LoggerFactory;
  * If you need finer grained control, consider using the {@link org.eclipse.kura.camel.runner.CamelRunner} mechanism.
  * </p>
  */
+@org.osgi.service.component.annotations.Component(
+    name = "org.eclipse.kura.camel.KuraCloudComponentResolver",
+    service = { org.apache.camel.spi.ComponentResolver.class },
+    properties = "OSGI-INF/kuraCloudResolver.properties")
 public class KuraCloudComponentResolver implements ComponentResolver {
 
     private static final Logger logger = LoggerFactory.getLogger(KuraCloudComponentResolver.class);
 
     private CloudService cloudService;
 
+    @Reference(name = "CloudService", service = org.eclipse.kura.cloud.CloudService.class, unbind = "-")
     public void setCloudService(final CloudService cloudService) {
         this.cloudService = cloudService;
     }

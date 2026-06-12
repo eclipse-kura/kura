@@ -1,0 +1,7 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Name: Native libraries for 'org.eclipse.kura.linux.usb' on x86_64
+Fragment-Host: org.eclipse.kura.linux.usb;bundle-version="[2.0.0,3.0.0)"
+Bundle-NativeCode: lib/linux/libEurotechLinuxUdev.so; osname=Linux; processor=x86-64
+-includeresource: \
+    about.html,\
+    lib=lib

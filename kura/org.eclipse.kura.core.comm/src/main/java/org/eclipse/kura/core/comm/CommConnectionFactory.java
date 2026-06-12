@@ -21,6 +21,13 @@ import javax.microedition.io.Connection;
 
 import org.osgi.service.io.ConnectionFactory;
 
+import org.osgi.service.component.annotations.Component;
+@Component(
+    name = "org.eclipse.kura.core.comm.CommConnectionFactory",
+    service = { org.osgi.service.io.ConnectionFactory.class },
+    property = {
+        "io.scheme=comm",
+        "service.pid=org.eclipse.kura.core.comm.CommConnectionFactory" })
 public class CommConnectionFactory implements ConnectionFactory {
 
     @Override

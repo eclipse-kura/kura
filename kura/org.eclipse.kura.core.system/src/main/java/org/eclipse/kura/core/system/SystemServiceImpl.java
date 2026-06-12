@@ -72,6 +72,16 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+@Component(
+    name = "org.eclipse.kura.system.SystemService",
+    immediate = true,
+    service = { org.eclipse.kura.system.SystemService.class },
+    property = { "service.pid=org.eclipse.kura.system.SystemService" })
 public class SystemServiceImpl extends SuperSystemService implements SystemService {
 
     private ScheduledExecutorService internetCheckerExecutor;
@@ -108,6 +118,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     private ScheduledFuture<?> currentTask;
 
+    @Reference(name = "PrivilegedExecutorService",
+            service = org.eclipse.kura.executor.PrivilegedExecutorService.class,
+            unbind = "unsetExecutorService")
     public void setExecutorService(CommandExecutorService executorService) {
         this.executorService = executorService;
     }
@@ -123,6 +136,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     // ----------------------------------------------------------------
 
     @SuppressWarnings({ "rawtypes", "unchecked", "checkstyle:methodLength" })
+    @Activate
     protected void activate(ComponentContext componentContext) {
         this.componentContext = componentContext;
 
@@ -550,6 +564,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         return IOUtils.toString(resourceUrl);
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         this.componentContext = null;
         this.kuraProperties = null;
@@ -569,6 +584,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         }
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         // nothing to do
         // all properties of the System service are read-only

@@ -21,6 +21,10 @@ import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireSupport;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +40,12 @@ public abstract class AbstractWireComponent implements WireComponent, Configurab
 
     protected WireSupport wireSupport;
 
+    @Reference(name = "WireHelperService", service = WireHelperService.class, unbind = "-")
     public void setWireHelperService(final WireHelperService wireHelperService) {
         this.wireHelperService = wireHelperService;
     }
 
+    @Activate
     @SuppressWarnings("unchecked")
     protected synchronized void activate(final ComponentContext componentContext, final Map<String, ?> properties)
             throws Exception {
@@ -49,9 +55,11 @@ public abstract class AbstractWireComponent implements WireComponent, Configurab
         }
     }
 
+    @Modified
     protected void modified(final ComponentContext componentContext, final Map<String, ?> properties) throws Exception {
     }
 
+    @Deactivate
     protected synchronized void deactivate() {
         /*
          * We must not close the wireSupport instance here as we do implement

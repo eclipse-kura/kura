@@ -1,0 +1,8 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Name: Plain XML router component
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+DynamicImport-Package: *
+-includeresource: \
+    OSGI-INF=OSGI-INF,\
+    about.html

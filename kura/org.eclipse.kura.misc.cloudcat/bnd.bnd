@@ -1,0 +1,6 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: CloudService Relay (CloudService CAT)
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+-includeresource: \
+    OSGI-INF=OSGI-INF

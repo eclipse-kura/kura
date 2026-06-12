@@ -27,6 +27,12 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+@Component(
+    name = "org.eclipse.kura.emulator.Emulator",
+    service = { org.eclipse.kura.emulator.Emulator.class })
 public class Emulator {
 
     private static final Logger logger = LoggerFactory.getLogger(Emulator.class);
@@ -43,6 +49,7 @@ public class Emulator {
 
     private ComponentContext componentContext;
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         this.componentContext = componentContext;
 
@@ -69,6 +76,7 @@ public class Emulator {
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         this.componentContext = null;
     }

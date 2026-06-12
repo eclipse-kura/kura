@@ -1,0 +1,17 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: org.eclipse.kura.camel
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+Export-Package: \
+    org.eclipse.kura.camel;version="2.0.0",\
+    org.eclipse.kura.camel.bean;version="2.0.0",\
+    org.eclipse.kura.camel.camelcloud;version="2.0.0",\
+    org.eclipse.kura.camel.cloud;version="2.0.0",\
+    org.eclipse.kura.camel.component;version="2.0.0",\
+    org.eclipse.kura.camel.router;version="2.0.0",\
+    org.eclipse.kura.camel.runner;version="2.0.0",\
+    org.eclipse.kura.camel.type;version="2.0.0",\
+    org.eclipse.kura.camel.utils;version="2.0.0"
+-includeresource: \
+    about.html,\
+    OSGI-INF=OSGI-INF

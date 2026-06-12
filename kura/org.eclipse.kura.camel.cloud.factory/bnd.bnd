@@ -1,0 +1,8 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: Camel Cloud Factory
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+DynamicImport-Package: *
+-includeresource: \
+    about.html,\
+    OSGI-INF=OSGI-INF

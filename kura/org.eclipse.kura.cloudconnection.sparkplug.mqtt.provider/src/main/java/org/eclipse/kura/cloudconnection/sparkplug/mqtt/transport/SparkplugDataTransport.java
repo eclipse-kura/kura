@@ -38,6 +38,27 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+@Component(
+    name = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.data.DataTransportService.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = {
+        "kura.ui.service.hide:Boolean=true",
+        "kura.ui.factory.hide:Boolean=true" },
+    reference = {
+        @Reference(name = "DataTransportListener",
+                service = org.eclipse.kura.data.DataTransportListener.class,
+                cardinality = ReferenceCardinality.MULTIPLE,
+                policy = ReferencePolicy.DYNAMIC) })
 public class SparkplugDataTransport implements ConfigurableComponent, DataTransportService, MqttCallback {
 
     private static final Logger logger = LoggerFactory.getLogger(SparkplugDataTransport.class);
@@ -55,6 +76,11 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
      * Activation APIs
      */
 
+    @Reference(name = "SslManagerService",
+            service = org.eclipse.kura.ssl.SslManagerService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetSslManagerService")
     public synchronized void setSslManagerService(SslManagerService sslManagerService) {
         this.sslManagerService = sslManagerService;
         update();
@@ -67,10 +93,12 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
         }
     }
 
+    @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "-")
     public synchronized void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
 
+    @Activate
     public synchronized void activate(Map<String, Object> properties) {
         this.kuraServicePid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
         logger.info("{} - Activating", this.kuraServicePid);
@@ -80,6 +108,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
         logger.info("{} - Activated", this.kuraServicePid);
     }
 
+    @Modified
     public synchronized void update(Map<String, Object> properties) {
         try {
             this.options = new SparkplugDataTransportOptions(properties, this.cryptoService);
@@ -89,6 +118,7 @@ public class SparkplugDataTransport implements ConfigurableComponent, DataTransp
         }
     }
 
+    @Deactivate
     public synchronized void deactivate() {
         logger.info("{} - Deactivating", this.kuraServicePid);
 

@@ -64,7 +64,18 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 @Path("/configuration/v2")
+@Component(
+    name = "org.eclipse.kura.internal.rest.configuration.ConfigurationRestService",
+    service = { org.eclipse.kura.internal.rest.configuration.ConfigurationRestService.class },
+    property = {
+        "kura.service.pid=org.eclipse.kura.internal.rest.configuration.ConfigurationRestService",
+        "service.pid=org.eclipse.kura.internal.rest.configuration.ConfigurationRestService",
+        "osgi.jakartars.resource=true" })
 public class ConfigurationRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationRestService.class);
@@ -80,22 +91,31 @@ public class ConfigurationRestService {
     private OCDService ocdService;
     private CryptoService cryptoService;
 
+    @Reference(name = "UserAdmin", service = org.osgi.service.useradmin.UserAdmin.class, unbind = "-")
     public void setUserAdmin(UserAdmin userAdmin) {
         userAdmin.createRole(KURA_PERMISSION_REST_CONFIGURATION_ROLE, Role.GROUP);
     }
 
+    @Reference(name = "ConfigurationService", service = org.eclipse.kura.configuration.ConfigurationService.class, unbind = "-")
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
 
+    @Reference(name = "OCDService", service = org.eclipse.kura.configuration.metatype.OCDService.class, unbind = "-")
     public void setOCDService(OCDService ocdService) {
         this.ocdService = ocdService;
     }
 
+    @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "-")
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
 
+    @Reference(name = "RequestHandlerRegistry",
+            service = org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRequestHandlerRegistry")
     public void setRequestHandlerRegistry(final RequestHandlerRegistry registry) {
         try {
             registry.registerRequestHandler(APP_ID, this.requestHandler);

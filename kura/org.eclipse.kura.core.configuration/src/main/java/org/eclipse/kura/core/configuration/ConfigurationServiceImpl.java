@@ -84,6 +84,11 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.runtime.ServiceComponentRuntime;
 import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.osgi.service.event.EventAdmin;
@@ -147,34 +152,48 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     //
     // ----------------------------------------------------------------
 
+    @Reference(name = "ConfigurationAdmin", service = ConfigurationAdmin.class, unbind = "-")
     public void setConfigurationAdmin(ConfigurationAdmin configAdmin) {
         this.configurationAdmin = configAdmin;
     }
 
+    @Reference(name = "MetaTypeService", service = MetaTypeService.class, unbind = "-")
     public void setMetaTypeService(MetaTypeService metaTypeService) {
         this.metaTypeService = metaTypeService;
     }
 
+    @Reference(name = "SystemService", service = SystemService.class, unbind = "-")
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
 
+    @Reference(name = "CryptoService", service = CryptoService.class, unbind = "-")
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
 
+    @Reference(name = "ScrService", service = ServiceComponentRuntime.class, unbind = "-")
     public void setScrService(ServiceComponentRuntime scrService) {
         this.scrService = scrService;
     }
 
+    @Reference(name = "Marshaller",
+            service = Marshaller.class,
+            target = "(kura.service.pid=org.eclipse.kura.xml.marshaller.unmarshaller.provider)",
+            unbind = "-")
     public void setXmlMarshaller(final Marshaller marshaller) {
         this.xmlMarshaller = marshaller;
     }
 
+    @Reference(name = "Unmarshaller",
+            service = Unmarshaller.class,
+            target = "(kura.service.pid=org.eclipse.kura.xml.marshaller.unmarshaller.provider)",
+            unbind = "-")
     public void setXmlUnmarshaller(final Unmarshaller unmarshaller) {
         this.xmlUnmarshaller = unmarshaller;
     }
 
+    @Reference(name = "EventAdmin", service = EventAdmin.class, unbind = "-")
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }
@@ -195,6 +214,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     //
     // ----------------------------------------------------------------
 
+    @Activate
     protected void activate(ComponentContext componentContext) throws InvalidSyntaxException {
         logger.info("activate...");
 
@@ -213,6 +233,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         this.bundleTracker.open();
     }
 
+    @Reference(name = "ConfigurableComponent",
+            service = ConfigurableComponent.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeConfigurableComponent")
     protected void addConfigurableComponent(final ServiceReference<ConfigurableComponent> reference) {
 
         final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
@@ -240,6 +265,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         unregisterComponentConfiguration(kuraPid);
     }
 
+    @Reference(name = "SelfConfiguringComponent",
+            service = SelfConfiguringComponent.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeSelfConfiguringComponent")
     protected void addSelfConfiguringComponent(final ServiceReference<SelfConfiguringComponent> reference) {
 
         final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
@@ -267,6 +297,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     }
 
+    @Deactivate
     protected void deactivate() {
         logger.info("deactivate...");
 

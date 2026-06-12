@@ -48,6 +48,21 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+@Component(
+    name = "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl",
+    immediate = false,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.security.keystore.KeystoreService.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = {
+        "service.pid=org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImplerviceImpl",
+        "kura.ui.factory.hide=true",
+        "kura.ui.service.hide=true" })
 public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
 
     private static final Logger logger = LoggerFactory.getLogger(FilesystemKeystoreServiceImpl.class);
@@ -66,10 +81,12 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
     //
     // ----------------------------------------------------------------
 
+    @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "-")
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
 
+    @Reference(name = "ConfigurationService", service = org.eclipse.kura.configuration.ConfigurationService.class, unbind = "-")
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
@@ -81,6 +98,7 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
     // ----------------------------------------------------------------
 
     @Override
+    @Activate
     public void activate(ComponentContext context, Map<String, Object> properties) {
         logger.info("Bundle {} is starting!", properties.get(KURA_SERVICE_PID));
         this.componentContext = context;
@@ -106,6 +124,7 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
     }
 
     @Override
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.info("Bundle {} is updating!", properties.get(KURA_SERVICE_PID));
         FilesystemKeystoreServiceOptions newOptions = new FilesystemKeystoreServiceOptions(properties,
@@ -130,6 +149,7 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
     }
 
     @Override
+    @Deactivate
     public void deactivate() {
         logger.info("Bundle {} is deactivating!", this.keystoreServiceOptions.getProperties().get(KURA_SERVICE_PID));
 

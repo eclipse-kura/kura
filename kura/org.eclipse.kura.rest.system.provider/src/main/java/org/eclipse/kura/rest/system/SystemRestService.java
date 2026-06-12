@@ -45,7 +45,18 @@ import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 @Path(REST_APP_ID)
+@Component(
+    name = "org.eclipse.kura.rest.system.SystemRestService",
+    service = { org.eclipse.kura.rest.system.SystemRestService.class },
+    property = {
+        "kura.service.pid=org.eclipse.kura.rest.system.SystemRestService",
+        "service.pid=org.eclipse.kura.rest.system.SystemRestService",
+        "osgi.jakartars.resource=true" })
 public class SystemRestService {
 
     private static final Logger logger = LoggerFactory.getLogger(SystemRestService.class);
@@ -54,14 +65,21 @@ public class SystemRestService {
     private SystemService systemService;
     private final RequestHandler requestHandler = new JaxRsRequestHandlerProxy(this);
 
+    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "-")
     public void bindSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
 
+    @Reference(name = "UserAdmin", service = org.osgi.service.useradmin.UserAdmin.class, unbind = "-")
     public void bindUserAdmin(UserAdmin userAdmin) {
         userAdmin.createRole(KURA_PERMISSION_REST_ROLE, Role.GROUP);
     }
 
+    @Reference(name = "RequestHandlerRegistry",
+            service = org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unbindRequestHandlerRegistry")
     public void bindRequestHandlerRegistry(RequestHandlerRegistry registry) {
         try {
             registry.registerRequestHandler(MQTT_APP_ID, this.requestHandler);

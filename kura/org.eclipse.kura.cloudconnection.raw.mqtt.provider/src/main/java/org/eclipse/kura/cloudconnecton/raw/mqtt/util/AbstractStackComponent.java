@@ -27,6 +27,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -54,6 +57,7 @@ public abstract class AbstractStackComponent<T> implements ConfigurableComponent
         this.endpoint.set(Optional.empty());
     }
 
+    @Activate
     public void activated(final Map<String, Object> properties) {
         getLogger().info("activating...");
 
@@ -62,6 +66,7 @@ public abstract class AbstractStackComponent<T> implements ConfigurableComponent
         getLogger().info("activating...done");
     }
 
+    @Modified
     public void updated(final Map<String, Object> properties) {
         getLogger().info("updating...");
 
@@ -71,6 +76,7 @@ public abstract class AbstractStackComponent<T> implements ConfigurableComponent
         getLogger().info("updating...done");
     }
 
+    @Deactivate
     public void deactivated() {
         getLogger().info("deactivating...");
 

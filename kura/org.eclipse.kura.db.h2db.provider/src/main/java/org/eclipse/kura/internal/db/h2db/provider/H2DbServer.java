@@ -20,6 +20,17 @@ import org.h2.tools.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+@Component(
+    name = "org.eclipse.kura.core.db.H2DbServer",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = { "service.pid=org.eclipse.kura.core.db.H2DbServer" })
 public class H2DbServer implements ConfigurableComponent {
 
     enum ServerType {
@@ -31,18 +42,21 @@ public class H2DbServer implements ConfigurableComponent {
     private static final Logger logger = LoggerFactory.getLogger(H2DbServer.class);
     private Server server;
 
+    @Activate
     protected void activate(Map<String, Object> properties) {
         logger.info("activating...");
         updated(properties);
         logger.info("activating...done");
     }
 
+    @Modified
     protected void updated(Map<String, Object> properties) {
         logger.info("updating...");
         restartServer(new H2DbServerOptions(properties));
         logger.info("updating...done");
     }
 
+    @Deactivate
     protected void deactivate() {
         logger.info("deactivating...");
         shutdownServer();

@@ -40,6 +40,9 @@ import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.rest.utils.Validable;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +73,11 @@ public class KeystoreServiceRequestHandler extends KeystoreRemoteService impleme
         this.appId = appId;
     }
 
+    @Reference(name = "RequestHandlerRegistry",
+            service = RequestHandlerRegistry.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRequestHandlerRegistry")
     public void setRequestHandlerRegistry(RequestHandlerRegistry requestHandlerRegistry) {
         try {
             requestHandlerRegistry.registerRequestHandler(this.appId, this);

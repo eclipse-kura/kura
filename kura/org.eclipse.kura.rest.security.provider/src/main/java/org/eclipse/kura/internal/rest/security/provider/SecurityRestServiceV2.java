@@ -34,7 +34,16 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
+import org.osgi.service.component.annotations.Component;
 @Path("security/v2")
+@Component(
+    name = "org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2",
+    immediate = true,
+    service = { org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2.class },
+    property = {
+        "kura.service.pid=org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2",
+        "service.pid=org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2",
+        "osgi.jakartars.resource=true" })
 public class SecurityRestServiceV2 extends AbstractRestSecurityService {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityRestServiceV2.class);

@@ -39,6 +39,21 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+@Component(
+    name = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.device.SparkplugDevice",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = {
+        "service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.device.SparkplugDevice",
+        "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint",
+        "kura.ui.service.hide:Boolean=true",
+        "kura.ui.factory.hide=true" })
 public class SparkplugDevice
         implements CloudPublisher, ConfigurableComponent, CloudConnectionListener, CloudDeliveryListener {
 
@@ -59,6 +74,7 @@ public class SparkplugDevice
      * ConfigurableComponent APIs
      */
 
+    @Activate
     public void activate(final ComponentContext componentContext, final Map<String, Object> properties)
             throws InvalidSyntaxException {
         String endpointPid = (String) properties
@@ -71,6 +87,7 @@ public class SparkplugDevice
         update(properties);
     }
 
+    @Modified
     public void update(final Map<String, Object> properties) {
         this.deviceId = (String) properties.get(KEY_DEVICE_ID);
         if (Objects.isNull(this.deviceId) || this.deviceId.trim().isEmpty()) {
@@ -82,6 +99,7 @@ public class SparkplugDevice
         logger.info("Sparkplug Device {} - Updated device ID", this.deviceId);
     }
 
+    @Deactivate
     public void deactivate() {
         logger.info("Sparkplug Device {} - Deactivating", this.deviceId);
 

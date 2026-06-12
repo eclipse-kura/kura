@@ -31,9 +31,17 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 @Path("/tamper/v1")
+@Component(
+    name = "org.eclipse.kura.internal.rest.tamper.detection.TamperDetectionRestService",
+    immediate = true,
+    service = { org.eclipse.kura.internal.rest.tamper.detection.TamperDetectionRestService.class },
+    property = { "osgi.jakartars.resource=true" })
 public class TamperDetectionRestService extends TamperDetectionRemoteService {
 
+    @Reference(name = "UserAdmin", service = org.osgi.service.useradmin.UserAdmin.class, unbind = "-")
     public void setUserAdmin(final UserAdmin userAdmin) {
         userAdmin.createRole("kura.permission.rest.tamper.detection", Role.GROUP);
     }

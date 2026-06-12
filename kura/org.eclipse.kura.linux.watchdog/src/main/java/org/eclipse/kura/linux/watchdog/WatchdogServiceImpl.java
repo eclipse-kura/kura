@@ -36,6 +36,17 @@ import org.eclipse.kura.watchdog.WatchdogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+@Component(
+    name = "org.eclipse.kura.watchdog.WatchdogService",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.watchdog.WatchdogService.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = { "service.pid=org.eclipse.kura.watchdog.WatchdogService" })
 public class WatchdogServiceImpl implements WatchdogService, ConfigurableComponent {
 
     private static final String[] STOP_WATCHDOGD_COMMANDS = { "systemctl stop watchdog", "service watchdog stop",
@@ -52,6 +63,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private Writer watchdogFileWriter;
     private WatchdogServiceOptions options;
 
+    @Activate
     protected void activate(Map<String, Object> properties) {
         this.criticalComponentRegistrations = new CopyOnWriteArrayList<>();
         this.pollExecutor = Executors.newSingleThreadScheduledExecutor();
@@ -59,6 +71,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         updated(properties);
     }
 
+    @Deactivate
     protected void deactivate() {
         cancelPollTask();
         shutdownPollExecutor();
@@ -68,6 +81,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         }
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         WatchdogServiceOptions newOptions = new WatchdogServiceOptions(properties);
 

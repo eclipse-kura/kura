@@ -21,6 +21,17 @@ import org.eclipse.kura.wire.WireEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+@Component(
+    name = "org.eclipse.kura.wire.camel.CamelProduce",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
+            org.eclipse.kura.wire.WireReceiver.class,
+            org.eclipse.kura.wire.WireComponent.class,
+            org.osgi.service.wireadmin.Consumer.class })
 public class CamelProduce extends AbstractReceiverWireComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(CamelProduce.class);
@@ -59,6 +70,7 @@ public class CamelProduce extends AbstractReceiverWireComponent {
     }
 
     @Override
+    @Deactivate
     protected void deactivate() {
         closeTemplate();
     }

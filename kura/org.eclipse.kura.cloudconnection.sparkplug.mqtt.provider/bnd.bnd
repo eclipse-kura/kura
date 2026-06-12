@@ -1,0 +1,9 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Name: Sparkplug MQTT Cloud Connection Provider
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .,lib/org.eclipse.paho.client.mqttv3-1.2.1.k2.jar
+-includeresource: \
+    OSGI-INF=OSGI-INF,\
+    about.html,\
+    lib=lib

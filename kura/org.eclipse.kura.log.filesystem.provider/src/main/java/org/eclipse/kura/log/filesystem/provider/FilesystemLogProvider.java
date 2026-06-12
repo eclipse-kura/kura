@@ -29,6 +29,17 @@ import org.eclipse.kura.log.listener.LogListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+@Component(
+    name = "org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.log.LogProvider.class },
+    property = { "service.pid=org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider" })
 public class FilesystemLogProvider implements ConfigurableComponent, LogProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(FilesystemLogProvider.class);
@@ -38,12 +49,14 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
     private FileLogReader readerThread;
     private String filePath;
 
+    @Activate
     protected void activate(Map<String, Object> properties) {
         logger.info("Activating FilesystemLogProvider...");
         updated(properties);
         logger.info("Activating FilesystemLogProvider... Done.");
     }
 
+    @Deactivate
     protected void deactivate() {
         logger.info("Deactivating FilesystemLogProvider...");
         if (this.readerThread != null) {
@@ -52,6 +65,7 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
         logger.info("Deactivating FilesystemLogProvider... Done.");
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.info("Updated FilesystemLogProvider...");
         if (this.readerThread != null) {

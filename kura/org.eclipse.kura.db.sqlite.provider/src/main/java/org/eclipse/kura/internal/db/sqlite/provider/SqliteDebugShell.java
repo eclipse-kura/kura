@@ -27,6 +27,16 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.db.BaseDbService;
 import org.eclipse.kura.util.configuration.Property;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+@Component(
+    name = "org.eclipse.kura.internal.db.sqlite.provider.SqliteDebugShell",
+    service = { org.eclipse.kura.internal.db.sqlite.provider.SqliteDebugShell.class },
+    property = {
+        "osgi.command.scope=sqlitedbg",
+        "osgi.command.function=executeQuery" })
 public class SqliteDebugShell {
 
     private static final Property<String> KURA_SERVICE_PID = new Property<>(ConfigurationService.KURA_SERVICE_PID,
@@ -35,6 +45,11 @@ public class SqliteDebugShell {
     private final Map<String, BaseDbService> dbServices = new HashMap<>();
     private final Set<String> allowedPids = new HashSet<>();
 
+    @Reference(name = "BaseDbService",
+            service = org.eclipse.kura.db.BaseDbService.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetDbService")
     public void setDbService(final BaseDbService dbService, final Map<String, Object> properties) {
         final Optional<String> kuraServiePid = KURA_SERVICE_PID.getOptional(properties);
 

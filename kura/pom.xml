@@ -182,8 +182,8 @@
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>
                             <linkXRef>false</linkXRef>
-                            <configLocation>../checkstyle_checks.xml</configLocation>
-                            <suppressionsLocation>../suppressions.xml</suppressionsLocation>
+                            <configLocation>${maven.multiModuleProjectDirectory}/checkstyle_checks.xml</configLocation>
+                            <suppressionsLocation>${maven.multiModuleProjectDirectory}/suppressions.xml</suppressionsLocation>
                         </configuration>
                         <goals>
                             <goal>check</goal>

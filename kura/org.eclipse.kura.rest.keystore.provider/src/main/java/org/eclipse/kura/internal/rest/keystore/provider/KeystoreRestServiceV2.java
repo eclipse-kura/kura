@@ -23,7 +23,15 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 
+import org.osgi.service.component.annotations.Component;
 @Path("/keystores/v2")
+@Component(
+    name = "org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestServiceV2",
+    immediate = true,
+    service = { org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestService.class },
+    property = {
+        "service.pid=org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestServiceV2",
+        "osgi.jakartars.resource=true" })
 public class KeystoreRestServiceV2 extends KeystoreRestService {
 
     private static final String BAD_WRITE_REQUEST_ERROR_MESSAGE = BAD_REQUEST_MESSAGE

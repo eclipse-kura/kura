@@ -34,6 +34,9 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 /**
  * The Kura default {@link CloudServiceFactory} implements a three layer stack architecture.
  * Each layer is an OSGi Declarative Services Factory Component and provides a service as follows:
@@ -159,6 +162,15 @@ import org.osgi.service.component.ComponentContext;
  *
  * <br>
  */
+@Component(
+    name = "org.eclipse.kura.core.cloud.factory.DefaultCloudServiceFactory",
+    service = { org.eclipse.kura.cloud.factory.CloudServiceFactory.class, org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory.class },
+    property = {
+        "osgi.command.scope=kura.cloud",
+        "osgi.command.function=createConfiguration",
+        "kura.ui.csf.pid.default=org.eclipse.kura.cloud.CloudService-2",
+        "kura.ui.csf.pid.regex=^org.eclipse.kura.cloud.CloudService\\-[a-zA-Z0-9]+$",
+        "service.pid=org.eclipse.kura.core.cloud.factory.DefaultCloudServiceFactory" })
 public class DefaultCloudServiceFactory implements CloudServiceFactory, CloudConnectionFactory {
 
     private static final String FACTORY_PID = "org.eclipse.kura.core.cloud.factory.DefaultCloudServiceFactory";
@@ -183,6 +195,9 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory, CloudCon
     private ConfigurationService configurationService;
     private BundleContext bundleContext;
 
+    @Reference(name = "ConfigurationService",
+            service = org.eclipse.kura.configuration.ConfigurationService.class,
+            unbind = "unsetConfigurationService")
     protected void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
@@ -193,6 +208,7 @@ public class DefaultCloudServiceFactory implements CloudServiceFactory, CloudCon
         }
     }
 
+    @Activate
     public void activate(final ComponentContext context) {
         this.bundleContext = context.getBundleContext();
     }

@@ -1,0 +1,8 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: org.eclipse.kura.core.certificates
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+-includeresource: \
+    OSGI-INF=OSGI-INF,\
+    about_files=about_files/,\
+    about.html

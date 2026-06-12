@@ -41,6 +41,20 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+@Component(
+    name = "org.eclipse.kura.core.keystore.PKCS11KeystoreServiceImpl",
+    immediate = false,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.security.keystore.KeystoreService.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = {
+        "kura.ui.factory.hide=true",
+        "kura.ui.service.hide=true" })
 public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
 
     private static final Logger logger = LoggerFactory.getLogger(PKCS11KeystoreServiceImpl.class);
@@ -51,15 +65,18 @@ public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
     private CryptoService cryptoService;
     private SystemService systemService;
 
+    @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "-")
     public void setCryptoService(final CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
 
+    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "-")
     public void setSystemService(final SystemService systemService) {
         this.systemService = systemService;
     }
 
     @Override
+    @Activate
     public void activate(ComponentContext context, Map<String, Object> properties) {
 
         super.activate(context, properties);
@@ -69,6 +86,7 @@ public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
     }
 
     @Override
+    @Modified
     public void updated(Map<String, Object> properties) {
 
         super.updated(properties);
@@ -85,6 +103,7 @@ public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
     }
 
     @Override
+    @Deactivate
     public void deactivate() {
 
         removeProvider();

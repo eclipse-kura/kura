@@ -29,6 +29,15 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentConstants;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+@Component(
+    name = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory",
+    service = { org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory.class },
+    property = {
+        "kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint[-optionalSuffix]",
+        "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint(\\-[a-zA-Z0-9]+)?$",
+        "service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory" })
 public class SparkplugCloudConnectionFactory implements CloudConnectionFactory {
 
     private static final String FACTORY_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory";
@@ -51,6 +60,7 @@ public class SparkplugCloudConnectionFactory implements CloudConnectionFactory {
 
     private ConfigurationService configurationService;
 
+    @Reference(name = "ConfigurationService", service = org.eclipse.kura.configuration.ConfigurationService.class, unbind = "-")
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }

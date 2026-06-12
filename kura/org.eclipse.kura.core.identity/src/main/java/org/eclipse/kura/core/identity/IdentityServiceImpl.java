@@ -49,7 +49,17 @@ import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 @SuppressWarnings("restriction")
+@Component(
+    name = "org.eclipse.kura.core.identity.IdentityServiceImpl",
+    immediate = true,
+    service = { org.eclipse.kura.identity.IdentityService.class })
 public class IdentityServiceImpl implements IdentityService {
 
     private static final String IDENTITY_SERVICE_FAILURE_FORMAT_STRING = "{} IdentityService - Failure - {}";
@@ -71,19 +81,29 @@ public class IdentityServiceImpl implements IdentityService {
     private TemporaryIdentityStoreAdapter temporaryIdentityStore;
     private UserAdminIdentityStore userAdminIdentityStore;
 
+    @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "-")
     public void setCryptoService(final CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
 
+    @Reference(name = "UserAdmin", service = org.osgi.service.useradmin.UserAdmin.class, unbind = "-")
     public void setUserAdmin(final UserAdmin userAdmin) {
         this.userAdmin = userAdmin;
     }
 
+    @Reference(name = "PasswordStrengthVerificationService",
+            service = org.eclipse.kura.identity.PasswordStrengthVerificationService.class,
+            unbind = "-")
     public void setPasswordStrengthVerificationService(
             final PasswordStrengthVerificationService passwordStrengthVerificationService) {
         this.passwordStrengthVerificationService = passwordStrengthVerificationService;
     }
 
+    @Reference(name = "IdentityConfigurationExtension",
+            service = org.eclipse.kura.identity.configuration.extension.IdentityConfigurationExtension.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetIdentityConfigurationExtension")
     public synchronized void setIdentityConfigurationExtension(
             final IdentityConfigurationExtension identityConfigurationExtension, final Map<String, Object> properties) {
         final Object kuraServicePid = properties.get(ConfigurationService.KURA_SERVICE_PID);
@@ -106,6 +126,7 @@ public class IdentityServiceImpl implements IdentityService {
         }
     }
 
+    @Activate
     public void activate() {
         this.userAdminHelper = new UserAdminHelper(this.userAdmin, this.cryptoService);
         this.temporaryIdentityStore = new TemporaryIdentityStoreAdapter(this.temporaryStore,
@@ -114,6 +135,7 @@ public class IdentityServiceImpl implements IdentityService {
                 this::computePasswordHash);
     }
 
+    @Deactivate
     public void deactivate() {
         this.temporaryStore.shutdown();
     }

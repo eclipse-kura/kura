@@ -36,6 +36,21 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+@Component(
+    name = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.subscriber.SparkplugSubscriber",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = {
+        "service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.subscriber.SparkplugSubscriber",
+        "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint",
+        "kura.ui.service.hide:Boolean=true",
+        "kura.ui.factory.hide=true" })
 public class SparkplugSubscriber
         implements ConfigurableComponent, CloudSubscriber, CloudSubscriberListener, CloudConnectionListener {
 
@@ -58,6 +73,7 @@ public class SparkplugSubscriber
      * Activation APIs
      */
 
+    @Activate
     public void activate(final ComponentContext componentContext, final Map<String, Object> properties)
             throws InvalidSyntaxException {
         this.kuraServicePid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
@@ -74,6 +90,7 @@ public class SparkplugSubscriber
         logger.info("{} - Activated", this.kuraServicePid);
     }
 
+    @Modified
     public void update(final Map<String, Object> properties) throws InvalidSyntaxException {
         logger.info("{} - Updating", this.kuraServicePid);
 
@@ -87,6 +104,7 @@ public class SparkplugSubscriber
         logger.info("{} - Updated", this.kuraServicePid);
     }
 
+    @Deactivate
     public void deactivate() {
         logger.info("{} - Deactivating", this.kuraServicePid);
 

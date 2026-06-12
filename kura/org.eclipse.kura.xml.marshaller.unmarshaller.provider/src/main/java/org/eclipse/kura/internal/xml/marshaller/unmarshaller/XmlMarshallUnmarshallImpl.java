@@ -51,6 +51,14 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import org.osgi.service.component.annotations.Component;
+@Component(
+    name = "org.eclipse.kura.xml.marshaller.unmarshaller.provider",
+    immediate = false,
+    service = { org.eclipse.kura.marshalling.Marshaller.class, org.eclipse.kura.marshalling.Unmarshaller.class },
+    property = {
+        "service.pid=org.eclipse.kura.xml.marshaller.unmarshaller.provider",
+        "kura.service.pid=org.eclipse.kura.xml.marshaller.unmarshaller.provider" })
 public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
     private static final Logger logger = LoggerFactory.getLogger(XmlMarshallUnmarshallImpl.class);

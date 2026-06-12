@@ -43,6 +43,21 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+@Component(
+    name = "org.eclipse.kura.event.publisher.EventPublisher",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = {
+        "service.pid=org.eclipse.kura.event.publisher.EventPublisher",
+        "cloud.connection.factory.pid=org.eclipse.kura.cloud.CloudService",
+        "kura.ui.service.hide:Boolean=true",
+        "kura.ui.factory.hide=true" })
 public class EventPublisher
         implements CloudPublisher, ConfigurableComponent, CloudConnectionListener, CloudDeliveryListener {
 
@@ -65,6 +80,7 @@ public class EventPublisher
      * Activation APIs
      */
 
+    @Activate
     public void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.debug("Activating ConfigurationChangePublisher...");
 
@@ -75,6 +91,7 @@ public class EventPublisher
         logger.debug("Activating ConfigurationChangePublisher... Done.");
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.debug("Updating ConfigurationChangePublisher...");
         
@@ -84,6 +101,7 @@ public class EventPublisher
         logger.debug("Updating ConfigurationChangePublisher... Done.");
     }
 
+    @Deactivate
     public void deactivate(ComponentContext componentContext) {
         logger.debug("Deactivating ConfigurationChangePublisher...");
         this.cloudHelper.close();

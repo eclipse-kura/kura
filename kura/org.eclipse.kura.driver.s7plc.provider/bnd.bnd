@@ -1,0 +1,11 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: S7 PLC Communication Driver
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .,lib/org.eclipse.kura.driver.block.jar
+-includeresource: \
+    OSGI-INF=OSGI-INF,\
+    lib=lib,\
+    lib/org.eclipse.kura.driver.block.jar,\
+    about.html,\
+    about_files=about_files/

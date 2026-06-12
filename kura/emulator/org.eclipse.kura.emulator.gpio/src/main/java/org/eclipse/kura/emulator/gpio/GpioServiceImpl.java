@@ -29,6 +29,14 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+@Component(
+    name = "org.eclipse.kura.gpio.GPIOService",
+    immediate = true,
+    service = { org.eclipse.kura.gpio.GPIOService.class },
+    property = { "service.pid=org.eclipse.kura.gpio.GPIOService" })
 public class GpioServiceImpl implements GPIOService {
 
     private static final Logger logger = LoggerFactory.getLogger(GpioServiceImpl.class);
@@ -36,6 +44,7 @@ public class GpioServiceImpl implements GPIOService {
     private final HashMap<Integer, String> pins = new HashMap<>();
     private final List<KuraGPIODescription> pinDescriptions = new ArrayList<>();
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         logger.debug("activating emulated GPIOService");
         for (int chip = 0; chip < 2; chip++) {
@@ -53,6 +62,7 @@ public class GpioServiceImpl implements GPIOService {
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         logger.debug("deactivating emulated GPIOService");
     }

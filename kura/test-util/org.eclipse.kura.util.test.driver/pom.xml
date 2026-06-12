@@ -24,27 +24,35 @@
     </parent>
 
     <artifactId>org.eclipse.kura.util.test.driver</artifactId>
-    <packaging>eclipse-plugin</packaging>
 
     <properties>
         <kura.basedir>${project.basedir}/../..</kura.basedir>
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
+
+    <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.component.annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.core.configuration</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
-        <plugin>
-            <groupId>de.dentrassi.maven</groupId>
-            <artifactId>osgi-dp</artifactId>
-            <version>${osgi-dp-plugin-version}</version>
-            <executions>
-                <execution>
-                    <goals>
-                        <goal>build</goal>
-                    </goals>
-                </execution>
-            </executions>
-            </plugin>
         </plugins>
     </build>
 

@@ -30,6 +30,14 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+@Component(
+    name = "org.eclipse.kura.internal.rest.tamper.detection.TamperDetectionRequestHandler",
+    immediate = true,
+    service = {})
 public class TamperDetectionRequestHandler extends TamperDetectionRemoteService implements RequestHandler {
 
     private static final String APP_ID = "TAMPER-V1";
@@ -42,6 +50,11 @@ public class TamperDetectionRequestHandler extends TamperDetectionRemoteService 
 
     private static final Logger logger = LoggerFactory.getLogger(TamperDetectionRequestHandler.class);
 
+    @Reference(name = "RequestHandlerRegistry",
+            service = org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRequestHandlerRegistry")
     public void setRequestHandlerRegistry(final RequestHandlerRegistry requestHandlerRegistry) {
         try {
             requestHandlerRegistry.registerRequestHandler(APP_ID, this);

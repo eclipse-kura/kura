@@ -25,6 +25,17 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+@Component(
+    name = "org.eclipse.kura.stress.Stress",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = { "service.pid=org.eclipse.kura.stress.Stress" })
 public class HeapStress implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(HeapStress.class);
@@ -61,6 +72,7 @@ public class HeapStress implements ConfigurableComponent {
     //
     // ----------------------------------------------------------------
 
+    @Activate
     public void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.info("Activating Stress...");
 
@@ -74,6 +86,7 @@ public class HeapStress implements ConfigurableComponent {
         logger.info("Activating Stress... Done.");
     }
 
+    @Deactivate
     public void deactivate(ComponentContext componentContext) {
         logger.debug("Deactivating Stress...");
 
@@ -83,6 +96,7 @@ public class HeapStress implements ConfigurableComponent {
         logger.debug("Deactivating Stress... Done.");
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.info("Updated Stress...");
 

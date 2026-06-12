@@ -26,14 +26,22 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
 /**
  * The Class DriverServiceImpl is an implementation of the utility API
  * {@link DriverService} to provide useful factory methods for drivers
  */
+@Component(
+    name = "org.eclipse.kura.driver.DriverService",
+    immediate = true,
+    service = { org.eclipse.kura.driver.DriverService.class },
+    property = { "service.pid=org.eclipse.kura.driver.DriverService" })
 public class DriverServiceImpl implements DriverService {
 
     private BundleContext bundleContext;
 
+    @Activate
     public void activate(ComponentContext componentContext) {
         this.bundleContext = componentContext.getBundleContext();
     }

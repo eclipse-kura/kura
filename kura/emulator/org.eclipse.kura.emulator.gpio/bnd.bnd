@@ -1,0 +1,10 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: org.eclipse.kura.emulator.gpio
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+Export-Package: \
+    org.eclipse.kura.emulator.gpio;version="2.0.0"
+-includeresource: \
+    OSGI-INF=OSGI-INF,\
+    about.html,\
+    about_files=about_files/

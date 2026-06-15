@@ -5,4 +5,5 @@ Bundle-ActivationPolicy: lazy
 DynamicImport-Package: *
 -includeresource: \
     about.html,\
-    OSGI-INF=OSGI-INF
+    OSGI-INF=OSGI-INF,\
+    about_files=about_files/

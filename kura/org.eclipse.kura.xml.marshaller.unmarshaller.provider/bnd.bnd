@@ -6,4 +6,5 @@ Export-Package: \
     org.eclipse.kura.internal.xml.marshaller.unmarshaller;version="2.0.0"
 -includeresource: \
     about.html,\
-    OSGI-INF=OSGI-INF
+    OSGI-INF=OSGI-INF,\
+    about_files=about_files/

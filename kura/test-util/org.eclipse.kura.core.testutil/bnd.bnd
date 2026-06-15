@@ -12,4 +12,5 @@ Export-Package: \
     org.eclipse.kura.core.testutil.requesthandler;version="6.0.0",\
     org.eclipse.kura.core.testutil.service;version="6.0.0"
 -includeresource: \
-    about.html
+    about.html,\
+    about_files=about_files/

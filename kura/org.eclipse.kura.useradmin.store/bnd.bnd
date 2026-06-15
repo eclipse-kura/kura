@@ -3,4 +3,6 @@ Bundle-Name: Kura Asset Accessor Provider
 Bundle-Vendor: Eclipse Kura
 Bundle-ActivationPolicy: lazy
 -includeresource: \
-    OSGI-INF=OSGI-INF
+    OSGI-INF=OSGI-INF,\
+    about.html,\
+    about_files=about_files/

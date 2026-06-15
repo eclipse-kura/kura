@@ -3,4 +3,7 @@ Bundle-Name: org.eclipse.kura.core.test
 Bundle-Vendor: Eclipse Kura
 Fragment-Host: org.eclipse.kura.core
 Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;org.eclipse.kura.*Test}
--includeresource: OSGI-INF=OSGI-INF, about.html
+-includeresource: \
+    OSGI-INF=OSGI-INF,\
+    about.html,\
+    about_files=about_files/

@@ -3,4 +3,5 @@ Bundle-Name: org.eclipse.kura.http.server.manager
 Require-Bundle: org.apache.felix.http.bridge;bundle-version="5.1.8"
 -includeresource: \
     OSGI-INF=OSGI-INF,\
-    about.html
+    about.html,\
+    about_files=about_files/

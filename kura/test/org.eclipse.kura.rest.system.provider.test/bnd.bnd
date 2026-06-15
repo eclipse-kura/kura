@@ -4,3 +4,7 @@ Bundle-Vendor: Eclipse Kura
 Fragment-Host: org.eclipse.kura.rest.system.provider
 Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;org.eclipse.kura.*Test}
 Import-Package: org.eclipse.kura, *
+
+-includeresource: \
+    about.html,\
+    about_files=about_files/

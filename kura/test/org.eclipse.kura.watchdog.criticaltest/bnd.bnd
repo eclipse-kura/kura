@@ -2,5 +2,8 @@ Bundle-SymbolicName: ${project.artifactId}
 Bundle-Name: org.eclipse.kura.watchdog.criticaltest
 Bundle-Vendor: Eclipse Kura
 Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;org.eclipse.kura.*Test}
--includeresource: OSGI-INF=OSGI-INF, about.html
+-includeresource: \
+    OSGI-INF=OSGI-INF,\
+    about.html,\
+    about_files=about_files/
 Service-Component: OSGI-INF/component.xml

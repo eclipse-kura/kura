@@ -6,7 +6,8 @@ Bundle-ClassPath: .,lib/org.eclipse.paho.client.mqttv3-1.2.1.k2.jar
 -includeresource: \
     OSGI-INF=OSGI-INF,\
     about.html,\
-    lib=lib
+    lib=lib,\
+    about_files=about_files/
 Export-Package: \
     org.eclipse.kura.cloudconnection.sparkplug.mqtt.device;version="2.0.0";x-internal:=true,\
     org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint;version="2.0.0";x-internal:=true,\

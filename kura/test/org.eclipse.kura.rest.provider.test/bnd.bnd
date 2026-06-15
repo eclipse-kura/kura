@@ -3,4 +3,6 @@ Bundle-Name: org.eclipse.kura.rest.provider.test
 Bundle-Vendor: Eclipse Kura
 Fragment-Host: org.eclipse.kura.rest.provider
 Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;org.eclipse.kura.*Test}
--includeresource: about.html
+-includeresource: \
+    about.html,\
+    about_files=about_files/

@@ -8,4 +8,6 @@ Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;org.eclipse.kura.*Test}
 # add that import to the host and wire it to an external unpatched Paho bundle
 # (whose httpsHostnameVerification defaults to true), breaking the TLS tests.
 Import-Package: !org.eclipse.paho.client.mqttv3,!org.eclipse.paho.client.mqttv3.*,*
--includeresource: about.html
+-includeresource: \
+    about.html,\
+    about_files=about_files/

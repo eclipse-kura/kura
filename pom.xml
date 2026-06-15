@@ -46,73 +46,73 @@
     </modules>
 
     <properties>
+        <!-- Build settings -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.release>21</maven.compiler.release>
         <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
         <kura.build.version>${maven.build.timestamp}</kura.build.version>
         <check.plugins.exist.remote>false</check.plugins.exist.remote>
         <kura.addons.url>https://artifactory.dev.everyware.io/artifactory/kura-addons</kura.addons.url>
 
-        <maven.compiler.release>21</maven.compiler.release>
-
         <!-- Build plugin versions -->
         <bnd.version>7.1.0</bnd.version>
         <bnd.baseline.version>6.3.1</bnd.baseline.version>
         <bnd.baseline.continueOnError>false</bnd.baseline.continueOnError>
+        <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
         <exists-maven-plugin.version>0.0.3</exists-maven-plugin.version>
         <findbugs-maven-plugin.version>3.0.5</findbugs-maven-plugin.version>
+        <git-commit-id-maven-plugin.version>9.0.1</git-commit-id-maven-plugin.version>
         <jacoco.version>0.8.13</jacoco.version>
         <license-maven-plugin.version>2.2</license-maven-plugin.version>
         <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
-        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+        <maven-archetype-plugin.version>3.3.1</maven-archetype-plugin.version>
         <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
+        <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
+        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
         <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
         <maven-deploy-plugin.version>3.0.0</maven-deploy-plugin.version>
+        <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
         <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+        <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <maven-site-plugin.version>3.3</maven-site-plugin.version>
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
         <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
-        <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
-        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-        <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
-        <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
-        <maven-archetype-plugin.version>3.3.1</maven-archetype-plugin.version>
-        <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
-        <git-commit-id-maven-plugin.version>9.0.1</git-commit-id-maven-plugin.version>
         <os-maven-plugin.version>1.7.1</os-maven-plugin.version>
+        <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
         <wagon-ssh.version>1.0-beta-6</wagon-ssh.version>
-        <properties-maven-plugin.version>1.2.1</properties-maven-plugin.version>
 
         <!-- Dependency versions -->
+        <byte-buddy.version>1.17.7</byte-buddy.version>
+        <commons-codec.version>1.18.0</commons-codec.version>
+        <commons-compress.version>1.27.1</commons-compress.version>
         <commons-fileupload.version>2.0.0-M4</commons-fileupload.version>
+        <docker-java.version>3.5.3</docker-java.version>
         <hk2.version>3.1.1</hk2.version>
+        <httpclient5.version>5.5</httpclient5.version>
+        <httpcore5.version>5.3.4</httpcore5.version>
         <io.netty.version>4.1.132.Final</io.netty.version>
+        <jackson.core.version>2.19.2</jackson.core.version>
         <jersey.version>3.1.11</jersey.version>
+        <jna.version>5.17.0</jna.version>
         <log4j.version>2.25.3</log4j.version>
+        <mockito.version>5.21.0</mockito.version>
+        <objenesis.version>3.3</objenesis.version>
         <org.apache.camel.version>2.25.3</org.apache.camel.version>
         <org.bouncycastle.version>1.84</org.bouncycastle.version>
         <org.eclipse.jetty.version>12.0.33</org.eclipse.jetty.version>
         <org.eclipse.osgi-technology.rest.version>1.2.3</org.eclipse.osgi-technology.rest.version>
-        <org.ow2.asm.version>9.7.1</org.ow2.asm.version>
-        <slf4j.version>2.0.17</slf4j.version>
-        <spring.version>4.3.20.RELEASE_1</spring.version>
-        <jackson.core.version>2.19.2</jackson.core.version>
-        <byte-buddy.version>1.17.7</byte-buddy.version>
-        <objenesis.version>3.3</objenesis.version>
-        <mockito.version>5.21.0</mockito.version>
-        <org.hamcrest.version>1.1.0.v20090501071000</org.hamcrest.version>
-        <usb4java.version>1.3.0</usb4java.version>
-        <usb-api.version>1.0.2</usb-api.version>
         <org.eclipse.paho.client.mqttv3.version>1.2.1</org.eclipse.paho.client.mqttv3.version>
+        <org.hamcrest.version>1.1.0.v20090501071000</org.hamcrest.version>
+        <org.ow2.asm.version>9.7.1</org.ow2.asm.version>
         <perfmark-api.version>0.26.0</perfmark-api.version>
         <protobuf.version>4.30.2</protobuf.version>
-        <docker-java.version>3.5.3</docker-java.version>
-        <httpcore5.version>5.3.4</httpcore5.version>
-        <jna.version>5.17.0</jna.version>
-        <commons-compress.version>1.27.1</commons-compress.version>
-        <commons-codec.version>1.18.0</commons-codec.version>
-        <httpclient5.version>5.5</httpclient5.version>
+        <slf4j.version>2.0.17</slf4j.version>
+        <spring.version>4.3.20.RELEASE_1</spring.version>
+        <usb-api.version>1.0.2</usb-api.version>
+        <usb4java.version>1.3.0</usb4java.version>
 
         <!-- Wrapper bundle versions (target-platform modules) -->
         <kura.wrappers.version>2.0.0-SNAPSHOT</kura.wrappers.version>

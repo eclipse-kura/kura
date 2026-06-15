@@ -47,6 +47,16 @@ public class SqliteDbServiceTestBase {
     private static final String SQLITE_DB_SERVICE_FACTORY_PID = "org.eclipse.kura.db.SQLiteDbService";
     private static final AtomicInteger currentId = new AtomicInteger(0);
 
+    // Settle window for the DS factory-configuration component. In the bnd/equinox test runtime the
+    // newly created component can be briefly deactivated/reactivated by the ConfigurationAdmin event
+    // queue right after creation (and felix.scr replaces the component instance on reactivation), so the
+    // service object resolved at creation time may transiently report "Database is not initialized" or be
+    // stale. We re-resolve the current service for the pid and poll getConnection() until it succeeds,
+    // bounded by this timeout (a permanently-unusable instance, e.g. a second instance on the same db
+    // path, simply exhausts the timeout and the test then asserts on its expected failure).
+    private static final long DB_READY_TIMEOUT_MS = 10_000;
+    private static final long DB_READY_POLL_INTERVAL_MS = 50;
+
     private final ConfigurationService configurationService;
     private final List<String> createdPids = new ArrayList<>();
     private final Map<Path, Long> fileSize = new HashMap<>();
@@ -75,6 +85,50 @@ public class SqliteDbServiceTestBase {
                 SQLITE_DB_SERVICE_FACTORY_PID, properties).get(30, TimeUnit.SECONDS);
 
         createdPids.add(pid);
+
+        awaitDbServiceReady(pid);
+    }
+
+    /**
+     * Waits for the {@link BaseDbService} registered with the given pid to become usable, re-resolving the
+     * current service instance (which felix.scr may replace on reactivation) and polling getConnection()
+     * until it succeeds or {@link #DB_READY_TIMEOUT_MS} elapses. Failures are swallowed: a component that
+     * is intentionally never usable (e.g. a second instance claiming an already-open db file) just exhausts
+     * the timeout, leaving {@link #dbService} pointing at the current instance so the test can assert on the
+     * expected error.
+     */
+    private void awaitDbServiceReady(final String pid) throws InterruptedException {
+        final long deadline = System.currentTimeMillis() + DB_READY_TIMEOUT_MS;
+
+        while (System.currentTimeMillis() < deadline) {
+            final Optional<BaseDbService> current = currentDbService(pid);
+
+            if (current.isPresent()) {
+                this.dbService = current.get();
+                try (final Connection conn = current.get().getConnection()) {
+                    return;
+                } catch (final Exception e) {
+                    // component still (re)activating or intentionally unusable - retry until the deadline
+                }
+            }
+
+            Thread.sleep(DB_READY_POLL_INTERVAL_MS);
+        }
+
+        currentDbService(pid).ifPresent(svc -> this.dbService = svc);
+    }
+
+    private Optional<BaseDbService> currentDbService(final String pid) {
+        try {
+            return Optional.ofNullable(ServiceUtil
+                    .trackService(BaseDbService.class, Optional.of("(kura.service.pid=" + pid + ")"))
+                    .get(30, TimeUnit.SECONDS));
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return Optional.empty();
+        } catch (final Exception e) {
+            return Optional.empty();
+        }
     }
 
     protected void givenExecutedQuery(final String query) {

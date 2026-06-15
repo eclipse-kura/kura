@@ -1,0 +1,53 @@
+#*******************************************************************************
+# Copyright (c) 2026 Eurotech and/or its affiliates and others
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+# Contributors:
+#  Eurotech
+#*******************************************************************************
+#
+# Shared parent configuration for every integration-test.bndrun under kura/test.
+# Each module's integration-test.bndrun pulls this in with:
+#
+#     -include: ${.}/../integration-test.bnd
+#
+# and only declares what is specific to it: the runtime bundles it requires
+# (-runrequires[.emulator]) and the resolved -runbundles.
+#
+
+index: target/index.xml
+
+-standalone: ${index}
+
+-resolve.effective: resolve
+
+-runfw: org.eclipse.osgi
+
+-runee: JavaSE-21
+
+# Run all integration tests named *Test
+Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
+
+-runproperties: \
+    osgi.console=5002,\
+    osgi.signedcontent.support=all,\
+    org.eclipse.kura.mode=emulator,\
+    org.osgi.framework.trust.repositories=${kura.workdir}/user/security/.certificates.ks,\
+    kura.configuration=file:${kura.workdir}/framework/kura.properties,\
+    dpa.configuration=${kura.workdir}/data/dpa.properties,\
+    kura.data=${kura.workdir}/data,\
+    kura.snapshots=${kura.workdir}/user/snapshots,\
+    log4j.configurationFile=file:${kura.workdir}/log4j/log4j.xml,\
+    org.osgi.framework.bootdelegation='org.mockito.internal.creation.bytebuddy.inject'
+
+# Inject JaCoCo agent args produced by maven (prepare-agent)
+-runvm: \
+    ${argLine}
+
+# Used by Objenesis/Mockito and not actually optional
+-runsystempackages: sun.reflect, sun.security.pkcs11, sun.misc

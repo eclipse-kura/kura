@@ -155,32 +155,33 @@ To install Maven you can follow the tutorial from the official [Maven](http://ma
 
 ### Build Eclipse Kura™
 
-Change to the new directory and clone the Eclipse Kura™ repo:
+Clone the Eclipse Kura™ repository:
 
 ```bash
 git clone -b develop https://github.com/eclipse-kura/kura.git
 ```
 
-Move inside the newly created directory and build the target platform:
+Eclipse Kura™ is built with [Maven](https://maven.apache.org/) and the [bnd](https://bndtools.org/) tooling (`bnd-maven-plugin`): each bundle's OSGi manifest is generated at build time from its `bnd.bnd` descriptor, and all dependency/plugin versions are centralized in the root parent POM (`pom.xml`). The project is a single Maven reactor rooted at the top-level `pom.xml`, which aggregates two modules:
+
+* `target-platform/` — third-party and native wrapper bundles;
+* `kura/` — the Eclipse Kura™ framework bundles.
+
+Move inside the cloned directory and build everything from the repository root:
 
 ```bash
-mvn -f target-platform/pom.xml clean install
+mvn clean install
 ```
 
-Build the core components:
+This builds the `target-platform` wrapper bundles first and then all the framework bundles under `kura/`.
 
-```bash
-mvn -f kura/pom.xml clean install
-```
-
-Build the target profiles and the Eclipse Kura Target Definition:
+To build the device installers and target profiles (e.g. the `.deb` packages):
 
 ```bash
 mvn -f kura/distrib/pom.xml clean install -DbuildAll
 ```
 
 > [!TIP]
-You can skip tests by adding `-Dmaven.test.skip=true` in the commands above and you can compile a specific target by specifying the profile (e.g. `-Paarch64`).
+> You can skip tests by adding `-Dmaven.test.skip=true` to the commands above, and you can compile a specific target by specifying its profile (e.g. `-Paarch64`).
 
 To list the available installer profiles, run:
 
@@ -188,10 +189,22 @@ To list the available installer profiles, run:
 mvn -f kura/distrib/pom.xml help:all-profiles
 ```
 
-Additionally you can build only the Eclipse Kura Target Definition, by running in the `distrib` folder:
+### Testing
+
+Unit tests run automatically as part of `mvn install` (every bundle keeps its unit tests under `src/test/java`).
+
+The OSGi **integration tests** live under `kura/test/` and are executed inside a real OSGi framework by the bnd testing tooling (`bnd-testing-maven-plugin`). They are grouped under the `tests` Maven profile; each test module is driven by its own `integration-test.bndrun`, while the run configuration shared by all of them (framework, execution environment, runtime properties) lives in `kura/test/integration-test.bnd`.
+
+Build and run the integration tests with:
 
 ```bash
-mvn -f kura/distrib/pom.xml clean install -Ptarget-definition
+mvn clean install -Ptests
+```
+
+The set of runtime bundles (`-runbundles`) of each `integration-test.bndrun` is computed by the bnd resolver. The first time, or after changing the runtime dependencies, re-resolve them with the `resolve-integration-tests` profile:
+
+```bash
+mvn -f kura/test/pom.xml clean verify -Ptests -Presolve-integration-tests
 ```
 
 #### Build scripts

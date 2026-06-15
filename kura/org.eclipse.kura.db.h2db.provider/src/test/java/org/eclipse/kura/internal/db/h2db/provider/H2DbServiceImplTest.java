@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -182,8 +182,6 @@ public class H2DbServiceImplTest {
     @Test
     public void testUpdateFailUrlOccupied() throws Throwable {
         final String enc = "enc";
-        char[] encPass = enc.toCharArray();
-        String pass = "pass";
         String user = "USR";
         String url = "jdbc:h2:mem:test";
 
@@ -192,19 +190,23 @@ public class H2DbServiceImplTest {
                 "activeInstances");
         activeInstances.put(url, svc1);
 
-        H2DbServiceImpl svc = new H2DbServiceImpl();
-        svc.activate(Collections.emptyMap());
-
-        Map<String, Object> props = new HashMap<>();
-        props.put("db.user", user);
-        props.put("db.password", enc);
-        props.put("db.connection.pool.max.size", 10);
-        props.put("db.connector.url", url);
-
         try {
-            svc.updated(props);
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().startsWith("Another H2DbService instance"));
+            H2DbServiceImpl svc = new H2DbServiceImpl();
+            svc.activate(Collections.emptyMap());
+
+            Map<String, Object> props = new HashMap<>();
+            props.put("db.user", user);
+            props.put("db.password", enc);
+            props.put("db.connection.pool.max.size", 10);
+            props.put("db.connector.url", url);
+
+            try {
+                svc.updated(props);
+            } catch (IllegalArgumentException e) {
+                assertTrue(e.getMessage().startsWith("Another H2DbService instance"));
+            }
+        } finally {
+            activeInstances.remove(url);
         }
     }
 

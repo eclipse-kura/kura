@@ -32,65 +32,66 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>emulator</module>
         <module>org.eclipse.kura.api</module>
         <module>org.eclipse.kura.camel</module>
         <module>org.eclipse.kura.camel.cloud.factory</module>
         <module>org.eclipse.kura.camel.xml</module>
+        <module>org.eclipse.kura.cloud.base.provider</module>
+        <module>org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider</module>
+        <module>org.eclipse.kura.cloudconnection.kapua.mqtt.provider</module>
+        <module>org.eclipse.kura.cloudconnection.raw.mqtt.provider</module>
+        <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</module>
+        <module>org.eclipse.kura.configuration.change.manager</module>
+        <module>org.eclipse.kura.container.orchestration.provider</module>
+        <module>org.eclipse.kura.container.provider</module>
         <module>org.eclipse.kura.core</module>
         <module>org.eclipse.kura.core.certificates</module>
-        <module>org.eclipse.kura.core.keystore</module>
-        <module>org.eclipse.kura.cloud.base.provider</module>
         <module>org.eclipse.kura.core.cloud.factory</module>
         <module>org.eclipse.kura.core.comm</module>
         <module>org.eclipse.kura.core.configuration</module>
         <module>org.eclipse.kura.core.crypto</module>
         <module>org.eclipse.kura.core.identity</module>
         <module>org.eclipse.kura.core.inventory</module>
+        <module>org.eclipse.kura.core.keystore</module>
         <module>org.eclipse.kura.core.status</module>
         <module>org.eclipse.kura.core.system</module>
-        <module>org.eclipse.kura.driver.helper.provider</module>
+        <module>org.eclipse.kura.db.h2db.provider</module>
+        <module>org.eclipse.kura.db.sqlite.provider</module>
         <module>org.eclipse.kura.driver.block</module>
+        <module>org.eclipse.kura.driver.helper.provider</module>
         <module>org.eclipse.kura.driver.s7plc.provider</module>
+        <module>org.eclipse.kura.event.publisher</module>
+        <module>org.eclipse.kura.http.server.manager</module>
+        <module>org.eclipse.kura.json.marshaller.unmarshaller.provider</module>
+        <module>org.eclipse.kura.jul.to.slf4j.configuration</module>
         <module>org.eclipse.kura.linux.clock</module>
         <module>org.eclipse.kura.linux.usb</module>
-        <module>org.eclipse.kura.linux.usb.x86_64</module>
         <module>org.eclipse.kura.linux.usb.aarch64</module>
+        <module>org.eclipse.kura.linux.usb.x86_64</module>
         <module>org.eclipse.kura.linux.watchdog</module>
-        <module>org.eclipse.kura.protocol.modbus</module>
-        <module>org.eclipse.kura.stress</module>
-        <module>org.eclipse.kura.util</module>
-        <module>org.eclipse.kura.wire.camel</module>
-        <module>org.eclipse.kura.rest.provider</module>
-        <module>org.eclipse.kura.misc.cloudcat</module>
-        <module>org.eclipse.kura.json.marshaller.unmarshaller.provider</module>
-        <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider</module>
-        <module>org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider</module>
-        <module>org.eclipse.kura.cloudconnection.raw.mqtt.provider</module>
-        <module>org.eclipse.kura.http.server.manager</module>
-        <module>org.eclipse.kura.useradmin.store</module>
-        <module>org.eclipse.kura.rest.tamper.detection.provider</module>
         <module>org.eclipse.kura.log.filesystem.provider</module>
+        <module>org.eclipse.kura.misc.cloudcat</module>
+        <module>org.eclipse.kura.protocol.modbus</module>
+        <module>org.eclipse.kura.request.handler.jaxrs</module>
         <module>org.eclipse.kura.rest.cloudconnection.provider</module>
         <module>org.eclipse.kura.rest.configuration.provider</module>
         <module>org.eclipse.kura.rest.identity.provider</module>
         <module>org.eclipse.kura.rest.inventory.provider</module>
         <module>org.eclipse.kura.rest.keystore.provider</module>
+        <module>org.eclipse.kura.rest.provider</module>
         <module>org.eclipse.kura.rest.security.provider</module>
         <module>org.eclipse.kura.rest.service.listing.provider</module>
         <module>org.eclipse.kura.rest.system.provider</module>
-        <module>org.eclipse.kura.request.handler.jaxrs</module>
-        <module>org.eclipse.kura.container.orchestration.provider</module>
-        <module>org.eclipse.kura.container.provider</module>
-        <module>org.eclipse.kura.event.publisher</module>
-        <module>org.eclipse.kura.configuration.change.manager</module>
-        <module>org.eclipse.kura.db.sqlite.provider</module>
-        <module>org.eclipse.kura.db.h2db.provider</module>
-        <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider</module>
-        <module>org.eclipse.kura.cloudconnection.kapua.mqtt.provider</module>
-        <module>org.eclipse.kura.jul.to.slf4j.configuration</module>
-        <module>emulator</module>
+        <module>org.eclipse.kura.rest.tamper.detection.provider</module>
+        <module>org.eclipse.kura.stress</module>
+        <module>org.eclipse.kura.useradmin.store</module>
+        <module>org.eclipse.kura.util</module>
+        <module>org.eclipse.kura.wire.camel</module>
+        <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider</module>
         <module>test-util</module>
         <module>tools</module>
+
     </modules>
 
     <properties>

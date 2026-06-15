@@ -3,10 +3,15 @@ Bundle-Name: org.eclipse.kura.cloud.base.provider
 Bundle-Vendor: Eclipse Kura
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,lib/org.eclipse.paho.client.mqttv3-1.2.1.k2.jar
+# The patched Paho (.k2) client is embedded via Bundle-ClassPath above and must
+# be used at runtime (it defaults httpsHostnameVerification to false and honours
+# the Kura SslManagerService hostname setting). Do NOT import the paho packages,
+# otherwise OSGi would wire them to an external unpatched paho bundle.
+Import-Package: !org.eclipse.paho.client.mqttv3.*,*
 Export-Package: \
     org.eclipse.kura.core.data;version="1.0.0",\
     org.eclipse.kura.core.data.util;version="1.0.0";x-internal:=true
 -includeresource: \
     OSGI-INF=OSGI-INF,\
     about.html,\
-    lib/org.eclipse.paho.client.mqttv3-1.2.1.k2.jar
+    lib/org.eclipse.paho.client.mqttv3-1.2.1.k2.jar=lib/org.eclipse.paho.client.mqttv3-1.2.1.k2.jar

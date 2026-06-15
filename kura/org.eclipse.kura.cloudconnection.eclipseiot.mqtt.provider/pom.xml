@@ -87,7 +87,6 @@
         <plugins>
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.8.1</version>
                 <executions>
                     <execution>
                         <id>copy-dependencies</id>
@@ -114,7 +113,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>3.1.0</version>
                 <configuration>
                     <filesets>
                         <fileset>

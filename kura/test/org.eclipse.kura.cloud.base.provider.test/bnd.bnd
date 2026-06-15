@@ -3,4 +3,9 @@ Bundle-Name: org.eclipse.kura.cloud.base.provider.test
 Bundle-Vendor: Eclipse Kura
 Fragment-Host: org.eclipse.kura.cloud.base.provider
 Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;org.eclipse.kura.*Test}
+# As a fragment of cloud.base.provider this bundle must reuse the host's
+# embedded, patched Paho (.k2) client. Importing org.eclipse.paho.* here would
+# add that import to the host and wire it to an external unpatched Paho bundle
+# (whose httpsHostnameVerification defaults to true), breaking the TLS tests.
+Import-Package: !org.eclipse.paho.client.mqttv3,!org.eclipse.paho.client.mqttv3.*,*
 -includeresource: about.html

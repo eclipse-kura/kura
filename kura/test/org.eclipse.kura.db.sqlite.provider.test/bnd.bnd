@@ -1,0 +1,5 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Name: org.eclipse.kura.db.sqlite.provider.test
+Bundle-Vendor: Eclipse Kura
+Fragment-Host: org.eclipse.kura.db.sqlite.provider
+Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;org.eclipse.kura.*Test}

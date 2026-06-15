@@ -1,36 +1,20 @@
-index: target/index.xml
+#*******************************************************************************
+# Copyright (c) 2026 Eurotech and/or its affiliates and others
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+# Contributors:
+#  Eurotech
+#*******************************************************************************
 
--standalone: ${index}
+# Pull in the shared run configuration (framework, EE, runproperties, etc.)
+-include: ${.}/../integration-test.bnd
 
--resolve.effective: resolve
-
--runfw: org.eclipse.osgi
-
--runee: JavaSE-21
-
-# Run all integration tests named *Test
-Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
-
--runproperties: \
-    osgi.console=5002,\
-    osgi.signedcontent.support=all,\
-    org.eclipse.kura.mode=emulator,\
-    org.osgi.framework.trust.repositories=${kura.workdir}/user/security/.certificates.ks,\
-    kura.configuration=file:${kura.workdir}/framework/kura.properties,\
-    dpa.configuration=${kura.workdir}/data/dpa.properties,\
-    kura.data=${kura.workdir}/data,\
-    kura.snapshots=${kura.workdir}/user/snapshots,\
-    log4j.configurationFile=file:${kura.workdir}/log4j/log4j.xml,\
-    org.osgi.framework.bootdelegation='org.mockito.internal.creation.bytebuddy.inject'
-
-# Inject JaCoCo agent args produced by maven (prepare-agent)
--runvm: \
-    ${argLine}
-
-# Used by Objenesis/Mockito and not actually optional
--runsystempackages: sun.reflect, sun.security.pkcs11, sun.misc
-
-# Kura emulator runtime
+# Kura emulator runtime (bundles this test needs available for resolution)
 -runrequires.emulator: \
     osgi.identity;filter:='(osgi.identity=moquette-broker)',\
     osgi.identity;filter:='(osgi.identity=org.apache.logging.log4j.api)',\
@@ -62,11 +46,7 @@ Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.position)',\
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.usb)',\
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.watchdog)',\
-    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.http.server.manager)',\
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.json.marshaller.unmarshaller.provider)',\
-    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.rest.provider)',\
-    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.rest.security.provider)',\
-    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.useradmin.store)',\
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.util)',\
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.util.wire.test)',\
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.xml.marshaller.unmarshaller.provider)',\
@@ -81,136 +61,103 @@ Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
 # (mvn verify -Presolve-integration-tests)
 #
 -runbundles: \
-	bcpkix;version='[1.84.0,1.84.1)',\
-	bcprov;version='[1.84.0,1.84.1)',\
-	bcutil;version='[1.84.0,1.84.1)',\
-	com.google.gson;version='[2.9.0,2.9.1)',\
-	com.google.guava;version='[32.1.1,32.1.2)',\
-	com.google.guava.failureaccess;version='[1.0.1,1.0.2)',\
-	com.google.protobuf;version='[4.30.2,4.30.3)',\
-	com.h2database;version='[2.4.240,2.4.241)',\
-	io.netty.buffer;version='[4.1.132,4.1.133)',\
-	io.netty.codec;version='[4.1.132,4.1.133)',\
-	io.netty.codec-http;version='[4.1.132,4.1.133)',\
-	io.netty.codec-mqtt;version='[4.1.132,4.1.133)',\
-	io.netty.common;version='[4.1.132,4.1.133)',\
-	io.netty.handler;version='[4.1.132,4.1.133)',\
-	io.netty.resolver;version='[4.1.132,4.1.133)',\
-	io.netty.transport;version='[4.1.132,4.1.133)',\
-	io.netty.transport-classes-epoll;version='[4.1.132,4.1.133)',\
-	io.netty.transport-classes-kqueue;version='[4.1.132,4.1.133)',\
-	io.netty.transport-native-unix-common;version='[4.1.132,4.1.133)',\
-	jakarta.activation-api;version='[2.1.2,2.1.3)',\
-	jakarta.annotation-api;version='[2.1.1,2.1.2)',\
-	jakarta.inject.jakarta.inject-api;version='[2.0.1,2.0.2)',\
-	jakarta.validation.jakarta.validation-api;version='[3.0.2,3.0.3)',\
-	jakarta.ws.rs-api;version='[3.1.0,3.1.1)',\
-	jakarta.xml.bind-api;version='[4.0.2,4.0.3)',\
-	javassist;version='[3.30.2,3.30.3)',\
-	minimal-json;version='[0.9.5,0.9.6)',\
-	moquette-broker;version='[0.18.0,0.18.1)',\
-	net.bytebuddy.byte-buddy;version='[1.17.7,1.17.8)',\
-	net.bytebuddy.byte-buddy-agent;version='[1.17.7,1.17.8)',\
-	org.apache.aries.spifly.dynamic.bundle;version='[1.3.7,1.3.8)',\
-	org.apache.commons.commons-io;version='[2.19.0,2.19.1)',\
-	org.apache.commons.exec;version='[1.3.0,1.3.1)',\
-	org.apache.commons.lang3;version='[3.19.0,3.19.1)',\
-	org.apache.felix.gogo.runtime;version='[1.1.6,1.1.7)',\
-	org.apache.felix.gogo.shell;version='[1.1.4,1.1.5)',\
-	org.apache.felix.http.bridge;version='[5.1.8,5.1.9)',\
-	org.apache.felix.http.servlet-api;version='[3.0.0,3.0.1)',\
-	org.apache.felix.scr;version='[2.2.12,2.2.13)',\
-	org.apache.felix.useradmin;version='[1.0.4,1.0.5)',\
-	org.apache.logging.log4j.api;version='[2.25.3,2.25.4)',\
-	org.apache.logging.log4j.core;version='[2.25.3,2.25.4)',\
-	org.apache.logging.log4j.slf4j2.impl;version='[2.25.3,2.25.4)',\
-	org.apache.servicemix.bundles.junit;version='[4.13.2,4.13.3)',\
-	org.apache.tomcat-servlet-api;version='[9.0.80,9.0.81)',\
-	org.eclipse.equinox.cm;version='[1.6.100,1.6.101)',\
-	org.eclipse.equinox.common;version='[3.19.100,3.19.101)',\
-	org.eclipse.equinox.console;version='[1.4.800,1.4.801)',\
-	org.eclipse.equinox.event;version='[1.7.100,1.7.101)',\
-	org.eclipse.equinox.io;version='[1.1.300,1.1.301)',\
-	org.eclipse.equinox.metatype;version='[1.6.600,1.6.601)',\
-	org.eclipse.equinox.registry;version='[3.12.100,3.12.101)',\
-	org.eclipse.equinox.util;version='[1.1.300,1.1.301)',\
-	org.eclipse.jetty.ee10.servlet;version='[12.0.33,12.0.34)',\
-	org.eclipse.jetty.http;version='[12.0.33,12.0.34)',\
-	org.eclipse.jetty.io;version='[12.0.33,12.0.34)',\
-	org.eclipse.jetty.security;version='[12.0.33,12.0.34)',\
-	org.eclipse.jetty.server;version='[12.0.33,12.0.34)',\
-	org.eclipse.jetty.session;version='[12.0.33,12.0.34)',\
-	org.eclipse.jetty.util;version='[12.0.33,12.0.34)',\
-	org.eclipse.kura.api;version='[3.0.0,3.0.1)',\
-	org.eclipse.kura.cloud.base.provider;version='[1.0.0,1.0.1)',\
-	org.eclipse.kura.cloud.base.provider.test;version='[6.0.0,6.0.1)',\
-	org.eclipse.kura.cloudconnection.kapua.mqtt.provider;version='[1.0.0,1.0.1)',\
-	org.eclipse.kura.core;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.core.cloud.factory;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.core.configuration;version='[3.0.0,3.0.1)',\
-	org.eclipse.kura.core.crypto;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.core.identity;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.core.inventory;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.core.keystore;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.core.status;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.core.system;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.core.testutil;version='[6.0.0,6.0.1)',\
-	org.eclipse.kura.db.h2db.provider;version='[1.0.0,1.0.1)',\
-	org.eclipse.kura.emulator;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.emulator.clock;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.emulator.gpio;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.emulator.net;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.emulator.position;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.emulator.usb;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.emulator.watchdog;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.http.server.manager;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.json.marshaller.unmarshaller.provider;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.request.handler.jaxrs;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.rest.provider;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.rest.security.provider;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.test;version='[6.0.0,6.0.1)',\
-	org.eclipse.kura.useradmin.store;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.util;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.util.wire.test;version='[6.0.0,6.0.1)',\
-	org.eclipse.kura.xml.marshaller.unmarshaller.provider;version='[2.0.0,2.0.1)',\
-	org.eclipse.osgitech.rest;version='[1.2.3,1.2.4)',\
-	org.eclipse.osgitech.rest.servlet.whiteboard;version='[1.2.3,1.2.4)',\
-	org.eclipse.osgitech.rest.sse;version='[1.2.3,1.2.4)',\
-	org.eclipse.paho.client.mqttv3;version='[1.2.1,1.2.2)',\
-	org.glassfish.hk2.api;version='[3.1.1,3.1.2)',\
-	org.glassfish.hk2.external.aopalliance-repackaged;version='[3.1.1,3.1.2)',\
-	org.glassfish.hk2.locator;version='[3.1.1,3.1.2)',\
-	org.glassfish.hk2.osgi-resource-locator;version='[1.0.3,1.0.4)',\
-	org.glassfish.hk2.utils;version='[3.1.1,3.1.2)',\
-	org.glassfish.jersey.containers.jersey-container-servlet;version='[3.1.11,3.1.12)',\
-	org.glassfish.jersey.containers.jersey-container-servlet-core;version='[3.1.11,3.1.12)',\
-	org.glassfish.jersey.core.jersey-client;version='[3.1.11,3.1.12)',\
-	org.glassfish.jersey.core.jersey-common;version='[3.1.11,3.1.12)',\
-	org.glassfish.jersey.core.jersey-server;version='[3.1.11,3.1.12)',\
-	org.glassfish.jersey.inject.jersey-hk2;version='[3.1.11,3.1.12)',\
-	org.glassfish.jersey.media.jersey-media-jaxb;version='[3.1.11,3.1.12)',\
-	org.glassfish.jersey.media.jersey-media-sse;version='[3.1.11,3.1.12)',\
-	org.mockito.mockito-core;version='[5.21.0,5.21.1)',\
-	org.objectweb.asm;version='[9.7.1,9.7.2)',\
-	org.objectweb.asm.commons;version='[9.7.1,9.7.2)',\
-	org.objectweb.asm.tree;version='[9.7.1,9.7.2)',\
-	org.objectweb.asm.tree.analysis;version='[9.7.1,9.7.2)',\
-	org.objectweb.asm.util;version='[9.7.1,9.7.2)',\
-	org.objenesis;version='[3.3.0,3.3.1)',\
-	org.osgi.service.cm;version='[1.6.1,1.6.2)',\
-	org.osgi.service.component;version='[1.5.1,1.5.2)',\
-	org.osgi.service.coordinator;version='[1.0.2,1.0.3)',\
-	org.osgi.service.event;version='[1.4.1,1.4.2)',\
-	org.osgi.service.jakartars;version='[2.0.0,2.0.1)',\
-	org.osgi.service.metatype;version='[1.4.1,1.4.2)',\
-	org.osgi.service.useradmin;version='[1.1.1,1.1.2)',\
-	org.osgi.service.wireadmin;version='[1.0.2,1.0.3)',\
-	org.osgi.util.function;version='[1.2.0,1.2.1)',\
-	org.osgi.util.measurement;version='[1.0.2,1.0.3)',\
-	org.osgi.util.position;version='[1.0.1,1.0.2)',\
-	org.osgi.util.promise;version='[1.3.0,1.3.1)',\
-	org.usb4java;version='[2.0.0,2.0.1)',\
-	osgi.cmpn;version='[4.2.0,4.2.1)',\
-	quartz;version='[2.5.0,2.5.1)',\
-	slf4j.api;version='[2.0.17,2.0.18)',\
-	usb4java-javax;version='[2.0.0,2.0.1)'
+	bcpkix;version='1.84.0',\
+	bcprov;version='1.84.0',\
+	bcutil;version='1.84.0',\
+	com.google.gson;version='2.9.0',\
+	com.google.guava;version='32.1.1',\
+	com.google.guava.failureaccess;version='1.0.1',\
+	com.google.protobuf;version='4.30.2',\
+	com.h2database;version='2.4.240',\
+	io.netty.buffer;version='4.1.132',\
+	io.netty.codec;version='4.1.132',\
+	io.netty.codec-http;version='4.1.132',\
+	io.netty.codec-mqtt;version='4.1.132',\
+	io.netty.common;version='4.1.132',\
+	io.netty.handler;version='4.1.132',\
+	io.netty.resolver;version='4.1.132',\
+	io.netty.transport;version='4.1.132',\
+	io.netty.transport-classes-epoll;version='4.1.132',\
+	io.netty.transport-classes-kqueue;version='4.1.132',\
+	io.netty.transport-native-unix-common;version='4.1.132',\
+	minimal-json;version='0.9.5',\
+	moquette-broker;version='0.18.0',\
+	net.bytebuddy.byte-buddy;version='1.17.7',\
+	net.bytebuddy.byte-buddy-agent;version='1.17.7',\
+	org.apache.aries.spifly.dynamic.bundle;version='1.3.7',\
+	org.apache.commons.commons-io;version='2.19.0',\
+	org.apache.commons.exec;version='1.3.0',\
+	org.apache.commons.lang3;version='3.19.0',\
+	org.apache.felix.gogo.runtime;version='1.1.6',\
+	org.apache.felix.gogo.shell;version='1.1.4',\
+	org.apache.felix.http.servlet-api;version='3.0.0',\
+	org.apache.felix.scr;version='2.2.12',\
+	org.apache.logging.log4j.api;version='2.25.3',\
+	org.apache.logging.log4j.core;version='2.25.3',\
+	org.apache.logging.log4j.slf4j2.impl;version='2.25.3',\
+	org.apache.servicemix.bundles.junit;version='4.13.2',\
+	org.eclipse.equinox.cm;version='1.6.100',\
+	org.eclipse.equinox.common;version='3.19.100',\
+	org.eclipse.equinox.console;version='1.4.800',\
+	org.eclipse.equinox.event;version='1.7.100',\
+	org.eclipse.equinox.io;version='1.1.300',\
+	org.eclipse.equinox.metatype;version='1.6.600',\
+	org.eclipse.equinox.registry;version='3.12.100',\
+	org.eclipse.equinox.util;version='1.1.300',\
+	org.eclipse.jetty.ee10.servlet;version='12.0.33',\
+	org.eclipse.jetty.http;version='12.0.33',\
+	org.eclipse.jetty.io;version='12.0.33',\
+	org.eclipse.jetty.security;version='12.0.33',\
+	org.eclipse.jetty.server;version='12.0.33',\
+	org.eclipse.jetty.session;version='12.0.33',\
+	org.eclipse.jetty.util;version='12.0.33',\
+	org.eclipse.kura.api;version='[3.0,3.1)',\
+	org.eclipse.kura.cloud.base.provider;version='[1.0,1.1)',\
+	org.eclipse.kura.cloud.base.provider.test;version='[6.0,6.1)',\
+	org.eclipse.kura.cloudconnection.kapua.mqtt.provider;version='[1.0,1.1)',\
+	org.eclipse.kura.core;version='[2.0,2.1)',\
+	org.eclipse.kura.core.cloud.factory;version='[2.0,2.1)',\
+	org.eclipse.kura.core.configuration;version='[3.0,3.1)',\
+	org.eclipse.kura.core.crypto;version='[2.0,2.1)',\
+	org.eclipse.kura.core.identity;version='[2.0,2.1)',\
+	org.eclipse.kura.core.inventory;version='[2.0,2.1)',\
+	org.eclipse.kura.core.keystore;version='[2.0,2.1)',\
+	org.eclipse.kura.core.status;version='[2.0,2.1)',\
+	org.eclipse.kura.core.system;version='[2.0,2.1)',\
+	org.eclipse.kura.core.testutil;version='[6.0,6.1)',\
+	org.eclipse.kura.db.h2db.provider;version='[1.0,1.1)',\
+	org.eclipse.kura.emulator;version='[2.0,2.1)',\
+	org.eclipse.kura.emulator.clock;version='[2.0,2.1)',\
+	org.eclipse.kura.emulator.gpio;version='[2.0,2.1)',\
+	org.eclipse.kura.emulator.net;version='[2.0,2.1)',\
+	org.eclipse.kura.emulator.position;version='[2.0,2.1)',\
+	org.eclipse.kura.emulator.usb;version='[2.0,2.1)',\
+	org.eclipse.kura.emulator.watchdog;version='[2.0,2.1)',\
+	org.eclipse.kura.json.marshaller.unmarshaller.provider;version='[2.0,2.1)',\
+	org.eclipse.kura.test;version='[6.0,6.1)',\
+	org.eclipse.kura.util;version='[2.0,2.1)',\
+	org.eclipse.kura.util.wire.test;version='[6.0,6.1)',\
+	org.eclipse.kura.xml.marshaller.unmarshaller.provider;version='[2.0,2.1)',\
+	org.mockito.mockito-core;version='5.21.0',\
+	org.objectweb.asm;version='9.7.1',\
+	org.objectweb.asm.commons;version='9.7.1',\
+	org.objectweb.asm.tree;version='9.7.1',\
+	org.objectweb.asm.tree.analysis;version='9.7.1',\
+	org.objectweb.asm.util;version='9.7.1',\
+	org.objenesis;version='3.3.0',\
+	org.osgi.service.cm;version='1.6.1',\
+	org.osgi.service.component;version='1.5.1',\
+	org.osgi.service.coordinator;version='1.0.2',\
+	org.osgi.service.event;version='1.4.1',\
+	org.osgi.service.metatype;version='1.4.1',\
+	org.osgi.service.useradmin;version='1.1.1',\
+	org.osgi.service.wireadmin;version='1.0.2',\
+	org.osgi.util.function;version='1.2.0',\
+	org.osgi.util.measurement;version='1.0.2',\
+	org.osgi.util.position;version='1.0.1',\
+	org.osgi.util.promise;version='1.3.0',\
+	org.usb4java;version='2.0.0',\
+	osgi.cmpn;version='4.2.0',\
+	quartz;version='2.5.0',\
+	slf4j.api;version='2.0.17',\
+	usb4java-javax;version='2.0.0'

@@ -40,22 +40,26 @@
         <module>org.eclipse.kura.core.configuration.test</module>
         <module>org.eclipse.kura.core.identity.test</module>
         <module>org.eclipse.kura.core.inventory.test</module>
-        <module>org.eclipse.kura.core.unit.test</module>
         <module>org.eclipse.kura.core.system.test</module>
         <module>org.eclipse.kura.core.test</module>
+        <module>org.eclipse.kura.core.unit.test</module>
+        <module>org.eclipse.kura.db.sqlite.provider.test</module>
+        <module>org.eclipse.kura.event.publisher.test</module>
         <module>org.eclipse.kura.http.server.manager.test</module>
         <module>org.eclipse.kura.message.store.provider.test</module>
+        <module>org.eclipse.kura.rest.cloudconnection.provider.test</module>
         <module>org.eclipse.kura.rest.configuration.provider.test</module>
         <module>org.eclipse.kura.rest.identity.provider.test</module>
+        <module>org.eclipse.kura.rest.keystore.provider.test</module>
         <module>org.eclipse.kura.rest.provider.test</module>
         <module>org.eclipse.kura.rest.security.provider.test</module>
         <module>org.eclipse.kura.rest.service.listing.provider.test</module>
         <module>org.eclipse.kura.rest.system.provider.test</module>
         <module>org.eclipse.kura.rest.tamper.detection.provider.test</module>
         <module>org.eclipse.kura.useradmin.store.test</module>
-        <module>org.eclipse.kura.rest.cloudconnection.provider.test</module>
         <module>org.eclipse.kura.util.test</module>
         <module>org.eclipse.kura.watchdog.criticaltest</module>
+
     </modules>
 
     <!-- Shared compile/index dependencies: the full Kura runtime, mirroring the
@@ -1157,6 +1161,41 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+
+        <!--
+            Active for every child module: rebuild a pristine ${kura.workdir}
+            (the emulator "kura.home") before each test run, mirroring the fresh
+            snapshots directory that the old Tycho surefire setup created per run.
+            Wiping it first prevents snapshots written by a previous run from
+            leaking configuration (e.g. factory PIDs) into the next one.
+        -->
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>clean-test-env</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <configuration>
+                            <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                            <filesets>
+                                <fileset>
+                                    <directory>${kura.workdir}</directory>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
+        </plugins>
     </build>
 
     <!-- Enable to (re-)resolve the -runbundles of every integration-test.bndrun -->

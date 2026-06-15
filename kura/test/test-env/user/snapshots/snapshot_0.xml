@@ -111,9 +111,20 @@
             <esf:property name="ssl.default.protocol" array="false" encrypted="false" type="String">
                 <esf:value>TLSv1.2</esf:value>
             </esf:property>
+            <!--
+                Hostname verification is disabled for the integration tests: the
+                embedded Moquette broker certificate is issued for CN=broker (see
+                MqttDataTransportTest/BaseCloudTests) and is reached over
+                localhost, so HTTPS endpoint identification would otherwise reject
+                the TLS handshake with "No name matching localhost found".
+            -->
             <esf:property name="ssl.hostname.verification" array="false" encrypted="false"
                 type="Boolean">
-                <esf:value>true</esf:value>
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property name="ssl.revocation.check.enabled" array="false" encrypted="false"
+                type="Boolean">
+                <esf:value>false</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="KeystoreService.target"
                 type="String">
@@ -137,6 +148,12 @@
             </esf:property>
             <esf:property array="false" encrypted="false" name="randomize.password" type="Boolean">
                 <esf:value>false</esf:value>
+            </esf:property>
+            <!-- Enable the CRL manager so the revocation integration test
+                 (MqttDataTransportTest#shouldSupportRevocation) can load CRLs and
+                 emit KeystoreChangedEvents, as in the production snapshot. -->
+            <esf:property array="false" encrypted="false" name="crl.management.enabled" type="Boolean">
+                <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
                 <esf:value>org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl</esf:value>

@@ -33,6 +33,18 @@ index: target/index.xml
 # Run all integration tests named *Test
 Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
 
+# ds.delayed.keepInstances=true is REQUIRED for the integration tests, do not remove it.
+# The Kura services under test (e.g. SqliteDbServiceImpl, H2DbServiceImpl, the filesystem
+# KeystoreService) are DS *delayed* components. The test helpers (ServiceUtil.trackService /
+# createFactoryConfiguration) obtain them with bundleContext.getService(ref) and then close the
+# tracker, which ungets the service; with the default felix.scr behaviour the use count drops to
+# zero and the delayed component instance is immediately deactivated. The test is then left holding
+# a dead service: SqliteDbServiceImpl reports "Database is not initialized", H2DbServiceImpl's
+# async executor is shut down (RejectedExecutionException on the next query), and the dynamic
+# KeystoreService is torn down before the CRL KeystoreChangedEvent fires (shouldSupportRevocation).
+# Setting ds.delayed.keepInstances=true keeps delayed instances alive after the use count reaches
+# zero, matching how these components actually live in a running Kura framework, and removes the
+# spurious deactivate/reactivate churn that otherwise makes these tests flaky/failing.
 -runproperties: \
     osgi.console=5002,\
     osgi.signedcontent.support=all,\

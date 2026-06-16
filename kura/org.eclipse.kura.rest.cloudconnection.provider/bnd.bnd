@@ -2,7 +2,6 @@ Bundle-SymbolicName: ${project.artifactId};singleton:=true
 Bundle-Name: CloudConnection REST Service
 Bundle-ActivationPolicy: lazy
 -includeresource: \
-    OSGI-INF=OSGI-INF,\
     about.html,\
     about_files=about_files/
 Export-Package: \

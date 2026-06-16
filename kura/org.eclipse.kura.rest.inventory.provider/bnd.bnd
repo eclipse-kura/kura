@@ -2,6 +2,5 @@ Bundle-SymbolicName: ${project.artifactId};singleton:=true
 Bundle-Name: org.eclipse.kura.rest.inventory.provider
 Bundle-ActivationPolicy: lazy
 -includeresource: \
-    OSGI-INF=OSGI-INF,\
     about.html,\
     about_files=about_files/

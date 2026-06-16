@@ -4,5 +4,4 @@ Bundle-Vendor: Eclipse Kura
 Bundle-ActivationPolicy: lazy
 -includeresource: \
     about.html,\
-    OSGI-INF=OSGI-INF,\
     about_files=about_files/

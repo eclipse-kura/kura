@@ -6,6 +6,5 @@ Export-Package: \
     org.eclipse.kura.core.inventory;version="2.0.0";x-internal:=true,\
     org.eclipse.kura.core.inventory.resources;version="2.0.0";x-internal:=true
 -includeresource: \
-    OSGI-INF=OSGI-INF,\
     about.html,\
     about_files=about_files/

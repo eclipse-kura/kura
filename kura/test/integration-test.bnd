@@ -58,9 +58,12 @@ Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
     log4j.configurationFile=file:${kura.workdir}/log4j/log4j.xml,\
     org.osgi.framework.bootdelegation='org.mockito.internal.creation.bytebuddy.inject'
 
-# Inject JaCoCo agent args produced by maven (prepare-agent)
+# Inject JaCoCo agent args produced by maven (prepare-agent), and point
+# java.util.logging at the test config that silences the noisy Jersey JAX-RS
+# whiteboard provider-constraint WARNINGs (see log4j/jul-logging.properties).
 -runvm: \
-    ${argLine}
+    ${argLine}, \
+    -Djava.util.logging.config.file=${kura.workdir}/log4j/jul-logging.properties
 
 # Used by Objenesis/Mockito and not actually optional
 -runsystempackages: sun.reflect, sun.security.pkcs11, sun.misc

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -366,7 +366,7 @@ public class CloudConnectionService {
                         return false;
                     }
 
-                    return Objects.equals(factoryPid, properties.get("service.pid")) && pubSubFactoryToInfo(c) != null;
+                    return Objects.equals(factoryPid, pubSubFactoryPid(c)) && pubSubFactoryToInfo(c) != null;
                 }));
 
         if (!isPubSub) {
@@ -384,16 +384,13 @@ public class CloudConnectionService {
         final String ccsfFactoryPidPropName = CloudConnectionConstants.CLOUD_CONNECTION_FACTORY_PID_PROP_NAME.value();
 
         final Object ccsfFactoryPid = component.properties.get(ccsfFactoryPidPropName);
-        final Object factoryPid = component.properties.get("service.pid");
+        // The factory pid is the component name. Historically the DS XML also declared a redundant
+        // service.pid=<name> property and this code read it, but the DS-annotation migration removed
+        // that redundant property (it broke felix.scr ConfigurationAdmin delivery for @Modified
+        // ConfigurableComponents); the component name carries the same value, so use it directly.
+        final String factoryPid = pubSubFactoryPid(component);
         final Object defaultFactoryPid = component.properties.get(KURA_UI_CSF_PID_DEFAULT);
         final Object defaultFactoryPidRegex = component.properties.get(KURA_UI_CSF_PID_REGEX);
-
-        if (!(factoryPid instanceof String)) {
-            logger.warn(
-                    "component {} defines a CloudPublisher or CloudSubscriber but does not specify the service.pid property, ignoring it",
-                    component.name);
-            return null;
-        }
 
         if (!(ccsfFactoryPid instanceof String)) {
             logger.warn(
@@ -402,8 +399,17 @@ public class CloudConnectionService {
             return null;
         }
 
-        return new PubSubFactoryInfo((String) factoryPid, (String) ccsfFactoryPid, (String) defaultFactoryPid,
+        return new PubSubFactoryInfo(factoryPid, (String) ccsfFactoryPid, (String) defaultFactoryPid,
                 (String) defaultFactoryPidRegex);
+    }
+
+    /**
+     * Returns the factory pid of a pubSub component. This is its DS component name; a removed
+     * redundant service.pid=<name> property is tolerated for backward compatibility.
+     */
+    private static String pubSubFactoryPid(final ComponentDescriptionDTO component) {
+        final Object servicePid = component.properties.get("service.pid");
+        return servicePid instanceof String ? (String) servicePid : component.name;
     }
 
     private void fillState(final CloudEndpointInstance cloudEndpointInstance) throws KuraException {

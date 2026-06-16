@@ -1724,6 +1724,16 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <!-- Load Mockito's inline mock-maker as a static -javaagent (Mockito 5 on
+                             JDK 21+) instead of letting it self-attach the byte-buddy agent at
+                             runtime, which prints "Mockito is currently self-attaching..." and the
+                             "Java agent loaded dynamically / will be disallowed" JVM warnings.
+                             @{argLine} preserves the JaCoCo agent set by jacoco:prepare-agent.
+                             -Xshare:off silences the CDS "bootstrap classpath has been appended"
+                             warning caused by the agent instrumenting bootstrap classes. -->
+                        <argLine>@{argLine} -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar -Xshare:off</argLine>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

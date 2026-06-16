@@ -16,3 +16,7 @@ Export-Package: \
     org.eclipse.kura.cloudconnection.sparkplug.mqtt.subscriber;version="2.0.0";x-internal:=true,\
     org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport;version="2.0.0";x-internal:=true,\
     org.eclipse.tahu.protobuf;version="2.0.0";x-internal:=true
+
+# Pick up DS components contributed by the attached whitebox test fragment, if any.
+# bnd merges this with the components it generates from this bundle's @Component annotations.
+Service-Component: OSGI-INF/test-*.xml

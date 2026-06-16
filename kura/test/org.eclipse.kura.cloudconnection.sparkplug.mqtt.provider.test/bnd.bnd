@@ -1,7 +1,14 @@
 Bundle-SymbolicName: ${project.artifactId}
 Bundle-Name: org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test
 Bundle-Vendor: Eclipse Kura
+Fragment-Host: org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider
 Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;org.eclipse.kura.*Test}
+# Whitebox test: as a fragment of the sparkplug provider this bundle reuses the host's
+# internal packages and its embedded, patched Paho (.k2) client (on the host
+# Bundle-ClassPath). Importing org.eclipse.paho.* here would add that import to the host
+# and wire it to an external Paho bundle, causing a loader constraint violation on
+# MqttConnectOptions.
+Import-Package: !org.eclipse.paho.client.mqttv3,!org.eclipse.paho.client.mqttv3.*,*
 -includeresource: \
     OSGI-INF=OSGI-INF,\
     about.html,\

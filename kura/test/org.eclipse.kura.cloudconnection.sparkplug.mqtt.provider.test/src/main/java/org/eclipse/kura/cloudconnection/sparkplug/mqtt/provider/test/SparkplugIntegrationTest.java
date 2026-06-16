@@ -115,8 +115,13 @@ public class SparkplugIntegrationTest {
     }
 
     public static void startMqttBroker() throws Exception {
-        IResourceLoader classpathLoader = new ClasspathResourceLoader();
-        IConfig classPathConfig = new ResourceLoaderConfig(classpathLoader);
+        // Load config/moquette.conf from this (fragment) bundle's classpath. The no-arg
+        // ClasspathResourceLoader captures the thread context classloader, which in the bnd/equinox
+        // test runtime is not this bundle's loader, so the resource is not found ("Can't locate
+        // classpath resource null"). Pass this class' own classloader explicitly and the resource name.
+        IResourceLoader classpathLoader = new ClasspathResourceLoader("config/moquette.conf",
+                SparkplugIntegrationTest.class.getClassLoader());
+        IConfig classPathConfig = new ResourceLoaderConfig(classpathLoader, "config/moquette.conf");
 
         mqttBroker = new Server();
         mqttBroker.startServer(classPathConfig);

@@ -31,6 +31,19 @@
 	</properties>
 
 
+    <build>
+        <plugins>
+            <!-- Produce jacoco.exec for the unit tests in src/test/java so the test
+                 modules' report-aggregate (which depends on this bundle) reports their
+                 coverage. Without prepare-agent active here, surefire runs without the
+                 jacoco agent and the relocated unit-test coverage is lost. -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.felix</groupId>

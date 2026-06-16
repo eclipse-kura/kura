@@ -32,6 +32,15 @@
 	<version>2.0.0-SNAPSHOT</version>
 
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>

@@ -32,6 +32,15 @@
 		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.linux.usb.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>

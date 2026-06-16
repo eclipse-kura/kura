@@ -32,8 +32,7 @@ import org.osgi.service.component.annotations.Deactivate;
 @Component(
     name = "org.eclipse.kura.usb.UsbService",
     immediate = true,
-    service = { org.eclipse.kura.usb.UsbService.class },
-    property = { "service.pid=org.eclipse.kura.usb.UsbService" })
+    service = { org.eclipse.kura.usb.UsbService.class })
 public class UsbServiceImpl implements UsbService {
 
     @Activate

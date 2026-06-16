@@ -29,8 +29,7 @@ import org.osgi.service.component.annotations.Modified;
     name = "org.eclipse.kura.core.db.H2DbServer",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = { "service.pid=org.eclipse.kura.core.db.H2DbServer" })
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class })
 public class H2DbServer implements ConfigurableComponent {
 
     enum ServerType {

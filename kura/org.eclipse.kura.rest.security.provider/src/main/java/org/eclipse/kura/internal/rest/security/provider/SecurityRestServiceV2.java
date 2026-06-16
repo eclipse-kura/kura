@@ -42,7 +42,6 @@ import org.osgi.service.component.annotations.Component;
     service = { org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2.class },
     property = {
         "kura.service.pid=org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2",
-        "service.pid=org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2",
         "osgi.jakartars.resource=true" })
 public class SecurityRestServiceV2 extends AbstractRestSecurityService {
 

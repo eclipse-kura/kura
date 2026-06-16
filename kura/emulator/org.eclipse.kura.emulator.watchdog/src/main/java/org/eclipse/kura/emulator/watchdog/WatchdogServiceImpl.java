@@ -40,8 +40,7 @@ import org.osgi.service.component.annotations.Modified;
     name = "org.eclipse.kura.watchdog.WatchdogService",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.watchdog.WatchdogService.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = { "service.pid=org.eclipse.kura.watchdog.WatchdogService" })
+    service = { org.eclipse.kura.watchdog.WatchdogService.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
 public class WatchdogServiceImpl implements WatchdogService, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(WatchdogServiceImpl.class);

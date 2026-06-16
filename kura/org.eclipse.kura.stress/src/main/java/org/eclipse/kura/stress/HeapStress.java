@@ -34,8 +34,7 @@ import org.osgi.service.component.annotations.Modified;
     name = "org.eclipse.kura.stress.Stress",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = { "service.pid=org.eclipse.kura.stress.Stress" })
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class })
 public class HeapStress implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(HeapStress.class);

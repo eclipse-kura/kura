@@ -50,7 +50,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.configuration.ConfigurableComponent.class },
     property = {
-        "service.pid=org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager",
         "kura.service.pid=org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager" })
 public class ConfigurationChangeManager implements ConfigurableComponent, ServiceTrackerListener {
 

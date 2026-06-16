@@ -34,9 +34,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(name = "org.eclipse.kura.executor.UnprivilegedExecutorService", //
-        property = "service.pid=org.eclipse.kura.executor.UnprivilegedExecutorService" //
-)
+@Component(name = "org.eclipse.kura.executor.UnprivilegedExecutorService")
 public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorService {
 
     private static final Logger logger = LoggerFactory.getLogger(UnprivilegedExecutorServiceImpl.class);

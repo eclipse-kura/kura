@@ -48,8 +48,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component(
     name = "org.eclipse.kura.usb.UsbService",
     immediate = true,
-    service = { org.eclipse.kura.usb.UsbService.class },
-    property = { "service.pid=org.eclipse.kura.usb.UsbService" })
+    service = { org.eclipse.kura.usb.UsbService.class })
 public class UsbServiceImpl implements UsbService, LinuxUdevListener {
 
     private static final Logger logger = LoggerFactory.getLogger(UsbServiceImpl.class);

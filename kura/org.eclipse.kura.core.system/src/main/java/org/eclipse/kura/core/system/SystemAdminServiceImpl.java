@@ -35,8 +35,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
     name = "org.eclipse.kura.system.SystemAdminService",
     immediate = true,
-    service = { org.eclipse.kura.system.SystemAdminService.class },
-    property = { "service.pid=org.eclipse.kura.system.SystemAdminService" })
+    service = { org.eclipse.kura.system.SystemAdminService.class })
 public class SystemAdminServiceImpl extends SuperSystemService implements SystemAdminService {
 
     private static final Logger logger = LoggerFactory.getLogger(SystemAdminServiceImpl.class);

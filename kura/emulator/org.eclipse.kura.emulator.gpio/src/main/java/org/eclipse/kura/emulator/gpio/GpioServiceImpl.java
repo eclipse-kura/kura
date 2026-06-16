@@ -35,8 +35,7 @@ import org.osgi.service.component.annotations.Deactivate;
 @Component(
     name = "org.eclipse.kura.gpio.GPIOService",
     immediate = true,
-    service = { org.eclipse.kura.gpio.GPIOService.class },
-    property = { "service.pid=org.eclipse.kura.gpio.GPIOService" })
+    service = { org.eclipse.kura.gpio.GPIOService.class })
 public class GpioServiceImpl implements GPIOService {
 
     private static final Logger logger = LoggerFactory.getLogger(GpioServiceImpl.class);

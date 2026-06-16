@@ -36,8 +36,7 @@ import org.osgi.service.component.annotations.Component;
 @Component(
     name = "org.eclipse.kura.driver.descriptor.DriverDescriptorService",
     immediate = true,
-    service = { org.eclipse.kura.driver.descriptor.DriverDescriptorService.class },
-    property = { "service.pid=org.eclipse.kura.driver.descriptor.DriverDescriptorService" })
+    service = { org.eclipse.kura.driver.descriptor.DriverDescriptorService.class })
 public class DriverDescriptorServiceImpl implements DriverDescriptorService {
 
     private static final Logger logger = LoggerFactory.getLogger(DriverDescriptorServiceImpl.class);

@@ -43,8 +43,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 @Component(
     name = "org.eclipse.kura.status.CloudConnectionStatusService",
-    service = { org.eclipse.kura.status.CloudConnectionStatusService.class },
-    property = { "service.pid=org.eclipse.kura.status.CloudConnectionStatusService" })
+    service = { org.eclipse.kura.status.CloudConnectionStatusService.class })
 public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusService {
 
     private static final String STATUS_NOTIFICATION_URL = "ccs.status.notification.url";

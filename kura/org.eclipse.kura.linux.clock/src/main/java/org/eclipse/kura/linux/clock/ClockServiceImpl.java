@@ -43,8 +43,7 @@ import org.osgi.service.component.annotations.Reference;
     name = "org.eclipse.kura.clock.ClockService",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.clock.ClockService.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = { "service.pid=org.eclipse.kura.clock.ClockService" })
+    service = { org.eclipse.kura.clock.ClockService.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
 public class ClockServiceImpl implements ConfigurableComponent, ClockService, ClockSyncListener {
 
     private static final ClockEvent EMPTY_EVENT = new ClockEvent(Collections.<String, Object>emptyMap());

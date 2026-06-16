@@ -75,8 +75,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
     name = "org.eclipse.kura.core.inventory.InventoryHandlerV1",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.OPTIONAL,
-    service = { org.eclipse.kura.core.inventory.InventoryHandlerV1.class },
-    property = { "service.pid=org.eclipse.kura.core.inventory.InventoryHandlerV1" })
+    service = { org.eclipse.kura.core.inventory.InventoryHandlerV1.class })
 public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(InventoryHandlerV1.class);

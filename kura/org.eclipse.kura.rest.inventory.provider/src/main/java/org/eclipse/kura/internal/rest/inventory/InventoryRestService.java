@@ -49,7 +49,6 @@ import org.osgi.service.component.annotations.Reference;
     service = { org.eclipse.kura.internal.rest.inventory.InventoryRestService.class },
     property = {
         "kura.service.pid=org.eclipse.kura.internal.rest.inventory.InventoryRestService",
-        "service.pid=org.eclipse.kura.internal.rest.inventory.InventoryRestService",
         "osgi.jakartars.resource=true" })
 public class InventoryRestService {
 

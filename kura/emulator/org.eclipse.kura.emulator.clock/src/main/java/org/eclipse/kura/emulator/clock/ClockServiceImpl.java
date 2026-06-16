@@ -33,8 +33,7 @@ import org.osgi.service.component.annotations.Reference;
     name = "org.eclipse.kura.clock.ClockService",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.clock.ClockService.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = { "service.pid=org.eclipse.kura.clock.ClockService" })
+    service = { org.eclipse.kura.clock.ClockService.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
 public class ClockServiceImpl implements ConfigurableComponent, ClockService {
 
     private static final Logger logger = LoggerFactory.getLogger(ClockServiceImpl.class);

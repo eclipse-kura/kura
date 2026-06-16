@@ -55,7 +55,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
     service = { org.eclipse.kura.rest.system.SystemRestService.class },
     property = {
         "kura.service.pid=org.eclipse.kura.rest.system.SystemRestService",
-        "service.pid=org.eclipse.kura.rest.system.SystemRestService",
         "osgi.jakartars.resource=true" })
 public class SystemRestService {
 

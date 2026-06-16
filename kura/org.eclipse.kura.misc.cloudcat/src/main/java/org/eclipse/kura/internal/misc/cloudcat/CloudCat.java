@@ -37,8 +37,7 @@ import org.osgi.service.component.annotations.Modified;
 @Component(
     name = "org.eclipse.kura.misc.cloudcat.CloudCat",
     configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = { "service.pid=org.eclipse.kura.misc.cloudcat.CloudCat" })
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class })
 public class CloudCat implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudCat.class);

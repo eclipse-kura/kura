@@ -38,8 +38,7 @@ import org.osgi.service.component.annotations.Modified;
     name = "org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.log.LogProvider.class },
-    property = { "service.pid=org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider" })
+    service = { org.eclipse.kura.log.LogProvider.class })
 public class FilesystemLogProvider implements ConfigurableComponent, LogProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(FilesystemLogProvider.class);

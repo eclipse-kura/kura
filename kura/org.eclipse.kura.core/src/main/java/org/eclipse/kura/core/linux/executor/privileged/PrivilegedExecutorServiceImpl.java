@@ -34,8 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(immediate = true, //
-        name = "org.eclipse.kura.executor.PrivilegedExecutorService", //
-        property = "service.pid=org.eclipse.kura.executor.PrivilegedExecutorService")
+        name = "org.eclipse.kura.executor.PrivilegedExecutorService")
 public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService {
 
     private static final Logger logger = LoggerFactory.getLogger(PrivilegedExecutorServiceImpl.class);

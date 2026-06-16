@@ -40,8 +40,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 @Component(
     name = "org.eclipse.kura.cloud.CloudCallService",
-    service = { org.eclipse.kura.cloud.CloudCallService.class },
-    property = { "service.pid=org.eclipse.kura.cloud.CloudCallService" })
+    service = { org.eclipse.kura.cloud.CloudCallService.class })
 public class CloudCallServiceImpl implements CloudCallService, DataServiceListener {
 
     private static final Logger s_logger = LoggerFactory.getLogger(CloudCallServiceImpl.class);

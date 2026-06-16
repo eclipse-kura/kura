@@ -80,8 +80,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
     name = "org.eclipse.kura.system.SystemService",
     immediate = true,
-    service = { org.eclipse.kura.system.SystemService.class },
-    property = { "service.pid=org.eclipse.kura.system.SystemService" })
+    service = { org.eclipse.kura.system.SystemService.class })
 public class SystemServiceImpl extends SuperSystemService implements SystemService {
 
     private ScheduledExecutorService internetCheckerExecutor;

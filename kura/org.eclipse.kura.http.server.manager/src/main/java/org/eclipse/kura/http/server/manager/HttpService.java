@@ -46,7 +46,6 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.configuration.ConfigurableComponent.class, org.osgi.service.event.EventHandler.class },
     property = {
-        "service.pid=org.eclipse.kura.http.server.manager.HttpService",
         "kura.ui.service.hide:Boolean=true",
         "event.topics=org/eclipse/kura/security/keystore/KeystoreChangedEvent/KEYSTORE_CHANGED" })
 public class HttpService implements ConfigurableComponent, EventHandler {

@@ -35,8 +35,7 @@ import org.osgi.service.component.annotations.Component;
 @Component(
     name = "org.eclipse.kura.driver.DriverService",
     immediate = true,
-    service = { org.eclipse.kura.driver.DriverService.class },
-    property = { "service.pid=org.eclipse.kura.driver.DriverService" })
+    service = { org.eclipse.kura.driver.DriverService.class })
 public class DriverServiceImpl implements DriverService {
 
     private BundleContext bundleContext;

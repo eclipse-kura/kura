@@ -42,8 +42,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
     name = "org.eclipse.kura.net.NetworkService",
     immediate = true,
-    service = { org.eclipse.kura.net.NetworkService.class },
-    property = { "service.pid=org.eclipse.kura.net.NetworkService" })
+    service = { org.eclipse.kura.net.NetworkService.class })
 public class EmulatedNetworkServiceImpl implements NetworkService {
 
     private static final Logger logger = LoggerFactory.getLogger(EmulatedNetworkServiceImpl.class);

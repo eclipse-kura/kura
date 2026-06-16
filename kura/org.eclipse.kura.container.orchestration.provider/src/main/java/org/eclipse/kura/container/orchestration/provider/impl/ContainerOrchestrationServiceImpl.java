@@ -89,8 +89,7 @@ import org.osgi.service.component.annotations.Reference;
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
-            org.eclipse.kura.container.orchestration.ContainerOrchestrationService.class },
-    property = { "service.pid=org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService" })
+            org.eclipse.kura.container.orchestration.ContainerOrchestrationService.class })
 public class ContainerOrchestrationServiceImpl implements ConfigurableComponent, ContainerOrchestrationService {
 
     private static final String PARAMETER_CANNOT_BE_NULL = "The provided parameter cannot be null";

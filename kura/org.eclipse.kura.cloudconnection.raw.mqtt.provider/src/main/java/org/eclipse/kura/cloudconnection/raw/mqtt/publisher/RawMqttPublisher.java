@@ -37,7 +37,6 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
     property = {
-        "service.pid=org.eclipse.kura.cloudconnection.raw.mqtt.publisher.RawMqttPublisher",
         "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint",
         "kura.ui.service.hide:Boolean=true",
         "kura.ui.factory.hide=true" })

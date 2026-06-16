@@ -62,7 +62,6 @@ import org.osgi.service.component.annotations.ReferencePolicy;
     service = { org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService.class },
     property = {
         "kura.service.pid=org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService",
-        "service.pid=org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService",
         "osgi.jakartars.resource=true" })
 public class CloudConnectionRestService {
 

@@ -164,8 +164,7 @@ import org.osgi.service.component.annotations.Reference;
         "osgi.command.scope=kura.cloud",
         "osgi.command.function=createConfiguration",
         "kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager",
-        "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager(\\-[a-zA-Z0-9]+)?$",
-        "service.pid=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.DefaultCloudConnectionFactory" })
+        "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager(\\-[a-zA-Z0-9]+)?$"})
 public class DefaultCloudConnectionFactory implements CloudConnectionFactory {
 
     private static final String FACTORY_PID = "org.eclipse.kura.cloud.mqtt.eclipseiot.internal.cloud.factory.DefaultCloudServiceFactory";

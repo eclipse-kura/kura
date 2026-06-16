@@ -64,8 +64,7 @@ import org.osgi.service.component.annotations.Reference;
     name = "org.eclipse.kura.crypto.CryptoService",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.OPTIONAL,
-    service = { org.eclipse.kura.crypto.CryptoService.class },
-    property = { "service.pid=org.eclipse.kura.crypto.CryptoService" })
+    service = { org.eclipse.kura.crypto.CryptoService.class })
 public class CryptoServiceImpl implements CryptoService {
 
     private static final Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);

@@ -28,8 +28,7 @@ import org.osgi.service.component.annotations.Component;
 @Component(
     name = "org.eclipse.kura.configuration.ConfigurationService",
     immediate = true,
-    service = { org.eclipse.kura.configuration.ConfigurationService.class, org.eclipse.kura.configuration.metatype.OCDService.class },
-    property = { "service.pid=org.eclipse.kura.configuration.ConfigurationService" })
+    service = { org.eclipse.kura.configuration.ConfigurationService.class, org.eclipse.kura.configuration.metatype.OCDService.class })
 public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
 
     private static final String CONFIGURATION_SERVICE_FAILURE = "{} ConfigurationService - Failure - {}";

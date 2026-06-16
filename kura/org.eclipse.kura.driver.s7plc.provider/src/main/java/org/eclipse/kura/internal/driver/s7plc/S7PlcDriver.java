@@ -64,8 +64,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
     name = "org.eclipse.kura.driver.s7plc",
     configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.driver.Driver.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = { "service.pid=org.eclipse.kura.driver.s7plc" })
+    service = { org.eclipse.kura.driver.Driver.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
 public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(S7PlcDriver.class);

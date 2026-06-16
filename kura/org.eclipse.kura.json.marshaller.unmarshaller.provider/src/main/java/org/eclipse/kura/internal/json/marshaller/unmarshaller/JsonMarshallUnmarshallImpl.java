@@ -56,7 +56,6 @@ import org.osgi.service.component.annotations.Component;
     immediate = false,
     service = { org.eclipse.kura.marshalling.Marshaller.class, org.eclipse.kura.marshalling.Unmarshaller.class },
     property = {
-        "service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider",
         "kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider" })
 public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 

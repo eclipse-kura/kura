@@ -30,7 +30,6 @@ import org.osgi.service.component.annotations.Component;
     immediate = true,
     service = { org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestService.class },
     property = {
-        "service.pid=org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestServiceV2",
         "osgi.jakartars.resource=true" })
 public class KeystoreRestServiceV2 extends KeystoreRestService {
 

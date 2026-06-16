@@ -37,8 +37,7 @@ import org.osgi.service.component.annotations.Reference;
     service = { org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory.class },
     property = {
         "kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.raw.mqtt.CloudEndpoint",
-        "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.raw.mqtt.CloudEndpoint(\\-[a-zA-Z0-9]+)?$",
-        "service.pid=org.eclipse.kura.cloudconnection.raw.mqtt.factory.RawMqttCloudConnectionFactory" })
+        "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.raw.mqtt.CloudEndpoint(\\-[a-zA-Z0-9]+)?$"})
 public class RawMqttCloudConnectionFactory implements CloudConnectionFactory {
 
     private static final String FACTORY_PID = "org.eclipse.kura.cloudconnection.raw.mqtt.factory.RawMqttCloudConnectionFactory";

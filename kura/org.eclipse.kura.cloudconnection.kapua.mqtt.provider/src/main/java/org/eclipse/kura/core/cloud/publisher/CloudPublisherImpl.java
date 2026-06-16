@@ -62,7 +62,6 @@ import org.osgi.service.component.annotations.Modified;
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
     property = {
-        "service.pid=org.eclipse.kura.cloud.publisher.CloudPublisher",
         "cloud.connection.factory.pid=org.eclipse.kura.cloud.CloudService",
         "kura.ui.service.hide:Boolean=true",
         "kura.ui.factory.hide=true" })

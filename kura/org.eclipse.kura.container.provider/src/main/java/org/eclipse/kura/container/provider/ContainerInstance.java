@@ -77,8 +77,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
     name = "org.eclipse.kura.container.provider.ContainerInstance",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
-    service = { org.eclipse.kura.configuration.ConfigurableComponent.class },
-    property = { "service.pid=org.eclipse.kura.container.provider.ContainerInstance" })
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class })
 public class ContainerInstance implements ConfigurableComponent, ContainerOrchestrationServiceListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ContainerInstance.class);

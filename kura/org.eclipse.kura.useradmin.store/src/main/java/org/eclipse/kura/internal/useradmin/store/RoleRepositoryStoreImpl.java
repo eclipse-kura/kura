@@ -60,7 +60,6 @@ import org.osgi.service.component.annotations.Reference;
             org.eclipse.kura.configuration.ConfigurableComponent.class,
             org.osgi.service.useradmin.UserAdminListener.class },
     property = {
-        "service.pid=org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl",
         "kura.ui.service.hide:Boolean=true" })
 public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminListener, ConfigurableComponent {
 

@@ -36,8 +36,7 @@ import org.osgi.service.component.annotations.Reference;
     service = { org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory.class },
     property = {
         "kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint[-optionalSuffix]",
-        "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint(\\-[a-zA-Z0-9]+)?$",
-        "service.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory" })
+        "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint(\\-[a-zA-Z0-9]+)?$"})
 public class SparkplugCloudConnectionFactory implements CloudConnectionFactory {
 
     private static final String FACTORY_PID = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory.SparkplugCloudConnectionFactory";

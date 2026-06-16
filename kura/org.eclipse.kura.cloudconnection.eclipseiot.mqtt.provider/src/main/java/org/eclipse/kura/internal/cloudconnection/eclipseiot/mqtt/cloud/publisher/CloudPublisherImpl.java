@@ -62,7 +62,6 @@ import org.osgi.service.component.annotations.Modified;
     service = { org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
     property = {
         "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager",
-        "service.pid=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher",
         "kura.ui.service.hide:Boolean=true",
         "kura.ui.factory.hide=true",
         "kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher",

@@ -72,8 +72,7 @@ import org.osgi.service.component.annotations.Reference;
             org.eclipse.kura.db.H2DbService.class,
             org.eclipse.kura.message.store.provider.MessageStoreProvider.class,
             org.eclipse.kura.wire.store.provider.WireRecordStoreProvider.class,
-            org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider.class },
-    property = { "service.pid=org.eclipse.kura.core.db.H2DbService" })
+            org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider.class })
 public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireRecordStoreProvider,
         ConfigurableComponent, QueryableWireRecordStoreProvider {
 

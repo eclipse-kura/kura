@@ -26,8 +26,7 @@ import org.osgi.service.component.annotations.Component;
     name = "org.eclipse.kura.core.comm.CommConnectionFactory",
     service = { org.osgi.service.io.ConnectionFactory.class },
     property = {
-        "io.scheme=comm",
-        "service.pid=org.eclipse.kura.core.comm.CommConnectionFactory" })
+        "io.scheme=comm"})
 public class CommConnectionFactory implements ConnectionFactory {
 
     @Override

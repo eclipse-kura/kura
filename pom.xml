@@ -1691,9 +1691,6 @@
                     <groupId>biz.aQute.bnd</groupId>
                     <artifactId>bnd-testing-maven-plugin</artifactId>
                     <version>${bnd.version}</version>
-                    <configuration>
-                        <reportsDir>${project.build.directory}/surefire-reports</reportsDir>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>biz.aQute.bnd</groupId>

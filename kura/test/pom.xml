@@ -1126,7 +1126,6 @@
                         <bndruns>
                             <bndrun>integration-test.bndrun</bndrun>
                         </bndruns>
-                        <reportsDir>${project.build.directory}/surefire-reports</reportsDir>
                     </configuration>
                     <executions>
                         <execution>

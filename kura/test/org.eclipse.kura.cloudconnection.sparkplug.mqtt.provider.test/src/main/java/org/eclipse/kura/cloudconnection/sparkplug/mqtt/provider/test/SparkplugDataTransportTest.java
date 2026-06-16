@@ -56,7 +56,12 @@ import com.google.protobuf.InvalidProtocolBufferException;
 public class SparkplugDataTransportTest extends SparkplugIntegrationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SparkplugDataTransportTest.class);
-    private static final long DEFAULT_TIMEOUT_MS = 10_000L;
+    // 30s (not 10s): these reconnection tests drive a real Moquette broker + Paho client with a
+    // randomized reconnect delay, so NDEATH/NBIRTH delivery can exceed 10s under full-reactor load
+    // (the suite passes in isolation but flaked on shouldDisconnectCleanWhenPrimaryHostOffline /
+    // shouldIncrementBdSeqOnSuccessfulReconnection during a full build). Mockito timeout() returns
+    // as soon as the expected invocation arrives, so the extra headroom only costs time on failure.
+    private static final long DEFAULT_TIMEOUT_MS = 30_000L;
 
     private DataTransportListener listener = mock(DataTransportListener.class);
     private MqttCallback callback = mock(MqttCallback.class);

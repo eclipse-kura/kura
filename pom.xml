@@ -257,6 +257,11 @@
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
                 <artifactId>jcl-over-slf4j</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
@@ -1165,6 +1170,15 @@
                 <groupId>com.github.moquette-io.moquette</groupId>
                 <artifactId>moquette-broker</artifactId>
                 <version>0.18.0</version>
+                <exclusions>
+                    <!-- moquette drags slf4j-reload4j 1.7.x, an obsolete SLF4J 1.7 binding that
+                         slf4j-api 2.x ignores (logging the "ignored binding" warning). The project
+                         provides a 2.x binding (slf4j-simple) for tests instead. -->
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-reload4j</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>

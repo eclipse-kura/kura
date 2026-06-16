@@ -137,6 +137,19 @@
         </profile>
     </profiles>
 
+    <dependencies>
+        <!-- Universal test-scoped SLF4J 2.x binding so the unit tests relocated into the
+             bundles (src/test/java, run by surefire) have a working logging provider.
+             Without it slf4j-api 2.x finds no provider and falls back to NOP, emitting the
+             "No SLF4J providers were found" warning. Test scope only: it never enters a
+             bundle's manifest nor the bnd-testing OSGi runtime (which logs via log4j2). -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
     <build>
         <extensions>
             <extension>

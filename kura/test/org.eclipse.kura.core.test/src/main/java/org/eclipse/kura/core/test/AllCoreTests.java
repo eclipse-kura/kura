@@ -30,10 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.moquette.broker.Server;
-import io.moquette.broker.config.FileResourceLoader;
+import io.moquette.broker.config.FluentConfig;
 import io.moquette.broker.config.IConfig;
-import io.moquette.broker.config.IResourceLoader;
-import io.moquette.broker.config.ResourceLoaderConfig;
 
 @RunWith(Suite.class)
 @SuiteClasses({ InventoryHandlerTest.class, CommURITest.class, ComponentConfigurationImplTest.class,
@@ -149,12 +147,18 @@ public class AllCoreTests {
 
     public static void startMqttBroker() throws Exception {
 
-        logger.info("Starting Moquette MQTT broker... with path: {}", "moquette.conf");
-        IResourceLoader fileLoader = new FileResourceLoader();
-        IConfig classPathConfig = new ResourceLoaderConfig(fileLoader, "moquette.conf");
+        logger.info("Starting Moquette MQTT broker...");
+
+        // Build the broker configuration programmatically (FluentConfig) instead of loading
+        // moquette.conf from the filesystem. Under bnd-testing the working directory is not the
+        // module directory, so a file-based loader cannot find the resource; the same settings
+        // (port 1883, anonymous, no persistence, 16 MiB max message) are expressed here directly.
+        IConfig brokerConfig = new FluentConfig().port(1883).host("0.0.0.0").disablePersistence().build();
+        brokerConfig.setProperty(IConfig.NETTY_MAX_BYTES_PROPERTY_NAME, "16777216");
+        brokerConfig.setProperty(IConfig.WEB_SOCKET_PORT_PROPERTY_NAME, "8080");
 
         mqttBroker = new Server();
-        mqttBroker.startServer(classPathConfig);
+        mqttBroker.startServer(brokerConfig);
         logger.info("Moquette MQTT broker started");
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> stopBroker()));

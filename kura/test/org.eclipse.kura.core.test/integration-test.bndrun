@@ -17,6 +17,7 @@
 # Kura emulator runtime (bundles this test needs available for resolution)
 -runrequires.emulator: \
     osgi.identity;filter:='(osgi.identity=moquette-broker)',\
+    osgi.identity;filter:='(osgi.identity=org.apache.felix.deploymentadmin)',\
     osgi.identity;filter:='(osgi.identity=org.apache.logging.log4j.api)',\
     osgi.identity;filter:='(osgi.identity=org.apache.logging.log4j.core)',\
     osgi.identity;filter:='(osgi.identity=org.apache.logging.log4j.slf4j2.impl)',\
@@ -88,6 +89,8 @@
 	org.apache.commons.commons-io;version='2.19.0',\
 	org.apache.commons.exec;version='1.3.0',\
 	org.apache.commons.lang3;version='3.19.0',\
+	org.apache.felix.dependencymanager;version='3.0.0',\
+	org.apache.felix.deploymentadmin;version='0.9.5',\
 	org.apache.felix.gogo.runtime;version='1.1.6',\
 	org.apache.felix.gogo.shell;version='1.1.4',\
 	org.apache.felix.http.servlet-api;version='3.0.0',\

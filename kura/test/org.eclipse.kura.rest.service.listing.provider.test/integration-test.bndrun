@@ -49,6 +49,7 @@
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.http.server.manager)',\
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.json.marshaller.unmarshaller.provider)',\
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.rest.provider)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.rest.service.listing.provider)',\
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.rest.security.provider)',\
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.useradmin.store)',\
     osgi.identity;filter:='(osgi.identity=org.eclipse.kura.util.wire.test)',\
@@ -147,8 +148,10 @@
 	org.eclipse.kura.http.server.manager;version='[2.0,2.1)',\
 	org.eclipse.kura.json.marshaller.unmarshaller.provider;version='[2.0,2.1)',\
 	org.eclipse.kura.request.handler.jaxrs;version='[2.0,2.1)',\
+	org.eclipse.kura.rest.configuration.provider;version='[2.0,2.1)',\
 	org.eclipse.kura.rest.provider;version='[2.0,2.1)',\
 	org.eclipse.kura.rest.security.provider;version='[2.0,2.1)',\
+	org.eclipse.kura.rest.service.listing.provider;version='[2.0,2.1)',\
 	org.eclipse.kura.rest.service.listing.provider.test;version='[6.0,6.1)',\
 	org.eclipse.kura.useradmin.store;version='[2.0,2.1)',\
 	org.eclipse.kura.util;version='[2.0,2.1)',\

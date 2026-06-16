@@ -33,6 +33,51 @@ index: target/index.xml
 # Run all integration tests named *Test
 Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}
 
+# Shared Kura emulator runtime required by EVERY integration test for resolution.
+# bnd merges all -runrequires[.*] keys, so each module's integration-test.bndrun only adds
+# the requirements specific to it (its system-under-test bundle and any extra provider) via
+# its own -runrequires.* keys. NOTE: this set deliberately does NOT include the HTTP/REST
+# stack (http.server.manager, rest.provider, rest.security.provider, useradmin.store): the
+# Moquette-broker-starting modules (cloud.base/kapua/sparkplug/core.test) must not pull
+# jetty, which would bind port 8080 and clash with the broker's WebSocket transport. REST
+# modules add those four in their own -runrequires.
+-runrequires.base: \
+    osgi.identity;filter:='(osgi.identity=moquette-broker)',\
+    osgi.identity;filter:='(osgi.identity=org.apache.logging.log4j.api)',\
+    osgi.identity;filter:='(osgi.identity=org.apache.logging.log4j.core)',\
+    osgi.identity;filter:='(osgi.identity=org.apache.logging.log4j.slf4j2.impl)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.equinox.cm)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.equinox.common)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.equinox.console)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.equinox.event)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.equinox.metatype)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.equinox.registry)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.api)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.cloud.base.provider)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.cloudconnection.kapua.mqtt.provider)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core.cloud.factory)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core.configuration)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core.crypto)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core.identity)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core.inventory)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core.status)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core.system)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.core.testutil)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.db.h2db.provider)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.clock)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.gpio)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.net)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.position)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.usb)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.emulator.watchdog)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.json.marshaller.unmarshaller.provider)',\
+    osgi.identity;filter:='(osgi.identity=org.eclipse.kura.xml.marshaller.unmarshaller.provider)'
+
+# The test bundle itself is always required (its artifactId == the module).
+-runrequires.self: osgi.identity;filter:='(osgi.identity=${project.artifactId})'
+
 # ds.delayed.keepInstances=true is REQUIRED for the integration tests, do not remove it.
 # The Kura services under test (e.g. SqliteDbServiceImpl, H2DbServiceImpl, the filesystem
 # KeystoreService) are DS *delayed* components. The test helpers (ServiceUtil.trackService /

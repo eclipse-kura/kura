@@ -37,6 +37,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.util.wire.test.TestEmitterReceiver",
     immediate = true,
@@ -54,6 +55,7 @@ import org.osgi.service.component.annotations.Reference;
         "output.cardinality.minimum:Integer=1",
         "output.cardinality.maximum:Integer=1",
         "output.cardinality.default:Integer=1" })
+@Designate(ocd = TestEmitterReceiverOptions.class, factory = true)
 public class TestEmitterReceiver implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(TestEmitterReceiver.class);

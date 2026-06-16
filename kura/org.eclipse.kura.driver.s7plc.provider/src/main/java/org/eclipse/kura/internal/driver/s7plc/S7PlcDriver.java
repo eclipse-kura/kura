@@ -44,6 +44,7 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
 /**
  * The Kura S7PlcDriver is a S7 PLC Driver implementation for Kura Asset-Driver
  * Topology.<br/>
@@ -65,6 +66,7 @@ import org.osgi.service.component.annotations.Reference;
     name = "org.eclipse.kura.driver.s7plc",
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.driver.Driver.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
+@Designate(ocd = S7PlcMetatype.class, factory = true)
 public class S7PlcDriver extends AbstractBlockDriver<S7PlcDomain> implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(S7PlcDriver.class);

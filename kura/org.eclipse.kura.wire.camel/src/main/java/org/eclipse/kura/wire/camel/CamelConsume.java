@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.wire.camel.CamelConsume",
     immediate = true,
@@ -33,6 +34,7 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
             org.eclipse.kura.wire.WireEmitter.class,
             org.eclipse.kura.wire.WireComponent.class,
             org.osgi.service.wireadmin.Producer.class })
+@Designate(ocd = CamelConsumeOptions.class, factory = true)
 public class CamelConsume extends AbstractEndpointWireComponent implements WireEmitter {
 
     private static final Logger logger = LoggerFactory.getLogger(CamelConsume.class);

@@ -84,12 +84,14 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
             org.eclipse.kura.container.orchestration.ContainerOrchestrationService.class })
+@Designate(ocd = ContainerOrchestrationServiceMetatype.class)
 public class ContainerOrchestrationServiceImpl implements ConfigurableComponent, ContainerOrchestrationService {
 
     private static final String PARAMETER_CANNOT_BE_NULL = "The provided parameter cannot be null";

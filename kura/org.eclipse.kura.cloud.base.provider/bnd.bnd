@@ -12,7 +12,6 @@ Export-Package: \
     org.eclipse.kura.core.data;version="1.0.0",\
     org.eclipse.kura.core.data.util;version="1.0.0";x-internal:=true
 -includeresource: \
-    OSGI-INF=OSGI-INF,\
     about.html,\
     lib/org.eclipse.paho.client.mqttv3-1.2.1.k2.jar=lib/org.eclipse.paho.client.mqttv3-1.2.1.k2.jar,\
     about_files=about_files/

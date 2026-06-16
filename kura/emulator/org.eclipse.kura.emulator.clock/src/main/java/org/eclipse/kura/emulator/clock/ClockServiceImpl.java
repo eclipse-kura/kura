@@ -29,11 +29,13 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.clock.ClockService",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.clock.ClockService.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
+@Designate(ocd = ClockServiceOptions.class)
 public class ClockServiceImpl implements ConfigurableComponent, ClockService {
 
     private static final Logger logger = LoggerFactory.getLogger(ClockServiceImpl.class);

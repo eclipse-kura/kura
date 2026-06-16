@@ -51,11 +51,13 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.position.PositionService",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.position.PositionService.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
+@Designate(ocd = PositionServiceOptions.class)
 public class PositionServiceImpl implements PositionService, ConfigurableComponent {
 
     private static final String USE_GPSD_PROPERTY_NAME = "useGpsd";

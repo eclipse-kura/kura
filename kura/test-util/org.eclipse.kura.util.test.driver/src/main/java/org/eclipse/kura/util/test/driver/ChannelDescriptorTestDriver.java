@@ -36,10 +36,12 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.util.test.driver.ChannelDescriptorTestDriver",
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.driver.Driver.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
+@Designate(ocd = ChannelDescriptorTestDriverOptions.class, factory = true)
 public class ChannelDescriptorTestDriver implements Driver, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(ChannelDescriptorTestDriver.class);

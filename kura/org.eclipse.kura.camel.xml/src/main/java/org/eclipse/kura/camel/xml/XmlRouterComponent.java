@@ -42,6 +42,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.Designate;
 /**
  * A ready to run XML based Apache Camel component
  *
@@ -52,6 +53,7 @@ import org.osgi.service.component.annotations.Modified;
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.configuration.ConfigurableComponent.class })
+@Designate(ocd = XmlRouterComponentOptions.class, factory = true)
 public class XmlRouterComponent extends AbstractXmlCamelComponent {
 
     private static final String TOKEN_PATTERN = "\\s*,\\s*";

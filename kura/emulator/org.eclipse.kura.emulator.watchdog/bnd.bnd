@@ -4,6 +4,5 @@ Bundle-Vendor: Eclipse Kura
 Export-Package: \
     org.eclipse.kura.emulator.watchdog;version="2.0.0"
 -includeresource: \
-    OSGI-INF=OSGI-INF,\
     about.html,\
     about_files=about_files/

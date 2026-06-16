@@ -64,6 +64,7 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.core.db.H2DbService",
     configurationPolicy = ConfigurationPolicy.REQUIRE,
@@ -73,6 +74,7 @@ import org.osgi.service.component.annotations.Reference;
             org.eclipse.kura.message.store.provider.MessageStoreProvider.class,
             org.eclipse.kura.wire.store.provider.WireRecordStoreProvider.class,
             org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider.class })
+@Designate(ocd = H2DbServiceMetatype.class, factory = true)
 public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireRecordStoreProvider,
         ConfigurableComponent, QueryableWireRecordStoreProvider {
 

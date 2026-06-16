@@ -28,6 +28,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.Designate;
 /**
  * A Kura component which takes care of creating a {@link org.eclipse.kura.cloud.CloudService} based in Apache Camel
  * <p>
@@ -42,6 +43,7 @@ import org.osgi.service.component.annotations.Modified;
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.configuration.ConfigurableComponent.class },
     property = { "kura.ui.service.hide:Boolean=true" })
+@Designate(ocd = CamelFactoryOptions.class, factory = true)
 public class CamelFactory implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(CamelFactory.class);

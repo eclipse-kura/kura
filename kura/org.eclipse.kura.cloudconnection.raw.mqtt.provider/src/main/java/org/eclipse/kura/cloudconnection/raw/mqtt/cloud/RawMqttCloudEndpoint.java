@@ -55,6 +55,7 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint",
     immediate = false,
@@ -65,6 +66,7 @@ import org.osgi.service.component.annotations.Reference;
     property = {
         "kura.ui.service.hide:Boolean=true",
         "kura.ui.factory.hide:Boolean=true" })
+@Designate(ocd = RawMqttCloudEndpointOptions.class, factory = true)
 public class RawMqttCloudEndpoint
         implements CloudEndpoint, CloudConnectionManager, DataServiceListener, ConfigurableComponent {
 

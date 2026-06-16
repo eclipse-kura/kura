@@ -73,11 +73,13 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.container.provider.ContainerInstance",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.configuration.ConfigurableComponent.class })
+@Designate(ocd = ContainerInstanceMetatype.class, factory = true)
 public class ContainerInstance implements ConfigurableComponent, ContainerOrchestrationServiceListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ContainerInstance.class);

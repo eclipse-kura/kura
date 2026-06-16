@@ -47,6 +47,7 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.core.keystore.PKCS11KeystoreServiceImpl",
     immediate = false,
@@ -55,6 +56,7 @@ import org.osgi.service.component.annotations.Reference;
     property = {
         "kura.ui.factory.hide=true",
         "kura.ui.service.hide=true" })
+@Designate(ocd = PKCS11KeystoreServiceImplOptions.class, factory = true)
 public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
 
     private static final Logger logger = LoggerFactory.getLogger(PKCS11KeystoreServiceImpl.class);

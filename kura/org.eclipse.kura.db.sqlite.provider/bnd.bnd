@@ -4,6 +4,5 @@ Bundle-Vendor: Eclipse Kura
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.eclipse.kura.internal.db.sqlite.provider.SqliteProviderActivator
 -includeresource: \
-    OSGI-INF=OSGI-INF,\
     about_files=about_files/,\
     about.html

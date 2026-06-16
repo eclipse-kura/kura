@@ -65,6 +65,7 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.Designate;
 @SuppressWarnings("java:S2789")
 @Component(
     name = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",
@@ -79,6 +80,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
                 service = org.eclipse.kura.data.DataTransportListener.class,
                 cardinality = ReferenceCardinality.MULTIPLE,
                 policy = ReferencePolicy.DYNAMIC) })
+@Designate(ocd = MqttDataTransportOptions.class, factory = true)
 public class MqttDataTransport implements DataTransportService, MqttCallback, ConfigurableComponent, SslServiceListener,
         CloudConnectionStatusComponent {
 

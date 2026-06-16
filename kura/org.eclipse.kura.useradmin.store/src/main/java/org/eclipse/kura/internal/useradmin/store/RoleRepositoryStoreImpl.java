@@ -52,6 +52,7 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl",
     immediate = true,
@@ -61,6 +62,7 @@ import org.osgi.service.component.annotations.Reference;
             org.osgi.service.useradmin.UserAdminListener.class },
     property = {
         "kura.ui.service.hide:Boolean=true" })
+@Designate(ocd = RoleRepositoryStoreImplOptions.class)
 public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminListener, ConfigurableComponent {
 
     private static final String INTERNAL_UPDATE_ID_PROP_NAME = "internal.update.id";

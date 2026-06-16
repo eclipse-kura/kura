@@ -30,11 +30,13 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.stress.Stress",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.configuration.ConfigurableComponent.class })
+@Designate(ocd = StressOptions.class)
 public class HeapStress implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(HeapStress.class);

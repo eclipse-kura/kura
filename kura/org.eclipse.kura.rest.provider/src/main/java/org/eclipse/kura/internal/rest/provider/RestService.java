@@ -54,6 +54,7 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +65,7 @@ import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.MessageBodyWriter;
 
 @Component(immediate = true, configurationPolicy = ConfigurationPolicy.REQUIRE)
+@Designate(ocd = RestServiceMetatype.class)
 public class RestService implements ConfigurableComponent {
 
     private static final String KURA_DEFAULT_JAKARTARS_WHITEBOARD_NAME = "KuraDefaultJakartarsWhiteboard";

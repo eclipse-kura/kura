@@ -44,6 +44,7 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager",
     immediate = true,
@@ -51,6 +52,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
     service = { org.eclipse.kura.configuration.ConfigurableComponent.class },
     property = {
         "kura.service.pid=org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager" })
+@Designate(ocd = ConfigurationChangeManagerMetatype.class, factory = true)
 public class ConfigurationChangeManager implements ConfigurableComponent, ServiceTrackerListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationChangeManager.class);

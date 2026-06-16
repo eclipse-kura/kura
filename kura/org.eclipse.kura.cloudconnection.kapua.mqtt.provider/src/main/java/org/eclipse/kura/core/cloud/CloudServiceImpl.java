@@ -119,6 +119,7 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.cloud.CloudService",
     immediate = false,
@@ -131,6 +132,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
             org.eclipse.kura.cloudconnection.CloudConnectionManager.class,
             org.eclipse.kura.cloudconnection.CloudEndpoint.class },
     property = { "kura.ui.service.hide:Boolean=true" })
+@Designate(ocd = CloudServiceMetatype.class, factory = true)
 public class CloudServiceImpl
         implements CloudService, DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder,
         CloudPayloadProtoBufDecoder, RequestHandlerRegistry, CloudConnectionManager, CloudEndpoint {

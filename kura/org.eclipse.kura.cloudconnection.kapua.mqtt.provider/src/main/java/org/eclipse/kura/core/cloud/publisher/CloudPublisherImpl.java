@@ -56,6 +56,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.cloud.publisher.CloudPublisher",
     immediate = true,
@@ -65,6 +66,7 @@ import org.osgi.service.component.annotations.Modified;
         "cloud.connection.factory.pid=org.eclipse.kura.cloud.CloudService",
         "kura.ui.service.hide:Boolean=true",
         "kura.ui.factory.hide=true" })
+@Designate(ocd = CloudPublisherMetatype.class, factory = true)
 public class CloudPublisherImpl
         implements CloudPublisher, ConfigurableComponent, CloudConnectionListener, CloudPublisherDeliveryListener {
 

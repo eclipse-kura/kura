@@ -78,6 +78,7 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.data.DataService",
     immediate = false,
@@ -89,6 +90,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
                 service = org.eclipse.kura.data.DataServiceListener.class,
                 cardinality = ReferenceCardinality.MULTIPLE,
                 policy = ReferencePolicy.DYNAMIC) })
+@Designate(ocd = DataServiceMetatype.class, factory = true)
 public class DataServiceImpl implements DataService, DataTransportListener, ConfigurableComponent,
         CloudConnectionStatusComponent, CriticalComponent, AutoConnectStrategy.ConnectionManager, ConnectionListener {
 

@@ -40,6 +40,7 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.http.server.manager.HttpService",
     immediate = true,
@@ -48,6 +49,7 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
     property = {
         "kura.ui.service.hide:Boolean=true",
         "event.topics=org/eclipse/kura/security/keystore/KeystoreChangedEvent/KEYSTORE_CHANGED" })
+@Designate(ocd = HttpServiceMetatype.class)
 public class HttpService implements ConfigurableComponent, EventHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpService.class);

@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.cloudconnection.raw.mqtt.publisher.RawMqttPublisher",
     immediate = true,
@@ -40,6 +41,7 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
         "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint",
         "kura.ui.service.hide:Boolean=true",
         "kura.ui.factory.hide=true" })
+@Designate(ocd = RawMqttPublisherOptions.class, factory = true)
 public class RawMqttPublisher extends AbstractStackComponent<PublishOptions>
         implements CloudPublisher, CloudDeliveryListener {
 

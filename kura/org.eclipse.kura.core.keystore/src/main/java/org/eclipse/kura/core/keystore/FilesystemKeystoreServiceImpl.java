@@ -54,6 +54,7 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl",
     immediate = false,
@@ -63,6 +64,7 @@ import org.osgi.service.component.annotations.Reference;
         "service.pid=org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImplerviceImpl",
         "kura.ui.factory.hide=true",
         "kura.ui.service.hide=true" })
+@Designate(ocd = FilesystemKeystoreServiceImplOptions.class, factory = true)
 public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
 
     private static final Logger logger = LoggerFactory.getLogger(FilesystemKeystoreServiceImpl.class);

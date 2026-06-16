@@ -4,7 +4,6 @@ Bundle-Vendor: Eclipse Kura
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,lib/org.eclipse.paho.client.mqttv3-1.2.1.k2.jar
 -includeresource: \
-    OSGI-INF=OSGI-INF,\
     about.html,\
     lib=lib,\
     about_files=about_files/

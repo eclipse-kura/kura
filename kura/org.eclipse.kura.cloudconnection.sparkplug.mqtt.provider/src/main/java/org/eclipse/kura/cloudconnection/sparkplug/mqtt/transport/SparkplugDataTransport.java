@@ -46,6 +46,7 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport.SparkplugDataTransport",
     immediate = true,
@@ -59,6 +60,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
                 service = org.eclipse.kura.data.DataTransportListener.class,
                 cardinality = ReferenceCardinality.MULTIPLE,
                 policy = ReferencePolicy.DYNAMIC) })
+@Designate(ocd = SparkplugDataTransportMetatype.class, factory = true)
 public class SparkplugDataTransport implements ConfigurableComponent, DataTransportService, MqttCallback {
 
     private static final Logger logger = LoggerFactory.getLogger(SparkplugDataTransport.class);

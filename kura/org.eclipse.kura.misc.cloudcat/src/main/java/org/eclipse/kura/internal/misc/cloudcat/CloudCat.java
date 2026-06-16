@@ -34,10 +34,12 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.misc.cloudcat.CloudCat",
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.configuration.ConfigurableComponent.class })
+@Designate(ocd = CloudCatMetatype.class, factory = true)
 public class CloudCat implements ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(CloudCat.class);

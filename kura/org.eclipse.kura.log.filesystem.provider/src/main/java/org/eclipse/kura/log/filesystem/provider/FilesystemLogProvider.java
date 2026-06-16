@@ -34,11 +34,13 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider",
     immediate = true,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.log.LogProvider.class })
+@Designate(ocd = FilesystemLogProviderOptions.class, factory = true)
 public class FilesystemLogProvider implements ConfigurableComponent, LogProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(FilesystemLogProvider.class);

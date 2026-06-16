@@ -4,7 +4,6 @@ Bundle-Vendor: Eclipse Kura
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,lib/org.eclipse.kura.driver.block.jar
 -includeresource: \
-    OSGI-INF=OSGI-INF,\
     lib=lib,\
     lib/org.eclipse.kura.driver.block.jar,\
     about.html,\

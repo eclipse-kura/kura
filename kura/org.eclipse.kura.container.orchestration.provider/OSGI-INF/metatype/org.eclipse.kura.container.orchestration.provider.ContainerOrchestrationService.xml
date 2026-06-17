@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-
     Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
-  
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
-	SPDX-License-Identifier: EPL-2.0
-	
-	Contributors:
-	 Eurotech
 
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService" name="Container Orchestration Service"
         description="The ContainerOrchestrationService connects to locally running Docker/Podman instances, and allows for container management.">
-        
+
 
         <AD id="enabled" name="Enabled" type="Boolean" cardinality="0" required="true" default="true"
             description="Enables the service to connect to the container engine host. Please make sure that the Docker/Podman service is running in the host environment prior to enable this functionality.">
@@ -25,11 +23,11 @@
         <AD id="container.engine.host" name="Container Engine Host URL"
             description="Host URL: tcp://localhost:2376 or unix:///var/run/docker.sock" type="String"
             cardinality="0" required="true" default="unix:///var/run/docker.sock" />
-            
+
         <AD id="enforcement.enabled" name="Allowlist Enforcement Enabled" type="Boolean" cardinality="0" required="true" default="false"
             description="Enable/Disable the Allowlist enforcement. If enabled, only containers images whose digest can be found in the allowlist will be allowed to be run/loaded/created.">
         </AD>
-        
+
         <AD
             id="enforcement.allowlist"
             name="Container Image Allowlist "
@@ -38,7 +36,7 @@
             cardinality="1"
             required="false"
             default="" />
-        
+
     </OCD>
 
     <Designate pid="org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService">

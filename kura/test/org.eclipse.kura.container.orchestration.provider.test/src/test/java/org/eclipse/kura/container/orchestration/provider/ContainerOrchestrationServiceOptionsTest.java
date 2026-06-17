@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -33,7 +33,7 @@ public class ContainerOrchestrationServiceOptionsTest {
     private static final String ALLOWLIST_CONTENT = "allowlist.content";
 
     private static final String DEFAULT_DOCKER_HOST_URL = "unix:///var/run/docker.sock";
-    private static final boolean DEFAULT_IS_ENABLED = false;
+    private static final boolean DEFAULT_IS_ENABLED = true;
     private static final String DEFAULT_ALLOWLIST_CONTENT = "";
     private static final boolean DEFAULT_ALLOWLIST_ENABLED = false;
 
@@ -68,17 +68,17 @@ public class ContainerOrchestrationServiceOptionsTest {
     }
 
     @Test
-    public void testDisabledDefault() {
+    public void testEnabledDefault() {
         givenEmptyProperties();
         givenDockerServiceOptions();
 
         whenIsEnabled();
 
-        thenEnabledStateIs(false);
+        thenEnabledStateIs(true);
     }
 
     @Test
-    public void testEnabledDefault() {
+    public void testExplicitlyEnabled() {
         givenEmptyProperties();
         givenDockerServiceEnabled(true);
         givenDockerServiceOptions();

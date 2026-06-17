@@ -13,7 +13,7 @@
 	 Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="false" immediate="true" modified="updated" name="org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService">
    <implementation class="org.eclipse.kura.container.orchestration.provider.impl.ContainerOrchestrationServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>

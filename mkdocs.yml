@@ -7,6 +7,7 @@ nav:
       - Raspberry Pi - Raspberry Pi OS Quick Start: getting-started/raspberry-pi-raspberryos-quick-start.md
       - Raspberry Pi - Ubuntu 20 Quick Start: getting-started/raspberry-pi-ubuntu-20-quick-start.md
       - Docker Quick Start: getting-started/docker-quick-start.md
+      - ZimaBoard/Blade Quick Start: getting-started/zima-board-quick-start.md
       - Intel Up² Quick Start: getting-started/intel-up-2-quick-start.md
       - NVIDIA Jetson Nano&trade; - Quick Start: getting-started/nvidia-jetson-nano-quick-start.md
     - Gateway Configuration:

@@ -1,12 +1,48 @@
-# ZimaBoard/Blade Quick Start
+# ZimaBoard Quick Start
 
 ## Overview
 
-TBD
+This section provides Eclipse Kura&trade; quick installation procedures for the ZimaBoard and the Kura development environment.
+
+!!! warning
+    This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not [CAN bus](https://en.wikipedia.org/wiki/CAN_bus) support. For more information on this please visit the [Eclipse Kura download page](https://websites.eclipseprojects.io/kura/downloads.php)
+
+This quickstart has been tested using the latest Ubuntu 24.04.3 LTS Live Server for amd64 architecture flashed on the SD card with [balenaEtcher](https://www.balena.io/etcher/).
 
 ## Eclipse Kura&trade; Installation
 
-TBD
+To install Eclipse Kura with its dependencies on the ZimaBoard, perform the
+following steps:
+
+1. Boot the ZimaBoard with the latest Ubuntu 24.04 LTS Server image.
+
+2. Make sure your device is connected to internet.
+
+3. Upgrade the system:
+
+    ```bash
+    sudo apt update
+    ```
+    ```bash
+    sudo apt upgrade
+    ```
+
+4. Download the Kura package with:
+
+    ```
+    wget http://download.eclipse.org/kura/releases/<version>/kura-<kura-version>_generic-<arch>_installer.deb
+    ```
+
+    Note: replace `<version>` in the URL above with the version number of the latest release (e.g. 5.6.0) and `<arch>` with your device architecture (i.e. `x86_64` in this case)
+
+
+5. Install Kura with:
+
+    ```
+    sudo apt install ./kura-<kura-version>_generic-<arch>_installer.deb
+    ```
+
+    All the required dependencies will be downloaded and installed.
 
 ## Known Issues
 

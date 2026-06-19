@@ -111,6 +111,7 @@ Kura generic has been tested on the following devices and provides full configur
 | - | - | - |
 | **Raspberry Pi 3/4** | *arm32* | Raspbian "Bookworm" |
 | **Raspberry Pi 3/4** | *arm64* | Ubuntu 20.04 |
+| **ZimaBoard** | *x86_64* | Ubuntu 24.04 |
 | **Intel Up²** | *x86_64* | Ubuntu 20.04 |
 | **NVIDIA Jetson Nano&trade;** | *arm64* | Ubuntu 20.04 |
 
@@ -120,4 +121,5 @@ Check out the quick start guides for the detailed installation steps and set-up 
 - [Raspberry Pi - Ubuntu 20 Quick Start](./raspberry-pi-ubuntu-20-quick-start.md)
 - [Docker Quick Start](./docker-quick-start.md)
 - [Intel Up² Quick Start](./intel-up-2-quick-start.md)
+- [ZimaBoard Quick Start](./zima-board-quick-start.md)
 - [NVIDIA Jetson Nano&trade;](./nvidia-jetson-nano-quick-start.md)

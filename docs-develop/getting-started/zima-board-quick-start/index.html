@@ -475,6 +475,30 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Known Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dhclient-apparmor-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      dhclient apparmor profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#named-failing-to-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      named failing to start
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -4669,6 +4693,30 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Known Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dhclient-apparmor-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      dhclient apparmor profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#named-failing-to-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      named failing to start
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -4689,21 +4737,21 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 <h1 id="zimaboardblade-quick-start">ZimaBoard/Blade Quick Start</h1>
 <h2 id="overview">Overview</h2>
+<p>TBD</p>
 <h2 id="eclipse-kuratm-installation">Eclipse Kura&trade; Installation</h2>
+<p>TBD</p>
 <h2 id="known-issues">Known Issues</h2>
+<h3 id="dhclient-apparmor-profile"><code>dhclient</code> apparmor profile</h3>
 <p>On Ubuntu 24.04 with NetworkManager and DHCP (IPv4), a network interface fails to obtain an IPv4 address automatically. The issue is due to this <a href="https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/2116733">bug</a>.</p>
 <p>To fix it, the <code>AppArmor</code> configuration has to be updated as follows:</p>
 <ul>
-<li>edit the <code>/etc/apparmor.d/sbin.dhclient</code> file and add the following lines in the main section:</li>
-</ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>  # Added to fix dhclient
+<li>edit the <code>/etc/apparmor.d/sbin.dhclient</code> file and add the following lines in the main section:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>  # Added to fix dhclient
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  /usr/libexec/nm-dhcp-helper                     Pxrm,
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  signal (receive) peer=/usr/libexec/nm-dhcp-helper,
-</code></pre></div>
-<ul>
-<li>add the following at the end of the file:</li>
-</ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a># Added to fix dhclient
+</code></pre></div></li>
+<li>add the following at the end of the file:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a># Added to fix dhclient
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>/usr/libexec/nm-dhcp-helper {
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  #include &lt;abstractions/base&gt;
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  #include &lt;abstractions/dbus&gt;
@@ -4718,7 +4766,45 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>  network inet dgram,
 <a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>  network inet6 dgram,
 <a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>}
+</code></pre></div></li>
+</ul>
+<h3 id="named-failing-to-start"><code>named</code> failing to start</h3>
+<p>On Ubuntu 24.04 with NetworkManager and DHCP (IPv4) you might see the following error in the Kura logs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>2026-06-19T10:00:09,741 [DnsMonitorServiceImpl] WARN  o.e.k.n.c.m.DnsServerMonitor - Command &#39;Failed to start named&#39; exited with code {1}.
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>org.eclipse.kura.KuraException: Command &#39;Failed to start named&#39; exited with code {1}.
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    at org.eclipse.kura.linux.net.dns.LinuxDnsServer.start(LinuxDnsServer.java:181)
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    at org.eclipse.kura.nm.configuration.monitor.DnsServerMonitor.reconfigureDNSProxy(DnsServerMonitor.java:254)
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    at org.eclipse.kura.nm.configuration.monitor.DnsServerMonitor.manageDnsProxies(DnsServerMonitor.java:229)
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    at org.eclipse.kura.nm.configuration.monitor.DnsServerMonitor.monitorDnsServerStatus(DnsServerMonitor.java:133)
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java:305)
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    at java.base/java.lang.Thread.run(Thread.java:840)
 </code></pre></div>
+<p>To fix it, the <code>AppArmor</code> configuration has to be updated as follows:</p>
+<ul>
+<li>edit the <code>/etc/apparmor.d/local/usr.sbin.named</code> file and add the following lines in the main section:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a># Site-local additions for /usr/sbin/named.
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a># This file is included by /etc/apparmor.d/usr.sbin.named.
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a># Allow BIND/named worker threads to set/read their thread names.
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>owner /proc/*/task/*/comm rw,
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a># Allow BIND/named to read the kernel ephemeral port range.
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>@{PROC}/sys/net/ipv4/ip_local_port_range r,
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a># Allow BIND/named to notify systemd that it is ready / running.
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>@{run}/systemd/notify w,
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a># Allow BIND/named to read Ubuntu kernel version metadata.
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>@{PROC}/version_signature r,
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a># Only enable this if named still fails to start/run without it.
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a># capability sys_admin,
+</code></pre></div></li>
+</ul>
 
 
 

@@ -11,6 +11,10 @@
         <link rel="canonical" href="https://eclipse-kura.github.io/kura/docs-release-5.6/getting-started/zima-board-quick-start/">
       
       
+        <link rel="prev" href="../docker-quick-start/">
+      
+      
+        <link rel="next" href="../intel-up-2-quick-start/">
       
       
       <link rel="icon" href="../../assets/favicon.png">
@@ -18,7 +22,7 @@
     
     
       
-        <title>ZimaBoard/Blade Quick Start - Eclipse Kura™ Documentation</title>
+        <title>ZimaBoard Quick Start - Eclipse Kura™ Documentation</title>
       
     
     
@@ -80,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#zimaboardblade-quick-start" class="md-skip">
+        <a href="#zimaboard-quick-start" class="md-skip">
           Skip to content
         </a>
       
@@ -131,7 +135,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              ZimaBoard/Blade Quick Start
+              ZimaBoard Quick Start
             
           </span>
         </div>
@@ -270,17 +274,19 @@ You are viewing the documentation relative to the develop branch or to an outdat
       
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
         
           
           <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
@@ -295,7 +301,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
             Getting Started
@@ -385,6 +391,120 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    ZimaBoard Quick Start
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    ZimaBoard Quick Start
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eclipse-kuratm-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Eclipse Kura&trade; Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Known Issues
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Known Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dhclient-apparmor-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      dhclient apparmor profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#named-failing-to-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      named failing to start
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -4595,6 +4715,30 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Known Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dhclient-apparmor-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      dhclient apparmor profile
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#named-failing-to-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      named failing to start
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -4613,38 +4757,109 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 
 
-<h1 id="zimaboardblade-quick-start">ZimaBoard/Blade Quick Start</h1>
+<h1 id="zimaboard-quick-start">ZimaBoard Quick Start</h1>
 <h2 id="overview">Overview</h2>
+<p>This section provides Eclipse Kura&trade; quick installation procedures for the ZimaBoard and the Kura development environment.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not <a href="https://en.wikipedia.org/wiki/CAN_bus">CAN bus</a> support. For more information on this please visit the <a href="https://websites.eclipseprojects.io/kura/downloads.php">Eclipse Kura download page</a></p>
+</div>
+<p>This quickstart has been tested using the latest Ubuntu 24.04.3 LTS Live Server for amd64 architecture flashed on the SD card with <a href="https://www.balena.io/etcher/">balenaEtcher</a>.</p>
 <h2 id="eclipse-kuratm-installation">Eclipse Kura&trade; Installation</h2>
+<p>To install Eclipse Kura with its dependencies on the ZimaBoard, perform the
+following steps:</p>
+<ol>
+<li>
+<p>Boot the ZimaBoard with the latest Ubuntu 24.04 LTS Server image.</p>
+</li>
+<li>
+<p>Make sure your device is connected to internet.</p>
+</li>
+<li>
+<p>Upgrade the system:</p>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>update
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>upgrade
+</code></pre></div></p>
+</li>
+<li>
+<p>Download the Kura package with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura-&lt;kura-version&gt;_generic-&lt;arch&gt;_installer.deb
+</code></pre></div>
+<p>Note: replace <code>&lt;version&gt;</code> in the URL above with the version number of the latest release (e.g. 5.6.0) and <code>&lt;arch&gt;</code> with your device architecture (i.e. <code>x86_64</code> in this case)</p>
+</li>
+<li>
+<p>Install Kura with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo apt install ./kura-&lt;kura-version&gt;_generic-&lt;arch&gt;_installer.deb
+</code></pre></div>
+<p>All the required dependencies will be downloaded and installed.</p>
+</li>
+</ol>
 <h2 id="known-issues">Known Issues</h2>
+<h3 id="dhclient-apparmor-profile"><code>dhclient</code> apparmor profile</h3>
 <p>On Ubuntu 24.04 with NetworkManager and DHCP (IPv4), a network interface fails to obtain an IPv4 address automatically. The issue is due to this <a href="https://bugs.launchpad.net/ubuntu/+source/network-manager/+bug/2116733">bug</a>.</p>
 <p>To fix it, the <code>AppArmor</code> configuration has to be updated as follows:</p>
 <ul>
-<li>edit the <code>/etc/apparmor.d/sbin.dhclient</code> file and add the following lines in the main section:</li>
+<li>edit the <code>/etc/apparmor.d/sbin.dhclient</code> file and add the following lines in the main section:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>  # Added to fix dhclient
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  /usr/libexec/nm-dhcp-helper                     Pxrm,
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  signal (receive) peer=/usr/libexec/nm-dhcp-helper,
+</code></pre></div></li>
+<li>add the following at the end of the file:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a># Added to fix dhclient
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>/usr/libexec/nm-dhcp-helper {
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  #include &lt;abstractions/base&gt;
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  #include &lt;abstractions/dbus&gt;
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  /usr/libexec/nm-dhcp-helper mr,
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>  /run/NetworkManager/private-dhcp rw,
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>  signal (send) peer=/sbin/dhclient,
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>  /var/lib/NetworkManager/*lease r,
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>  signal (receive) peer=/usr/sbin/NetworkManager,
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>  ptrace (readby) peer=/usr/sbin/NetworkManager,
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>  network inet dgram,
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>  network inet6 dgram,
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>}
+</code></pre></div></li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>  # Added to fix dhclient
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  /usr/libexec/nm-dhcp-helper                     Pxrm,
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  signal (receive) peer=/usr/libexec/nm-dhcp-helper,
+<h3 id="named-failing-to-start"><code>named</code> failing to start</h3>
+<p>On Ubuntu 24.04 with NetworkManager and DHCP (IPv4) you might see the following error in the Kura logs:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>2026-06-19T10:00:09,741 [DnsMonitorServiceImpl] WARN  o.e.k.n.c.m.DnsServerMonitor - Command &#39;Failed to start named&#39; exited with code {1}.
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>org.eclipse.kura.KuraException: Command &#39;Failed to start named&#39; exited with code {1}.
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    at org.eclipse.kura.linux.net.dns.LinuxDnsServer.start(LinuxDnsServer.java:181)
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    at org.eclipse.kura.nm.configuration.monitor.DnsServerMonitor.reconfigureDNSProxy(DnsServerMonitor.java:254)
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    at org.eclipse.kura.nm.configuration.monitor.DnsServerMonitor.manageDnsProxies(DnsServerMonitor.java:229)
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    at org.eclipse.kura.nm.configuration.monitor.DnsServerMonitor.monitorDnsServerStatus(DnsServerMonitor.java:133)
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539)
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java:305)
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>    at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305)
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>    at java.base/java.lang.Thread.run(Thread.java:840)
 </code></pre></div>
+<p>To fix it, the <code>AppArmor</code> configuration has to be updated as follows:</p>
 <ul>
-<li>add the following at the end of the file:</li>
+<li>edit the <code>/etc/apparmor.d/local/usr.sbin.named</code> file and add the following lines in the main section:
+  <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a># Site-local additions for /usr/sbin/named.
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a># This file is included by /etc/apparmor.d/usr.sbin.named.
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a># Allow BIND/named worker threads to set/read their thread names.
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>owner /proc/*/task/*/comm rw,
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a># Allow BIND/named to read the kernel ephemeral port range.
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>@{PROC}/sys/net/ipv4/ip_local_port_range r,
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a># Allow BIND/named to notify systemd that it is ready / running.
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>@{run}/systemd/notify w,
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a># Allow BIND/named to read Ubuntu kernel version metadata.
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>@{PROC}/version_signature r,
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a># Only enable this if named still fails to start/run without it.
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a># capability sys_admin,
+</code></pre></div></li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a># Added to fix dhclient
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>/usr/libexec/nm-dhcp-helper {
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  #include &lt;abstractions/base&gt;
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  #include &lt;abstractions/dbus&gt;
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  /usr/libexec/nm-dhcp-helper mr,
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>  /run/NetworkManager/private-dhcp rw,
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>  signal (send) peer=/sbin/dhclient,
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  /var/lib/NetworkManager/*lease r,
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>  signal (receive) peer=/usr/sbin/NetworkManager,
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>  ptrace (readby) peer=/usr/sbin/NetworkManager,
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>  network inet dgram,
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>  network inet6 dgram,
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>}
-</code></pre></div>
 
 
 

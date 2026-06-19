@@ -17,32 +17,29 @@ On Ubuntu 24.04 with NetworkManager and DHCP (IPv4), a network interface fails t
 To fix it, the `AppArmor` configuration has to be updated as follows:
 
 - edit the `/etc/apparmor.d/sbin.dhclient` file and add the following lines in the main section:
-
-```
-  # Added to fix dhclient
-  /usr/libexec/nm-dhcp-helper                     Pxrm,
-  signal (receive) peer=/usr/libexec/nm-dhcp-helper,
-```
-
+  ```
+    # Added to fix dhclient
+    /usr/libexec/nm-dhcp-helper                     Pxrm,
+    signal (receive) peer=/usr/libexec/nm-dhcp-helper,
+  ```
 - add the following at the end of the file:
+  ```
+  # Added to fix dhclient
+  /usr/libexec/nm-dhcp-helper {
+    #include <abstractions/base>
+    #include <abstractions/dbus>
+    /usr/libexec/nm-dhcp-helper mr,
 
-```
-# Added to fix dhclient
-/usr/libexec/nm-dhcp-helper {
-  #include <abstractions/base>
-  #include <abstractions/dbus>
-  /usr/libexec/nm-dhcp-helper mr,
+    /run/NetworkManager/private-dhcp rw,
+    signal (send) peer=/sbin/dhclient,
 
-  /run/NetworkManager/private-dhcp rw,
-  signal (send) peer=/sbin/dhclient,
-
-  /var/lib/NetworkManager/*lease r,
-  signal (receive) peer=/usr/sbin/NetworkManager,
-  ptrace (readby) peer=/usr/sbin/NetworkManager,
-  network inet dgram,
-  network inet6 dgram,
-}
-```
+    /var/lib/NetworkManager/*lease r,
+    signal (receive) peer=/usr/sbin/NetworkManager,
+    ptrace (readby) peer=/usr/sbin/NetworkManager,
+    network inet dgram,
+    network inet6 dgram,
+  }
+  ```
 
 ### `named` failing to start
 
@@ -67,23 +64,22 @@ org.eclipse.kura.KuraException: Command 'Failed to start named' exited with code
 To fix it, the `AppArmor` configuration has to be updated as follows:
 
 - edit the `/etc/apparmor.d/local/usr.sbin.named` file and add the following lines in the main section:
-
-```
-# Site-local additions for /usr/sbin/named.
-# This file is included by /etc/apparmor.d/usr.sbin.named.
-
-# Allow BIND/named worker threads to set/read their thread names.
-owner /proc/*/task/*/comm rw,
-
-# Allow BIND/named to read the kernel ephemeral port range.
-@{PROC}/sys/net/ipv4/ip_local_port_range r,
-
-# Allow BIND/named to notify systemd that it is ready / running.
-@{run}/systemd/notify w,
-
-# Allow BIND/named to read Ubuntu kernel version metadata.
-@{PROC}/version_signature r,
-
-# Only enable this if named still fails to start/run without it.
-# capability sys_admin,
-```
+  ```
+  # Site-local additions for /usr/sbin/named.
+  # This file is included by /etc/apparmor.d/usr.sbin.named.
+  
+  # Allow BIND/named worker threads to set/read their thread names.
+  owner /proc/*/task/*/comm rw,
+  
+  # Allow BIND/named to read the kernel ephemeral port range.
+  @{PROC}/sys/net/ipv4/ip_local_port_range r,
+  
+  # Allow BIND/named to notify systemd that it is ready / running.
+  @{run}/systemd/notify w,
+  
+  # Allow BIND/named to read Ubuntu kernel version metadata.
+  @{PROC}/version_signature r,
+  
+  # Only enable this if named still fails to start/run without it.
+  # capability sys_admin,
+  ```

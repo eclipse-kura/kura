@@ -295,11 +295,6 @@ public class DbDataStoreStorageTest {
     @After
     public void tearDown() throws SQLException {
         if (this.keepAliveConnection != null && !this.keepAliveConnection.isClosed()) {
-            try (Statement st = this.keepAliveConnection.createStatement()) {
-                st.execute("SHUTDOWN");
-            } catch (SQLException ignored) {
-                // ignore shutdown errors
-            }
             this.keepAliveConnection.close();
         }
     }

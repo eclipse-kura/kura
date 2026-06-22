@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -15,6 +15,7 @@ package org.eclipse.kura.internal.db.h2db.provider;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -46,12 +47,11 @@ public class H2DbServiceImplTest {
         String user = "USR";
 
         H2DbServiceImpl svc = new H2DbServiceImpl();
-        svc.activate(Collections.emptyMap());
-
         CryptoService csMock = mock(CryptoService.class);
-        svc.setCryptoService(csMock);
-
+        when(csMock.decryptAes(any(char[].class))).thenReturn(new char[0]);
         when(csMock.decryptAes(encPass)).thenReturn(pass.toCharArray());
+        svc.setCryptoService(csMock);
+        svc.activate(Collections.emptyMap());
 
         Map<String, Object> props = new HashMap<>();
         props.put("db.user", user);
@@ -85,24 +85,31 @@ public class H2DbServiceImplTest {
         String user = "USR";
 
         H2DbServiceImpl svc = new H2DbServiceImpl();
+        CryptoService csMock = mock(CryptoService.class);
+        when(csMock.decryptAes(any(char[].class))).thenReturn(new char[0]);
+        svc.setCryptoService(csMock);
         svc.activate(Collections.emptyMap());
 
-        Map<String, Object> props = new HashMap<>();
-        props.put("db.user", user);
-        props.put("db.password", pass);
-        props.put("db.connection.pool.max.size", 10);
-        props.put("db.connector.url", "jdb:h2:mem:testdb");
-
         try {
-            svc.getConnection();
-        } catch (SQLException e) {
-            assertTrue(e.getMessage().contains("not initialized"));
-        }
+            Map<String, Object> props = new HashMap<>();
+            props.put("db.user", user);
+            props.put("db.password", pass);
+            props.put("db.connection.pool.max.size", 10);
+            props.put("db.connector.url", "jdb:h2:mem:testdb");
 
-        try {
-            svc.updated(props);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Invalid DB URL", e.getMessage());
+            try {
+                svc.getConnection();
+            } catch (SQLException e) {
+                assertTrue(e.getMessage().contains("not initialized"));
+            }
+
+            try {
+                svc.updated(props);
+            } catch (IllegalArgumentException e) {
+                assertEquals("Invalid DB URL", e.getMessage());
+            }
+        } finally {
+            svc.deactivate();
         }
     }
 
@@ -112,78 +119,93 @@ public class H2DbServiceImplTest {
         String user = "USR";
 
         H2DbServiceImpl svc = new H2DbServiceImpl();
+        CryptoService csMock = mock(CryptoService.class);
+        when(csMock.decryptAes(any(char[].class))).thenReturn(new char[0]);
+        svc.setCryptoService(csMock);
         svc.activate(Collections.emptyMap());
 
-        Map<String, Object> props = new HashMap<>();
-        props.put("db.user", user);
-        props.put("db.password", pass);
-        props.put("db.connection.pool.max.size", 10);
-        props.put("db.connector.url", "jdbc:h3:mem:testdb");
-
         try {
-            svc.getConnection();
-        } catch (SQLException e) {
-            assertTrue(e.getMessage().contains("not initialized"));
-        }
+            Map<String, Object> props = new HashMap<>();
+            props.put("db.user", user);
+            props.put("db.password", pass);
+            props.put("db.connection.pool.max.size", 10);
+            props.put("db.connector.url", "jdbc:h3:mem:testdb");
 
-        try {
-            svc.updated(props);
-        } catch (IllegalArgumentException e) {
-            assertEquals("JDBC driver must be h2", e.getMessage());
+            try {
+                svc.getConnection();
+            } catch (SQLException e) {
+                assertTrue(e.getMessage().contains("not initialized"));
+            }
+
+            try {
+                svc.updated(props);
+            } catch (IllegalArgumentException e) {
+                assertEquals("JDBC driver must be h2", e.getMessage());
+            }
+        } finally {
+            svc.deactivate();
         }
     }
 
     @Test
     public void testUpdateFailRemote() throws Throwable {
         final String enc = "enc";
-        char[] encPass = enc.toCharArray();
-        String pass = "pass";
         String user = "USR";
 
         H2DbServiceImpl svc = new H2DbServiceImpl();
+        CryptoService csMock = mock(CryptoService.class);
+        when(csMock.decryptAes(any(char[].class))).thenReturn(new char[0]);
+        svc.setCryptoService(csMock);
         svc.activate(Collections.emptyMap());
 
-        Map<String, Object> props = new HashMap<>();
-        props.put("db.user", user);
-        props.put("db.password", enc);
-        props.put("db.connection.pool.max.size", 10);
-        props.put("db.connector.url", "jdbc:h2:rmt:test");
-
         try {
-            svc.updated(props);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Remote databases are not supported", e.getMessage());
+            Map<String, Object> props = new HashMap<>();
+            props.put("db.user", user);
+            props.put("db.password", enc);
+            props.put("db.connection.pool.max.size", 10);
+            props.put("db.connector.url", "jdbc:h2:rmt:test");
+
+            try {
+                svc.updated(props);
+            } catch (IllegalArgumentException e) {
+                assertEquals("Remote databases are not supported", e.getMessage());
+            }
+        } finally {
+            svc.deactivate();
         }
     }
 
     @Test
     public void testUpdateFailAnonymous() throws Throwable {
         final String enc = "enc";
-        char[] encPass = enc.toCharArray();
-        String pass = "pass";
         String user = "USR";
 
         H2DbServiceImpl svc = new H2DbServiceImpl();
+        CryptoService csMock = mock(CryptoService.class);
+        when(csMock.decryptAes(any(char[].class))).thenReturn(new char[0]);
+        svc.setCryptoService(csMock);
         svc.activate(Collections.emptyMap());
 
-        Map<String, Object> props = new HashMap<>();
-        props.put("db.user", user);
-        props.put("db.password", enc);
-        props.put("db.connection.pool.max.size", 10);
-        props.put("db.connector.url", "jdbc:h2:mem:");
-
         try {
-            svc.updated(props);
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().startsWith("Anonymous"));
+            Map<String, Object> props = new HashMap<>();
+            props.put("db.user", user);
+            props.put("db.password", enc);
+            props.put("db.connection.pool.max.size", 10);
+            props.put("db.connector.url", "jdbc:h2:mem:");
+
+            try {
+                svc.updated(props);
+            } catch (IllegalArgumentException e) {
+                assertTrue(e.getMessage().startsWith("Anonymous"));
+            }
+        } finally {
+            svc.deactivate();
         }
     }
 
     @Test
     public void testUpdateFailUrlOccupied() throws Throwable {
         final String enc = "enc";
-        char[] encPass = enc.toCharArray();
-        String pass = "pass";
         String user = "USR";
         String url = "jdbc:h2:mem:test";
 
@@ -193,18 +215,26 @@ public class H2DbServiceImplTest {
         activeInstances.put(url, svc1);
 
         H2DbServiceImpl svc = new H2DbServiceImpl();
-        svc.activate(Collections.emptyMap());
-
-        Map<String, Object> props = new HashMap<>();
-        props.put("db.user", user);
-        props.put("db.password", enc);
-        props.put("db.connection.pool.max.size", 10);
-        props.put("db.connector.url", url);
-
         try {
-            svc.updated(props);
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().startsWith("Another H2DbService instance"));
+            CryptoService csMock = mock(CryptoService.class);
+            when(csMock.decryptAes(any(char[].class))).thenReturn(new char[0]);
+            svc.setCryptoService(csMock);
+            svc.activate(Collections.emptyMap());
+
+            Map<String, Object> props = new HashMap<>();
+            props.put("db.user", user);
+            props.put("db.password", enc);
+            props.put("db.connection.pool.max.size", 10);
+            props.put("db.connector.url", url);
+
+            try {
+                svc.updated(props);
+            } catch (IllegalArgumentException e) {
+                assertTrue(e.getMessage().startsWith("Another H2DbService instance"));
+            }
+        } finally {
+            svc.deactivate();
+            activeInstances.remove(url);
         }
     }
 
@@ -217,12 +247,11 @@ public class H2DbServiceImplTest {
         String user = "USR";
 
         H2DbServiceImpl svc = new H2DbServiceImpl();
-        svc.activate(Collections.emptyMap());
-
         CryptoService csMock = mock(CryptoService.class);
-        svc.setCryptoService(csMock);
-
+        when(csMock.decryptAes(any(char[].class))).thenReturn(new char[0]);
         when(csMock.decryptAes(encPass)).thenReturn(pass.toCharArray());
+        svc.setCryptoService(csMock);
+        svc.activate(Collections.emptyMap());
 
         Map<String, Object> props = new HashMap<>();
         props.put("db.user", user);

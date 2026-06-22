@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -25,6 +25,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.UUID;
 
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.db.H2DbService;
@@ -33,6 +34,7 @@ import org.eclipse.kura.message.store.StoredMessage;
 import org.eclipse.kura.message.store.provider.MessageStore;
 import org.eclipse.kura.util.jdbc.ConnectionProvider;
 import org.eclipse.kura.util.jdbc.SQLFunction;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -52,6 +54,8 @@ public class DbDataStoreStorageTest {
 
     private MessageStore dataStore;
     private int messageId;
+    private String dbName;
+    private Connection keepAliveConnection;
 
     /*
      * Scenarios
@@ -182,18 +186,17 @@ public class DbDataStoreStorageTest {
                 this.messageId = this.dataStore.store(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
 
                 Class.forName("org.h2.Driver");
-                Connection c = DriverManager.getConnection("jdbc:h2:mem:testdb;", "sa", "");
-
-                // keep just one message at every moment
-                for (int j = 0; j < i; j++) {
-                    PreparedStatement stmt = c.prepareStatement("DELETE FROM ? WHERE ID=?;");
-                    stmt.setString(1, TABLE_NAME);
-                    stmt.setInt(2, i);
-                    stmt.execute();
+                try (Connection c = DriverManager.getConnection(
+                        "jdbc:h2:mem:" + this.dbName + ";DB_CLOSE_DELAY=-1", "sa", "")) {
+                    // keep just one message at every moment
+                    for (int j = 0; j < i; j++) {
+                        PreparedStatement stmt = c.prepareStatement("DELETE FROM ? WHERE ID=?;");
+                        stmt.setString(1, TABLE_NAME);
+                        stmt.setInt(2, i);
+                        stmt.execute();
+                    }
+                    c.commit();
                 }
-
-                c.commit();
-
             }
 
             this.messageId = this.dataStore.store(TOPIC, this.payload, QOS2, true, PRIORITY_LOW);
@@ -230,36 +233,37 @@ public class DbDataStoreStorageTest {
 
         // also inspect the database
         try {
-
             Class.forName("org.h2.Driver");
-            Connection c = DriverManager.getConnection("jdbc:h2:mem:testdb;", "sa", "");
-            PreparedStatement stmt = c.prepareStatement("SELECT * FROM ?;", Statement.RETURN_GENERATED_KEYS);
-            stmt.setString(1, TABLE_NAME);
-            ResultSet rs = stmt.executeQuery();
+            try (Connection c = DriverManager.getConnection(
+                    "jdbc:h2:mem:" + this.dbName + ";DB_CLOSE_DELAY=-1", "sa", "");
+                    PreparedStatement stmt = c.prepareStatement("SELECT * FROM ?;",
+                            Statement.RETURN_GENERATED_KEYS)) {
+                stmt.setString(1, TABLE_NAME);
+                ResultSet rs = stmt.executeQuery();
 
-            while (rs.next()) {
-                if (rs.getInt("id") == message.getId()) {
-                    String rowTopic = rs.getString("topic");
-                    int rowQos = rs.getInt("qos");
-                    boolean rowRetain = rs.getBoolean("retain");
-                    byte[] smallPayload = rs.getBytes("smallPayload");
-                    byte[] largePayload = rs.getBytes("largePayload");
-                    int rowPriority = rs.getInt("priority");
+                while (rs.next()) {
+                    if (rs.getInt("id") == message.getId()) {
+                        String rowTopic = rs.getString("topic");
+                        int rowQos = rs.getInt("qos");
+                        boolean rowRetain = rs.getBoolean("retain");
+                        byte[] smallPayload = rs.getBytes("smallPayload");
+                        byte[] largePayload = rs.getBytes("largePayload");
+                        int rowPriority = rs.getInt("priority");
 
-                    assertEquals(topic, rowTopic);
-                    assertEquals(qos, rowQos);
-                    assertEquals(retain, rowRetain);
-                    assertEquals(priority, rowPriority);
-                    if (message.getPayload().length < 200) {
-                        assertTrue(Arrays.equals(payload, smallPayload));
-                        assertNull(largePayload);
-                    } else {
-                        assertTrue(Arrays.equals(payload, largePayload));
-                        assertNull(smallPayload);
+                        assertEquals(topic, rowTopic);
+                        assertEquals(qos, rowQos);
+                        assertEquals(retain, rowRetain);
+                        assertEquals(priority, rowPriority);
+                        if (message.getPayload().length < 200) {
+                            assertTrue(Arrays.equals(payload, smallPayload));
+                            assertNull(largePayload);
+                        } else {
+                            assertTrue(Arrays.equals(payload, largePayload));
+                            assertNull(smallPayload);
+                        }
                     }
                 }
             }
-
         } catch (SQLException | ClassNotFoundException e) {
             this.occurredException = e;
         }
@@ -279,8 +283,25 @@ public class DbDataStoreStorageTest {
      */
 
     @Before
-    public void cleanUp() {
+    public void setUp() throws SQLException, ClassNotFoundException {
         this.occurredException = null;
+        this.dbName = "testdb_" + UUID.randomUUID().toString().replace("-", "");
+        // Hold a connection open to prevent H2 from dropping the in-memory DB between steps
+        Class.forName("org.h2.Driver");
+        this.keepAliveConnection = DriverManager.getConnection("jdbc:h2:mem:" + this.dbName + ";DB_CLOSE_DELAY=-1",
+                "sa", "");
+    }
+
+    @After
+    public void tearDown() throws SQLException {
+        if (this.keepAliveConnection != null && !this.keepAliveConnection.isClosed()) {
+            try (Statement st = this.keepAliveConnection.createStatement()) {
+                st.execute("SHUTDOWN");
+            } catch (SQLException ignored) {
+                // ignore shutdown errors
+            }
+            this.keepAliveConnection.close();
+        }
     }
 
     private final class MockH2DbService implements H2DbService {
@@ -289,7 +310,8 @@ public class DbDataStoreStorageTest {
         public Connection getConnection() throws SQLException {
             try {
                 Class.forName("org.h2.Driver");
-                return DriverManager.getConnection("jdbc:h2:mem:testdb;", "sa", "");
+                return DriverManager.getConnection(
+                        "jdbc:h2:mem:" + DbDataStoreStorageTest.this.dbName + ";DB_CLOSE_DELAY=-1", "sa", "");
             } catch (ClassNotFoundException e) {
                 DbDataStoreStorageTest.this.occurredException = e;
             }

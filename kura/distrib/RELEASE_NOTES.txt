@@ -44,7 +44,7 @@ Target Platform Updates:
   * 56be0dcfb5 - Updated io.netty version to 4.1.134.Final (#6250) (Pierantonio Merlino)
 
 Known Issues:
-  * Watchdog service not working on Ubuntu 24.04 (tested on Zimaboard)
+  * Watchdog service not working on Ubuntu 24.04 (tested on Zimaboard) because `/dev/watchdog` is not available on a clean installation.
   * On certain systems the IPv6 rt match module (-m rt) is not available, causing Kura to fail when applying IPv6 mangle table rules related to Routing Header Type 0 filtering.
     When this occurs, IPv6 Routing Header Type 0 packets will not be explicitly dropped on affected systems.
   * During a wifi scan, some access points with the WPA/WPA2 wifi security are recognized as WPA.

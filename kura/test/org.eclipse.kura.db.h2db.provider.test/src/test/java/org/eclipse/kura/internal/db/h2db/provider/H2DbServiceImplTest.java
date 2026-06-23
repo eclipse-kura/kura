@@ -49,7 +49,6 @@ public class H2DbServiceImplTest {
         H2DbServiceImpl svc = new H2DbServiceImpl();
         CryptoService csMock = mock(CryptoService.class);
         when(csMock.decryptAes(any(char[].class))).thenReturn(new char[0]);
-        when(csMock.decryptAes(encPass)).thenReturn(pass.toCharArray());
         svc.setCryptoService(csMock);
         svc.activate(Collections.emptyMap());
 

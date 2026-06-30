@@ -1,0 +1,9 @@
+{
+    "kuraProperties": {
+        "kura.have.net.admin":"test",
+        "kura.name":"test",
+        "kura.home":"test",
+        "kura.plugins":"test",
+        "kura.packages":"test"
+    }
+}

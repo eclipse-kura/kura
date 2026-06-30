@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2018, 2026 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="CloudPublisherTest">
+   <implementation class="org.eclipse.kura.core.cloud.CloudPublisherImplTest"/>
+   <reference name="ConfigurationService"
+              policy="static"
+              cardinality="1..1"
+              bind="bindCfgSvc"
+              unbind="unbindCfgSvc"
+              interface="org.eclipse.kura.configuration.ConfigurationService"/>
+   <reference name="DefaultCloudServiceFactory"
+              policy="static"
+              cardinality="1..n"
+              bind="bindCloudFactory"
+              unbind="unbindCloudFactory"
+              interface="org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory"/>
+   <reference bind="bindCloudService"
+              unbind="unbindCloudService"
+              cardinality="0..1"
+              interface="org.eclipse.kura.cloud.CloudService"
+              name="cloudService"
+              target="(kura.service.pid=org.eclipse.kura.cloud.CloudService)"
+              policy="dynamic"/>
+   <reference bind="bindCloudPublisher"
+              unbind="unbindCloudPublisher"
+              cardinality="0..1"
+              interface="org.eclipse.kura.cloudconnection.publisher.CloudPublisher"
+              name="cloudPublisher"
+              target="(kura.service.pid=org.eclipse.kura.cloud.publisher.CloudPublisher-1)"
+              policy="dynamic"/>
+</scr:component>

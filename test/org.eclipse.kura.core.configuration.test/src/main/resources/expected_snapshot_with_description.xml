@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><esf:configurations xmlns:esf="http://eurotech.com/esf/2.0" xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0">
+    <esf:configuration pid="123">
+        <ocd:OCD description="description"/>
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="pass" type="String">
+                <esf:value>pass</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+</esf:configurations>

@@ -1,0 +1,17 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Name: org.eclipse.kura.core.test
+Bundle-Vendor: Eclipse Kura
+Fragment-Host: org.eclipse.kura.core
+# Run the AllCoreTests JUnit suite (@RunWith(Suite.class)). Its @BeforeClass starts the Moquette
+# broker and connects the shared DataService, then runs its @SuiteClasses members (CommURITest,
+# ComponentConfigurationImplTest, ConfigurationServiceTest, InventoryHandlerTest, NetUtilTest,
+# NetworkServiceTest, SystemAdminServiceTest) within that broker lifecycle. This matches the set
+# of core tests executed on the develop branch. A broad ${classes;...*Test} glob is deliberately
+# NOT used: it would (a) skip the suite (named "AllCoreTests", not "*Test") so the broker would
+# never start, and (b) pick up classes develop never ran and that are broken standalone
+# (ExampleTest, CommTest, RxTxTest - the latter has no runnable methods).
+Test-Cases: org.eclipse.kura.core.test.AllCoreTests
+-includeresource: \
+    OSGI-INF=OSGI-INF,\
+    about.html,\
+    about_files=about_files/

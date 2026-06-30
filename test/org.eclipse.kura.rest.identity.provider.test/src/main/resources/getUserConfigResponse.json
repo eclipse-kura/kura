@@ -1,0 +1,13 @@
+{
+    "userConfig": [
+        {
+            "userName": "testuser2",
+            "passwordAuthEnabled": false,
+            "passwordChangeNeeded": true,
+            "permissions": [
+                "perm1",
+                "perm2"
+            ]
+        }
+    ]
+}

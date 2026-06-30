@@ -1,0 +1,162 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
+package org.eclipse.kura.core.test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import org.eclipse.kura.cloud.CloudClient;
+import org.eclipse.kura.cloud.CloudClientListener;
+import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.test.annotation.TestTarget;
+import org.junit.Test;
+
+public class CloudServiceTest extends BaseCloudTests implements CloudClientListener {
+
+    private int publishedMsgId;
+    private boolean publishPublished;
+    private boolean publishConfirmed;
+    private boolean publishArrived;
+
+    private int controlMsgId;
+    private boolean controlPublished;
+    private boolean controlConfirmed;
+    private boolean controlArrived;
+    
+    private CountDownLatch eventLatch;
+
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testServiceExists() {
+        assertNotNull(CloudServiceTest.cloudService);
+    }
+
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void testService() throws Exception {
+    	this.publishPublished = false;
+        this.publishConfirmed = false;
+        this.publishArrived = false;
+        this.controlPublished = false;
+        this.controlConfirmed = false;
+        this.controlArrived = false;
+        this.eventLatch = new CountDownLatch(6);
+
+        CloudClient cloudAppClient = CloudServiceTest.cloudService.newCloudClient("testService");
+        cloudAppClient.addCloudClientListener(this);
+
+        // test regular subscriptions
+        int count = 0;
+        while (!cloudAppClient.isConnected() && count < 10) {
+            Thread.sleep(1000);
+            count++;
+        }
+        if (!cloudAppClient.isConnected()) {
+            throw new Exception("Not connected");
+        }
+        cloudAppClient.subscribe("test", 1);
+
+        // test default subscriptions
+        int priority = 5;
+
+        KuraPayload payload = new KuraPayload();
+        payload.setBody("payload".getBytes());
+        this.publishedMsgId = cloudAppClient.publish("test", payload, 1, false, priority);
+
+        KuraPayload controlPayload = new KuraPayload();
+        controlPayload.setBody("control_payload".getBytes());
+        this.controlMsgId = cloudAppClient.controlPublish("control_test", controlPayload, 1, false, priority);
+
+        this.eventLatch.await(30, TimeUnit.SECONDS);
+
+        assertTrue("publish not published!", this.publishPublished);
+        assertTrue("publish not confirmed!", this.publishConfirmed);
+        assertTrue("publish not arrived!", this.publishArrived);
+
+        assertTrue("control not published!", this.controlPublished);
+        assertTrue("control not confirmed!", this.controlConfirmed);
+        assertTrue("control not arrived!", this.controlArrived);
+
+        cloudAppClient.release();
+    }
+
+    @Override
+    public void onConnectionLost() {
+        // Ignore
+    }
+
+    @Override
+    public void onConnectionEstablished() {
+        // Ignore
+    }
+
+    @Override
+    public void onControlMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
+        assertEquals("control_test", appTopic);
+        assertEquals("control_payload", new String(msg.getBody()));
+        this.controlArrived = true;
+        if (this.eventLatch != null) {
+            this.eventLatch.countDown();
+        }
+    }
+
+    @Override
+    public void onMessageArrived(String deviceId, String appTopic, KuraPayload msg, int qos, boolean retain) {
+        assertEquals("test", appTopic);
+        assertEquals("payload", new String(msg.getBody()));
+        this.publishArrived = true;
+        if (this.eventLatch != null) {
+            this.eventLatch.countDown();
+        }
+    }
+
+    @Override
+    public void onMessageConfirmed(int messageId, String appTopic) {
+        if (messageId == this.publishedMsgId) {
+            assertEquals("test", appTopic);
+            this.publishConfirmed = true;
+            if (this.eventLatch != null) {
+                this.eventLatch.countDown();
+            }
+        }
+        if (messageId == this.controlMsgId) {
+            assertEquals("control_test", appTopic);
+            this.controlConfirmed = true;
+            if (this.eventLatch != null) {
+                this.eventLatch.countDown();
+            }
+        }
+    }
+
+    @Override
+    public void onMessagePublished(int messageId, String appTopic) {
+        if (messageId == this.publishedMsgId) {
+            assertEquals("test", appTopic);
+            this.publishPublished = true;
+            if (this.eventLatch != null) {
+                this.eventLatch.countDown();
+            }
+        }
+        if (messageId == this.controlMsgId) {
+            assertEquals("control_test", appTopic);
+            this.controlPublished = true;
+            if (this.eventLatch != null) {
+                this.eventLatch.countDown();
+            }
+        }
+    }
+}

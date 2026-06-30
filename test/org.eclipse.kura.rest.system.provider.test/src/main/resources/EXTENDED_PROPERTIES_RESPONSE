@@ -1,0 +1,13 @@
+{
+    "version":"1.0.0",
+    "extendedProperties": {
+        "group2": {
+            "key1":"val1",
+            "key2":"val2"
+        },
+        "group1": {
+            "key1":"val1",
+            "key2":"val2"
+        }
+    }
+}

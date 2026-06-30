@@ -1,0 +1,7 @@
+{
+    "pids": [
+        "org.eclipse.kura.cloud.CloudService-test",
+        "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport-test",
+        "org.eclipse.kura.data.DataService-test"
+    ]
+}

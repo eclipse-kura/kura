@@ -1,0 +1,7 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Name: org.eclipse.kura.core.identity.test
+Bundle-Vendor: Eclipse Kura
+Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;org.eclipse.kura.*Test}
+-includeresource: \
+    about.html,\
+    about_files=about_files/

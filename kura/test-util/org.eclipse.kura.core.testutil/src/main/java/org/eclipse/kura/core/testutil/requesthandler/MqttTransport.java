@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -105,12 +105,20 @@ public class MqttTransport implements Transport {
             observerInspector = new DataTransportInspector(observer, true);
             final DataTransportInspector underTestInspector = new DataTransportInspector(mqttDataTransport, false);
 
+            // Only connect if not already connected: connect() throws "Already connected" if the
+            // transport connected in the meantime (e.g. a connect triggered by the configuration
+            // update above wins the race under load). That exception would otherwise tear down the
+            // shared broker here and leave every test in the suite "Not connected".
             final CompletableFuture<Void> underTestConnected = underTestInspector.connected();
-            mqttDataTransport.connect();
+            if (!mqttDataTransport.isConnected()) {
+                mqttDataTransport.connect();
+            }
             underTestConnected.get(1, TimeUnit.MINUTES);
 
             final CompletableFuture<Void> observerConnected = observerInspector.connected();
-            observer.connect();
+            if (!observer.isConnected()) {
+                observer.connect();
+            }
             observerConnected.get(1, TimeUnit.MINUTES);
 
         } catch (final Exception e) {

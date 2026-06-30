@@ -1,0 +1,10 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: org.eclipse.kura.core.inventory
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+Export-Package: \
+    org.eclipse.kura.core.inventory;version="2.0.0";x-internal:=true,\
+    org.eclipse.kura.core.inventory.resources;version="2.0.0";x-internal:=true
+-includeresource: \
+    about.html,\
+    about_files=about_files/

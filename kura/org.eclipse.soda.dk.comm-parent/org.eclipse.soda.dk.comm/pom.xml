@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+    Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>org.eclipse.soda.dk.comm-parent</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>org.eclipse.soda.dk.comm</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Serial Device based on SODA DK comm</name>
+    <description>An implementation of the serialdevice.api, based on SODA DK comm</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.osgi</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>.</directory>
+                <includes>
+                    <include>plugin.xml</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
+                <configuration>
+                    <bnd><![CDATA[
+                        Bundle-Activator: org.eclipse.soda.dk.comm.bundle.Activator
+                        Bundle-SymbolicName: ${project.artifactId}
+                        Bundle-Name: %bundle.name
+                        Bundle-Localization: OSGI-INF/l10n/bundle
+                        Bundle-Vendor: %bundle.vendor
+                        Bundle-Copyright: %bundle.copyright
+                        -includeresource: about.html,\
+                            OSGI-INF=OSGI-INF,\
+                            about_files=about_files/
+                        Import-Package: org.osgi.framework;version="[1.5.0,2.0.0)"
+                        Export-Package: javax.comm;version="1.2.0",\
+                            org.eclipse.soda.dk.comm;version="1.2.0",\
+                            org.eclipse.soda.dk.comm.bundle;version="1.2.0",\
+                            org.eclipse.soda.dk.comm.internal;version="1.2.0"
+                        ]]></bnd>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

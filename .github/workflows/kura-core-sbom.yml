@@ -68,9 +68,17 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRO }}
 
+      - name: Install BOM POM
+        # The kura reactor inherits its managed dependency versions from the
+        # standalone kura-bom, which is not a child of kura/pom.xml. Install the
+        # current BOM into the local repository so the aggregate BOM run below
+        # resolves the imported BOM from this checkout instead of a stale
+        # published snapshot.
+        run: mvn -B -pl bom install -DskipTests
+
       - name: Generate sbom
         run: |
-          mvn org.cyclonedx:cyclonedx-maven-plugin:${{ env.PLUGIN_VERSION }}:makeAggregateBom -DprojectType=framework -DexcludeArtifactId=target-definition,emulator,distrib,test,kura-pde-deps -f ${{ env.PRODUCT_PATH }}/pom.xml
+          mvn org.cyclonedx:cyclonedx-maven-plugin:${{ env.PLUGIN_VERSION }}:makeAggregateBom -DprojectType=framework -DexcludeArtifactId=emulator,tools,kura-addon-archetype -f ${{ env.PRODUCT_PATH }}/pom.xml
 
       - name: Extract product version
         id: get-version

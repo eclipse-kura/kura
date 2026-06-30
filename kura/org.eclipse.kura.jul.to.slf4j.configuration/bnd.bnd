@@ -1,0 +1,9 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: Kura Configurator for jul-to-slf4j
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: org.eclipse.kura.jul.to.slf4j.configuration.Activator
+
+-includeresource: \
+    about.html,\
+    about_files=about_files/

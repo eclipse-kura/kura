@@ -18,11 +18,6 @@
 
 MAVEN_PROPS="-B"
 
-# allow running tests
-
-[ -z "$RUN_TESTS" ] && MAVEN_PROPS="$MAVEN_PROPS -Dmaven.test.skip=true"
-
-mvn "$@" --color=always -f target-platform/pom.xml clean install $MAVEN_PROPS &&
-mvn "$@" --color=always -f kura/pom.xml clean install $MAVEN_PROPS &&
-mvn "$@" --color=always -f kura/distrib/pom.xml clean install $MAVEN_PROPS
+[ -z "$RUN_TESTS" ] && MAVEN_PROPS="$MAVEN_PROPS -DskipTests"
+mvn "$@" --color=always clean install $MAVEN_PROPS
 

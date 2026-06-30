@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+
+    Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+     Cavium
+
+-->
+
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>com.codeminders.hidapi-parent</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>com.codeminders.hidapi.aarch64</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Native libraries for 'com.codeminders.hidapi' on ARM 64 bits</name>
+
+    <licenses>
+        <license>
+            <name>New BSD License</name>
+            <url>http://opensource.org/licenses/BSD-3-Clause</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:hg:http://code.google.com/p/javahidapi</connection>
+        <developerConnection>scm:hg:https://code.google.com/p/javahidapi</developerConnection>
+        <url>http://code.google.com/p/javahidapi</url>
+    </scm>
+    <developers>
+        <developer>
+            <id>lord</id>
+            <name>Vadim Zaliva</name>
+            <email>lord@codeminders.com</email>
+        </developer>
+        <developer>
+            <id>Alexander Sova</id>
+            <name>Vadim Zaliva</name>
+            <email>bird@codeminders.com</email>
+        </developer>
+        <developer>
+            <id>dshmyga</id>
+            <name>Denis Shmyga</name>
+            <email>dshmyga@codeminders.com</email>
+        </developer>
+    </developers>
+
+    <dependencies>
+        <!-- Fragment-Host bundle, on the classpath so bnd can resolve the host. -->
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
+            <artifactId>com.codeminders.hidapi</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
+                <configuration>
+                    <bnd><![CDATA[
+                        Bundle-SymbolicName: ${project.artifactId}
+                        -includeresource: lib=src/main/lib/linux,\
+                            about.html,\
+                            about_files=about_files/
+                        Bundle-NativeCode: lib/libhidapi.so; osname=Linux; processor=AARCH64
+                        Fragment-Host: com.codeminders.hidapi;bundle-version="[2.0.0,3.0.0)"
+                        Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=21))"
+                        ]]></bnd>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

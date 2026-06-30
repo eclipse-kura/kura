@@ -1,0 +1,7 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: Security REST Service
+Bundle-ActivationPolicy: lazy
+-includeresource: \
+    about.html,\
+    about_files=about_files/
+-dsannotations-options: inherit

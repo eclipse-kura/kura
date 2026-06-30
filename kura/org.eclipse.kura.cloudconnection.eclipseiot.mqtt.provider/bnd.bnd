@@ -1,0 +1,9 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: Connection Provider for the Eclipse IoT Cloud Platform
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .,lib/protobuf-java.jar
+-includeresource: \
+    about.html,\
+    lib/protobuf-java.jar,\
+    about_files=about_files/

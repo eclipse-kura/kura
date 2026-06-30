@@ -59,6 +59,8 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -77,12 +79,14 @@ public class KeystoreRemoteService {
     private ServiceTrackerCustomizer<KeystoreService, KeystoreService> keystoreServiceTrackerCustomizer;
     private ServiceTracker<KeystoreService, KeystoreService> keystoreServiceTracker;
 
+    @Activate
     public void activate(ComponentContext componentContext) {
         this.bundleContext = componentContext.getBundleContext();
         this.keystoreServiceTrackerCustomizer = new KeystoreServiceTrackerCustomizer();
         initKeystoreServiceTracking();
     }
 
+    @Deactivate
     public void deactivate(ComponentContext componentContext) {
         if (this.keystoreServiceTracker != null) {
             this.keystoreServiceTracker.close();

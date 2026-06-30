@@ -1,0 +1,9 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: org.eclipse.kura.emulator.net
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+Export-Package: \
+    org.eclipse.kura.emulator.net;version="2.0.0"
+-includeresource: \
+    about.html,\
+    about_files=about_files/

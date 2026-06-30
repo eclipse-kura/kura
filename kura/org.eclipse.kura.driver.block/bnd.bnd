@@ -1,0 +1,11 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Name: org.eclipse.kura.driver.block
+Bundle-Vendor: Eclipse Kura
+Export-Package: \
+    org.eclipse.kura.driver.binary;version="2.0.0",\
+    org.eclipse.kura.driver.binary.adapter;version="2.0.0",\
+    org.eclipse.kura.driver.block;version="2.0.0",\
+    org.eclipse.kura.driver.block.task;version="2.0.0"
+-includeresource: \
+    about.html,\
+    about_files=about_files/

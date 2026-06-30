@@ -1,0 +1,10 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: org.eclipse.kura.core.system
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+-includeresource: \
+    about.html,\
+    about_files=about_files/
+
+# Pick up test components contributed by the attached test fragment, if any
+Service-Component: OSGI-INF/test-*.xml

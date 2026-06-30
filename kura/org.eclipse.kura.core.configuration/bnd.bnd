@@ -1,0 +1,15 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: org.eclipse.kura.core.configuration
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+Export-Package: \
+    org.eclipse.kura.core.configuration;version="3.0.0",\
+    org.eclipse.kura.core.configuration.metatype;version="3.0.0",\
+    org.eclipse.kura.core.configuration.util;version="3.0.0"
+-includeresource: \
+    about.html,\
+    about_files=about_files/
+-dsannotations-options: inherit
+
+# Pick up test components contributed by the attached test fragment, if any
+Service-Component: OSGI-INF/test-*.xml

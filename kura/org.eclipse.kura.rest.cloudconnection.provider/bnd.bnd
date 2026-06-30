@@ -1,0 +1,8 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: CloudConnection REST Service
+Bundle-ActivationPolicy: lazy
+-includeresource: \
+    about.html,\
+    about_files=about_files/
+Export-Package: \
+    org.eclipse.kura.internal.rest.cloudconnection.provider.dto;version="2.0.0";x-internal:=true

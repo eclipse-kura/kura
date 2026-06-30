@@ -1,0 +1,7 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: Configurable custom container service
+Bundle-Vendor: EUROTECH
+Bundle-ActivationPolicy: lazy
+-includeresource: \
+    about.html,\
+    about_files=about_files/

@@ -50,15 +50,15 @@ jobs:
       continue-on-error: true
       uses: thebinaryfelix/check-file-existence-action@436223737a098725b8d10ab1950a03efba5e6fc6 # 1.0.0
       with:
-        files: './kura/distrib/RELEASE_NOTES.txt'
+        files: './distrib/RELEASE_NOTES.txt'
 
     - name: Files exist
       id: get-old-text
       if: steps.check_files.outputs.exists == 'true' && github.event.inputs.overwrite == 'false'
       run: |
-        awk '/Description:/ {found=1; next} /^$/ {found=0} found {print}' ./kura/distrib/RELEASE_NOTES.txt > description.txt
-        awk '/Target Environments:/ {found=1; next} /^$/ {found=0} found {print}' ./kura/distrib/RELEASE_NOTES.txt > target-env.txt
-        awk '/Known Issues:/ {found=1; next} /^$/ {found=0} found {print}' ./kura/distrib/RELEASE_NOTES.txt > known-issues.txt
+        awk '/Description:/ {found=1; next} /^$/ {found=0} found {print}' ./distrib/RELEASE_NOTES.txt > description.txt
+        awk '/Target Environments:/ {found=1; next} /^$/ {found=0} found {print}' ./distrib/RELEASE_NOTES.txt > target-env.txt
+        awk '/Known Issues:/ {found=1; next} /^$/ {found=0} found {print}' ./distrib/RELEASE_NOTES.txt > known-issues.txt
       shell: bash
 
     - name: Download git-changelog-command-line tool
@@ -79,16 +79,16 @@ jobs:
         -ex "{\"version\":\"${{ steps.get-version.outputs.resolved-version }}\"}" \
         -t .github/release_notes_template/template.hbs \
         -hhf .github/release_notes_template/helper.hbs \
-        -of ./kura/distrib/RELEASE_NOTES.txt
+        -of ./distrib/RELEASE_NOTES.txt
 
     - name: Files exist write description
       id: get-description
       if: steps.check_files.outputs.exists == 'true' && github.event.inputs.overwrite == 'false'
       # Only runs if all of the files exist
       run: |
-          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' description.txt done=0 ./kura/distrib/RELEASE_NOTES.txt > tmpfile && mv tmpfile ./kura/distrib/RELEASE_NOTES.txt
-          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' target-env.txt done=0 ./kura/distrib/RELEASE_NOTES.txt > tmpfile && mv tmpfile ./kura/distrib/RELEASE_NOTES.txt
-          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' known-issues.txt done=0 ./kura/distrib/RELEASE_NOTES.txt > tmpfile && mv tmpfile ./kura/distrib/RELEASE_NOTES.txt
+          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' description.txt done=0 ./distrib/RELEASE_NOTES.txt > tmpfile && mv tmpfile ./distrib/RELEASE_NOTES.txt
+          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' target-env.txt done=0 ./distrib/RELEASE_NOTES.txt > tmpfile && mv tmpfile ./distrib/RELEASE_NOTES.txt
+          awk 'NR==FNR { desc = (desc == "" ? $0 : desc "\n" $0); next } /\[TODO\]/ && !done { sub(/\[TODO\]/, desc); done=1 } 1' known-issues.txt done=0 ./distrib/RELEASE_NOTES.txt > tmpfile && mv tmpfile ./distrib/RELEASE_NOTES.txt
       shell: bash
 
     - name: Files exist clean up

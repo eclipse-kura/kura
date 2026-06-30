@@ -1,0 +1,10 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Bundle-Name: org.eclipse.kura.core.keystore
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+Export-Package: \
+    org.eclipse.kura.core.keystore.util;version="2.0.0"
+-includeresource: \
+    about_files=about_files/,\
+    about.html
+-dsannotations-options: inherit

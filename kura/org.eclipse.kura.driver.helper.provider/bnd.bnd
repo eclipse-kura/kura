@@ -1,0 +1,7 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Name: Driver Helper Service Provider
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+-includeresource: \
+    about.html,\
+    about_files=about_files/

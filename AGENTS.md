@@ -1,9 +1,9 @@
 # Eclipse Kura Agent Guide
 
 ## Build Commands
-- **Full Build**: `mvn -f target-platform/pom.xml clean install && mvn -f kura/pom.xml clean install && mvn -f kura/distrib/pom.xml clean install`, or just `./build-all.sh`. There is no root `pom.xml`: these are three separate reactors coupled only through the local repository, so the order is mandatory. `build-all.sh` skips tests unless `RUN_TESTS` is set.
-- **Skip Tests**: Add `-Dmaven.test.skip=true` to any build command. Note that this still builds the test modules; `-DskipTests` also drops `kura/test` from the reactor, since the `tests` profile activates on `!skipTests`.
-- **Run Single Test**: `mvn -f kura/test/<test-module>/pom.xml test` (e.g., `mvn -f kura/test/org.eclipse.kura.core.configuration.test/pom.xml test`). `test` runs the plain-JVM unit tests from `src/test/java`; use `verify` to also run the in-OSGi tests from `src/main/java` under Tycho surefire. Add `-Dtest=<ClassName>` to narrow down to a single class.
+- **Full Build**: `mvn clean install` from the repository root (single reactor: `bom`, `kura`, `distrib`, and `test` via the `tests` profile)
+- **Skip Tests**: Add `-DskipTests` to any build command (also excludes the integration-test module from the reactor)
+- **Run Single Test**: `mvn -f test/<test-module>/pom.xml test` (e.g., `mvn -f test/org.eclipse.kura.core.configuration.test/pom.xml test`)
 - **Checkstyle**: Runs automatically during `process-sources` phase with config in `checkstyle_checks.xml`
 
 ## Code Style

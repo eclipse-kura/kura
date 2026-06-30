@@ -1,0 +1,26 @@
+#########################################################################
+# Copyright (c) 2001, 2009 IBM.                                         #
+# All rights reserved. This program and the accompanying materials      #
+# are made available under the terms of the Eclipse Public License v1.0 #
+# which accompanies this distribution, and is available at              #
+# http://www.eclipse.org/legal/epl-v10.html                             #
+#                                                                       #
+# Contributors:                                                         #
+#     IBM - initial API and implementation                              #
+#########################################################################
+TARGETNAME=dkcomm
+DLLFILENAME=$(TARGETNAME).dll
+DLLPATH=Release\win32\x64
+DLLNAME=$(DLLPATH)\$(DLLFILENAME)
+CC=gcc
+CFLAGS=-m64 -Wall -O0 -g -Wl,--subsystem,windows -I "$(JAVA_HOME)\include" -I "$(JAVA_HOME)\include\win32"
+LFLAGS=-Wl,--subsystem,windows -shared
+BUILDFILES = CommPortIdentifier.o NSCommDriver.o NSDeviceInputStream.o NSDeviceOutputStream.o NSSerialPort.o\
+             SerialDataEventThread.o SerialStatusEventThread.o w32CommDriver.o w32CommPortIdentifier.o\
+             w32DeviceInputStream.o w32DeviceOutputStream.o w32SerialDataEventThread.o\
+             w32SerialPort.o w32SerialStatusEventThread.o NSCommLOG.o
+.c.o: 
+	$(CC) $(CFLAGS) -c $<
+
+$(DLLNAME): $(BUILDFILES)
+	$(CC) $(LFLAGS) -o $@ $^ -lws2_32

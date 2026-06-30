@@ -1,44 +1,50 @@
-# OS generated files #
-######################
+# OS generated files
 .DS_Store*
 *~
+
+# Build output
+target/
 classes
-target
-.classpath
-.project
-.wtpmodules
-.settings
-.sonar
-.sonarlint
-.metadata
-.recommenders
-kura/data
-kura/snapshots
-kura/target-definition/*/plugins/*
-kura/target-definition/*/source/*
-kura/target-definition/repository/artifacts.xml
-kura/target-definition/repository/content.xml
-kura/target-definition/repository/plugins/*
-kura/target-definition/*/repository/artifacts.xml
-kura/target-definition/*/repository/content.xml
-kura/target-definition/*/repository/plugins/*
-target-platform/*/META-INF/MANIFEST.MF
-target-platform/*/*/META-INF/MANIFEST.MF
-kura/distrib/kura-target-definition/kura-target-definition.target
+bin/
+manifests
 gwt-unitCache
-.launch
-www-test
 .gwt
 *.cache.*
-manifests
-bin/
-+# IntelliJ Idea
+www-test
+
+# bnd / bndtools
+generated/
+bin_test/
+
+# Eclipse / PDE
+.classpath
+.project
+.settings
+.wtpmodules
+.metadata
+.recommenders
+.launch
+
+# IntelliJ IDEA
 .idea/
 *.iml
-maven.deps
-DEPENDENCIES
-.java-version
 
 # VS Code
 javaConfig.json
 .vscode
+
+# Code analysis
+.sonar
+.sonarlint
+
+# Local runtime / misc
+kura/data
+kura/snapshots
+maven.deps
+DEPENDENCIES
+.java-version
+.worktrees
+.claude/settings.local.json
+
+# flatten-maven-plugin output (BOM)
+.flattened-pom.xml

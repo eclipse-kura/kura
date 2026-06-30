@@ -1,0 +1,35 @@
+/*******************************************************************************
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ ******************************************************************************/
+package org.eclipse.kura.container.orchestration.provider.impl;
+
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+
+@ObjectClassDefinition(id = "org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService", name = "Container Orchestration Service", description = "The ContainerOrchestrationService connects to locally running Docker/Podman instances, and allows for container management.")
+public @interface ContainerOrchestrationServiceMetatype {
+
+    @AttributeDefinition(name = "Enabled", description = "Enables the service to connect to the container engine host. Please make sure that the Docker/Podman service is running in the host environment prior to enable this functionality.")
+    boolean enabled() default false;
+
+    @AttributeDefinition(name = "Container Engine Host URL", description = "Host URL: tcp://localhost:2376 or unix:///var/run/docker.sock")
+    String container_engine_host() default "unix:///var/run/docker.sock";
+
+    @AttributeDefinition(name = "Allowlist Enforcement Enabled", description = "Enable/Disable the Allowlist enforcement. If enabled, only containers images whose digest can be found in the allowlist will be allowed to be run/loaded/created.")
+    boolean enforcement_enabled() default false;
+
+    @AttributeDefinition(name = "Container Image Allowlist ", cardinality = 1, required = false, description = "List of container image digests. Each entry must be separated by a new line of the text box|TextArea")
+    String enforcement_allowlist() default "";
+
+}
+
+

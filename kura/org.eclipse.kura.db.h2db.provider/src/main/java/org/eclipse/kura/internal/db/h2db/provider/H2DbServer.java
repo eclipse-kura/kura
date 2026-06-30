@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -20,6 +20,18 @@ import org.h2.tools.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.core.db.H2DbServer",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class })
+@Designate(ocd = H2DbServerMetatype.class, factory = true)
 public class H2DbServer implements ConfigurableComponent {
 
     enum ServerType {
@@ -31,18 +43,21 @@ public class H2DbServer implements ConfigurableComponent {
     private static final Logger logger = LoggerFactory.getLogger(H2DbServer.class);
     private Server server;
 
+    @Activate
     protected void activate(Map<String, Object> properties) {
         logger.info("activating...");
         updated(properties);
         logger.info("activating...done");
     }
 
+    @Modified
     protected void updated(Map<String, Object> properties) {
         logger.info("updating...");
         restartServer(new H2DbServerOptions(properties));
         logger.info("updating...done");
     }
 
+    @Deactivate
     protected void deactivate() {
         logger.info("deactivating...");
         shutdownServer();

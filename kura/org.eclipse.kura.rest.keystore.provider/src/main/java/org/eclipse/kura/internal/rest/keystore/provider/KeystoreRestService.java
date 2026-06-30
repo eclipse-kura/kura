@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -34,6 +34,7 @@ import org.eclipse.kura.internal.rest.keystore.request.KeyPairWriteRequest;
 import org.eclipse.kura.internal.rest.keystore.request.TrustedCertificateWriteRequest;
 import org.eclipse.kura.internal.rest.keystore.util.KeystoreRemoteService;
 import org.eclipse.kura.security.keystore.KeystoreInfo;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 
@@ -50,6 +51,7 @@ public class KeystoreRestService extends KeystoreRemoteService {
     private static final String BAD_DELETE_REQUEST_ERROR_MESSAGE = BAD_REQUEST_MESSAGE
             + "expected request format: {\"keystoreServicePid\": \"MyKeystoreName\", \"alias\": \"MyAlias\"}";
 
+    @Reference(name = "UserAdmin", service = UserAdmin.class, unbind = "-")
     public void setUserAdmin(final UserAdmin userAdmin) {
         userAdmin.createRole("kura.permission.rest.keystores", Role.GROUP);
     }

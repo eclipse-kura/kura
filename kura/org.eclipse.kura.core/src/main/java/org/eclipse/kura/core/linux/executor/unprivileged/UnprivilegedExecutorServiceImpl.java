@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2025 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2019, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -34,9 +34,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(name = "org.eclipse.kura.executor.UnprivilegedExecutorService", //
-        property = "service.pid=org.eclipse.kura.executor.UnprivilegedExecutorService" //
-)
+@Component(name = "org.eclipse.kura.executor.UnprivilegedExecutorService")
 public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorService {
 
     private static final Logger logger = LoggerFactory.getLogger(UnprivilegedExecutorServiceImpl.class);

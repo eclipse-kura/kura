@@ -2,6 +2,13 @@ Bundle-SymbolicName: ${project.artifactId};singleton:=true
 Bundle-Name: org.eclipse.kura.core.keystore
 Bundle-Vendor: Eclipse Kura
 Bundle-ActivationPolicy: lazy
+# sun.security.pkcs11 is a JDK-internal package used only by the optional
+# PKCS11KeystoreServiceImpl. It is not exported by any bundle nor by the
+# framework system packages, so a mandatory import (bnd's default) leaves the
+# whole bundle UNRESOLVED at runtime -> its DS components (incl. the Filesystem
+# keystore used for HTTPS) never activate. Make it optional so the bundle
+# resolves; PKCS11 support still works where the JVM package is boot-delegated.
+Import-Package: sun.security.pkcs11;resolution:=optional, *
 Export-Package: \
     org.eclipse.kura.core.keystore.util;version="2.0.0"
 -includeresource: \

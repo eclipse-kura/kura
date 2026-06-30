@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -36,6 +36,18 @@ import org.eclipse.kura.watchdog.WatchdogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.watchdog.WatchdogService",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.watchdog.WatchdogService.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
+@Designate(ocd = WatchdogServiceMetatype.class)
 public class WatchdogServiceImpl implements WatchdogService, ConfigurableComponent {
 
     private static final String[] STOP_WATCHDOGD_COMMANDS = { "systemctl stop watchdog", "service watchdog stop",
@@ -52,6 +64,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private Writer watchdogFileWriter;
     private WatchdogServiceOptions options;
 
+    @Activate
     protected void activate(Map<String, Object> properties) {
         this.criticalComponentRegistrations = new CopyOnWriteArrayList<>();
         this.pollExecutor = Executors.newSingleThreadScheduledExecutor();
@@ -59,6 +72,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         updated(properties);
     }
 
+    @Deactivate
     protected void deactivate() {
         cancelPollTask();
         shutdownPollExecutor();
@@ -68,6 +82,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         }
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         WatchdogServiceOptions newOptions = new WatchdogServiceOptions(properties);
 

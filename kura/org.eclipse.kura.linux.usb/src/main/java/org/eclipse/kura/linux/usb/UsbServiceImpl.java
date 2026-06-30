@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -40,6 +40,15 @@ import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+@Component(
+    name = "org.eclipse.kura.usb.UsbService",
+    immediate = true,
+    service = { org.eclipse.kura.usb.UsbService.class })
 public class UsbServiceImpl implements UsbService, LinuxUdevListener {
 
     private static final Logger logger = LoggerFactory.getLogger(UsbServiceImpl.class);
@@ -47,6 +56,7 @@ public class UsbServiceImpl implements UsbService, LinuxUdevListener {
     private LinuxUdevNative linuxUdevNative;
     private EventAdmin eventAdmin;
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         // only support Linux
         String osName = System.getProperty("os.name");
@@ -63,11 +73,13 @@ public class UsbServiceImpl implements UsbService, LinuxUdevListener {
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         this.linuxUdevNative.unbind();
         this.linuxUdevNative = null;
     }
 
+    @Reference(name = "EventAdmin", service = org.osgi.service.event.EventAdmin.class, policy = ReferencePolicy.DYNAMIC, unbind = "unsetEventAdmin")
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -70,6 +70,27 @@ import org.quartz.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.data.DataService",
+    immediate = false,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class, org.eclipse.kura.data.DataService.class },
+    property = { "kura.ui.service.hide:Boolean=true" },
+    reference = {
+        @Reference(name = "DataServiceListener",
+                service = org.eclipse.kura.data.DataServiceListener.class,
+                cardinality = ReferenceCardinality.MULTIPLE,
+                policy = ReferencePolicy.DYNAMIC) })
+@Designate(ocd = DataServiceMetatype.class, factory = true)
 public class DataServiceImpl implements DataService, DataTransportListener, ConfigurableComponent,
         CloudConnectionStatusComponent, CriticalComponent, AutoConnectStrategy.ConnectionManager, ConnectionListener {
 
@@ -129,6 +150,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     //
     // ----------------------------------------------------------------
 
+    @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         String pid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
         logger.info("Activating {}...", pid);
@@ -248,6 +270,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         }
     }
 
+    @Modified
     public synchronized void updated(Map<String, Object> properties) {
         logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
@@ -273,6 +296,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         createAutoConnectStrategy();
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         logger.info("Deactivating {}...", this.dataServiceOptions.getKuraServicePid());
 
@@ -312,6 +336,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     //
     // ----------------------------------------------------------------
 
+    @Reference(name = "DataTransportService", service = org.eclipse.kura.data.DataTransportService.class, unbind = "unsetDataTransportService")
     public void setDataTransportService(DataTransportService dataTransportService) {
         this.dataTransportService = dataTransportService;
     }
@@ -338,6 +363,9 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
     }
 
+    @Reference(name = "CloudConnectionStatusService",
+            service = org.eclipse.kura.status.CloudConnectionStatusService.class,
+            unbind = "unsetCloudConnectionStatusService")
     public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
         this.cloudConnectionStatusService = cloudConnectionStatusService;
     }
@@ -346,6 +374,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         this.cloudConnectionStatusService = null;
     }
 
+    @Reference(name = "WatchdogService", service = org.eclipse.kura.watchdog.WatchdogService.class, unbind = "unsetWatchdogService")
     public void setWatchdogService(WatchdogService watchdogService) {
         this.watchdogService = watchdogService;
     }

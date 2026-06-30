@@ -94,6 +94,29 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
+            org.eclipse.kura.cloud.CloudPayloadProtoBufEncoder.class,
+            org.eclipse.kura.cloud.CloudPayloadProtoBufDecoder.class,
+            org.eclipse.kura.cloudconnection.CloudConnectionManager.class,
+            org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
+            org.eclipse.kura.cloudconnection.CloudEndpoint.class },
+    property = {
+        "kura.ui.service.hide:Boolean=true",
+        "kura.ui.factory.hide:Boolean=true" })
+@Designate(ocd = ConnectionManagerOptions.class, factory = true)
 public class CloudConnectionManagerImpl
         implements DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder,
         CloudPayloadProtoBufDecoder, RequestHandlerRegistry, CloudConnectionManager, CloudEndpoint {
@@ -164,6 +187,7 @@ public class CloudConnectionManagerImpl
     //
     // ----------------------------------------------------------------
 
+    @Reference(name = "DataService", service = org.eclipse.kura.data.DataService.class, unbind = "unsetDataService")
     public void setDataService(DataService dataService) {
         this.dataService = dataService;
     }
@@ -178,6 +202,7 @@ public class CloudConnectionManagerImpl
         return this.dataService;
     }
 
+    @Reference(name = "SystemAdminService", service = org.eclipse.kura.system.SystemAdminService.class, unbind = "unsetSystemAdminService")
     public void setSystemAdminService(SystemAdminService systemAdminService) {
         this.systemAdminService = systemAdminService;
     }
@@ -192,6 +217,7 @@ public class CloudConnectionManagerImpl
         return this.systemAdminService;
     }
 
+    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "unsetSystemService")
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -206,6 +232,11 @@ public class CloudConnectionManagerImpl
         return this.systemService;
     }
 
+    @Reference(name = "NetworkService",
+            service = org.eclipse.kura.net.NetworkService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetNetworkService")
     public void setNetworkService(NetworkService networkService) {
         this.networkService = Optional.of(networkService);
     }
@@ -220,6 +251,11 @@ public class CloudConnectionManagerImpl
         return this.networkService;
     }
 
+    @Reference(name = "PositionService",
+            service = org.eclipse.kura.position.PositionService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetPositionService")
     public void setPositionService(PositionService positionService) {
         this.positionService = Optional.of(positionService);
     }
@@ -234,6 +270,7 @@ public class CloudConnectionManagerImpl
         return this.positionService;
     }
 
+    @Reference(name = "EventAdmin", service = org.osgi.service.event.EventAdmin.class, unbind = "unsetEventAdmin")
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }
@@ -244,6 +281,10 @@ public class CloudConnectionManagerImpl
         }
     }
 
+    @Reference(name = "Unmarshaller",
+            service = org.eclipse.kura.marshalling.Unmarshaller.class,
+            target = "(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)",
+            unbind = "unsetJsonUnmarshaller")
     public void setJsonUnmarshaller(Unmarshaller jsonUnmarshaller) {
         this.jsonUnmarshaller = jsonUnmarshaller;
     }
@@ -254,6 +295,10 @@ public class CloudConnectionManagerImpl
         }
     }
 
+    @Reference(name = "Marshaller",
+            service = org.eclipse.kura.marshalling.Marshaller.class,
+            target = "(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)",
+            unbind = "unsetJsonMarshaller")
     public void setJsonMarshaller(Marshaller jsonMarshaller) {
         this.jsonMarshaller = jsonMarshaller;
     }
@@ -264,6 +309,11 @@ public class CloudConnectionManagerImpl
         }
     }
 
+    @Reference(name = "NetworkStatusService",
+            service = org.eclipse.kura.net.status.NetworkStatusService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetNetworkStatusService")
     public void setNetworkStatusService(NetworkStatusService networkStatusService) {
         this.networkStatusService = Optional.of(networkStatusService);
     }
@@ -284,6 +334,7 @@ public class CloudConnectionManagerImpl
     //
     // ----------------------------------------------------------------
 
+    @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         this.ownPid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
 
@@ -320,6 +371,7 @@ public class CloudConnectionManagerImpl
         }
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.info("updated {}...: {}", properties.get(ConfigurationService.KURA_SERVICE_PID), properties);
 
@@ -334,6 +386,7 @@ public class CloudConnectionManagerImpl
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         logger.info("deactivate {}...", componentContext.getProperties().get(ConfigurationService.KURA_SERVICE_PID));
 

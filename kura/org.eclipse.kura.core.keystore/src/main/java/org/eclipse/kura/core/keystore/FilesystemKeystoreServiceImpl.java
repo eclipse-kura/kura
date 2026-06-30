@@ -61,7 +61,6 @@ import org.osgi.service.metatype.annotations.Designate;
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.security.keystore.KeystoreService.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
     property = {
-        "service.pid=org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImplerviceImpl",
         "kura.ui.factory.hide=true",
         "kura.ui.service.hide=true" })
 @Designate(ocd = FilesystemKeystoreServiceImplOptions.class, factory = true)

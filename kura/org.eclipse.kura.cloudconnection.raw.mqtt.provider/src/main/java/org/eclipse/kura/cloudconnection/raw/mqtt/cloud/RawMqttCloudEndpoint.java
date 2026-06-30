@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2019, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -49,6 +49,24 @@ import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint",
+    immediate = false,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
+            org.eclipse.kura.cloudconnection.CloudConnectionManager.class,
+            org.eclipse.kura.cloudconnection.CloudEndpoint.class },
+    property = {
+        "kura.ui.service.hide:Boolean=true",
+        "kura.ui.factory.hide:Boolean=true" })
+@Designate(ocd = RawMqttCloudEndpointOptions.class, factory = true)
 public class RawMqttCloudEndpoint
         implements CloudEndpoint, CloudConnectionManager, DataServiceListener, ConfigurableComponent {
 
@@ -62,6 +80,7 @@ public class RawMqttCloudEndpoint
     private final Set<CloudConnectionListener> cloudConnectionListeners = new CopyOnWriteArraySet<>();
     private final Map<SubscribeOptions, Set<CloudSubscriberListener>> subscribers = new ConcurrentHashMap<>();
 
+    @Reference(name = "DataService", service = org.eclipse.kura.data.DataService.class, unbind = "unsetDataService")
     public void setDataService(final DataService dataService) {
         this.dataService = dataService;
     }
@@ -70,6 +89,7 @@ public class RawMqttCloudEndpoint
         this.dataService = null;
     }
 
+    @Reference(name = "EventAdmin", service = org.osgi.service.event.EventAdmin.class, unbind = "unsetEventAdmin")
     public void setEventAdmin(final EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }
@@ -78,6 +98,7 @@ public class RawMqttCloudEndpoint
         this.eventAdmin = null;
     }
 
+    @Activate
     public void activated(final ComponentContext componentContext) {
         logger.info("activating...");
 
@@ -91,11 +112,13 @@ public class RawMqttCloudEndpoint
         logger.info("activating...done");
     }
 
+    @Modified
     public void updated() {
         logger.info("updating...");
         logger.info("updating...done");
     }
 
+    @Deactivate
     public void deactivated() {
         logger.info("deactivating...");
 

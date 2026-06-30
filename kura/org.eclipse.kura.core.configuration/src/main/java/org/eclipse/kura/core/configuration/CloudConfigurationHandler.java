@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -47,11 +47,18 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 /**
  * @deprecated Please switch to CONF-V2 and corresponding REST APIs
  *             (https://eclipse-kura.github.io/kura/docs-release-5.6/references/rest-apis/rest-configuration-service-v2/)
  */
 @Deprecated
+@Component(
+    name = "org.eclipse.kura.core.configuration.CloudConfigurationHandler",
+    service = {})
 public class CloudConfigurationHandler implements RequestHandler {
 
     private static final String EXPECTED_ONE_RESOURCE_BUT_FOUND_NONE_MESSAGE = "Expected one resource but found none";
@@ -81,6 +88,9 @@ public class CloudConfigurationHandler implements RequestHandler {
 
     private ScheduledExecutorService executor;
 
+    @Reference(name = "ConfigurationService",
+            service = org.eclipse.kura.configuration.ConfigurationService.class,
+            unbind = "unsetConfigurationService")
     protected void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
@@ -89,6 +99,7 @@ public class CloudConfigurationHandler implements RequestHandler {
         this.configurationService = null;
     }
 
+    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "unsetSystemService")
     protected void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -97,6 +108,11 @@ public class CloudConfigurationHandler implements RequestHandler {
         this.systemService = null;
     }
 
+    @Reference(name = "RequestHandlerRegistry",
+            service = org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRequestHandlerRegistry")
     public void setRequestHandlerRegistry(RequestHandlerRegistry requestHandlerRegistry) {
         try {
             requestHandlerRegistry.registerRequestHandler(APP_ID, this);

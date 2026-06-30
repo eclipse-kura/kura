@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -55,7 +55,20 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 @Path("serviceListing/v1")
+@Component(
+    name = "org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProviderstingProvider",
+    immediate = true,
+    service = { org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider.class },
+    property = {
+        "kura.service.pid=org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider",
+        "service.pid=org.eclipse.kura.internal.rest.services.provider.RestServicesProvider",
+        "osgi.jakartars.resource=true" })
 public class RestServiceListingProvider {
 
     private static final String OBJECT_CLASS = "objectClass";
@@ -72,6 +85,11 @@ public class RestServiceListingProvider {
     private ServiceComponentRuntime scr;
     private BundleContext bundleContext;
 
+    @Reference(name = "RequestHandlerRegistry",
+            service = org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unbindRequestHandlerRegistry")
     public void bindRequestHandlerRegistry(RequestHandlerRegistry bindingRegistry) {
         try {
             bindingRegistry.registerRequestHandler(APP_ID_MQTT, this.requestHandler);
@@ -88,14 +106,17 @@ public class RestServiceListingProvider {
         }
     }
 
+    @Reference(name = "ConfigurationService", service = org.eclipse.kura.configuration.ConfigurationService.class, unbind = "-")
     public void setConfigurationService(final ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
 
+    @Reference(name = "ServiceComponentRuntime", service = org.osgi.service.component.runtime.ServiceComponentRuntime.class, unbind = "-")
     public void setServiceComponentRuntime(final ServiceComponentRuntime scr) {
         this.scr = scr;
     }
 
+    @Activate
     public void activate(final ComponentContext componentContext) {
         this.bundleContext = componentContext.getBundleContext();
     }

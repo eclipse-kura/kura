@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -32,6 +32,24 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.http.HttpServlet;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.http.server.manager.HttpService",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class, org.osgi.service.event.EventHandler.class },
+    property = {
+        "kura.ui.service.hide:Boolean=true",
+        "event.topics=org/eclipse/kura/security/keystore/KeystoreChangedEvent/KEYSTORE_CHANGED" })
+@Designate(ocd = HttpServiceMetatype.class)
 public class HttpService implements ConfigurableComponent, EventHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpService.class);
@@ -48,19 +66,27 @@ public class HttpService implements ConfigurableComponent, EventHandler {
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private Future<?> restartTask = CompletableFuture.completedFuture(null);
 
+    @Reference(name = "KeystoreService",
+            service = org.eclipse.kura.security.keystore.KeystoreService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policyOption = ReferencePolicyOption.GREEDY,
+            unbind = "-")
     public void setKeystoreService(KeystoreService keystoreService, final Map<String, Object> properties) {
         this.keystoreService = keystoreService;
         this.keystoreServicePid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
     }
 
+    @Reference(name = "HttpServlet", service = jakarta.servlet.http.HttpServlet.class, target = "(http.felix.dispatcher=*)", unbind = "-")
     public void setDispatcherServlet(HttpServlet dispatcherServlet) {
         this.dispatcherServlet = dispatcherServlet;
     }
 
+    @Reference(name = "EventListener", service = java.util.EventListener.class, target = "(http.felix.dispatcher=*)", unbind = "-")
     public void setEventListener(EventListener eventListener) {
         this.eventListener = eventListener;
     }
 
+    @Activate
     public void activate(Map<String, Object> properties) {
         logger.info("Activating {}", this.getClass().getSimpleName());
 
@@ -71,6 +97,7 @@ public class HttpService implements ConfigurableComponent, EventHandler {
         logger.info("Activating... Done.");
     }
 
+    @Modified
     public synchronized void updated(Map<String, Object> properties) {
         logger.info("Updating {}", this.getClass().getSimpleName());
 
@@ -87,6 +114,7 @@ public class HttpService implements ConfigurableComponent, EventHandler {
         logger.info("Updating... Done.");
     }
 
+    @Deactivate
     public synchronized void deactivate() {
         logger.info("Deactivating {}", this.getClass().getSimpleName());
 

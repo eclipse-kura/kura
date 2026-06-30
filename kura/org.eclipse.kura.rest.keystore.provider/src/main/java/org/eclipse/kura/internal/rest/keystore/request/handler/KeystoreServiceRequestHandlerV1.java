@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,13 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.keystore.request.handler;
 
+
+import org.osgi.service.component.annotations.Component;
+@Component(
+    name = "org.eclipse.kura.internal.rest.keystore.request.handler.KeystoreRequestHandlerV1",
+    immediate = true,
+    service = {},
+    property = { "service.pid=org.eclipse.kura.internal.rest.keystore.request.handler.KeystoreServiceRequestHandlerV1" })
 public class KeystoreServiceRequestHandlerV1 extends KeystoreServiceRequestHandler {
 
     public KeystoreServiceRequestHandlerV1() {

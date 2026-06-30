@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,12 @@ import org.eclipse.kura.message.KuraResponsePayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Component;
+@Component(
+    name = "org.eclipse.kura.internal.rest.keystore.request.handler.KeystoreRequestHandlerV2",
+    immediate = true,
+    service = {},
+    property = { "service.pid=org.eclipse.kura.internal.rest.keystore.request.handler.KeystoreServiceRequestHandlerV2" })
 public class KeystoreServiceRequestHandlerV2 extends KeystoreServiceRequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(KeystoreServiceRequestHandlerV2.class);

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -31,6 +31,18 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.watchdog.WatchdogService",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.watchdog.WatchdogService.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
+@Designate(ocd = WatchdogServiceOptions.class)
 public class WatchdogServiceImpl implements WatchdogService, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(WatchdogServiceImpl.class);
@@ -44,6 +56,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
     private boolean configEnabled = false; // initialized in properties, if false -> no watchdog
     private boolean enabled;
 
+    @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         this.properties = properties;
         if (properties == null) {
@@ -78,6 +91,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         }, 0, this.pingInterval, TimeUnit.MILLISECONDS);
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         this.executor.shutdown();
         while (!this.executor.isTerminated()) {
@@ -92,6 +106,7 @@ public class WatchdogServiceImpl implements WatchdogService, ConfigurableCompone
         criticalServiceList = null;
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.debug("updated...");
         this.properties = properties;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -24,6 +24,11 @@ import org.osgi.framework.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Component;
+@Component(
+    name = "org.eclipse.kura.configuration.ConfigurationService",
+    immediate = true,
+    service = { org.eclipse.kura.configuration.ConfigurationService.class, org.eclipse.kura.configuration.metatype.OCDService.class })
 public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
 
     private static final String CONFIGURATION_SERVICE_FAILURE = "{} ConfigurationService - Failure - {}";

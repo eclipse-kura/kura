@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -36,6 +36,22 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.cloudconnection.sparkplug.mqtt.subscriber.SparkplugSubscriber",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = {
+        "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint.SparkplugCloudEndpoint",
+        "kura.ui.service.hide:Boolean=true",
+        "kura.ui.factory.hide=true" })
+@Designate(ocd = SparkplugSubscriberOptions.class, factory = true)
 public class SparkplugSubscriber
         implements ConfigurableComponent, CloudSubscriber, CloudSubscriberListener, CloudConnectionListener {
 
@@ -58,6 +74,7 @@ public class SparkplugSubscriber
      * Activation APIs
      */
 
+    @Activate
     public void activate(final ComponentContext componentContext, final Map<String, Object> properties)
             throws InvalidSyntaxException {
         this.kuraServicePid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
@@ -74,6 +91,7 @@ public class SparkplugSubscriber
         logger.info("{} - Activated", this.kuraServicePid);
     }
 
+    @Modified
     public void update(final Map<String, Object> properties) throws InvalidSyntaxException {
         logger.info("{} - Updating", this.kuraServicePid);
 
@@ -87,6 +105,7 @@ public class SparkplugSubscriber
         logger.info("{} - Updated", this.kuraServicePid);
     }
 
+    @Deactivate
     public void deactivate() {
         logger.info("{} - Deactivating", this.kuraServicePid);
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -45,6 +45,19 @@ import org.osgi.util.position.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.position.PositionService",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.position.PositionService.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
+@Designate(ocd = PositionServiceOptions.class)
 public class PositionServiceImpl implements PositionService, ConfigurableComponent {
 
     private static final String USE_GPSD_PROPERTY_NAME = "useGpsd";
@@ -69,6 +82,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
     private boolean useGpsd;
     private String source;
 
+    @Reference(name = "EventAdmin", service = org.osgi.service.event.EventAdmin.class, unbind = "unsetEventAdmin")
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }
@@ -83,6 +97,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
     //
     // ----------------------------------------------------------------
 
+    @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         //
         // save the bundle context
@@ -93,6 +108,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
         start();
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.info("Updating position service");
         stop();
@@ -101,6 +117,7 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
         logger.info("Updating position service. Done.");
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         logger.info("Stopping position service");
         stop();

@@ -33,6 +33,8 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentConstants;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 /**
  * The Kura default {@link CloudConnectionFactory} implements a three layer stack architecture.
  * Each layer is an OSGi Declarative Services Factory Component and provides a service as follows:
@@ -155,6 +157,14 @@ import org.osgi.service.component.ComponentConstants;
  *
  * <br>
  */
+@Component(
+    name = "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.DefaultCloudConnectionFactory",
+    service = { org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory.class },
+    property = {
+        "osgi.command.scope=kura.cloud",
+        "osgi.command.function=createConfiguration",
+        "kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager",
+        "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager(\\-[a-zA-Z0-9]+)?$"})
 public class DefaultCloudConnectionFactory implements CloudConnectionFactory {
 
     private static final String FACTORY_PID = "org.eclipse.kura.cloud.mqtt.eclipseiot.internal.cloud.factory.DefaultCloudServiceFactory";
@@ -178,6 +188,9 @@ public class DefaultCloudConnectionFactory implements CloudConnectionFactory {
 
     private ConfigurationService configurationService;
 
+    @Reference(name = "ConfigurationService",
+            service = org.eclipse.kura.configuration.ConfigurationService.class,
+            unbind = "unsetConfigurationService")
     protected void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }

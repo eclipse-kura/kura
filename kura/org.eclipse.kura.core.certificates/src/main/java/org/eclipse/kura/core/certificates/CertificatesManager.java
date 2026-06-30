@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -43,9 +43,19 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 /*
  *
  */
+@Component(
+    name = "org.eclipse.kura.certificate.CertificatesService",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.OPTIONAL,
+    service = { org.eclipse.kura.certificate.CertificatesService.class })
 public class CertificatesManager implements CertificatesService {
 
     private static final Logger logger = LoggerFactory.getLogger(CertificatesManager.class);
@@ -74,6 +84,7 @@ public class CertificatesManager implements CertificatesService {
     //
     // ----------------------------------------------------------------
 
+    @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "unsetCryptoService")
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
@@ -84,6 +95,9 @@ public class CertificatesManager implements CertificatesService {
         }
     }
 
+    @Reference(name = "ConfigurationService",
+            service = org.eclipse.kura.configuration.ConfigurationService.class,
+            unbind = "unsetConfigurationService")
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
@@ -100,6 +114,7 @@ public class CertificatesManager implements CertificatesService {
     //
     // ----------------------------------------------------------------
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         this.bundleContext = componentContext.getBundleContext();
         this.keystoreServiceTrackerCustomizer = new KeystoreServiceTrackerCustomizer();
@@ -107,6 +122,7 @@ public class CertificatesManager implements CertificatesService {
         logger.info("Bundle {} has started!", APP_ID);
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         if (this.keystoreServiceTracker != null) {
             this.keystoreServiceTracker.close();

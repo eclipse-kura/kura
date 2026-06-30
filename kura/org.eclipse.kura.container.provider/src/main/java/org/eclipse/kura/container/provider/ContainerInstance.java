@@ -66,6 +66,21 @@ import org.eclipse.kura.net.NetworkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.container.provider.ContainerInstance",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class })
+@Designate(ocd = ContainerInstanceMetatype.class, factory = true)
 public class ContainerInstance implements ConfigurableComponent, ContainerOrchestrationServiceListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ContainerInstance.class);
@@ -95,15 +110,26 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private final AtomicReference<char[]> currentTemporaryPassword = new AtomicReference<>();
     private final TokenFileManager tokenFileManager = new TokenFileManager();
 
+    @Reference(name = "ContainerOrchestrationService",
+            service = org.eclipse.kura.container.orchestration.ContainerOrchestrationService.class,
+            unbind = "-")
     public void setContainerOrchestrationService(final ContainerOrchestrationService containerOrchestrationService) {
         this.containerOrchestrationService = containerOrchestrationService;
     }
 
+    @Reference(name = "PasswordStrengthVerificationService",
+            service = org.eclipse.kura.identity.PasswordStrengthVerificationService.class,
+            unbind = "-")
     public void setPasswordStrengthVerificationService(
             final PasswordStrengthVerificationService passwordStrengthVerificationService) {
         this.passwordStrengthVerificationService = passwordStrengthVerificationService;
     }
 
+    @Reference(name = "ContainerSignatureValidationService",
+            service = org.eclipse.kura.container.signature.ContainerSignatureValidationService.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetContainerSignatureValidationService")
     public synchronized void setContainerSignatureValidationService(
             final ContainerSignatureValidationService containerSignatureValidationService) {
 
@@ -118,14 +144,20 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         this.availableContainerSignatureValidationService.remove(containerSignatureValidationService);
     }
 
+    @Reference(name = "ConfigurationService", service = org.eclipse.kura.configuration.ConfigurationService.class, unbind = "-")
     public synchronized void setConfigurationService(final ConfigurationService confService) {
         this.configurationService = confService;
     }
 
+    @Reference(name = "IdentityService", service = org.eclipse.kura.identity.IdentityService.class, unbind = "-")
     public synchronized void setIdentityService(final IdentityService identityService) {
         this.identityService = identityService;
     }
 
+    @Reference(name = "NetworkService",
+            service = org.eclipse.kura.net.NetworkService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            unbind = "-")
     public synchronized void setNetworkService(final NetworkService networkService) {
         this.networkService = networkService;
     }
@@ -136,6 +168,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     //
     // ----------------------------------------------------------------
 
+    @Activate
     public void activate(final Map<String, Object> properties) {
         logger.info("activating...");
         updated(properties);
@@ -143,6 +176,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         logger.info("activating...done");
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
 
         if (isNull(properties)) {
@@ -203,6 +237,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
     }
 
+    @Deactivate
     public void deactivate() {
         logger.info("deactivate...");
 

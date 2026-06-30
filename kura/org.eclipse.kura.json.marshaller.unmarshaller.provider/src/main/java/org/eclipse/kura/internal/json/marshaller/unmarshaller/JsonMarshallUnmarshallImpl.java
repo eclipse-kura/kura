@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -50,6 +50,13 @@ import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.wire.graph.WireGraphConfiguration;
 
+import org.osgi.service.component.annotations.Component;
+@Component(
+    name = "org.eclipse.kura.json.marshaller.unmarshaller.provider",
+    immediate = false,
+    service = { org.eclipse.kura.marshalling.Marshaller.class, org.eclipse.kura.marshalling.Unmarshaller.class },
+    property = {
+        "kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider" })
 public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
     @Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -58,6 +58,23 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.core.db.H2DbService",
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
+            org.eclipse.kura.db.BaseDbService.class,
+            org.eclipse.kura.db.H2DbService.class,
+            org.eclipse.kura.message.store.provider.MessageStoreProvider.class,
+            org.eclipse.kura.wire.store.provider.WireRecordStoreProvider.class,
+            org.eclipse.kura.wire.store.provider.QueryableWireRecordStoreProvider.class })
+@Designate(ocd = H2DbServiceMetatype.class, factory = true)
 public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireRecordStoreProvider,
         ConfigurableComponent, QueryableWireRecordStoreProvider {
 
@@ -109,6 +126,7 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
     //
     // ----------------------------------------------------------------
 
+    @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "unsetCryptoService")
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
@@ -125,6 +143,7 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
     //
     // ----------------------------------------------------------------
 
+    @Activate
     public void activate(final Map<String, Object> properties) {
         logger.info("activating...");
 
@@ -147,11 +166,13 @@ public class H2DbServiceImpl implements H2DbService, MessageStoreProvider, WireR
         logger.info("activating...done");
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         this.pendingUpdates.incrementAndGet();
         this.executor.submit(() -> updateInternal(properties));
     }
 
+    @Deactivate
     public void deactivate() {
         logger.info("deactivate...");
         this.executor.shutdown();

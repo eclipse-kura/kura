@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -21,6 +21,12 @@ import javax.microedition.io.Connection;
 
 import org.osgi.service.io.ConnectionFactory;
 
+import org.osgi.service.component.annotations.Component;
+@Component(
+    name = "org.eclipse.kura.core.comm.CommConnectionFactory",
+    service = { org.osgi.service.io.ConnectionFactory.class },
+    property = {
+        "io.scheme=comm"})
 public class CommConnectionFactory implements ConnectionFactory {
 
     @Override

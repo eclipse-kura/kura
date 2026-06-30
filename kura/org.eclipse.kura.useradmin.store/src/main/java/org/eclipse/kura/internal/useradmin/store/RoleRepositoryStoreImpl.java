@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -46,6 +46,23 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonValue;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.apache.felix.useradmin.RoleRepositoryStore.class,
+            org.eclipse.kura.configuration.ConfigurableComponent.class,
+            org.osgi.service.useradmin.UserAdminListener.class },
+    property = {
+        "kura.ui.service.hide:Boolean=true" })
+@Designate(ocd = RoleRepositoryStoreImplOptions.class)
 public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminListener, ConfigurableComponent {
 
     private static final String INTERNAL_UPDATE_ID_PROP_NAME = "internal.update.id";
@@ -63,10 +80,12 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private Optional<ScheduledFuture<?>> storeTask = Optional.empty();
 
+    @Reference(name = "ConfigurationService", service = org.eclipse.kura.configuration.ConfigurationService.class, unbind = "-")
     public void setConfigurationService(final ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
 
+    @Activate
     public void activate(final Map<String, Object> properties) {
         logger.info("activating...");
 
@@ -75,6 +94,7 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
         logger.info("activating...done");
     }
 
+    @Modified
     public synchronized void update(final Map<String, Object> properties) {
 
         if (isSelfUpdate(properties)) {
@@ -127,6 +147,7 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
         logger.info("updating...done");
     }
 
+    @Deactivate
     public void deactivate() {
         logger.info("deactivating...");
 

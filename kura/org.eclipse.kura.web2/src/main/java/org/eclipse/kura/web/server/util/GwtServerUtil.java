@@ -121,6 +121,8 @@ public final class GwtServerUtil {
 
         if (gwtType == GwtConfigParameterType.STRING) {
             objValue = strValue;
+        } else if (strValue != null && gwtType == GwtConfigParameterType.PASSWORD) {
+        	objValue = new Password(strValue.trim());
         } else if (strValue != null && !strValue.trim().isEmpty()) {
             final String trimmedValue = strValue.trim();
             switch (gwtType) {
@@ -144,9 +146,6 @@ public final class GwtServerUtil {
                 break;
             case BOOLEAN:
                 objValue = Boolean.parseBoolean(trimmedValue);
-                break;
-            case PASSWORD:
-                objValue = new Password(trimmedValue);
                 break;
             case CHAR:
                 objValue = Character.valueOf(trimmedValue.charAt(0));
@@ -277,6 +276,8 @@ public final class GwtServerUtil {
                     return getObjectValue(cloned);
                 }
             }
+            
+            return new Password("");
         }
 
         return getObjectValue(param);
@@ -300,17 +301,30 @@ public final class GwtServerUtil {
                 }
             }
 
-            if (current.isPresent()) {
-                for (int i = 0; i < strValues.length; i++) {
-                    if (PASSWORD_PLACEHOLDER.equals(strValues[i]) && i < current.get().length) {
-                        strValues[i] = current.get()[i];
-                    }
-                }
-            }
+            mergeCurrentPasswords(strValues, current);
+            replacePlaceholders(strValues);
         }
 
         return getObjectValues(param, strValues);
     }
+
+	private static void mergeCurrentPasswords(String[] strValues, Optional<String[]> current) {
+		if (current.isPresent()) {
+		    for (int i = 0; i < strValues.length; i++) {
+		        if (PASSWORD_PLACEHOLDER.equals(strValues[i]) && i < current.get().length) {
+		            strValues[i] = current.get()[i];
+		        }
+		    }
+		}
+	}
+	
+	private static void replacePlaceholders(String[] strValues) {
+		for (int i = 0; i < strValues.length; i++) {
+		    if (PASSWORD_PLACEHOLDER.equals(strValues[i])) {
+		        strValues[i] = "";
+		    }
+		}
+	}
 
     /**
      * Strip PID prefix.

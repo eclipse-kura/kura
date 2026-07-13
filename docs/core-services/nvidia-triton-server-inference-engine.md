@@ -8,7 +8,9 @@ Kura provides three components for exposing the Triton Server service functional
 - **TritonServerNativeService**: provides methods for interacting with a local native Nvidia™ Triton Server. Requires the Triton Server executable to be already available on the device and offers more options and features (like AI Model Encryption).
 - **TritonServerContainerService**: provides methods for interacting with a local container running Nvidia™ Triton Server. Requires the Triton Server container image to be already available on the device and offers more options and features (like AI Model Encryption).
 
+!!! info "EU AI Act applicability"
 
+    The ESF Triton integration provides connectivity and deployment tooling for inference workloads running on Eurotech edge gateways; it does not itself perform inference, training, or any function that infers outputs from input data, and Eurotech does not develop, train, or distribute AI models as part of this offering. As such, the ESF Triton add-on does not constitute an "AI system" under Regulation (EU) 2024/1689 (the EU AI Act) and Eurotech's role with respect to this integration is that of an infrastructure enabler rather than a provider or deployer of AI systems. Responsibility for classifying and complying with the obligations of the AI Act — including any conformity assessment, risk management, or documentation requirements applicable to high-risk AI systems — rests with the customer or third party that develops, deploys, or places into service the AI model(s) running on this infrastructure. Customers integrating AI models with the Triton add-on, particularly in safety-critical or regulated contexts, should independently assess their obligations under the AI Act and applicable sectoral legislation.
 
 ## Nvidia™ Triton Server installation
 

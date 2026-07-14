@@ -113,10 +113,10 @@ nav:
         - Mathematical Components Example: kura-wires/multiport-wire-components/mathematical-components-example.md
       - Script Components:
         - Introduction: kura-wires/script-components/introduction.md
-        - Nashorn Script Filter: kura-wires/script-components/nashorn-script-filter.md
-        - Nashorn Conditional Component: kura-wires/script-components/nashorn-conditional-component.md
         - GraalVM&trade; Filter Component: kura-wires/script-components/graalvm-filter-component.md
         - GraalVM&trade; Conditional Component: kura-wires/script-components/graalvm-conditional-component.md
+        - Nashorn Script Filter (Deprecated): kura-wires/script-components/nashorn-script-filter.md
+        - Nashorn Conditional Component (Deprecated): kura-wires/script-components/nashorn-conditional-component.md
       - Usage Examples:
         - OPC-UA Application: kura-wires/usage-examples/opcua-application.md
         - TI SensorTag Application: kura-wires/usage-examples/ti-sensortag-application.md

@@ -112,7 +112,7 @@ nav:
         - Join Component: kura-wires/multiport-wire-components/join-component.md
         - Mathematical Components Example: kura-wires/multiport-wire-components/mathematical-components-example.md
       - Script Components:
-        - Introduction: kura-wires/script-components/overview.md
+        - Overview: kura-wires/script-components/overview.md
         - GraalVM&trade; Filter Component: kura-wires/script-components/graalvm-filter-component.md
         - GraalVM&trade; Conditional Component: kura-wires/script-components/graalvm-conditional-component.md
       - Usage Examples:

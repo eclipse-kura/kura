@@ -112,9 +112,7 @@ nav:
         - Join Component: kura-wires/multiport-wire-components/join-component.md
         - Mathematical Components Example: kura-wires/multiport-wire-components/mathematical-components-example.md
       - Script Components:
-        - Introduction: kura-wires/script-components/introduction.md
-        - Nashorn Script Filter: kura-wires/script-components/nashorn-script-filter.md
-        - Nashorn Conditional Component: kura-wires/script-components/nashorn-conditional-component.md
+        - Overview: kura-wires/script-components/overview.md
         - GraalVM&trade; Filter Component: kura-wires/script-components/graalvm-filter-component.md
         - GraalVM&trade; Conditional Component: kura-wires/script-components/graalvm-conditional-component.md
       - Usage Examples:

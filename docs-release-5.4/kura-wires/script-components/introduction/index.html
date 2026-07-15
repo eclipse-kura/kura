@@ -12,7 +12,7 @@
         <link rel="prev" href="../../multiport-wire-components/mathematical-components-example/">
       
       
-        <link rel="next" href="../nashorn-script-filter/">
+        <link rel="next" href="../graalvm-filter-component/">
       
       
       <link rel="icon" href="../../../assets/favicon.png">
@@ -2861,6 +2861,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Introduction
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -2872,50 +2884,34 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
       </a>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../nashorn-script-filter/" class="md-nav__link">
         
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
-  <span class="md-ellipsis">
-    Nashorn Script Filter
+  
+  
     
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#legacy-installations-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Legacy installations support
+    </span>
+  </a>
   
+</li>
+      
+    </ul>
   
-    <li class="md-nav__item">
-      <a href="../nashorn-conditional-component/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Nashorn Conditional Component
-    
-  </span>
-  
-
-      </a>
+</nav>
+      
     </li>
   
 
@@ -2955,6 +2951,50 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   <span class="md-ellipsis">
     GraalVM&trade; Conditional Component
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../nashorn-script-filter/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Nashorn Script Filter (Deprecated)
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../nashorn-conditional-component/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Nashorn Conditional Component (Deprecated)
     
   </span>
   
@@ -4360,6 +4400,23 @@ You are viewing the documentation relative to the develop branch or to an outdat
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#legacy-installations-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      Legacy installations support
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -4375,20 +4432,24 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 
 <h1 id="introduction-to-the-script-components">Introduction to the Script Components</h1>
-<p>The Script Components allow for performing more complex operations on the received Wire Envelopes using a JavaScript Engine.</p>
-<p>Depending if the target device is running on Java 8 or Java 17, there are several components to choose from.</p>
-<p>For devices running a JRE <strong>with Nashorn JS Engine</strong> (Java &lt; 15), a <em>Script Filter</em> and a <em>Conditional Component</em> are provided:</p>
+<p>The Script Components enable advanced data processing operations on Wire Envelopes through execution of JavaScript code within the Wire Composer framework.</p>
+<p>These components leverage the <a href="https://www.graalvm.org/22.1/reference-manual/js/">GraalVM&trade; JavaScript Engine</a> and consist of the following:</p>
 <ul>
-<li><a href="../nashorn-script-filter/">Nashorn-based Script Filter</a></li>
-<li><a href="../nashorn-conditional-component/">Nashorn-based Conditional Component</a></li>
+<li><a href="../graalvm-filter-component/">GraalVM&trade; Filter Component</a>: provides comprehensive scripting capabilities for general-purpose Wire Envelope manipulation</li>
+<li><a href="../graalvm-conditional-component/">GraalVM&trade; Conditional Component</a>: a multiport component that implements conditional branching logic within the Wire Composer</li>
 </ul>
-<p>The above components will run only on Java &lt; 15 since the Nashorn dependency is not included in the DP. The two components are available in the Eclipse Marketplace as two separate entries. <em>These components are deprecated as of Kura version 5.3.</em></p>
-<p>The following components instead have the <a href="https://www.graalvm.org/22.1/reference-manual/js/">GraalVM&trade; JavaScript Engine</a> included in the DP and therefore do not require a JRE with Nashorn JS Engine:</p>
+<p>The components can be installed through the <em>Wires Script Tools</em> deployment package available on the Eclipse Marketplace at <a href="https://marketplace.eclipse.org/content/wires-script-tools-kura-5">this link</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Compatibility Notice</p>
+<p>Scripts developed for the <a href="https://eclipse-kura.github.io/kura/docs-release-5.6/kura-wires/script-components/nashorn-script-filter/"><em>Script Filter</em></a> and <a href="https://eclipse-kura.github.io/kura/docs-release-5.6/kura-wires/script-components/nashorn-conditional-component/"><em>Conditional Component</em></a> Wire Components in Kura 5.x are not compatible with these GraalVM-based components. Refer to <a href="../graalvm-filter-component/">GraalVM&trade; Filter Component</a> and <a href="../graalvm-conditional-component/">GraalVM&trade; Conditional Component</a> documentation for the updated syntax specifications.</p>
+</div>
+<h2 id="legacy-installations-support">Legacy installations support</h2>
+<p>For legacy installations running on a JRE <strong>with Nashorn JS Engine</strong> (Java &lt; 15, <a href="https://openjdk.org/jeps/372">JEP 372</a>), a <em>Script Filter</em> and a <em>Conditional Component</em> are still provided:</p>
 <ul>
-<li><a href="../graalvm-filter-component/">GraalVM&trade; Filter Component</a></li>
-<li><a href="../graalvm-conditional-component/">GraalVM&trade; Conditional Component</a></li>
+<li><a href="../nashorn-script-filter/">Nashorn-based Script Filter (Deprecated)</a></li>
+<li><a href="../nashorn-conditional-component/">Nashorn-based Conditional Component (Deprecated)</a></li>
 </ul>
-<p>The input scripts for these components are not compatible with the Nashorn implementations <em>Script Filter</em> and <em>Conditional Component</em>. Both components are shipped as a single DP named <em>org.eclipse.kura.wire.script.tools</em>. Since the JS engine dependency is shipped along with the DP, these components will work on both Java 8 and Java 17 devices but the DP is bigger in size (~18,6 MB).</p>
+<p>The above components will run only on Java &lt; 15 since the Nashorn dependency is not included in the DP. The two components are available in the Eclipse Marketplace as two separate entries. <strong>These components are deprecated as of Kura version 5.3.</strong></p>
 
 
 

@@ -1,4 +1,4 @@
-# Nashorn Script Filter
+# Nashorn Script Filter (Deprecated)
 
 !!! warning
     This component is deprecated as of Kura version 5.3 since no more available on Java 17.

@@ -1,19 +1,22 @@
 # Introduction to the Script Components
 
-The Script Components allow for performing more complex operations on the received Wire Envelopes using a JavaScript Engine.
+The Script Components enable advanced data processing operations on Wire Envelopes through execution of JavaScript code within the Wire Composer framework.
 
-Depending if the target device is running on Java 8 or Java 17, there are several components to choose from.
+These components leverage the [GraalVM&trade; JavaScript Engine](https://www.graalvm.org/22.1/reference-manual/js/) and consist of the following:
 
-For devices running a JRE **with Nashorn JS Engine** (Java < 15), a *Script Filter* and a *Conditional Component* are provided:
+- [GraalVM&trade; Filter Component](graalvm-filter-component.md): provides comprehensive scripting capabilities for general-purpose Wire Envelope manipulation
+- [GraalVM&trade; Conditional Component](graalvm-conditional-component.md): a multiport component that implements conditional branching logic within the Wire Composer
 
-- [Nashorn-based Script Filter](nashorn-script-filter.md)
-- [Nashorn-based Conditional Component](nashorn-conditional-component.md)
+The components can be installed through the *Wires Script Tools* deployment package available on the Eclipse Marketplace at [this link](https://marketplace.eclipse.org/content/wires-script-tools-kura-5).
 
-The above components will run only on Java < 15 since the Nashorn dependency is not included in the DP. The two components are available in the Eclipse Marketplace as two separate entries. *These components are deprecated as of Kura version 5.3.*
+!!! warning "Compatibility Notice"
+    Scripts developed for the [*Script Filter*](https://eclipse-kura.github.io/kura/docs-release-5.6/kura-wires/script-components/nashorn-script-filter/) and [*Conditional Component*](https://eclipse-kura.github.io/kura/docs-release-5.6/kura-wires/script-components/nashorn-conditional-component/) Wire Components in Kura 5.x are not compatible with these GraalVM-based components. Refer to [GraalVM&trade; Filter Component](graalvm-filter-component.md) and [GraalVM&trade; Conditional Component](graalvm-conditional-component.md) documentation for the updated syntax specifications.
 
-The following components instead have the [GraalVM&trade; JavaScript Engine](https://www.graalvm.org/22.1/reference-manual/js/) included in the DP and therefore do not require a JRE with Nashorn JS Engine:
+## Legacy installations support
 
-- [GraalVM&trade; Filter Component](graalvm-filter-component.md)
-- [GraalVM&trade; Conditional Component](graalvm-conditional-component.md)
+For legacy installations running on a JRE **with Nashorn JS Engine** (Java < 15, [JEP 372](https://openjdk.org/jeps/372)), a *Script Filter* and a *Conditional Component* are still provided:
 
-The input scripts for these components are not compatible with the Nashorn implementations *Script Filter* and *Conditional Component*. Both components are shipped as a single DP named *org.eclipse.kura.wire.script.tools*. Since the JS engine dependency is shipped along with the DP, these components will work on both Java 8 and Java 17 devices but the DP is bigger in size (~18,6 MB).
+- [Nashorn-based Script Filter (Deprecated)](nashorn-script-filter.md)
+- [Nashorn-based Conditional Component (Deprecated)](nashorn-conditional-component.md)
+
+The above components will run only on Java < 15 since the Nashorn dependency is not included in the DP. The two components are available in the Eclipse Marketplace as two separate entries. **These components are deprecated as of Kura version 5.3.**

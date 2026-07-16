@@ -2,8 +2,21 @@ Bundle-SymbolicName: ${project.artifactId};singleton:=true
 Bundle-Name: org.eclipse.kura.emulator.position
 Bundle-Vendor: Eclipse Kura
 Bundle-ActivationPolicy: lazy
+Import-Package: \
+    javax.xml.parsers,\
+    org.eclipse.kura.configuration;version="[1.1,2.0)",\
+    org.eclipse.kura.position;version="[1.4,1.5)",\
+    org.osgi.framework;version="1.7.0",\
+    org.osgi.service.component;version="1.2.0",\
+    org.osgi.service.event;version="1.3.0",\
+    org.osgi.util.measurement;version="1.0.1",\
+    org.osgi.util.position;version="1.0.1",\
+    org.slf4j;version="1.6.4",\
+    org.xml.sax,\
+    org.xml.sax.helpers,\
+    *
 Export-Package: \
-    org.eclipse.kura.emulator.position;version="2.0.0"
+    org.eclipse.kura.emulator.position; version="1.0.0"
 -includeresource: \
     about.html,\
     about_files=about_files/

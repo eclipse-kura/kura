@@ -3,6 +3,40 @@ Bundle-Name: org.eclipse.kura.core.testutil
 Bundle-Vendor: Eclipse Kura
 Bundle-ActivationPolicy: lazy
 Require-Bundle: moquette-broker
+Import-Package: \
+    com.eclipsesource.json;version="0.9.5",\
+    jakarta.servlet;version="5.0.0",\
+    jakarta.servlet.http;version="5.0.0",\
+    org.apache.commons.io;version="2.4.0",\
+    org.bouncycastle.asn1;version="1.78.1",\
+    org.bouncycastle.asn1.x500;version="1.78.1",\
+    org.bouncycastle.asn1.x509;version="1.78.1",\
+    org.bouncycastle.cert;version="1.78.1",\
+    org.bouncycastle.cert.bc;version="1.78.1",\
+    org.bouncycastle.cert.jcajce;version="1.78.1",\
+    org.bouncycastle.jce.provider;version="1.78.1",\
+    org.bouncycastle.openssl.jcajce;version="1.78.1",\
+    org.bouncycastle.operator;version="1.78.1",\
+    org.bouncycastle.operator.jcajce;version="1.78.1",\
+    org.eclipse.jetty.ee10.servlet;version="[12.0.0,13.0.0)",\
+    org.eclipse.jetty.server;version="[12.0.0,13.0.0)",\
+    org.eclipse.kura;version="[1.6,2.0)",\
+    org.eclipse.kura.configuration;version="[1.2,2.0)",\
+    org.eclipse.kura.core.data.util;version="[1.0,2.0)",\
+    org.eclipse.kura.data;version="[1.1,2.0)",\
+    org.eclipse.kura.data.transport.listener;version="[1.0,2.0)",\
+    org.eclipse.kura.marshalling;version="[1.0,2.0)",\
+    org.eclipse.kura.message;version="[1.4,2.0)",\
+    org.junit;version="[4.12.0,5.0.0)",\
+    org.junit.rules;version="4.12.0",\
+    org.junit.runner;version="[4.12.0,5.0.0)",\
+    org.junit.runners.model;version="4.12.0",\
+    org.osgi.framework;version="1.10.0",\
+    org.osgi.service.event;version="1.4.0",\
+    org.osgi.util.tracker;version="1.5.2",\
+    org.slf4j;version="1.6.4",\
+    javax.net.ssl,\
+    *
 Export-Package: \
     org.eclipse.kura.core.testutil;version="6.0.0",\
     org.eclipse.kura.core.testutil.event;version="6.0.0",\

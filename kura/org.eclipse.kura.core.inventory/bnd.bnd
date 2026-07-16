@@ -2,9 +2,24 @@ Bundle-SymbolicName: ${project.artifactId};singleton:=true
 Bundle-Name: org.eclipse.kura.core.inventory
 Bundle-Vendor: Eclipse Kura
 Bundle-ActivationPolicy: lazy
+Import-Package: \
+    org.eclipse.kura;version="[1.0,2.0)",\
+    org.eclipse.kura.cloudconnection.message;version="[1.0,2.0)",\
+    org.eclipse.kura.cloudconnection.request;version="[1.0,1.1)",\
+    org.eclipse.kura.configuration;version="[1.1,2.0)",\
+    org.eclipse.kura.container.orchestration;version="[1.0,2.0)",\
+    org.eclipse.kura.marshalling;version="[1.0,2.0)",\
+    org.eclipse.kura.message;version="[1.0,2.0)",\
+    org.eclipse.kura.system;version="[1.5,2.0)",\
+    org.eclipse.kura.util.service;version="[1.0,2.0)",\
+    org.osgi.framework;version="1.5.0",\
+    org.osgi.service.component;version="1.2.0",\
+    org.osgi.service.deploymentadmin;version="1.0.0",\
+    org.slf4j;version="1.6.4",\
+    *
 Export-Package: \
-    org.eclipse.kura.core.inventory;version="2.0.0";x-internal:=true,\
-    org.eclipse.kura.core.inventory.resources;version="2.0.0";x-internal:=true
+    org.eclipse.kura.core.inventory;version="1.1.0";x-internal:=true,\
+    org.eclipse.kura.core.inventory.resources;version="1.0.0";x-internal:=true
 -includeresource: \
     about.html,\
     about_files=about_files/

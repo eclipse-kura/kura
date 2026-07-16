@@ -110,7 +110,10 @@
                         -includeresource: lib,\
                             about.html,\
                             about_files=about_files/
-                        Export-Package: org.usb4java;version="${usb4java.version}"
+                        Export-Package: \
+                            org.usb4java.linux-aarch64;version="${usb4java.version}",\
+                            org.usb4java.linux-x86-64;version="${usb4java.version}",\
+                            org.usb4java;uses:="org.apache.commons.lang3.builder,org.apache.commons.lang3.tuple";version="${usb4java.version}"
                         ]]></bnd>
                 </configuration>
             </plugin>

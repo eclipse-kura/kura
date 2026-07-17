@@ -771,33 +771,35 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
         List<Bind> bindsToAdd = new LinkedList<>();
 
-        if (containerDescription.getContainerVolumes() != null
-                && !containerDescription.getContainerVolumes().isEmpty()) {
-
-            for (Map.Entry<String, String> element : containerDescription.getContainerVolumes().entrySet()) {
-                // source: path on host (key)
-                // destination: path in container (value), optionally suffixed with ":ro" for a
-                // read-only bind; the suffix is an internal convention used by
-                // org.eclipse.kura.container.provider and cannot be produced from user configuration
-                if (!element.getKey().isEmpty() && !element.getValue().isEmpty()) {
-                    String containerPath = element.getValue();
-                    AccessMode accessMode = AccessMode.DEFAULT;
-                    if (containerPath.endsWith(READ_ONLY_VOLUME_SUFFIX)) {
-                        containerPath = containerPath.substring(0,
-                                containerPath.length() - READ_ONLY_VOLUME_SUFFIX.length());
-                        accessMode = AccessMode.ro;
-                    }
-                    if (!containerPath.isEmpty()) {
-                        bindsToAdd.add(new Bind(element.getKey(), new Volume(containerPath), accessMode));
-                    }
-                }
-            }
-            hostConfiguration = hostConfiguration.withBinds(bindsToAdd);
-
+        for (Map.Entry<String, String> element : containerDescription.getContainerVolumes().entrySet()) {
+            // source: path on host (key)
+            // destination: path in container (value), optionally suffixed with ":ro" for a
+            // read-only bind; the suffix is an internal convention used by
+            // org.eclipse.kura.container.provider and cannot be produced from user configuration
+            volumeBind(element.getKey(), element.getValue()).ifPresent(bindsToAdd::add);
         }
 
-        return hostConfiguration;
+        return hostConfiguration.withBinds(bindsToAdd);
 
+    }
+
+    private static Optional<Bind> volumeBind(String hostPath, String containerPathSpec) {
+        if (hostPath.isEmpty() || containerPathSpec.isEmpty()) {
+            return Optional.empty();
+        }
+
+        String containerPath = containerPathSpec;
+        AccessMode accessMode = AccessMode.DEFAULT;
+        if (containerPath.endsWith(READ_ONLY_VOLUME_SUFFIX)) {
+            containerPath = containerPath.substring(0, containerPath.length() - READ_ONLY_VOLUME_SUFFIX.length());
+            accessMode = AccessMode.ro;
+        }
+
+        if (containerPath.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(new Bind(hostPath, new Volume(containerPath), accessMode));
     }
 
     private HostConfig containerDevicesHandler(ContainerConfiguration containerDescription,

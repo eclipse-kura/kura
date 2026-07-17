@@ -16,7 +16,6 @@ package org.eclipse.kura.container.provider;
 import java.security.SecureRandom;
 import java.util.Random;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.identity.PasswordStrengthRequirements;
 
 public class PasswordGenerator {
@@ -24,16 +23,16 @@ public class PasswordGenerator {
     private static final char[] SPECIAL_CHARS = { '!', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/',
             ':', ';', '?', '@', '[', ']', '^', '_', '{', '|', '~' };
     private static final int SPECIAL_CHARS_BOUND = SPECIAL_CHARS.length;
-    private static final int DIGITS_BOUND = SPECIAL_CHARS_BOUND + ((int) '9' - (int) '0' + 1);
-    private static final int LOWERCASE_BOUND = DIGITS_BOUND + ((int) 'z' - (int) 'a' + 1);
-    private static final int UPPERCASE_BOUND = LOWERCASE_BOUND + ((int) 'Z' - (int) 'A' + 1);
+    private static final int DIGITS_BOUND = SPECIAL_CHARS_BOUND + ('9' - '0' + 1);
+    private static final int LOWERCASE_BOUND = DIGITS_BOUND + ('z' - 'a' + 1);
+    private static final int UPPERCASE_BOUND = LOWERCASE_BOUND + ('Z' - 'A' + 1);
     private static final Random RANDOM = new SecureRandom();
 
     private PasswordGenerator() {
     }
 
     private static char charInRange(final Random random, final char lower, final char upper) {
-        return (char) random.nextInt((int) lower, ((int) upper) + 1);
+        return (char) random.nextInt(lower, (upper) + 1);
     }
 
     private static int freeIndex(final Random random, final char[] values) {
@@ -46,7 +45,7 @@ public class PasswordGenerator {
         return result;
     }
 
-    public static char[] generatePassword(final PasswordStrengthRequirements requirements) throws KuraException {
+    public static char[] generatePassword(final PasswordStrengthRequirements requirements) {
         final char[] pwd = new char[Math.max(32, requirements.getPasswordMinimumLength())];
 
         if (requirements.digitsRequired()) {
@@ -74,11 +73,11 @@ public class PasswordGenerator {
             if (index < SPECIAL_CHARS_BOUND) {
                 result = SPECIAL_CHARS[index];
             } else if (index < DIGITS_BOUND) {
-                result = (char) ((int) '0' + (index - SPECIAL_CHARS_BOUND));
+                result = (char) ('0' + (index - SPECIAL_CHARS_BOUND));
             } else if (index < LOWERCASE_BOUND) {
-                result = (char) ((int) 'a' + (index - DIGITS_BOUND));
+                result = (char) ('a' + (index - DIGITS_BOUND));
             } else {
-                result = (char) ((int) 'A' + (index - LOWERCASE_BOUND));
+                result = (char) ('A' + (index - LOWERCASE_BOUND));
             }
 
             pwd[i] = result;

@@ -54,6 +54,7 @@ import com.github.dockerjava.api.command.InspectImageResponse;
 import com.github.dockerjava.api.command.PullImageCmd;
 import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.exception.NotModifiedException;
+import com.github.dockerjava.api.model.AccessMode;
 import com.github.dockerjava.api.model.AuthConfig;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Container;
@@ -84,6 +85,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private static final String UNABLE_TO_CONNECT_TO_DOCKER_CLI = "Unable to connect to docker cli";
     private static final Logger logger = LoggerFactory.getLogger(ContainerOrchestrationServiceImpl.class);
     private static final String APP_ID = "org.eclipse.kura.container.orchestration.provider.ConfigurableDocker";
+    private static final String READ_ONLY_VOLUME_SUFFIX = ":ro";
 
     private ContainerOrchestrationServiceOptions currentConfig;
 
@@ -774,11 +776,20 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
             for (Map.Entry<String, String> element : containerDescription.getContainerVolumes().entrySet()) {
                 // source: path on host (key)
-                // destination: path in container (value)
+                // destination: path in container (value), optionally suffixed with ":ro" for a
+                // read-only bind; the suffix is an internal convention used by
+                // org.eclipse.kura.container.provider and cannot be produced from user configuration
                 if (!element.getKey().isEmpty() && !element.getValue().isEmpty()) {
-                    Volume tempVolume = new Volume(element.getValue());
-                    Bind tempBind = new Bind(element.getKey(), tempVolume);
-                    bindsToAdd.add(tempBind);
+                    String containerPath = element.getValue();
+                    AccessMode accessMode = AccessMode.DEFAULT;
+                    if (containerPath.endsWith(READ_ONLY_VOLUME_SUFFIX)) {
+                        containerPath = containerPath.substring(0,
+                                containerPath.length() - READ_ONLY_VOLUME_SUFFIX.length());
+                        accessMode = AccessMode.ro;
+                    }
+                    if (!containerPath.isEmpty()) {
+                        bindsToAdd.add(new Bind(element.getKey(), new Volume(containerPath), accessMode));
+                    }
                 }
             }
             hostConfiguration = hostConfiguration.withBinds(bindsToAdd);

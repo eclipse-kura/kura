@@ -20,6 +20,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,6 +74,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private static final String CONTAINER_IDENTITY_PREFIX = "container_";
     private static final int MAX_IDENTITY_NAME_LENGTH = 255;
     private static final int MAX_IDENTITY_NAME_GENERATION_ATTEMPTS = 10;
+    private static final String CONTAINER_TOKEN_PATH = "/run/secrets/kura-token";
+    private static final String READ_ONLY_VOLUME_SUFFIX = ":ro";
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -86,6 +89,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private ContainerInstanceOptions currentOptions = null;
     private final AtomicReference<String> currentTemporaryIdentityName = new AtomicReference<>();
     private final AtomicReference<char[]> currentTemporaryPassword = new AtomicReference<>();
+    private final TokenFileManager tokenFileManager = new TokenFileManager();
 
     public void setContainerOrchestrationService(final ContainerOrchestrationService containerOrchestrationService) {
         this.containerOrchestrationService = containerOrchestrationService;
@@ -377,25 +381,30 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         }
 
         private ContainerConfiguration getContainerConfigurationWithCredentials(
-                final ContainerInstanceOptions options) {
+                final ContainerInstanceOptions options) throws KuraException {
             ContainerConfiguration baseConfig = options.getContainerConfiguration();
 
             final String identityName = ContainerInstance.this.currentTemporaryIdentityName.get();
             final char[] password = ContainerInstance.this.currentTemporaryPassword.get();
 
             if (options.isIdentityIntegrationEnabled() && password != null && identityName != null) {
+                final Path tokenFile = ContainerInstance.this.tokenFileManager.writeToken(password);
+
                 final List<String> envVars = new ArrayList<>(baseConfig.getContainerEnvVars());
                 envVars.add("KURA_IDENTITY_NAME=" + identityName);
-                envVars.add("KURA_IDENTITY_PASSWORD=" + new String(password));
+                envVars.add("KURA_TOKEN_FILE=" + CONTAINER_TOKEN_PATH);
 
                 String restBaseUrl = buildRestBaseUrl(options);
                 envVars.add("KURA_REST_BASE_URL=" + restBaseUrl);
                 logger.info("Setting container REST base URL to: {}", restBaseUrl);
 
+                final Map<String, String> volumes = new HashMap<>(baseConfig.getContainerVolumes());
+                volumes.put(tokenFile.toAbsolutePath().toString(), CONTAINER_TOKEN_PATH + READ_ONLY_VOLUME_SUFFIX);
+
                 return ContainerConfiguration.builder().setContainerName(baseConfig.getContainerName())
                         .setImageConfiguration(baseConfig.getImageConfiguration())
                         .setContainerPorts(baseConfig.getContainerPorts()).setEnvVars(envVars)
-                        .setVolumes(baseConfig.getContainerVolumes())
+                        .setVolumes(volumes)
                         .setPrivilegedMode(baseConfig.isContainerPrivileged())
                         .setDeviceList(baseConfig.getContainerDevices())
                         .setFrameworkManaged(baseConfig.isFrameworkManaged())
@@ -584,7 +593,15 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             int retryInterval = options.getRetryInterval();
 
             createTemporaryIdentityIfEnabled(options);
-            final ContainerConfiguration containerConfiguration = getContainerConfigurationWithCredentials(options);
+            final ContainerConfiguration containerConfiguration;
+            try {
+                containerConfiguration = getContainerConfigurationWithCredentials(options);
+            } catch (final KuraException e) {
+                logger.error("Failed to prepare the credential token file for container {}, aborting startup",
+                        options.getContainerName(), e);
+                updateState(State::onStartupFailure);
+                return;
+            }
 
             int retries = 0;
             while ((unlimitedRetries || retries < maxRetries) && !Thread.currentThread().isInterrupted()) {
@@ -934,6 +951,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private void cleanupTemporaryIdentity() {
         final String identityName = this.currentTemporaryIdentityName.getAndSet(null);
         clearTemporaryPassword();
+        this.tokenFileManager.cleanup();
 
         if (identityName != null && this.identityService != null) {
             try {

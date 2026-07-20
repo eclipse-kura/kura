@@ -60,6 +60,7 @@ nav:
         - Container Orchestration Provider: core-services/container-orchestration-provider.md
         - Container Orchestration Provider APIs: core-services/container-orchestration-provider-apis.md
         - Container Orchestration Provider Usage: core-services/container-orchestration-provider-usage.md
+        - Container Identity Credentials Migration: core-services/container-orchestration-provider-identity-migration.md
         - Container Orchestration Provider Authenticated Registries: core-services/container-orchestration-provider-authenticated-registries.md
         - Container Image Authenticity and Allowlist Enforcement: core-services/container-orchestration-image-auth.md
       - Nvidia™ Triton Server Inference Engine: core-services/nvidia-triton-server-inference-engine.md

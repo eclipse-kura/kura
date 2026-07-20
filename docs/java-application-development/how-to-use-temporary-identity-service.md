@@ -81,8 +81,10 @@ public class TemporaryIdentityExample {
 
 ## REST Authentication Example
 
+When the Container Orchestration Provider provisions a temporary identity for a container, it delivers the password through a read-only file whose path is exported in the `KURA_TOKEN_FILE` environment variable (see [Container Identity Integration](/core-services/container-orchestration-provider-usage/#container-identity-integration)):
+
 ```bash
-curl -k -u "${KURA_IDENTITY_NAME}:${KURA_IDENTITY_PASSWORD}" \
+curl -k -u "${KURA_IDENTITY_NAME}:$(cat "${KURA_TOKEN_FILE}")" \
   "${KURA_REST_BASE_URL}/system/info"
 ```
 

@@ -47,7 +47,9 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
+import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.container.orchestration.ContainerState;
 import org.eclipse.kura.identity.AssignedPermissions;
 import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityService;
@@ -78,6 +80,7 @@ public class ContainerIdentityIntegrationTest {
     private static final String PERMISSIONS = "rest.read,rest.write";
     private static final String CONTAINER_ID = "container-id";
     private static final String SECOND_CONTAINER_ID = "container-id-2";
+    private static final String SURVIVING_CONTAINER_ID = "surviving-container-id";
     private static final String UPDATED_CONTAINER_NAME = CONTAINER_NAME + "-v2";
     private static final String INVALID_CONTAINER_NAME = "....@@@....";
     private static final String TMPFS_BASE_PROPERTY = "kura.tmpfs.base";
@@ -372,6 +375,20 @@ public class ContainerIdentityIntegrationTest {
         thenTemporaryPasswordIsCleared();
     }
 
+    @Test
+    public void recreatesSurvivingContainerToRefreshCredentialsOnStartup() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentityServiceProvidesPassword();
+        givenSurvivingContainerExists(SURVIVING_CONTAINER_ID);
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivated();
+
+        thenSurvivingContainerIsRecreated(SURVIVING_CONTAINER_ID);
+        thenStartContainerReceivesTokenEnvironment();
+        thenStartContainerReceivesReadOnlyTokenVolume();
+    }
+
     /*
      * GIVEN
      */
@@ -502,6 +519,14 @@ public class ContainerIdentityIntegrationTest {
 
     private void givenUserConfiguredVolume() {
         this.properties.put("container.volume", "/host/data:/container/data");
+    }
+
+    private void givenSurvivingContainerExists(final String containerId) {
+        final ContainerInstanceDescriptor descriptor = ContainerInstanceDescriptor.builder()
+                .setContainerName(CONTAINER_NAME).setContainerImage(CONTAINER_IMAGE).setContainerID(containerId)
+                .setContainerState(ContainerState.ACTIVE).build();
+        when(this.containerOrchestrationService.listContainerDescriptors())
+                .thenReturn(Collections.singletonList(descriptor));
     }
 
     private void givenMissingTmpfsBase() {
@@ -752,6 +777,12 @@ public class ContainerIdentityIntegrationTest {
     private void thenContainerIsNeverStarted() throws Exception {
         verify(this.containerOrchestrationService, Mockito.never())
                 .startContainer(Mockito.any(ContainerConfiguration.class));
+    }
+
+    private void thenSurvivingContainerIsRecreated(final String containerId) throws Exception {
+        assertTrue("Container start was not invoked", this.startLatch.await(2, TimeUnit.SECONDS));
+        verify(this.containerOrchestrationService).stopContainer(containerId);
+        verify(this.containerOrchestrationService).deleteContainer(containerId);
     }
 
     private Path tokenHostPathOf(final ContainerConfiguration configuration) {

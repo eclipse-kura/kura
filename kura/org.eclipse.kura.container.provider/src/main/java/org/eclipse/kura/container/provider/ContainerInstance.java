@@ -593,6 +593,11 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             int retryInterval = options.getRetryInterval();
 
             createTemporaryIdentityIfEnabled(options);
+
+            if (options.isIdentityIntegrationEnabled()) {
+                recreateSurvivingContainerForCredentialRefresh(options);
+            }
+
             final ContainerConfiguration containerConfiguration;
             try {
                 containerConfiguration = getContainerConfigurationWithCredentials(options);
@@ -633,6 +638,43 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             updateState(State::onStartupFailure);
 
             logger.warn("Unable to start microservice...giving up");
+        }
+
+        private void recreateSurvivingContainerForCredentialRefresh(final ContainerInstanceOptions options) {
+            // On a framework restart the temporary identity minted for this container is lost
+            // (identities live only in memory), leaving a surviving container with credentials that
+            // no longer authenticate and with a now-orphaned token file. Delete it so it is recreated
+            // below with the freshly minted identity and its matching read-only token bind.
+            final Optional<ContainerInstanceDescriptor> existing;
+            try {
+                existing = getExistingContainerByName(options.getContainerName());
+            } catch (final Exception e) {
+                logger.warn("Failed to look up existing container {} for credential refresh",
+                        options.getContainerName(), e);
+                return;
+            }
+
+            if (!existing.isPresent()) {
+                return;
+            }
+
+            final String containerId = existing.get().getContainerId();
+            logger.info("Recreating container {} to apply refreshed identity credentials",
+                    options.getContainerName());
+
+            try {
+                ContainerInstance.this.containerOrchestrationService.stopContainer(containerId);
+            } catch (final Exception e) {
+                logger.warn("Failed to stop stale container {} during credential refresh",
+                        options.getContainerName(), e);
+            }
+
+            try {
+                ContainerInstance.this.containerOrchestrationService.deleteContainer(containerId);
+            } catch (final Exception e) {
+                logger.warn("Failed to delete stale container {} during credential refresh",
+                        options.getContainerName(), e);
+            }
         }
 
         private String buildRestBaseUrl(ContainerInstanceOptions options) {

@@ -44,7 +44,7 @@ node {
         timeout(time: 3, unit: 'HOURS') {
             dir("kura") {
                 withMaven(jdk: 'temurin-jdk21-latest', maven: 'apache-maven-3.9.9', options: [artifactsPublisher(disabled: true)]) {
-                    sh "mvn clean install -Pcheck-exists-plugin"
+                    sh "mvn clean install -Pcheck-exists-plugin -Ptests"
                 }
             }
         }

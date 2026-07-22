@@ -52,10 +52,12 @@ node {
 
     stage('Generate test reports') {
         dir("kura") {
-            // bnd-testing writes its JUnit XML under <bndrun-name>/ (integration-test/); since the
-            // read-only reportsDir is no longer configured it uses the plugin default (test-reports).
-            // Match both the old (surefire-reports) and default (test-reports) locations recursively.
-            junit 'test/*/target/surefire-reports/**/TEST-*.xml, test/*/target/test-reports/**/TEST-*.xml'
+            // Three sources of JUnit XML, all published:
+            //  - unit tests moved into the kura/ bundles run under surefire (surefire-reports);
+            //  - the test/ reactor's pure-unit modules also run under surefire (surefire-reports);
+            //  - the test/ reactor's bnd-testing integration modules write to the plugin default
+            //    (test-reports) since the read-only reportsDir is no longer configured.
+            junit 'kura/**/target/surefire-reports/**/TEST-*.xml, test/*/target/surefire-reports/**/TEST-*.xml, test/*/target/test-reports/**/TEST-*.xml'
         }
     }
 

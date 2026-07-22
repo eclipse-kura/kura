@@ -85,25 +85,16 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.commons/commons-lang3/3.19.0, Apache-2.0, approved, #23560
 * maven/mavencentral/org.apache.felix/org.apache.felix.dependencymanager/3.0.0, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.felix/org.apache.felix.deploymentadmin/0.9.5, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/org.apache.geronimo.specs/geronimo-jms_2.0_spec/1.0-alpha-2, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.httpcomponents.core5/httpcore5-h2/5.3.4, Apache-2.0, approved, #16867
 * maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.5, Apache-2.0 AND MPL-2.0, approved, #24483
 * maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.3.4, Apache-2.0, approved, #16866
 * maven/mavencentral/org.apache.logging.log4j/log4j-api/2.25.3, Apache-2.0, approved, #21940
 * maven/mavencentral/org.apache.logging.log4j/log4j-core/2.25.3, Apache-2.0 AND (Apache-2.0 AND LGPL-2.0-or-later), approved, #21939
 * maven/mavencentral/org.apache.logging.log4j/log4j-slf4j2-impl/2.25.3, Apache-2.0, approved, #21938
-* maven/mavencentral/org.apache.qpid/proton-j/0.33.2, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/org.apache.qpid/qpid-jms-client/0.45.0, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-beans/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16239
-* maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context/4.3.20.RELEASE_1, , approved, CQ16240
-* maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-core/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16241
-* maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-expression/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16242
-* maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jms/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16243
-* maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-tx/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16244
 * maven/mavencentral/org.bouncycastle/bcpg-jdk18on/1.84, Apache-2.0, approved, #27145
 * maven/mavencentral/org.bouncycastle/bcpkix-jdk18on/1.84, MIT, approved, #27142
 * maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.84, MIT AND CC0-1.0, approved, #27143
-* maven/mavencentral/org.bouncycastle/bctls-jdk18on/1.78.1, MIT, approved, #14676
+* maven/mavencentral/org.bouncycastle/bctls-jdk18on/1.84, MIT, approved, #29890
 * maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.84, MIT, approved, #27144
 * maven/mavencentral/org.eclipse.milo/sdk-client/0.6.8, EPL-2.0, approved, iot.milo
 * maven/mavencentral/org.eclipse.milo/sdk-core/0.6.8, EPL-2.0, approved, iot.milo

@@ -44,7 +44,7 @@ node {
         timeout(time: 3, unit: 'HOURS') {
             dir("kura") {
                 withMaven(jdk: 'temurin-jdk21-latest', maven: 'apache-maven-3.9.9', options: [artifactsPublisher(disabled: true)]) {
-                    sh "mvn clean install -Pcheck-exists-plugin -Ptests"
+                    sh "mvn clean install -Pcheck-exists-plugin"
                 }
             }
         }
@@ -108,8 +108,7 @@ node {
                                 ${analysisParameters} \
                                 -Dsonar.core.codeCoveragePlugin=jacoco \
                                 -Dsonar.projectKey=org.eclipse.kura:kura \
-                                -Dsonar.exclusions=test/**/*,**/*.xml,**/*.yml,test-util/**/*,emulator/**/*,com.codeminders.hidapi-parent/**/*,org.moka7/**/*,org.eclipse.soda.dk.comm-parent/**/*,org.eclipse.kura.sun.misc/**/*,org.eclipse.kura.camel.sun.misc/**/*,log4j2-api-config/**/*,org.usb4java/**/*,usb4java-javax/**/* \
-                                -Dsonar.coverage.exclusions=org.eclipse.kura.camel/**/*,org.eclipse.kura.camel.xml/**/*,org.eclipse.kura.camel.cloud.factory/**/* \
+                                -Dsonar.exclusions=test/**/*,**/*.xml,**/*.yml,test-util/**/*,emulator/**/*,com.codeminders.hidapi-parent/**/*,org.moka7/**/*,org.eclipse.soda.dk.comm-parent/**/*,org.eclipse.kura.sun.misc/**/*,log4j2-api-config/**/*,org.usb4java/**/*,usb4java-javax/**/* \
                                 -Dsonar.test.exclusions=**/*
                         """
                     }

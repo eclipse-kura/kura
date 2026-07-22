@@ -31,10 +31,13 @@ import java.util.Objects;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.identity.IdentityService;
+import org.eclipse.kura.identity.IdentityTokenService;
 import org.eclipse.kura.identity.LoginBannerService;
 import org.eclipse.kura.identity.PasswordStrengthVerificationService;
 import org.eclipse.kura.internal.rest.auth.BasicAuthenticationProvider;
 import org.eclipse.kura.internal.rest.auth.CertificateAuthenticationProvider;
+import org.eclipse.kura.internal.rest.auth.JwtAuthenticationProvider;
+import org.eclipse.kura.internal.rest.auth.JwtRestService;
 import org.eclipse.kura.internal.rest.auth.RestIdentityHelper;
 import org.eclipse.kura.internal.rest.auth.RestSessionHelper;
 import org.eclipse.kura.internal.rest.auth.SessionAuthProvider;
@@ -79,14 +82,17 @@ public class RestService implements ConfigurableComponent {
 
     private AuthenticationProvider basicAuthProvider;
     private AuthenticationProvider certificateAuthProvider;
-
     private SessionAuthProvider sessionAuthenticationProvider;
+    private AuthenticationProvider jwtAuthenticationProvider;
+
     private SessionRestService authRestService;
+    private JwtRestService jwtRestService;
 
     private final IncomingPortCheckFilter incomingPortCheckFilter = new IncomingPortCheckFilter();
     private final AuthenticationFilter authenticationFilter = new AuthenticationFilter();
     private PasswordStrengthVerificationService passwordStrengthVerificationService;
     private LoginBannerService loginBannerService;
+    private IdentityTokenService tokenService;
 
     @Reference
     public void setIdentityService(final IdentityService identityService) {
@@ -108,6 +114,11 @@ public class RestService implements ConfigurableComponent {
     @Reference
     public void setLoginBannerService(LoginBannerService loginBannerService) {
         this.loginBannerService = loginBannerService;
+    }
+
+    @Reference
+    public void setIdentityTokenService(IdentityTokenService tokenService) {
+        this.tokenService = tokenService;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -150,11 +161,15 @@ public class RestService implements ConfigurableComponent {
                 restSessionHelper,
                 new HashSet<>(Arrays.asList(BASE_PATH + CHANGE_PASSWORD_PATH, BASE_PATH + XSRF_TOKEN_PATH)),
                 Collections.singleton(BASE_PATH + XSRF_TOKEN_PATH));
+        this.jwtAuthenticationProvider = new JwtAuthenticationProvider(identityHelper, this.tokenService);
 
         this.authRestService = new SessionRestService(identityHelper, restSessionHelper, this.configurationAdmin,
                 this.passwordStrengthVerificationService, this.loginBannerService);
+        this.jwtRestService = new JwtRestService(identityHelper, this.tokenService);
 
         this.registeredServices.add(bundleContext.registerService(SessionRestService.class, this.authRestService,
+                RestServiceUtils.resourceProperties()));
+        this.registeredServices.add(bundleContext.registerService(JwtRestService.class, this.jwtRestService,
                 RestServiceUtils.resourceProperties()));
         this.registeredServices.add(
                 bundleContext.registerService(ExceptionMapper.class, new RestExceptionMapper(), serviceProperties));
@@ -237,6 +252,8 @@ public class RestService implements ConfigurableComponent {
         if (options.isSessionManagementEnabled()) {
             bindAuthenticationProvider(this.sessionAuthenticationProvider);
         }
+
+        bindAuthenticationProvider(this.jwtAuthenticationProvider);
     }
 
 }

@@ -507,9 +507,7 @@
                                     <!-- netty-plugins --> 
                                     netty-common, netty-codec-http, netty-codec, netty-transport, netty-buffer,
                                     netty-transport-classes-epoll, netty-resolver, netty-handler,
-                                    netty-transport-classes-kqueue, netty-transport-native-epoll,
-                                    netty-codec-mqtt, netty-transport-native-kqueue,
-                                    netty-transport-native-unix-common,
+                                    netty-codec-mqtt,
                                     netty-codec-socks,
                                     netty-handler-proxy,
                                     <!-- api-plugins -->
@@ -684,6 +682,22 @@
                         </execution>
 
                         <!-- Linux Plugins -->
+                        <execution>
+                            <id>linux-plugins-3</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <classifier>linux-${alt.native.tag}</classifier>
+                                <outputDirectory>${project.build.directory}/pkg/plugins/3</outputDirectory>
+                                <skip>${exclude.linux.plugins}</skip>
+                                <includeArtifactIds>
+                                    netty-transport-native-unix-common,
+                                    netty-transport-native-epoll
+                                </includeArtifactIds>
+                            </configuration>
+                        </execution>
                         <execution>
                             <id>linux-plugins-4</id>
                             <phase>generate-sources</phase>

@@ -31,6 +31,7 @@
     <properties>
         <kura.basedir>../</kura.basedir>
         <kura.arch>x86_64</kura.arch>
+        <alt.native.tag>x86_64</alt.native.tag>
         <target.device>${kura.arch}</target.device>
         <arch>${kura.arch}</arch>
         <deb.name>kura-core</deb.name>

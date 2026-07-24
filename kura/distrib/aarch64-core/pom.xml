@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2025 Eurotech and/or its affiliates and others
+    Copyright (c) 2025, 2026 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -31,6 +31,7 @@
     <properties>
         <kura.basedir>../</kura.basedir>
         <kura.arch>aarch64</kura.arch>
+        <alt.native.tag>aarch_64</alt.native.tag>
         <target.device>${kura.arch}</target.device>
         <arch>${kura.arch}</arch>
         <deb.name>kura-core</deb.name>

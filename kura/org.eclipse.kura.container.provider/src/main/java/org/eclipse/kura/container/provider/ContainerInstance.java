@@ -599,7 +599,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             createTemporaryIdentityIfEnabled(options);
 
             if (options.isIdentityIntegrationEnabled()) {
-                recreateSurvivingContainerForCredentialRefresh(options);
+                deleteSurvivingContainerForCredentialRefresh(options);
             }
 
             final ContainerConfiguration containerConfiguration;
@@ -644,11 +644,12 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             logger.warn("Unable to start microservice...giving up");
         }
 
-        private void recreateSurvivingContainerForCredentialRefresh(final ContainerInstanceOptions options) {
+        private void deleteSurvivingContainerForCredentialRefresh(final ContainerInstanceOptions options) {
             // On a framework restart the temporary identity minted for this container is lost
             // (identities live only in memory), leaving a surviving container with credentials that
-            // no longer authenticate and with a now-orphaned token file. Delete it so it is recreated
-            // below with the freshly minted identity and its matching read-only token bind.
+            // no longer authenticate and with a now-orphaned token file. Delete it here so the normal
+            // startup flow below recreates it with the freshly minted identity and its matching
+            // read-only token bind.
             final Optional<ContainerInstanceDescriptor> existing;
             try {
                 existing = getExistingContainerByName(options.getContainerName());
@@ -663,7 +664,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             }
 
             final String containerId = existing.get().getContainerId();
-            logger.info("Recreating container {} to apply refreshed identity credentials",
+            logger.info("Deleting stale container {} to apply refreshed identity credentials on restart",
                     options.getContainerName());
 
             try {

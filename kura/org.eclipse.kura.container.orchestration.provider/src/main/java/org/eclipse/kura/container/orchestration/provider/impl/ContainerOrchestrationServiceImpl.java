@@ -769,13 +769,14 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private HostConfig containerVolumeMangamentHandler(ContainerConfiguration containerDescription,
             HostConfig hostConfiguration) {
 
-        if (containerDescription.getContainerVolumes().isEmpty()) {
+        final Map<String, String> containerVolumes = containerDescription.getContainerVolumes();
+        if (containerVolumes == null || containerVolumes.isEmpty()) {
             return hostConfiguration;
         }
 
         List<Bind> bindsToAdd = new LinkedList<>();
 
-        for (Map.Entry<String, String> element : containerDescription.getContainerVolumes().entrySet()) {
+        for (Map.Entry<String, String> element : containerVolumes.entrySet()) {
             // source: path on host (key)
             // destination: path in container (value), optionally suffixed with ":ro" for a
             // read-only bind; the suffix is an internal convention used by
@@ -787,23 +788,23 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     }
 
-    private static Optional<Bind> volumeBind(String hostPath, String containerPathSpec) {
+    private static Optional<Bind> volumeBind(final String hostPath, final String containerPathSpec) {
         if (hostPath.isEmpty() || containerPathSpec.isEmpty()) {
             return Optional.empty();
         }
 
-        String containerPath = containerPathSpec;
-        AccessMode accessMode = AccessMode.DEFAULT;
-        if (containerPath.endsWith(READ_ONLY_VOLUME_SUFFIX)) {
-            containerPath = containerPath.substring(0, containerPath.length() - READ_ONLY_VOLUME_SUFFIX.length());
-            accessMode = AccessMode.ro;
-        }
+        final boolean readOnly = containerPathSpec.endsWith(READ_ONLY_VOLUME_SUFFIX);
+        final String containerPath = readOnly
+                ? containerPathSpec.substring(0, containerPathSpec.length() - READ_ONLY_VOLUME_SUFFIX.length())
+                : containerPathSpec;
 
+        // a value consisting only of the ":ro" suffix leaves an empty container path once stripped: it carries
+        // no real mount, so the entry is dropped here (distinct from the empty-spec guard above)
         if (containerPath.isEmpty()) {
             return Optional.empty();
         }
 
-        return Optional.of(new Bind(hostPath, new Volume(containerPath), accessMode));
+        return Optional.of(new Bind(hostPath, new Volume(containerPath), readOnly ? AccessMode.ro : AccessMode.DEFAULT));
     }
 
     private HostConfig containerDevicesHandler(ContainerConfiguration containerDescription,

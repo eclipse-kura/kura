@@ -54,6 +54,7 @@ import com.github.dockerjava.api.command.InspectImageResponse;
 import com.github.dockerjava.api.command.PullImageCmd;
 import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.exception.NotModifiedException;
+import com.github.dockerjava.api.model.AccessMode;
 import com.github.dockerjava.api.model.AuthConfig;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Container;
@@ -84,6 +85,11 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private static final String UNABLE_TO_CONNECT_TO_DOCKER_CLI = "Unable to connect to docker cli";
     private static final Logger logger = LoggerFactory.getLogger(ContainerOrchestrationServiceImpl.class);
     private static final String APP_ID = "org.eclipse.kura.container.orchestration.provider.ConfigurableDocker";
+    // Internal convention shared with ContainerInstance (a separate bundle): a volume whose container path ends
+    // with ":ro" is bind-mounted read-only. The constant is intentionally duplicated there rather than exported
+    // through the orchestration API, as it is an implementation detail of how these two bundles cooperate and not
+    // part of the public container.volume contract.
+    private static final String READ_ONLY_VOLUME_SUFFIX = ":ro";
 
     private ContainerOrchestrationServiceOptions currentConfig;
 
@@ -763,30 +769,42 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private HostConfig containerVolumeMangamentHandler(ContainerConfiguration containerDescription,
             HostConfig hostConfiguration) {
 
-        if (containerDescription.getContainerVolumes().isEmpty()) {
+        final Map<String, String> containerVolumes = containerDescription.getContainerVolumes();
+        if (containerVolumes == null || containerVolumes.isEmpty()) {
             return hostConfiguration;
         }
 
         List<Bind> bindsToAdd = new LinkedList<>();
 
-        if (containerDescription.getContainerVolumes() != null
-                && !containerDescription.getContainerVolumes().isEmpty()) {
-
-            for (Map.Entry<String, String> element : containerDescription.getContainerVolumes().entrySet()) {
-                // source: path on host (key)
-                // destination: path in container (value)
-                if (!element.getKey().isEmpty() && !element.getValue().isEmpty()) {
-                    Volume tempVolume = new Volume(element.getValue());
-                    Bind tempBind = new Bind(element.getKey(), tempVolume);
-                    bindsToAdd.add(tempBind);
-                }
-            }
-            hostConfiguration = hostConfiguration.withBinds(bindsToAdd);
-
+        for (Map.Entry<String, String> element : containerVolumes.entrySet()) {
+            // source: path on host (key)
+            // destination: path in container (value), optionally suffixed with ":ro" for a
+            // read-only bind; the suffix is an internal convention used by
+            // org.eclipse.kura.container.provider and cannot be produced from user configuration
+            volumeBind(element.getKey(), element.getValue()).ifPresent(bindsToAdd::add);
         }
 
-        return hostConfiguration;
+        return hostConfiguration.withBinds(bindsToAdd);
 
+    }
+
+    private static Optional<Bind> volumeBind(final String hostPath, final String containerPathSpec) {
+        if (hostPath.isEmpty() || containerPathSpec.isEmpty()) {
+            return Optional.empty();
+        }
+
+        final boolean readOnly = containerPathSpec.endsWith(READ_ONLY_VOLUME_SUFFIX);
+        final String containerPath = readOnly
+                ? containerPathSpec.substring(0, containerPathSpec.length() - READ_ONLY_VOLUME_SUFFIX.length())
+                : containerPathSpec;
+
+        // a value consisting only of the ":ro" suffix leaves an empty container path once stripped: it carries
+        // no real mount, so the entry is dropped here (distinct from the empty-spec guard above)
+        if (containerPath.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(new Bind(hostPath, new Volume(containerPath), readOnly ? AccessMode.ro : AccessMode.DEFAULT));
     }
 
     private HostConfig containerDevicesHandler(ContainerConfiguration containerDescription,

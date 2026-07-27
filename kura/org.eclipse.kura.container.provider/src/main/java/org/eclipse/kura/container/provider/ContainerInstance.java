@@ -20,6 +20,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,6 +74,12 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private static final String CONTAINER_IDENTITY_PREFIX = "container_";
     private static final int MAX_IDENTITY_NAME_LENGTH = 255;
     private static final int MAX_IDENTITY_NAME_GENERATION_ATTEMPTS = 10;
+    private static final String CONTAINER_TOKEN_PATH = "/run/secrets/kura-token";
+    // Internal convention shared with ContainerOrchestrationServiceImpl (a separate bundle): a volume whose
+    // container path ends with ":ro" is bind-mounted read-only. The constant is intentionally duplicated here
+    // rather than exported through the orchestration API, as it is an implementation detail of how these two
+    // bundles cooperate and not part of the public container.volume contract.
+    private static final String READ_ONLY_VOLUME_SUFFIX = ":ro";
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -86,6 +93,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private ContainerInstanceOptions currentOptions = null;
     private final AtomicReference<String> currentTemporaryIdentityName = new AtomicReference<>();
     private final AtomicReference<char[]> currentTemporaryPassword = new AtomicReference<>();
+    private final TokenFileManager tokenFileManager = new TokenFileManager();
 
     public void setContainerOrchestrationService(final ContainerOrchestrationService containerOrchestrationService) {
         this.containerOrchestrationService = containerOrchestrationService;
@@ -377,25 +385,30 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         }
 
         private ContainerConfiguration getContainerConfigurationWithCredentials(
-                final ContainerInstanceOptions options) {
+                final ContainerInstanceOptions options) throws KuraException {
             ContainerConfiguration baseConfig = options.getContainerConfiguration();
 
             final String identityName = ContainerInstance.this.currentTemporaryIdentityName.get();
             final char[] password = ContainerInstance.this.currentTemporaryPassword.get();
 
             if (options.isIdentityIntegrationEnabled() && password != null && identityName != null) {
+                final Path tokenFile = ContainerInstance.this.tokenFileManager.writeToken(password);
+
                 final List<String> envVars = new ArrayList<>(baseConfig.getContainerEnvVars());
                 envVars.add("KURA_IDENTITY_NAME=" + identityName);
-                envVars.add("KURA_IDENTITY_PASSWORD=" + new String(password));
+                envVars.add("KURA_TOKEN_FILE=" + CONTAINER_TOKEN_PATH);
 
                 String restBaseUrl = buildRestBaseUrl(options);
                 envVars.add("KURA_REST_BASE_URL=" + restBaseUrl);
                 logger.info("Setting container REST base URL to: {}", restBaseUrl);
 
+                final Map<String, String> volumes = new HashMap<>(baseConfig.getContainerVolumes());
+                volumes.put(tokenFile.toAbsolutePath().toString(), CONTAINER_TOKEN_PATH + READ_ONLY_VOLUME_SUFFIX);
+
                 return ContainerConfiguration.builder().setContainerName(baseConfig.getContainerName())
                         .setImageConfiguration(baseConfig.getImageConfiguration())
                         .setContainerPorts(baseConfig.getContainerPorts()).setEnvVars(envVars)
-                        .setVolumes(baseConfig.getContainerVolumes())
+                        .setVolumes(volumes)
                         .setPrivilegedMode(baseConfig.isContainerPrivileged())
                         .setDeviceList(baseConfig.getContainerDevices())
                         .setFrameworkManaged(baseConfig.isFrameworkManaged())
@@ -584,7 +597,20 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             int retryInterval = options.getRetryInterval();
 
             createTemporaryIdentityIfEnabled(options);
-            final ContainerConfiguration containerConfiguration = getContainerConfigurationWithCredentials(options);
+
+            if (options.isIdentityIntegrationEnabled()) {
+                deleteSurvivingContainerForCredentialRefresh(options);
+            }
+
+            final ContainerConfiguration containerConfiguration;
+            try {
+                containerConfiguration = getContainerConfigurationWithCredentials(options);
+            } catch (final KuraException e) {
+                logger.error("Failed to prepare the credential token file for container {}, aborting startup",
+                        options.getContainerName(), e);
+                updateState(State::onStartupFailure);
+                return;
+            }
 
             int retries = 0;
             while ((unlimitedRetries || retries < maxRetries) && !Thread.currentThread().isInterrupted()) {
@@ -616,6 +642,44 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             updateState(State::onStartupFailure);
 
             logger.warn("Unable to start microservice...giving up");
+        }
+
+        private void deleteSurvivingContainerForCredentialRefresh(final ContainerInstanceOptions options) {
+            // On a framework restart the temporary identity minted for this container is lost
+            // (identities live only in memory), leaving a surviving container with credentials that
+            // no longer authenticate and with a now-orphaned token file. Delete it here so the normal
+            // startup flow below recreates it with the freshly minted identity and its matching
+            // read-only token bind.
+            final Optional<ContainerInstanceDescriptor> existing;
+            try {
+                existing = getExistingContainerByName(options.getContainerName());
+            } catch (final Exception e) {
+                logger.warn("Failed to look up existing container {} for credential refresh",
+                        options.getContainerName(), e);
+                return;
+            }
+
+            if (!existing.isPresent()) {
+                return;
+            }
+
+            final String containerId = existing.get().getContainerId();
+            logger.info("Deleting stale container {} to apply refreshed identity credentials on restart",
+                    options.getContainerName());
+
+            try {
+                ContainerInstance.this.containerOrchestrationService.stopContainer(containerId);
+            } catch (final Exception e) {
+                logger.warn("Failed to stop stale container {} during credential refresh",
+                        options.getContainerName(), e);
+            }
+
+            try {
+                ContainerInstance.this.containerOrchestrationService.deleteContainer(containerId);
+            } catch (final Exception e) {
+                logger.warn("Failed to delete stale container {} during credential refresh",
+                        options.getContainerName(), e);
+            }
         }
 
         private String buildRestBaseUrl(ContainerInstanceOptions options) {
@@ -934,6 +998,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private void cleanupTemporaryIdentity() {
         final String identityName = this.currentTemporaryIdentityName.getAndSet(null);
         clearTemporaryPassword();
+        this.tokenFileManager.cleanup();
 
         if (identityName != null && this.identityService != null) {
             try {

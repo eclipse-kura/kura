@@ -15,6 +15,7 @@
 package org.eclipse.kura.container.provider;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -24,6 +25,10 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,7 +47,9 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
+import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.container.orchestration.ContainerState;
 import org.eclipse.kura.identity.AssignedPermissions;
 import org.eclipse.kura.identity.IdentityConfiguration;
 import org.eclipse.kura.identity.IdentityService;
@@ -56,7 +63,9 @@ import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetworkService;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -71,8 +80,16 @@ public class ContainerIdentityIntegrationTest {
     private static final String PERMISSIONS = "rest.read,rest.write";
     private static final String CONTAINER_ID = "container-id";
     private static final String SECOND_CONTAINER_ID = "container-id-2";
+    private static final String SURVIVING_CONTAINER_ID = "surviving-container-id";
     private static final String UPDATED_CONTAINER_NAME = CONTAINER_NAME + "-v2";
     private static final String INVALID_CONTAINER_NAME = "....@@@....";
+    private static final String TMPFS_BASE_PROPERTY = "kura.tmpfs.base";
+    private static final String TOKEN_VOLUME_VALUE = "/run/secrets/kura-token:ro";
+
+    @Rule
+    public TemporaryFolder tmpfsBase = new TemporaryFolder();
+
+    private String previousTmpfsBaseProperty;
 
     private ContainerInstance containerInstance;
     private ContainerOrchestrationService containerOrchestrationService;
@@ -94,6 +111,9 @@ public class ContainerIdentityIntegrationTest {
 
     @Before
     public void setUp() throws Exception {
+        this.previousTmpfsBaseProperty = System.getProperty(TMPFS_BASE_PROPERTY);
+        System.setProperty(TMPFS_BASE_PROPERTY, this.tmpfsBase.getRoot().getAbsolutePath());
+
         this.containerInstance = new ContainerInstance();
         this.containerOrchestrationService = Mockito.mock(ContainerOrchestrationService.class);
         this.identityService = Mockito.mock(IdentityService.class);
@@ -122,6 +142,12 @@ public class ContainerIdentityIntegrationTest {
     @After
     public void tearDown() {
         this.containerInstance.deactivate();
+
+        if (this.previousTmpfsBaseProperty != null) {
+            System.setProperty(TMPFS_BASE_PROPERTY, this.previousTmpfsBaseProperty);
+        } else {
+            System.clearProperty(TMPFS_BASE_PROPERTY);
+        }
     }
 
     @Test
@@ -257,6 +283,112 @@ public class ContainerIdentityIntegrationTest {
         thenRestBaseUrlIs("https://[fe80::7024:e3ff:feb9:997d%25docker0]:443/services");
     }
 
+    @Test
+    public void mountsTokenFileReadOnlyIntoContainer() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenUserConfiguredVolume();
+        givenTemporaryIdentityServiceProvidesPassword();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivated();
+
+        thenStartContainerReceivesReadOnlyTokenVolume();
+        thenStartContainerReceivesUserConfiguredVolume();
+    }
+
+    @Test
+    public void tokenFileSurvivesAfterContainerIsCreated() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentityServiceProvidesPassword();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivatedUntilCreated();
+
+        thenTemporaryPasswordIsCleared();
+        thenTokenFileContains(this.configurationCaptor.getValue(),
+                this.capturedPasswords.get(this.capturedPasswords.size() - 1));
+    }
+
+    @Test
+    public void deletesTokenFileWhenContainerIsDisabled() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentityServiceProvidesPassword();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivatedUntilCreated();
+        whenContainerInstanceIsDisabled();
+
+        awaitCounterAtLeast(this.deleteCount, 1);
+        thenTokenFileIsDeleted(this.configurationCaptor.getValue());
+    }
+
+    @Test
+    public void deletesTokenFileOnConfigurationChange() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentityServiceProvidesPassword();
+        givenContainerOrchestratorStartsSuccessfullyWithIds(CONTAINER_ID, SECOND_CONTAINER_ID);
+
+        whenContainerInstanceIsActivatedUntilCreated();
+        final ContainerConfiguration firstConfiguration = this.configurationCaptor.getValue();
+        whenContainerConfigurationIsUpdatedWithNewName();
+
+        awaitCounterAtLeast(this.startCount, 2);
+        thenTokenFileIsDeleted(firstConfiguration);
+        thenLatestContainerStartReceivesRefreshedPassword();
+    }
+
+    @Test
+    public void deletesTokenFileOnDeactivate() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentityServiceProvidesPassword();
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivatedUntilCreated();
+        whenContainerInstanceIsDeactivated();
+
+        thenTokenFileIsDeleted(this.configurationCaptor.getValue());
+    }
+
+    @Test
+    public void deletesTokenFileOnStartupFailure() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentityServiceProvidesPassword();
+        givenContainerOrchestratorFailsToStart();
+        givenFastRetryConfiguration();
+
+        whenContainerInstanceIsActivatedUntilDisabled();
+
+        thenTokenFileIsDeleted(this.configurationCaptor.getValue());
+    }
+
+    @Test
+    public void failsStartupWhenTmpfsBaseIsMissing() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentityServiceProvidesPassword();
+        givenContainerOrchestratorStartsSuccessfully();
+        givenMissingTmpfsBase();
+
+        whenContainerInstanceIsActivatedUntilDisabled();
+
+        awaitCounterAtLeast(this.deleteCount, 1);
+        thenContainerIsNeverStarted();
+        thenTemporaryPasswordIsCleared();
+    }
+
+    @Test
+    public void recreatesSurvivingContainerToRefreshCredentialsOnStartup() throws Exception {
+        givenIdentityIntegrationIsEnabled();
+        givenTemporaryIdentityServiceProvidesPassword();
+        givenSurvivingContainerExists(SURVIVING_CONTAINER_ID);
+        givenContainerOrchestratorStartsSuccessfully();
+
+        whenContainerInstanceIsActivated();
+
+        thenSurvivingContainerIsRecreated(SURVIVING_CONTAINER_ID);
+        thenStartContainerReceivesTokenEnvironment();
+        thenStartContainerReceivesReadOnlyTokenVolume();
+    }
+
     /*
      * GIVEN
      */
@@ -385,6 +517,23 @@ public class ContainerIdentityIntegrationTest {
         this.properties.put("container.image.download.interval", 0);
     }
 
+    private void givenUserConfiguredVolume() {
+        this.properties.put("container.volume", "/host/data:/container/data");
+    }
+
+    private void givenSurvivingContainerExists(final String containerId) {
+        final ContainerInstanceDescriptor descriptor = ContainerInstanceDescriptor.builder()
+                .setContainerName(CONTAINER_NAME).setContainerImage(CONTAINER_IMAGE).setContainerID(containerId)
+                .setContainerState(ContainerState.ACTIVE).build();
+        when(this.containerOrchestrationService.listContainerDescriptors())
+                .thenReturn(Collections.singletonList(descriptor));
+    }
+
+    private void givenMissingTmpfsBase() {
+        System.setProperty(TMPFS_BASE_PROPERTY,
+                Paths.get(this.tmpfsBase.getRoot().getAbsolutePath(), "missing").toString());
+    }
+
     private void givenHttpsServiceIsEnabledOnPort(final int port) throws Exception {
         final ComponentConfiguration componentConfiguration = Mockito.mock(ComponentConfiguration.class);
         final Map<String, Object> properties = new HashMap<>();
@@ -509,11 +658,15 @@ public class ContainerIdentityIntegrationTest {
 
         assertTrue("Identity name var missing",
                 envVars.contains("KURA_IDENTITY_NAME=" + latestIdentityName));
-        assertTrue("Password var missing",
-                envVars.contains("KURA_IDENTITY_PASSWORD=" + latestPassword));
+        assertTrue("Token file env var missing",
+                envVars.contains("KURA_TOKEN_FILE=/run/secrets/kura-token"));
+        assertTrue("Password must not be passed through the environment",
+                envVars.stream().noneMatch(envVar -> envVar.startsWith("KURA_IDENTITY_PASSWORD")));
         // Check that KURA_REST_BASE_URL is set (now dynamic, not hardcoded to localhost:8080)
         assertTrue("Base URL env var missing",
                 envVars.stream().anyMatch(envVar -> envVar.startsWith("KURA_REST_BASE_URL=")));
+
+        thenTokenFileContains(configuration, latestPassword);
     }
 
     private void thenTemporaryIdentityIsDeleted() throws Exception {
@@ -538,17 +691,15 @@ public class ContainerIdentityIntegrationTest {
         assertTrue("Container was not started twice", this.startLatch.await(5, TimeUnit.SECONDS));
     }
 
-    private void thenLatestContainerStartReceivesRefreshedPassword() {
+    private void thenLatestContainerStartReceivesRefreshedPassword() throws Exception {
         // Extract the latest token from captured IdentityConfiguration
         final String latestPassword = this.capturedPasswords.get(this.capturedPasswords.size() - 1);
 
-        // Verify the latest container start received this password
+        // Verify the latest token file contains this password
         final List<ContainerConfiguration> configurations = this.configurationCaptor.getAllValues();
         final ContainerConfiguration latestConfiguration = configurations.get(configurations.size() - 1);
-        final List<String> envVars = latestConfiguration.getContainerEnvVars();
 
-        assertTrue("Latest start should include refreshed token",
-                envVars.contains("KURA_IDENTITY_PASSWORD=" + latestPassword));
+        thenTokenFileContains(latestConfiguration, latestPassword);
     }
 
     private void thenTemporaryIdentityCreationIsRetriedWithSuffixedName() throws Exception {
@@ -587,6 +738,59 @@ public class ContainerIdentityIntegrationTest {
         for (char value : this.lastTemporaryPassword) {
             assertTrue("Temporary password array should be cleared", value == '\0');
         }
+    }
+
+    private void thenStartContainerReceivesReadOnlyTokenVolume() throws Exception {
+        assertTrue("Container start was not invoked", this.startLatch.await(2, TimeUnit.SECONDS));
+
+        final ContainerConfiguration configuration = this.configurationCaptor.getValue();
+        final Path tokenFile = tokenHostPathOf(configuration);
+
+        assertTrue("Token file should live under the tmpfs base",
+                tokenFile.startsWith(Paths.get(this.tmpfsBase.getRoot().getAbsolutePath(), "kura-tokens")));
+        assertEquals("Unexpected token file name", "kura-token", tokenFile.getFileName().toString());
+    }
+
+    private void thenStartContainerReceivesUserConfiguredVolume() {
+        final ContainerConfiguration configuration = this.configurationCaptor.getValue();
+
+        assertEquals("User configured volume should be preserved", "/container/data",
+                configuration.getContainerVolumes().get("/host/data"));
+    }
+
+    private void thenTokenFileContains(final ContainerConfiguration configuration, final String expectedPassword)
+            throws Exception {
+        final Path tokenFile = tokenHostPathOf(configuration);
+
+        assertTrue("Token file should exist", Files.exists(tokenFile));
+        assertEquals("Token file should contain only the password", expectedPassword,
+                new String(Files.readAllBytes(tokenFile), StandardCharsets.UTF_8));
+    }
+
+    private void thenTokenFileIsDeleted(final ContainerConfiguration configuration) {
+        final Path tokenFile = tokenHostPathOf(configuration);
+
+        assertFalse("Token file should be deleted", Files.exists(tokenFile));
+        assertFalse("Token directory should be deleted", Files.exists(tokenFile.getParent()));
+    }
+
+    private void thenContainerIsNeverStarted() throws Exception {
+        verify(this.containerOrchestrationService, Mockito.never())
+                .startContainer(Mockito.any(ContainerConfiguration.class));
+    }
+
+    private void thenSurvivingContainerIsRecreated(final String containerId) throws Exception {
+        assertTrue("Container start was not invoked", this.startLatch.await(2, TimeUnit.SECONDS));
+        verify(this.containerOrchestrationService).stopContainer(containerId);
+        verify(this.containerOrchestrationService).deleteContainer(containerId);
+    }
+
+    private Path tokenHostPathOf(final ContainerConfiguration configuration) {
+        return configuration.getContainerVolumes().entrySet().stream()
+                .filter(entry -> TOKEN_VOLUME_VALUE.equals(entry.getValue()))
+                .map(entry -> Paths.get(entry.getKey()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("token volume not found in container configuration"));
     }
 
     private void thenWaitForContainerState(String expectedState) throws InterruptedException {

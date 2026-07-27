@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022, 2024 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -44,6 +44,7 @@ import org.eclipse.kura.container.orchestration.PortInternetProtocol;
 import org.eclipse.kura.container.orchestration.provider.impl.ContainerOrchestrationServiceImpl;
 import org.junit.Test;
 import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -52,8 +53,11 @@ import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.ListContainersCmd;
 import com.github.dockerjava.api.command.ListImagesCmd;
+import com.github.dockerjava.api.model.AccessMode;
+import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ContainerPort;
+import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Image;
 
 public class ContainerOrchestrationServiceImplTest {
@@ -69,8 +73,8 @@ public class ContainerOrchestrationServiceImplTest {
     private static final String CONTAINER_ID_2 = "1f134f3s4";
     private static final String CONTAINER_ID_1 = "1f12d3s23";
 
-    private static final String DOCKER_HOST_URL = "dockerService.dockerHost";
-    private static final String IS_ENABLED = "dockerService.enabled";
+    private static final String DOCKER_HOST_URL = "container.engine.host";
+    private static final String IS_ENABLED = "enabled";
     private static final String DEFAULT_DOCKER_HOST_URL = "unix:///var/run/docker.sock";
     private static final boolean DEFAULT_IS_ENABLED = false;
 
@@ -297,6 +301,19 @@ public class ContainerOrchestrationServiceImplTest {
     }
 
     @Test
+    public void testCreateContainerWithReadOnlyTokenVolume() throws KuraException, InterruptedException {
+        givenFullProperties(true);
+        givenDockerServiceImpl();
+        givenDockerClient();
+
+        whenDockerClientMockHasNoContainers();
+        whenMockforContainerCreationWithReadOnlyTokenVolume();
+        whenRunContainer();
+
+        thenHostConfigContainsReadOnlyTokenBind();
+    }
+
+    @Test
     public void testStopContainer() throws KuraException, InterruptedException {
         givenFullProperties(true);
         givenDockerServiceImplSpy();
@@ -350,7 +367,9 @@ public class ContainerOrchestrationServiceImplTest {
     @Test
     public void testContainerInstanceDigestIsAddedToAllowlist() throws KuraException, InterruptedException {
 
-        givenFullProperties(true);
+        // keep the docker connection disabled so the service uses the injected mock client instead of opening a
+        // real connection; enforcement is driven by the separate enforcement.enabled property
+        givenFullProperties(false);
         givenEnforcementEnabledProperty(true);
         givenDockerServiceImplSpy();
         givenDockerClient();
@@ -368,7 +387,9 @@ public class ContainerOrchestrationServiceImplTest {
     public void testContainerInstanceDigestIsAddedToAndRemovedFromAllowlist()
             throws KuraException, InterruptedException {
 
-        givenFullProperties(true);
+        // keep the docker connection disabled so the service uses the injected mock client instead of opening a
+        // real connection; enforcement is driven by the separate enforcement.enabled property
+        givenFullProperties(false);
         givenEnforcementEnabledProperty(true);
         givenDockerServiceImplSpy();
         givenDockerClient();
@@ -410,12 +431,6 @@ public class ContainerOrchestrationServiceImplTest {
 
         this.properties.put(DOCKER_HOST_URL, DEFAULT_DOCKER_HOST_URL);
         this.properties.put(IS_ENABLED, b);
-
-        this.properties.put(REPOSITORY_ENABLED, DEFAULT_REPOSITORY_ENABLED);
-        this.properties.put(REPOSITORY_URL, DEFAULT_REPOSITORY_URL);
-        this.properties.put(REPOSITORY_USERNAME, DEFAULT_REPOSITORY_USERNAME);
-        this.properties.put(REPOSITORY_PASSWORD, DEFAULT_REPOSITORY_PASSWORD);
-        this.properties.put(IMAGES_DOWNLOAD_TIMEOUT, DEFAULT_IMAGES_DOWNLOAD_TIMEOUT);
     }
 
     private void givenFullProperties(boolean b, boolean customRepoEnabled) {
@@ -587,6 +602,42 @@ public class ContainerOrchestrationServiceImplTest {
 
     }
 
+    private void whenMockforContainerCreationWithReadOnlyTokenVolume() {
+
+        this.imageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName(IMAGE_NAME_NGINX)
+                .setImageTag(IMAGE_TAG_LATEST).setImageDownloadTimeoutSeconds(0)
+                .setRegistryCredentials(Optional.empty()).build();
+
+        Map<String, String> volumes = new HashMap<>();
+        volumes.put("test", "~/test/test");
+        volumes.put("/dev/shm/kura-tokens/uuid/kura-token", "/run/secrets/kura-token:ro");
+        volumes.put("/host/dropped", ":ro");
+
+        this.containerConfig1 = ContainerConfiguration.builder().setContainerName(CONTAINER_NAME_FRANK)
+                .setImageConfiguration(this.imageConfig).setVolumes(volumes).setLoggingType("NONE").build();
+
+        this.createContainerCmd = mock(CreateContainerCmd.class);
+        when(this.localDockerClient.createContainerCmd(anyString())).thenReturn(this.createContainerCmd);
+        when(this.createContainerCmd.withName(anyString())).thenReturn(this.createContainerCmd);
+        when(this.createContainerCmd.withEnv(anyList())).thenReturn(this.createContainerCmd);
+        when(this.createContainerCmd.withEntrypoint(anyList())).thenReturn(this.createContainerCmd);
+        when(this.createContainerCmd.withExposedPorts(anyList())).thenReturn(this.createContainerCmd);
+        when(this.createContainerCmd.withHostConfig(any())).thenReturn(this.createContainerCmd);
+
+        CreateContainerResponse response = new CreateContainerResponse();
+        response.setId("1d3dewf34r5");
+        when(this.createContainerCmd.exec()).thenReturn(response);
+
+        List<Image> images = new LinkedList<>();
+        Image mockImage = mock(Image.class);
+        when(mockImage.getRepoTags()).thenReturn(new String[] { IMAGE_NAME_NGINX, IMAGE_TAG_LATEST, "nginx:latest" });
+        images.add(mockImage);
+
+        when(this.localDockerClient.listImagesCmd()).thenReturn(mock(ListImagesCmd.class));
+        when(this.localDockerClient.listImagesCmd().exec()).thenReturn(images);
+
+    }
+
     private void whenMockForImageListing() {
         this.imageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName(IMAGE_NAME_NGINX)
                 .setImageTag(IMAGE_TAG_LATEST).setImageDownloadTimeoutSeconds(0)
@@ -731,6 +782,33 @@ public class ContainerOrchestrationServiceImplTest {
 
     private void thenTestIfNewContainerExists() {
         assertEquals(2, this.dockerService.listContainerDescriptors().size());
+    }
+
+    private void thenHostConfigContainsReadOnlyTokenBind() {
+        ArgumentCaptor<HostConfig> hostConfigCaptor = ArgumentCaptor.forClass(HostConfig.class);
+        verify(this.createContainerCmd).withHostConfig(hostConfigCaptor.capture());
+
+        Bind[] binds = hostConfigCaptor.getValue().getBinds();
+
+        assertEquals("The \":ro\"-only entry should be dropped", 2, binds.length);
+
+        Bind tokenBind = null;
+        Bind plainBind = null;
+        for (Bind bind : binds) {
+            if ("/run/secrets/kura-token".equals(bind.getVolume().getPath())) {
+                tokenBind = bind;
+            } else {
+                plainBind = bind;
+            }
+        }
+
+        assertTrue("Token bind should be present", tokenBind != null);
+        assertEquals("/dev/shm/kura-tokens/uuid/kura-token", tokenBind.getPath());
+        assertEquals("Token bind should be read-only", AccessMode.ro, tokenBind.getAccessMode());
+
+        assertTrue("Plain bind should be present", plainBind != null);
+        assertEquals("~/test/test", plainBind.getVolume().getPath());
+        assertEquals("Plain bind should keep the default access mode", AccessMode.DEFAULT, plainBind.getAccessMode());
     }
 
     private void thenTestIfNewContainerDoesNotExists() {

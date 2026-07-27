@@ -147,7 +147,7 @@ The result should be a single line with all the existing options plus the new on
 
 ## Container Identity Integration
 
-The Container Identity Integration feature allows containers to securely authenticate and interact with Kura's REST APIs using temporary credentials. When enabled, Kura automatically provisions a temporary identity and provides password-based credentials to the container, eliminating the need for manual credential configuration.
+The Container Identity Integration feature allows containers to securely authenticate and interact with Kura's REST APIs using temporary credentials. When enabled, Kura automatically provisions a temporary identity and delivers its credentials to the container through a read-only file mounted from an in-memory filesystem (tmpfs), eliminating the need for manual credential configuration and keeping the password out of the container's environment.
 
 ### Overview
 
@@ -155,21 +155,23 @@ When Identity Integration is enabled for a container instance, Kura performs the
 
 1. **Creates a Temporary Identity**: A temporary, non-persistent identity is created specifically for the container with a unique name based on the container name (e.g., `container_myapp` for a container named `myapp`).
 
-2. **Assigns Permissions**: The temporary identity is granted the permissions specified in the **Container Permissions** field.
+2. **Assigns Permissions**: The temporary identity is granted the permissions specified in the **Container Permissions** field. These are the same permissions used by Kura identities (for example `rest.system` or `rest.configuration`), so each name must reference a permission that already exists in the gateway.
 
 3. **Provides Credentials**: The container receives the following environment variables:
-   - `KURA_IDENTITY_NAME`: The temporary identity name for accessing Kura's REST APIs
-   - `KURA_IDENTITY_PASSWORD`: The temporary password for accessing Kura's REST APIs
-   - `KURA_REST_BASE_URL`: The complete base URL for Kura's REST API endpoints (e.g., `http://172.17.0.1:8080/services` or `https://172.17.0.1:443/services`)
+    - `KURA_IDENTITY_NAME`: The temporary identity name for accessing Kura's REST APIs
+    - `KURA_TOKEN_FILE`: The in-container path of a read-only file containing the temporary password (always `/run/secrets/kura-token`)
+    - `KURA_REST_BASE_URL`: The complete base URL for Kura's REST API endpoints (e.g., `http://172.17.0.1:8080/services` or `https://172.17.0.1:443/services`)
 
-4. **Automatic Cleanup**: When the container stops or is deleted, Kura automatically removes the temporary identity and invalidates its credentials.
+4. **Mounts a Secure Token File**: The temporary password is written to a file on an in-memory filesystem (tmpfs) on the host — `<base>/kura-tokens/<uuid>/kura-token`, where `<base>` defaults to `/dev/shm` — with owner-read-only permissions (`400`), and is mounted **read-only** into the container at `/run/secrets/kura-token`. Because the password is never placed in an environment variable, it does not appear in `docker inspect` or in `/proc/<pid>/environ`.
+
+5. **Automatic Cleanup**: When the container stops or is deleted, Kura automatically removes the temporary identity, invalidates its credentials, and deletes the token file and its parent directory from tmpfs.
 
 ### Features
 
 - **Zero Configuration**: Containers automatically receive the correct REST API URL based on the gateway's HTTPS configuration and network mode.
 - **Network-Aware**: The REST base URL is automatically adjusted based on the container's networking mode (bridge, host, etc.).
-- **Secure**: Credentials are temporary and automatically invalidated when containers stop.
-- **Non-Persistent**: Temporary identities exist only in memory and are never persisted to disk.
+- **Secure**: Credentials are temporary and automatically invalidated when containers stop. The password is delivered through a read-only tmpfs file, so it is not exposed via `docker inspect` or `/proc/<pid>/environ`.
+- **Non-Persistent**: Temporary identities exist only in memory and are never persisted to disk. The token file lives on tmpfs (RAM) and is cleared on reboot.
 - **Permission-Based**: Fine-grained access control using Kura's existing permission system.
 
 ### Configuration
@@ -183,6 +185,9 @@ To enable Identity Integration for a container:
 To use the temporary credentials with REST APIs, ensure **Basic Authentication Enabled** is set to `true` in the **RestService** configuration.
 
 The framework will create the temporary identity when the container starts and clean it up when the container stops.
+
+!!! note
+    The token file is written to an in-memory filesystem (tmpfs). The base directory is `/dev/shm` by default and can be changed with the `kura.tmpfs.base` system property. The platform must provide a writable tmpfs at that location: if it is missing, the container fails to start with a clear error message.
 
 ### Available Permissions
 
@@ -198,33 +203,107 @@ A monitoring container that needs to read system information but cannot modify c
 - **Identity Integration Enabled**: `true`
 - **Container Permissions**: `rest.system`
 
+**Container Code (Java):**
+```java
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Base64;
+
+public class SystemInfoExample {
+
+    public static void main(String[] args) throws Exception {
+        // Read the identity name and the REST base URL from the environment
+        String identityName = System.getenv("KURA_IDENTITY_NAME");
+        String baseUrl = System.getenv("KURA_REST_BASE_URL");
+
+        // Read the password from the read-only token file
+        String password = new String(Files.readAllBytes(Path.of(System.getenv("KURA_TOKEN_FILE"))));
+
+        // Make an authenticated request to get system information
+        String basicAuth = Base64.getEncoder()
+                .encodeToString((identityName + ":" + password).getBytes());
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/system/info"))
+                .header("Authorization", "Basic " + basicAuth)
+                .GET()
+                .build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient()
+                .send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            System.out.println("System info: " + response.body());
+        } else {
+            System.out.println("Failed to get system info: " + response.statusCode());
+        }
+    }
+}
+```
+
+The same flow can be implemented in other languages. In each case the identity name and REST base URL are read from the environment, while the password is read from the file referenced by `KURA_TOKEN_FILE`.
+
+!!! note
+    When Kura's REST endpoint uses HTTPS with a self-signed certificate, the client must either trust that certificate or disable TLS verification (the examples below disable verification for brevity). Prefer trusting the certificate in production.
+
 **Container Code (Python):**
 ```python
 import os
 import requests
 
-# Read credentials from environment variables
-identity_name = os.environ.get('KURA_IDENTITY_NAME')
-identity_password = os.environ.get('KURA_IDENTITY_PASSWORD')
-base_url = os.environ.get('KURA_REST_BASE_URL')
+identity_name = os.environ['KURA_IDENTITY_NAME']
+base_url = os.environ['KURA_REST_BASE_URL']
 
-# Make authenticated request to get system information
+with open(os.environ['KURA_TOKEN_FILE']) as token_file:
+    identity_password = token_file.read()
+
 response = requests.get(
     f'{base_url}/system/info',
-    auth=(identity_name, identity_password)
+    auth=(identity_name, identity_password),
+    verify=False
 )
-if response.status_code == 200:
-    system_info = response.json()
-    print(f"System info: {system_info}")
-else:
-    print(f"Failed to get system info: {response.status_code}")
+response.raise_for_status()
+print(response.json())
+```
+
+**Container Code (Shell):**
+```bash
+#!/bin/sh
+# KURA_IDENTITY_NAME, KURA_TOKEN_FILE and KURA_REST_BASE_URL are provided by Kura
+curl -k -u "${KURA_IDENTITY_NAME}:$(cat "${KURA_TOKEN_FILE}")" \
+  "${KURA_REST_BASE_URL}/system/info"
+```
+
+**Container Code (Node.js):**
+```javascript
+const fs = require('fs');
+
+const identityName = process.env.KURA_IDENTITY_NAME;
+const baseUrl = process.env.KURA_REST_BASE_URL;
+const password = fs.readFileSync(process.env.KURA_TOKEN_FILE, 'utf8');
+
+const auth = Buffer.from(`${identityName}:${password}`).toString('base64');
+
+// Allow self-signed certificates (development only)
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+fetch(`${baseUrl}/system/info`, {
+  headers: { Authorization: `Basic ${auth}` }
+})
+  .then((response) => response.json())
+  .then((info) => console.log(info))
+  .catch((error) => console.error(error));
 ```
 
 ### Best Practices
 
 1. **Principle of Least Privilege**: Only grant permissions that are absolutely necessary for the container's functionality.
 
-2. **Validate Environment Variables**: Always check that `KURA_IDENTITY_NAME`, `KURA_IDENTITY_PASSWORD`, and `KURA_REST_BASE_URL` are present before making API calls.
+2. **Validate Environment Variables and Token File**: Always check that `KURA_IDENTITY_NAME`, `KURA_TOKEN_FILE`, and `KURA_REST_BASE_URL` are present, and that the file referenced by `KURA_TOKEN_FILE` exists and is non-empty, before making API calls.
 
 3. **Handle Credential Lifecycle**: Be prepared for credentials to become invalid when the container is stopping or restarting.
 
@@ -241,12 +320,17 @@ else:
 **Container cannot access Kura APIs:**
 - Verify that **Identity Integration Enabled** is set to `true`
 - Check that the container has been granted the necessary permissions in **Container Permissions**
-- Ensure the container is reading the environment variables correctly
+- Ensure the container is reading the environment variables and the token file correctly
 - If Kura firewall is installed and enabled, allow traffic from container networks (for example `docker0` or user-defined Docker bridges) to the Kura REST API port
 - Check container logs for authentication errors
 
+**Token file missing or empty:**
+- Verify that `KURA_TOKEN_FILE` is set and points to `/run/secrets/kura-token`
+- Confirm the file is mounted read-only and readable by the process inside the container
+- Check the Kura logs for token file creation errors (for example a missing or non-writable tmpfs base directory)
+
 **Basic authentication fails:**
-- Verify the request includes valid Basic credentials (`KURA_IDENTITY_NAME` / `KURA_IDENTITY_PASSWORD`)
+- Verify the request includes valid Basic credentials (`KURA_IDENTITY_NAME` as the username and the content of the file referenced by `KURA_TOKEN_FILE` as the password)
 - Check that the temporary identity was created successfully in Kura logs
 - Ensure the container is using the correct REST base URL
 - Verify **Basic Authentication Enabled** is set to `true` in **RestService**

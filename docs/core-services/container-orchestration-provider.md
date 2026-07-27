@@ -11,5 +11,5 @@ The feature is composed of two bundles, one that exposes APIs for container mana
 - **Resource Control**: Configure CPU, memory, GPU allocation, and cgroup settings for containers
 - **Network Configuration**: Support for various Docker networking modes (bridge, host, custom networks)
 - **Security**: Container image signature verification and allowlist enforcement
-- **Identity Integration**: Automatic provisioning of temporary credentials for containers to securely access Kura's REST APIs
+- **Identity Integration**: Automatic provisioning of temporary credentials for containers to securely access Kura's REST APIs, delivered through a read-only token file on an in-memory filesystem (tmpfs).
 - **Persistence**: Automatic container restart after gateway reboot if configured

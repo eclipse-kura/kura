@@ -245,7 +245,59 @@ public class SystemInfoExample {
 }
 ```
 
-Examples for other languages (Python, Shell, Node.js) and a side-by-side comparison with the previous environment-variable approach are available in the [Container Identity Credentials Migration Guide](./container-orchestration-provider-identity-migration.md).
+The same flow can be implemented in other languages. In each case the identity name and REST base URL are read from the environment, while the password is read from the file referenced by `KURA_TOKEN_FILE`.
+
+!!! note
+    When Kura's REST endpoint uses HTTPS with a self-signed certificate, the client must either trust that certificate or disable TLS verification (the examples below disable verification for brevity). Prefer trusting the certificate in production.
+
+**Container Code (Python):**
+```python
+import os
+import requests
+
+identity_name = os.environ['KURA_IDENTITY_NAME']
+base_url = os.environ['KURA_REST_BASE_URL']
+
+with open(os.environ['KURA_TOKEN_FILE']) as token_file:
+    identity_password = token_file.read()
+
+response = requests.get(
+    f'{base_url}/system/info',
+    auth=(identity_name, identity_password),
+    verify=False
+)
+response.raise_for_status()
+print(response.json())
+```
+
+**Container Code (Shell):**
+```bash
+#!/bin/sh
+# KURA_IDENTITY_NAME, KURA_TOKEN_FILE and KURA_REST_BASE_URL are provided by Kura
+curl -k -u "${KURA_IDENTITY_NAME}:$(cat "${KURA_TOKEN_FILE}")" \
+  "${KURA_REST_BASE_URL}/system/info"
+```
+
+**Container Code (Node.js):**
+```javascript
+const fs = require('fs');
+
+const identityName = process.env.KURA_IDENTITY_NAME;
+const baseUrl = process.env.KURA_REST_BASE_URL;
+const password = fs.readFileSync(process.env.KURA_TOKEN_FILE, 'utf8');
+
+const auth = Buffer.from(`${identityName}:${password}`).toString('base64');
+
+// Allow self-signed certificates (development only)
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+fetch(`${baseUrl}/system/info`, {
+  headers: { Authorization: `Basic ${auth}` }
+})
+  .then((response) => response.json())
+  .then((info) => console.log(info))
+  .catch((error) => console.error(error));
+```
 
 ### Best Practices
 

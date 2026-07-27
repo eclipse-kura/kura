@@ -102,6 +102,23 @@ public class TokenFileManagerTest {
     }
 
     @Test
+    public void setsOwnerOnlyPermissionsOnTokenDirectories() throws Exception {
+        givenPosixFileSystem();
+
+        whenTokenIsWritten();
+
+        final Set<PosixFilePermission> ownerAll = EnumSet.of(PosixFilePermission.OWNER_READ,
+                PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE);
+
+        final Path uuidDirectory = this.tokenFile.getParent();
+        assertEquals("UUID directory should be owner-only", ownerAll, Files.getPosixFilePermissions(uuidDirectory));
+
+        final Path tokensRoot = uuidDirectory.getParent();
+        assertEquals("kura-tokens directory should be owner-only", ownerAll,
+                Files.getPosixFilePermissions(tokensRoot));
+    }
+
+    @Test
     public void failsFastWhenBaseDirectoryDoesNotExist() {
         final String missingBase = Paths.get(this.tmpfsBase.getRoot().getAbsolutePath(), "missing").toString();
         System.setProperty(TMPFS_BASE_PROPERTY, missingBase);

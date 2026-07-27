@@ -75,6 +75,10 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
     private static final int MAX_IDENTITY_NAME_LENGTH = 255;
     private static final int MAX_IDENTITY_NAME_GENERATION_ATTEMPTS = 10;
     private static final String CONTAINER_TOKEN_PATH = "/run/secrets/kura-token";
+    // Internal convention shared with ContainerOrchestrationServiceImpl (a separate bundle): a volume whose
+    // container path ends with ":ro" is bind-mounted read-only. The constant is intentionally duplicated here
+    // rather than exported through the orchestration API, as it is an implementation detail of how these two
+    // bundles cooperate and not part of the public container.volume contract.
     private static final String READ_ONLY_VOLUME_SUFFIX = ":ro";
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();

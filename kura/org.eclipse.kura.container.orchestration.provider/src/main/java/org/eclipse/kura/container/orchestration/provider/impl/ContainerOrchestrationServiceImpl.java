@@ -85,6 +85,10 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private static final String UNABLE_TO_CONNECT_TO_DOCKER_CLI = "Unable to connect to docker cli";
     private static final Logger logger = LoggerFactory.getLogger(ContainerOrchestrationServiceImpl.class);
     private static final String APP_ID = "org.eclipse.kura.container.orchestration.provider.ConfigurableDocker";
+    // Internal convention shared with ContainerInstance (a separate bundle): a volume whose container path ends
+    // with ":ro" is bind-mounted read-only. The constant is intentionally duplicated there rather than exported
+    // through the orchestration API, as it is an implementation detail of how these two bundles cooperate and not
+    // part of the public container.volume contract.
     private static final String READ_ONLY_VOLUME_SUFFIX = ":ro";
 
     private ContainerOrchestrationServiceOptions currentConfig;

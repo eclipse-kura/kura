@@ -58,11 +58,15 @@ class TokenFileManager {
                             + "\" system property to an existing tmpfs directory");
         }
 
-        final Path directory = basePath.resolve(TOKENS_DIRECTORY_NAME).resolve(UUID.randomUUID().toString());
+        final Path tokensRoot = basePath.resolve(TOKENS_DIRECTORY_NAME);
+        final Path directory = tokensRoot.resolve(UUID.randomUUID().toString());
         final Path tokenFile = directory.resolve(TOKEN_FILE_NAME);
 
         try {
             Files.createDirectories(directory);
+            // Restrict both the shared "kura-tokens" root and the per-token UUID directory to the owner so that
+            // the token file cannot be traversed to by other local users.
+            setPosixPermissions(tokensRoot, "rwx------");
             setPosixPermissions(directory, "rwx------");
 
             final ByteBuffer encoded = StandardCharsets.UTF_8.encode(CharBuffer.wrap(password));
@@ -104,15 +108,16 @@ class TokenFileManager {
         return Optional.ofNullable(this.tokenDirectory).map(dir -> dir.resolve(TOKEN_FILE_NAME));
     }
 
-    private static void setPosixPermissions(final Path path, final String permissions) {
+    private static void setPosixPermissions(final Path path, final String permissions) throws IOException {
         try {
             Files.setPosixFilePermissions(path,
                     java.nio.file.attribute.PosixFilePermissions.fromString(permissions));
         } catch (final UnsupportedOperationException e) {
+            // Non-POSIX platform (e.g. Windows during development): nothing we can do, warn and continue.
             logger.warn("POSIX file permissions are not supported, unable to restrict access to {}", path, e);
-        } catch (final IOException e) {
-            logger.warn("failed to set permissions {} on {}", permissions, path, e);
         }
+        // An IOException here means we could not restrict access on a POSIX platform: let it propagate so that the
+        // caller aborts and deletes the partially created token rather than exposing a world-readable secret.
     }
 
     private static void deleteBestEffort(final Path tokenFile, final Path directory) {

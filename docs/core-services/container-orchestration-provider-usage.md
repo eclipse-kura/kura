@@ -155,7 +155,7 @@ When Identity Integration is enabled for a container instance, Kura performs the
 
 1. **Creates a Temporary Identity**: A temporary, non-persistent identity is created specifically for the container with a unique name based on the container name (e.g., `container_myapp` for a container named `myapp`).
 
-2. **Assigns Permissions**: The temporary identity is granted the permissions specified in the **Container Permissions** field.
+2. **Assigns Permissions**: The temporary identity is granted the permissions specified in the **Container Permissions** field. These are the same permissions used by Kura identities (for example `rest.system` or `rest.configuration`), so each name must reference a permission that already exists in the gateway.
 
 3. **Provides Credentials**: The container receives the following environment variables:
     - `KURA_IDENTITY_NAME`: The temporary identity name for accessing Kura's REST APIs

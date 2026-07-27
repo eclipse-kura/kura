@@ -73,8 +73,8 @@ public class ContainerOrchestrationServiceImplTest {
     private static final String CONTAINER_ID_2 = "1f134f3s4";
     private static final String CONTAINER_ID_1 = "1f12d3s23";
 
-    private static final String DOCKER_HOST_URL = "dockerService.dockerHost";
-    private static final String IS_ENABLED = "dockerService.enabled";
+    private static final String DOCKER_HOST_URL = "container.engine.host";
+    private static final String IS_ENABLED = "enabled";
     private static final String DEFAULT_DOCKER_HOST_URL = "unix:///var/run/docker.sock";
     private static final boolean DEFAULT_IS_ENABLED = false;
 
@@ -367,7 +367,9 @@ public class ContainerOrchestrationServiceImplTest {
     @Test
     public void testContainerInstanceDigestIsAddedToAllowlist() throws KuraException, InterruptedException {
 
-        givenFullProperties(true);
+        // keep the docker connection disabled so the service uses the injected mock client instead of opening a
+        // real connection; enforcement is driven by the separate enforcement.enabled property
+        givenFullProperties(false);
         givenEnforcementEnabledProperty(true);
         givenDockerServiceImplSpy();
         givenDockerClient();
@@ -385,7 +387,9 @@ public class ContainerOrchestrationServiceImplTest {
     public void testContainerInstanceDigestIsAddedToAndRemovedFromAllowlist()
             throws KuraException, InterruptedException {
 
-        givenFullProperties(true);
+        // keep the docker connection disabled so the service uses the injected mock client instead of opening a
+        // real connection; enforcement is driven by the separate enforcement.enabled property
+        givenFullProperties(false);
         givenEnforcementEnabledProperty(true);
         givenDockerServiceImplSpy();
         givenDockerClient();
@@ -427,12 +431,6 @@ public class ContainerOrchestrationServiceImplTest {
 
         this.properties.put(DOCKER_HOST_URL, DEFAULT_DOCKER_HOST_URL);
         this.properties.put(IS_ENABLED, b);
-
-        this.properties.put(REPOSITORY_ENABLED, DEFAULT_REPOSITORY_ENABLED);
-        this.properties.put(REPOSITORY_URL, DEFAULT_REPOSITORY_URL);
-        this.properties.put(REPOSITORY_USERNAME, DEFAULT_REPOSITORY_USERNAME);
-        this.properties.put(REPOSITORY_PASSWORD, DEFAULT_REPOSITORY_PASSWORD);
-        this.properties.put(IMAGES_DOWNLOAD_TIMEOUT, DEFAULT_IMAGES_DOWNLOAD_TIMEOUT);
     }
 
     private void givenFullProperties(boolean b, boolean customRepoEnabled) {

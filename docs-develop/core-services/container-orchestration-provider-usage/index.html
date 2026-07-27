@@ -5053,7 +5053,7 @@ You should see output similar to this:
 <p>Modifying the bootloader options incorrectly may prevent the system from booting. Please ensure to back up any important data before making changes to these settings.</p>
 </div>
 <h2 id="container-identity-integration">Container Identity Integration</h2>
-<p>The Container Identity Integration feature allows containers to securely authenticate and interact with Kura's REST APIs using temporary credentials. When enabled, Kura automatically provisions a temporary identity and provides password-based credentials to the container, eliminating the need for manual credential configuration.</p>
+<p>The Container Identity Integration feature allows containers to securely authenticate and interact with Kura's REST APIs using temporary credentials. When enabled, Kura automatically provisions a temporary identity and delivers its credentials to the container through a read-only file mounted from an in-memory filesystem (tmpfs), eliminating the need for manual credential configuration and keeping the password out of the container's environment.</p>
 <h3 id="overview">Overview</h3>
 <p>When Identity Integration is enabled for a container instance, Kura performs the following operations:</p>
 <ol>
@@ -5061,26 +5061,29 @@ You should see output similar to this:
 <p><strong>Creates a Temporary Identity</strong>: A temporary, non-persistent identity is created specifically for the container with a unique name based on the container name (e.g., <code>container_myapp</code> for a container named <code>myapp</code>).</p>
 </li>
 <li>
-<p><strong>Assigns Permissions</strong>: The temporary identity is granted the permissions specified in the <strong>Container Permissions</strong> field.</p>
+<p><strong>Assigns Permissions</strong>: The temporary identity is granted the permissions specified in the <strong>Container Permissions</strong> field. These are the same permissions used by Kura identities (for example <code>rest.system</code> or <code>rest.configuration</code>), so each name must reference a permission that already exists in the gateway.</p>
 </li>
 <li>
 <p><strong>Provides Credentials</strong>: The container receives the following environment variables:</p>
-</li>
+<ul>
 <li><code>KURA_IDENTITY_NAME</code>: The temporary identity name for accessing Kura's REST APIs</li>
-<li><code>KURA_IDENTITY_PASSWORD</code>: The temporary password for accessing Kura's REST APIs</li>
-<li>
-<p><code>KURA_REST_BASE_URL</code>: The complete base URL for Kura's REST API endpoints (e.g., <code>http://172.17.0.1:8080/services</code> or <code>https://172.17.0.1:443/services</code>)</p>
+<li><code>KURA_TOKEN_FILE</code>: The in-container path of a read-only file containing the temporary password (always <code>/run/secrets/kura-token</code>)</li>
+<li><code>KURA_REST_BASE_URL</code>: The complete base URL for Kura's REST API endpoints (e.g., <code>http://172.17.0.1:8080/services</code> or <code>https://172.17.0.1:443/services</code>)</li>
+</ul>
 </li>
 <li>
-<p><strong>Automatic Cleanup</strong>: When the container stops or is deleted, Kura automatically removes the temporary identity and invalidates its credentials.</p>
+<p><strong>Mounts a Secure Token File</strong>: The temporary password is written to a file on an in-memory filesystem (tmpfs) on the host — <code>&lt;base&gt;/kura-tokens/&lt;uuid&gt;/kura-token</code>, where <code>&lt;base&gt;</code> defaults to <code>/dev/shm</code> — with owner-read-only permissions (<code>400</code>), and is mounted <strong>read-only</strong> into the container at <code>/run/secrets/kura-token</code>. Because the password is never placed in an environment variable, it does not appear in <code>docker inspect</code> or in <code>/proc/&lt;pid&gt;/environ</code>.</p>
+</li>
+<li>
+<p><strong>Automatic Cleanup</strong>: When the container stops or is deleted, Kura automatically removes the temporary identity, invalidates its credentials, and deletes the token file and its parent directory from tmpfs.</p>
 </li>
 </ol>
 <h3 id="features">Features</h3>
 <ul>
 <li><strong>Zero Configuration</strong>: Containers automatically receive the correct REST API URL based on the gateway's HTTPS configuration and network mode.</li>
 <li><strong>Network-Aware</strong>: The REST base URL is automatically adjusted based on the container's networking mode (bridge, host, etc.).</li>
-<li><strong>Secure</strong>: Credentials are temporary and automatically invalidated when containers stop.</li>
-<li><strong>Non-Persistent</strong>: Temporary identities exist only in memory and are never persisted to disk.</li>
+<li><strong>Secure</strong>: Credentials are temporary and automatically invalidated when containers stop. The password is delivered through a read-only tmpfs file, so it is not exposed via <code>docker inspect</code> or <code>/proc/&lt;pid&gt;/environ</code>.</li>
+<li><strong>Non-Persistent</strong>: Temporary identities exist only in memory and are never persisted to disk. The token file lives on tmpfs (RAM) and is cleared on reboot.</li>
 <li><strong>Permission-Based</strong>: Fine-grained access control using Kura's existing permission system.</li>
 </ul>
 <h3 id="configuration">Configuration</h3>
@@ -5092,6 +5095,10 @@ You should see output similar to this:
 </ol>
 <p>To use the temporary credentials with REST APIs, ensure <strong>Basic Authentication Enabled</strong> is set to <code>true</code> in the <strong>RestService</strong> configuration.</p>
 <p>The framework will create the temporary identity when the container starts and clean it up when the container stops.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The token file is written to an in-memory filesystem (tmpfs). The base directory is <code>/dev/shm</code> by default and can be changed with the <code>kura.tmpfs.base</code> system property. The platform must provide a writable tmpfs at that location: if it is missing, the container fails to start with a clear error message.</p>
+</div>
 <h3 id="available-permissions">Available Permissions</h3>
 <p>For a complete list of available permissions, use the <a href="/references/rest-apis/rest-identity-api-v2/#get-defined-permissions">REST Identity API</a> to query defined permissions in your system.</p>
 <h3 id="usage-example">Usage Example</h3>
@@ -5100,25 +5107,93 @@ You should see output similar to this:
 <p><strong>Container Configuration:</strong>
 - <strong>Identity Integration Enabled</strong>: <code>true</code>
 - <strong>Container Permissions</strong>: <code>rest.system</code></p>
-<p><strong>Container Code (Python):</strong>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1"># Read credentials from environment variables</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="n">identity_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;KURA_IDENTITY_NAME&#39;</span><span class="p">)</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="n">identity_password</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;KURA_IDENTITY_PASSWORD&#39;</span><span class="p">)</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="n">base_url</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;KURA_REST_BASE_URL&#39;</span><span class="p">)</span>
+<p><strong>Container Code (Java):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.net.URI</span><span class="p">;</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.net.http.HttpClient</span><span class="p">;</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.net.http.HttpRequest</span><span class="p">;</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.net.http.HttpResponse</span><span class="p">;</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.nio.file.Files</span><span class="p">;</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.nio.file.Path</span><span class="p">;</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Base64</span><span class="p">;</span>
 <a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="c1"># Make authenticated request to get system information</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">base_url</span><span class="si">}</span><span class="s1">/system/info&#39;</span><span class="p">,</span>
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="n">auth</span><span class="o">=</span><span class="p">(</span><span class="n">identity_name</span><span class="p">,</span> <span class="n">identity_password</span><span class="p">)</span>
-<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="p">)</span>
-<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
-<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>    <span class="n">system_info</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;System info: </span><span class="si">{</span><span class="n">system_info</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to get system info: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">SystemInfoExample</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">Exception</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">        </span><span class="c1">// Read the identity name and the REST base URL from the environment</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">identityName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">getenv</span><span class="p">(</span><span class="s">&quot;KURA_IDENTITY_NAME&quot;</span><span class="p">);</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">baseUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">getenv</span><span class="p">(</span><span class="s">&quot;KURA_REST_BASE_URL&quot;</span><span class="p">);</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">        </span><span class="c1">// Read the password from the read-only token file</span>
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">String</span><span class="p">(</span><span class="n">Files</span><span class="p">.</span><span class="na">readAllBytes</span><span class="p">(</span><span class="n">Path</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">System</span><span class="p">.</span><span class="na">getenv</span><span class="p">(</span><span class="s">&quot;KURA_TOKEN_FILE&quot;</span><span class="p">))));</span>
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">        </span><span class="c1">// Make an authenticated request to get system information</span>
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">basicAuth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Base64</span><span class="p">.</span><span class="na">getEncoder</span><span class="p">()</span>
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="w">                </span><span class="p">.</span><span class="na">encodeToString</span><span class="p">((</span><span class="n">identityName</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;:&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">password</span><span class="p">).</span><span class="na">getBytes</span><span class="p">());</span>
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>
+<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="w">        </span><span class="n">HttpRequest</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HttpRequest</span><span class="p">.</span><span class="na">newBuilder</span><span class="p">()</span>
+<a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a><span class="w">                </span><span class="p">.</span><span class="na">uri</span><span class="p">(</span><span class="n">URI</span><span class="p">.</span><span class="na">create</span><span class="p">(</span><span class="n">baseUrl</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;/system/info&quot;</span><span class="p">))</span>
+<a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a><span class="w">                </span><span class="p">.</span><span class="na">header</span><span class="p">(</span><span class="s">&quot;Authorization&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Basic &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">basicAuth</span><span class="p">)</span>
+<a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a><span class="w">                </span><span class="p">.</span><span class="na">GET</span><span class="p">()</span>
+<a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a><span class="w">                </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+<a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>
+<a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a><span class="w">        </span><span class="n">HttpResponse</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HttpClient</span><span class="p">.</span><span class="na">newHttpClient</span><span class="p">()</span>
+<a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a><span class="w">                </span><span class="p">.</span><span class="na">send</span><span class="p">(</span><span class="n">request</span><span class="p">,</span><span class="w"> </span><span class="n">HttpResponse</span><span class="p">.</span><span class="na">BodyHandlers</span><span class="p">.</span><span class="na">ofString</span><span class="p">());</span>
+<a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a>
+<a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="na">statusCode</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">200</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a><span class="w">            </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;System info: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">response</span><span class="p">.</span><span class="na">body</span><span class="p">());</span>
+<a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a><span class="w">            </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">&quot;Failed to get system info: &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">response</span><span class="p">.</span><span class="na">statusCode</span><span class="p">());</span>
+<a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a><span class="p">}</span>
+</code></pre></div></p>
+<p>The same flow can be implemented in other languages. In each case the identity name and REST base URL are read from the environment, while the password is read from the file referenced by <code>KURA_TOKEN_FILE</code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When Kura's REST endpoint uses HTTPS with a self-signed certificate, the client must either trust that certificate or disable TLS verification (the examples below disable verification for brevity). Prefer trusting the certificate in production.</p>
+</div>
+<p><strong>Container Code (Python):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">identity_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;KURA_IDENTITY_NAME&#39;</span><span class="p">]</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="n">base_url</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;KURA_REST_BASE_URL&#39;</span><span class="p">]</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;KURA_TOKEN_FILE&#39;</span><span class="p">])</span> <span class="k">as</span> <span class="n">token_file</span><span class="p">:</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">identity_password</span> <span class="o">=</span> <span class="n">token_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>    <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">base_url</span><span class="si">}</span><span class="s1">/system/info&#39;</span><span class="p">,</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="n">auth</span><span class="o">=</span><span class="p">(</span><span class="n">identity_name</span><span class="p">,</span> <span class="n">identity_password</span><span class="p">),</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>    <span class="n">verify</span><span class="o">=</span><span class="kc">False</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="p">)</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+</code></pre></div></p>
+<p><strong>Container Code (Shell):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="ch">#!/bin/sh</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1"># KURA_IDENTITY_NAME, KURA_TOKEN_FILE and KURA_REST_BASE_URL are provided by Kura</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>curl<span class="w"> </span>-k<span class="w"> </span>-u<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">KURA_IDENTITY_NAME</span><span class="si">}</span><span class="s2">:</span><span class="k">$(</span>cat<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">KURA_TOKEN_FILE</span><span class="si">}</span><span class="s2">&quot;</span><span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">KURA_REST_BASE_URL</span><span class="si">}</span><span class="s2">/system/info&quot;</span>
+</code></pre></div></p>
+<p><strong>Container Code (Node.js):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">fs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">);</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="kd">const</span><span class="w"> </span><span class="nx">identityName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">KURA_IDENTITY_NAME</span><span class="p">;</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="kd">const</span><span class="w"> </span><span class="nx">baseUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">KURA_REST_BASE_URL</span><span class="p">;</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="kd">const</span><span class="w"> </span><span class="nx">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">KURA_TOKEN_FILE</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;utf8&#39;</span><span class="p">);</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="kd">const</span><span class="w"> </span><span class="nx">auth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Buffer</span><span class="p">.</span><span class="kr">from</span><span class="p">(</span><span class="sb">`</span><span class="si">${</span><span class="nx">identityName</span><span class="si">}</span><span class="sb">:</span><span class="si">${</span><span class="nx">password</span><span class="si">}</span><span class="sb">`</span><span class="p">).</span><span class="nx">toString</span><span class="p">(</span><span class="s1">&#39;base64&#39;</span><span class="p">);</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="c1">// Allow self-signed certificates (development only)</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">NODE_TLS_REJECT_UNAUTHORIZED</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;0&#39;</span><span class="p">;</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="nx">fetch</span><span class="p">(</span><span class="sb">`</span><span class="si">${</span><span class="nx">baseUrl</span><span class="si">}</span><span class="sb">/system/info`</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">  </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Authorization</span><span class="o">:</span><span class="w"> </span><span class="sb">`Basic </span><span class="si">${</span><span class="nx">auth</span><span class="si">}</span><span class="sb">`</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="p">})</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">  </span><span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">response</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">())</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">  </span><span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">info</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">info</span><span class="p">))</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">  </span><span class="p">.</span><span class="k">catch</span><span class="p">((</span><span class="nx">error</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">error</span><span class="p">));</span>
 </code></pre></div></p>
 <h3 id="best-practices">Best Practices</h3>
 <ol>
@@ -5126,7 +5201,7 @@ You should see output similar to this:
 <p><strong>Principle of Least Privilege</strong>: Only grant permissions that are absolutely necessary for the container's functionality.</p>
 </li>
 <li>
-<p><strong>Validate Environment Variables</strong>: Always check that <code>KURA_IDENTITY_NAME</code>, <code>KURA_IDENTITY_PASSWORD</code>, and <code>KURA_REST_BASE_URL</code> are present before making API calls.</p>
+<p><strong>Validate Environment Variables and Token File</strong>: Always check that <code>KURA_IDENTITY_NAME</code>, <code>KURA_TOKEN_FILE</code>, and <code>KURA_REST_BASE_URL</code> are present, and that the file referenced by <code>KURA_TOKEN_FILE</code> exists and is non-empty, before making API calls.</p>
 </li>
 <li>
 <p><strong>Handle Credential Lifecycle</strong>: Be prepared for credentials to become invalid when the container is stopping or restarting.</p>
@@ -5149,11 +5224,15 @@ You should see output similar to this:
 <p><strong>Container cannot access Kura APIs:</strong>
 - Verify that <strong>Identity Integration Enabled</strong> is set to <code>true</code>
 - Check that the container has been granted the necessary permissions in <strong>Container Permissions</strong>
-- Ensure the container is reading the environment variables correctly
+- Ensure the container is reading the environment variables and the token file correctly
 - If Kura firewall is installed and enabled, allow traffic from container networks (for example <code>docker0</code> or user-defined Docker bridges) to the Kura REST API port
 - Check container logs for authentication errors</p>
+<p><strong>Token file missing or empty:</strong>
+- Verify that <code>KURA_TOKEN_FILE</code> is set and points to <code>/run/secrets/kura-token</code>
+- Confirm the file is mounted read-only and readable by the process inside the container
+- Check the Kura logs for token file creation errors (for example a missing or non-writable tmpfs base directory)</p>
 <p><strong>Basic authentication fails:</strong>
-- Verify the request includes valid Basic credentials (<code>KURA_IDENTITY_NAME</code> / <code>KURA_IDENTITY_PASSWORD</code>)
+- Verify the request includes valid Basic credentials (<code>KURA_IDENTITY_NAME</code> as the username and the content of the file referenced by <code>KURA_TOKEN_FILE</code> as the password)
 - Check that the temporary identity was created successfully in Kura logs
 - Ensure the container is using the correct REST base URL
 - Verify <strong>Basic Authentication Enabled</strong> is set to <code>true</code> in <strong>RestService</strong></p>

@@ -170,7 +170,7 @@ When Identity Integration is enabled for a container instance, Kura performs the
 
 - **Zero Configuration**: Containers automatically receive the correct REST API URL based on the gateway's HTTPS configuration and network mode.
 - **Network-Aware**: The REST base URL is automatically adjusted based on the container's networking mode (bridge, host, etc.).
-- **Secure**: Credentials are temporary and automatically invalidated when containers stop. The password is delivered through a read-only tmpfs file instead of an environment variable, so it is not exposed via `docker inspect` or `/proc/<pid>/environ`.
+- **Secure**: Credentials are temporary and automatically invalidated when containers stop. The password is delivered through a read-only tmpfs file, so it is not exposed via `docker inspect` or `/proc/<pid>/environ`.
 - **Non-Persistent**: Temporary identities exist only in memory and are never persisted to disk. The token file lives on tmpfs (RAM) and is cleared on reboot.
 - **Permission-Based**: Fine-grained access control using Kura's existing permission system.
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,8 @@ package org.eclipse.kura.internal.ble;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -34,6 +36,7 @@ import org.eclipse.kura.KuraBluetoothDiscoveryException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.types.Variant;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -46,6 +49,7 @@ public class BluetoothLeAdapterImplTest {
     private static BluetoothLeAdapterImpl bluetoothLeAdapter;
     private static BluetoothAdapter adapterMock;
     private static DeviceManager deviceManagerMock;
+    private static List<BluetoothDevice> defaultDevices;
 
     @BeforeClass
     public static void setup() throws DBusException {
@@ -71,10 +75,10 @@ public class BluetoothLeAdapterImplTest {
         BluetoothDevice device = mock(BluetoothDevice.class);
         when(device.getAddress()).thenReturn("11:22:33:44:55:66");
         when(device.getName()).thenReturn("DeviceName");
-        List<BluetoothDevice> devices = new ArrayList<>();
-        devices.add(device);
+        defaultDevices = new ArrayList<>();
+        defaultDevices.add(device);
         deviceManagerMock = mock(DeviceManager.class);
-        when(deviceManagerMock.getDevices("AA:BB:CC:DD:EE:FF", true)).thenReturn(devices);
+        when(deviceManagerMock.getDevices("AA:BB:CC:DD:EE:FF", true)).thenReturn(defaultDevices);
 
         bluetoothLeAdapter = new BluetoothLeAdapterImpl(adapterMock) {
 
@@ -83,6 +87,13 @@ public class BluetoothLeAdapterImplTest {
                 return deviceManagerMock;
             }
         };
+    }
+
+    @Before
+    public void resetDeviceManagerMock() {
+        // some tests below override the device list returned for the adapter's address;
+        // restore the default single-device list so test order doesn't matter
+        when(deviceManagerMock.getDevices("AA:BB:CC:DD:EE:FF", true)).thenReturn(defaultDevices);
     }
 
     @Test
@@ -175,5 +186,70 @@ public class BluetoothLeAdapterImplTest {
         filter.put("Transport", new Variant<>("auto"));
         filter.put("DuplicateData", new Variant<>(false));
         verify(adapterMock).setDiscoveryFilter(filter);
+    }
+
+    @Test(timeout = 5000)
+    public void findDeviceByAddressShouldNotThrowNpeWhenDeviceAddressIsNull()
+            throws InterruptedException, ExecutionException {
+        when(adapterMock.isDiscovering()).thenReturn(false);
+        when(adapterMock.startDiscovery()).thenReturn(true);
+        when(adapterMock.stopDiscovery()).thenReturn(true);
+
+        BluetoothDevice deviceWithNullAddress = mock(BluetoothDevice.class);
+        when(deviceWithNullAddress.getAddress()).thenReturn(null);
+        when(deviceWithNullAddress.getName()).thenReturn("SomeDevice");
+
+        List<BluetoothDevice> devices = new ArrayList<>();
+        devices.add(deviceWithNullAddress);
+        when(deviceManagerMock.getDevices("AA:BB:CC:DD:EE:FF", true)).thenReturn(devices);
+
+        BluetoothLeDevice result = bluetoothLeAdapter.findDeviceByAddress(1, "11:22:33:44:55:66").get();
+
+        assertNull(result);
+    }
+
+    @Test(timeout = 5000)
+    public void findDeviceByNameShouldNotThrowNpeWhenDeviceNameIsNull()
+            throws InterruptedException, ExecutionException {
+        when(adapterMock.isDiscovering()).thenReturn(false);
+        when(adapterMock.startDiscovery()).thenReturn(true);
+        when(adapterMock.stopDiscovery()).thenReturn(true);
+
+        BluetoothDevice deviceWithNullName = mock(BluetoothDevice.class);
+        when(deviceWithNullName.getName()).thenReturn(null);
+        when(deviceWithNullName.getAddress()).thenReturn("11:22:33:44:55:66");
+
+        List<BluetoothDevice> devices = new ArrayList<>();
+        devices.add(deviceWithNullName);
+        when(deviceManagerMock.getDevices("AA:BB:CC:DD:EE:FF", true)).thenReturn(devices);
+
+        BluetoothLeDevice result = bluetoothLeAdapter.findDeviceByName(1, "DeviceName").get();
+
+        assertNull(result);
+    }
+
+    @Test(timeout = 5000)
+    public void findDeviceByAddressShouldSkipDeviceWithNullAddressAndFindMatch()
+            throws InterruptedException, ExecutionException {
+        when(adapterMock.isDiscovering()).thenReturn(false);
+        when(adapterMock.startDiscovery()).thenReturn(true);
+        when(adapterMock.stopDiscovery()).thenReturn(true);
+
+        BluetoothDevice deviceWithNullAddress = mock(BluetoothDevice.class);
+        when(deviceWithNullAddress.getAddress()).thenReturn(null);
+        when(deviceWithNullAddress.getName()).thenReturn(null);
+
+        BluetoothDevice matchingDevice = mock(BluetoothDevice.class);
+        when(matchingDevice.getAddress()).thenReturn("11:22:33:44:55:66");
+        when(matchingDevice.getName()).thenReturn("TargetDevice");
+
+        List<BluetoothDevice> devices = new ArrayList<>();
+        devices.add(deviceWithNullAddress);
+        devices.add(matchingDevice);
+        when(deviceManagerMock.getDevices("AA:BB:CC:DD:EE:FF", true)).thenReturn(devices);
+
+        BluetoothLeDevice result = bluetoothLeAdapter.findDeviceByAddress(1, "11:22:33:44:55:66").get();
+
+        assertNotNull(result);
     }
 }

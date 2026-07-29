@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -317,8 +317,8 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
         private void getDevice(List<BluetoothDevice> devices) {
             BluetoothDevice leDevice = null;
             for (BluetoothDevice device : devices) {
-                if (this.address != null && device.getAddress().equals(this.address)
-                        || this.name != null && device.getName().equals(this.name)) {
+                if (this.address != null && this.address.equals(device.getAddress())
+                        || this.name != null && this.name.equals(device.getName())) {
                     leDevice = device;
                     break;
                 }

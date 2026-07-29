@@ -87,7 +87,6 @@
         <module>org.eclipse.kura.jul.to.slf4j.configuration</module>
         <module>emulator</module>
         <module>test-util</module>
-        <module>tools</module>
     </modules>
 
     <properties>
@@ -669,15 +668,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-        <profile>
-            <id>tools</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <modules>
-                <module>tools</module>
-            </modules>
         </profile>
         <profile>
             <id>tests</id>

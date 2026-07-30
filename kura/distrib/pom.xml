@@ -513,9 +513,7 @@
                                     <!-- api-plugins -->
                                     failureaccess, guava,
                                     <!-- Jackson core -->
-                                    jackson-databind, jackson-annotations, jackson-core,
-                                    <!-- artemis and camel common plugins -->
-                                    geronimo-jms_2.0_spec
+                                    jackson-databind, jackson-annotations, jackson-core
                                 </includeArtifactIds>
                                 <excludeClassifiers>
                                     sources,linux-x86_64,linux-aarch_64,osx-x86_64,osx-aarch_64

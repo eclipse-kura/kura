@@ -49,13 +49,11 @@
         <io.netty.version>4.1.132.Final</io.netty.version>
         <jersey.version>3.1.11</jersey.version>
         <log4j.version>2.25.3</log4j.version>
-        <org.apache.camel.version>2.25.3</org.apache.camel.version>
         <org.bouncycastle.version>1.84</org.bouncycastle.version>
         <org.eclipse.jetty.version>12.0.33</org.eclipse.jetty.version>
         <org.eclipse.osgi-technology.rest.version>1.2.3</org.eclipse.osgi-technology.rest.version>
         <org.ow2.asm.version>9.7.1</org.ow2.asm.version>
         <slf4j.version>2.0.17</slf4j.version>
-        <spring.version>4.3.20.RELEASE_1</spring.version>
         <jackson.core.version>2.19.2</jackson.core.version>
         <byte-buddy.version>1.17.7</byte-buddy.version>
         <objenesis.version>3.3</objenesis.version>
@@ -67,7 +65,6 @@
 
     <modules>
         <module>target-platform-pde-deps</module>
-        <module>org.eclipse.kura.camel.sun.misc</module>
         <module>org.eclipse.kura.sun.misc</module>
         <module>com.codeminders.hidapi-parent</module>
         <module>org.usb4java</module>
@@ -237,76 +234,6 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-csv</artifactId>
                 <version>1.4</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-amqp</artifactId>
-                <version>${org.apache.camel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-core</artifactId>
-                <version>${org.apache.camel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-core-osgi</artifactId>
-                <version>${org.apache.camel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-jms</artifactId>
-                <version>${org.apache.camel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-script</artifactId>
-                <version>${org.apache.camel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.camel</groupId>
-                <artifactId>camel-stream</artifactId>
-                <version>${org.apache.camel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.qpid</groupId>
-                <artifactId>qpid-jms-client</artifactId>
-                <version>0.45.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.qpid</groupId>
-                <artifactId>proton-j</artifactId>
-                <version>0.33.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.spring-jms</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.spring-tx</artifactId>
-                <version>${spring.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
@@ -718,13 +645,6 @@
                 <version>${jackson.core.version}</version>
             </dependency>
             <!-- END common dependencies -->
-            <!-- START Artemis and Camel common dependencies -->
-            <dependency>
-                <groupId>org.apache.geronimo.specs</groupId>
-                <artifactId>geronimo-jms_2.0_spec</artifactId>
-                <version>1.0-alpha-2</version>
-            </dependency>
-            <!-- END Artemis and Camel common dependencies -->
             <!-- START Jakarta dependencies -->
             <dependency>
                 <groupId>jakarta.inject</groupId>
@@ -1050,11 +970,6 @@
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>log4j2-api-config</artifactId>
-                <version>2.0.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.camel.sun.misc</artifactId>
                 <version>2.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>

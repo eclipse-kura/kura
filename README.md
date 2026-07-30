@@ -208,7 +208,7 @@ IDE Setups
 We currently support two setups for Eclipse Kura™ development:
 
 - [**Eclipse Kura™ Development Environment Setup**](https://eclipse-kura.github.io/kura/latest/java-application-development/development-environment-setup/): This is the full setup allowing you to contribute to the core Eclipse Kura™ project codebase. It will install all the IDE plugins and formatters to have a pleasant development experience and clone the Eclipse Kura™ source code on your workstation.
-- [**Kura Addon Archetype**](https://eclipse-kura.github.io/kura/docs-develop/java-application-development/kura-addon-archetype/): The Kura Addon Archetype will allow you to develop applications or bundles running on Eclipse Kura™. It will install only the APIs and is best suited for developing Eclipse Kura™ add-ons.
+- [**Kura Addon Archetype**](https://eclipse-kura.github.io/kura/docs-develop/java-application-development/kura-addon-archetype/): The Kura Addon Archetype will allow you to develop applications or bundles running on Eclipse Kura™. It will install only the APIs and is best suited for developing Eclipse Kura™ add-ons. Its sources live in the [eclipse-kura/kura-archetype](https://github.com/eclipse-kura/kura-archetype) repository.
 
 Contributing
 ------------

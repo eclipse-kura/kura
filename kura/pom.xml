@@ -33,6 +33,12 @@
     <packaging>pom</packaging>
 
     <modules>
+        <!-- version-less dependency aggregators (type=pom), kept as installable GAVs so
+             downstream builds can still consume them and migrate gradually; distrib does
+             not use them (it lists its dependencies inline) -->
+        <module>kura-pde-deps</module>
+        <module>target-platform-pde-deps</module>
+
         <!-- third-party / native wrapper bundles (formerly the target-platform reactor) -->
         <module>com.codeminders.hidapi-parent</module>
         <module>log4j2-api-config</module>

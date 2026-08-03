@@ -800,6 +800,7 @@
         <module>org.eclipse.kura.core.status.test</module>
         <module>org.eclipse.kura.core.system.test</module>
         <module>org.eclipse.kura.core.test</module>
+        <module>org.eclipse.kura.core.token.jwt.test</module>
         <module>org.eclipse.kura.core.util.test</module>
         <module>org.eclipse.kura.db.h2db.provider.test</module>
         <module>org.eclipse.kura.db.sqlite.provider.test</module>

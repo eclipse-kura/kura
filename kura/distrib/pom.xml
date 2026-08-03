@@ -622,7 +622,9 @@
                                     <!-- core.inventory-plugins -->
                                     org.eclipse.kura.core.inventory, 
                                     <!-- core.comm-plugins -->
-                                    org.eclipse.kura.core.comm
+                                    org.eclipse.kura.core.comm,
+                                    <!-- core.token plugins -->
+                                    org.eclipse.kura.core.token.jwt
                                 </includeArtifactIds>
                             </configuration>
                         </execution>

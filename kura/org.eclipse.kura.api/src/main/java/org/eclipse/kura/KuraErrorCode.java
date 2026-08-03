@@ -253,5 +253,11 @@ public enum KuraErrorCode {
      * 
      * @since 2.4
      */
-    INVALID_CERTIFICATE_EXCEPTION
+    INVALID_CERTIFICATE_EXCEPTION,
+    /**
+     * Authentication failed: {0}.
+     * 
+     * @since 3.0
+     */
+    AUTHENTICATION_FAILED
 }

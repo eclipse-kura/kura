@@ -1,0 +1,134 @@
+/*******************************************************************************
+ * Copyright (c) 2026 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ ******************************************************************************/
+package org.eclipse.kura.security.token;
+
+import java.util.Objects;
+import java.util.Optional;
+
+/**
+ * Describes what the caller wants to verify on the token.
+ * 
+ * @since 3.0
+ */
+public final class TokenVerifyRequest {
+
+    private final String token;
+    private final String intendedConsumer;
+
+    private TokenVerifyRequest(final Builder builder) {
+        this.token = builder.token;
+        this.intendedConsumer = builder.intendedConsumer;
+    }
+
+    /**
+     * 
+     * @return the encoded token associated with this request, cannot be {@code null}, or empty, or whitespace-only
+     */
+    public String getToken() {
+        return this.token;
+    }
+
+    /**
+     * 
+     * @return the intended consumer for the presented token, so that token verifier can reject the presented token if
+     *         it is not for him, cannot be {@code null}
+     */
+    public Optional<String> getIntendedConsumer() {
+        return Optional.ofNullable(this.intendedConsumer);
+    }
+
+    /**
+     * 
+     * @return a {@link Builder} for constructing a {@link TokenVerifyRequest}. When building a request, the
+     *         {@link Builder#token(String)} is mandatory
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private String token;
+        private String intendedConsumer;
+
+        private Builder() {
+        }
+
+        /**
+         * Sets the encoded token to be verified. This property is mandatory.
+         *
+         * @param token
+         *            the encoded token to be verified, must not be {@code null}, nor empty, nor whitespace-only
+         * @return this builder instance, for method chaining
+         * @throws NullPointerException
+         *             if the provided token is {@code null}
+         * @throws IllegalArgumentException
+         *             if {@code token} is empty or whitespace-only
+         */
+        public Builder token(final String token) {
+            this.token = ensureNotNullNotBlank(token, "token");
+            return this;
+        }
+
+        /**
+         * Sets the identifier of the component that is presenting the token for use. This property is optional.
+         *
+         * <p>
+         * When set, verification succeeds only if the token was issued for use by the specified consumer. This prevents
+         * a token obtained by one component from being replayed against a different, possibly more privileged, one.
+         * </p>
+         *
+         * <p>
+         * If this property is left unset, no consumer constraint is enforced and a token issued for any consumer is
+         * accepted.
+         * </p>
+         *
+         * @param intendedConsumer
+         *            the identifier of the component presenting the token, must not be {@code null}, empty or
+         *            whitespace-only
+         * @return this builder instance, for method chaining
+         * @throws NullPointerException
+         *             if the provided intendedConsumer is {@code null}
+         * @throws IllegalArgumentException
+         *             if {@code intendedConsumer} is empty or whitespace-only
+         */
+        public Builder intendedConsumer(final String intendedConsumer) {
+            this.intendedConsumer = ensureNotNullNotBlank(intendedConsumer, "intendedConsumer");
+            return this;
+        }
+
+        /**
+         * Builds a {@link TokenVerifyRequest}.
+         * 
+         * @return
+         * @throws IllegalStateException
+         *             if the token has not been set
+         */
+        public TokenVerifyRequest build() {
+            if (this.token == null) {
+                throw new IllegalStateException("TokenVerifyRequest requires the token to be set");
+            }
+
+            return new TokenVerifyRequest(this);
+        }
+
+        private static String ensureNotNullNotBlank(final String value, final String parameterName) {
+            final String result = Objects.requireNonNull(value, parameterName + " cannot be null");
+            if (result.isBlank()) {
+                throw new IllegalArgumentException(parameterName + " cannot be empty or whitespace-only");
+            }
+            return result;
+        }
+
+    }
+}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -253,5 +253,11 @@ public enum KuraErrorCode {
      * 
      * @since 2.4
      */
-    INVALID_CERTIFICATE_EXCEPTION
+    INVALID_CERTIFICATE_EXCEPTION,
+    /**
+     * Authentication failed: {0}.
+     * 
+     * @since 3.0
+     */
+    AUTHENTICATION_FAILED
 }

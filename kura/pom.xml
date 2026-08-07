@@ -69,6 +69,7 @@
         <module>org.eclipse.kura.core.keystore</module>
         <module>org.eclipse.kura.core.status</module>
         <module>org.eclipse.kura.core.system</module>
+        <module>org.eclipse.kura.core.token.jwt</module>
         <module>org.eclipse.kura.db.h2db.provider</module>
         <module>org.eclipse.kura.db.sqlite.provider</module>
         <module>org.eclipse.kura.driver.block</module>

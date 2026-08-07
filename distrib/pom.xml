@@ -239,6 +239,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
+            <artifactId>org.eclipse.kura.core.token.jwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.rest.tamper.detection.provider</artifactId>
         </dependency>
         <dependency>
@@ -1534,7 +1538,9 @@
                                     <!-- core.inventory-plugins -->
                                     org.eclipse.kura.core.inventory, 
                                     <!-- core.comm-plugins -->
-                                    org.eclipse.kura.core.comm
+                                    org.eclipse.kura.core.comm,
+                                    <!-- core.token plugins -->
+                                    org.eclipse.kura.core.token.jwt
                                 </includeArtifactIds>
                             </configuration>
                         </execution>

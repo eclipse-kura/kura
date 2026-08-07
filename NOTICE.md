@@ -187,6 +187,7 @@ This project leverages the following third party content.
 * maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.19.2, Apache-2.0, approved, #21909
 * maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.19.2, Apache-2.0, approved, #21911
 * maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.19.2, Apache-2.0 AND MIT, approved, #21916
+* maven/mavencentral/com.auth0/java-jwt/4.6.0, MIT, approved, #29896
 
 ### Additional Dependencies
 

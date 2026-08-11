@@ -463,16 +463,6 @@
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
-                                <id>org.apache.camel.camel-core</id>
-                                <autoStart>true</autoStart>
-                                <level>2</level>
-                            </bundle>
-                            <bundle>
-                                <id>org.eclipse.kura.camel</id>
-                                <autoStart>true</autoStart>
-                                <level>3</level>
-                            </bundle>
-                            <bundle>
                                 <id>org.eclipse.kura.core.status</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>

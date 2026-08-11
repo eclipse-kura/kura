@@ -30,9 +30,6 @@
         <module>kura-pde-deps</module>
         <module>target-definition</module>
         <module>org.eclipse.kura.api</module>
-        <module>org.eclipse.kura.camel</module>
-        <module>org.eclipse.kura.camel.cloud.factory</module>
-        <module>org.eclipse.kura.camel.xml</module>
         <module>org.eclipse.kura.core</module>
         <module>org.eclipse.kura.core.certificates</module>
         <module>org.eclipse.kura.core.keystore</module>
@@ -56,7 +53,6 @@
         <module>org.eclipse.kura.protocol.modbus</module>
         <module>org.eclipse.kura.stress</module>
         <module>org.eclipse.kura.util</module>
-        <module>org.eclipse.kura.wire.camel</module>
         <module>org.eclipse.kura.rest.provider</module>
         <module>org.eclipse.kura.misc.cloudcat</module>
         <module>org.eclipse.kura.json.marshaller.unmarshaller.provider</module>
@@ -314,21 +310,6 @@
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.api</artifactId>
                 <version>3.0.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.camel</artifactId>
-                <version>2.0.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.camel.cloud.factory</artifactId>
-                <version>2.0.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.camel.xml</artifactId>
-                <version>2.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
@@ -609,11 +590,6 @@
             <dependency>
                 <groupId>org.eclipse.kura</groupId>
                 <artifactId>org.eclipse.kura.util</artifactId>
-                <version>2.0.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.kura</groupId>
-                <artifactId>org.eclipse.kura.wire.camel</artifactId>
                 <version>2.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>

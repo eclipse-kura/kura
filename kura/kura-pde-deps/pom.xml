@@ -36,18 +36,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.camel</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.camel.cloud.factory</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.camel.xml</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.cloud.base.provider</artifactId>
         </dependency>
         <dependency>
@@ -269,10 +257,6 @@
         <dependency>
             <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.util</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.wire.camel</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>

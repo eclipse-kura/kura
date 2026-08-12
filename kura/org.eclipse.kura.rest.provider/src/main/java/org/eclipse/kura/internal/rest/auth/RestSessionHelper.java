@@ -32,6 +32,20 @@ import jakarta.ws.rs.container.ContainerRequestContext;
 @SuppressWarnings("restriction")
 public class RestSessionHelper {
 
+    private static final String XSRF_TOKEN_HEADER = "X-XSRF-Token";
+
+    /**
+     * Describes the outcome of the XSRF token check for a given request. {@link #MISSING} means that the request does
+     * not carry the XSRF token header at all, and therefore it should not be considered a session authentication
+     * attempt, {@link #INVALID} means that a token was provided but it does not match the one bound to the session and
+     * {@link #VALID} means that the provided token matches the one bound to the session.
+     */
+    public enum XsrfTokenStatus {
+        MISSING,
+        INVALID,
+        VALID
+    }
+
     private final RestIdentityHelper identityHelper;
 
     public RestSessionHelper(final RestIdentityHelper identityHelper) {
@@ -151,9 +165,25 @@ public class RestSessionHelper {
         return asString;
     }
 
-    public boolean isXsrfTokenValid(final HttpServletRequest httpServletRequest) {
+    /**
+     * Checks the XSRF token carried by the given request against the one bound to the request session, keeping the
+     * absence of the token distinct from an actual token mismatch.
+     *
+     * @param httpServletRequest
+     *            the request to be checked
+     * @return {@link XsrfTokenStatus#MISSING} if the request does not provide the XSRF token header,
+     *         {@link XsrfTokenStatus#INVALID} if the provided token does not match the session one and
+     *         {@link XsrfTokenStatus#VALID} if the provided token matches the token bound to the request session
+     */
+    public XsrfTokenStatus getXsrfTokenStatus(final HttpServletRequest httpServletRequest) {
 
-        return checkXsrfToken(Optional.ofNullable(httpServletRequest.getHeader("X-XSRF-Token")), httpServletRequest);
+        final Optional<String> userToken = Optional.ofNullable(httpServletRequest.getHeader(XSRF_TOKEN_HEADER));
+
+        if (!userToken.isPresent()) {
+            return XsrfTokenStatus.MISSING;
+        }
+
+        return checkXsrfToken(userToken, httpServletRequest) ? XsrfTokenStatus.VALID : XsrfTokenStatus.INVALID;
     }
 
     public boolean checkXsrfToken(final Optional<String> userToken, final HttpServletRequest httpServletRequest) {

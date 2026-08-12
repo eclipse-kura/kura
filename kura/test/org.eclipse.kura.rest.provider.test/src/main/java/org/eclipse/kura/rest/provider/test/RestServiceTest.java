@@ -433,6 +433,20 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
+    public void shouldNotAllowAccessingResourceThroughSessionAuthIfXsrfTokenIsWrong() {
+        givenService(new RequiresAssetsRole());
+        givenNoBasicCredentials();
+        givenIdentity("foo", Optional.of("bar"), Arrays.asList("rest.assets"));
+        givenSuccessfulRequest("http", 8080, new MethodSpec("POST"), "/session/v1/login/password",
+                "{\"username\":\"foo\",\"password\":\"bar\"}");
+        givenXsrfTokenHeader("not-the-session-token");
+
+        whenRequestIsPerformed(new MethodSpec("GET"), "/requireAssets");
+
+        thenResponseCodeIs(401);
+    }
+
+    @Test
     public void shouldSupportLogout() {
         givenService(new RequiresAssetsRole());
         givenNoBasicCredentials();
@@ -1462,6 +1476,10 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
     private void givenXsrfToken(final String protocol, final int port) {
         whenXsrfTokenIsObtained(protocol, port);
+    }
+
+    private void givenXsrfTokenHeader(final String token) {
+        ((RestTransport) this.transport).setHeader("X-XSRF-Token", token);
     }
 
     private void givenDelay(final long amount, final TimeUnit timeUnit) {

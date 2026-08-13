@@ -28,9 +28,11 @@ import org.eclipse.kura.message.KuraBirthPayload.TamperStatus;
 import org.eclipse.kura.message.KuraDeviceProfile;
 import org.eclipse.kura.message.KuraDisconnectPayload;
 import org.eclipse.kura.message.KuraPosition;
+import org.eclipse.kura.net.IP4Address;
+import org.eclipse.kura.net.IP6Address;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
-import org.eclipse.kura.net.NetworkService;
+import org.eclipse.kura.net.status.NetworkInterfaceIpAddressStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceStatus;
 import org.eclipse.kura.net.status.NetworkInterfaceType;
 import org.eclipse.kura.net.status.modem.ModemInterfaceStatus;
@@ -192,57 +194,21 @@ public class LifeCyclePayloadBuilder {
     public KuraDeviceProfile buildDeviceProfile() {
         SystemService systemService = this.cloudServiceImpl.getSystemService();
         SystemAdminService sysAdminService = this.cloudServiceImpl.getSystemAdminService();
-        NetworkService networkService = this.cloudServiceImpl.getNetworkService();
         PositionService positionService = this.cloudServiceImpl.getPositionService();
 
         //
         // get the network information
-        StringBuilder sbConnectionIp = null;
-        StringBuilder sbConnectionInterface = null;
+        StringBuilder sbConnectionIp = new StringBuilder();
+        StringBuilder sbConnectionInterface = new StringBuilder();
         Set<String> reportedInterfaceNames = new HashSet<>();
-        try {
-            List<NetInterface<? extends NetInterfaceAddress>> nis = networkService.getActiveNetworkInterfaces();
-            if (!nis.isEmpty()) {
-                sbConnectionIp = new StringBuilder();
-                sbConnectionInterface = new StringBuilder();
 
-                for (NetInterface<? extends NetInterfaceAddress> ni : nis) {
-                    List<? extends NetInterfaceAddress> nias = ni.getNetInterfaceAddresses();
-                    if (nias != null && !nias.isEmpty()) {
-                        sbConnectionInterface.append(buildConnectionInterface(ni)).append(",");
-                        sbConnectionIp.append(buildConnectionIp(ni)).append(",");
-                        reportedInterfaceNames.add(ni.getName());
-                    }
-                }
-
-                // Remove trailing comma
-                sbConnectionIp.deleteCharAt(sbConnectionIp.length() - 1);
-                sbConnectionInterface.deleteCharAt(sbConnectionInterface.length() - 1);
-            }
-        } catch (Exception se) {
-            logger.warn("Error while getting ConnetionIP and ConnectionInterface", se);
-        }
-
+        appendActiveNetworkInterfaces(sbConnectionInterface, sbConnectionIp, reportedInterfaceNames);
         // NetworkService has no visibility on ModemManager-managed modem interfaces (e.g. QMI/MBIM wwan*),
         // so their IP is fetched separately from NetworkStatusService, when available.
-        final List<ModemInterfaceStatus> connectedModemsWithIp = getConnectedModemsWithIp(reportedInterfaceNames);
-        if (!connectedModemsWithIp.isEmpty()) {
-            if (sbConnectionInterface == null) {
-                sbConnectionInterface = new StringBuilder();
-                sbConnectionIp = new StringBuilder();
-            }
-            for (final ModemInterfaceStatus modemStatus : connectedModemsWithIp) {
-                if (sbConnectionInterface.length() > 0) {
-                    sbConnectionInterface.append(",");
-                    sbConnectionIp.append(",");
-                }
-                sbConnectionInterface.append(buildConnectionInterface(modemStatus));
-                sbConnectionIp.append(buildConnectionIp(modemStatus));
-            }
-        }
+        appendConnectedModemsWithIp(sbConnectionInterface, sbConnectionIp, reportedInterfaceNames);
 
-        String connectionIp = sbConnectionIp != null ? sbConnectionIp.toString() : UNKNOWN;
-        String connectionInterface = sbConnectionInterface != null ? sbConnectionInterface.toString() : UNKNOWN;
+        String connectionIp = sbConnectionIp.length() > 0 ? sbConnectionIp.toString() : UNKNOWN;
+        String connectionInterface = sbConnectionInterface.length() > 0 ? sbConnectionInterface.toString() : UNKNOWN;
 
         //
         // get the position information
@@ -314,6 +280,38 @@ public class LifeCyclePayloadBuilder {
         return sb.toString();
     }
 
+    private void appendActiveNetworkInterfaces(StringBuilder sbConnectionInterface, StringBuilder sbConnectionIp,
+            Set<String> reportedInterfaceNames) {
+        try {
+            for (final NetInterface<? extends NetInterfaceAddress> ni : this.cloudServiceImpl.getNetworkService()
+                    .getActiveNetworkInterfaces()) {
+                List<? extends NetInterfaceAddress> nias = ni.getNetInterfaceAddresses();
+                if (nias != null && !nias.isEmpty()) {
+                    appendCsv(sbConnectionInterface, buildConnectionInterface(ni));
+                    appendCsv(sbConnectionIp, buildConnectionIp(ni));
+                    reportedInterfaceNames.add(ni.getName());
+                }
+            }
+        } catch (Exception se) {
+            logger.warn("Error while getting ConnetionIP and ConnectionInterface", se);
+        }
+    }
+
+    private void appendConnectedModemsWithIp(StringBuilder sbConnectionInterface, StringBuilder sbConnectionIp,
+            Set<String> reportedInterfaceNames) {
+        for (final ModemInterfaceStatus modemStatus : getConnectedModemsWithIp(reportedInterfaceNames)) {
+            appendCsv(sbConnectionInterface, buildConnectionInterface(modemStatus));
+            appendCsv(sbConnectionIp, buildConnectionIp(modemStatus));
+        }
+    }
+
+    private void appendCsv(StringBuilder sb, String value) {
+        if (sb.length() > 0) {
+            sb.append(",");
+        }
+        sb.append(value);
+    }
+
     private List<ModemInterfaceStatus> getConnectedModemsWithIp(Set<String> reportedInterfaceNames) {
         final List<ModemInterfaceStatus> result = new ArrayList<>();
 
@@ -342,13 +340,15 @@ public class LifeCyclePayloadBuilder {
     }
 
     private String buildConnectionIp(ModemInterfaceStatus modemStatus) {
-        if (modemStatus.getInterfaceIp4Addresses().isPresent()
-                && !modemStatus.getInterfaceIp4Addresses().get().getAddresses().isEmpty()) {
-            return modemStatus.getInterfaceIp4Addresses().get().getAddresses().get(0).getAddress().getHostAddress();
+        final Optional<NetworkInterfaceIpAddressStatus<IP4Address>> ip4Addresses = modemStatus
+                .getInterfaceIp4Addresses();
+        if (ip4Addresses.isPresent() && !ip4Addresses.get().getAddresses().isEmpty()) {
+            return ip4Addresses.get().getAddresses().get(0).getAddress().getHostAddress();
         }
-        if (modemStatus.getInterfaceIp6Addresses().isPresent()
-                && !modemStatus.getInterfaceIp6Addresses().get().getAddresses().isEmpty()) {
-            return modemStatus.getInterfaceIp6Addresses().get().getAddresses().get(0).getAddress().getHostAddress();
+        final Optional<NetworkInterfaceIpAddressStatus<IP6Address>> ip6Addresses = modemStatus
+                .getInterfaceIp6Addresses();
+        if (ip6Addresses.isPresent() && !ip6Addresses.get().getAddresses().isEmpty()) {
+            return ip6Addresses.get().getAddresses().get(0).getAddress().getHostAddress();
         }
         return UNKNOWN;
     }

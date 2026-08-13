@@ -248,10 +248,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.stress</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.useradmin.store</artifactId>
         </dependency>
         <dependency>

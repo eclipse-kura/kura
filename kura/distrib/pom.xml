@@ -603,8 +603,6 @@
                                     org.eclipse.kura.core.identity, 
                                     <!-- core-plugins -->
                                     org.eclipse.kura.core, 
-                                    <!-- misc-plugins -->
-                                    org.eclipse.kura.misc.cloudcat,
                                     <!-- keystore-management-plugins -->
                                     org.eclipse.kura.core.keystore,
                                     <!-- osgi-base-plugins --> 

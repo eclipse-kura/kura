@@ -1,3 +1,5 @@
+This is only a test
+
 # Notices for Eclipse Kura
 
 This content is produced and maintained by the Eclipse Kura project.

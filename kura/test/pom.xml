@@ -799,7 +799,6 @@
         <module>org.eclipse.kura.emulator.watchdog.test</module>
         <module>org.eclipse.kura.event.publisher.test</module>
         <module>org.eclipse.kura.http.server.manager.test</module>
-        <module>org.eclipse.kura.internal.driver.s7plc.test</module>
         <module>org.eclipse.kura.json.marshaller.unmarshaller.provider.test</module>
         <module>org.eclipse.kura.linux.clock.test</module>
         <module>org.eclipse.kura.linux.usb.test</module>

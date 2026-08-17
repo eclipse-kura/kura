@@ -132,10 +132,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.driver.s7plc.provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.emulator</artifactId>
         </dependency>
         <dependency>

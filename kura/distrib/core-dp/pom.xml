@@ -47,10 +47,8 @@
                         <configuration>
                             <includeArtifactIds>
                                 org.eclipse.kura.protocol.modbus,
-                                org.eclipse.kura.driver.s7plc,
                                 org.eclipse.kura.driver.eddystone,
                                 org.eclipse.kura.driver.ibeacon,
-                                org.eclipse.kura.driver.gpio,
                                 org.eclipse.kura.driver.ble.xdk,
                                 org.eclipse.kura.db.sqlite.provider,
                                 org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider,

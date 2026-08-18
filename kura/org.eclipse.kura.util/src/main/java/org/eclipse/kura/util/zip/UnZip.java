@@ -55,73 +55,83 @@ public class UnZip {
     }
 
     private static void unZipZipInputStream(ZipInputStream zis, String outFolder) throws IOException {
-        String outputFolder = outFolder;
-        if (outputFolder == null) {
-            outputFolder = System.getProperty("user.dir");
-        }
-
-        File folder = new File(outputFolder);
+        File folder = new File(outFolder == null ? System.getProperty("user.dir") : outFolder);
         Deque<File> createdEntries = new ArrayDeque<>();
 
-        int entries = 0;
-        long total = 0;
         try {
             createDirectories(folder, createdEntries);
 
-            ZipEntry ze = zis.getNextEntry();
-
-            while (ze != null) {
-                byte[] buffer = new byte[BUFFER];
-
-                String expectedFilePath = new StringBuilder(folder.getPath()).append(File.separator)
-                        .append(ze.getName()).toString();
-                File newFile = getFile(expectedFilePath, folder);
-
-                if (ze.isDirectory()) {
-                    createDirectories(newFile, createdEntries);
-                    ze = zis.getNextEntry();
-                    continue;
-                }
-
-                if (newFile.getParent() != null) {
-                    createDirectories(new File(newFile.getParent()), createdEntries);
-                }
-
-                if (!newFile.exists()) {
-                    createdEntries.push(newFile);
-                }
-
-                try (FileOutputStream fos = new FileOutputStream(newFile)) {
-
-                    int len = zis.read(buffer);
-                    while (total + BUFFER <= tooBig && len > 0) {
-                        fos.write(buffer, 0, len);
-                        total += len;
-                        len = zis.read(buffer);
-                    }
-                    fos.flush();
-                }
-
-                entries++;
-                if (entries > tooMany) {
-                    throw new IllegalStateException("Too many files to unzip.");
-                }
-                if (total + BUFFER > tooBig) {
-                    throw new IllegalStateException("File being unzipped is too big.");
-                }
-
-                ze = zis.getNextEntry();
-            }
-
-            zis.closeEntry();
+            unZipEntries(zis, folder, createdEntries);
         } catch (IOException | RuntimeException e) {
             deleteCreatedEntries(createdEntries);
             throw e;
         } finally {
-            if (zis != null) {
-                zis.close();
-            }
+            zis.close();
         }
+    }
+
+    private static void unZipEntries(ZipInputStream zis, File folder, Deque<File> createdEntries) throws IOException {
+        int entries = 0;
+        long total = 0;
+
+        ZipEntry ze = zis.getNextEntry();
+
+        while (ze != null) {
+            File newFile = getFile(entryPath(folder, ze), folder);
+
+            if (ze.isDirectory()) {
+                createDirectories(newFile, createdEntries);
+            } else {
+                total = writeEntry(zis, newFile, createdEntries, total);
+                entries++;
+
+                verifyLimits(entries, total);
+            }
+
+            ze = zis.getNextEntry();
+        }
+
+        zis.closeEntry();
+    }
+
+    private static long writeEntry(ZipInputStream zis, File newFile, Deque<File> createdEntries, long writtenSoFar)
+            throws IOException {
+        if (newFile.getParent() != null) {
+            createDirectories(new File(newFile.getParent()), createdEntries);
+        }
+
+        if (!newFile.exists()) {
+            createdEntries.push(newFile);
+        }
+
+        long total = writtenSoFar;
+        try (FileOutputStream fos = new FileOutputStream(newFile)) {
+            byte[] buffer = new byte[BUFFER];
+
+            int len = zis.read(buffer);
+            while (total + BUFFER <= tooBig && len > 0) {
+                fos.write(buffer, 0, len);
+                total += len;
+                len = zis.read(buffer);
+            }
+            fos.flush();
+        }
+
+        return total;
+    }
+
+    private static void verifyLimits(int entries, long total) {
+        if (entries > tooMany) {
+            throw new IllegalStateException("Too many files to unzip.");
+        }
+
+        if (total + BUFFER > tooBig) {
+            throw new IllegalStateException("File being unzipped is too big.");
+        }
+    }
+
+    private static String entryPath(File folder, ZipEntry ze) {
+        return new StringBuilder(folder.getPath()).append(File.separator).append(ze.getName()).toString();
     }
 
     private static void createDirectories(File directory, Deque<File> createdEntries) {

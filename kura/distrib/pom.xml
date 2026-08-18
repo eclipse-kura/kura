@@ -588,7 +588,6 @@
                                     <!-- cloud.mqtt.kapua-plugins -->
                                     org.eclipse.kura.cloudconnection.kapua.mqtt.provider,
                                     <!-- filesystem-logprovider-plugins -->
-                                    org.eclipse.kura.log.filesystem.provider,
                                     <!-- rest-plugins -->
                                     org.eclipse.kura.rest.keystore.provider,
                                     org.eclipse.kura.rest.inventory.provider,

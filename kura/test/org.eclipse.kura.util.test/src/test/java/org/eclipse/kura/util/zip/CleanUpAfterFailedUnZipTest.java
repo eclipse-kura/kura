@@ -14,6 +14,9 @@
 
 package org.eclipse.kura.util.zip;
 
+import static org.eclipse.kura.util.zip.TestZipArchives.FILE_NAME;
+import static org.eclipse.kura.util.zip.TestZipArchives.MAX_ALLOWED_ENTRIES;
+import static org.eclipse.kura.util.zip.TestZipArchives.MAX_ALLOWED_UNCOMPRESSED_SIZE;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -31,11 +34,10 @@ import org.junit.Test;
 public class CleanUpAfterFailedUnZipTest {
 
     private static final String WORK_FOLDER = "/tmp/kura_cleanup_test/";
+    private static final String INPUT_ZIP_FILE = WORK_FOLDER + "input.zip";
     private static final String OUTPUT_FOLDER = WORK_FOLDER + "out/";
     private static final String PRESERVED_FILE = "keepme.txt";
-    private static final String TEST_CLASSES_FOLDER = "target/test-classes/";
 
-    private String inputFilePath;
     private Optional<Exception> exception = Optional.empty();
 
     @After
@@ -44,10 +46,10 @@ public class CleanUpAfterFailedUnZipTest {
     }
 
     @Test
-    public void noFilesLeftBehindWhenTooManyEntries() {
-        givenCompressedFileInWorkFolder("tooManyCompressedFiles.zip");
+    public void noFilesLeftBehindWhenTooManyEntries() throws IOException {
+        givenArchiveWithEntryCount(MAX_ALLOWED_ENTRIES + 1);
 
-        whenFileIsUnzippedIn(OUTPUT_FOLDER);
+        whenArchiveIsUnzippedIn(OUTPUT_FOLDER);
 
         thenExceptionIsThrown(IllegalStateException.class);
         thenExceptionMessageContains("Too many files to unzip.");
@@ -55,10 +57,10 @@ public class CleanUpAfterFailedUnZipTest {
     }
 
     @Test
-    public void noFilesLeftBehindWhenFileIsTooBig() {
-        givenCompressedFileInWorkFolder("tooBigCompressedFile.zip");
+    public void noFilesLeftBehindWhenFileIsTooBig() throws IOException {
+        givenArchiveWithUncompressedSize(MAX_ALLOWED_UNCOMPRESSED_SIZE + 1024 * 1024);
 
-        whenFileIsUnzippedIn(OUTPUT_FOLDER);
+        whenArchiveIsUnzippedIn(OUTPUT_FOLDER);
 
         thenExceptionIsThrown(IllegalStateException.class);
         thenExceptionMessageContains("File being unzipped is too big.");
@@ -66,10 +68,10 @@ public class CleanUpAfterFailedUnZipTest {
     }
 
     @Test
-    public void noFilesLeftBehindWhenPathIsIllegal() {
-        givenCompressedFileInWorkFolder("illegalPathCompressedFile.zip");
+    public void noFilesLeftBehindWhenPathIsIllegal() throws IOException {
+        givenArchiveWithAnEntryOutsideTheTargetFolder();
 
-        whenFileIsUnzippedIn(OUTPUT_FOLDER);
+        whenArchiveIsUnzippedIn(OUTPUT_FOLDER);
 
         thenExceptionIsThrown(IOException.class);
         thenExceptionMessageContains("File is outside extraction target directory.");
@@ -77,46 +79,49 @@ public class CleanUpAfterFailedUnZipTest {
     }
 
     @Test
-    public void preexistingFilesArePreservedOnFailure() {
-        givenCompressedFileInWorkFolder("tooManyCompressedFiles.zip");
+    public void preexistingFilesArePreservedOnFailure() throws IOException {
+        givenArchiveWithEntryCount(MAX_ALLOWED_ENTRIES + 1);
         givenExistingOutputFolderContaining(PRESERVED_FILE);
 
-        whenFileIsUnzippedIn(OUTPUT_FOLDER);
+        whenArchiveIsUnzippedIn(OUTPUT_FOLDER);
 
         thenExceptionIsThrown(IllegalStateException.class);
         thenFolderContainsOnly(OUTPUT_FOLDER, PRESERVED_FILE);
     }
 
     @Test
-    public void extractedFilesAreKeptOnSuccess() {
-        givenCompressedFileInWorkFolder("singleCompressedFile.zip");
+    public void extractedFilesAreKeptOnSuccess() throws IOException {
+        givenArchiveWithASingleFile();
 
-        whenFileIsUnzippedIn(OUTPUT_FOLDER);
+        whenArchiveIsUnzippedIn(OUTPUT_FOLDER);
 
         thenNoExceptionIsThrown();
-        thenFolderContainsOnly(OUTPUT_FOLDER, "file.txt");
+        thenFolderContainsOnly(OUTPUT_FOLDER, FILE_NAME);
     }
 
-    private void givenCompressedFileInWorkFolder(String inputFileName) {
-        this.inputFilePath = WORK_FOLDER + inputFileName;
-        try {
-            FileUtils.copyFile(new File(TEST_CLASSES_FOLDER + inputFileName), new File(this.inputFilePath));
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to prepare the test input file", e);
-        }
+    private void givenArchiveWithASingleFile() throws IOException {
+        TestZipArchives.writeTo(TestZipArchives.withSingleFile(), INPUT_ZIP_FILE);
     }
 
-    private void givenExistingOutputFolderContaining(String fileName) {
-        try {
-            FileUtils.writeStringToFile(new File(OUTPUT_FOLDER + fileName), "do not delete me", "UTF-8");
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to prepare the preexisting file", e);
-        }
+    private void givenArchiveWithEntryCount(int entryCount) throws IOException {
+        TestZipArchives.writeTo(TestZipArchives.withEntryCount(entryCount), INPUT_ZIP_FILE);
     }
 
-    private void whenFileIsUnzippedIn(String outputFolder) {
+    private void givenArchiveWithUncompressedSize(long uncompressedSize) throws IOException {
+        TestZipArchives.writeTo(TestZipArchives.withUncompressedSize(uncompressedSize), INPUT_ZIP_FILE);
+    }
+
+    private void givenArchiveWithAnEntryOutsideTheTargetFolder() throws IOException {
+        TestZipArchives.writeTo(TestZipArchives.withEntryOutsideTargetFolder(), INPUT_ZIP_FILE);
+    }
+
+    private void givenExistingOutputFolderContaining(String fileName) throws IOException {
+        FileUtils.writeStringToFile(new File(OUTPUT_FOLDER + fileName), "do not delete me", "UTF-8");
+    }
+
+    private void whenArchiveIsUnzippedIn(String outputFolder) {
         try {
-            UnZip.unZipFile(this.inputFilePath, outputFolder);
+            UnZip.unZipFile(INPUT_ZIP_FILE, outputFolder);
         } catch (Exception e) {
             this.exception = Optional.of(e);
         }

@@ -17,10 +17,11 @@ package org.eclipse.kura.util.zip;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.zip.ZipEntry;
@@ -36,6 +37,8 @@ public class UnZip {
     private static final Logger logger = LoggerFactory.getLogger(UnZip.class);
 
     private static final int BUFFER = 1024;
+    private static final int ZIP_MAGIC_FIRST_BYTE = 0x50;  // 'P'
+    private static final int ZIP_MAGIC_SECOND_BYTE = 0x4B; // 'K'
     private static int tooBig = 0x6400000; // Max size of unzipped data, 100MB
     private static int tooMany = 1024;     // Max number of files
 
@@ -105,7 +108,7 @@ public class UnZip {
         }
 
         long total = writtenSoFar;
-        try (FileOutputStream fos = new FileOutputStream(newFile)) {
+        try (OutputStream fos = Files.newOutputStream(newFile.toPath())) {
             byte[] buffer = new byte[BUFFER];
 
             int len = zis.read(buffer);
@@ -182,22 +185,14 @@ public class UnZip {
     }
 
     public static boolean isZipCompressed(String filePath) throws IOException {
-        byte b1 = 0;
-        byte b2 = 0;
-
-        try (InputStream is = new FileInputStream(filePath)) {
-            b1 = (byte) is.read();
-            b2 = (byte) is.read();
-        } catch (IOException e) {
-            throw new IOException(e);
+        try (InputStream is = Files.newInputStream(Paths.get(filePath))) {
+            return is.read() == ZIP_MAGIC_FIRST_BYTE && is.read() == ZIP_MAGIC_SECOND_BYTE;
         }
-
-        return b1 == 0x50 && b2 == 0x4B;
     }
 
     public static boolean isZipCompressed(byte[] bytes) {
         if (bytes.length > 2) {
-            return bytes[0] == 0x50 && bytes[1] == 0x4B;
+            return bytes[0] == ZIP_MAGIC_FIRST_BYTE && bytes[1] == ZIP_MAGIC_SECOND_BYTE;
         } else {
             return false;
         }

@@ -192,10 +192,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.protocol.modbus</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
             <artifactId>org.eclipse.kura.request.handler.jaxrs</artifactId>
         </dependency>
         <dependency>

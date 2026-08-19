@@ -46,7 +46,6 @@
                         </goals>
                         <configuration>
                             <includeArtifactIds>
-                                org.eclipse.kura.protocol.modbus,
                                 org.eclipse.kura.driver.eddystone,
                                 org.eclipse.kura.driver.ibeacon,
                                 org.eclipse.kura.driver.ble.xdk,

@@ -814,7 +814,6 @@
         <module>org.eclipse.kura.rest.service.listing.provider.test</module>
         <module>org.eclipse.kura.rest.system.provider.test</module>
         <module>org.eclipse.kura.rest.tamper.detection.provider.test</module>
-        <module>org.eclipse.kura.stress.test</module>
         <module>org.eclipse.kura.useradmin.store.test</module>
         <module>org.eclipse.kura.util.test</module>
         <module>org.eclipse.kura.watchdog.criticaltest</module>

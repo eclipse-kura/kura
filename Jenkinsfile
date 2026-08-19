@@ -109,6 +109,7 @@ node {
                                 -Dsonar.core.codeCoveragePlugin=jacoco \
                                 -Dsonar.projectKey=org.eclipse.kura:kura \
                                 -Dsonar.exclusions=test/**/*,**/*.xml,**/*.yml,test-util/**/*,emulator/**/*,com.codeminders.hidapi-parent/**/*,org.moka7/**/*,org.eclipse.soda.dk.comm-parent/**/*,org.eclipse.kura.sun.misc/**/*,log4j2-api-config/**/*,org.usb4java/**/*,usb4java-javax/**/* \
+                                -Dsonar.cpd.exclusions=**/*Metatype.java,**/*Options.java \
                                 -Dsonar.test.exclusions=**/*
                         """
                     }

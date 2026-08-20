@@ -14,6 +14,7 @@
 package org.eclipse.kura.linux.clock;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,11 +35,13 @@ public class ChronyProviderSyncStateTest {
 
     private static final String[] CHRONYD_STATUS_COMMAND = { "systemctl", "is-active", "chrony" };
     private static final String[] TRACKING_COMMAND = { "chronyc", "-c", "tracking" };
+    private static final String[] RESULT_COMMAND = { "systemctl", "show", "chrony", "-p", "Result" };
 
     private CommandExecutorService executorMock;
     private CryptoService cryptoServiceMock;
     private ChronyClockSyncProvider provider;
     private ClockSyncState reportedState;
+    private RuntimeException thrownException;
 
     @Test
     public void trackingNormalReportsSynced() throws NoSuchFieldException {
@@ -115,6 +118,124 @@ public class ChronyProviderSyncStateTest {
         thenReportedStateIs(ClockSyncState.UNKNOWN);
     }
 
+    @Test
+    public void emptyUnitStateOutputReportsUnknown() throws NoSuchFieldException {
+        givenChronyProvider();
+        givenChronydStateOutputIsEmpty();
+
+        whenSyncStateIsQueried();
+
+        thenReportedStateIs(ClockSyncState.UNKNOWN);
+        thenFailureReasonIsNull();
+    }
+
+    @Test
+    public void blankUnitStateOutputReportsUnknown() throws NoSuchFieldException {
+        givenChronyProvider();
+        givenChronydStateOutputIs("  \n");
+
+        whenSyncStateIsQueried();
+
+        thenReportedStateIs(ClockSyncState.UNKNOWN);
+        thenFailureReasonIsNull();
+    }
+
+    @Test
+    public void failedUnitReportsFailedWithResultReason() throws NoSuchFieldException {
+        givenChronyProvider();
+        givenChronydIsFailed();
+        givenResultProbeOutputIs("Result=exit-code\n");
+
+        whenSyncStateIsQueried();
+
+        thenReportedStateIs(ClockSyncState.FAILED);
+        thenFailureReasonIs("chrony service failed (Result: exit-code)");
+    }
+
+    @Test
+    public void failingResultProbeReportsGenericFailureReason() throws NoSuchFieldException {
+        givenChronyProvider();
+        givenChronydIsFailed();
+        givenResultProbeFails();
+
+        whenSyncStateIsQueried();
+
+        thenReportedStateIs(ClockSyncState.FAILED);
+        thenFailureReasonIs("chrony service is in a failed state");
+    }
+
+    @Test
+    public void emptyResultProbeOutputReportsGenericFailureReason() throws NoSuchFieldException {
+        givenChronyProvider();
+        givenChronydIsFailed();
+        givenResultProbeOutputIs("");
+
+        whenSyncStateIsQueried();
+
+        thenReportedStateIs(ClockSyncState.FAILED);
+        thenFailureReasonIs("chrony service is in a failed state");
+    }
+
+    @Test
+    public void resultProbeWithoutResultPropertyReportsGenericFailureReason() throws NoSuchFieldException {
+        givenChronyProvider();
+        givenChronydIsFailed();
+        givenResultProbeOutputIs("MainPID=1234\n");
+
+        whenSyncStateIsQueried();
+
+        thenReportedStateIs(ClockSyncState.FAILED);
+        thenFailureReasonIs("chrony service is in a failed state");
+    }
+
+    @Test
+    public void commaOnlyTrackingLineReportsUnknown() throws NoSuchFieldException {
+        givenChronyProvider();
+        givenChronydIsActive();
+        givenTrackingOutputIs(",");
+
+        whenSyncStateIsQueried();
+
+        thenNoExceptionIsThrown();
+        thenReportedStateIs(ClockSyncState.UNKNOWN);
+    }
+
+    @Test
+    public void trackingLineWithoutCommaIsParsedAsWhole() throws NoSuchFieldException {
+        givenChronyProvider();
+        givenChronydIsActive();
+        givenTrackingOutputIs("Normal");
+
+        whenSyncStateIsQueried();
+
+        thenNoExceptionIsThrown();
+        thenReportedStateIs(ClockSyncState.SYNCED);
+    }
+
+    @Test
+    public void inactiveUnitReportsNoFailureReason() throws NoSuchFieldException {
+        givenChronyProvider();
+        givenChronydIsInactive();
+
+        whenSyncStateIsQueried();
+
+        thenReportedStateIs(ClockSyncState.NOT_SYNCED);
+        thenFailureReasonIsNull();
+    }
+
+    @Test
+    public void syncedClockReportsNoFailureDetails() throws NoSuchFieldException {
+        givenChronyProvider();
+        givenChronydIsActive();
+        givenTrackingOutputIs(trackingCsvWithLeapStatus("Normal"));
+
+        whenSyncStateIsQueried();
+
+        thenReportedStateIs(ClockSyncState.SYNCED);
+        thenFailureReasonIsNull();
+        thenRetryCountIsNull();
+    }
+
     private void givenChronyProvider() throws NoSuchFieldException {
         this.executorMock = mock(CommandExecutorService.class);
         this.cryptoServiceMock = mock(CryptoService.class);
@@ -124,12 +245,43 @@ public class ChronyProviderSyncStateTest {
 
     private void givenChronydIsActive() {
         CommandStatus status = new CommandStatus(new Command(CHRONYD_STATUS_COMMAND), new LinuxExitStatus(0));
+        status.setOutputStream(outputStreamOf("active\n"));
         when(this.executorMock.execute(new Command(CHRONYD_STATUS_COMMAND))).thenReturn(status);
     }
 
     private void givenChronydIsInactive() {
         CommandStatus status = new CommandStatus(new Command(CHRONYD_STATUS_COMMAND), new LinuxExitStatus(3));
+        status.setOutputStream(outputStreamOf("inactive\n"));
         when(this.executorMock.execute(new Command(CHRONYD_STATUS_COMMAND))).thenReturn(status);
+    }
+
+    private void givenChronydStateOutputIsEmpty() {
+        CommandStatus status = new CommandStatus(new Command(CHRONYD_STATUS_COMMAND), new LinuxExitStatus(0));
+        status.setOutputStream(new ByteArrayOutputStream());
+        when(this.executorMock.execute(new Command(CHRONYD_STATUS_COMMAND))).thenReturn(status);
+    }
+
+    private void givenChronydStateOutputIs(String output) {
+        CommandStatus status = new CommandStatus(new Command(CHRONYD_STATUS_COMMAND), new LinuxExitStatus(0));
+        status.setOutputStream(outputStreamOf(output));
+        when(this.executorMock.execute(new Command(CHRONYD_STATUS_COMMAND))).thenReturn(status);
+    }
+
+    private void givenChronydIsFailed() {
+        CommandStatus status = new CommandStatus(new Command(CHRONYD_STATUS_COMMAND), new LinuxExitStatus(3));
+        status.setOutputStream(outputStreamOf("failed\n"));
+        when(this.executorMock.execute(new Command(CHRONYD_STATUS_COMMAND))).thenReturn(status);
+    }
+
+    private void givenResultProbeOutputIs(String output) {
+        CommandStatus status = new CommandStatus(new Command(RESULT_COMMAND), new LinuxExitStatus(0));
+        status.setOutputStream(outputStreamOf(output));
+        when(this.executorMock.execute(new Command(RESULT_COMMAND))).thenReturn(status);
+    }
+
+    private void givenResultProbeFails() {
+        CommandStatus status = new CommandStatus(new Command(RESULT_COMMAND), new LinuxExitStatus(1));
+        when(this.executorMock.execute(new Command(RESULT_COMMAND))).thenReturn(status);
     }
 
     private void givenChronydCheckThrowsRuntimeException() {
@@ -139,13 +291,7 @@ public class ChronyProviderSyncStateTest {
 
     private void givenTrackingOutputIs(String output) {
         CommandStatus status = new CommandStatus(new Command(TRACKING_COMMAND), new LinuxExitStatus(0));
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        try {
-            outputStream.write(output.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-        status.setOutputStream(outputStream);
+        status.setOutputStream(outputStreamOf(output));
         when(this.executorMock.execute(new Command(TRACKING_COMMAND))).thenReturn(status);
     }
 
@@ -161,11 +307,41 @@ public class ChronyProviderSyncStateTest {
     }
 
     private void whenSyncStateIsQueried() {
-        this.reportedState = this.provider.getSyncState();
+        try {
+            this.reportedState = this.provider.getSyncState();
+        } catch (RuntimeException e) {
+            this.thrownException = e;
+        }
     }
 
     private void thenReportedStateIs(ClockSyncState expected) {
         assertEquals(expected, this.reportedState);
+    }
+
+    private void thenFailureReasonIs(String expected) {
+        assertEquals(expected, this.provider.getFailureReason());
+    }
+
+    private void thenFailureReasonIsNull() {
+        assertNull(this.provider.getFailureReason());
+    }
+
+    private void thenRetryCountIsNull() {
+        assertNull(this.provider.getRetryCount());
+    }
+
+    private void thenNoExceptionIsThrown() {
+        assertNull(this.thrownException);
+    }
+
+    private static ByteArrayOutputStream outputStreamOf(String content) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try {
+            outputStream.write(content.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+        return outputStream;
     }
 
     private static String trackingCsvWithLeapStatus(String leapStatus) {

@@ -51,6 +51,14 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
 
     private static final int SERVICE_STATUS_UNKNOWN = 4;
 
+    private static final String ACTIVE_UNIT_STATE = "active";
+
+    private static final String FAILED_UNIT_STATE = "failed";
+
+    private static final String RESULT_PROPERTY_PREFIX = "Result=";
+
+    private static final String GENERIC_FAILURE_REASON = "chrony service is in a failed state";
+
     private final CommandExecutorService executorService;
     private ScheduledExecutorService schedulerExecutor;
     private ScheduledFuture<?> future;
@@ -66,6 +74,8 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
     private Gson gson;
 
     private long lastSyncTime;
+
+    private volatile String failureReason;
 
     private final Path[] chronyConfigLocations = new Path[] { Paths.get("/etc/chrony.conf"),
             Paths.get("/etc/chrony/chrony.conf") };
@@ -244,8 +254,21 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
     @Override
     public ClockSyncState getSyncState() {
 
+        this.failureReason = null;
+
         try {
-            if (!isChronydRunning()) {
+            String chronydUnitState = readChronydUnitState();
+
+            if (chronydUnitState == null) {
+                return ClockSyncState.UNKNOWN;
+            }
+
+            if (FAILED_UNIT_STATE.equals(chronydUnitState)) {
+                this.failureReason = readChronydFailureReason();
+                return ClockSyncState.FAILED;
+            }
+
+            if (!ACTIVE_UNIT_STATE.equals(chronydUnitState)) {
                 return ClockSyncState.NOT_SYNCED;
             }
 
@@ -269,9 +292,8 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
             }
 
             String output = new String(chronycTrackingOutput.toByteArray(), StandardCharsets.UTF_8);
-            String firstLine = output.split("\\r?\\n", 2)[0];
-            String[] fields = firstLine.split(",");
-            String leapStatus = fields[fields.length - 1].trim();
+            String firstLine = output.lines().findFirst().orElse("");
+            String leapStatus = firstLine.substring(firstLine.lastIndexOf(',') + 1).trim();
 
             if ("Normal".equals(leapStatus)) {
                 return ClockSyncState.SYNCED;
@@ -288,12 +310,71 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
 
     @Override
     public String getFailureReason() {
-        return null;
+        return this.failureReason;
     }
 
     @Override
     public Integer getRetryCount() {
         return null;
+    }
+
+    private String readChronydUnitState() {
+
+        Command checkChronyState = new Command(new String[] { SERVICE_MANAGER, "is-active", this.chronyServiceName });
+        checkChronyState.setTimeout(60);
+        checkChronyState.setOutputStream(new ByteArrayOutputStream());
+        checkChronyState.setErrorStream(new ByteArrayOutputStream());
+
+        CommandStatus chronyStateStatus = this.executorService.execute(checkChronyState);
+
+        if (!(chronyStateStatus.getOutputStream() instanceof ByteArrayOutputStream)) {
+            return null;
+        }
+
+        ByteArrayOutputStream chronyStateOutput = (ByteArrayOutputStream) chronyStateStatus.getOutputStream();
+
+        if (chronyStateOutput.size() == 0) {
+            return null;
+        }
+
+        String chronydUnitState = new String(chronyStateOutput.toByteArray(), StandardCharsets.UTF_8).trim();
+
+        return chronydUnitState.isEmpty() ? null : chronydUnitState;
+    }
+
+    private String readChronydFailureReason() {
+
+        try {
+            Command showChronyResult = new Command(
+                    new String[] { SERVICE_MANAGER, "show", this.chronyServiceName, "-p", "Result" });
+            showChronyResult.setTimeout(60);
+            showChronyResult.setOutputStream(new ByteArrayOutputStream());
+            showChronyResult.setErrorStream(new ByteArrayOutputStream());
+
+            CommandStatus showChronyResultStatus = this.executorService.execute(showChronyResult);
+
+            if (!showChronyResultStatus.getExitStatus().isSuccessful()
+                    || !(showChronyResultStatus.getOutputStream() instanceof ByteArrayOutputStream)) {
+                return GENERIC_FAILURE_REASON;
+            }
+
+            ByteArrayOutputStream showChronyResultOutput = (ByteArrayOutputStream) showChronyResultStatus
+                    .getOutputStream();
+
+            if (showChronyResultOutput.size() == 0) {
+                return GENERIC_FAILURE_REASON;
+            }
+
+            String output = new String(showChronyResultOutput.toByteArray(), StandardCharsets.UTF_8);
+
+            return output.lines().map(String::trim).filter(line -> line.startsWith(RESULT_PROPERTY_PREFIX))
+                    .map(line -> line.substring(RESULT_PROPERTY_PREFIX.length()).trim()).filter(value -> !value.isEmpty())
+                    .findFirst().map(value -> "chrony service failed (Result: " + value + ")")
+                    .orElse(GENERIC_FAILURE_REASON);
+        } catch (RuntimeException e) {
+            logger.debug("Unable to read the chrony service failure result", e);
+            return GENERIC_FAILURE_REASON;
+        }
     }
 
     private boolean isChronydRunning() {

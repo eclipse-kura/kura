@@ -53,7 +53,7 @@ To create a new H2 database instance, use the following procedure:
 ### Configuration Parameters
 The **H2DbService** provides the following configuration parameters:
 
-* **Connector URL**: JDBC connector URL of the database instance.  Passing the USER and PASSWORD parameters in the connector URL is not supported, these paramters will be ignored if present. Please use the db.user and db.password fields to provide the credentials. 
+* **Connector URL**: JDBC connector URL of the database instance.  Passing the USER and PASSWORD parameters in the connector URL is not supported, these paramters will be ignored if present. Please use the db.user and db.password fields to provide the credentials. If the database is persisted on disk, the path must be set to a location under the data partition, as defined by the specific target OS configuration, to ensure data is preserved across software updates and reboots.
 
 !!! warning
     If the database is created in persisted mode, please make sure that the Linux user running Eclipse Kura has the permissions required to create the database file.
@@ -172,7 +172,7 @@ The default database instance is in-memory by default and uses the **jdbc:h2:mem
 
 ### Persistent
 
-A persistent database instance can be created using the **jdbc:h2:file:<dbpath>**, where **<dbpath>** is a non-empty string that represents the database path.
+A persistent database instance can be created using the **jdbc:h2:file:<dbpath>**, where **<dbpath>** is a non-empty string that represents the database path. The path must be set to a location under the data partition, as defined by the specific target OS configuration, to ensure data is preserved across software updates and reboots.
 
 If no URL parameters are supplied the database will enable the transaction log by default. The transaction log is used to restore the database to a consistent state after a crash or power failure. This provides good protection against data losses but causes a lot of writes to the storage device, reducing both performance and the lifetime of flash-based storage devices.
 

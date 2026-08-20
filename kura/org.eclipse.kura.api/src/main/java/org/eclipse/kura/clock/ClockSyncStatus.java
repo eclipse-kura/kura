@@ -30,6 +30,8 @@ public class ClockSyncStatus {
     private final ClockSyncState state;
     private final Date lastSync;
     private final String syncProvider;
+    private final String failureReason;
+    private final Integer retryCount;
 
     /**
      * Creates a new {@link ClockSyncStatus} instance.
@@ -42,11 +44,20 @@ public class ClockSyncStatus {
      * @param syncProvider
      *            the name of the synchronization provider that reported this status (e.g. {@code "java-ntp"},
      *            {@code "chrony-advanced"}), can be <code>null</code> if not known.
+     * @param failureReason
+     *            a human readable description of the detected failure, non-<code>null</code> only when the state
+     *            is {@link ClockSyncState#FAILED}, <code>null</code> otherwise.
+     * @param retryCount
+     *            the number of consecutive failed synchronization attempts in the current cycle of the
+     *            synchronization provider, can be <code>null</code> if the provider does not track retries.
      */
-    public ClockSyncStatus(ClockSyncState state, Date lastSync, String syncProvider) {
+    public ClockSyncStatus(ClockSyncState state, Date lastSync, String syncProvider, String failureReason,
+            Integer retryCount) {
         this.state = state;
         this.lastSync = lastSync;
         this.syncProvider = syncProvider;
+        this.failureReason = failureReason;
+        this.retryCount = retryCount;
     }
 
     /**
@@ -75,6 +86,27 @@ public class ClockSyncStatus {
      */
     public String getSyncProvider() {
         return this.syncProvider;
+    }
+
+    /**
+     * Returns a human readable description of the detected failure.
+     *
+     * @return the description of the detected failure, non-<code>null</code> only when the state is
+     *         {@link ClockSyncState#FAILED}, <code>null</code> otherwise.
+     */
+    public String getFailureReason() {
+        return this.failureReason;
+    }
+
+    /**
+     * Returns the number of consecutive failed synchronization attempts in the current cycle of the
+     * synchronization provider.
+     *
+     * @return the number of consecutive failed synchronization attempts, can be <code>null</code> if the provider
+     *         does not track retries.
+     */
+    public Integer getRetryCount() {
+        return this.retryCount;
     }
 
 }

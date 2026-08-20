@@ -32,6 +32,16 @@ public enum ClockSyncState {
     NOT_SYNCED,
 
     /**
+     * The clock synchronization failed. This state is reported only when a failure condition is positively
+     * detected, for example the time daemon unit is reported by systemd in a <code>failed</code> state, or a
+     * finite number of synchronization retries was configured and those retries have been exhausted. Where the
+     * synchronization provider is configured to retry indefinitely, retries alone never lead to this state. It
+     * is never inferred from how long the clock has been in the {@link #NOT_SYNCED} state: a device that has
+     * just booted and is still reaching its time source is honestly {@link #NOT_SYNCED}, not {@link #FAILED}.
+     */
+    FAILED,
+
+    /**
      * The synchronization state of the clock cannot be determined.
      */
     UNKNOWN;

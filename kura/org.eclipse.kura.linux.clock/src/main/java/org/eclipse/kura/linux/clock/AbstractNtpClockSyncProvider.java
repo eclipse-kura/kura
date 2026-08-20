@@ -156,6 +156,16 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider 
         return this.syncState;
     }
 
+    @Override
+    public String getFailureReason() {
+        return null;
+    }
+
+    @Override
+    public Integer getRetryCount() {
+        return null;
+    }
+
     // ----------------------------------------------------------------
     //
     // Private/Protected Methods

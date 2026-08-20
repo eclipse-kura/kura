@@ -286,6 +286,16 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
         }
     }
 
+    @Override
+    public String getFailureReason() {
+        return null;
+    }
+
+    @Override
+    public Integer getRetryCount() {
+        return null;
+    }
+
     private boolean isChronydRunning() {
 
         logger.info("Checking chrony service status...");

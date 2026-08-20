@@ -32,4 +32,8 @@ public interface ClockSyncProvider {
 
     public ClockSyncState getSyncState();
 
+    public String getFailureReason();
+
+    public Integer getRetryCount();
+
 }

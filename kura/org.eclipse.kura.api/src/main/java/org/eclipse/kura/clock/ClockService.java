@@ -45,7 +45,8 @@ public interface ClockService {
      * Returns the current clock synchronization status.
      * The default implementation derives the status from {@link #getLastSync()}: if it returns
      * <code>null</code> the status is {@link ClockSyncState#NOT_SYNCED}, otherwise it is
-     * {@link ClockSyncState#SYNCED}, with no synchronization provider name reported.
+     * {@link ClockSyncState#SYNCED}, with no synchronization provider name, no failure reason and no retry
+     * count reported.
      * Implementations are encouraged to override this method to report the actual health of their
      * synchronization provider.
      *
@@ -57,7 +58,7 @@ public interface ClockService {
     default ClockSyncStatus getSyncStatus() throws KuraException {
         Date lastSync = getLastSync();
         return new ClockSyncStatus(lastSync != null ? ClockSyncState.SYNCED : ClockSyncState.NOT_SYNCED, lastSync,
-                null);
+                null, null, null);
     }
 
 }

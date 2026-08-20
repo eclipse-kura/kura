@@ -163,7 +163,8 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
     public ClockSyncStatus getSyncStatus() throws KuraException {
         if (this.provider != null) {
             return new ClockSyncStatus(this.provider.getSyncState(), this.provider.getLastSync(),
-                    this.clockServiceConfig.getClockProvider());
+                    this.clockServiceConfig.getClockProvider(), this.provider.getFailureReason(),
+                    this.provider.getRetryCount());
         } else {
             throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, "Clock service not configured yet");
         }

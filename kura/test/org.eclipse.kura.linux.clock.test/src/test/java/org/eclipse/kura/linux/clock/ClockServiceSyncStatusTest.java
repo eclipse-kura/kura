@@ -59,6 +59,29 @@ public class ClockServiceSyncStatusTest {
     }
 
     @Test
+    public void statusComposesProviderReportedFailureReasonAndRetryCount() throws NoSuchFieldException {
+        givenClockServiceImplWithProvider(ClockSyncState.FAILED, new Date(3000L), "chrony-advanced",
+                "chrony service is in failed state", 5);
+
+        whenGetSyncStatusIsInvoked();
+
+        thenStatusStateIs(ClockSyncState.FAILED);
+        thenStatusFailureReasonIs("chrony service is in failed state");
+        thenStatusRetryCountIs(5);
+    }
+
+    @Test
+    public void statusReportsNoFailureReasonAndNoRetryCountWhenProviderReportsNeither() throws NoSuchFieldException {
+        givenClockServiceImplWithProvider(ClockSyncState.SYNCED, new Date(4000L), "java-ntp", null, null);
+
+        whenGetSyncStatusIsInvoked();
+
+        thenStatusStateIs(ClockSyncState.SYNCED);
+        thenStatusFailureReasonIs(null);
+        thenStatusRetryCountIs(null);
+    }
+
+    @Test
     public void defaultMethodDerivesNotSyncedFromNullLastSync() throws NoSuchFieldException {
         givenClockServiceWithLastSync(null);
 
@@ -67,6 +90,8 @@ public class ClockServiceSyncStatusTest {
         thenStatusStateIs(ClockSyncState.NOT_SYNCED);
         thenStatusLastSyncIs(null);
         thenStatusSyncProviderIs(null);
+        thenStatusFailureReasonIs(null);
+        thenStatusRetryCountIs(null);
     }
 
     @Test
@@ -79,6 +104,8 @@ public class ClockServiceSyncStatusTest {
         thenStatusStateIs(ClockSyncState.SYNCED);
         thenStatusLastSyncIs(lastSync);
         thenStatusSyncProviderIs(null);
+        thenStatusFailureReasonIs(null);
+        thenStatusRetryCountIs(null);
     }
 
     private void givenFreshClockServiceImpl() {
@@ -87,11 +114,18 @@ public class ClockServiceSyncStatusTest {
 
     private void givenClockServiceImplWithProvider(ClockSyncState providerState, Date lastSync,
             String configuredProvider) throws NoSuchFieldException {
+        givenClockServiceImplWithProvider(providerState, lastSync, configuredProvider, null, null);
+    }
+
+    private void givenClockServiceImplWithProvider(ClockSyncState providerState, Date lastSync,
+            String configuredProvider, String failureReason, Integer retryCount) throws NoSuchFieldException {
         ClockServiceImpl clockServiceImpl = new ClockServiceImpl();
 
         ClockSyncProvider providerMock = mock(ClockSyncProvider.class);
         when(providerMock.getSyncState()).thenReturn(providerState);
         when(providerMock.getLastSync()).thenReturn(lastSync);
+        when(providerMock.getFailureReason()).thenReturn(failureReason);
+        when(providerMock.getRetryCount()).thenReturn(retryCount);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("clock.provider", configuredProvider);
@@ -144,6 +178,22 @@ public class ClockServiceSyncStatusTest {
             assertNull(this.status.getSyncProvider());
         } else {
             assertEquals(expected, this.status.getSyncProvider());
+        }
+    }
+
+    private void thenStatusFailureReasonIs(String expected) {
+        if (expected == null) {
+            assertNull(this.status.getFailureReason());
+        } else {
+            assertEquals(expected, this.status.getFailureReason());
+        }
+    }
+
+    private void thenStatusRetryCountIs(Integer expected) {
+        if (expected == null) {
+            assertNull(this.status.getRetryCount());
+        } else {
+            assertEquals(expected, this.status.getRetryCount());
         }
     }
 }

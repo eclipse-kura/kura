@@ -37,10 +37,12 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider 
     protected Date lastSync;
     protected ScheduledExecutorService scheduler;
     protected int maxRetry;
-    protected int numRetry;
+    protected volatile int numRetry;
     protected boolean isSynced;
     protected int syncCount;
     protected volatile ClockSyncState syncState = ClockSyncState.UNKNOWN;
+
+    private volatile String failureReason;
 
     private ScheduledFuture<?> future;
 
@@ -61,6 +63,8 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider 
     public void start() throws KuraException {
         this.isSynced = false;
         this.numRetry = 0;
+        this.failureReason = null;
+        this.syncState = ClockSyncState.UNKNOWN;
         if (this.refreshInterval < 0) {
             // Never do any update. So Nothing to do.
             logger.info("No clock update required");
@@ -93,14 +97,14 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider 
                             logger.info("Clock synced");
                             AbstractNtpClockSyncProvider.this.isSynced = true;
                             AbstractNtpClockSyncProvider.this.numRetry = 0;
+                            AbstractNtpClockSyncProvider.this.failureReason = null;
                             AbstractNtpClockSyncProvider.this.syncState = ClockSyncState.SYNCED;
                         } else {
                             AbstractNtpClockSyncProvider.this.numRetry++;
                             AbstractNtpClockSyncProvider.this.syncState = ClockSyncState.NOT_SYNCED;
                             if (AbstractNtpClockSyncProvider.this.maxRetry > 0
                                     && AbstractNtpClockSyncProvider.this.numRetry >= AbstractNtpClockSyncProvider.this.maxRetry) {
-                                logger.error("Failed to synchronize System Clock. Exhausted retry attempts, giving up");
-                                AbstractNtpClockSyncProvider.this.isSynced = true;
+                                giveUp(null);
                             }
                         }
                     } catch (KuraException e) {
@@ -109,8 +113,7 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider 
                         logger.error("Error Synchronizing Clock", e);
                         if (AbstractNtpClockSyncProvider.this.maxRetry > 0
                                 && AbstractNtpClockSyncProvider.this.numRetry >= AbstractNtpClockSyncProvider.this.maxRetry) {
-                            logger.error("Failed to synchronize System Clock. Exhausted retry attempts, giving up");
-                            AbstractNtpClockSyncProvider.this.isSynced = true;
+                            giveUp(e);
                         }
                     }
                 } else {
@@ -119,6 +122,10 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider 
                             * retryInt >= AbstractNtpClockSyncProvider.this.refreshInterval - 1) {
                         AbstractNtpClockSyncProvider.this.isSynced = false;
                         AbstractNtpClockSyncProvider.this.numRetry = 0;
+                        if (AbstractNtpClockSyncProvider.this.syncState == ClockSyncState.FAILED) {
+                            AbstractNtpClockSyncProvider.this.syncState = ClockSyncState.NOT_SYNCED;
+                            AbstractNtpClockSyncProvider.this.failureReason = null;
+                        }
                     }
                 }
             }, 0, retryInt, TimeUnit.SECONDS);
@@ -129,8 +136,12 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider 
         this.future = this.scheduler.schedule(() -> {
             Thread.currentThread().setName("AbstractNtpClockSyncProvider:scheduleOnce");
             try {
-                boolean synced = syncClock();
-                this.syncState = synced ? ClockSyncState.SYNCED : ClockSyncState.NOT_SYNCED;
+                if (syncClock()) {
+                    this.syncState = ClockSyncState.SYNCED;
+                } else {
+                    this.syncState = ClockSyncState.FAILED;
+                    this.failureReason = "Single synchronization attempt failed and no retry is scheduled";
+                }
             } catch (KuraException e) {
                 this.syncState = ClockSyncState.NOT_SYNCED;
                 logger.error("Error Synchronizing Clock - retrying", e);
@@ -158,12 +169,12 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider 
 
     @Override
     public String getFailureReason() {
-        return null;
+        return this.failureReason;
     }
 
     @Override
     public Integer getRetryCount() {
-        return null;
+        return this.numRetry;
     }
 
     // ----------------------------------------------------------------
@@ -171,5 +182,17 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider 
     // Private/Protected Methods
     //
     // ----------------------------------------------------------------
+    private void giveUp(KuraException cause) {
+        logger.error("Failed to synchronize System Clock. Exhausted retry attempts, giving up");
+        this.isSynced = true;
+        this.syncState = ClockSyncState.FAILED;
+        StringBuilder reason = new StringBuilder("Gave up after ").append(this.numRetry)
+                .append(" failed synchronization attempts");
+        if (cause != null && cause.getMessage() != null) {
+            reason.append(": ").append(cause.getMessage());
+        }
+        this.failureReason = reason.toString();
+    }
+
     protected abstract boolean syncClock() throws KuraException;
 }

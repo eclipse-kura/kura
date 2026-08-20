@@ -14,9 +14,12 @@
 package org.eclipse.kura.linux.clock;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.ArrayDeque;
@@ -38,6 +41,7 @@ public class NtpProviderSyncStateTest {
     private ScheduledExecutorService scheduler;
     private ScriptedNtpProvider provider;
     private Runnable scheduledTick;
+    private KuraException scriptedException;
 
     @Test
     public void freshProviderReportsUnknown() throws Exception {
@@ -77,7 +81,7 @@ public class NtpProviderSyncStateTest {
     }
 
     @Test
-    public void retryExhaustionReportsNotSynced() throws Exception {
+    public void exhaustedRetriesReportFailedWithGiveUpReason() throws Exception {
         givenNtpProviderConfiguredWithRefreshInterval(3600, 2);
         givenNextSyncAttemptFails();
         givenNextSyncAttemptFails();
@@ -85,7 +89,9 @@ public class NtpProviderSyncStateTest {
         whenScheduledSyncAttemptRuns();
         whenScheduledSyncAttemptRuns();
 
-        thenSyncStateIs(ClockSyncState.NOT_SYNCED);
+        thenSyncStateIs(ClockSyncState.FAILED);
+        thenFailureReasonIs("Gave up after 2 failed synchronization attempts");
+        thenRetryCountIs(2);
         thenSchedulingFlagIs(true);
     }
 
@@ -105,6 +111,90 @@ public class NtpProviderSyncStateTest {
         thenSyncStateIs(ClockSyncState.SYNCED);
     }
 
+    @Test
+    public void exhaustedRetriesOnExceptionAppendExceptionMessageToReason() throws Exception {
+        givenNtpProviderConfiguredWithRefreshInterval(3600, 1);
+        givenNextSyncAttemptThrows();
+
+        whenScheduledSyncAttemptRuns();
+
+        thenSyncStateIs(ClockSyncState.FAILED);
+        thenFailureReasonReportsGiveUpWithScriptedExceptionMessage(1);
+        thenRetryCountIs(1);
+    }
+
+    @Test
+    public void retryForeverDefaultNeverReportsFailed() throws Exception {
+        givenNtpProviderConfiguredWithRefreshInterval(3600, 0);
+        givenNextSyncAttemptFails();
+        givenNextSyncAttemptFails();
+        givenNextSyncAttemptFails();
+
+        whenScheduledSyncAttemptRuns();
+        whenScheduledSyncAttemptRuns();
+        whenScheduledSyncAttemptRuns();
+
+        thenSyncStateIs(ClockSyncState.NOT_SYNCED);
+        thenFailureReasonIsNotReported();
+        thenRetryCountIs(3);
+    }
+
+    @Test
+    public void refreshWindowReArmClearsFailure() throws Exception {
+        givenNtpProviderConfiguredWithRefreshInterval(1, 1);
+        givenNextSyncAttemptFails();
+
+        whenScheduledSyncAttemptRuns();
+
+        thenSyncStateIs(ClockSyncState.FAILED);
+
+        whenScheduledSyncAttemptRuns();
+
+        thenSyncStateIs(ClockSyncState.NOT_SYNCED);
+        thenFailureReasonIsNotReported();
+        thenRetryCountIs(0);
+    }
+
+    @Test
+    public void successfulSyncResetsRetryCountAndFailureReason() throws Exception {
+        givenNtpProviderConfiguredWithRefreshInterval(3600, 0);
+        givenNextSyncAttemptFails();
+        givenNextSyncAttemptFails();
+        givenNextSyncAttemptSucceeds();
+
+        whenScheduledSyncAttemptRuns();
+        whenScheduledSyncAttemptRuns();
+        whenScheduledSyncAttemptRuns();
+
+        thenSyncStateIs(ClockSyncState.SYNCED);
+        thenRetryCountIs(0);
+        thenFailureReasonIsNotReported();
+    }
+
+    @Test
+    public void terminalSingleShotFailureReportsFailed() throws Exception {
+        givenNtpProviderConfiguredForSingleShot();
+        givenNextSyncAttemptFails();
+
+        whenScheduledSyncAttemptRuns();
+
+        thenSyncStateIs(ClockSyncState.FAILED);
+        thenFailureReasonIs("Single synchronization attempt failed and no retry is scheduled");
+        thenNoFurtherAttemptWasScheduled();
+    }
+
+    @Test
+    public void singleShotSyncExceptionRemainsNotSyncedAndRetries() throws Exception {
+        givenNtpProviderConfiguredForSingleShot();
+        givenNextSyncAttemptThrows();
+
+        whenScheduledSyncAttemptRuns();
+
+        thenSyncStateIs(ClockSyncState.NOT_SYNCED);
+        thenFailureReasonIsNotReported();
+        thenAnotherAttemptWasScheduled();
+    }
+
     private void givenNtpProviderConfiguredWithRefreshInterval(int refreshIntervalSeconds, int maxRetry)
             throws KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -122,6 +212,22 @@ public class NtpProviderSyncStateTest {
         this.scheduledTick = tickCaptor.getValue();
     }
 
+    private void givenNtpProviderConfiguredForSingleShot() throws KuraException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("clock.ntp.refresh-interval", 0);
+        properties.put("clock.ntp.max-retry", 0);
+        ClockServiceConfig config = new ClockServiceConfig(properties);
+
+        this.scheduler = mock(ScheduledExecutorService.class);
+        this.provider = new ScriptedNtpProvider();
+        this.provider.init(config, this.scheduler, null);
+        this.provider.start();
+
+        ArgumentCaptor<Runnable> tickCaptor = ArgumentCaptor.forClass(Runnable.class);
+        verify(this.scheduler).schedule(tickCaptor.capture(), anyLong(), eq(TimeUnit.SECONDS));
+        this.scheduledTick = tickCaptor.getValue();
+    }
+
     private void givenNextSyncAttemptSucceeds() {
         this.provider.enqueueResult(true);
     }
@@ -131,7 +237,8 @@ public class NtpProviderSyncStateTest {
     }
 
     private void givenNextSyncAttemptThrows() {
-        this.provider.enqueueException(new KuraException(KuraErrorCode.CONNECTION_FAILED, "simulated sync failure"));
+        this.scriptedException = new KuraException(KuraErrorCode.CONNECTION_FAILED, "simulated sync failure");
+        this.provider.enqueueException(this.scriptedException);
     }
 
     private void whenScheduledSyncAttemptRuns() {
@@ -144,6 +251,31 @@ public class NtpProviderSyncStateTest {
 
     private void thenSchedulingFlagIs(boolean expected) throws NoSuchFieldException {
         assertEquals(expected, TestUtil.getFieldValue(this.provider, "isSynced"));
+    }
+
+    private void thenFailureReasonIs(String expected) {
+        assertEquals(expected, this.provider.getFailureReason());
+    }
+
+    private void thenFailureReasonReportsGiveUpWithScriptedExceptionMessage(int attempts) {
+        assertEquals("Gave up after " + attempts + " failed synchronization attempts: " + this.scriptedException.getMessage(),
+                this.provider.getFailureReason());
+    }
+
+    private void thenFailureReasonIsNotReported() {
+        assertNull(this.provider.getFailureReason());
+    }
+
+    private void thenRetryCountIs(int expected) {
+        assertEquals(Integer.valueOf(expected), this.provider.getRetryCount());
+    }
+
+    private void thenNoFurtherAttemptWasScheduled() {
+        verify(this.scheduler, times(1)).schedule(any(Runnable.class), anyLong(), eq(TimeUnit.SECONDS));
+    }
+
+    private void thenAnotherAttemptWasScheduled() {
+        verify(this.scheduler, times(2)).schedule(any(Runnable.class), anyLong(), eq(TimeUnit.SECONDS));
     }
 
     private static final class ScriptedNtpProvider extends AbstractNtpClockSyncProvider {

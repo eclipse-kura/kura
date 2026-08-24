@@ -43,5 +43,4 @@ Bundle-ClassPath: .,lib/protobuf-java.jar
     about_files=about_files/,\
     lib/protobuf-java.jar
 
-# Pick up test components contributed by the attached test fragment, if any
-Service-Component: OSGI-INF/test-*.xml
+Service-Component: OSGI-INF/*.xml

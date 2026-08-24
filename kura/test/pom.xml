@@ -773,6 +773,7 @@
 
     <modules>
         <module>org.eclipse.kura.cloud.base.provider.test</module>
+        <module>org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.test</module>
         <module>org.eclipse.kura.cloudconnection.kapua.mqtt.provider.test</module>
         <module>org.eclipse.kura.cloudconnection.sparkplug.mqtt.provider.test</module>
         <module>org.eclipse.kura.configuration.change.manager.test</module>

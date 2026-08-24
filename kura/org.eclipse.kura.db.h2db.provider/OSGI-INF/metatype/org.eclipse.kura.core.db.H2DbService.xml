@@ -30,7 +30,7 @@
             Please use the db.user and db.password fields to provide the credentials.
 	    In case of persisted databases, the database file path is subject to limitations.
             Please make sure to read official H2DbService documentation before creating a new database.
-            If the database is persisted on disk, the path must be set to a location under the data partition, as defined by the specific target OS configuration, to ensure data is preserved across software updates and reboots."/>
+            If the database is meant to be persisted on disk, the path must be set to a location designated for persistent storage by the target OS configuration, to ensure data is preserved across software updates and reboots."/>
 
         <AD id="db.user"
             name="User"

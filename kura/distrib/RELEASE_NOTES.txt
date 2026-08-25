@@ -1,3 +1,13 @@
+Eclipse Kura - 5.6.3 - TBD
+-------------------------------------------------------------------------------------------------
+Security Fixes:
+  * CVE-2026-54399 - no issue: httpcore5 and httpcore5-h2 are embedded in
+    org.eclipse.kura.container.orchestration.provider on the bundle class path only. They are
+    not exported, no other bundle imports them, and no Kura component uses them in a server
+    role, so the HTTP/1.1 message parser affected by this vulnerability is never exposed to
+    untrusted input. No dependency update is required on this branch.
+
+
 Eclipse Kura - 5.6.2 - June 2026
 -------------------------------------------------------------------------------------------------
 Description:

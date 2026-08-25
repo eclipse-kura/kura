@@ -82,7 +82,7 @@ public class RestTransport implements Transport {
 
             Thread.sleep(1000);
 
-            waitJerseyReady(2, TimeUnit.MINUTES);
+            waitJerseyReady(30, TimeUnit.SECONDS);
 
             initialized = true;
         } catch (final InterruptedException e) {
@@ -94,23 +94,28 @@ public class RestTransport implements Transport {
     }
 
     private void waitJerseyReady(final long timeout, final TimeUnit timeoutUnit) throws InterruptedException {
-        final long now = System.nanoTime();
+        final long deadline = System.nanoTime() + timeoutUnit.toNanos(timeout);
 
-        while (System.nanoTime() - now < timeoutUnit.toNanos(timeout)) {
+        while (System.nanoTime() < deadline) {
+            final Response response;
+
             try {
-                if (!isJerseyNotReady(runRequest("", new MethodSpec("GET")))) {
-                    return;
-                }
-
-                logger.info("Jersey is not ready yet");
+                response = runRequest("", new MethodSpec("GET"));
             } catch (final Exception e) {
-                logger.warn("failed to probe Jersey readiness", e);
+                logger.warn("failed to probe Jersey readiness, proceeding", e);
+                return;
             }
+
+            if (!isJerseyNotReady(response)) {
+                return;
+            }
+
+            logger.info("Jersey is not ready yet");
 
             Thread.sleep(1000);
         }
 
-        throw new IllegalStateException("Jersey did not become ready");
+        logger.warn("Jersey did not report readiness within {} {}, proceeding", timeout, timeoutUnit);
     }
 
     private static boolean isJerseyNotReady(final Response response) {

@@ -1,7 +1,7 @@
 node {
     properties([
         disableConcurrentBuilds(abortPrevious: true),
-        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '2', daysToKeepStr: '', numToKeepStr: '5')),
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '2', daysToKeepStr: '', numToKeepStr: '3')),
         gitLabConnection('gitlab.eclipse.org'),
         [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
         [$class: 'JobLocalConfiguration', changeReasonComment: '']
@@ -18,7 +18,7 @@ node {
     stage('Build') {
         timeout(time: 2, unit: 'HOURS') {
             dir("kura") {
-                withMaven(jdk: 'adoptopenjdk-hotspot-jdk8-latest', maven: 'apache-maven-3.9.6') {
+                withMaven(jdk: 'adoptopenjdk-hotspot-jdk8-latest', maven: 'apache-maven-3.9.6', options: [artifactsPublisher(disabled: true)]) {
                     sh "touch /tmp/isJenkins.txt"
                     sh "mvn -f target-platform/pom.xml clean install -Pno-mirror -Pcheck-exists-plugin"
                     sh "mvn -f kura/pom.xml clean install -Pcheck-exists-plugin"

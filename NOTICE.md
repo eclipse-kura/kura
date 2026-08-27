@@ -85,9 +85,9 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.commons/commons-lang3/3.19.0, Apache-2.0, approved, #23560
 * maven/mavencentral/org.apache.felix/org.apache.felix.dependencymanager/3.0.0, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.felix/org.apache.felix.deploymentadmin/0.9.5, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/org.apache.httpcomponents.core5/httpcore5-h2/5.3.4, Apache-2.0, approved, #16867
-* maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.5, Apache-2.0 AND MPL-2.0, approved, #24483
-* maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.3.4, Apache-2.0, approved, #16866
+* maven/mavencentral/org.apache.httpcomponents.core5/httpcore5-h2/5.4.3, Apache-2.0, approved, #27052
+* maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.6.4, Apache-2.0 AND MPL-2.0, approved, #28182
+* maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.4.3, Apache-2.0, approved, #29518
 * maven/mavencentral/org.apache.logging.log4j/log4j-api/2.25.3, Apache-2.0, approved, #21940
 * maven/mavencentral/org.apache.logging.log4j/log4j-core/2.25.3, Apache-2.0 AND (Apache-2.0 AND LGPL-2.0-or-later), approved, #21939
 * maven/mavencentral/org.apache.logging.log4j/log4j-slf4j2-impl/2.25.3, Apache-2.0, approved, #21938

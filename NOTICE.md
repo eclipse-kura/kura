@@ -55,7 +55,7 @@ This project leverages the following third party content.
 * maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.equinox.preferences/0.10.0-3c97afeac, EPL-2.0, approved, #7856
 * maven/mavencentral/commons-codec/commons-codec/1.18.0, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #19214
 * maven/mavencentral/org.apache.commons/commons-fileupload2-core/2.0.0-M4, Apache-2.0, approved, #15738
-* maven/mavencentral/org.apache.commons/commons-fileupload2-jakarta-servlet5/2.0.0-M2, Apache-2.0, approved, #15737
+* maven/mavencentral/org.apache.commons/commons-fileupload2-jakarta-servlet5/2.0.0-M4, Apache-2.0, approved, #15737
 * maven/mavencentral/commons-io/commons-io/2.19.0, Apache-2.0, approved, #20657
 * maven/mavencentral/commons-net/commons-net/3.8.0, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/io.netty/netty-buffer/4.1.137.Final, Apache-2.0, approved, CQ21842
@@ -76,7 +76,7 @@ This project leverages the following third party content.
 * maven/mavencentral/io.perfmark/perfmark-api/0.26.0, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/jakarta.activation/jakarta.activation-api/2.1.2, EPL-2.0 OR BSD-3-Clause OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jaf
 * maven/mavencentral/jakarta.xml.bind/jakarta.xml.bind-api/4.0.2, BSD-3-Clause, approved, ee4j.jaxb
-* maven/mavencentral/jakarta.xml.soap/jakarta.xml.soap-api/1.4.2, , approved, eclipse
+* maven/mavencentral/jakarta.xml.soap/jakarta.xml.soap-api/3.0.2, BSD-3-Clause, approved, ee4j.jaxws
 * maven/mavencentral/jakarta.xml.ws/jakarta.xml.ws-api/4.0.2, BSD-3-Clause, approved, ee4j.jaxws
 * maven/mavencentral/net.java.dev.jna/jna/5.17.0, Apache-2.0 AND LGPL-2.1-or-later, approved, #20112
 * maven/mavencentral/org.apache.commons/commons-compress/1.27.1, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #17651

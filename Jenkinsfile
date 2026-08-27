@@ -30,7 +30,7 @@ node(POD_LABEL) {
     stage('Build') {
         timeout(time: 2, unit: 'HOURS') {
             dir("kura") {
-                withMaven(jdk: 'adoptopenjdk-hotspot-jdk8-latest', maven: 'apache-maven-3.9.6', options: [artifactsPublisher(disabled: true)]) {
+                withMaven(jdk: 'adoptopenjdk-hotspot-jdk8-latest', maven: 'apache-maven-3.9.6', publisherStrategy: 'EXPLICIT') {
                     sh "touch /tmp/isJenkins.txt"
                     sh "mvn -f target-platform/pom.xml clean install -Pno-mirror -Pcheck-exists-plugin"
                     sh "mvn -f kura/pom.xml clean install -Pcheck-exists-plugin"

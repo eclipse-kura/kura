@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 public class RestTransport implements Transport {
 
     private static final String JERSEY_NOT_READY_MESSAGE = "Jersey is not ready yet!";
+    private static final int READINESS_PROBE_TIMEOUT_MS = 5000;
 
     private static final Encoder ENCODER = Base64.getEncoder();
     private static final Logger logger = LoggerFactory.getLogger(RestTransport.class);
@@ -51,6 +52,7 @@ public class RestTransport implements Transport {
     private final String baseURL;
 
     private boolean initialized = false;
+    private int timeoutMs = 0;
 
     private Optional<String> basicCredentials = Optional.of("admin:admin");
     private Optional<SSLContext> sslContext = Optional.empty();
@@ -99,11 +101,15 @@ public class RestTransport implements Transport {
         while (System.nanoTime() < deadline) {
             final Response response;
 
+            this.timeoutMs = READINESS_PROBE_TIMEOUT_MS;
+
             try {
                 response = runRequest("", new MethodSpec("GET"));
             } catch (final Exception e) {
                 logger.warn("failed to probe Jersey readiness, proceeding", e);
                 return;
+            } finally {
+                this.timeoutMs = 0;
             }
 
             if (!isJerseyNotReady(response)) {
@@ -184,6 +190,9 @@ public class RestTransport implements Transport {
                     ((HttpsURLConnection) connection).setHostnameVerifier((h, s) -> true);
                 }
             }
+
+            connection.setConnectTimeout(this.timeoutMs);
+            connection.setReadTimeout(this.timeoutMs);
 
             connection.setRequestProperty("Accept", "application/json");
             connection.setRequestProperty("Connection", "close");

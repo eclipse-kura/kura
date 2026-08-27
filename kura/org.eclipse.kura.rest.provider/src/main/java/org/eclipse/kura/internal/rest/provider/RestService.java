@@ -220,7 +220,7 @@ public class RestService
     @Override
     public Principal authenticate(ContainerRequestContext requestContext) {
 
-        initAuditContext(requestContext);
+        initAuditContext(requestContext, this.request);
 
         synchronized (this.authenticationProviders) {
             for (final AuthenticationProviderHolder provider : this.authenticationProviders) {
@@ -246,7 +246,7 @@ public class RestService
             throws IOException {
         int responseStatus = responseContext.getStatus();
 
-        final AuditContext auditContext = initAuditContext(requestContext);
+        final AuditContext auditContext = initAuditContext(requestContext, this.request);
 
         try {
             if (responseContext.getStatus() == 404) {
@@ -297,7 +297,7 @@ public class RestService
         return pathBuilder.toString();
     }
 
-    private AuditContext initAuditContext(ContainerRequestContext request) {
+    private AuditContext initAuditContext(ContainerRequestContext request, HttpServletRequest servletRequest) {
 
         final Object rawContext = request.getProperty("org.eclipse.kura.rest.audit.context");
 
@@ -307,11 +307,12 @@ public class RestService
 
         final Map<String, String> properties = new HashMap<>();
 
-        final String requestIp = this.request.getRemoteAddr();
         final String xForwardedFor = request.getHeaderString("X-FORWARDED-FOR");
 
         properties.put(AuditConstants.KEY_ENTRY_POINT.getValue(), "RestService");
-        properties.put(AuditConstants.KEY_IP.getValue(), requestIp);
+        if (servletRequest != null) {
+            properties.put(AuditConstants.KEY_IP.getValue(), servletRequest.getRemoteAddr());
+        }
         if (xForwardedFor != null) {
             properties.put("forwarded.for", xForwardedFor);
         }
@@ -346,7 +347,7 @@ public class RestService
         @Override
         public void filter(final ContainerRequestContext request) throws IOException {
 
-            initAuditContext(request);
+            initAuditContext(request, this.sr);
 
             final Set<Integer> allowedPorts = options.getAllowedPorts();
 

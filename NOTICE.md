@@ -36,23 +36,17 @@ This project leverages the following third party content.
 ### Maven Dependencies
 
 * maven/mavencentral/com.eclipsesource.minimal-json/minimal-json/0.9.5, MIT, approved, CQ10061
-* maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.19.1, Apache-2.0, approved, #21911
-* maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.19.1, Apache-2.0 AND MIT, approved, #21916
-* maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.19.1, Apache-2.0, approved, #21909
 * maven/mavencentral/com.github.docker-java/docker-java-api/3.5.3, Apache-2.0, approved, #22668
 * maven/mavencentral/com.github.docker-java/docker-java-core/3.5.3, Apache-2.0, approved, #22665
 * maven/mavencentral/com.github.docker-java/docker-java-transport-httpclient5/3.5.3, Apache-2.0, approved, #22669
 * maven/mavencentral/com.github.docker-java/docker-java-transport/3.5.3, Apache-2.0, approved, #22667
 * maven/mavencentral/com.github.docker-java/docker-java/3.5.3, Apache-2.0, approved, #22666
-* maven/mavencentral/com.github.rodionmoiseev.c10n/c10n-core/1.2, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/com.google.code.gson/gson/2.9.0, Apache-2.0, approved, CQ24148
 * maven/mavencentral/com.google.guava/guava/32.1.1-jre, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/com.google.guava/failureaccess/1.0.1, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/com.google.protobuf/protobuf-java/4.30.2, BSD-3-Clause, approved, clearlydefined
 * maven/mavencentral/com.h2database/h2/2.4.240, EPL-1.0 AND MPL-2.0 AND LGPL-2.1-or-later AND BSD-3-Clause AND LicenseRef-Public-Domain, approved, #23567
 * maven/mavencentral/com.sun.xml.bind/jaxb-osgi/4.0.2, BSD-3-Clause, approved, ee4j.jaxb-impl
-* maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.core.jobs/0.10.0-3c97afeac, EPL-2.0, approved, eclipse.platform
-* maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.equinox.preferences/0.10.0-3c97afeac, EPL-2.0, approved, #7856
 * maven/mavencentral/commons-codec/commons-codec/1.18.0, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #19214
 * maven/mavencentral/org.apache.commons/commons-fileupload2-core/2.0.0-M4, Apache-2.0, approved, #15738
 * maven/mavencentral/org.apache.commons/commons-fileupload2-jakarta-servlet5/2.0.0-M4, Apache-2.0, approved, #15737
@@ -73,7 +67,6 @@ This project leverages the following third party content.
 * maven/mavencentral/io.netty/netty-transport/4.1.137.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
 * maven/mavencentral/io.netty/netty-codec-socks/4.1.137.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
 * maven/mavencentral/io.netty/netty-handler-proxy/4.1.137.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
-* maven/mavencentral/io.perfmark/perfmark-api/0.26.0, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/jakarta.activation/jakarta.activation-api/2.1.2, EPL-2.0 OR BSD-3-Clause OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jaf
 * maven/mavencentral/jakarta.xml.bind/jakarta.xml.bind-api/4.0.2, BSD-3-Clause, approved, ee4j.jaxb
 * maven/mavencentral/jakarta.xml.soap/jakarta.xml.soap-api/3.0.2, BSD-3-Clause, approved, ee4j.jaxws
@@ -96,10 +89,6 @@ This project leverages the following third party content.
 * maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.84, MIT AND CC0-1.0, approved, #27143
 * maven/mavencentral/org.bouncycastle/bctls-jdk18on/1.84, MIT, approved, #29890
 * maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.84, MIT, approved, #27144
-* maven/mavencentral/org.eclipse.milo/sdk-client/0.6.8, EPL-2.0, approved, iot.milo
-* maven/mavencentral/org.eclipse.milo/sdk-core/0.6.8, EPL-2.0, approved, iot.milo
-* maven/mavencentral/org.eclipse.milo/stack-client/0.6.8, EPL-2.0, approved, iot.milo
-* maven/mavencentral/org.eclipse.milo/stack-core/0.6.8, EPL-2.0, approved, iot.milo
 * maven/mavencentral/org.glassfish.hk2/osgi-resource-locator/1.0.3, CDDL-1.0, approved, CQ10889
 * maven/mavencentral/org.knowhowlab.osgi/monitoradmin/1.0.3, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.osgi/osgi.annotation/8.1.0, Apache-2.0, approved, #1985
@@ -113,32 +102,6 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.c3p0/0.9.5.5_1, Apache-2.0, approved, #3761
 * maven/mavencentral/com.zaxxer/HikariCP/2.7.9, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.xerial/sqlite-jdbc/3.42.0.0, Apache-2.0 AND BSD-2-Clause AND ISC AND Artistic-2.0, approved, #9089
-* maven/mavencentral/org.graalvm.js/js/21.3.9, UPL-1.0 AND (UPL-1.0 AND GPL-2.0-only WITH Classpath-exception-2.0) AND BSD-3-Clause AND MPL-2.0, approved, #6714
-* maven/mavencentral/org.graalvm.js/js-scriptengine/21.3.9, UPL-1.0, approved, #6715
-* maven/mavencentral/org.graalvm.js/js-launcher/21.3.9, UPL-1.0, approved, #6716
-* maven/mavencentral/org.graalvm.sdk/graal-sdk/21.3.9, UPL-1.0, approved, #6717
-* maven/mavencentral/org.graalvm.truffle/truffle-api/21.3.9, UPL-1.0, approved, #6718
-* maven/mavencentral/org.graalvm.regex/regex/21.3.9, UPL-1.0 AND Unicode-TOU, approved, #6719
-* maven/mavencentral/org.graalvm.sdk/launcher-common/21.3.9, UPL-1.0, approved, #6720
-* maven/mavencentral/com.ibm.icu/icu4j/72.1, ICU, approved, #4354
-* maven/mavencentral/com.github.hypfvieh/dbus-java/3.3.2, MIT, approved, CQ23190
-* maven/mavencentral/com.github.jnr/jffi/1.3.9, Apache-2.0 OR LGPL-3.0-or-later, approved, CQ23196
-* maven/mavencentral/com.github.jnr/jnr-a64asm/1.0.0, Apache-2.0, approved, CQ22814
-* maven/mavencentral/com.github.jnr/jnr-constants/0.10.3, Apache-2.0, approved, CQ23193
-* maven/mavencentral/com.github.jnr/jnr-enxio/0.32.13, Apache-2.0, approved, CQ23194
-* maven/mavencentral/com.github.jnr/jnr-ffi/2.2.11, Apache-2.0, approved, CQ23192
-* maven/mavencentral/com.github.jnr/jnr-posix/3.1.15, EPL-2.0 OR GPL-2.0-only OR LGPL-2.1-only, approved, #2711
-* maven/mavencentral/com.github.jnr/jnr-unixsocket/0.38.17, Apache-2.0, approved, CQ23191
-* maven/mavencentral/com.github.jnr/jnr-x86asm/1.0.2, MIT, approved, CQ9094
-* maven/mavencentral/org.ow2.asm/asm-analysis/9.2, BSD-3-Clause, approved, clearlydefined
-* maven/mavencentral/org.ow2.asm/asm-commons/9.2, BSD-3-Clause, approved, clearlydefined
-* maven/mavencentral/org.ow2.asm/asm-tree/9.2, BSD-3-Clause, approved, clearlydefined
-* maven/mavencentral/org.ow2.asm/asm-util/9.2, BSD-3-Clause, approved, clearlydefined
-* maven/mavencentral/org.ow2.asm/asm/9.2, BSD-3-Clause, approved, CQ23635
-* maven/mavencentral/com.google.guava/guava/31.0-jre, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/com.google.guava/failureaccess/1.0, Apache-2.0, approved, CQ22654
-* maven/mavencentral/com.digitalpetri.fsm/strict-machine/0.6, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/com.digitalpetri.netty/netty-channel-fsm/0.8, Apache-2.0, approved, #6168
 * maven/mavencentral/jakarta.annotation/jakarta.annotation-api/2.1.1, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.ca
 * maven/mavencentral/org.apache.felix/org.apache.felix.http.servlet-api/3.0.0, Apache-2.0, approved, #13345
 * maven/mavencentral/org.apache.felix/org.apache.felix.http.bridge/5.1.8, Apache-2.0, approved, #18536
@@ -227,11 +190,8 @@ This project leverages the following third party content.
 ### Additional Dependencies
 
 * maven/mavencentral/javax.usb/usb-api/1.0.2, MIT, approved, CQ7834
-* javax.el_2.2.0.v201303151357, EPL-2.0, approved, eclipse.platform
-* org.tigris.mtoolkit.iagent.rpc_3.0.0.20110411-0918, EPL-1.0, approved, CQ7880
 * com.codeminders.hidapi natives 1.1, New BSD License, approved, CQ7871
 * soda.dk.comm, EPL-1.0, approved, CQ8156
-* org.hamcrest.core 1.1, New BSD License, approved, CQ7842
 * org.apache.felix.useradmin_1.0.4.k1, Apache-2.0, approved, CQ23078
 * com.codeminders.hidapi 1.1, New BSD License, approved, CQ7833
 * org.moka7 1.0.2, EPL-1.0, approved, CQ12777

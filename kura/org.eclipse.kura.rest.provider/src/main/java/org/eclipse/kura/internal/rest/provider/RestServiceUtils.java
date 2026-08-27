@@ -44,11 +44,12 @@ public final class RestServiceUtils {
 
         final Map<String, String> properties = new HashMap<>();
 
-        final String requestIp = request.getRemoteAddr();
         final String xForwardedFor = requestContext.getHeaderString("X-FORWARDED-FOR");
 
         properties.put(AuditConstants.KEY_ENTRY_POINT.getValue(), "RestService");
-        properties.put(AuditConstants.KEY_IP.getValue(), requestIp);
+        if (request != null) {
+            properties.put(AuditConstants.KEY_IP.getValue(), request.getRemoteAddr());
+        }
         if (xForwardedFor != null) {
             properties.put("forwarded.for", xForwardedFor);
         }

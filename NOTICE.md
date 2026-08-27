@@ -41,9 +41,9 @@ This project leverages the following third party content.
 * maven/mavencentral/com.github.docker-java/docker-java-transport-httpclient5/3.5.3, Apache-2.0, approved, #22669
 * maven/mavencentral/com.github.docker-java/docker-java-transport/3.5.3, Apache-2.0, approved, #22667
 * maven/mavencentral/com.github.docker-java/docker-java/3.5.3, Apache-2.0, approved, #22666
-* maven/mavencentral/com.google.code.gson/gson/2.9.0, Apache-2.0, approved, CQ24148
-* maven/mavencentral/com.google.guava/guava/32.1.1-jre, Apache-2.0, approved, clearlydefined
-* maven/mavencentral/com.google.guava/failureaccess/1.0.1, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/com.google.code.gson/gson/2.9.0, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/com.google.guava/guava/32.1.1-jre, Apache-2.0 AND CC0-1.0 AND LicenseRef-Public-Domain, approved, #9229
+* maven/mavencentral/com.google.guava/failureaccess/1.0.1, Apache-2.0, approved, CQ22654
 * maven/mavencentral/com.google.protobuf/protobuf-java/4.30.2, BSD-3-Clause, approved, clearlydefined
 * maven/mavencentral/com.h2database/h2/2.4.240, EPL-1.0 AND MPL-2.0 AND LGPL-2.1-or-later AND BSD-3-Clause AND LicenseRef-Public-Domain, approved, #23567
 * maven/mavencentral/com.sun.xml.bind/jaxb-osgi/4.0.2, BSD-3-Clause, approved, ee4j.jaxb-impl
@@ -78,6 +78,7 @@ This project leverages the following third party content.
 * maven/mavencentral/org.apache.commons/commons-lang3/3.19.0, Apache-2.0, approved, #23560
 * maven/mavencentral/org.apache.felix/org.apache.felix.dependencymanager/3.0.0, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.apache.felix/org.apache.felix.deploymentadmin/0.9.5, Apache-2.0, approved, clearlydefined
+* maven/mavencentral/org.apache.felix/org.apache.felix.gogo.shell/1.1.4, Apache-2.0, approved, #17670
 * maven/mavencentral/org.apache.httpcomponents.core5/httpcore5-h2/5.4.3, Apache-2.0, approved, #27052
 * maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.6.4, Apache-2.0 AND MPL-2.0, approved, #28182
 * maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.4.3, Apache-2.0, approved, #29518
@@ -89,7 +90,7 @@ This project leverages the following third party content.
 * maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.84, MIT AND CC0-1.0, approved, #27143
 * maven/mavencentral/org.bouncycastle/bctls-jdk18on/1.84, MIT, approved, #29890
 * maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.84, MIT, approved, #27144
-* maven/mavencentral/org.glassfish.hk2/osgi-resource-locator/1.0.3, CDDL-1.0, approved, CQ10889
+* maven/mavencentral/org.glassfish.hk2/osgi-resource-locator/1.0.3, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.glassfish
 * maven/mavencentral/org.knowhowlab.osgi/monitoradmin/1.0.3, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.osgi/osgi.annotation/8.1.0, Apache-2.0, approved, #1985
 * maven/mavencentral/org.quartz-scheduler/quartz/2.5.0, Apache-2.0, approved, clearlydefined
@@ -99,7 +100,7 @@ This project leverages the following third party content.
 * maven/mavencentral/org.usb4java/libusb4java/1.3.0, MIT, approved, #3087
 * maven/mavencentral/org.usb4java/usb4java-javax/1.3.0, MIT, approved, #22528
 * maven/mavencentral/org.usb4java/usb4java/1.3.0, MIT, approved, clearlydefined
-* maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.c3p0/0.9.5.5_1, Apache-2.0, approved, #3761
+* maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.c3p0/0.9.5.5_1, (LGPL-2.1-only or EPL-1.0) AND Apache-2.0, approved, #3761
 * maven/mavencentral/com.zaxxer/HikariCP/2.7.9, Apache-2.0, approved, clearlydefined
 * maven/mavencentral/org.xerial/sqlite-jdbc/3.42.0.0, Apache-2.0 AND BSD-2-Clause AND ISC AND Artistic-2.0, approved, #9089
 * maven/mavencentral/jakarta.annotation/jakarta.annotation-api/2.1.1, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.ca

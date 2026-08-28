@@ -120,6 +120,11 @@ public class LifeCyclePayloadBuilder {
             birthPayloadBuilder.withModemImsi(this.cloudServiceImpl.imsi);
         }
 
+        if (this.cloudServiceImpl.eid != null && this.cloudServiceImpl.eid.length() > 0
+                && !this.cloudServiceImpl.eid.equals(ERROR)) {
+            birthPayloadBuilder.withModemEid(this.cloudServiceImpl.eid);
+        }
+
         if (this.cloudServiceImpl.rssi != null && this.cloudServiceImpl.rssi.length() > 0) {
             birthPayloadBuilder.withModemRssi(this.cloudServiceImpl.rssi);
         }

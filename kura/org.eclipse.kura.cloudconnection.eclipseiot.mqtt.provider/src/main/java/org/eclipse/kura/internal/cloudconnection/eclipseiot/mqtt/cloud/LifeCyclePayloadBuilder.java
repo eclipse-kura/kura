@@ -107,6 +107,11 @@ public class LifeCyclePayloadBuilder {
             birthPayloadBuilder.withModemImsi(this.cloudConnectionManagerImpl.imsi);
         }
 
+        if (this.cloudConnectionManagerImpl.eid != null && this.cloudConnectionManagerImpl.eid.length() > 0
+                && !this.cloudConnectionManagerImpl.eid.equals(ERROR)) {
+            birthPayloadBuilder.withModemEid(this.cloudConnectionManagerImpl.eid);
+        }
+
         if (this.cloudConnectionManagerImpl.rssi != null && this.cloudConnectionManagerImpl.rssi.length() > 0) {
             birthPayloadBuilder.withModemRssi(this.cloudConnectionManagerImpl.rssi);
         }

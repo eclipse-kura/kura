@@ -53,7 +53,7 @@ To create a new H2 database instance, use the following procedure:
 ### Configuration Parameters
 The **H2DbService** provides the following configuration parameters:
 
-* **Connector URL**: JDBC connector URL of the database instance.  Passing the USER and PASSWORD parameters in the connector URL is not supported, these paramters will be ignored if present. Please use the db.user and db.password fields to provide the credentials. If the database is persisted on disk, the path must be set to a location under the data partition, as defined by the specific target OS configuration, to ensure data is preserved across software updates and reboots.
+* **Connector URL**: JDBC connector URL of the database instance.  Passing the USER and PASSWORD parameters in the connector URL is not supported, these paramters will be ignored if present. Please use the db.user and db.password fields to provide the credentials. If the database is meant to be persisted on disk, the path must be set to a location designated for persistent storage by the target OS configuration, to ensure data is preserved across software updates and reboots.
 
 !!! warning
     If the database is created in persisted mode, please make sure that the Linux user running Eclipse Kura has the permissions required to create the database file.

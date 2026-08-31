@@ -4899,7 +4899,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h3 id="configuration-parameters">Configuration Parameters</h3>
 <p>The <strong>H2DbService</strong> provides the following configuration parameters:</p>
 <ul>
-<li><strong>Connector URL</strong>: JDBC connector URL of the database instance.  Passing the USER and PASSWORD parameters in the connector URL is not supported, these paramters will be ignored if present. Please use the db.user and db.password fields to provide the credentials. </li>
+<li><strong>Connector URL</strong>: JDBC connector URL of the database instance.  Passing the USER and PASSWORD parameters in the connector URL is not supported, these paramters will be ignored if present. Please use the db.user and db.password fields to provide the credentials. If the database is meant to be persisted on disk, the path must be set to a location designated for persistent storage by the target OS configuration, to ensure data is preserved across software updates and reboots.</li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -5008,7 +5008,7 @@ The purpose of this is to allow changing the type of a column with a Wire Graph 
 </ul>
 <p>The default database instance is in-memory by default and uses the <strong>jdbc:h2:mem:kuradb</strong> URL.</p>
 <h3 id="persistent">Persistent</h3>
-<p>A persistent database instance can be created using the <strong>jdbc:h2:file:<dbpath></strong>, where <strong><dbpath></strong> is a non-empty string that represents the database path.</p>
+<p>A persistent database instance can be created using the <strong>jdbc:h2:file:<dbpath></strong>, where <strong><dbpath></strong> is a non-empty string that represents the database path. The path must be set to a location designated for persistent storage by the target OS configuration, to ensure data is preserved across software updates and reboots.</p>
 <p>If no URL parameters are supplied the database will enable the transaction log by default. The transaction log is used to restore the database to a consistent state after a crash or power failure. This provides good protection against data losses but causes a lot of writes to the storage device, reducing both performance and the lifetime of flash-based storage devices.</p>
 <p>Examples:
 - <strong>jdbc:h2:file:/opt/db/mydb</strong></p>

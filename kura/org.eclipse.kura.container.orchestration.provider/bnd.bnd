@@ -31,6 +31,11 @@ Import-Package: \
     org.slf4j;version="1.7.25",\
     javax.annotation;resolution:=optional,\
     org.conscrypt;resolution:=optional,\
+    com.aayushatharva.brotli4j;resolution:=optional,\
+    com.aayushatharva.brotli4j.decoder;resolution:=optional,\
+    com.aayushatharva.brotli4j.encoder;resolution:=optional,\
+    org.newsclub.net.unix;resolution:=optional,\
+    org.newsclub.net.unix.*;resolution:=optional,\
     *
 Bundle-Name: Configurable container management component
 Bundle-Vendor: Eclipse Kura

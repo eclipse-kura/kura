@@ -880,7 +880,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
     }
 
-    private boolean connect() {
+    protected boolean connect() {
         if (this.currentConfig.getHostUrl() == null) {
             return false;
         }

@@ -172,7 +172,7 @@ The default database instance is in-memory by default and uses the **jdbc:h2:mem
 
 ### Persistent
 
-A persistent database instance can be created using the **jdbc:h2:file:<dbpath>**, where **<dbpath>** is a non-empty string that represents the database path. The path must be set to a location under the data partition, as defined by the specific target OS configuration, to ensure data is preserved across software updates and reboots.
+A persistent database instance can be created using the **jdbc:h2:file:<dbpath>**, where **<dbpath>** is a non-empty string that represents the database path. The path must be set to a location designated for persistent storage by the target OS configuration, to ensure data is preserved across software updates and reboots.
 
 If no URL parameters are supplied the database will enable the transaction log by default. The transaction log is used to restore the database to a consistent state after a crash or power failure. This provides good protection against data losses but causes a lot of writes to the storage device, reducing both performance and the lifetime of flash-based storage devices.
 

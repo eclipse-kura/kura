@@ -9,6 +9,7 @@ Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Fragment-Host: org.eclipse.kura.web2
 Bundle-ActivationPolicy: lazy
 Import-Package: org.junit;version="[4.12.0,5.0.0)",
+ org.junit.rules;version="[4.12.0,5.0.0)",
  org.mockito;version="[4.0.0,5.0.0)",
  org.mockito.invocation;version="[4.0.0,5.0.0)",
  org.mockito.stubbing;version="[4.0.0,5.0.0)"

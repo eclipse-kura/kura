@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -92,28 +92,28 @@ public class LogTabUi extends Composite {
     private boolean autoFollow = true;
     private boolean initialized = false;
 
-    private final String nonce = Integer.toString(Random.nextInt());
+    private static final String COOKIE_NAME_PREFIX = "LogsDownload-";
+
+    // regenerated on every download, so that two downloads never share a completion cookie
+    private String nonce = newNonce();
 
     private static final int DOWNLOAD_COMPLETE_WAIT_TIMEOUT = 5000;
     private static final int DOWNLOAD_COMPLETION_RETRIES= 60; 
     
     private Timer waitDownloadCompleted = new Timer() {
 
-        // safety parameter, 9 = 45secs
+        // safety parameter, 60 retries every 5 seconds = 5 minutes
         private short retryLimit = DOWNLOAD_COMPLETION_RETRIES;
         private String cookieName;
 
         @Override
         public void run() {
-            cookieName = "LogsDownload-" + LogTabUi.this.nonce;
-
-            if (Cookies.getCookie(cookieName) != null) {
-                hideModalAndStop();
-            }
+            cookieName = COOKIE_NAME_PREFIX + LogTabUi.this.nonce;
 
             // eventually regain access to the UI
-            if (this.retryLimit <= 0) {
+            if (Cookies.getCookie(cookieName) != null || this.retryLimit <= 0) {
                 hideModalAndStop();
+                return;
             }
 
             this.retryLimit--;
@@ -145,6 +145,9 @@ public class LogTabUi extends Composite {
 
                     @Override
                     public void onSuccess(GwtXSRFToken token) {
+                        Cookies.removeCookie(COOKIE_NAME_PREFIX + LogTabUi.this.nonce, "/");
+                        LogTabUi.this.nonce = newNonce();
+
                         final StringBuilder sbUrl = new StringBuilder();
                         sbUrl.append("/log?nonce=").append(LogTabUi.this.nonce);
                         DownloadHelper.instance().startDownload(token, sbUrl.toString());
@@ -170,6 +173,10 @@ public class LogTabUi extends Composite {
         this.openNewWindow.addClickHandler(handler -> {
             Window.open(Window.Location.getHref(), "_blank", "");
         });
+    }
+
+    private static String newNonce() {
+        return Integer.toString(Random.nextInt(Integer.MAX_VALUE));
     }
 
     public void initialize() {

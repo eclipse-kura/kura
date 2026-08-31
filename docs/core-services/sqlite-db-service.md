@@ -31,7 +31,7 @@ The SQLite DB provides the following configuration parameters:
 
 * **Database Mode**: Defines the database mode. If `In Memory` is selected, the database will not be persisted on the filesystem, all data will be lost if Kura is restarted and/or the database instance is deleted. If `Persisted` is selected, the database will be stored on disk in the location specified by the **Persisted Database Path** parameter.
 
-* **Persisted Database Path**: Defines the path to the database file (it must include the database file name). This parameter is only relevant for persisted databases.
+* **Persisted Database Path**: Defines the path to the database file (it must include the database file name). This parameter is only relevant for persisted databases. If the database is meant to be persisted on disk, the path must be set to a location designated for persistent storage by the target OS configuration, to ensure data is preserved across software updates and reboots.
 
 * **Encryption Key**: Allows to specify a key/passphrase for encrypting the database file. This feature requires a SQLite binary with an encryption extension, and is only relevant for persisted databases. The key format can be specified using the **Encryption Key Format** parameter. If the value of this parameter is changed, the encryption key of the database will be updated accordingly. This parameter can be left empty to create an unencrypted database or to decrypt an encrypted one.
 

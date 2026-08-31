@@ -15,6 +15,12 @@ node {
         }
     }
 
+    stage('Validate metatypes') {
+        dir("kura") {
+            sh 'xmllint --noout --schema kura/setups/metatype/kura-metatype-1.2.0.xsd $(git ls-files "**/OSGI-INF/metatype/*.xml")'
+        }
+    }
+
     stage('Build') {
         timeout(time: 2, unit: 'HOURS') {
             dir("kura") {

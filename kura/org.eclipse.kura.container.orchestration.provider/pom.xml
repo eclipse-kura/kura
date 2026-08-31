@@ -95,6 +95,10 @@
             <artifactId>org.eclipse.kura.util</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.osgi</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.service.component</artifactId>
         </dependency>

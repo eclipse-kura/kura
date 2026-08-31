@@ -16,6 +16,9 @@ package org.eclipse.kura.container.orchestration.provider.impl;
 import java.util.Optional;
 
 import org.eclipse.kura.system.SystemService;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.runtime.ServiceComponentRuntime;
 import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.slf4j.Logger;
@@ -28,6 +31,7 @@ import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
 
+@Component(immediate = true)
 public class ContainerOrchestrationActivator {
 
     private static final Logger logger = LoggerFactory.getLogger(ContainerOrchestrationActivator.class);
@@ -38,14 +42,17 @@ public class ContainerOrchestrationActivator {
     private ServiceComponentRuntime scr;
     private String dockerHost = DEFAULT_DOCKER_HOST;
 
+    @Reference
     public void setSystemService(final SystemService systemService) {
         this.dockerHost = systemService.getProperties().getProperty(DOCKER_HOST_KEY, DEFAULT_DOCKER_HOST);
     }
 
+    @Reference
     public void setServiceComponentRuntime(final ServiceComponentRuntime scr) {
         this.scr = scr;
     }
 
+    @Activate
     public void activate() {
         if (isDockerReachable()) {
             logger.info("Docker daemon reachable at {}, enabling Container Orchestration Service integration",

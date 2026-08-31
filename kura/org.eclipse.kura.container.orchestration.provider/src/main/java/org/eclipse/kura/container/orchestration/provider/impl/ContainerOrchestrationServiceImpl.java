@@ -89,6 +89,7 @@ import org.osgi.service.metatype.annotations.Designate;
 @Component(
     name = "org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService",
     immediate = true,
+    enabled = false,
     configurationPolicy = ConfigurationPolicy.REQUIRE,
     service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
             org.eclipse.kura.container.orchestration.ContainerOrchestrationService.class })

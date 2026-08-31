@@ -25,6 +25,7 @@ node {
     stage('Preparation') {
         dir("kura") {
             checkout scm
+            sh 'apt install xmllint'
         }
     }
 

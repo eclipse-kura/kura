@@ -17,7 +17,8 @@ node {
 
     stage('Validate metatypes') {
         dir("kura") {
-            sh 'xmllint --noout --schema kura/setups/metatype/kura-metatype-1.2.0.xsd $(git ls-files "**/OSGI-INF/metatype/*.xml")'
+            // archetype-resources are Velocity templates, not parseable XML
+            sh 'xmllint --noout --schema kura/setups/metatype/kura-metatype-1.2.0.xsd $(git ls-files "**/OSGI-INF/metatype/*.xml" | grep -v archetype-resources)'
         }
     }
 

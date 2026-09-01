@@ -72,6 +72,14 @@ jobs:
         )\" >> \"${GITHUB_OUTPUT}\""
       shell: bash
 
+    - name: Align the kura-bom import to the upticked version
+      env:
+        RESOLVED_VERSION: ${{ steps.get-version.outputs.resolved-version }}
+      run: |
+        perl -0pi -e 's{(<artifactId>kura-bom</artifactId>\s*<version>)[^<]+(</version>)}{${1}'"${RESOLVED_VERSION}"'${2}}' pom.xml
+        grep -n 'kura-bom' -A1 pom.xml
+      shell: bash
+
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@38e0b6e68b4c852a5500a94740f0e535e0d7ba54 # v4.2.4
       with:

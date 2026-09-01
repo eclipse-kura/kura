@@ -17,9 +17,7 @@ node {
     properties([
         disableConcurrentBuilds(abortPrevious: true),
         buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '1', daysToKeepStr: '', numToKeepStr: '3')),
-        gitLabConnection('gitlab.eclipse.org'),
-        [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
-        [$class: 'JobLocalConfiguration', changeReasonComment: '']
+        gitLabConnection('gitlab.eclipse.org')
     ])
 
     deleteDir()
@@ -39,25 +37,20 @@ node {
     }
 
     stage('Build') {
-        // Single reactor from the root parent pom: it aggregates bom, kura (all bundles +
-        // wrapper bundles), distrib and test, ordered by inter-module dependencies.
-        timeout(time: 3, unit: 'HOURS') {
-            dir("kura") {
-                withMaven(jdk: 'temurin-jdk21-latest', maven: 'apache-maven-3.9.9', options: [artifactsPublisher(disabled: true)]) {
-                    sh "mvn clean install -Pcheck-exists-plugin"
-                }
-            }
-        }
-    }
-
-    stage('Generate test reports') {
         dir("kura") {
-            // Three sources of JUnit XML, all published:
-            //  - unit tests moved into the kura/ bundles run under surefire (surefire-reports);
-            //  - the test/ reactor's pure-unit modules also run under surefire (surefire-reports);
-            //  - the test/ reactor's bnd-testing integration modules write to the plugin default
-            //    (test-reports) since the read-only reportsDir is no longer configured.
-            junit 'kura/**/target/surefire-reports/**/TEST-*.xml, test/*/target/surefire-reports/**/TEST-*.xml, test/*/target/test-reports/**/TEST-*.xml'
+            try {
+                // Single reactor from the root parent pom: it aggregates bom, kura (all bundles +
+                // wrapper bundles), distrib and test, ordered by inter-module dependencies.
+                timeout(time: 3, unit: 'HOURS') {
+                    withMaven(jdk: 'temurin-jdk21-latest', maven: 'apache-maven-3.9.9', options: [artifactsPublisher(disabled: true), junitPublisher(disabled: true)]) {
+                        sh "mvn -B -ntp clean install -Pcheck-exists-plugin"
+                    }
+                }
+            } finally {
+                // In the finally block so a failing test still publishes its report: the reactor is
+                // fail-fast, so a test failure aborts the Build stage before this would otherwise run.
+                junit allowEmptyResults: true, testResults: 'kura/**/target/surefire-reports/**/TEST-*.xml, test/*/target/surefire-reports/**/TEST-*.xml, test/*/target/test-reports/**/TEST-*.xml'
+            }
         }
     }
 
@@ -102,15 +95,12 @@ node {
                         }
 
                         sh """
-                            mvn -f kura/pom.xml org.sonarsource.scanner.maven:sonar-maven-plugin:5.6.0.6792:sonar \
-                                -Dmaven.test.failure.ignore=true \
+                            mvn -B -ntp -f kura/pom.xml org.sonarsource.scanner.maven:sonar-maven-plugin:5.6.0.6792:sonar \
                                 -Dsonar.organization=eclipse \
                                 -Dsonar.host.url=${SONAR_HOST_URL} \
-                                -Dsonar.java.binaries='target/classes' \
                                 ${analysisParameters} \
-                                -Dsonar.core.codeCoveragePlugin=jacoco \
                                 -Dsonar.projectKey=org.eclipse.kura:kura \
-                                -Dsonar.exclusions=test/**/*,**/*.xml,**/*.yml,test-util/**/*,emulator/**/*,com.codeminders.hidapi-parent/**/*,org.moka7/**/*,org.eclipse.soda.dk.comm-parent/**/*,org.eclipse.kura.sun.misc/**/*,log4j2-api-config/**/*,org.usb4java/**/*,usb4java-javax/**/* \
+                                -Dsonar.exclusions=**/*.xml,**/*.yml,test-util/**/*,emulator/**/*,com.codeminders.hidapi-parent/**/*,org.moka7/**/*,org.eclipse.soda.dk.comm-parent/**/*,org.eclipse.kura.sun.misc/**/*,log4j2-api-config/**/*,org.usb4java/**/*,usb4java-javax/**/* \
                                 -Dsonar.cpd.exclusions=**/*Metatype.java,**/*Options.java \
                                 -Dsonar.test.exclusions=**/*
                         """
@@ -123,11 +113,9 @@ node {
     stage('quality-gate') {
         // Sonar quality gate
         timeout(time: 30, unit: 'MINUTES') {
-            withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONARCLOUD_TOKEN')]) {
-                def qg = waitForQualityGate()
-                if (qg.status != 'OK') {
-                    error "Pipeline aborted due to sonar quality gate failure: ${qg.status}"
-                }
+            def qg = waitForQualityGate()
+            if (qg.status != 'OK') {
+                error "Pipeline aborted due to sonar quality gate failure: ${qg.status}"
             }
         }
     }

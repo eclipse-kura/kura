@@ -34,6 +34,10 @@ jobs:
         distribution: 'temurin' # See 'Supported distributions' for available options
         java-version: '21'
 
+    - name: Install BOM POM
+      run: mvn -B -pl bom install -DskipTests
+      shell: bash
+
     - name: Get version
       id: get-version
       run: "echo \"resolved-version=\

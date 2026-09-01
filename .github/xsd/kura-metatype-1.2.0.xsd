@@ -38,11 +38,10 @@
        an xmlns:metatype prefix with unprefixed children would be rejected;
        give it a default xmlns instead.
 
-    2. Tmetadata and Tocd use a repeatable <choice> rather than the spec's
-       ordered sequences. Tocd needs it: 33 metatypes place <Icon> before
-       <AD>, and some OCDs have no AD at all. Both are harmless in practice.
-       Tmetadata does not strictly need it today (no metatype interleaves
-       OCD and Designate) and is kept symmetric with Tocd.
+    2. Tocd uses a repeatable <choice> rather than the spec's ordered
+       sequence of <AD> then <Icon>. It needs it: 33 metatypes place <Icon>
+       before <AD>, and some OCDs have no AD at all. Tmetadata keeps the
+       spec's sequence: no metatype interleaves OCD and Designate.
 
     3. The <any> extension wildcards are dropped. Nothing in this repository
        uses metatype extension elements, and they add non-determinism that
@@ -63,16 +62,18 @@
     <element name="MetaData" type="metatype:Tmetadata" />
 
     <complexType name="Tmetadata">
-        <choice minOccurs="0" maxOccurs="unbounded">
-            <element name="OCD" type="metatype:Tocd">
+        <sequence>
+            <element name="OCD" type="metatype:Tocd" minOccurs="0"
+                maxOccurs="unbounded">
                 <!-- AD ids must be unique within their own OCD. -->
                 <unique name="uniqueAdId">
                     <selector xpath="metatype:AD" />
                     <field xpath="@id" />
                 </unique>
             </element>
-            <element name="Designate" type="metatype:Tdesignate" />
-        </choice>
+            <element name="Designate" type="metatype:Tdesignate"
+                minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
         <attribute name="localization" type="string" use="optional" />
         <anyAttribute processContents="lax" />
     </complexType>

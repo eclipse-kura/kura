@@ -61,15 +61,11 @@ jobs:
         rm ./version-uptick-0.2.0-linux-x86_64
       shell: bash
 
-    - name: Install BOM POM
-      run: mvn -B -pl bom install -DskipTests
-      shell: bash
-
     - name: Get version
       id: get-version
       run: "echo \"resolved-version=\
         $(mvn
-          --file ./pom.xml
+          --file ./bom/pom.xml
           -Dexec.executable=echo
           -Dexec.args='${project.version}'
           --quiet exec:exec --non-recursive

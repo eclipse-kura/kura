@@ -44,6 +44,11 @@ Target Platform Updates:
   * 56be0dcfb5 - Updated io.netty version to 4.1.134.Final (#6250) (Pierantonio Merlino)
 
 Known Issues:
+  * CVE-2026-41855 (unsafe deserialization in the Spring Framework JMS message converters) is reported against the
+    org.apache.servicemix.bundles.spring-jms bundle, which is shipped only as a Camel dependency. The affected class
+    org.springframework.jms.support.converter.MappingJackson2MessageConverter cannot be loaded in the default distribution:
+    it optionally imports the com.fasterxml.jackson.* packages, and no bundle in the framework exports them.
+    The framework is therefore not exploitable as delivered and no fix is applied in this release.
   * Watchdog service not working on Ubuntu 24.04 because `/dev/watchdog` is not available on a clean installation (verified on Zimaboard).
   * On certain systems the IPv6 rt match module (-m rt) is not available, causing Kura to fail when applying IPv6 mangle table rules related to Routing Header Type 0 filtering.
     When this occurs, IPv6 Routing Header Type 0 packets will not be explicitly dropped on affected systems.

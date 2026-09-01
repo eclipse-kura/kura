@@ -38,39 +38,26 @@ node {
         return
     }
 
-    stage('Build target-platform') {
-        timeout(time: 1, unit: 'HOURS') {
+    stage('Build') {
+        // Single reactor from the root parent pom: it aggregates bom, kura (all bundles +
+        // wrapper bundles), distrib and test, ordered by inter-module dependencies.
+        timeout(time: 3, unit: 'HOURS') {
             dir("kura") {
                 withMaven(jdk: 'temurin-jdk21-latest', maven: 'apache-maven-3.9.9', options: [artifactsPublisher(disabled: true)]) {
-                    sh "mvn -f target-platform/pom.xml clean install -Pno-mirror -Pcheck-exists-plugin"
+                    sh "mvn clean install -Pcheck-exists-plugin"
                 }
-            }
-        }
-    }
-
-    stage('Build core') {
-        timeout(time: 2, unit: 'HOURS') {
-            dir("kura") {
-                withMaven(jdk: 'temurin-jdk21-latest', maven: 'apache-maven-3.9.9', options: [artifactsPublisher(disabled: true)]) {
-                    sh "mvn -f kura/pom.xml -Dsurefire.rerunFailingTestsCount=3 clean install -Pcheck-exists-plugin"
-                }
-            }
-        }
-    }
-
-    stage('Build distrib') {
-        timeout(time: 1, unit: 'HOURS') {
-            dir("kura") {
-                withMaven(jdk: 'temurin-jdk21-latest', maven: 'apache-maven-3.9.9', options: [artifactsPublisher(disabled: true)]) {
-                    sh "mvn -f kura/distrib/pom.xml clean install"
-        }
             }
         }
     }
 
     stage('Generate test reports') {
         dir("kura") {
-            junit 'kura/test/*/target/surefire-reports/*.xml'
+            // Three sources of JUnit XML, all published:
+            //  - unit tests moved into the kura/ bundles run under surefire (surefire-reports);
+            //  - the test/ reactor's pure-unit modules also run under surefire (surefire-reports);
+            //  - the test/ reactor's bnd-testing integration modules write to the plugin default
+            //    (test-reports) since the read-only reportsDir is no longer configured.
+            junit 'kura/**/target/surefire-reports/**/TEST-*.xml, test/*/target/surefire-reports/**/TEST-*.xml, test/*/target/test-reports/**/TEST-*.xml'
         }
     }
 
@@ -80,13 +67,15 @@ node {
         if (env.BRANCH_IS_PRIMARY) {
             echo "Uploading DEB packages..."
 
-            def distribPom = readMavenPom file: 'kura/kura/distrib/pom.xml'
+            dir("kura") {
+                def distribPom = readMavenPom file: 'distrib/pom.xml'
 
-            def repoDistribution = distribPom.properties['kura.repo.distribution']
-            def repoModule = distribPom.properties['kura.repo.module']
+                def repoDistribution = distribPom.properties['kura.repo.distribution']
+                def repoModule = distribPom.properties['kura.repo.module']
 
-            def nexusUtils = load 'kura/.jenkins/nexusUtils.groovy'
-            nexusUtils.uploadPackages(repoDistribution, repoModule)
+                def nexusUtils = load '.jenkins/nexusUtils.groovy'
+                nexusUtils.uploadPackages(repoDistribution, repoModule)
+            }
         } else {
             echo "Skipping DEB upload"
             Utils.markStageSkippedForConditional(STAGE_NAME)
@@ -95,7 +84,7 @@ node {
 
     stage('Archive .deb artifacts') {
         dir("kura") {
-            archiveArtifacts artifacts: 'kura/distrib/**/target/*.deb', onlyIfSuccessful: true
+            archiveArtifacts artifacts: 'distrib/**/target/*.deb', onlyIfSuccessful: true
         }
     }
 
@@ -117,11 +106,12 @@ node {
                                 -Dmaven.test.failure.ignore=true \
                                 -Dsonar.organization=eclipse \
                                 -Dsonar.host.url=${SONAR_HOST_URL} \
-                                -Dsonar.java.binaries='target/' \
+                                -Dsonar.java.binaries='target/classes' \
                                 ${analysisParameters} \
                                 -Dsonar.core.codeCoveragePlugin=jacoco \
                                 -Dsonar.projectKey=org.eclipse.kura:kura \
-                                -Dsonar.exclusions=test/**/*,**/*.xml,**/*.yml,test-util/**/* \
+                                -Dsonar.exclusions=test/**/*,**/*.xml,**/*.yml,test-util/**/*,emulator/**/*,com.codeminders.hidapi-parent/**/*,org.moka7/**/*,org.eclipse.soda.dk.comm-parent/**/*,org.eclipse.kura.sun.misc/**/*,log4j2-api-config/**/*,org.usb4java/**/*,usb4java-javax/**/* \
+                                -Dsonar.cpd.exclusions=**/*Metatype.java,**/*Options.java \
                                 -Dsonar.test.exclusions=**/*
                         """
                     }

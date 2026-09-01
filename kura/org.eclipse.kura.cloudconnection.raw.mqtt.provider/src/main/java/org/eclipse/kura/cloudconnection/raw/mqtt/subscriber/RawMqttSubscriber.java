@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2019, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -27,6 +27,19 @@ import org.eclipse.kura.cloudconnecton.raw.mqtt.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.cloudconnection.raw.mqtt.subscriber.RawMqttSubscriber",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = {
+        "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint",
+        "kura.ui.service.hide:Boolean=true",
+        "kura.ui.factory.hide=true" })
+@Designate(ocd = RawMqttSubscriberOptions.class, factory = true)
 public class RawMqttSubscriber extends AbstractStackComponent<SubscribeOptions>
         implements CloudSubscriber, CloudSubscriberListener {
 

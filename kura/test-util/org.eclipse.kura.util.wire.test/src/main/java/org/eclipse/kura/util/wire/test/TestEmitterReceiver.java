@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -32,6 +32,30 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.util.wire.test.TestEmitterReceiver",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
+            org.eclipse.kura.wire.WireComponent.class,
+            org.osgi.service.wireadmin.Consumer.class,
+            org.osgi.service.wireadmin.Producer.class },
+    property = {
+        "service.pid=com.eurotech.framework.wire.AvroSerializer",
+        "kura.ui.service.hide:Boolean=true",
+        "input.cardinality.minimum:Integer=1",
+        "input.cardinality.maximum:Integer=1",
+        "input.cardinality.default:Integer=1",
+        "output.cardinality.minimum:Integer=1",
+        "output.cardinality.maximum:Integer=1",
+        "output.cardinality.default:Integer=1" })
+@Designate(ocd = TestEmitterReceiverOptions.class, factory = true)
 public class TestEmitterReceiver implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(TestEmitterReceiver.class);
@@ -41,6 +65,7 @@ public class TestEmitterReceiver implements WireEmitter, WireReceiver, Configura
 
     private Consumer<WireEnvelope> consumer;
 
+    @Activate
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.info("activating...");
         this.wireSupport = (MultiportWireSupport) this.wireHelperService.newWireSupport(this,
@@ -48,11 +73,13 @@ public class TestEmitterReceiver implements WireEmitter, WireReceiver, Configura
         logger.info("activating...done");
     }
 
+    @Modified
     public void updated(final Map<String, Object> properties) {
         logger.info("updating...");
         logger.info("updating...done");
     }
 
+    @Reference(name = "WireHelperService", service = org.eclipse.kura.wire.WireHelperService.class, unbind = "-")
     protected void bindWireHelperService(WireHelperService wireHelperService) {
         this.wireHelperService = wireHelperService;
     }

@@ -1,0 +1,16 @@
+Bundle-SymbolicName: ${project.artifactId};singleton:=true
+Import-Package: \
+    org.eclipse.kura;version="1.6.0",\
+    org.eclipse.kura.cloud.factory;version="[1.1,1.2)",\
+    org.eclipse.kura.cloudconnection;version="[1.0,2.0)",\
+    org.eclipse.kura.cloudconnection.factory;version="[1.0,1.1)",\
+    org.eclipse.kura.configuration;version="[1.0,2.0)",\
+    org.osgi.framework;version="1.10.0",\
+    org.osgi.service.component,\
+    *
+Bundle-Name: org.eclipse.kura.core.cloud.factory
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+-includeresource: \
+    about.html,\
+    about_files=about_files/

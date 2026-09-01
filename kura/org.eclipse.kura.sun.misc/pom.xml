@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2016, 2026 Red Hat Inc and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Jens Reimann <jreimann@redhat.com> - Initial file
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+        <groupId>org.eclipse.kura</groupId>
+        <artifactId>kura-parent</artifactId>
+        <version>6.0.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+	<groupId>org.eclipse.kura</groupId>
+	<artifactId>org.eclipse.kura.sun.misc</artifactId>
+	<version>2.0.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>System extension fragment for 'sun.misc'</name>
+
+	<build>
+		<plugins>
+			<!-- Metadata-only system extension fragment: the exported packages
+				(sun.misc, com.sun) live in the JRE, not in this jar, so the
+				manifest is written directly instead of being computed by bnd. -->
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<forceCreation>true</forceCreation>
+					<archive combine.self="override">
+						<manifestEntries>
+							<Bundle-ManifestVersion>2</Bundle-ManifestVersion>
+							<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+							<Bundle-Name>${project.name}</Bundle-Name>
+							<Bundle-Version>2.0.0.SNAPSHOT</Bundle-Version>
+							<Bundle-Vendor>Eclipse Kura</Bundle-Vendor>
+							<Fragment-Host>system.bundle; extension:=framework</Fragment-Host>
+							<Export-Package>sun.misc, com.sun</Export-Package>
+							<Require-Capability>osgi.ee;filter:="(&amp;(osgi.ee=JavaSE)(version=21))"</Require-Capability>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

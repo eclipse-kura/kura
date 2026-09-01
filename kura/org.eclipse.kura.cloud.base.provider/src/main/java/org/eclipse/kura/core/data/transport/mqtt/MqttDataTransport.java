@@ -57,7 +57,30 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.Designate;
 @SuppressWarnings("java:S2789")
+@Component(
+    name = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport",
+    immediate = false,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.data.DataTransportService.class,
+            org.eclipse.kura.ssl.SslServiceListener.class,
+            org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = { "kura.ui.service.hide:Boolean=true" },
+    reference = {
+        @Reference(name = "DataTransportListener",
+                service = org.eclipse.kura.data.DataTransportListener.class,
+                cardinality = ReferenceCardinality.MULTIPLE,
+                policy = ReferencePolicy.DYNAMIC) })
+@Designate(ocd = MqttDataTransportOptions.class, factory = true)
 public class MqttDataTransport implements DataTransportService, MqttCallback, ConfigurableComponent, SslServiceListener,
         CloudConnectionStatusComponent {
 
@@ -134,6 +157,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     //
     // ----------------------------------------------------------------
 
+    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "unsetSystemService")
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -142,6 +166,11 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         this.systemService = null;
     }
 
+    @Reference(name = "SslManagerService",
+            service = org.eclipse.kura.ssl.SslManagerService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetSslManagerService")
     public void setSslManagerService(SslManagerService sslManagerService) {
         final boolean update;
 
@@ -163,6 +192,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         }
     }
 
+    @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "unsetCryptoService")
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
@@ -171,6 +201,9 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         this.cryptoService = null;
     }
 
+    @Reference(name = "CloudConnectionStatusService",
+            service = org.eclipse.kura.status.CloudConnectionStatusService.class,
+            unbind = "unsetCloudConnectionStatusService")
     public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
         this.cloudConnectionStatusService = cloudConnectionStatusService;
     }
@@ -185,6 +218,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     //
     // ----------------------------------------------------------------
 
+    @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         synchronized (this.updateLock) {
             logger.info("Activating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
@@ -225,6 +259,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         logger.debug("Deactivating {}...", this.properties.get(ConfigurationService.KURA_SERVICE_PID));
 
@@ -240,6 +275,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         }
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         synchronized (this.updateLock) {
             logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));

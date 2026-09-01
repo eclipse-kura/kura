@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,14 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+@Component(
+    name = "org.eclipse.kura.internal.rest.tamper.detection.TamperDetectionRequestHandler",
+    immediate = true,
+    service = {})
 public class TamperDetectionRequestHandler extends TamperDetectionRemoteService implements RequestHandler {
 
     private static final String APP_ID = "TAMPER-V1";
@@ -42,6 +50,11 @@ public class TamperDetectionRequestHandler extends TamperDetectionRemoteService 
 
     private static final Logger logger = LoggerFactory.getLogger(TamperDetectionRequestHandler.class);
 
+    @Reference(name = "RequestHandlerRegistry",
+            service = org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRequestHandlerRegistry")
     public void setRequestHandlerRegistry(final RequestHandlerRegistry requestHandlerRegistry) {
         try {
             requestHandlerRegistry.registerRequestHandler(APP_ID, this);

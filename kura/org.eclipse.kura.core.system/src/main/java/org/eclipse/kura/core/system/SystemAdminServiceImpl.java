@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -28,6 +28,14 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+@Component(
+    name = "org.eclipse.kura.system.SystemAdminService",
+    immediate = true,
+    service = { org.eclipse.kura.system.SystemAdminService.class })
 public class SystemAdminServiceImpl extends SuperSystemService implements SystemAdminService {
 
     private static final Logger logger = LoggerFactory.getLogger(SystemAdminServiceImpl.class);
@@ -47,6 +55,9 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
     //
     // ----------------------------------------------------------------
 
+    @Reference(name = "PrivilegedExecutorService",
+            service = org.eclipse.kura.executor.PrivilegedExecutorService.class,
+            unbind = "unsetExecutorService")
     public void setExecutorService(CommandExecutorService executorService) {
         this.executorService = executorService;
     }
@@ -61,12 +72,14 @@ public class SystemAdminServiceImpl extends SuperSystemService implements System
     //
     // ----------------------------------------------------------------
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         //
         // save the bundle context
         this.ctx = componentContext;
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         this.ctx = null;
     }

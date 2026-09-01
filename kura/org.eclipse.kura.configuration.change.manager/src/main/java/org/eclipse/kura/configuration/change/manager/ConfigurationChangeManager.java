@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -36,6 +36,23 @@ import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.GsonBuilder;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = {
+        "kura.service.pid=org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager" })
+@Designate(ocd = ConfigurationChangeManagerMetatype.class, factory = true)
 public class ConfigurationChangeManager implements ConfigurableComponent, ServiceTrackerListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationChangeManager.class);
@@ -79,6 +96,11 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
      * Dependencies
      */
 
+    @Reference(name = "CloudPublisher",
+            service = org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetCloudPublisher")
     public void setCloudPublisher(CloudPublisher cloudPublisher) {
         this.cloudPublisher = cloudPublisher;
     }
@@ -93,6 +115,7 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
      * Activation APIs
      */
 
+    @Activate
     public void activate(final Map<String, Object> properties) throws InvalidSyntaxException {
         logger.info("Activating ConfigurationChangeManager...");
 
@@ -106,6 +129,7 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
         logger.info("Activating ConfigurationChangeManager... Done.");
     }
 
+    @Modified
     public void updated(final Map<String, Object> properties) {
         logger.info("Updating ConfigurationChangeManager...");
 
@@ -124,6 +148,7 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
         logger.info("Updating ConfigurationChangeManager... Done.");
     }
 
+    @Deactivate
     public void deactivate() {
         logger.info("Deactivating ConfigurationChangeManager...");
         this.acceptNotifications = false;

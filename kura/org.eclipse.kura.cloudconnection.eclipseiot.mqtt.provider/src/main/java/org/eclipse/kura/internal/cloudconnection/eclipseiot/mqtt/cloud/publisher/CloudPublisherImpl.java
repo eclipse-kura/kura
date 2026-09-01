@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2018, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -50,6 +50,24 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = {
+        "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager",
+        "kura.ui.service.hide:Boolean=true",
+        "kura.ui.factory.hide=true",
+        "kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher",
+        "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher(\\-[a-zA-Z0-9]+)?$" })
+@Designate(ocd = CloudPublisherMetatype.class, factory = true)
 public class CloudPublisherImpl
         implements CloudPublisher, ConfigurableComponent, CloudConnectionListener, CloudPublisherDeliveryListener {
 
@@ -106,6 +124,7 @@ public class CloudPublisherImpl
 
     private final ExecutorService worker = Executors.newCachedThreadPool();
 
+    @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.debug("Activating Cloud Publisher...");
         this.bundleContext = componentContext.getBundleContext();
@@ -118,6 +137,7 @@ public class CloudPublisherImpl
         logger.debug("Activating Cloud Publisher... Done");
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.debug("Updating Cloud Publisher...");
 
@@ -131,6 +151,7 @@ public class CloudPublisherImpl
         logger.debug("Updating Cloud Publisher... Done");
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         logger.debug("Deactivating Cloud Publisher...");
 

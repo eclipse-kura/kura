@@ -1,0 +1,9 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Name: org.eclipse.kura.rest.keystore.provider.test
+Bundle-Vendor: Eclipse Kura
+Fragment-Host: org.eclipse.kura.rest.keystore.provider
+Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;org.eclipse.kura.*Test}
+
+-includeresource: \
+    about.html,\
+    about_files=about_files/

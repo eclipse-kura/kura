@@ -155,51 +155,44 @@ To install Maven you can follow the tutorial from the official [Maven](http://ma
 
 ### Build Eclipse Kura™
 
-Change to the new directory and clone the Eclipse Kura™ repo:
+Clone the Eclipse Kura™ repository:
 
 ```bash
 git clone -b develop https://github.com/eclipse-kura/kura.git
 ```
 
-Move inside the newly created directory and build the target platform:
+Eclipse Kura™ is built with [Maven](https://maven.apache.org/) and the [bnd](https://bndtools.org/) tooling (`bnd-maven-plugin`): each bundle's OSGi manifest is generated at build time from its `bnd.bnd` descriptor, all plugin versions are centralized in the root parent POM (`pom.xml`), and all dependency versions are centralized in the Bill of Materials (`bom/pom.xml`). The project is a single Maven reactor rooted at the top-level `pom.xml`, which aggregates four modules:
+
+* `bom/` — the Bill of Materials that centralizes the managed versions of every dependency;
+* `kura/` — the Eclipse Kura™ framework bundles, including the third-party and native wrapper bundles;
+* `distrib/` — the distribution packaging that assembles the framework into the installable `.deb` packages;
+* `test/` — the OSGi integration tests (included in the reactor through the `tests` profile).
+
+Move inside the cloned directory and build everything from the repository root:
 
 ```bash
-mvn -f target-platform/pom.xml clean install
+mvn clean install
 ```
 
-Build the core components:
-
-```bash
-mvn -f kura/pom.xml clean install
-```
-
-Build the target profiles and the Eclipse Kura Target Definition:
-
-```bash
-mvn -f kura/distrib/pom.xml clean install -DbuildAll
-```
+Maven orders the reactor by inter-module dependencies, so this builds all the framework bundles under `kura/` (the wrapper bundles first) and finally the `distrib/` packaging — producing the `.deb` packages under `distrib/*-core/target/`.
 
 > [!TIP]
-You can skip tests by adding `-Dmaven.test.skip=true` in the commands above and you can compile a specific target by specifying the profile (e.g. `-Paarch64`).
+> You can skip the tests by adding `-DskipTests` to the commands above (this also excludes the integration-test module from the reactor).
 
-To list the available installer profiles, run:
+### Testing
+
+Unit tests run automatically as part of `mvn install` (every bundle keeps its unit tests under `src/test/java`).
+
+The OSGi **integration tests** live under `test/` and are executed inside a real OSGi framework by the bnd testing tooling (`bnd-testing-maven-plugin`); each test module is driven by its own `integration-test.bndrun`, while the run configuration shared by all of them (framework, execution environment, runtime properties) lives in `test/integration-test.bnd`. They belong to the `tests` Maven profile, which is **active by default** — it is disabled only by `-DskipTests`. So both unit and integration tests run with a plain:
 
 ```bash
-mvn -f kura/distrib/pom.xml help:all-profiles
+mvn clean install
 ```
 
-Additionally you can build only the Eclipse Kura Target Definition, by running in the `distrib` folder:
+The set of runtime bundles (`-runbundles`) of each `integration-test.bndrun` is already resolved and committed in those files, so a fresh checkout needs no extra step. After changing a module's runtime dependencies, re-resolve them with the `resolve-integration-tests` profile:
 
 ```bash
-mvn -f kura/distrib/pom.xml clean install -Ptarget-definition
-```
-
-#### Build scripts
-
-Alternatively, you can use the build scripts available in the root directory.
-
-```bash
-./build-all.sh
+mvn -f test/pom.xml clean verify -Presolve-integration-tests
 ```
 
 IDE Setups

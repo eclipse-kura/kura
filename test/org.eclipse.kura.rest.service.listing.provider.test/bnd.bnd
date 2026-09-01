@@ -1,0 +1,9 @@
+Bundle-SymbolicName: ${project.artifactId}
+Bundle-Name: org.eclipse.kura.rest.service.listing.provider.test
+Bundle-Vendor: Eclipse Kura
+Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;org.eclipse.kura.*Test}
+-includeresource: \
+    OSGI-INF=OSGI-INF,\
+    about.html,\
+    about_files=about_files/
+Service-Component: OSGI-INF/TargetFilterTestService.xml,OSGI-INF/TestFactory1.xml,OSGI-INF/TestFactory2.xml

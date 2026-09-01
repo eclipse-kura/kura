@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -35,6 +35,15 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+@Component(
+    name = "org.eclipse.kura.status.CloudConnectionStatusService",
+    service = { org.eclipse.kura.status.CloudConnectionStatusService.class })
 public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusService {
 
     private static final String STATUS_NOTIFICATION_URL = "ccs.status.notification.url";
@@ -68,6 +77,7 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
         this.idleComponent = new IdleStatusComponent();
     }
 
+    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "unsetSystemService")
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -76,6 +86,11 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
         this.systemService = null;
     }
 
+    @Reference(name = "GPIOService",
+            service = org.eclipse.kura.gpio.GPIOService.class,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetGPIOService")
     public void setGPIOService(GPIOService gpioService) {
         this.gpioService = Optional.of(gpioService);
     }
@@ -90,6 +105,7 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
     //
     // ----------------------------------------------------------------
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         logger.info("Activating CloudConnectionStatus service...");
 
@@ -101,6 +117,7 @@ public class CloudConnectionStatusServiceImpl implements CloudConnectionStatusSe
         register(this.idleComponent);
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         logger.info("Deactivating CloudConnectionStatus service...");
 

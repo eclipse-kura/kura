@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2024 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2024, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -134,7 +134,8 @@ public class SparkplugMqttClient {
             return new Established();
         }
 
-        private void newClientConnection() throws MqttException, GeneralSecurityException, IOException {
+        private void newClientConnection()
+                throws MqttException, GeneralSecurityException, IOException, KuraConnectException {
             SparkplugMqttClient.this.bdSeqCounter.next();
             setWillMessage();
             logger.debug("bdSeq: {}", SparkplugMqttClient.this.bdSeqCounter.getCurrent());
@@ -144,7 +145,11 @@ public class SparkplugMqttClient {
                 logger.info("Randomly delaying connect by {} ms", randomDelay);
                 Thread.sleep(randomDelay);
             } catch (InterruptedException e) {
+                // The connect delay is interrupted when the executor is shut down (disconnect/deactivate).
+                // Abort instead of establishing a connection: proceeding here would leak a second client
+                // with the same clientId, which the broker kicks (EOFException), disrupting the session.
                 Thread.currentThread().interrupt();
+                throw new KuraConnectException(e, "Reconnection aborted: interrupted while waiting to reconnect");
             }
 
             SparkplugMqttClient.this.client = new MqttAsyncClient(getNextServer(), SparkplugMqttClient.this.clientId,

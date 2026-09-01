@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2016, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -26,14 +26,21 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
 /**
  * The Class DriverServiceImpl is an implementation of the utility API
  * {@link DriverService} to provide useful factory methods for drivers
  */
+@Component(
+    name = "org.eclipse.kura.driver.DriverService",
+    immediate = true,
+    service = { org.eclipse.kura.driver.DriverService.class })
 public class DriverServiceImpl implements DriverService {
 
     private BundleContext bundleContext;
 
+    @Activate
     public void activate(ComponentContext componentContext) {
         this.bundleContext = componentContext.getBundleContext();
     }

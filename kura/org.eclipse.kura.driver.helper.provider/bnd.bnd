@@ -1,0 +1,15 @@
+Bundle-SymbolicName: ${project.artifactId}
+Import-Package: \
+    org.eclipse.kura.driver;version="[1.0,1.1)",\
+    org.eclipse.kura.driver.descriptor;version="[1.0,1.1)",\
+    org.eclipse.kura.util.service;version="[1.0,2.0)",\
+    org.osgi.framework;version="1.8",\
+    org.osgi.service.component;version="1.2.2",\
+    org.slf4j;version="1.6.4",\
+    *
+Bundle-Name: Driver Helper Service Provider
+Bundle-Vendor: Eclipse Kura
+Bundle-ActivationPolicy: lazy
+-includeresource: \
+    about.html,\
+    about_files=about_files/

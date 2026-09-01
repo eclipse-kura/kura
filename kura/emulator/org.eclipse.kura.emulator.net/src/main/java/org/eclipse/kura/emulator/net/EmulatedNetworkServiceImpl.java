@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -35,6 +35,14 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+@Component(
+    name = "org.eclipse.kura.net.NetworkService",
+    immediate = true,
+    service = { org.eclipse.kura.net.NetworkService.class })
 public class EmulatedNetworkServiceImpl implements NetworkService {
 
     private static final Logger logger = LoggerFactory.getLogger(EmulatedNetworkServiceImpl.class);
@@ -51,6 +59,7 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
     //
     // ----------------------------------------------------------------
 
+    @Reference(name = "Emulator", service = org.eclipse.kura.emulator.Emulator.class, unbind = "unsetEmulator")
     public void setEmulator(Emulator emulator) {
         this.emulator = emulator;
     }
@@ -65,12 +74,14 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
     //
     // ----------------------------------------------------------------
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         //
         // save the bundle context
         this.ctx = componentContext;
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         this.ctx = null;
     }

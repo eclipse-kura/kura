@@ -17,7 +17,7 @@ def uploadPackages(String repoDistribution, String repoModule, Boolean setupProm
     }
 
     stage("Upload .deb packages to Nexus") {
-        def debFiles = findFiles(glob: 'kura/**/*.deb')
+        def debFiles = findFiles(glob: 'distrib/**/*.deb')
 
         if (debFiles.size() == 0) {
             error("No .deb files found to upload")

@@ -48,6 +48,22 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl",
+    immediate = false,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.security.keystore.KeystoreService.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = {
+        "kura.ui.factory.hide=true",
+        "kura.ui.service.hide=true" })
+@Designate(ocd = FilesystemKeystoreServiceImplOptions.class, factory = true)
 public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
 
     private static final Logger logger = LoggerFactory.getLogger(FilesystemKeystoreServiceImpl.class);
@@ -60,16 +76,23 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
     private ScheduledExecutorService selfUpdaterExecutor;
     private ScheduledFuture<?> selfUpdaterFuture;
 
+    // Throttles the "waiting for ConfigurationService" log: the self-updater task ticks every
+    // second, but we only want to log once every SELF_UPDATER_LOG_EVERY ticks (~10 seconds).
+    private static final int SELF_UPDATER_LOG_EVERY = 10;
+    private int selfUpdaterAttempts;
+
     // ----------------------------------------------------------------
     //
     // Dependencies
     //
     // ----------------------------------------------------------------
 
+    @Reference(name = "CryptoService", service = org.eclipse.kura.crypto.CryptoService.class, unbind = "-")
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
 
+    @Reference(name = "ConfigurationService", service = org.eclipse.kura.configuration.ConfigurationService.class, unbind = "-")
     public void setConfigurationService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
@@ -81,6 +104,7 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
     // ----------------------------------------------------------------
 
     @Override
+    @Activate
     public void activate(ComponentContext context, Map<String, Object> properties) {
         logger.info("Bundle {} is starting!", properties.get(KURA_SERVICE_PID));
         this.componentContext = context;
@@ -106,6 +130,7 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
     }
 
     @Override
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.info("Bundle {} is updating!", properties.get(KURA_SERVICE_PID));
         FilesystemKeystoreServiceOptions newOptions = new FilesystemKeystoreServiceOptions(properties,
@@ -130,6 +155,7 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
     }
 
     @Override
+    @Deactivate
     public void deactivate() {
         logger.info("Bundle {} is deactivating!", this.keystoreServiceOptions.getProperties().get(KURA_SERVICE_PID));
 
@@ -258,6 +284,7 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
         props.put(FilesystemKeystoreServiceOptions.KEY_KEYSTORE_PASSWORD, new Password(newPassword));
         props.put(FilesystemKeystoreServiceOptions.KEY_RANDOMIZE_PASSWORD, false);
 
+        this.selfUpdaterAttempts = 0;
         this.selfUpdaterFuture = this.selfUpdaterExecutor.scheduleAtFixedRate(() -> {
             try {
                 if (this.componentContext.getServiceReference() != null
@@ -266,8 +293,10 @@ public class FilesystemKeystoreServiceImpl extends BaseKeystoreService {
                     this.configurationService.updateConfiguration(pid, props);
                     throw new KuraRuntimeException(KuraErrorCode.CONFIGURATION_SNAPSHOT_TAKING,
                             "Updated. The task will be terminated.");
-                } else {
-                    logger.info("No service or configuration available yet.");
+                } else if (this.selfUpdaterAttempts++ % SELF_UPDATER_LOG_EVERY == 0) {
+                    logger.info(
+                            "Waiting for ConfigurationService to register keystore pid {} before persisting the randomized password...",
+                            pid);
                 }
             } catch (KuraException e) {
                 logger.warn("Cannot get/update configuration for pid: {}", pid, e);

@@ -28,7 +28,16 @@ template_xml: |2
        {holder}
 # Ignore specific files and paths. The syntax and semantics are the same as in the .gitignore file.
 ignore:
-  - target-platform/
-  - kura/test/org.eclipse.kura.core.configuration.test/src/test/resources/
+  # third-party / native wrapper bundles (formerly the target-platform reactor)
+  - kura/com.codeminders.hidapi-parent/
+  - kura/log4j2-api-config/
+  - kura/org.eclipse.kura.sun.misc/
+  - kura/org.eclipse.soda.dk.comm-parent/
+  - kura/org.moka7/
+  - kura/org.usb4java/
+  - kura/usb4java-javax/
+  # Byte-exact snapshot fixtures compared against the marshaller output (no header allowed)
+  - test/org.eclipse.kura.core.configuration.test/src/main/resources/expected_snapshot_with_description.xml
+  - test/org.eclipse.kura.core.configuration.test/src/main/resources/expected_snapshot_without_description.xml
   - suppressions.xml
   - /kura/emulator/org.eclipse.kura.emulator.position/src/main/resources/*.gpx

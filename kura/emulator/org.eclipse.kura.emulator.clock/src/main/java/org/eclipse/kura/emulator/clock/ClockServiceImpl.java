@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -23,6 +23,19 @@ import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.clock.ClockService",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.clock.ClockService.class, org.eclipse.kura.configuration.ConfigurableComponent.class })
+@Designate(ocd = ClockServiceOptions.class)
 public class ClockServiceImpl implements ConfigurableComponent, ClockService {
 
     private static final Logger logger = LoggerFactory.getLogger(ClockServiceImpl.class);
@@ -40,6 +53,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService {
     //
     // ----------------------------------------------------------------
 
+    @Reference(name = "EventAdmin", service = org.osgi.service.event.EventAdmin.class, unbind = "unsetEventAdmin")
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }
@@ -54,6 +68,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService {
     //
     // ----------------------------------------------------------------
 
+    @Activate
     protected void activate(ComponentContext componentContext) {
         logger.info("Activate. Current Time: {}", new Date());
 
@@ -61,10 +76,12 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService {
         this.ctx = componentContext;
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         logger.info("Deactivate...");
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.info("Updated...");
         try {

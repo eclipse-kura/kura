@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -56,6 +56,15 @@ import org.eclipse.kura.system.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+@Component(
+    name = "org.eclipse.kura.crypto.CryptoService",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.OPTIONAL,
+    service = { org.eclipse.kura.crypto.CryptoService.class })
 public class CryptoServiceImpl implements CryptoService {
 
     private static final Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
@@ -79,6 +88,7 @@ public class CryptoServiceImpl implements CryptoService {
     private SystemService systemService;
     private Optional<byte[]> secretKey;
 
+    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "unsetSystemService")
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -87,6 +97,7 @@ public class CryptoServiceImpl implements CryptoService {
         this.systemService = null;
     }
 
+    @Activate
     protected void activate() {
 
         this.secretKey = loadCustomEncryptionKey().filter(CryptoServiceImpl::isEncryptionKeyValid);

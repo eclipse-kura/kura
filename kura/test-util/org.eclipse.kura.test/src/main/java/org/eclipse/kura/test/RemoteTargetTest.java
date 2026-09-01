@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -33,6 +33,11 @@ import org.osgi.util.tracker.BundleTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+@Component(
+    name = "org.eclipse.kura.test.RemoteTargetTest",
+    service = {})
 public class RemoteTargetTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteTargetTest.class);
@@ -49,6 +54,7 @@ public class RemoteTargetTest {
     private BundleTracker<?> bundleTracker;
     private TestExtender testExtender;
 
+    @Reference(name = "SystemService", service = org.eclipse.kura.system.SystemService.class, unbind = "unsetSystemService")
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -57,6 +63,7 @@ public class RemoteTargetTest {
         this.systemService = null;
     }
 
+    @Reference(name = "CloudService", service = org.eclipse.kura.cloud.CloudService.class, unbind = "unsetCloudService")
     public void setCloudService(CloudService cloudService) {
         this.cloudService = cloudService;
         try {
@@ -70,6 +77,7 @@ public class RemoteTargetTest {
         this.cloudService = null;
     }
 
+    @Reference(name = "ConfigurationAdmin", service = org.osgi.service.cm.ConfigurationAdmin.class, unbind = "unsetConfigAdmin")
     public void setConfigAdmin(ConfigurationAdmin configAdmin) {
         this.configAdmin = configAdmin;
     }

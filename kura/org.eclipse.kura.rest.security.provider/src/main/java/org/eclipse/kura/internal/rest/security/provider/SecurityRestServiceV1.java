@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2023, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,15 @@ package org.eclipse.kura.internal.rest.security.provider;
 
 import jakarta.ws.rs.Path;
 
+import org.osgi.service.component.annotations.Component;
 @Path("security/v1")
+@Component(
+    name = "org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV1",
+    immediate = true,
+    service = { org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV1.class },
+    property = {
+        "kura.service.pid=org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV1",
+        "osgi.jakartars.resource=true" })
 public class SecurityRestServiceV1 extends AbstractRestSecurityService {
 
     private static final String MQTT_APP_ID = "SEC-V1";

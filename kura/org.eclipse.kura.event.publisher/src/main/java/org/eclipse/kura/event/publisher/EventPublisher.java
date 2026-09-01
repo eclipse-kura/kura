@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -43,6 +43,22 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.event.publisher.EventPublisher",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.cloudconnection.publisher.CloudPublisher.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = {
+        "cloud.connection.factory.pid=org.eclipse.kura.cloud.CloudService",
+        "kura.ui.service.hide:Boolean=true",
+        "kura.ui.factory.hide=true" })
+@Designate(ocd = EventPublisherMetatype.class, factory = true)
 public class EventPublisher
         implements CloudPublisher, ConfigurableComponent, CloudConnectionListener, CloudDeliveryListener {
 
@@ -65,6 +81,7 @@ public class EventPublisher
      * Activation APIs
      */
 
+    @Activate
     public void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.debug("Activating ConfigurationChangePublisher...");
 
@@ -75,6 +92,7 @@ public class EventPublisher
         logger.debug("Activating ConfigurationChangePublisher... Done.");
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.debug("Updating ConfigurationChangePublisher...");
         
@@ -84,6 +102,7 @@ public class EventPublisher
         logger.debug("Updating ConfigurationChangePublisher... Done.");
     }
 
+    @Deactivate
     public void deactivate(ComponentContext componentContext) {
         logger.debug("Deactivating ConfigurationChangePublisher...");
         this.cloudHelper.close();

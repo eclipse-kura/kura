@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2018, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -42,6 +42,22 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.Designate;
+@Component(
+    name = "org.eclipse.kura.cloud.subscriber.CloudSubscriber",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber.class, org.eclipse.kura.configuration.ConfigurableComponent.class },
+    property = {
+        "cloud.connection.factory.pid=org.eclipse.kura.cloud.CloudService",
+        "kura.ui.service.hide:Boolean=true",
+        "kura.ui.factory.hide=true" })
+@Designate(ocd = CloudSubscriberMetatype.class, factory = true)
 public class CloudSubscriberImpl
         implements CloudSubscriber, ConfigurableComponent, CloudConnectionListener, CloudSubscriberListener {
 
@@ -100,6 +116,7 @@ public class CloudSubscriberImpl
     private final Set<CloudSubscriberListener> subscribers = new CopyOnWriteArraySet<>();
     private final Set<CloudConnectionListener> cloudConnectionListeners = new CopyOnWriteArraySet<>();
 
+    @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.debug("Activating Cloud Publisher...");
         this.bundleContext = componentContext.getBundleContext();
@@ -111,6 +128,7 @@ public class CloudSubscriberImpl
         logger.debug("Activating Cloud Publisher... Done");
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.debug("Updating Cloud Publisher...");
 
@@ -119,6 +137,7 @@ public class CloudSubscriberImpl
         logger.debug("Updating Cloud Publisher... Done");
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         logger.debug("Deactivating Cloud Publisher...");
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -23,6 +23,9 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.rest.tamper.detection.api.TamperDetectionServiceInfo;
 import org.eclipse.kura.rest.tamper.detection.api.TamperStatusInfo;
 import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +34,11 @@ public class TamperDetectionRemoteService {
     private static final Logger logger = LoggerFactory.getLogger(TamperDetectionRemoteService.class);
     private final Map<String, TamperDetectionService> tamperDetectionServices = new ConcurrentHashMap<>();
 
+    @Reference(name = "TamperDetectionService",
+            service = TamperDetectionService.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTamperDetectionService")
     public void setTamperDetectionService(final TamperDetectionService tamperDetectionService,
             final Map<String, Object> properties) {
         final Optional<String> pid = getPid(properties);

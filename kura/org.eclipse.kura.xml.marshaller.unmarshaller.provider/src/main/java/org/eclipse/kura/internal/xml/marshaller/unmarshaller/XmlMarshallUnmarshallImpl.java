@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2025 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -51,6 +51,13 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import org.osgi.service.component.annotations.Component;
+@Component(
+    name = "org.eclipse.kura.xml.marshaller.unmarshaller.provider",
+    immediate = false,
+    service = { org.eclipse.kura.marshalling.Marshaller.class, org.eclipse.kura.marshalling.Unmarshaller.class },
+    property = {
+        "kura.service.pid=org.eclipse.kura.xml.marshaller.unmarshaller.provider" })
 public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
     private static final Logger logger = LoggerFactory.getLogger(XmlMarshallUnmarshallImpl.class);

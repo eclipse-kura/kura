@@ -85,6 +85,7 @@ import org.eclipse.kura.core.keystore.crl.StoredCRL;
 import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,6 +112,7 @@ public abstract class BaseKeystoreService implements KeystoreService, Configurab
         Security.addProvider(new BouncyCastleProvider());
     }
 
+    @Reference(name = "EventAdmin", service = EventAdmin.class, unbind = "-")
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }

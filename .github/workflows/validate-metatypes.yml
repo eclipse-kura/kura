@@ -29,5 +29,5 @@ jobs:
         # archetype-resources are Velocity templates, not parseable XML
         run: |
           xmllint --quiet --noout \
-            --schema kura/setups/metatype/kura-metatype-1.2.0.xsd \
+            --schema .github/xsd/kura-metatype-1.2.0.xsd \
             $(git ls-files "**/OSGI-INF/metatype/*.xml" | grep -v archetype-resources)

@@ -183,26 +183,16 @@ Maven orders the reactor by inter-module dependencies, so this builds all the fr
 
 Unit tests run automatically as part of `mvn install` (every bundle keeps its unit tests under `src/test/java`).
 
-The OSGi **integration tests** live under `test/` and are executed inside a real OSGi framework by the bnd testing tooling (`bnd-testing-maven-plugin`). They are grouped under the `tests` Maven profile; each test module is driven by its own `integration-test.bndrun`, while the run configuration shared by all of them (framework, execution environment, runtime properties) lives in `test/integration-test.bnd`.
-
-Build and run the integration tests with:
+The OSGi **integration tests** live under `test/` and are executed inside a real OSGi framework by the bnd testing tooling (`bnd-testing-maven-plugin`); each test module is driven by its own `integration-test.bndrun`, while the run configuration shared by all of them (framework, execution environment, runtime properties) lives in `test/integration-test.bnd`. They belong to the `tests` Maven profile, which is **active by default** — it is disabled only by `-DskipTests`. So both unit and integration tests run with a plain:
 
 ```bash
-mvn clean install -Ptests
+mvn clean install
 ```
 
-The set of runtime bundles (`-runbundles`) of each `integration-test.bndrun` is computed by the bnd resolver. The first time, or after changing the runtime dependencies, re-resolve them with the `resolve-integration-tests` profile:
+The set of runtime bundles (`-runbundles`) of each `integration-test.bndrun` is already resolved and committed in those files, so a fresh checkout needs no extra step. After changing a module's runtime dependencies, re-resolve them with the `resolve-integration-tests` profile:
 
 ```bash
-mvn -f kura/test/pom.xml clean verify -Ptests -Presolve-integration-tests
-```
-
-#### Build scripts
-
-Alternatively, you can use the build scripts available in the root directory.
-
-```bash
-./build-all.sh
+mvn -f test/pom.xml clean verify -Presolve-integration-tests
 ```
 
 IDE Setups

@@ -32,6 +32,12 @@ jobs:
       with:
         ref: ${{ github.event.inputs.target_branch }}
 
+    - name: Setup Java
+      uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4.8.0
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+
     - name: Download version upticker tool
       uses: carlosperate/download-file-action@8b89cb8b4807765e7d63fe765cc600eb1919af11 # v1.1.2
       with:
@@ -55,17 +61,26 @@ jobs:
         rm ./version-uptick-0.2.0-linux-x86_64
       shell: bash
 
+    - name: Install BOM POM
+      run: mvn -B -pl bom install -DskipTests
+      shell: bash
+
     - name: Get version
       id: get-version
-      uses: JActions/maven-version@aafa242403588c1c69d619b3cec9c2ff6abd57ac # v1.0.1
-      with:
-        pom: ./pom.xml
+      run: "echo \"resolved-version=\
+        $(mvn
+          --file ./pom.xml
+          -Dexec.executable=echo
+          -Dexec.args='${project.version}'
+          --quiet exec:exec --non-recursive
+        )\" >> \"${GITHUB_OUTPUT}\""
+      shell: bash
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@38e0b6e68b4c852a5500a94740f0e535e0d7ba54 # v4.2.4
       with:
-        title: "chore: automated uptick to ${{ steps.get-version.outputs.version }}"
-        commit-message: "chore: automated uptick to ${{ steps.get-version.outputs.version }}"
-        body: "Automated changes by _Version uptick automation_ action: automated uptick to ${{ steps.get-version.outputs.version }} version"
+        title: "chore: automated uptick to ${{ steps.get-version.outputs.resolved-version }}"
+        commit-message: "chore: automated uptick to ${{ steps.get-version.outputs.resolved-version }}"
+        body: "Automated changes by _Version uptick automation_ action: automated uptick to ${{ steps.get-version.outputs.resolved-version }} version"
         branch-suffix: timestamp
         token: ${{ secrets.BOT_GITHUB_TOKEN }}

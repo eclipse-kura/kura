@@ -38,7 +38,7 @@ jobs:
       id: get-version
       run: "echo \"resolved-version=\
         $(mvn
-          --file ./kura/pom.xml
+          --file ./pom.xml
           -Dexec.executable=echo
           -Dexec.args='${project.version}'
           --quiet exec:exec --non-recursive

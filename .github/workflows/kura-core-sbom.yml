@@ -78,7 +78,7 @@ jobs:
 
       - name: Generate sbom
         run: |
-          mvn org.cyclonedx:cyclonedx-maven-plugin:${{ env.PLUGIN_VERSION }}:makeAggregateBom -DprojectType=framework -DexcludeArtifactId=emulator,tools,kura-addon-archetype -f ${{ env.PRODUCT_PATH }}/pom.xml
+          mvn org.cyclonedx:cyclonedx-maven-plugin:${{ env.PLUGIN_VERSION }}:makeAggregateBom -DprojectType=framework -DexcludeArtifactId=emulator,distrib,test,kura-pde-deps -f ${{ env.PRODUCT_PATH }}/pom.xml
 
       - name: Extract product version
         id: get-version

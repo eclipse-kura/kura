@@ -67,13 +67,15 @@ node {
         if (env.BRANCH_IS_PRIMARY) {
             echo "Uploading DEB packages..."
 
-            def distribPom = readMavenPom file: 'kura/distrib/pom.xml'
+            dir("kura") {
+                def distribPom = readMavenPom file: 'distrib/pom.xml'
 
-            def repoDistribution = distribPom.properties['kura.repo.distribution']
-            def repoModule = distribPom.properties['kura.repo.module']
+                def repoDistribution = distribPom.properties['kura.repo.distribution']
+                def repoModule = distribPom.properties['kura.repo.module']
 
-            def nexusUtils = load 'kura/.jenkins/nexusUtils.groovy'
-            nexusUtils.uploadPackages(repoDistribution, repoModule)
+                def nexusUtils = load '.jenkins/nexusUtils.groovy'
+                nexusUtils.uploadPackages(repoDistribution, repoModule)
+            }
         } else {
             echo "Skipping DEB upload"
             Utils.markStageSkippedForConditional(STAGE_NAME)

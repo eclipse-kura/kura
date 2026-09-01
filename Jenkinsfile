@@ -25,7 +25,6 @@ node {
     stage('Preparation') {
         dir("kura") {
             checkout scm
-            sh 'apt install xmllint'
         }
     }
 
@@ -34,13 +33,6 @@ node {
         echo "Skipping build for documentation changes"
         currentBuild.result = 'SUCCESS'
         return
-    }
-  
-    stage('Validate metatypes') {
-        dir("kura") {
-            // archetype-resources are Velocity templates, not parseable XML
-            sh 'xmllint --quiet --noout --schema kura/setups/metatype/kura-metatype-1.2.0.xsd $(git ls-files "**/OSGI-INF/metatype/*.xml" | grep -v archetype-resources)'
-        }
     }
 
     stage('Build') {

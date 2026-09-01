@@ -1,0 +1,72 @@
+Eclipse Kura - 6.0.0-SNAPSHOT - September 2026
+-------------------------------------------------------------------------------------------------
+Description:
+[TODO]
+
+
+Target Environments:
+[TODO]
+
+Bug Fixes:
+  * fc7a7c6915 - [cloudconnection.kapua.mqtt] restore test lost during the rebase (Salvatore Coppola)
+  * 0a7bd053d8 - [distrib] restore kura.default.log.manager comment dropped in the rebase (Salvatore Coppola)
+  * 4249a53a0f - [container.orchestration] keep optional embedded-transport imports optional (Salvatore Coppola)
+  * 80a5483fdb - [container.orchestration.provider] correct docker-java packaging in the bnd manifest (Salvatore Coppola)
+  * 58804a8003 - production fixes surfaced during the bnd migration (Salvatore Coppola)
+  * 23e4a56fd7 - avoid SCR "descriptor entry not found" error for whitebox test Service-Component (Salvatore Coppola)
+
+Target Platform Updates:
+  * 5c318ed5ae - drop obsolete build-all.sh and tracked kura/.vscode (Salvatore Coppola)
+  * 74c881bf65 - remove stray empty .mvn/maven.config (Salvatore Coppola)
+  * f27b29ab33 - restore explicit per-package OSGi package versions (Salvatore Coppola)
+  * ec8f231048 - restore kura-pde-deps / target-platform-pde-deps aggregators for downstream builds (Salvatore Coppola)
+  * a65fed513c - mark bctls-jdk18on 1.84 approved (iplab #29890) (Salvatore Coppola)
+  * 893523167b - update httpcore5 to 5.4.3 and httpclient5 to 5.6.4 (Salvatore Coppola)
+  * 77f2e36f47 - publish kura/ bundle unit-test reports in Jenkins (Salvatore Coppola)
+  * 4fd89c8a10 - drop redundant -Ptests from the build command (Salvatore Coppola)
+  * 1a402e1a56 - add kurad to the docker group in the installer (Salvatore Coppola)
+  * 168230f495 - move embedded-lib versions out of the BOM (Salvatore Coppola)
+  * 1069bfa4f4 - restore org.usb4java native-lib package exports (Salvatore Coppola)
+  * 37e5fdbfed - migrate Eclipse Kura from Tycho/PDE to bnd 7.3.0 (Salvatore Coppola)
+
+Known Issues:
+[TODO]
+
+Changelog:
+  * 2013590a56 - ci: install the BOM before resolving the version in release-notes (Salvatore Coppola)
+  * 0880124104 - chore(distrib): remove stale RELEASE_NOTES.txt (Salvatore Coppola)
+  * 6776421a47 - docs: clarify that the integration tests run by default (Salvatore Coppola)
+  * 5c318ed5ae - build: drop obsolete build-all.sh and tracked kura/.vscode (Salvatore Coppola)
+  * fc7a7c6915 - fix(cloudconnection.kapua.mqtt): restore test lost during the rebase (Salvatore Coppola)
+  * 0a7bd053d8 - fix(distrib): restore kura.default.log.manager comment dropped in the rebase (Salvatore Coppola)
+  * d7c495315b - ci: point automation at the root reactor after the bnd restructure (Salvatore Coppola)
+  * f9747d6b90 - test(container.orchestration): make ServiceImpl tests independent of a real Docker daemon (Salvatore Coppola)
+  * 74c881bf65 - build: remove stray empty .mvn/maven.config (Salvatore Coppola)
+  * 4249a53a0f - fix(container.orchestration): keep optional embedded-transport imports optional (Salvatore Coppola)
+  * 91ea7461ed - refactor(container.orchestration): port Docker-reachability gating to bnd DS annotations (Salvatore Coppola)
+  * faaa449274 - docs(notice): fix stale jakarta.xml.soap-api and fileupload2-servlet5 versions (Salvatore Coppola)
+  * f27b29ab33 - build: restore explicit per-package OSGi package versions (Salvatore Coppola)
+  * ec8f231048 - build: restore kura-pde-deps / target-platform-pde-deps aggregators for downstream builds (Salvatore Coppola)
+  * d6e6d53000 - test: stabilize flaky clock tests and harden REST audit context (Salvatore Coppola)
+  * b4df1774d1 - test: relocate new upstream unit tests into bnd hybrid layout (Salvatore Coppola)
+  * a65fed513c - build(notice): mark bctls-jdk18on 1.84 approved (iplab #29890) (Salvatore Coppola)
+  * a418fbc9b9 - test(core.configuration): settle snapshot baseline to fix ConfigurationServiceTest flake (Salvatore Coppola)
+  * 8a008a4571 - docs(notice): refresh third-party dependency versions via Eclipse Dash (Salvatore Coppola)
+  * 893523167b - build(container.orchestration.provider): update httpcore5 to 5.4.3 and httpclient5 to 5.6.4 (Salvatore Coppola)
+  * 88adea11a1 - Added tests profile to the Jenkinsfile (Salvatore Coppola)
+  * 80a5483fdb - fix(container.orchestration.provider): correct docker-java packaging in the bnd manifest (Salvatore Coppola)
+  * 77f2e36f47 - build(ci): publish kura/ bundle unit-test reports in Jenkins (Salvatore Coppola)
+  * 68f8877d6f - docs(notice): scope NOTICE.md to what kura-core actually ships (Salvatore Coppola)
+  * 64b809553c - ci: exclude generated metatype/options descriptors from Sonar CPD (Salvatore Coppola)
+  * 58804a8003 - fix: production fixes surfaced during the bnd migration (Salvatore Coppola)
+  * 4fd89c8a10 - build(ci): drop redundant -Ptests from the build command (Salvatore Coppola)
+  * 4208b23a51 - docs: update README and AGENTS for the bnd reactor (Salvatore Coppola)
+  * 407d6078cc - docs(notice): add shipped felix.gogo.shell and correct 5 license/id entries (Salvatore Coppola)
+  * 23e4a56fd7 - fix: avoid SCR "descriptor entry not found" error for whitebox test Service-Component (Salvatore Coppola)
+  * 1a402e1a56 - build(distrib): add kurad to the docker group in the installer (Salvatore Coppola)
+  * 17ace0daad - docs(notice): align httpclient5/httpcore5 to shipped 5.6.4/5.4.3 (Salvatore Coppola)
+  * 168230f495 - build(container.orchestration): move embedded-lib versions out of the BOM (Salvatore Coppola)
+  * 1069bfa4f4 - build: restore org.usb4java native-lib package exports (Salvatore Coppola)
+  * 46bcc9faf0 - refactor: migrate Declarative Services and metatype to OSGi annotations (Salvatore Coppola)
+  * 2cc2c24c7e - test: migrate tests to hybrid surefire/bnd-testing layout (Salvatore Coppola)
+  * 37e5fdbfed - build: migrate Eclipse Kura from Tycho/PDE to bnd 7.3.0 (Salvatore Coppola)

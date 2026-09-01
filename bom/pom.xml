@@ -18,7 +18,7 @@
 
     <groupId>org.eclipse.kura</groupId>
     <artifactId>kura-bom</artifactId>
-    <version>6.0.0-SNAPSHOT</version>
+    <version>6.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <description>Eclipse Kura bill of materials: centralizes dependency versions for the whole build.</description>
 

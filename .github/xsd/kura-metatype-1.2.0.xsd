@@ -25,24 +25,26 @@
     before "fixing" anything here:
 
     1. elementFormDefault="qualified" is added. The published schema omits it,
-       which means its local element declarations land in NO namespace. Kura's
-       hand-written metatypes declare a default xmlns and therefore put OCD/AD
-       in the metatype namespace, so the published schema rejects every one of
+       which means its local element declarations land in NO namespace. Every
+       metatype in this repository declares a default xmlns and therefore puts
+       OCD/AD in the metatype namespace, so the published schema rejects all of
        them with a misleading "Element 'OCD': This element is not expected".
 
-    2. Every child element is declared twice, form="qualified" and
-       form="unqualified". Both encodings occur in this repository and both are
-       accepted by the Equinox metatype parser: files with a default xmlns put
-       children in the metatype namespace, while files using an xmlns:metatype
-       prefix (and everything bnd generates from @ObjectClassDefinition) leave
-       children unqualified. The two declarations have distinct expanded names,
-       so this does not violate Unique Particle Attribution.
+       This schema consequently only accepts the qualified encoding. That is
+       the encoding all checked-in metatypes use, and the validation workflow
+       only feeds it checked-in files; what bnd generates from
+       @ObjectClassDefinition leaves children unqualified, but those are build
+       outputs and are never validated here. A new hand-written metatype using
+       an xmlns:metatype prefix with unprefixed children would be rejected;
+       give it a default xmlns instead.
 
-    3. OCD content is a repeatable <choice> of AD and Icon rather than the
-       spec's "AD+ then Icon*" sequence. Kura consistently places <Icon> first
-       and has OCDs with no AD at all. Both are harmless in practice.
+    2. Tmetadata and Tocd use a repeatable <choice> rather than the spec's
+       ordered sequences. Tocd needs it: 33 metatypes place <Icon> before
+       <AD>, and some OCDs have no AD at all. Both are harmless in practice.
+       Tmetadata does not strictly need it today (no metatype interleaves
+       OCD and Designate) and is kept symmetric with Tocd.
 
-    4. The <any> extension wildcards are dropped. Nothing in this repository
+    3. The <any> extension wildcards are dropped. Nothing in this repository
        uses metatype extension elements, and they add non-determinism that
        libxml2 handles poorly.
 
@@ -62,23 +64,14 @@
 
     <complexType name="Tmetadata">
         <choice minOccurs="0" maxOccurs="unbounded">
-            <element name="OCD" type="metatype:Tocd" form="qualified">
-                <!-- AD ids must be unique within their own OCD. The selector
-                     union covers both the qualified and the unqualified
-                     encoding described in deviation 2 above. -->
-                <unique name="uniqueAdIdQualified">
-                    <selector xpath="metatype:AD|AD" />
+            <element name="OCD" type="metatype:Tocd">
+                <!-- AD ids must be unique within their own OCD. -->
+                <unique name="uniqueAdId">
+                    <selector xpath="metatype:AD" />
                     <field xpath="@id" />
                 </unique>
             </element>
-            <element name="OCD" type="metatype:Tocd" form="unqualified">
-                <unique name="uniqueAdIdUnqualified">
-                    <selector xpath="metatype:AD|AD" />
-                    <field xpath="@id" />
-                </unique>
-            </element>
-            <element name="Designate" type="metatype:Tdesignate" form="qualified" />
-            <element name="Designate" type="metatype:Tdesignate" form="unqualified" />
+            <element name="Designate" type="metatype:Tdesignate" />
         </choice>
         <attribute name="localization" type="string" use="optional" />
         <anyAttribute processContents="lax" />
@@ -86,10 +79,8 @@
 
     <complexType name="Tocd">
         <choice minOccurs="0" maxOccurs="unbounded">
-            <element name="AD" type="metatype:Tad" form="qualified" />
-            <element name="AD" type="metatype:Tad" form="unqualified" />
-            <element name="Icon" type="metatype:Ticon" form="qualified" />
-            <element name="Icon" type="metatype:Ticon" form="unqualified" />
+            <element name="AD" type="metatype:Tad" />
+            <element name="Icon" type="metatype:Ticon" />
         </choice>
         <attribute name="name" type="string" use="required" />
         <attribute name="description" type="string" use="optional" />
@@ -98,10 +89,10 @@
     </complexType>
 
     <complexType name="Tad">
-        <choice minOccurs="0" maxOccurs="unbounded">
-            <element name="Option" type="metatype:Toption" form="qualified" />
-            <element name="Option" type="metatype:Toption" form="unqualified" />
-        </choice>
+        <sequence>
+            <element name="Option" type="metatype:Toption" minOccurs="0"
+                maxOccurs="unbounded" />
+        </sequence>
         <attribute name="name" type="string" use="optional" />
         <attribute name="description" type="string" use="optional" />
         <attribute name="id" type="string" use="required" />
@@ -115,12 +106,10 @@
     </complexType>
 
     <complexType name="Tdesignate">
-        <!-- The spec allows exactly one Object; the choice exists only to
-             accept either namespace encoding, not to relax the cardinality. -->
-        <choice minOccurs="1" maxOccurs="1">
-            <element name="Object" type="metatype:Tobject" form="qualified" />
-            <element name="Object" type="metatype:Tobject" form="unqualified" />
-        </choice>
+        <sequence>
+            <element name="Object" type="metatype:Tobject" minOccurs="1"
+                maxOccurs="1" />
+        </sequence>
         <attribute name="pid" type="string" use="optional" />
         <attribute name="factoryPid" type="string" use="optional" />
         <attribute name="bundle" type="string" use="optional" />
@@ -130,19 +119,19 @@
     </complexType>
 
     <complexType name="Tobject">
-        <choice minOccurs="0" maxOccurs="unbounded">
-            <element name="Attribute" type="metatype:Tattribute" form="qualified" />
-            <element name="Attribute" type="metatype:Tattribute" form="unqualified" />
-        </choice>
+        <sequence>
+            <element name="Attribute" type="metatype:Tattribute" minOccurs="0"
+                maxOccurs="unbounded" />
+        </sequence>
         <attribute name="ocdref" type="string" use="required" />
         <anyAttribute processContents="lax" />
     </complexType>
 
     <complexType name="Tattribute">
-        <choice minOccurs="0" maxOccurs="unbounded">
-            <element name="Value" type="string" form="qualified" />
-            <element name="Value" type="string" form="unqualified" />
-        </choice>
+        <sequence>
+            <element name="Value" type="string" minOccurs="0"
+                maxOccurs="unbounded" />
+        </sequence>
         <attribute name="adref" type="string" use="required" />
         <attribute name="content" type="string" use="optional" />
         <anyAttribute processContents="lax" />

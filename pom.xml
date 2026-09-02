@@ -41,6 +41,7 @@
     </licenses>
 
     <modules>
+        <module>checkstyle-resources</module>
         <module>bom</module>
         <module>kura</module>
         <module>distrib</module>

@@ -34,19 +34,19 @@ jobs:
         distribution: 'temurin' # See 'Supported distributions' for available options
         java-version: '21'
 
-    - name: Install BOM POM
-      run: mvn -B -pl bom install -DskipTests
-      shell: bash
-
     - name: Get version
       id: get-version
-      run: "echo \"resolved-version=\
-        $(mvn
-          --file ./pom.xml
-          -Dexec.executable=echo
-          -Dexec.args='${project.version}'
-          --quiet exec:exec --non-recursive
-        )\" >> \"${GITHUB_OUTPUT}\""
+      run: |
+        set -euo pipefail
+        version="$(python3 - <<'EOF'
+        import sys, xml.etree.ElementTree as ET
+        version = ET.parse("pom.xml").getroot().findtext("{http://maven.apache.org/POM/4.0.0}version")
+        if not version or not version.strip():
+            sys.exit("::error file=pom.xml::unable to read /project/version from the root pom")
+        print(version.strip())
+        EOF
+        )"
+        echo "version=${version}" >> "${GITHUB_OUTPUT}"
       shell: bash
 
     - name: Check file existence

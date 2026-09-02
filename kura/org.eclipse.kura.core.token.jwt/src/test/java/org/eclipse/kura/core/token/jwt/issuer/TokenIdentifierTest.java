@@ -54,7 +54,7 @@ public class TokenIdentifierTest extends AbstractJwtScenario {
     }
 
     private void whenTheSameRequestIsIssuedTwice() {
-        final TokenIssueRequest request = TokenIssueRequest.builder().identityName(TEST_IDENTITY).build();
+        final TokenIssueRequest request = TokenIssueRequest.builder(TEST_IDENTITY).build();
 
         whenATokenIsIssued(request);
         this.firstTokenId = tokenIdOfIssuedToken();

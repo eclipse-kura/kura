@@ -36,7 +36,7 @@ public class IssueAndVerifyTest extends AbstractJwtScenario {
     public void anIssuedTokenIsVerifiedForTheRequestedIdentity() throws TestCAException {
         givenAnIssuerAndAVerifierSharingOneKeystore();
 
-        whenATokenIsIssuedAndVerified(TokenIssueRequest.builder().identityName(TEST_IDENTITY).build());
+        whenATokenIsIssuedAndVerified(TokenIssueRequest.builder(TEST_IDENTITY).build());
 
         thenTheTokenIsVerifiedFor(TEST_IDENTITY);
     }
@@ -45,8 +45,7 @@ public class IssueAndVerifyTest extends AbstractJwtScenario {
     public void theIssuerAndTheCustomClaimsSurviveTheRoundTrip() throws TestCAException {
         givenAnIssuerAndAVerifierSharingOneKeystore();
 
-        whenATokenIsIssuedAndVerified(TokenIssueRequest.builder() //
-                .identityName(TEST_IDENTITY) //
+        whenATokenIsIssuedAndVerified(TokenIssueRequest.builder(TEST_IDENTITY) //
                 .claim("role", "admin") //
                 .claim("permissions", List.of("kura.admin")) //
                 .build());
@@ -69,7 +68,7 @@ public class IssueAndVerifyTest extends AbstractJwtScenario {
     public void theTokenIdentifierSurvivesTheRoundTrip() throws TestCAException {
         givenAnIssuerAndAVerifierSharingOneKeystore();
 
-        whenATokenIsIssuedAndVerified(TokenIssueRequest.builder().identityName(TEST_IDENTITY).build());
+        whenATokenIsIssuedAndVerified(TokenIssueRequest.builder(TEST_IDENTITY).build());
 
         thenTheProofExposesTheIssuedTokenIdentifier();
     }
@@ -78,7 +77,7 @@ public class IssueAndVerifyTest extends AbstractJwtScenario {
     public void theExpirationSurvivesTheRoundTrip() throws TestCAException {
         givenAnIssuerAndAVerifierSharingOneKeystore();
 
-        whenATokenIsIssuedAndVerified(TokenIssueRequest.builder().identityName(TEST_IDENTITY).build());
+        whenATokenIsIssuedAndVerified(TokenIssueRequest.builder(TEST_IDENTITY).build());
 
         thenTheProofExposesTheIssuedExpiration();
     }
@@ -100,8 +99,7 @@ public class IssueAndVerifyTest extends AbstractJwtScenario {
     }
 
     private void whenATokenIsIssuedAndVerifiedOnBehalfOf(final String intendedConsumer) {
-        whenATokenIsIssued(TokenIssueRequest.builder() //
-                .identityName(TEST_IDENTITY) //
+        whenATokenIsIssued(TokenIssueRequest.builder(TEST_IDENTITY) //
                 .intendedConsumer(WEB_CONSUMER) //
                 .intendedConsumer(REST_CONSUMER) //
                 .build());

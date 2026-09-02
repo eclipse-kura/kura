@@ -77,8 +77,7 @@ public class NotBeforeClaimTest extends AbstractJwtScenario {
     private void whenATokenIsRequestedNotValidBefore(final Duration delay) {
         this.requestedNotBefore = Instant.now().plus(delay);
 
-        whenATokenIsIssued(TokenIssueRequest.builder() //
-                .identityName(TEST_IDENTITY) //
+        whenATokenIsIssued(TokenIssueRequest.builder(TEST_IDENTITY) //
                 .notBefore(this.requestedNotBefore) //
                 .build());
     }

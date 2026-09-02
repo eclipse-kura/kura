@@ -67,7 +67,7 @@ public class AudienceClaimTest extends AbstractJwtScenario {
     }
 
     private void whenATokenIsRequestedFor(final String... intendedConsumers) {
-        final TokenIssueRequest.Builder builder = TokenIssueRequest.builder().identityName(TEST_IDENTITY);
+        final TokenIssueRequest.Builder builder = TokenIssueRequest.builder(TEST_IDENTITY);
 
         for (final String intendedConsumer : intendedConsumers) {
             builder.intendedConsumer(intendedConsumer);

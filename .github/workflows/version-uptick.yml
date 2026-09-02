@@ -32,6 +32,12 @@ jobs:
       with:
         ref: ${{ github.event.inputs.target_branch }}
 
+    - name: Setup Java SDK
+      uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4.7.0
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
     - name: Download version upticker tool
       uses: carlosperate/download-file-action@8b89cb8b4807765e7d63fe765cc600eb1919af11 # v1.1.2
       with:
@@ -55,26 +61,25 @@ jobs:
         rm ./version-uptick-0.2.0-linux-x86_64
       shell: bash
 
+    - name: Install BOM POM
+      run: mvn -B -pl bom install -DskipTests
+
     - name: Get version
       id: get-version
-      run: |
-        set -euo pipefail
-        version="$(python3 - <<'EOF'
-        import sys, xml.etree.ElementTree as ET
-        version = ET.parse("pom.xml").getroot().findtext("{http://maven.apache.org/POM/4.0.0}version")
-        if not version or not version.strip():
-            sys.exit("::error file=pom.xml::unable to read /project/version from the root pom")
-        print(version.strip())
-        EOF
-        )"
-        echo "version=${version}" >> "${GITHUB_OUTPUT}"
+      run: "echo \"resolved-version=\
+        $(mvn
+          --file ./pom.xml
+          -Dexec.executable=echo
+          -Dexec.args='${project.version}'
+          --quiet exec:exec --non-recursive
+        )\" >> \"${GITHUB_OUTPUT}\""
       shell: bash
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@38e0b6e68b4c852a5500a94740f0e535e0d7ba54 # v4.2.4
       with:
-        title: "chore: automated uptick to ${{ steps.get-version.outputs.version }}"
-        commit-message: "chore: automated uptick to ${{ steps.get-version.outputs.version }}"
-        body: "Automated changes by _Version uptick automation_ action: automated uptick to ${{ steps.get-version.outputs.version }} version"
+        title: "chore: automated uptick to ${{ steps.get-version.outputs.resolved-version }}"
+        commit-message: "chore: automated uptick to ${{ steps.get-version.outputs.resolved-version }}"
+        body: "Automated changes by _Version uptick automation_ action: automated uptick to ${{ steps.get-version.outputs.resolved-version }} version"
         branch-suffix: timestamp
         token: ${{ secrets.BOT_GITHUB_TOKEN }}

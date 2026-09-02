@@ -19,9 +19,10 @@ Import-Package: \
 Bundle-Vendor: Eclipse Kura
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,\
-    lib/java-jwt.jar
+    java-jwt.jar
 -includeresource: \
     about.html,\
-    about_files=about_files/
+    about_files=about_files/,\
+    lib/java-jwt.jar
 
 Service-Component: OSGI-INF/*.xml

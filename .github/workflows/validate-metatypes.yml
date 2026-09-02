@@ -3,7 +3,7 @@ name: Validate metatypes
 on:
   pull_request:
     branches:
-      - release-5.6.0
+      - release-5.*
     types:
       - opened
       - reopened

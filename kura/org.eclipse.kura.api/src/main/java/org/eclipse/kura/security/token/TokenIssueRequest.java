@@ -87,40 +87,39 @@ public final class TokenIssueRequest {
     }
 
     /**
+     * Get a builder for constructing a {@link TokenIssueRequest} with the identity name that
+     * the request should be issued for.
      * 
-     * @return a {@link Builder} for constructing a {@link TokenIssueRequest}. When building a request, the
-     *         {@link Builder#identityName(String)} is mandatory
+     * @param identityName
+     *            the name of the identity, must not be {@code null}, empty or whitespace-only
+     * @return a {@link Builder} for constructing a {@link TokenIssueRequest}
+     * @throws NullPointerException
+     *             if {@code identityName} is {@code null}
+     * @throws IllegalArgumentException
+     *             if {@code identityName} is empty or whitespace-only
      */
-    public static Builder builder() {
-        return new Builder();
+    public static Builder builder(final String identityName) {
+        return new Builder(ensureNotNullNotBlank(identityName, "identityName"));
+    }
+
+    private static String ensureNotNullNotBlank(final String value, final String parameterName) {
+        final String result = Objects.requireNonNull(value, parameterName + " cannot be null");
+        if (result.isBlank()) {
+            throw new IllegalArgumentException(parameterName + " cannot be empty or whitespace-only");
+        }
+        return result;
     }
 
     public static final class Builder {
 
-        private String identityName;
+        private final String identityName;
         private Instant expiresAt;
         private Instant notBefore;
         private final Set<String> intendedConsumers = new LinkedHashSet<>();
         private final Map<String, Object> claims = new LinkedHashMap<>();
 
-        private Builder() {
-        }
-
-        /**
-         * Sets the Kura identity name that identifies the identity the request is issued for. This property is
-         * mandatory. Calling this method again overwrites any previously set identity.
-         *
-         * @param identityName
-         *            the name of the identity, must not be {@code null}, empty or whitespace-only
-         * @return this builder instance, for method chaining
-         * @throws NullPointerException
-         *             if {@code identityName} is {@code null}
-         * @throws IllegalArgumentException
-         *             if {@code identityName} is empty or whitespace-only
-         */
-        public Builder identityName(final String identityName) {
-            this.identityName = ensureNotNullNotBlank(identityName, "identityName");
-            return this;
+        private Builder(final String identityName) {
+            this.identityName = identityName;
         }
 
         /**
@@ -209,23 +208,10 @@ public final class TokenIssueRequest {
         /**
          * Builds a {@link TokenIssueRequest}.
          * 
-         * @return
-         * @throws IllegalStateException
-         *             if the identityName has not been set
+         * @return a {@link TokenIssueRequest}
          */
         public TokenIssueRequest build() {
-            if (this.identityName == null) {
-                throw new IllegalStateException("TokenIssueRequest requires the identityName to be set");
-            }
             return new TokenIssueRequest(this);
-        }
-
-        private static String ensureNotNullNotBlank(final String value, final String parameterName) {
-            final String result = Objects.requireNonNull(value, parameterName + " cannot be null");
-            if (result.isBlank()) {
-                throw new IllegalArgumentException(parameterName + " cannot be empty or whitespace-only");
-            }
-            return result;
         }
     }
 }

@@ -48,36 +48,35 @@ public final class TokenVerifyRequest {
     }
 
     /**
+     * Get a builder for constructing a {@link TokenVerifyRequest} with the token that needs to be verified.
      * 
-     * @return a {@link Builder} for constructing a {@link TokenVerifyRequest}. When building a request, the
-     *         {@link Builder#token(String)} is mandatory
+     * @param token
+     *            the encoded token to be verified, must not be {@code null}, nor empty, nor whitespace-only
+     * @return a {@link Builder} for constructing a {@link TokenVerifyRequest}
+     * @throws NullPointerException
+     *             if the provided token is {@code null}
+     * @throws IllegalArgumentException
+     *             if {@code token} is empty or whitespace-only
      */
-    public static Builder builder() {
-        return new Builder();
+    public static Builder builder(final String token) {
+        return new Builder(ensureNotNullNotBlank(token, "token"));
+    }
+
+    private static String ensureNotNullNotBlank(final String value, final String parameterName) {
+        final String result = Objects.requireNonNull(value, parameterName + " cannot be null");
+        if (result.isBlank()) {
+            throw new IllegalArgumentException(parameterName + " cannot be empty or whitespace-only");
+        }
+        return result;
     }
 
     public static final class Builder {
 
-        private String token;
+        private final String token;
         private String intendedConsumer;
 
-        private Builder() {
-        }
-
-        /**
-         * Sets the encoded token to be verified. This property is mandatory.
-         *
-         * @param token
-         *            the encoded token to be verified, must not be {@code null}, nor empty, nor whitespace-only
-         * @return this builder instance, for method chaining
-         * @throws NullPointerException
-         *             if the provided token is {@code null}
-         * @throws IllegalArgumentException
-         *             if {@code token} is empty or whitespace-only
-         */
-        public Builder token(final String token) {
-            this.token = ensureNotNullNotBlank(token, "token");
-            return this;
+        private Builder(final String token) {
+            this.token = token;
         }
 
         /**
@@ -110,24 +109,10 @@ public final class TokenVerifyRequest {
         /**
          * Builds a {@link TokenVerifyRequest}.
          * 
-         * @return
-         * @throws IllegalStateException
-         *             if the token has not been set
+         * @return a {@link TokenVerifyRequest}
          */
         public TokenVerifyRequest build() {
-            if (this.token == null) {
-                throw new IllegalStateException("TokenVerifyRequest requires the token to be set");
-            }
-
             return new TokenVerifyRequest(this);
-        }
-
-        private static String ensureNotNullNotBlank(final String value, final String parameterName) {
-            final String result = Objects.requireNonNull(value, parameterName + " cannot be null");
-            if (result.isBlank()) {
-                throw new IllegalArgumentException(parameterName + " cannot be empty or whitespace-only");
-            }
-            return result;
         }
 
     }

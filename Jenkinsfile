@@ -49,7 +49,7 @@ node {
             } finally {
                 // In the finally block so a failing test still publishes its report: the reactor is
                 // fail-fast, so a test failure aborts the Build stage before this would otherwise run.
-                junit allowEmptyResults: true, testResults: '**/target/surefire-reports/**/TEST-*.xml, **/target/test-reports/**/TEST-*.xml'
+                junit skipPublishingChecks: true, allowEmptyResults: true, testResults: '**/target/surefire-reports/**/TEST-*.xml, **/target/test-reports/**/TEST-*.xml'
             }
         }
     }

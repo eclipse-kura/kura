@@ -1,0 +1,20 @@
+Eclipse Kura - 6.0.0-SNAPSHOT - September 2026
+-------------------------------------------------------------------------------------------------
+Description:
+[TODO]
+
+
+Target Environments:
+[TODO]
+
+Bug Fixes:
+  * b986f0484a - use correct variable (Mattia Dal Ben)
+
+Known Issues:
+[TODO]
+
+Changelog:
+  * b986f0484a - fix: use correct variable (Mattia Dal Ben)
+  * 6721214595 - ci: simplify release-notes action (Mattia Dal Ben)
+  * 0eea8640e6 - ci: fix wrong version read (Mattia Dal Ben)
+  * 58c0d79c6e - test(eclipseiot.mqtt.provider): fix wrong coverage path (#6360) (Mattia Dal Ben)

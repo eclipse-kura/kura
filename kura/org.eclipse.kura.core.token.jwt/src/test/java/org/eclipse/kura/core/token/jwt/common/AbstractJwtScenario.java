@@ -178,7 +178,7 @@ public abstract class AbstractJwtScenario {
     }
 
     protected void whenATokenIsIssuedFor(final String identityName) {
-        whenATokenIsIssued(TokenIssueRequest.builder().identityName(identityName).build());
+        whenATokenIsIssued(TokenIssueRequest.builder(identityName).build());
     }
 
     protected void whenATokenIsIssued(final TokenIssueRequest request) {
@@ -197,11 +197,11 @@ public abstract class AbstractJwtScenario {
     }
 
     protected void whenATokenIsVerified(final String token) {
-        whenTheRequestIsVerified(TokenVerifyRequest.builder().token(token).build());
+        whenTheRequestIsVerified(TokenVerifyRequest.builder(token).build());
     }
 
     protected void whenATokenIsVerifiedFor(final String token, final String intendedConsumer) {
-        whenTheRequestIsVerified(TokenVerifyRequest.builder().token(token).intendedConsumer(intendedConsumer).build());
+        whenTheRequestIsVerified(TokenVerifyRequest.builder(token).intendedConsumer(intendedConsumer).build());
     }
 
     protected void whenTheIssuedTokenIsVerified() {

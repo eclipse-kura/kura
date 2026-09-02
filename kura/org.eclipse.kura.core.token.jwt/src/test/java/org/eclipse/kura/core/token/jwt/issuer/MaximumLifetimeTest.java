@@ -104,8 +104,7 @@ public class MaximumLifetimeTest extends AbstractJwtScenario {
     private void whenATokenIsRequestedExpiringIn(final Duration lifetime) {
         this.requestedExpiration = Instant.now().plus(lifetime);
 
-        whenATokenIsIssued(TokenIssueRequest.builder() //
-                .identityName(TEST_IDENTITY) //
+        whenATokenIsIssued(TokenIssueRequest.builder(TEST_IDENTITY) //
                 .expiresAt(this.requestedExpiration) //
                 .build());
     }

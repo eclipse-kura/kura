@@ -129,15 +129,13 @@ public class CustomClaimTypesTest extends AbstractJwtScenario {
     }
 
     private void whenATokenIsRequestedWithClaim(final String name, final Object value) {
-        whenATokenIsIssued(TokenIssueRequest.builder() //
-                .identityName(TEST_IDENTITY) //
+        whenATokenIsIssued(TokenIssueRequest.builder(TEST_IDENTITY) //
                 .claim(name, value) //
                 .build());
     }
 
     private void whenATokenIsRequestedWithSeveralClaimTypes() {
-        whenATokenIsIssued(TokenIssueRequest.builder() //
-                .identityName(TEST_IDENTITY) //
+        whenATokenIsIssued(TokenIssueRequest.builder(TEST_IDENTITY) //
                 .claim("role", "admin") //
                 .claim("password_change_needed", Boolean.FALSE) //
                 .claim("failed_attempts", Integer.valueOf(0)) //

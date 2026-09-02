@@ -101,8 +101,7 @@ public class UnsupportedClaimValuesTest extends AbstractJwtScenario {
     }
 
     private void whenATokenIsRequestedWithClaim(final String name, final Object value) {
-        whenATokenIsIssued(TokenIssueRequest.builder() //
-                .identityName(TEST_IDENTITY) //
+        whenATokenIsIssued(TokenIssueRequest.builder(TEST_IDENTITY) //
                 .claim(name, value) //
                 .build());
     }

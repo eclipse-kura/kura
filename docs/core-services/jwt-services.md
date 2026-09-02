@@ -63,8 +63,7 @@ Blank and repeated entries in the two comma-separated lists are ignored, and sur
 @Reference
 private TokenIssuingService tokenIssuingService;
 
-final String token = this.tokenIssuingService.issue(TokenIssueRequest.builder()
-        .identityName("admin")
+final String token = this.tokenIssuingService.issue(TokenIssueRequest.builder("admin")
         .intendedConsumer("rest-api")
         .expiresAt(Instant.now().plus(Duration.ofMinutes(15)))
         .claim("roles", List.of("operator"))
@@ -124,8 +123,7 @@ Capping is silent: no error is raised when a requested lifetime is shortened. Ca
 @Reference
 private TokenVerificationService tokenVerificationService;
 
-final VerificationProof proof = this.tokenVerificationService.verify(TokenVerifyRequest.builder()
-        .token(encodedToken)
+final VerificationProof proof = this.tokenVerificationService.verify(TokenVerifyRequest.builder(encodedToken)
         .intendedConsumer("rest-api")
         .build());
 

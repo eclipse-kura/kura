@@ -1280,6 +1280,22 @@
         </dependencies>
     </dependencyManagement>
 
+    <!-- This BOM is standalone (no parent), so it cannot inherit the reactor's deploy targets;
+         declare them here so `mvn deploy` of the nightly can publish it. flattenMode=bom strips
+         this from the published pom, which is correct (consumers don't need it). -->
+    <distributionManagement>
+        <repository>
+            <id>repo.eclipse.org</id>
+            <name>Eclipse Kura Repository - Releases</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>repo.eclipse.org</id>
+            <name>Eclipse Kura Repository - Snapshots</name>
+            <url>https://repo.eclipse.org/content/repositories/kura-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <build>
         <plugins>
             <plugin>

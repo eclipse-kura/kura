@@ -42,7 +42,7 @@ node {
                 // Single reactor from the root parent pom: it aggregates bom, kura (all bundles +
                 // wrapper bundles), distrib and test, ordered by inter-module dependencies.
                 timeout(time: 3, unit: 'HOURS') {
-                    withMaven(jdk: 'temurin-jdk21-latest', maven: 'apache-maven-3.9.9', options: [artifactsPublisher(disabled: true), junitPublisher(disabled: true)]) {
+                    withMaven(jdk: 'temurin-jdk21-latest', maven: 'apache-maven-3.9.9', publisherStrategy: 'EXPLICIT') {
                         sh "mvn -B -ntp clean install -Pcheck-exists-plugin"
                     }
                 }
@@ -84,7 +84,7 @@ node {
     stage('Sonar') {
         timeout(time: 2, unit: 'HOURS') {
             dir("kura") {
-                withMaven(jdk: 'temurin-jdk21-latest', maven: 'apache-maven-3.9.9', options: [artifactsPublisher(disabled: true)]) {
+                withMaven(jdk: 'temurin-jdk21-latest', maven: 'apache-maven-3.9.9', publisherStrategy: 'EXPLICIT') {
                     withSonarQubeEnv(credentialsId: 'sonarcloud-token') {
                         // Check if on primary branch
                         def analysisParameters = ""

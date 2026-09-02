@@ -1,6 +1,6 @@
-# JSON Web Token (JWT) Service
+# JSON Web Token (JWT) Services
 
-`JwtService` issues and verifies JSON Web Tokens (JWT). Tokens are signed with **RS256** using an RSA private key held in a `KeystoreService`, and verified against the trusted certificates of that same keystore.
+Two services issue and verify JSON Web Tokens (JWT): the **JWT Issuing Service** mints them, the **JWT Verification Service** accepts them. Tokens are signed with **RS256** using an RSA private key held in a `KeystoreService`, and verified against the X.509 certificates of a `KeystoreService`. Each service is configured independently and points at its own keystore, so the key store holding the signing key and the trust store holding the accepted certificates need not be the same.
 
 Contents:
 
@@ -8,8 +8,8 @@ Contents:
 - [Configuration](#configuration): service parameters and their explanation
 - [Issuing a token](#issuing-a-token): how to issue a token, how claims will be populated by this service, how to set the expiration time correctly
 - [Verifying a token](#verifying-a-token): how to create a verification request and conditions for deciding if a token is valid or not
-- [Hardening](#hardening): notes on how to tighten the security of this service
-- [Operational notes](#operational-notes): general notes about the service behaviour
+- [Hardening](#hardening): notes on how to tighten the security of these service
+- [Operational notes](#operational-notes): general notes about the services' behaviour
 
 ## Introduction to JWT
 
@@ -38,14 +38,22 @@ A JWT is structured as follows, with three base64 encoded sections separated by 
 
 ## Configuration
 
-- *Keystore Target Filter*: OSGi filter selecting the `KeystoreService` holding the signing key and the trusted certificates. Defaults to `(kura.service.pid=changeme)`, so the service does nothing until it is pointed at a real keystore
-- *Signing Key Alias*: alias of the RSA private key entry used to sign. Published as the token's `kid` header. Leave empty for a verify-only service
-- *Issuer*: value asserted in the `iss` claim of issued tokens. Always accepted when verifying
-- *Trusted Issuers*: comma-separated `iss` values accepted in addition to *Issuer*
-- *Verification Key Aliases*: comma-separated trust-store aliases allowed to verify. Empty means every RSA certificate in the store
-- *Maximum Token Lifetime (sec)*: upper bound on `exp`. `0` means no bound
-- *Clock Skew Tolerance (sec)*: tolerance window applied to `exp`, `nbf` and `iat`
-- *Require Valid Certificate*: when enabled, a certificate outside its validity period cannot verify tokens
+### JWT Issuing Service
+
+- *Keystore Target Filter*: OSGi filter selecting the `KeystoreService` holding the signing key. Defaults to `(kura.service.pid=changeme)`, so the service issues nothing until it is pointed at a real keystore
+- *Signing Key Alias*: alias of the RSA private key entry used to sign, `jwt-signing-key` by default. Published as the token's `kid` header. If the alias does not resolve to an RSA private key entry, issuing is unavailable
+- *Issuer*: value asserted in the `iss` claim of issued tokens, `kura` by default
+- *Maximum Token Lifetime (sec)*: upper bound on `exp`, `3600` by default. `0` means no bound
+
+### JWT Verification Service
+
+- *Truststore Target Filter*: OSGi filter selecting the `KeystoreService` holding the trusted certificates. Defaults to `(kura.service.pid=changeme)`, so the service verifies nothing until it is pointed at a real keystore
+- *Trusted Issuers*: comma-separated `iss` values accepted when verifying. Empty means the `iss` claim is not checked at all
+- *Verification Key Aliases*: comma-separated trust-store aliases allowed to verify. Empty means every entry in the store that yields an X.509 certificate with an RSA public key is used in verification
+- *Clock Skew Tolerance (sec)*: tolerance window applied to `exp`, `nbf` and `iat`, `30` seconds by default
+- *Require Valid Certificate*: when enabled, which is the default, a certificate outside its own validity period is not used to verify tokens
+
+Blank and repeated entries in the two comma-separated lists are ignored, and surrounding whitespace is trimmed, so `kura, , kura.gateway ` and `kura,kura.gateway` are equivalent.
 
 
 
@@ -75,6 +83,24 @@ The `identityName` is mandatory and becomes the `sub` claim: it is the Kura iden
 
 !!! warning
     The returned string is a credential. Do not log it, do not put it in a URL, and transport it only over a secured channel.
+
+### The registered claims are reserved
+
+The seven registered claim names — `iss`, `sub`, `aud`, `exp`, `nbf`, `iat`, `jti` — cannot be set through `claim(...)`. A request that carries one of them fails with `KuraErrorCode.BAD_REQUEST` naming the offending claim, and no token is issued. Use the dedicated builder methods (`identityName`, `intendedConsumer`, `expiresAt`, `notBefore`) instead; the remaining three belong to the service.
+
+### Supported custom claim values
+
+| Java type | JSON form in the payload |
+| --- | --- |
+| `String` | string |
+| `Boolean` | boolean |
+| `Integer`, `Long`, `Double` | number |
+| `Instant` | NumericDate, that is whole epoch seconds |
+| `List<?>` | array |
+| `Map<String, ?>` | object |
+| `null` | null |
+
+Elements of a list and values of a map must themselves be of a supported type, and map keys must be `String`. Any other value type is refused with `KuraErrorCode.BAD_REQUEST` rather than serialized on a best-effort basis, so a token never carries a claim the caller did not intend.
 
 ### How `exp` is decided
 
@@ -106,7 +132,7 @@ final VerificationProof proof = this.tokenVerificationService.verify(TokenVerify
 final String identityName = proof.getIdentityName();
 ```
 
-Holding a `JwtVerificationProof` is the proof that verification succeeded. It exposes methods to access the verified token's claims.
+Holding a `VerificationProof` is the proof that verification succeeded. It exposes methods to access the verified token's claims.
 
 !!! warning
     `getExpiresAt()` is empty for a token issued without `exp`. Such a proof must not be cached indefinitely on the strength of a missing expiration.
@@ -122,15 +148,27 @@ A token is accepted only when all of the following hold:
 7. `sub` is present and not blank, so the proof always carries an identity;
 8. the intended consumer check passes (see [next section](#the-intended-consumer-check)).
 
+### How the trust anchor is chosen
+
+The token's `kid` is a **hint, not a constraint**. When it names an alias present in the trust store, that certificate is tried first; every other allowed certificate is then tried as a fallback, and so is every allowed certificate when the `kid` is absent or names an alias this store does not have.
+
+Both `TrustedCertificateEntry` and `PrivateKeyEntry` entries contribute their X.509 certificate as a trust anchor. Entries that hold no X.509 certificate, or whose public key is not RSA, are skipped.
+
+### The issuer check
+
+*Trusted Issuers* is the whole trust set, and an empty setting **disables the check**: any `iss` is accepted, including none at all. This is the default, and it is almost never what a deployment wants — see [Hardening](#always-configure-trusted-issuers).
+
+When the setting is non-empty, `iss` must match one of the listed values exactly, and a token carrying no `iss` is rejected. Matching is exact, so `kura.gateway` does not admit `kura.gateway.attacker`.
+
 ### The intended consumer check
 
 Why is the intended consumer a request parameter, and nothing else is? Every other check the service performs, it can decide on its own:
 
-- the signature and `kid` against the keystore
+- the signature and trust anchor against the keystore
 - `iss` against the configured trust set
 - `exp` / `nbf` / `iat` against the clock
 
-The audience is the exception. RFC 7519 requires each principal processing a token to identify itself with a value in `aud`, and only the caller knows which principal it is, so the expected audience cannot be configuration. Several libraries accept the issuer (`iss`) at verification time too; here it is configuration, which puts the trust set in an administrator's hands rather than in application code.
+The audience is the exception. RFC 7519 requires each principal processing a token to identify itself with a value in `aud`, and only the caller knows which principal it is, so the expected audience cannot be configuration.
 
 When an intended consumer is set, the token is accepted only if its `aud` contains that value, and a token with no `aud` at all is rejected. When it is left unset no audience constraint is enforced, and a token minted for a different consumer verifies happily.
 
@@ -161,13 +199,13 @@ Example of issuing a token with **bad** custom claims, that leak personal inform
 }
 ```
 
+### Always configure Trusted Issuers
+
+Left empty, *Trusted Issuers* accepts any `iss`, and a token with no `iss` at all. Every token a trusted certificate signed is then admitted, whatever minted it and whatever it was minted for. List the issuers you actually expect.
+
 ### Restrict Verification Key Aliases
 
-Restrict *Verification Key Aliases* whenever the keystore is shared with TLS. With the list empty, every entry in the store that yields an X.509 certificate with an RSA public key is accepted for verification. Anyone holding a private key whose certificate is in that store can then mint tokens this service will accept. Naming the aliases you actually trust closes that path. When the list is non-empty the **signing key alias is added to it automatically, so an instance never loses the ability to verify the tokens it issues
-
-### A verify-only instance is a valid deployment
-
-Leave the signing key alias empty and the instance will verify tokens from its peers while being unable to issue any. A misconfigured signing alias disables verification too, so an alias resolving to a certificate-only entry, or to a non-RSA key, makes the whole key material fail to load, and the instance can then neither issue nor verify.
+Restrict *Verification Key Aliases* whenever the keystore is shared with TLS. With the list empty, every entry in the store that yields an X.509 certificate with an RSA public key is accepted for verification. Anyone holding a private key whose certificate is in that store can then mint tokens this service will accept. Naming the aliases you actually trust closes that path.
 
 ### Configure Maximum Token Lifetime (sec)
 

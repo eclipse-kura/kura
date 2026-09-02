@@ -44,4 +44,4 @@ Import-Package: com.eclipsesource.json;version="0.9.5",
  org.xml.sax
 Export-Package: org.eclipse.kura.core.configuration;version="2.0.0",
  org.eclipse.kura.core.configuration.metatype;version="1.0.0",
- org.eclipse.kura.core.configuration.util;version="2.0.0"
+ org.eclipse.kura.core.configuration.util;version="2.1.0"

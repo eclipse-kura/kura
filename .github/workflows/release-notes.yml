@@ -34,19 +34,19 @@ jobs:
         distribution: 'temurin' # See 'Supported distributions' for available options
         java-version: '21'
 
-    - name: Install BOM POM
-      run: mvn -B -pl bom install -DskipTests
-      shell: bash
-
     - name: Get version
       id: get-version
-      run: "echo \"resolved-version=\
-        $(mvn
-          --file ./pom.xml
-          -Dexec.executable=echo
-          -Dexec.args='${project.version}'
-          --quiet exec:exec --non-recursive
-        )\" >> \"${GITHUB_OUTPUT}\""
+      run: |
+        set -euo pipefail
+        version="$(python3 - <<'EOF'
+        import sys, xml.etree.ElementTree as ET
+        version = ET.parse("pom.xml").getroot().findtext("{http://maven.apache.org/POM/4.0.0}version")
+        if not version or not version.strip():
+            sys.exit("::error file=pom.xml::unable to read /project/version from the root pom")
+        print(version.strip())
+        EOF
+        )"
+        echo "version=${version}" >> "${GITHUB_OUTPUT}"
       shell: bash
 
     - name: Check file existence
@@ -80,7 +80,7 @@ jobs:
       run: |
         java -jar ${{ steps.download-changelog-cli.outputs.file }} \
         -fc "${{ github.event.inputs.starting_commit }}" \
-        -ex "{\"version\":\"${{ steps.get-version.outputs.resolved-version }}\"}" \
+        -ex "{\"version\":\"${{ steps.get-version.outputs.version }}\"}" \
         -t .github/release_notes_template/template.hbs \
         -hhf .github/release_notes_template/helper.hbs \
         -of ./distrib/RELEASE_NOTES.txt
@@ -107,8 +107,8 @@ jobs:
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@38e0b6e68b4c852a5500a94740f0e535e0d7ba54 # v4.2.4
       with:
-        title: "chore: add Kura ${{ steps.get-version.outputs.resolved-version }} release notes"
-        commit-message: "chore: add Kura ${{ steps.get-version.outputs.resolved-version }} release notes"
-        body: "Automated changes by _Release Notes automation_ action: add Kura ${{ steps.get-version.outputs.resolved-version }} version release notes since commit `${{ github.event.inputs.starting_commit }}`"
+        title: "chore: add Kura ${{ steps.get-version.outputs.version }} release notes"
+        commit-message: "chore: add Kura ${{ steps.get-version.outputs.version }} release notes"
+        body: "Automated changes by _Release Notes automation_ action: add Kura ${{ steps.get-version.outputs.version }} version release notes since commit `${{ github.event.inputs.starting_commit }}`"
         branch-suffix: timestamp
         token: ${{ secrets.BOT_GITHUB_TOKEN }}

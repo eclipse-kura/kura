@@ -18,7 +18,7 @@
 	        name="TestInterface target" 
 	        type="String" 
 	        cardinality="0" 
-	        required="trie"
+	        required="true"
 	        default="(kura.service.pid=changeme)">
         </AD>
 

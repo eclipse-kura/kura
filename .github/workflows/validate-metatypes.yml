@@ -1,0 +1,33 @@
+name: Validate metatypes
+
+on:
+  pull_request:
+    branches:
+      - release-5.6.0
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions:
+  contents: read
+
+jobs:
+  validate-metatypes:
+    name: Validate metatypes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Install xmllint
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxml2-utils
+
+      - name: Validate metatypes against XSD
+        # archetype-resources are Velocity templates, not parseable XML
+        run: |
+          xmllint --quiet --noout \
+            --schema .github/xsd/kura-metatype-1.2.0.xsd \
+            $(git ls-files "**/OSGI-INF/metatype/*.xml" | grep -v archetype-resources)

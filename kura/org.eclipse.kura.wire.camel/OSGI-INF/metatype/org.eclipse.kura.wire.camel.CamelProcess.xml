@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
 
   <OCD id="org.eclipse.kura.wire.camel.CamelProcess" name="Camel Processor" description="Call an endpoint and extract its result">
     <AD id="id" type="String" name="ID" description="The ID of the Camel Context"/>
@@ -10,4 +10,4 @@
     <Object ocdref="org.eclipse.kura.wire.camel.CamelProcess"/>
   </Designate>
 
-</metatype:MetaData>
+</MetaData>

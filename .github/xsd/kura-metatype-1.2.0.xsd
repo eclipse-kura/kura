@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) OSGi Alliance (2005, 2013). All Rights Reserved.
+    Copyright (c) 2026 Eurotech and/or its affiliates and others
+
+    Derived from the OSGi Metatype 1.2.0 schema:
+      https://docs.osgi.org/xmlns/metatype/v1.2.0/metatype.xsd
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    SPDX-License-Identifier: Apache-2.0
+
+    Modifications by Eurotech, all deliberate. Please read before
+    "fixing" anything here:
+
+    1. elementFormDefault="qualified" is added. The published schema omits it,
+       which means its local element declarations land in NO namespace. Every
+       metatype in this repository declares a default xmlns and therefore puts
+       OCD/AD in the metatype namespace, so the published schema rejects all of
+       them with a misleading "Element 'OCD': This element is not expected".
+
+       This schema consequently only accepts the qualified encoding. That is
+       the encoding all checked-in metatypes use, and the validation workflow
+       only feeds it checked-in files; what bnd generates from
+       @ObjectClassDefinition leaves children unqualified, but those are build
+       outputs and are never validated here. A new hand-written metatype using
+       an xmlns:metatype prefix with unprefixed children would be rejected;
+       give it a default xmlns instead.
+
+    2. Tocd uses a repeatable <choice> rather than the spec's ordered
+       sequence of <AD> then <Icon>. It needs it: 33 metatypes place <Icon>
+       before <AD>, and some OCDs have no AD at all. Tmetadata keeps the
+       spec's sequence: no metatype interleaves OCD and Designate.
+
+    3. The <any> extension wildcards are dropped. Nothing in this repository
+       uses metatype extension elements, and they add non-determinism that
+       libxml2 handles poorly.
+
+    The reason this file exists at all is the <unique> constraint on OCD, which
+    rejects duplicate AD ids within a single OCD. A duplicate silently shadows
+    the earlier definition at runtime and is otherwise invisible until a
+    configuration behaves unexpectedly in the field.
+
+-->
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+    xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.2.0"
+    targetNamespace="http://www.osgi.org/xmlns/metatype/v1.2.0"
+    elementFormDefault="qualified"
+    version="1.2.0-kura">
+
+    <element name="MetaData" type="metatype:Tmetadata" />
+
+    <complexType name="Tmetadata">
+        <sequence>
+            <element name="OCD" type="metatype:Tocd" minOccurs="0"
+                maxOccurs="unbounded">
+                <!-- AD ids must be unique within their own OCD. -->
+                <unique name="uniqueAdId">
+                    <selector xpath="metatype:AD" />
+                    <field xpath="@id" />
+                </unique>
+            </element>
+            <element name="Designate" type="metatype:Tdesignate"
+                minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+        <attribute name="localization" type="string" use="optional" />
+        <anyAttribute processContents="lax" />
+    </complexType>
+
+    <complexType name="Tocd">
+        <choice minOccurs="0" maxOccurs="unbounded">
+            <element name="AD" type="metatype:Tad" />
+            <element name="Icon" type="metatype:Ticon" />
+        </choice>
+        <attribute name="name" type="string" use="required" />
+        <attribute name="description" type="string" use="optional" />
+        <attribute name="id" type="string" use="required" />
+        <anyAttribute processContents="lax" />
+    </complexType>
+
+    <complexType name="Tad">
+        <sequence>
+            <element name="Option" type="metatype:Toption" minOccurs="0"
+                maxOccurs="unbounded" />
+        </sequence>
+        <attribute name="name" type="string" use="optional" />
+        <attribute name="description" type="string" use="optional" />
+        <attribute name="id" type="string" use="required" />
+        <attribute name="type" type="metatype:Tscalar" use="required" />
+        <attribute name="cardinality" type="int" use="optional" default="0" />
+        <attribute name="min" type="string" use="optional" />
+        <attribute name="max" type="string" use="optional" />
+        <attribute name="default" type="string" use="optional" />
+        <attribute name="required" type="boolean" use="optional" default="true" />
+        <anyAttribute processContents="lax" />
+    </complexType>
+
+    <complexType name="Tdesignate">
+        <sequence>
+            <element name="Object" type="metatype:Tobject" minOccurs="1"
+                maxOccurs="1" />
+        </sequence>
+        <attribute name="pid" type="string" use="optional" />
+        <attribute name="factoryPid" type="string" use="optional" />
+        <attribute name="bundle" type="string" use="optional" />
+        <attribute name="optional" type="boolean" default="false" use="optional" />
+        <attribute name="merge" type="boolean" default="false" use="optional" />
+        <anyAttribute processContents="lax" />
+    </complexType>
+
+    <complexType name="Tobject">
+        <sequence>
+            <element name="Attribute" type="metatype:Tattribute" minOccurs="0"
+                maxOccurs="unbounded" />
+        </sequence>
+        <attribute name="ocdref" type="string" use="required" />
+        <anyAttribute processContents="lax" />
+    </complexType>
+
+    <complexType name="Tattribute">
+        <sequence>
+            <element name="Value" type="string" minOccurs="0"
+                maxOccurs="unbounded" />
+        </sequence>
+        <attribute name="adref" type="string" use="required" />
+        <attribute name="content" type="string" use="optional" />
+        <anyAttribute processContents="lax" />
+    </complexType>
+
+    <simpleType name="Tscalar">
+        <restriction base="string">
+            <enumeration value="String" />
+            <enumeration value="Long" />
+            <enumeration value="Double" />
+            <enumeration value="Float" />
+            <enumeration value="Integer" />
+            <enumeration value="Byte" />
+            <enumeration value="Char" />
+            <enumeration value="Boolean" />
+            <enumeration value="Short" />
+            <enumeration value="Password" />
+        </restriction>
+    </simpleType>
+
+    <complexType name="Toption">
+        <attribute name="label" type="string" use="required" />
+        <attribute name="value" type="string" use="required" />
+        <anyAttribute processContents="lax" />
+    </complexType>
+
+    <complexType name="Ticon">
+        <attribute name="resource" type="string" use="required" />
+        <attribute name="size" type="positiveInteger" use="required" />
+        <anyAttribute processContents="lax" />
+    </complexType>
+
+</schema>

@@ -154,7 +154,7 @@ public class JwtIssuingService implements TokenIssuingService, ConfigurableCompo
         this.state = new ServiceState(options.get().getMaximumLifetime(),
                 Optional.of(new JwtIssuer(options.get(), signingKey.get())));
 
-        logger.info("JWT issuing service state rebuilt");
+        logger.info("JWT issuing service state rebuilt, using signing key '{}'", alias);
     }
 
     private static Optional<RSAPrivateKey> loadRsaPrivateKey(final KeystoreService keystoreService,

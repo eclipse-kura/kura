@@ -27,7 +27,7 @@ import java.util.Set;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.core.token.jwt.KeystoreTracker;
 import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.security.token.TokenVerificationService;
@@ -59,8 +59,7 @@ public class JwtVerificationService implements TokenVerificationService, Configu
 
     private static final Logger logger = LoggerFactory.getLogger(JwtVerificationService.class);
 
-    private Optional<KeystoreService> keystoreService = Optional.empty();
-    private Optional<String> keystoreServicePid = Optional.empty();
+    private final KeystoreTracker keystoreTracker = new KeystoreTracker();
     private Optional<JwtVerificationServiceOptions> serviceOptions = Optional.empty();
 
     private volatile Optional<JwtVerifier> verifier = Optional.empty();
@@ -68,29 +67,20 @@ public class JwtVerificationService implements TokenVerificationService, Configu
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
     public synchronized void setKeystoreService(final KeystoreService keystoreService,
             final Map<String, Object> properties) {
-        this.keystoreService = Optional.of(keystoreService);
-        this.keystoreServicePid = Optional.ofNullable((String) properties.get(ConfigurationService.KURA_SERVICE_PID));
+        this.keystoreTracker.bind(keystoreService, properties);
         rebuildVerifier();
     }
 
     public synchronized void unsetKeystoreService(final KeystoreService keystoreService) {
-        if (this.keystoreService.equals(Optional.of(keystoreService))) {
-            this.keystoreService = Optional.empty();
-            this.keystoreServicePid = Optional.empty();
+        if (this.keystoreTracker.unbind(keystoreService)) {
             rebuildVerifier();
         }
     }
 
     @Override
     public synchronized void handleEvent(final Event event) {
-        if (!(event instanceof KeystoreChangedEvent keystoreChangedEvent)) {
-            return;
-        }
-
-        final Optional<String> eventPid = Optional.ofNullable(keystoreChangedEvent.getSenderPid());
-
-        if (eventPid.isPresent() && this.keystoreServicePid.equals(eventPid)) {
-            logger.info("Keystore changed, reloading JWT key material");
+        if (this.keystoreTracker.isContentChangedBy(event)) {
+            logger.info("Trust store changed, reloading JWT key material");
             rebuildVerifier();
         }
     }
@@ -129,7 +119,7 @@ public class JwtVerificationService implements TokenVerificationService, Configu
         logger.info("Rebuilding JWT verification service state");
 
         final Optional<JwtVerificationServiceOptions> options = this.serviceOptions;
-        final Optional<KeystoreService> keystore = this.keystoreService;
+        final Optional<KeystoreService> keystore = this.keystoreTracker.get();
 
         if (options.isEmpty() || keystore.isEmpty()) {
             this.verifier = Optional.empty();

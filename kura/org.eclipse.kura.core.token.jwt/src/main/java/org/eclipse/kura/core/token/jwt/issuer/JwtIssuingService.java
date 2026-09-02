@@ -23,7 +23,7 @@ import java.util.Optional;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.core.token.jwt.KeystoreTracker;
 import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.security.token.TokenIssueRequest;
@@ -54,8 +54,7 @@ public class JwtIssuingService implements TokenIssuingService, ConfigurableCompo
 
     private static final Logger logger = LoggerFactory.getLogger(JwtIssuingService.class);
 
-    private Optional<KeystoreService> keystoreService = Optional.empty();
-    private Optional<String> keystoreServicePid = Optional.empty();
+    private final KeystoreTracker keystoreTracker = new KeystoreTracker();
     private Optional<JwtIssuingServiceOptions> serviceOptions = Optional.empty();
 
     private record ServiceState(Optional<Duration> maximumLifetime, Optional<JwtIssuer> issuer) {
@@ -74,29 +73,20 @@ public class JwtIssuingService implements TokenIssuingService, ConfigurableCompo
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
     public synchronized void setKeystoreService(final KeystoreService keystoreService,
             final Map<String, Object> properties) {
-        this.keystoreService = Optional.of(keystoreService);
-        this.keystoreServicePid = Optional.ofNullable((String) properties.get(ConfigurationService.KURA_SERVICE_PID));
+        this.keystoreTracker.bind(keystoreService, properties);
         rebuildServiceState();
     }
 
     public synchronized void unsetKeystoreService(final KeystoreService keystoreService) {
-        if (this.keystoreService.equals(Optional.of(keystoreService))) {
-            this.keystoreService = Optional.empty();
-            this.keystoreServicePid = Optional.empty();
+        if (this.keystoreTracker.unbind(keystoreService)) {
             rebuildServiceState();
         }
     }
 
     @Override
     public synchronized void handleEvent(final Event event) {
-        if (!(event instanceof KeystoreChangedEvent keystoreChangedEvent)) {
-            return;
-        }
-
-        final Optional<String> eventPid = Optional.ofNullable(keystoreChangedEvent.getSenderPid());
-
-        if (eventPid.isPresent() && this.keystoreServicePid.equals(eventPid)) {
-            logger.info("Keystore changed, reloading JWT key material");
+        if (this.keystoreTracker.isContentChangedBy(event)) {
+            logger.info("Key store changed, reloading JWT key material");
             rebuildServiceState();
         }
     }
@@ -140,7 +130,7 @@ public class JwtIssuingService implements TokenIssuingService, ConfigurableCompo
         logger.info("Rebuilding JWT issuing service state");
 
         final Optional<JwtIssuingServiceOptions> options = this.serviceOptions;
-        final Optional<KeystoreService> keystore = this.keystoreService;
+        final Optional<KeystoreService> keystore = this.keystoreTracker.get();
 
         if (options.isEmpty()) {
             this.state = ServiceState.unconfigured();

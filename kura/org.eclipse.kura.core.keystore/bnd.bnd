@@ -46,4 +46,4 @@ Export-Package: \
 -includeresource: \
     about_files=about_files/,\
     about.html
--dsannotations-options: inherit
+-dsannotations-options: inherit,norequirements

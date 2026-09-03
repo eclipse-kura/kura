@@ -34,6 +34,6 @@ Export-Package: \
 -includeresource: \
     about.html,\
     about_files=about_files/
--dsannotations-options: inherit
+-dsannotations-options: inherit,norequirements
 
 Service-Component: OSGI-INF/*.xml

@@ -26,4 +26,4 @@ Bundle-ActivationPolicy: lazy
 -includeresource: \
     about.html,\
     about_files=about_files/
--dsannotations-options: inherit
+-dsannotations-options: inherit,norequirements

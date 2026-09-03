@@ -29,10 +29,6 @@ bin_test/
 .idea/
 *.iml
 
-# VS Code
-javaConfig.json
-.vscode
-
 # Code analysis
 .sonar
 .sonarlint

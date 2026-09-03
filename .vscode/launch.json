@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Remote Kura debug",
+            "request": "attach",
+            "hostName": "${input:ipAddress}",
+            "port": 8000
+        }
+    ],
+    "inputs": [
+        {
+          "id": "ipAddress",
+          "type": "promptString",
+          "description": "IP Address of the device running Kura"
+        }
+    ]
+}

@@ -50,6 +50,9 @@ public class WatchdogServiceImplTest {
         if (this.scenarioSvc != null) {
             this.scenarioSvc.deactivate();
         }
+        if (this.scenarioWatchdogEnabledFile != null) {
+            this.scenarioWatchdogEnabledFile.delete();
+        }
     }
 
     private class WatchdogTestWriter extends StringWriter {
@@ -214,6 +217,15 @@ public class WatchdogServiceImplTest {
     }
 
     @Test
+    public void temporaryReferenceFileNotRemovedWhenServiceDeactivatedWhileWatchdogEnabled() throws Throwable {
+        givenWatchdogServiceEnabled();
+
+        whenWatchdogServiceIsDeactivated();
+
+        thenWatchdogEnabledTemporaryFileExists();
+    }
+
+    @Test
     public void testRegisterUnregisterGetCriticalComponent() throws NoSuchFieldException {
         WatchdogServiceImpl svc = new WatchdogServiceImpl();
 
@@ -360,8 +372,16 @@ public class WatchdogServiceImplTest {
         awaitPendingUpdate();
     }
 
+    private void whenWatchdogServiceIsDeactivated() {
+        this.scenarioSvc.deactivate();
+    }
+
     private void thenWatchdogEnabledTemporaryFileDoesNotExist() {
         assertFalse(this.scenarioWatchdogEnabledFile.exists());
+    }
+
+    private void thenWatchdogEnabledTemporaryFileExists() {
+        assertTrue(this.scenarioWatchdogEnabledFile.exists());
     }
 
     private void awaitPendingUpdate()

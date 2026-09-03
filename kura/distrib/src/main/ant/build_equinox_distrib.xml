@@ -267,7 +267,6 @@
             property="linux.gpio.jar.present" />
         <antcall target="gpio-config" />
         <antcall target="emulator-gpio-config" />
-        <antcall target="emulator-config" />
         <antcall target="linux-sysv-config" />
         <antcall target="linux-debian-config" />
         <antcall target="linux-redhat-config" />
@@ -842,7 +841,6 @@ fi]]>
         <antcall target="web2-jar" />
         <antcall target="gpio-jar" />
         <antcall target="emulator-gpio-jar" />
-        <antcall target="emulator-jars" />
         <antcall target="linux-sysv-jars" />
         <antcall target="linux-debian-jars" />
         <antcall target="linux-redhat-jars" />
@@ -1814,14 +1812,6 @@ fi]]>
         </zip>
     </target>
 
-    <target name="emulator-config" if="is.nn">
-        <propertyfile
-            file="${project.build.directory}/${build.output.name}/config.ini">
-            <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar@4" />
-        </propertyfile>
-    </target>
-
     <target name="linux-config">
         <propertyfile
             file="${project.build.directory}/${build.output.name}/config.ini">
@@ -1905,15 +1895,6 @@ fi]]>
         </propertyfile>
     </target>
     
-    <target name="emulator-jars" if="is.nn">
-        <zip destfile="${project.build.directory}/${build.output.name}.zip"
-            update="true">
-            <zipfileset
-                file="${project.build.directory}/plugins/org.eclipse.kura.emulator_${org.eclipse.kura.emulator.version}.jar"
-                prefix="${build.output.name}/${plugins.folder}" />
-        </zip>
-    </target>
-
     <target name="linux-jars">
         <zip destfile="${project.build.directory}/${build.output.name}.zip"
             update="true">

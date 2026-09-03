@@ -29,6 +29,13 @@ bin_test/
 .idea/
 *.iml
 
+# VS Code
+javaConfig.json
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+
 # Code analysis
 .sonar
 .sonarlint

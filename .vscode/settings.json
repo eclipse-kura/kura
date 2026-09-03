@@ -1,13 +1,13 @@
 {
-    // --- Formatter: driven by kura/setups/formatting/KuraFormatter.xml ---
     "java.format.settings.url": "kura/setups/formatting/KuraFormatter.xml",
     "java.format.settings.profile": "Kura_formatter_v_3",
-    "editor.formatOnSave": true,
     "[java]": {
         "editor.defaultFormatter": "redhat.java",
+        "editor.formatOnSave": true,
         "files.trimTrailingWhitespace": true
     },
-    "files.eol": "\n",
-    "java.debug.settings.onBuildFailureProceed": true,
-    "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx4G -Xms100m -Xlog:disable"
+    "[xml]": {
+        "editor.defaultFormatter": "redhat.vscode-xml"
+    },
+    "files.eol": "\n"
 }

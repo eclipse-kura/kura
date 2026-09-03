@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -62,7 +63,7 @@ public class JwtVerificationService implements TokenVerificationService, Configu
     private final KeystoreTracker keystoreTracker = new KeystoreTracker();
     private Optional<JwtVerificationServiceOptions> serviceOptions = Optional.empty();
 
-    private volatile Optional<JwtVerifier> verifier = Optional.empty();
+    private AtomicReference<JwtVerifier> verifier = new AtomicReference<>();
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
     public synchronized void setKeystoreService(final KeystoreService keystoreService,
@@ -98,21 +99,21 @@ public class JwtVerificationService implements TokenVerificationService, Configu
 
     @Deactivate
     public synchronized void deactivate() {
-        this.verifier = Optional.empty();
+        this.verifier.set(null);
     }
 
     @Override
     public VerificationProof verify(final TokenVerifyRequest request) throws KuraException {
         Objects.requireNonNull(request, "Request cannot be null");
 
-        final Optional<JwtVerifier> currentVerifier = this.verifier;
+        final JwtVerifier currentVerifier = this.verifier.get();
 
-        if (currentVerifier.isEmpty()) {
+        if (currentVerifier == null) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                     "JwtVerificationService misconfigured or not yet ready");
         }
 
-        return currentVerifier.get().verify(request.getToken(), request.getIntendedConsumer());
+        return currentVerifier.verify(request.getToken(), request.getIntendedConsumer());
     }
 
     private synchronized void rebuildVerifier() {
@@ -122,7 +123,7 @@ public class JwtVerificationService implements TokenVerificationService, Configu
         final Optional<KeystoreService> keystore = this.keystoreTracker.get();
 
         if (options.isEmpty() || keystore.isEmpty()) {
-            this.verifier = Optional.empty();
+            this.verifier.set(null);
             return;
         }
 
@@ -131,11 +132,11 @@ public class JwtVerificationService implements TokenVerificationService, Configu
 
         if (certificates.isEmpty()) {
             logger.warn("No usable certificate found in the configured key store, token verification is not available");
-            this.verifier = Optional.empty();
+            this.verifier.set(null);
             return;
         }
 
-        this.verifier = Optional.of(new JwtVerifier(options.get(), certificates));
+        this.verifier.set(new JwtVerifier(options.get(), certificates));
 
         logger.info("JWT verification service state rebuilt, {} trusted certificate(s) loaded", certificates.size());
     }

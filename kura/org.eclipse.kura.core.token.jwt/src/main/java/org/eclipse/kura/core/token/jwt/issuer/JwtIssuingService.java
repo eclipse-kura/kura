@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -68,7 +69,7 @@ public class JwtIssuingService implements TokenIssuingService, ConfigurableCompo
         }
     }
 
-    private volatile ServiceState state = ServiceState.unconfigured();
+    private final AtomicReference<ServiceState> state = new AtomicReference<>(ServiceState.unconfigured());
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
     public synchronized void setKeystoreService(final KeystoreService keystoreService,
@@ -104,19 +105,19 @@ public class JwtIssuingService implements TokenIssuingService, ConfigurableCompo
 
     @Deactivate
     public synchronized void deactivate() {
-        this.state = ServiceState.unconfigured();
+        this.state.set(ServiceState.unconfigured());
     }
 
     @Override
     public Optional<Duration> getMaximumLifetime() {
-        return this.state.maximumLifetime;
+        return this.state.get().maximumLifetime;
     }
 
     @Override
     public String issue(final TokenIssueRequest request) throws KuraException {
         Objects.requireNonNull(request, "request cannot be null");
 
-        final Optional<JwtIssuer> currentIssuer = this.state.issuer();
+        final Optional<JwtIssuer> currentIssuer = this.state.get().issuer();
 
         if (currentIssuer.isEmpty()) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
@@ -133,12 +134,12 @@ public class JwtIssuingService implements TokenIssuingService, ConfigurableCompo
         final Optional<KeystoreService> keystore = this.keystoreTracker.get();
 
         if (options.isEmpty()) {
-            this.state = ServiceState.unconfigured();
+            this.state.set(ServiceState.unconfigured());
             return;
         }
 
         if (keystore.isEmpty()) {
-            this.state = ServiceState.withoutSigningKey(options.get().getMaximumLifetime());
+            this.state.set(ServiceState.withoutSigningKey(options.get().getMaximumLifetime()));
             return;
         }
 
@@ -147,12 +148,12 @@ public class JwtIssuingService implements TokenIssuingService, ConfigurableCompo
 
         if (signingKey.isEmpty()) {
             logger.warn("Signing key '{}' is not available, token issuing is not available", alias);
-            this.state = ServiceState.withoutSigningKey(options.get().getMaximumLifetime());
+            this.state.set(ServiceState.withoutSigningKey(options.get().getMaximumLifetime()));
             return;
         }
 
-        this.state = new ServiceState(options.get().getMaximumLifetime(),
-                Optional.of(new JwtIssuer(options.get(), signingKey.get())));
+        this.state.set(new ServiceState(options.get().getMaximumLifetime(),
+                Optional.of(new JwtIssuer(options.get(), signingKey.get()))));
 
         logger.info("JWT issuing service state rebuilt, using signing key '{}'", alias);
     }

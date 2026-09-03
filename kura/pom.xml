@@ -148,6 +148,17 @@
             <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-maven-plugin</artifactId>
+                <configuration>
+                    <!-- Do not emit "Require-Capability: osgi.service;...;effective:=active" for DS
+                         references. The OSGi framework ignores them at runtime and Kura's own bnd
+                         resolution uses -resolve.effective: resolve, but p2/Tycho does not honor the
+                         effective directive and treats them as hard requirements, which breaks the
+                         dependency resolution of every Tycho/PDE project consuming Kura bundles
+                         (e.g. an unsatisfiable osgi.service requirement on DeploymentAdmin). -->
+                    <bnd><![CDATA[
+                        -dsannotations-options: norequirements
+                    ]]></bnd>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

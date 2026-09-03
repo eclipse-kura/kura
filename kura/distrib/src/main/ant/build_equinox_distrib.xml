@@ -337,7 +337,6 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
-        -Dosgi.console= \
         -Declipse.consoleLog=true \
         -jar ${DIR}/plugins/org.eclipse.equinox.launcher_${org.eclipse.equinox.launcher.version}.jar \
         -configuration  /tmp/.kura/configuration
@@ -449,7 +448,6 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
-        -Dosgi.console= \
         -Declipse.consoleLog=true \
         -jar ${DIR}/plugins/org.eclipse.equinox.launcher_${org.eclipse.equinox.launcher.version}.jar \
         -configuration /tmp/.kura/configuration &

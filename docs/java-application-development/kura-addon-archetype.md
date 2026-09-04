@@ -8,7 +8,10 @@ The Kura Addon Archetype is a [Maven Archetype](https://maven.apache.org/guides/
 - unit tests (JUnit 4 + Mockito) and [OSGi integration tests](https://bnd.bndtools.org/chapters/310-testing.html) run by bnd against an embedded Kura framework
 - a template project producing a Debian (`.deb`) package
 
-The archetype lives in the [eclipse-kura/kura-archetype](https://github.com/eclipse-kura/kura-archetype) repository and is available since Kura 6.0.0. Its version matches the Kura version it targets: use `6.0.0-SNAPSHOT` (or `6.0.0` once released) to generate an add-on for Kura 6. All the Kura dependencies of the generated project are resolved through the Kura bill of materials, `org.eclipse.kura:kura-bom`, of the same version.
+The archetype is developed in the [eclipse-kura/kura-archetype](https://github.com/eclipse-kura/kura-archetype) repository and is published on Maven Central as `org.eclipse.kura:kura-addon-archetype`, so no installation step is required: Maven downloads it on first use. It is available since Kura 6.0.0 and its version matches the Kura version it targets: use `6.0.0` to generate an add-on for Kura 6. All the Kura dependencies of the generated project are resolved through the Kura bill of materials, `org.eclipse.kura:kura-bom`, of the same version.
+
+!!! note
+    Snapshot builds of the archetype are published to the [Kura snapshots repository](https://repo.eclipse.org/content/repositories/kura-snapshots/). To generate a project with a `-SNAPSHOT` version of the archetype, declare that repository in your `~/.m2/settings.xml`.
 
 ## Requirements
 
@@ -16,27 +19,12 @@ The archetype lives in the [eclipse-kura/kura-archetype](https://github.com/ecli
 - **Maven 3.9.x**
 - **git**: required to build a generated project, the `git-commit-id-maven-plugin` reads the commit hash that goes into the Debian package version.
 
-## Installing the archetype
-
-Clone the repository and install the archetype in the local Maven repository:
-
-```shell
-git clone https://github.com/eclipse-kura/kura-archetype.git
-cd kura-archetype
-mvn clean install
-```
-
-This installs `org.eclipse.kura:kura-addon-archetype` into `~/.m2` and registers it in the local archetype catalog (`~/.m2/repository/archetype-catalog.xml`), which is why the commands below pass `-DarchetypeCatalog=local`.
-
-Released versions of the archetype are published to the [Kura releases repository](https://repo.eclipse.org/content/repositories/kura-releases/) and snapshot builds to the [Kura snapshots repository](https://repo.eclipse.org/content/repositories/kura-snapshots/). To use a published archetype instead of a local build, declare the repository in your `~/.m2/settings.xml` and drop the `-DarchetypeCatalog=local` flag.
-
 ## Generating a project
 
 In interactive mode, Maven prompts for every property:
 
 ```shell
 mvn archetype:generate \
-  -DarchetypeCatalog=local \
   -DarchetypeGroupId=org.eclipse.kura \
   -DarchetypeArtifactId=kura-addon-archetype \
   -DarchetypeVersion=<kura-version>
@@ -48,16 +36,15 @@ The same result can be obtained in one shot:
 
 ```shell
 mvn -B archetype:generate \
-  -DarchetypeCatalog=local \
   -DarchetypeGroupId=org.eclipse.kura \
   -DarchetypeArtifactId=kura-addon-archetype \
-  -DarchetypeVersion=6.0.0-SNAPSHOT \
+  -DarchetypeVersion=<kura-version> \
   -DgroupId=org.eclipse.kura \
   -DartifactId=kura-myfeature \
   -Dpackage=org.eclipse.kura.myfeature \
   -Dversion=1.0.0-SNAPSHOT \
   -DmainBundleVendor="Eclipse Kura" \
-  -DkuraVersion=6.0.0-SNAPSHOT \
+  -DkuraVersion=<kura-version> \
   -Dyear=2026
 ```
 

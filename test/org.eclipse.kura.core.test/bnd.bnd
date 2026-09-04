@@ -4,7 +4,7 @@ Bundle-Vendor: Eclipse Kura
 Fragment-Host: org.eclipse.kura.core
 # Run the AllCoreTests JUnit suite (@RunWith(Suite.class)). Its @BeforeClass starts the Moquette
 # broker and connects the shared DataService, then runs its @SuiteClasses members (CommURITest,
-# ComponentConfigurationImplTest, ConfigurationServiceTest, InventoryHandlerTest, NetUtilTest,
+# ComponentConfigurationImplTest, PasswordTest, ConfigurationServiceTest, InventoryHandlerTest, NetUtilTest,
 # NetworkServiceTest, SystemAdminServiceTest) within that broker lifecycle. This matches the set
 # of core tests executed on the develop branch. A broad ${classes;...*Test} glob is deliberately
 # NOT used: it would (a) skip the suite (named "AllCoreTests", not "*Test") so the broker would

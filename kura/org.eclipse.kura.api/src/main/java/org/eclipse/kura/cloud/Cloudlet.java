@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -17,8 +17,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
@@ -26,6 +24,8 @@ import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.annotation.versioning.ConsumerType;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Cloudlet is an abstract class that can be extended by services that wants to implement remote resource management.
@@ -49,7 +49,7 @@ import org.osgi.service.component.ComponentException;
 @Deprecated
 public abstract class Cloudlet implements CloudClientListener {
 
-    private static final Logger logger = LogManager.getLogger(Cloudlet.class);
+    private static final Logger logger = LoggerFactory.getLogger(Cloudlet.class);
 
     protected static final int DFLT_PUB_QOS = 0;
     protected static final boolean DFLT_RETAIN = false;
@@ -215,7 +215,7 @@ public abstract class Cloudlet implements CloudClientListener {
 
 class MessageHandlerCallable implements Callable<Void> {
 
-    private static final Logger logger = LogManager.getLogger(MessageHandlerCallable.class);
+    private static final Logger logger = LoggerFactory.getLogger(MessageHandlerCallable.class);
 
     private final Cloudlet cloudApp;
     @SuppressWarnings("unused")

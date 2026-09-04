@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -32,11 +32,11 @@ import javax.comm.NoSuchPortException;
 import javax.comm.PortInUseException;
 import javax.comm.SerialPort;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.comm.CommURI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CommConnectionImpl implements CommConnection, Closeable {
 
@@ -44,7 +44,7 @@ public class CommConnectionImpl implements CommConnection, Closeable {
     private static final String JAVA_EXT_DIRS = "java.ext.dirs";
     private static final String KURA_EXT_DIR = "kura.ext.dir";
 
-    private static final Logger logger = LogManager.getLogger(CommConnectionImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(CommConnectionImpl.class);
 
     // set up the appropriate ext dir for RXTX extra device nodes
     static {
@@ -183,7 +183,9 @@ public class CommConnectionImpl implements CommConnection, Closeable {
             throw new NullPointerException("Message must not be null");
         }
 
-        logger.debug(SEND_MESSAGE, () -> getBytesAsString(message));
+        if (logger.isDebugEnabled()) {
+            logger.debug(SEND_MESSAGE, getBytesAsString(message));
+        }
 
         if (this.outputStream == null) {
             openOutputStream();
@@ -201,7 +203,9 @@ public class CommConnectionImpl implements CommConnection, Closeable {
             throw new NullPointerException("Serial command must not be null");
         }
 
-        logger.debug(SEND_MESSAGE, () -> getBytesAsString(command));
+        if (logger.isDebugEnabled()) {
+            logger.debug(SEND_MESSAGE, getBytesAsString(command));
+        }
 
         if (this.outputStream == null) {
             openOutputStream();

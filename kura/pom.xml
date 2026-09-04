@@ -198,7 +198,7 @@
                         <id>checkstyle-validation</id>
                         <phase>process-sources</phase>
                         <configuration>
-                            <encoding>UTF-8</encoding>
+                            <inputEncoding>UTF-8</inputEncoding>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>
                             <linkXRef>false</linkXRef>

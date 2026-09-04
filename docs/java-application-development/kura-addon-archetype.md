@@ -1,72 +1,102 @@
 # Kura Addon Archetype
 
-The Kura Addon Archetype is a [Maven Archetype](https://maven.apache.org/guides/introduction/introduction-to-archetypes.html) that allows to create a development environment with the following features:
+The Kura Addon Archetype is a [Maven Archetype](https://maven.apache.org/guides/introduction/introduction-to-archetypes.html) that bootstraps an Eclipse Kura add-on project. A generated project comes with:
 
-- Maven-based build
-- Template project for creating DEB packages
-- [bnd](https://bnd.bndtools.org/chapters/310-testing.html) based integration test template
+- a Maven + [bnd](https://bnd.bndtools.org/) build targeting Java 21 and OSGi
+- an example bundle using Declarative Services and Metatype annotations (a `ConfigurableComponent`, its OCD and its configuration options)
+- a bill of materials (`-bom`) listing the bundles the project releases
+- unit tests (JUnit 4 + Mockito) and [OSGi integration tests](https://bnd.bndtools.org/chapters/310-testing.html) run by bnd against an embedded Kura framework
+- a template project producing a Debian (`.deb`) package
 
-The Kura Archetype JAR (`kura-addon-archetype-<kura-version>.jar`) is available in the released artifacts and can be installed in the local maven repository with the following command:
+The archetype lives in the [eclipse-kura/kura-archetype](https://github.com/eclipse-kura/kura-archetype) repository and is available since Kura 6.0.0. Its version matches the Kura version it targets: use `6.0.0-SNAPSHOT` (or `6.0.0` once released) to generate an add-on for Kura 6. All the Kura dependencies of the generated project are resolved through the Kura bill of materials, `org.eclipse.kura:kura-bom`, of the same version.
+
+## Requirements
+
+- **JDK 21**: the generated project sets `maven.compiler.release=21`.
+- **Maven 3.9.x**
+- **git**: required to build a generated project, the `git-commit-id-maven-plugin` reads the commit hash that goes into the Debian package version.
+
+## Installing the archetype
+
+Clone the repository and install the archetype in the local Maven repository:
 
 ```shell
-mvn install:install-file \
--Dfile=./kura-addon-archetype-<kura-version>.jar \
--DgroupId=org.eclipse.kura \
--DartifactId=kura-addon-archetype \
--Dversion="<kura-version>" \
--Dpackaging=jar \
--DgeneratePom=true
+git clone https://github.com/eclipse-kura/kura-archetype.git
+cd kura-archetype
+mvn clean install
 ```
 
-Valid `<kura-version>` values are `6.0.0-SNAPSHOT` and `6.0.0`. This archetype is available since Kura 6.0.0.
+This installs `org.eclipse.kura:kura-addon-archetype` into `~/.m2` and registers it in the local archetype catalog (`~/.m2/repository/archetype-catalog.xml`), which is why the commands below pass `-DarchetypeCatalog=local`.
 
-After that, it is possible to generate a project skeleton using the archetype with the following command:
+Released versions of the archetype are published to the [Kura releases repository](https://repo.eclipse.org/content/repositories/kura-releases/) and snapshot builds to the [Kura snapshots repository](https://repo.eclipse.org/content/repositories/kura-snapshots/). To use a published archetype instead of a local build, declare the repository in your `~/.m2/settings.xml` and drop the `-DarchetypeCatalog=local` flag.
+
+## Generating a project
+
+In interactive mode, Maven prompts for every property:
 
 ```shell
 mvn archetype:generate \
--DarchetypeArtifactId=kura-addon-archetype \
--DarchetypeGroupId=org.eclipse.kura \
--DarchetypeVersion="<kura-version>"
+  -DarchetypeCatalog=local \
+  -DarchetypeGroupId=org.eclipse.kura \
+  -DarchetypeArtifactId=kura-addon-archetype \
+  -DarchetypeVersion=<kura-version>
 ```
-
-The command will start the generation of the archetype in interactive mode.
 
 ![](./images/kura-addon-archetype/archetype-generate.png)
 
-Maven will ask for a few parameters on the command line:
+The same result can be obtained in one shot:
 
-- **groupId** : the Maven group id of the generated POM files
-- **artifactId**: the Maven artifact id of the generated parent pom file, and the name of the generated top level project folder
-- **package**: the base Java package and the main artifact of the project
+```shell
+mvn -B archetype:generate \
+  -DarchetypeCatalog=local \
+  -DarchetypeGroupId=org.eclipse.kura \
+  -DarchetypeArtifactId=kura-addon-archetype \
+  -DarchetypeVersion=6.0.0-SNAPSHOT \
+  -DgroupId=org.eclipse.kura \
+  -DartifactId=kura-myfeature \
+  -Dpackage=org.eclipse.kura.myfeature \
+  -Dversion=1.0.0-SNAPSHOT \
+  -DmainBundleVendor="Eclipse Kura" \
+  -DkuraVersion=6.0.0-SNAPSHOT \
+  -Dyear=2026
+```
 
-The official Kura addons naming rule is:
+| Property | Meaning | Default |
+|---|---|---|
+| `groupId` | Maven group id of every generated module | *prompted* |
+| `artifactId` | artifact id of the root project and name of the top level folder | *prompted* |
+| `package` | base Java package **and** artifact id / OSGi symbolic name of the main bundle | *prompted* |
+| `version` | version of the generated project | `1.0.0-SNAPSHOT` |
+| `mainBundleVendor` | vendor name of the add-on | `Eclipse Kura` |
+| `kuraVersion` | version of the Kura bill of materials (`org.eclipse.kura:kura-bom`) used to resolve the dependencies | the archetype version |
+| `year` | year written in the copyright headers of the generated files | the year the archetype was built |
+
+In interactive mode the optional properties can be changed by answering `n` at the `Confirm properties configuration` prompt. The prompt also shows `archetypeVersion`, which never needs to be set: it defaults to the version of the archetype in use and is recorded as a comment in the generated root `pom.xml`, so a project always states what generated it.
+
+The official Kura add-ons naming rule is:
 
 - **groupId** = `org.eclipse.kura`
 - **artifactId** = repository name: `kura-<feature>` (e.g. `kura-wires`)
 - **package** = `org.eclipse.kura.<feature>` (e.g. `org.eclipse.kura.wires`)
 
-**It is not allowed to generate a project with artifactId = package**.
+**It is not allowed to generate a project with artifactId = package**: the root project and the main bundle are separate Maven modules.
 
-The following optional parameters can be changed by answering `n` after the `Confirm properties configuration` prompt, which appears after editing the properties above:
+The generated files carry the following copyright header, where `${year}` is the value of the `year` property:
 
-- **version**: the generated project's version. Defaults to *1.0.0-SNAPSHOT*
-- **mainBundleVendor**: the name of the vendor to use in the metadata. Defaults to *Eclipse Kura*
-- **kuraVersion**: the version of the Kura bill-of-materials, used to resolve dependencies. Defaults to *6.0.0[-SNAPSHOT]*
-- **year**: the year to use in the copyright headers, which by default have the following format:
-    ```
-    Copyright (c) ${year} Eurotech and/or its affiliates and others
+```
+Copyright (c) ${year} Eurotech and/or its affiliates and others
 
-    This program and the accompanying materials are made
-    available under the terms of the Eclipse Public License 2.0
-    which is available at https://www.eclipse.org/legal/epl-2.0/
+This program and the accompanying materials are made
+available under the terms of the Eclipse Public License 2.0
+which is available at https://www.eclipse.org/legal/epl-2.0/
 
-    SPDX-License-Identifier: EPL-2.0
+SPDX-License-Identifier: EPL-2.0
 
-    Contributors:
-     Eurotech
-    ```
+Contributors:
+ Eurotech
+```
 
-A `.gitignore` file is automatically added with a default configuration. The `OSGI-INF` folder is omitted because it will be generated during tests at compile-time (this is necessary to make the PDE launcher work).
+A `.gitignore` file is added with a default configuration that ignores, among others, the `OSGI-INF` folder and the flattened POMs, which are generated at build time.
 
 ### Add the generated sources to `git`
 
@@ -89,73 +119,114 @@ kura-myfeature
 ├── .gitignore
 ├── pom.xml
 ├── bom
-│   └── pom.xml
-├── distrib
-│   ├── deb
-│   └── pom.xml
+│   └── pom.xml
 ├── org.eclipse.kura.myfeature
-│   ├── pom.xml
-│   └── src
+│   ├── pom.xml
+│   ├── about.html
+│   ├── about_files
+│   └── src/main/java
+├── distrib
+│   ├── deb/control/control
+│   └── pom.xml
 └── tests
-    ├── org.eclipse.kura.myfeature.test
     ├── pom.xml
-    └── test-env
+    ├── test-env
+    └── org.eclipse.kura.myfeature.test
+        ├── integration-test.bndrun
+        ├── pom.xml
+        ├── src/main/java   (OSGi integration tests)
+        └── src/test/java   (unit tests)
 ```
 
-- **bom**: this project's bill-of-materials, containing the list of all the bundles that this project will deploy. It is intended to be consumed by other projects
+- **pom.xml**: the root project. It imports the Kura bill of materials (`org.eclipse.kura:kura-bom:${kuraVersion}`) in its `dependencyManagement` and configures the bnd Maven plugins, the checkstyle validation with the Kura rules and the flatten plugin.
 
-- **tests**: contains unit tests and OSGi integration tests executed via the `bnd-testing-maven-plugin`.
+- **bom**: this project's bill of materials, listing all the bundles that this project deploys. It is intended to be consumed by other projects.
 
-- **distrib**: a packaging project that builds a Debian (`.deb`) package. The package installs the JAR produced by the bundles into Kura’s plugins directory at `/opt/eclipse/kura/plugins`. You should review and adjust this project to match your target architecture and packaging requirements; the source is annotated with comments indicating the main configuration points
+- **org.eclipse.kura.myfeature**: the OSGi bundle, built by `bnd-maven-plugin`. The manifest is generated by bnd from the `<bnd>` instructions in the `pom.xml` and from the Declarative Services and Metatype annotations in the sources, so there is no `MANIFEST.MF` nor `OSGI-INF` folder to maintain.
+
+- **tests**: the tests aggregator. Its `pom.xml` declares the Kura runtime bundles indexed for the OSGi integration tests, `test-env` contains the Kura framework configuration used by the integration tests (`kura.properties`, `log4j.xml`, the initial snapshot) and the `.test` module contains unit tests, run by `maven-surefire-plugin`, and OSGi integration tests, run by `bnd-testing-maven-plugin`.
+
+- **distrib**: a packaging project that builds a Debian (`.deb`) package. The package installs the JAR produced by the bundles into Kura's plugins directory at `/opt/eclipse/kura/plugins`. You should review and adjust this project to match your target architecture and packaging requirements; the source is annotated with comments indicating the main configuration points.
+
+## Dependencies
+
+The Kura bill of materials manages the versions of every Kura bundle and of every third-party library that is part of the Kura runtime (OSGi, Equinox, Jetty, Jersey, log4j, BouncyCastle, Netty, ...). A dependency on any of them is declared **without a version** in the bundle `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>org.eclipse.kura</groupId>
+    <artifactId>org.eclipse.kura.api</artifactId>
+</dependency>
+```
+
+Using the versions managed by `kura-bom` guarantees that the bundle is compiled against the same packages that are available in the Kura runtime it targets. When upgrading the add-on to a new Kura version it is enough to change the `kura-bom` version imported in the root `pom.xml`.
+
+Dependencies that are not part of the Kura runtime must be added, with a version, to the `dependencyManagement` of the root `pom.xml`. Remember that such libraries also need to be installed in the Kura framework at runtime, for example by packaging them in the Debian package.
 
 ## Project build
 
-Requirements:
-
-- Java 21
-- Maven 3.9.9 or higher
-
-The first build will require running the `resolve-integration-tests` profile to resolve the dependencies of the integration tests. This is necessary to populate the `bndrun` files with the correct versions of the dependencies.
-
-Run the following command to execute the first build:
+The first build must run the `resolve-integration-tests` profile:
 
 ```bash
-mvn clean install -P resolve-integration-tests
+mvn clean install -Presolve-integration-tests
 ```
 
-The `resolve-integration-tests` profile is only required to run when building the project for the first time and any time the `runrequires` field of the `bndrun` file changes. We suggest adding the `bndrun` files to the source control to avoid losing changes and to have a clear history of the changes made to the test dependencies.
+The `-runbundles` of the generated `integration-test.bndrun` are not populated: the profile enables the `bnd-resolver-maven-plugin`, which computes the set of bundles needed by the integration tests from the `-runrequires` of the `.bndrun` and writes it back in the file. After the first build a plain `mvn clean install` is enough.
 
-The build will produce the following system packages in `distrib/target`:
+Run the profile again whenever the `-runrequires` of the `.bndrun` or the imports of the bundles change. We suggest adding the resolved `.bndrun` files to the source control to have a clear history of the changes made to the test runtime.
 
-- DEB installer (`<artifactId>_<version>_<debian-architecture>.deb`)
+The build will produce the following system packages in `distrib/target/deb`:
+
+- DEB installer (`<package.name>_<version>-<revision>_<debian-architecture>.deb`)
 
 Installer properties like the architecture, organization name, package dependencies, and others can be configured in the `distrib` project.
+
+### Tests
+
+Both kinds of tests run as part of `mvn verify` / `mvn install`:
+
+- **Unit tests**: `maven-surefire-plugin` runs the classes in `src/test/java` of the `.test` module. Reports land in `tests/<package>.test/target/surefire-reports/`.
+- **OSGi integration tests**: `bnd-testing-maven-plugin` starts an Equinox framework with the Kura emulator bundles listed in the `-runbundles` of `integration-test.bndrun`, installs the bundle under test and the test bundle, and runs the test classes selected by `Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}`. Test classes live in `src/main/java` of the `.test` module, since they are part of the test bundle. The framework works in a copy of `tests/test-env` created in `tests/<package>.test/target/test-env` before the run. Reports land in `tests/<package>.test/target/test-reports/integration-test/`.
+
+JaCoCo writes an aggregate coverage report to `tests/<package>.test/target/site/jacoco-aggregate/`.
+
+The bnd resolver only includes in the runtime the bundles that are required, directly or transitively, by the `.bndrun`. The generated `integration-test.bndrun` requires:
+
+- the Kura emulator runtime (`-runrequires.emulator`): configuration, crypto, identity, inventory, status and system services, the emulator bundles, the H2 database, the cloud connection with the embedded Moquette broker, and the HTTP and REST stack
+- the bundle under test and the test bundle itself (`-runrequires`). The symbolic name of the bundle under test comes from the `bundle.under.test` property of the `.test` module `pom.xml`.
+
+To make another Kura bundle available to the integration tests, add it to `-runrequires` and run the `resolve-integration-tests` profile again. The bundles that the resolver can pick from are the dependencies of `tests/pom.xml`, which are indexed by `bnd-indexer-maven-plugin`: the generated list mirrors the full Kura runtime, so it normally does not need changes. A bundle that is not part of the Kura runtime must be added there too, with its version managed in the root `pom.xml`.
+
+!!! note
+    The example integration test, `ExampleComponentItTest`, is itself a Declarative Services component: it obtains the component under test through an `@Reference` filtered on its `kura.service.pid` and waits for it before running the tests. This is the recommended way to obtain Kura services in integration tests.
 
 ### Install and run the generated packages
 
 Depending on the system, the packages can be installed with:
 
 ```shell
-apt install <artifactId>_<version>_<debian-architecture>.deb
+apt install ./<package.name>_<version>-<revision>_<debian-architecture>.deb
 ```
 
-After having installed the package, restart kura with:
+The package depends on `kura-core` version 6: the control file declares `Depends: kura-core (>= 6.0.0~), kura-core (<< 7.0.0~)`.
+
+After having installed the package, restart Kura with:
 
 ```shell
 systemctl restart kura
 ```
 
-During startup Kura will scan the plugins folder to pick up the installed JARs and include them in the framework's runtime.
+During startup Kura will scan the plugins folder to pick up the installed JARs and include them in the framework's runtime. The bundles are installed in the `6s` folder, i.e. at OSGi start level 6 and started automatically. See the comments in `distrib/pom.xml` to use other start levels.
 
 It is possible to remove the installed plugins with:
 
 ```shell
-apt purge <artifactId> # or apt remove <artifactId>
+apt purge <package.name> # or apt remove <package.name>
 ```
 
 ### Debug builds and Release builds
 
-Since version 6.0.0 of the archetype, two type of builds are supported:
+Two type of builds are supported:
 
 - **Debug builds**: active by default, generate artifacts whose version is computed from the timestamp and the `git` commit hash. Versioning scheme: `X.X.X~git{timestamp}.{hash}-{revision}`
 - **Release builds**: generate release-ready artifacts. This build _requires_ that no artifact/version is in "snapshot" mode. A "snapshot" version will result in a build failure. Versioning scheme: `X.X.X-{revision}`.
@@ -178,19 +249,15 @@ Using the following command it is possible to update the version of the project:
 mvn versions:set -DnewVersion=<new-version> -DprocessAllModules=true
 ```
 
-The BOM project and the bundles defined in the dependency management section are updated as well.
-
-Don't forget to update the version in the various `MANIFEST.MF` of the bundles and tests.
+The BOM project and the bundles defined in the dependency management section are updated as well. The OSGi `Bundle-Version` is derived by bnd from the Maven version, so no manifest needs to be edited.
 
 ### Deploy artifacts
 
-As default, the projects are not deployed (they are configured to skip the execution of the `maven-deploy-plugin`). Only the BOM POM (the root `pom.xml`) and the single OSGi bundles are meant to be deployed.
-
-Please add the proper `maven-deploy-plugin` configuration for the bundles that need to be deployed. See the archetype's generated bundle for details.
+By default the root project, the `tests` and the `distrib` modules are not deployed (they are configured to skip the execution of the `maven-deploy-plugin`). Only the BOM (`bom/pom.xml`) and the OSGi bundles are meant to be deployed: the generated bundle re-enables the `maven-deploy-plugin`, use it as a reference for any bundle added to the project.
 
 ## IDE setup
 
-Since the introduction of the bnd archetype, no specific IDE configuration is required to work with the generated projects. The project can be imported in any IDE that supports Maven projects, such as Visual Studio Code, IntelliJ Idea and Eclipse IDE.
+No specific IDE configuration is required to work with the generated projects. The project can be imported in any IDE that supports Maven projects, such as Visual Studio Code, IntelliJ Idea and Eclipse IDE.
 
 ### Importing Projects in Visual Studio Code
 
@@ -262,10 +329,10 @@ The `/distrib/deb/control/control` file contains the DEB package metadata. The s
 
 ```
 Package: [[package.name]]
-Version: [[project.version]]
+Version: [[package.version]]-[[package.revision]]
 Section: admin
 Priority: optional
-Depends: kura
+Depends: kura-core (>= 6.0.0~), kura-core (<< 7.0.0~)
 Architecture: [[deb.architecture]]
 Maintainer: [[deb.maintainer]]
 Description: [[summary]]
@@ -289,10 +356,10 @@ An example of `control` file for the `arm64` architecture is:
 
 ```
 Package: [[package.name]]
-Version: [[project.version]]
+Version: [[package.version]]-[[package.revision]]
 Section: admin
 Priority: optional
-Depends: kura
+Depends: kura-core (>= 6.0.0~), kura-core (<< 7.0.0~)
 Architecture: [[deb.arm64.architecture]]
 Maintainer: [[deb.maintainer]]
 Description: [[summary]]
@@ -313,7 +380,7 @@ Finally, the plugin responsible of generating the DEB package is the `jdeb` plug
     </goals>
     <configuration>
         <verbose>true</verbose>
-        <deb>${basedir}/target/deb/${output.installer.name}_${project.version}_${deb.arm64.architecture}.deb</deb>
+        <deb>${basedir}/target/deb/${package.name}_${package.version}-${package.revision}_${deb.arm64.architecture}.deb</deb>
         <controlDir>${project.basedir}/deb/arm64</controlDir>
         <skipPOMs>false</skipPOMs>
         <dataSet>
@@ -346,11 +413,11 @@ Finally, the plugin responsible of generating the DEB package is the `jdeb` plug
 </execution>
 ```
 
-A similar execution can be used for the `amd64` architecture, just changing the `deb` and `controlDir` fields to point to the correct architecture (and change the execution `id` if they're present at the same time). Also in the `<dataSet>` section, the `src` and `dst` fields must be changed to point to the correct architecture-specific jars.
+The `jar.name`, `jar.aarch64.core` and `native.core.installation.dir` properties used above are not part of the generated project: define them in the `distrib/pom.xml` properties to match your bundle names and installation folders. A similar execution can be used for the `amd64` architecture, just changing the `deb` and `controlDir` fields to point to the correct architecture (and change the execution `id` if they're present at the same time). Also in the `<dataSet>` section, the `src` and `dst` fields must be changed to point to the correct architecture-specific jars.
 
 The final result will consist of two installers, one for each architecture. They will be found in the `distrib/target/deb/` folder with the following names:
 
 ```
-<artifactId>_<version>_<deb.amd64.architecture>.deb
-<artifactId>_<version>_<deb.arm64.architecture>.deb
+<package.name>_<version>-<revision>_<deb.amd64.architecture>.deb
+<package.name>_<version>-<revision>_<deb.arm64.architecture>.deb
 ```

@@ -25,15 +25,15 @@ public class Password {
     private char[] passwordVal;
 
     public Password(String password) {
-        super();
         if (password != null) {
             this.passwordVal = password.toCharArray();
         }
     }
 
     public Password(char[] password) {
-        super();
-        this.passwordVal = password;
+        if (password != null) {
+            this.passwordVal = Arrays.copyOf(password, password.length);
+        }
     }
 
     public char[] getPassword() {

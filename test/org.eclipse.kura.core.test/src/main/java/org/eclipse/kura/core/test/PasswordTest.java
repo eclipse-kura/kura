@@ -23,6 +23,7 @@ import org.junit.Test;
 
 public class PasswordTest {
 
+    private char[] source;
     private Password first;
     private Object second;
 
@@ -78,6 +79,19 @@ public class PasswordTest {
     }
 
     @Test
+    public void passwordsStayEqualWhenSourceArrayIsModified() {
+        givenSourceArray('a', 'b', 'c');
+        givenPasswordFromSourceArray();
+        givenSecondPassword(new char[] { 'a', 'b', 'c' });
+
+        whenSourceArrayIsModified(1, 'x');
+
+        thenPasswordsAreEqual();
+        thenHashCodesAreEqual();
+        thenPasswordValueIs("abc");
+    }
+
+    @Test
     public void passwordsWithNullValueAreEqual() {
         givenPassword((String) null);
         givenSecondPassword((String) null);
@@ -86,8 +100,16 @@ public class PasswordTest {
         thenHashCodesAreEqual();
     }
 
+    private void givenSourceArray(char... value) {
+        this.source = value;
+    }
+
     private void givenPassword(String value) {
         this.first = new Password(value);
+    }
+
+    private void givenPasswordFromSourceArray() {
+        this.first = new Password(this.source);
     }
 
     private void givenSameInstanceAsSecond() {
@@ -110,6 +132,10 @@ public class PasswordTest {
         this.second = null;
     }
 
+    private void whenSourceArrayIsModified(int index, char value) {
+        this.source[index] = value;
+    }
+
     private void thenPasswordsAreEqual() {
         assertTrue(this.first.equals(this.second));
     }
@@ -120,6 +146,10 @@ public class PasswordTest {
 
     private void thenHashCodesAreEqual() {
         assertEquals(this.first.hashCode(), this.second.hashCode());
+    }
+
+    private void thenPasswordValueIs(String expected) {
+        assertEquals(expected, new String(this.first.getPassword()));
     }
 
     private void thenHashCodesAreDifferent() {

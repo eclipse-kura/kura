@@ -16,6 +16,7 @@ package org.eclipse.kura.core.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.eclipse.kura.configuration.Password;
@@ -26,7 +27,6 @@ public class PasswordTest {
     private char[] source;
     private Password first;
     private Object second;
-    private Exception exception;
 
     @Test
     public void sameInstanceIsEqual() {
@@ -93,17 +93,28 @@ public class PasswordTest {
     }
 
     @Test
-    public void nullStringIsRejected() {
-        whenPasswordIsCreatedFrom((String) null);
+    public void passwordsWithNullValueAreEqual() {
+        givenPassword((String) null);
+        givenSecondPassword((char[]) null);
 
-        thenNullPointerExceptionIsThrown();
+        thenPasswordsAreEqual();
+        thenHashCodesAreEqual();
     }
 
     @Test
-    public void nullCharArrayIsRejected() {
-        whenPasswordIsCreatedFrom((char[]) null);
+    public void nullValueHasEmptyStringRepresentation() {
+        givenPassword((String) null);
 
-        thenNullPointerExceptionIsThrown();
+        thenPasswordValueIsNull();
+        thenStringRepresentationIs("");
+    }
+
+    @Test
+    public void passwordWithNullValueIsNotEqualToPasswordWithValue() {
+        givenPassword((String) null);
+        givenSecondPassword("secret");
+
+        thenPasswordsAreNotEqual();
     }
 
     private void givenSourceArray(char... value) {
@@ -142,26 +153,6 @@ public class PasswordTest {
         this.source[index] = value;
     }
 
-    private void whenPasswordIsCreatedFrom(String value) {
-        try {
-            this.first = new Password(value);
-        } catch (Exception e) {
-            this.exception = e;
-        }
-    }
-
-    private void whenPasswordIsCreatedFrom(char[] value) {
-        try {
-            this.first = new Password(value);
-        } catch (Exception e) {
-            this.exception = e;
-        }
-    }
-
-    private void thenNullPointerExceptionIsThrown() {
-        assertTrue(this.exception instanceof NullPointerException);
-    }
-
     private void thenPasswordsAreEqual() {
         assertTrue(this.first.equals(this.second));
     }
@@ -176,6 +167,14 @@ public class PasswordTest {
 
     private void thenPasswordValueIs(String expected) {
         assertEquals(expected, new String(this.first.getPassword()));
+    }
+
+    private void thenPasswordValueIsNull() {
+        assertNull(this.first.getPassword());
+    }
+
+    private void thenStringRepresentationIs(String expected) {
+        assertEquals(expected, this.first.toString());
     }
 
     private void thenHashCodesAreDifferent() {

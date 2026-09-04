@@ -13,7 +13,6 @@
 package org.eclipse.kura.configuration;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -26,11 +25,11 @@ public class Password {
     private final char[] passwordVal;
 
     public Password(String password) {
-        this.passwordVal = Objects.requireNonNull(password).toCharArray();
+        this.passwordVal = password != null ? password.toCharArray() : null;
     }
 
     public Password(char[] password) {
-        this.passwordVal = Arrays.copyOf(Objects.requireNonNull(password), password.length);
+        this.passwordVal = password != null ? Arrays.copyOf(password, password.length) : null;
     }
 
     public char[] getPassword() {
@@ -39,7 +38,7 @@ public class Password {
 
     @Override
     public String toString() {
-        return new String(this.passwordVal);
+        return this.passwordVal != null ? new String(this.passwordVal) : "";
     }
 
     @Override

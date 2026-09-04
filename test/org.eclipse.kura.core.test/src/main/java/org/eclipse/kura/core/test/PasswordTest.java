@@ -26,6 +26,7 @@ public class PasswordTest {
     private char[] source;
     private Password first;
     private Object second;
+    private Exception exception;
 
     @Test
     public void sameInstanceIsEqual() {
@@ -92,12 +93,17 @@ public class PasswordTest {
     }
 
     @Test
-    public void passwordsWithNullValueAreEqual() {
-        givenPassword((String) null);
-        givenSecondPassword((String) null);
+    public void nullStringIsRejected() {
+        whenPasswordIsCreatedFrom((String) null);
 
-        thenPasswordsAreEqual();
-        thenHashCodesAreEqual();
+        thenNullPointerExceptionIsThrown();
+    }
+
+    @Test
+    public void nullCharArrayIsRejected() {
+        whenPasswordIsCreatedFrom((char[]) null);
+
+        thenNullPointerExceptionIsThrown();
     }
 
     private void givenSourceArray(char... value) {
@@ -134,6 +140,26 @@ public class PasswordTest {
 
     private void whenSourceArrayIsModified(int index, char value) {
         this.source[index] = value;
+    }
+
+    private void whenPasswordIsCreatedFrom(String value) {
+        try {
+            this.first = new Password(value);
+        } catch (Exception e) {
+            this.exception = e;
+        }
+    }
+
+    private void whenPasswordIsCreatedFrom(char[] value) {
+        try {
+            this.first = new Password(value);
+        } catch (Exception e) {
+            this.exception = e;
+        }
+    }
+
+    private void thenNullPointerExceptionIsThrown() {
+        assertTrue(this.exception instanceof NullPointerException);
     }
 
     private void thenPasswordsAreEqual() {

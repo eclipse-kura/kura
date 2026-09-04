@@ -13,6 +13,7 @@
 package org.eclipse.kura.configuration;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -22,18 +23,14 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class Password {
 
-    private char[] passwordVal;
+    private final char[] passwordVal;
 
     public Password(String password) {
-        if (password != null) {
-            this.passwordVal = password.toCharArray();
-        }
+        this.passwordVal = Objects.requireNonNull(password).toCharArray();
     }
 
     public Password(char[] password) {
-        if (password != null) {
-            this.passwordVal = Arrays.copyOf(password, password.length);
-        }
+        this.passwordVal = Arrays.copyOf(Objects.requireNonNull(password), password.length);
     }
 
     public char[] getPassword() {

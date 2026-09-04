@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -17,8 +17,6 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -40,9 +38,6 @@ public class KuraException extends Exception {
 
     /** The Constant denoting message pattern. */
     private static final String KURA_GENERIC_MESSAGES_PATTERN = "Generic Error - {0}: {1}";
-
-    /** The Logger. */
-    private static final Logger logger = LogManager.getLogger(KuraException.class);
 
     /** The Constant denoting serial version identifier. */
     private static final long serialVersionUID = 7468633737373095296L;
@@ -201,13 +196,10 @@ public class KuraException extends Exception {
             resourceBundle = ResourceBundle.getBundle(KURA_EXCEPTION_MESSAGES_BUNDLE, locale);
             if (resourceBundle != null && code != null) {
                 messagePattern = resourceBundle.getString(code.name());
-                if (messagePattern == null) {
-                    logger.warn("Could not find Exception Messages for Locale {} and code {}", locale, code);
-                }
             }
         } catch (final MissingResourceException mre) {
-            // log the failure to load a message bundle
-            logger.warn("Could not load Exception Messages Bundle for Locale {}", locale);
+            // no bundle for the locale or no message for the code: use the generic pattern below
+            messagePattern = null;
         }
         // If no bundle or code in the bundle is found, use a generic message
         if (messagePattern == null) {

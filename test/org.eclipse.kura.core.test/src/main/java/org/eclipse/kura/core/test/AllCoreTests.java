@@ -34,7 +34,7 @@ import io.moquette.broker.config.FluentConfig;
 import io.moquette.broker.config.IConfig;
 
 @RunWith(Suite.class)
-@SuiteClasses({ InventoryHandlerTest.class, CommURITest.class, ComponentConfigurationImplTest.class,
+@SuiteClasses({ InventoryHandlerTest.class, CommURITest.class, ComponentConfigurationImplTest.class, PasswordTest.class,
         ConfigurationServiceTest.class, NetUtilTest.class, NetworkServiceTest.class, SystemAdminServiceTest.class })
 public class AllCoreTests {
 

@@ -31,7 +31,10 @@ bin_test/
 
 # VS Code
 javaConfig.json
-.vscode
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
 
 # Code analysis
 .sonar

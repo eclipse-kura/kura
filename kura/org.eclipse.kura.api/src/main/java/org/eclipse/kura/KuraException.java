@@ -12,10 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura;
 
-import java.text.MessageFormat;
 import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -32,12 +29,6 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public class KuraException extends Exception {
-
-    /** The Constant denoting resource bundle. */
-    private static final String KURA_EXCEPTION_MESSAGES_BUNDLE = "org.eclipse.kura.core.messages.KuraExceptionMessagesBundle";
-
-    /** The Constant denoting message pattern. */
-    private static final String KURA_GENERIC_MESSAGES_PATTERN = "Generic Error - {0}: {1}";
 
     /** The Constant denoting serial version identifier. */
     private static final long serialVersionUID = 7468633737373095296L;
@@ -158,19 +149,7 @@ public class KuraException extends Exception {
      * @return the localized message
      */
     private String getLocalizedMessage(final Locale locale) {
-        final String pattern = getMessagePattern(locale, this.code);
-        if (this.code == null || KuraErrorCode.INTERNAL_ERROR.equals(this.code)) {
-            if (this.arguments != null && this.arguments.length > 1) {
-                // append all arguments into a single one
-                final StringBuilder sbAllArgs = new StringBuilder();
-                for (final Object arg : this.arguments) {
-                    sbAllArgs.append(" - ");
-                    sbAllArgs.append(arg);
-                }
-                this.arguments = new Object[] { sbAllArgs.toString() };
-            }
-        }
-        return MessageFormat.format(pattern, this.arguments);
+        return KuraExceptionMessages.localizedMessage(locale, this.code, this.arguments);
     }
 
     /** {@inheritDoc} */
@@ -179,38 +158,4 @@ public class KuraException extends Exception {
         return getLocalizedMessage(Locale.US);
     }
 
-    /**
-     * Gets the message pattern.
-     *
-     * @param locale
-     *            the locale
-     * @param code
-     *            the code
-     * @return the message pattern
-     */
-    private String getMessagePattern(final Locale locale, final KuraErrorCode code) {
-        // Load the message pattern from the bundle
-        String messagePattern = null;
-        ResourceBundle resourceBundle = null;
-        try {
-            resourceBundle = ResourceBundle.getBundle(KURA_EXCEPTION_MESSAGES_BUNDLE, locale);
-            if (resourceBundle != null && code != null) {
-                messagePattern = resourceBundle.getString(code.name());
-            }
-        } catch (final MissingResourceException mre) {
-            // no bundle for the locale or no message for the code: use the generic pattern below
-            messagePattern = null;
-        }
-        // If no bundle or code in the bundle is found, use a generic message
-        if (messagePattern == null) {
-            if (code != null) {
-                // build a generic message format
-                messagePattern = MessageFormat.format(KURA_GENERIC_MESSAGES_PATTERN, code.name());
-            } else {
-                // build a generic message format
-                messagePattern = MessageFormat.format(KURA_GENERIC_MESSAGES_PATTERN, "Unknown");
-            }
-        }
-        return messagePattern;
-    }
 }

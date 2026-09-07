@@ -99,6 +99,8 @@ public class JwtVerificationService implements TokenVerificationService, Configu
 
     @Deactivate
     public synchronized void deactivate() {
+        this.serviceOptions = Optional.empty();
+        this.keystoreTracker.release();
         this.verifier.set(null);
     }
 

@@ -35,10 +35,14 @@ public final class KeystoreTracker {
             return false;
         }
 
-        this.keystoreService = Optional.empty();
-        this.keystoreServicePid = Optional.empty();
+        release();
 
         return true;
+    }
+
+    public void release() {
+        this.keystoreService = Optional.empty();
+        this.keystoreServicePid = Optional.empty();
     }
 
     public boolean isContentChangedBy(final Event event) {

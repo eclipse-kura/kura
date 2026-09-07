@@ -105,6 +105,8 @@ public class JwtIssuingService implements TokenIssuingService, ConfigurableCompo
 
     @Deactivate
     public synchronized void deactivate() {
+        this.serviceOptions = Optional.empty();
+        this.keystoreTracker.release();
         this.state.set(ServiceState.unconfigured());
     }
 

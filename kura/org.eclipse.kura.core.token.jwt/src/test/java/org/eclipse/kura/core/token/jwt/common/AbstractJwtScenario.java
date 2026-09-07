@@ -29,6 +29,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.eclipse.kura.KuraAuthenticationFailedException;
@@ -133,6 +134,14 @@ public abstract class AbstractJwtScenario {
 
     protected void givenTheVerifierIsActivatedWith(final VerificationConfig config) {
         this.verificationService.activate(config.toOcd());
+    }
+
+    protected void givenTheServicesWereDeactivated() {
+        whenTheServicesAreDeactivated();
+    }
+
+    protected void givenTheIssuerReportsMaximumLifetime(final Duration expected) {
+        thenTheIssuerReportsMaximumLifetime(expected);
     }
 
     protected void givenIssuingIsNotAvailableYet() {
@@ -244,6 +253,20 @@ public abstract class AbstractJwtScenario {
 
         this.issuingService.handleEvent(KeystoreFixture.unrelatedEventOnTheKeystoreTopic());
         this.verificationService.handleEvent(KeystoreFixture.unrelatedEventOnTheKeystoreTopic());
+    }
+
+    protected void whenTheServicesAreDeactivated() {
+        this.keystore.forgetRecordedInteractions();
+
+        this.issuingService.deactivate();
+        this.verificationService.deactivate();
+    }
+
+    protected void whenTheKeystoreIsBoundAgain() {
+        this.keystore.forgetRecordedInteractions();
+
+        givenTheIssuerIsBoundToTheKeystore();
+        givenTheVerifierIsBoundToTheKeystore();
     }
 
     protected void whenTheBoundKeystoreIsUnbound() {
@@ -490,6 +513,19 @@ public abstract class AbstractJwtScenario {
     protected void thenTheProofExposesNoTokenId() {
         assertNotNull("expected a verification proof", this.proof);
         assertFalse("expected the proof to expose no jti", this.proof.getTokenID().isPresent());
+    }
+
+    protected void thenTheIssuerReportsMaximumLifetime(final Duration expected) {
+        final Optional<Duration> actual = this.issuingService.getMaximumLifetime();
+
+        assertTrue("expected the issuer to report a maximum lifetime", actual.isPresent());
+        assertEquals(expected, actual.get());
+    }
+
+    protected void thenTheIssuerReportsNoMaximumLifetime() {
+        final Optional<Duration> actual = this.issuingService.getMaximumLifetime();
+
+        assertFalse("expected the issuer to report no maximum lifetime but got " + actual, actual.isPresent());
     }
 
     protected void thenTheKeystoreWasConsultedAgain() throws KuraException {

@@ -63,7 +63,7 @@ public class JwtVerificationService implements TokenVerificationService, Configu
     private final KeystoreTracker keystoreTracker = new KeystoreTracker();
     private Optional<JwtVerificationServiceOptions> serviceOptions = Optional.empty();
 
-    private AtomicReference<JwtVerifier> verifier = new AtomicReference<>();
+    private final AtomicReference<JwtVerifier> verifier = new AtomicReference<>();
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
     public synchronized void setKeystoreService(final KeystoreService keystoreService,

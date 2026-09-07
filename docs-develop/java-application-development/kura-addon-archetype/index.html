@@ -1821,6 +1821,28 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core-services/jwt-services/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    JWT Services
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -3479,6 +3501,25 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generating-a-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generating a project
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Generating a project">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#add-the-generated-sources-to-git" class="md-nav__link">
     <span class="md-ellipsis">
       Add the generated sources to git
@@ -3486,11 +3527,25 @@ You are viewing the documentation relative to the develop branch or to an outdat
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#project-structure" class="md-nav__link">
     <span class="md-ellipsis">
       Project structure
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dependencies
     </span>
   </a>
   
@@ -3505,6 +3560,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
     <nav class="md-nav" aria-label="Project build">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#install-and-run-the-generated-packages" class="md-nav__link">
@@ -4724,6 +4788,25 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Requirements
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generating-a-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generating a project
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Generating a project">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#add-the-generated-sources-to-git" class="md-nav__link">
     <span class="md-ellipsis">
       Add the generated sources to git
@@ -4731,11 +4814,25 @@ You are viewing the documentation relative to the develop branch or to an outdat
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#project-structure" class="md-nav__link">
     <span class="md-ellipsis">
       Project structure
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dependencies
     </span>
   </a>
   
@@ -4750,6 +4847,15 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
     <nav class="md-nav" aria-label="Project build">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests
+    </span>
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#install-and-run-the-generated-packages" class="md-nav__link">
@@ -4890,50 +4996,102 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 
 <h1 id="kura-addon-archetype">Kura Addon Archetype</h1>
-<p>The Kura Addon Archetype is a <a href="https://maven.apache.org/guides/introduction/introduction-to-archetypes.html">Maven Archetype</a> that allows to create a development environment with the following features:</p>
+<p>The Kura Addon Archetype is a <a href="https://maven.apache.org/guides/introduction/introduction-to-archetypes.html">Maven Archetype</a> that bootstraps an Eclipse Kura add-on project. A generated project comes with:</p>
 <ul>
-<li>Maven-based build</li>
-<li>Template project for creating DEB packages</li>
-<li><a href="https://bnd.bndtools.org/chapters/310-testing.html">bnd</a> based integration test template</li>
+<li>a Maven + <a href="https://bnd.bndtools.org/">bnd</a> build targeting Java 21 and OSGi</li>
+<li>an example bundle using Declarative Services and Metatype annotations (a <code>ConfigurableComponent</code>, its OCD and its configuration options)</li>
+<li>a bill of materials (<code>-bom</code>) listing the bundles the project releases</li>
+<li>unit tests (JUnit 4 + Mockito) and <a href="https://bnd.bndtools.org/chapters/310-testing.html">OSGi integration tests</a> run by bnd against an embedded Kura framework</li>
+<li>a template project producing a Debian (<code>.deb</code>) package</li>
 </ul>
-<p>The Kura Archetype JAR (<code>kura-addon-archetype-&lt;kura-version&gt;.jar</code>) is available in the released artifacts and can be installed in the local maven repository with the following command:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mvn<span class="w"> </span>install:install-file<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>-Dfile<span class="o">=</span>./kura-addon-archetype-&lt;kura-version&gt;.jar<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>-DgroupId<span class="o">=</span>org.eclipse.kura<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>-DartifactId<span class="o">=</span>kura-addon-archetype<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>-Dversion<span class="o">=</span><span class="s2">&quot;&lt;kura-version&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>-Dpackaging<span class="o">=</span>jar<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>-DgeneratePom<span class="o">=</span><span class="nb">true</span>
+<p>The archetype is developed in the <a href="https://github.com/eclipse-kura/kura-archetype">eclipse-kura/kura-archetype</a> repository and is published on Maven Central as <code>org.eclipse.kura:kura-addon-archetype</code>, so no installation step is required: Maven downloads it on first use. It is available since Kura 6.0.0 and its version matches the Kura version it targets: use <code>6.0.0</code> to generate an add-on for Kura 6. All the Kura dependencies of the generated project are resolved through the Kura bill of materials, <code>org.eclipse.kura:kura-bom</code>, of the same version.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Snapshot builds of the archetype are published to the <a href="https://repo.eclipse.org/content/repositories/kura-snapshots/">Kura snapshots repository</a>. To generate a project with a <code>-SNAPSHOT</code> version of the archetype, declare that repository in your <code>~/.m2/settings.xml</code>.</p>
+</div>
+<h2 id="requirements">Requirements</h2>
+<ul>
+<li><strong>JDK 21</strong>: the generated project sets <code>maven.compiler.release=21</code>.</li>
+<li><strong>Maven 3.9.x</strong></li>
+<li><strong>git</strong>: required to build a generated project, the <code>git-commit-id-maven-plugin</code> reads the commit hash that goes into the Debian package version.</li>
+</ul>
+<h2 id="generating-a-project">Generating a project</h2>
+<p>In interactive mode, Maven prompts for every property:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mvn<span class="w"> </span>archetype:generate<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>-DarchetypeGroupId<span class="o">=</span>org.eclipse.kura<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span>-DarchetypeArtifactId<span class="o">=</span>kura-addon-archetype<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span>-DarchetypeVersion<span class="o">=</span>&lt;kura-version&gt;
 </code></pre></div>
-<p>Valid <code>&lt;kura-version&gt;</code> values are <code>6.0.0-SNAPSHOT</code> and <code>6.0.0</code>. This archetype is available since Kura 6.0.0.</p>
-<p>After that, it is possible to generate a project skeleton using the archetype with the following command:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mvn<span class="w"> </span>archetype:generate<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>-DarchetypeArtifactId<span class="o">=</span>kura-addon-archetype<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>-DarchetypeGroupId<span class="o">=</span>org.eclipse.kura<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>-DarchetypeVersion<span class="o">=</span><span class="s2">&quot;&lt;kura-version&gt;&quot;</span>
-</code></pre></div>
-<p>The command will start the generation of the archetype in interactive mode.</p>
 <p><img alt="" src="../images/kura-addon-archetype/archetype-generate.png" /></p>
-<p>Maven will ask for a few parameters on the command line:</p>
-<ul>
-<li><strong>groupId</strong> : the Maven group id of the generated POM files</li>
-<li><strong>artifactId</strong>: the Maven artifact id of the generated parent pom file, and the name of the generated top level project folder</li>
-<li><strong>package</strong>: the base Java package and the main artifact of the project</li>
-</ul>
-<p>The official Kura addons naming rule is:</p>
+<p>The same result can be obtained in one shot:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mvn<span class="w"> </span>-B<span class="w"> </span>archetype:generate<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span>-DarchetypeGroupId<span class="o">=</span>org.eclipse.kura<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span>-DarchetypeArtifactId<span class="o">=</span>kura-addon-archetype<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span>-DarchetypeVersion<span class="o">=</span>&lt;kura-version&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span>-DgroupId<span class="o">=</span>org.eclipse.kura<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span>-DartifactId<span class="o">=</span>kura-myfeature<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span>-Dpackage<span class="o">=</span>org.eclipse.kura.myfeature<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span>-Dversion<span class="o">=</span><span class="m">1</span>.0.0-SNAPSHOT<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span>-DmainBundleVendor<span class="o">=</span><span class="s2">&quot;Eclipse Kura&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span>-DkuraVersion<span class="o">=</span>&lt;kura-version&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span>-Dyear<span class="o">=</span><span class="m">2026</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Meaning</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>groupId</code></td>
+<td>Maven group id of every generated module</td>
+<td><em>prompted</em></td>
+</tr>
+<tr>
+<td><code>artifactId</code></td>
+<td>artifact id of the root project and name of the top level folder</td>
+<td><em>prompted</em></td>
+</tr>
+<tr>
+<td><code>package</code></td>
+<td>base Java package <strong>and</strong> artifact id / OSGi symbolic name of the main bundle</td>
+<td><em>prompted</em></td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td>version of the generated project</td>
+<td><code>1.0.0-SNAPSHOT</code></td>
+</tr>
+<tr>
+<td><code>mainBundleVendor</code></td>
+<td>vendor name of the add-on</td>
+<td><code>Eclipse Kura</code></td>
+</tr>
+<tr>
+<td><code>kuraVersion</code></td>
+<td>version of the Kura bill of materials (<code>org.eclipse.kura:kura-bom</code>) used to resolve the dependencies</td>
+<td>the archetype version</td>
+</tr>
+<tr>
+<td><code>year</code></td>
+<td>year written in the copyright headers of the generated files</td>
+<td>the year the archetype was built</td>
+</tr>
+</tbody>
+</table>
+<p>In interactive mode the optional properties can be changed by answering <code>n</code> at the <code>Confirm properties configuration</code> prompt. The prompt also shows <code>archetypeVersion</code>, which never needs to be set: it defaults to the version of the archetype in use and is recorded as a comment in the generated root <code>pom.xml</code>, so a project always states what generated it.</p>
+<p>The official Kura add-ons naming rule is:</p>
 <ul>
 <li><strong>groupId</strong> = <code>org.eclipse.kura</code></li>
 <li><strong>artifactId</strong> = repository name: <code>kura-&lt;feature&gt;</code> (e.g. <code>kura-wires</code>)</li>
 <li><strong>package</strong> = <code>org.eclipse.kura.&lt;feature&gt;</code> (e.g. <code>org.eclipse.kura.wires</code>)</li>
 </ul>
-<p><strong>It is not allowed to generate a project with artifactId = package</strong>.</p>
-<p>The following optional parameters can be changed by answering <code>n</code> after the <code>Confirm properties configuration</code> prompt, which appears after editing the properties above:</p>
-<ul>
-<li><strong>version</strong>: the generated project's version. Defaults to <em>1.0.0-SNAPSHOT</em></li>
-<li><strong>mainBundleVendor</strong>: the name of the vendor to use in the metadata. Defaults to <em>Eclipse Kura</em></li>
-<li><strong>kuraVersion</strong>: the version of the Kura bill-of-materials, used to resolve dependencies. Defaults to <em>6.0.0[-SNAPSHOT]</em></li>
-<li><strong>year</strong>: the year to use in the copyright headers, which by default have the following format:
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Copyright (c) ${year} Eurotech and/or its affiliates and others
+<p><strong>It is not allowed to generate a project with artifactId = package</strong>: the root project and the main bundle are separate Maven modules.</p>
+<p>The generated files carry the following copyright header, where <code>${year}</code> is the value of the <code>year</code> property:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Copyright (c) ${year} Eurotech and/or its affiliates and others
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>This program and the accompanying materials are made
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>available under the terms of the Eclipse Public License 2.0
@@ -4943,9 +5101,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
 <a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>Contributors:
 <a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a> Eurotech
-</code></pre></div></li>
-</ul>
-<p>A <code>.gitignore</code> file is automatically added with a default configuration. The <code>OSGI-INF</code> folder is omitted because it will be generated during tests at compile-time (this is necessary to make the PDE launcher work).</p>
+</code></pre></div>
+<p>A <code>.gitignore</code> file is added with a default configuration that ignores, among others, the <code>OSGI-INF</code> folder and the flattened POMs, which are generated at build time.</p>
 <h3 id="add-the-generated-sources-to-git">Add the generated sources to <code>git</code></h3>
 <p>The project <em>requires</em> source control management via <code>git</code> to correctly build. To add the project to <code>git</code> run the following:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>git<span class="w"> </span>init
@@ -4959,58 +5116,92 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>├── .gitignore
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>├── pom.xml
 <a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>├── bom
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>│   └── pom.xml
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>├── distrib
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>│   ├── deb
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>│   └── pom.xml
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>├── org.eclipse.kura.myfeature
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>│   ├── pom.xml
-<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>│   └── src
-<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>└── tests
-<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    ├── org.eclipse.kura.myfeature.test
-<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    ├── pom.xml
-<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>    └── test-env
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>│   └── pom.xml
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>├── org.eclipse.kura.myfeature
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>│   ├── pom.xml
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>│   ├── about.html
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>│   ├── about_files
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>│   └── src/main/java
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>├── distrib
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>│   ├── deb/control/control
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>│   └── pom.xml
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>└── tests
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>    ├── pom.xml
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>    ├── test-env
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>    └── org.eclipse.kura.myfeature.test
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>        ├── integration-test.bndrun
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>        ├── pom.xml
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>        ├── src/main/java   (OSGi integration tests)
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>        └── src/test/java   (unit tests)
 </code></pre></div>
 <ul>
 <li>
-<p><strong>bom</strong>: this project's bill-of-materials, containing the list of all the bundles that this project will deploy. It is intended to be consumed by other projects</p>
+<p><strong>pom.xml</strong>: the root project. It imports the Kura bill of materials (<code>org.eclipse.kura:kura-bom:${kuraVersion}</code>) in its <code>dependencyManagement</code> and configures the bnd Maven plugins, the checkstyle validation with the Kura rules and the flatten plugin.</p>
 </li>
 <li>
-<p><strong>tests</strong>: contains unit tests and OSGi integration tests executed via the <code>bnd-testing-maven-plugin</code>.</p>
+<p><strong>bom</strong>: this project's bill of materials, listing all the bundles that this project deploys. It is intended to be consumed by other projects.</p>
 </li>
 <li>
-<p><strong>distrib</strong>: a packaging project that builds a Debian (<code>.deb</code>) package. The package installs the JAR produced by the bundles into Kura’s plugins directory at <code>/opt/eclipse/kura/plugins</code>. You should review and adjust this project to match your target architecture and packaging requirements; the source is annotated with comments indicating the main configuration points</p>
+<p><strong>org.eclipse.kura.myfeature</strong>: the OSGi bundle, built by <code>bnd-maven-plugin</code>. The manifest is generated by bnd from the <code>&lt;bnd&gt;</code> instructions in the <code>pom.xml</code> and from the Declarative Services and Metatype annotations in the sources, so there is no <code>MANIFEST.MF</code> nor <code>OSGI-INF</code> folder to maintain.</p>
+</li>
+<li>
+<p><strong>tests</strong>: the tests aggregator. Its <code>pom.xml</code> declares the Kura runtime bundles indexed for the OSGi integration tests, <code>test-env</code> contains the Kura framework configuration used by the integration tests (<code>kura.properties</code>, <code>log4j.xml</code>, the initial snapshot) and the <code>.test</code> module contains unit tests, run by <code>maven-surefire-plugin</code>, and OSGi integration tests, run by <code>bnd-testing-maven-plugin</code>.</p>
+</li>
+<li>
+<p><strong>distrib</strong>: a packaging project that builds a Debian (<code>.deb</code>) package. The package installs the JAR produced by the bundles into Kura's plugins directory at <code>/opt/eclipse/kura/plugins</code>. You should review and adjust this project to match your target architecture and packaging requirements; the source is annotated with comments indicating the main configuration points.</p>
 </li>
 </ul>
+<h2 id="dependencies">Dependencies</h2>
+<p>The Kura bill of materials manages the versions of every Kura bundle and of every third-party library that is part of the Kura runtime (OSGi, Equinox, Jetty, Jersey, log4j, BouncyCastle, Netty, ...). A dependency on any of them is declared <strong>without a version</strong> in the bundle <code>pom.xml</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">&lt;dependency&gt;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="nt">&lt;groupId&gt;</span>org.eclipse.kura<span class="nt">&lt;/groupId&gt;</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>org.eclipse.kura.api<span class="nt">&lt;/artifactId&gt;</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="nt">&lt;/dependency&gt;</span>
+</code></pre></div>
+<p>Using the versions managed by <code>kura-bom</code> guarantees that the bundle is compiled against the same packages that are available in the Kura runtime it targets. When upgrading the add-on to a new Kura version it is enough to change the <code>kura-bom</code> version imported in the root <code>pom.xml</code>.</p>
+<p>Dependencies that are not part of the Kura runtime must be added, with a version, to the <code>dependencyManagement</code> of the root <code>pom.xml</code>. Remember that such libraries also need to be installed in the Kura framework at runtime, for example by packaging them in the Debian package.</p>
 <h2 id="project-build">Project build</h2>
-<p>Requirements:</p>
-<ul>
-<li>Java 21</li>
-<li>Maven 3.9.9 or higher</li>
-</ul>
-<p>The first build will require running the <code>resolve-integration-tests</code> profile to resolve the dependencies of the integration tests. This is necessary to populate the <code>bndrun</code> files with the correct versions of the dependencies.</p>
-<p>Run the following command to execute the first build:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>mvn<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-P<span class="w"> </span>resolve-integration-tests
+<p>The first build must run the <code>resolve-integration-tests</code> profile:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mvn<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-Presolve-integration-tests
 </code></pre></div>
-<p>The <code>resolve-integration-tests</code> profile is only required to run when building the project for the first time and any time the <code>runrequires</code> field of the <code>bndrun</code> file changes. We suggest adding the <code>bndrun</code> files to the source control to avoid losing changes and to have a clear history of the changes made to the test dependencies.</p>
-<p>The build will produce the following system packages in <code>distrib/target</code>:</p>
+<p>The <code>-runbundles</code> of the generated <code>integration-test.bndrun</code> are not populated: the profile enables the <code>bnd-resolver-maven-plugin</code>, which computes the set of bundles needed by the integration tests from the <code>-runrequires</code> of the <code>.bndrun</code> and writes it back in the file. After the first build a plain <code>mvn clean install</code> is enough.</p>
+<p>Run the profile again whenever the <code>-runrequires</code> of the <code>.bndrun</code> or the imports of the bundles change. We suggest adding the resolved <code>.bndrun</code> files to the source control to have a clear history of the changes made to the test runtime.</p>
+<p>The build will produce the following system packages in <code>distrib/target/deb</code>:</p>
 <ul>
-<li>DEB installer (<code>&lt;artifactId&gt;_&lt;version&gt;_&lt;debian-architecture&gt;.deb</code>)</li>
+<li>DEB installer (<code>&lt;package.name&gt;_&lt;version&gt;-&lt;revision&gt;_&lt;debian-architecture&gt;.deb</code>)</li>
 </ul>
 <p>Installer properties like the architecture, organization name, package dependencies, and others can be configured in the <code>distrib</code> project.</p>
+<h3 id="tests">Tests</h3>
+<p>Both kinds of tests run as part of <code>mvn verify</code> / <code>mvn install</code>:</p>
+<ul>
+<li><strong>Unit tests</strong>: <code>maven-surefire-plugin</code> runs the classes in <code>src/test/java</code> of the <code>.test</code> module. Reports land in <code>tests/&lt;package&gt;.test/target/surefire-reports/</code>.</li>
+<li><strong>OSGi integration tests</strong>: <code>bnd-testing-maven-plugin</code> starts an Equinox framework with the Kura emulator bundles listed in the <code>-runbundles</code> of <code>integration-test.bndrun</code>, installs the bundle under test and the test bundle, and runs the test classes selected by <code>Test-Cases: ${classes;CONCRETE;PUBLIC;NAMED;*Test}</code>. Test classes live in <code>src/main/java</code> of the <code>.test</code> module, since they are part of the test bundle. The framework works in a copy of <code>tests/test-env</code> created in <code>tests/&lt;package&gt;.test/target/test-env</code> before the run. Reports land in <code>tests/&lt;package&gt;.test/target/test-reports/integration-test/</code>.</li>
+</ul>
+<p>JaCoCo writes an aggregate coverage report to <code>tests/&lt;package&gt;.test/target/site/jacoco-aggregate/</code>.</p>
+<p>The bnd resolver only includes in the runtime the bundles that are required, directly or transitively, by the <code>.bndrun</code>. The generated <code>integration-test.bndrun</code> requires:</p>
+<ul>
+<li>the Kura emulator runtime (<code>-runrequires.emulator</code>): configuration, crypto, identity, inventory, status and system services, the emulator bundles, the H2 database, the cloud connection with the embedded Moquette broker, and the HTTP and REST stack</li>
+<li>the bundle under test and the test bundle itself (<code>-runrequires</code>). The symbolic name of the bundle under test comes from the <code>bundle.under.test</code> property of the <code>.test</code> module <code>pom.xml</code>.</li>
+</ul>
+<p>To make another Kura bundle available to the integration tests, add it to <code>-runrequires</code> and run the <code>resolve-integration-tests</code> profile again. The bundles that the resolver can pick from are the dependencies of <code>tests/pom.xml</code>, which are indexed by <code>bnd-indexer-maven-plugin</code>: the generated list mirrors the full Kura runtime, so it normally does not need changes. A bundle that is not part of the Kura runtime must be added there too, with its version managed in the root <code>pom.xml</code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The example integration test, <code>ExampleComponentItTest</code>, is itself a Declarative Services component: it obtains the component under test through an <code>@Reference</code> filtered on its <code>kura.service.pid</code> and waits for it before running the tests. This is the recommended way to obtain Kura services in integration tests.</p>
+</div>
 <h3 id="install-and-run-the-generated-packages">Install and run the generated packages</h3>
 <p>Depending on the system, the packages can be installed with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>apt<span class="w"> </span>install<span class="w"> </span>&lt;artifactId&gt;_&lt;version&gt;_&lt;debian-architecture&gt;.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>apt<span class="w"> </span>install<span class="w"> </span>./&lt;package.name&gt;_&lt;version&gt;-&lt;revision&gt;_&lt;debian-architecture&gt;.deb
 </code></pre></div>
-<p>After having installed the package, restart kura with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>systemctl<span class="w"> </span>restart<span class="w"> </span>kura
+<p>The package depends on <code>kura-core</code> version 6: the control file declares <code>Depends: kura-core (&gt;= 6.0.0~), kura-core (&lt;&lt; 7.0.0~)</code>.</p>
+<p>After having installed the package, restart Kura with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>systemctl<span class="w"> </span>restart<span class="w"> </span>kura
 </code></pre></div>
-<p>During startup Kura will scan the plugins folder to pick up the installed JARs and include them in the framework's runtime.</p>
+<p>During startup Kura will scan the plugins folder to pick up the installed JARs and include them in the framework's runtime. The bundles are installed in the <code>6s</code> folder, i.e. at OSGi start level 6 and started automatically. See the comments in <code>distrib/pom.xml</code> to use other start levels.</p>
 <p>It is possible to remove the installed plugins with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>apt<span class="w"> </span>purge<span class="w"> </span>&lt;artifactId&gt;<span class="w"> </span><span class="c1"># or apt remove &lt;artifactId&gt;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>apt<span class="w"> </span>purge<span class="w"> </span>&lt;package.name&gt;<span class="w"> </span><span class="c1"># or apt remove &lt;package.name&gt;</span>
 </code></pre></div>
 <h3 id="debug-builds-and-release-builds">Debug builds and Release builds</h3>
-<p>Since version 6.0.0 of the archetype, two type of builds are supported:</p>
+<p>Two type of builds are supported:</p>
 <ul>
 <li><strong>Debug builds</strong>: active by default, generate artifacts whose version is computed from the timestamp and the <code>git</code> commit hash. Versioning scheme: <code>X.X.X~git{timestamp}.{hash}-{revision}</code></li>
 <li><strong>Release builds</strong>: generate release-ready artifacts. This build <em>requires</em> that no artifact/version is in "snapshot" mode. A "snapshot" version will result in a build failure. Versioning scheme: <code>X.X.X-{revision}</code>.</li>
@@ -5018,19 +5209,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>The build defaults to the <code>debugBuild</code> profile, if the <code>-DreleaseBuild</code> parameter is specified, the build selects the <code>releaseBuild</code> profile.</p>
 <p>By default the <code>package.revision</code> is set to <code>1</code>. It can be overridden via CLI using the <code>-Dpackage.revision=N</code> parameters.</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mvn<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-Dpackage.revision<span class="o">=</span><span class="m">6</span><span class="w"> </span>-DreleaseBuild
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>mvn<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-Dpackage.revision<span class="o">=</span><span class="m">6</span><span class="w"> </span>-DreleaseBuild
 </code></pre></div>
 <h3 id="versions-uptick">Versions uptick</h3>
 <p>Using the following command it is possible to update the version of the project:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>mvn<span class="w"> </span>versions:set<span class="w"> </span>-DnewVersion<span class="o">=</span>&lt;new-version&gt;<span class="w"> </span>-DprocessAllModules<span class="o">=</span><span class="nb">true</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>mvn<span class="w"> </span>versions:set<span class="w"> </span>-DnewVersion<span class="o">=</span>&lt;new-version&gt;<span class="w"> </span>-DprocessAllModules<span class="o">=</span><span class="nb">true</span>
 </code></pre></div>
-<p>The BOM project and the bundles defined in the dependency management section are updated as well.</p>
-<p>Don't forget to update the version in the various <code>MANIFEST.MF</code> of the bundles and tests.</p>
+<p>The BOM project and the bundles defined in the dependency management section are updated as well. The OSGi <code>Bundle-Version</code> is derived by bnd from the Maven version, so no manifest needs to be edited.</p>
 <h3 id="deploy-artifacts">Deploy artifacts</h3>
-<p>As default, the projects are not deployed (they are configured to skip the execution of the <code>maven-deploy-plugin</code>). Only the BOM POM (the root <code>pom.xml</code>) and the single OSGi bundles are meant to be deployed.</p>
-<p>Please add the proper <code>maven-deploy-plugin</code> configuration for the bundles that need to be deployed. See the archetype's generated bundle for details.</p>
+<p>By default the root project, the <code>tests</code> and the <code>distrib</code> modules are not deployed (they are configured to skip the execution of the <code>maven-deploy-plugin</code>). Only the BOM (<code>bom/pom.xml</code>) and the OSGi bundles are meant to be deployed: the generated bundle re-enables the <code>maven-deploy-plugin</code>, use it as a reference for any bundle added to the project.</p>
 <h2 id="ide-setup">IDE setup</h2>
-<p>Since the introduction of the bnd archetype, no specific IDE configuration is required to work with the generated projects. The project can be imported in any IDE that supports Maven projects, such as Visual Studio Code, IntelliJ Idea and Eclipse IDE.</p>
+<p>No specific IDE configuration is required to work with the generated projects. The project can be imported in any IDE that supports Maven projects, such as Visual Studio Code, IntelliJ Idea and Eclipse IDE.</p>
 <h3 id="importing-projects-in-visual-studio-code">Importing Projects in Visual Studio Code</h3>
 <p>To import the project in Visual Studio Code, open the root folder of the project. Refer to the <a href="https://code.visualstudio.com/docs/java/java-project">VSCode documentation</a> for more details on how to work with Java projects in VSCode.</p>
 <p><strong>Suggested extensions</strong>:</p>
@@ -5057,96 +5246,96 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>The Addon Archetype standard procedure allows to build generic Debian installers not dependant on the architecture on which the bundle will be installed.</p>
 <p>However, it is possible to customise the files in the <code>distrib</code> folder to develop architecture-dependant installers: this might be necessary when a bundle contains native code (C/C++ libraries, jars that use JNI, etc.) or architecture-specific files (e.g. a systemd service file).</p>
 <p>In the following sections we will see how this can be accomplished for the DEB packages. These steps assume that architecture-specific jars are built in the form of fragments of the architecture-agnostic java code. The architecture-specific jars will then be copied in the <code>distrib</code> folder and included in the package. For example, given the following bundles structure:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>org.eclipse.kura.myartifact
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>org.eclipse.kura.myartifact.aarch64
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>org.eclipse.kura.myartifact.x86_64
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>....
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>org.eclipse.kura.myartifact
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>org.eclipse.kura.myartifact.aarch64
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>org.eclipse.kura.myartifact.x86_64
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>....
 </code></pre></div>
 <p>The <code>org.eclipse.kura.myartifact.bundle</code> contains the agnostic code, while the <code>org.eclipse.kura.myartifact.aarch64</code> and <code>org.eclipse.kura.myartifact.x86_64</code> fragments contain the architecture-specific code.</p>
 <p>The objective is to produce two debian packages, one for each of the supported architectures. It is possible to modify the <code>pom.xml</code> in <code>distrib</code> to produce the correct metadata for the installers (see section below). Each debian package will install the main bundle and the relative fragment that matches the target environment. For example, the <em>aarch64</em> deb package will install:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>/opt/eclipse/kura/plugins/&lt;start-level&gt;s/org.eclipse.kura.myartifact-&lt;version&gt;.jar
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>/opt/eclipse/kura/plugins/&lt;start-level&gt;/org.eclipse.kura.myartifact.aarch64-&lt;version&gt;.jar
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>/opt/eclipse/kura/plugins/&lt;start-level&gt;s/org.eclipse.kura.myartifact-&lt;version&gt;.jar
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>/opt/eclipse/kura/plugins/&lt;start-level&gt;/org.eclipse.kura.myartifact.aarch64-&lt;version&gt;.jar
 </code></pre></div>
 <p>Note that the fragment <code>org.eclipse.kura.myartifact.aarch64-&lt;version&gt;.jar</code> is put in a plugins folder that is not ending with <code>s</code> since fragments can never be started as they don't have their own lifecycle.</p>
 <h3 id="create-architecture-dependant-installers">Create architecture dependant installers</h3>
 <p>The <code>/distrib/deb/control/control</code> file contains the DEB package metadata. The standard file is configured as follows:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>Package: [[package.name]]
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>Version: [[project.version]]
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>Section: admin
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>Priority: optional
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>Depends: kura
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>Architecture: [[deb.architecture]]
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>Maintainer: [[deb.maintainer]]
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>Description: [[summary]]
-<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>  [[long.description]]
-<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>Homepage: [[deb.docs]]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>Package: [[package.name]]
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>Version: [[package.version]]-[[package.revision]]
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>Section: admin
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>Priority: optional
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>Depends: kura-core (&gt;= 6.0.0~), kura-core (&lt;&lt; 7.0.0~)
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>Architecture: [[deb.architecture]]
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>Maintainer: [[deb.maintainer]]
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>Description: [[summary]]
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>  [[long.description]]
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>Homepage: [[deb.docs]]
 </code></pre></div>
 <p>The Architecture field is the one responsible to specify the architecture of the package. The value is set in the <code>/distrib/pom.xml</code> file, by the property <code>&lt;deb.architecture&gt;all&lt;/deb.architecture&gt;</code>. The value <code>all</code> means that the package can be installed on any architecture. This is the recommended value for packages that do not contain architecture-specific files.</p>
 <p>To build a package that contains architecture-specific files, it is necessary to separate the control files of the different architectures (namely, <code>aarch64</code> and <code>amd64</code>). To do so, create two directories in the <code>distrib/deb/</code> folder with this structure:</p>
-<p><div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>distrib
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>├── deb
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>│   ├── amd64
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>│   ├── arm64
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>distrib
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>├── deb
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>│   ├── amd64
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>│   ├── arm64
 </code></pre></div>
 Each <code>control</code> file must be created in the <code>distrib/deb/&lt;arch&gt;/</code> folder. These folders can also contain the <code>postinst</code> and <code>postrm</code> files, used to execute commands after the installation and before the removal of the package. The content of these files is not relevant for this example, but they can be used to execute commands that are necessary for the correct installation of the package.</p>
 <p>An example of <code>control</code> file for the <code>arm64</code> architecture is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>Package: [[package.name]]
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>Version: [[project.version]]
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>Section: admin
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>Priority: optional
-<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>Depends: kura
-<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>Architecture: [[deb.arm64.architecture]]
-<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>Maintainer: [[deb.maintainer]]
-<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>Description: [[summary]]
-<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>  [[long.description]]
-<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>Homepage: [[deb.docs]]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>Package: [[package.name]]
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>Version: [[package.version]]-[[package.revision]]
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>Section: admin
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>Priority: optional
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>Depends: kura-core (&gt;= 6.0.0~), kura-core (&lt;&lt; 7.0.0~)
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>Architecture: [[deb.arm64.architecture]]
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>Maintainer: [[deb.maintainer]]
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>Description: [[summary]]
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>  [[long.description]]
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>Homepage: [[deb.docs]]
 </code></pre></div>
 <p>The same file for the <code>amd64</code> architecture will just change the <code>Architecture</code> field to <code>[[deb.amd64.architecture]]</code>.</p>
 <p>Finally, the plugin responsible of generating the DEB package is the <code>jdeb</code> plugin. To build the architecture-dependant installers, the execution must change to:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nt">&lt;execution&gt;</span>
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">    </span><span class="nt">&lt;id&gt;</span>generate-arm64-deb<span class="nt">&lt;/id&gt;</span>
-<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">    </span><span class="nt">&lt;phase&gt;</span>package<span class="nt">&lt;/phase&gt;</span>
-<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">    </span><span class="nt">&lt;goals&gt;</span>
-<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">        </span><span class="nt">&lt;goal&gt;</span>jdeb<span class="nt">&lt;/goal&gt;</span>
-<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">    </span><span class="nt">&lt;/goals&gt;</span>
-<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="w">    </span><span class="nt">&lt;configuration&gt;</span>
-<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="w">        </span><span class="nt">&lt;verbose&gt;</span>true<span class="nt">&lt;/verbose&gt;</span>
-<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="w">        </span><span class="nt">&lt;deb&gt;</span>${basedir}/target/deb/${output.installer.name}_${project.version}_${deb.arm64.architecture}.deb<span class="nt">&lt;/deb&gt;</span>
-<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="w">        </span><span class="nt">&lt;controlDir&gt;</span>${project.basedir}/deb/arm64<span class="nt">&lt;/controlDir&gt;</span>
-<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a><span class="w">        </span><span class="nt">&lt;skipPOMs&gt;</span>false<span class="nt">&lt;/skipPOMs&gt;</span>
-<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a><span class="w">        </span><span class="nt">&lt;dataSet&gt;</span>
-<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a><span class="w">            </span><span class="nt">&lt;data&gt;</span>
-<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a><span class="w">                </span><span class="nt">&lt;src&gt;</span>${basedir}/target/plugins/${jar.name}-${project.version}.jar<span class="nt">&lt;/src&gt;</span>
-<a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a><span class="w">                </span><span class="nt">&lt;dst&gt;</span>${jar.name}-${project.version}.jar<span class="nt">&lt;/dst&gt;</span>
-<a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a><span class="w">                </span><span class="nt">&lt;type&gt;</span>file<span class="nt">&lt;/type&gt;</span>
-<a id="__codelineno-16-17" name="__codelineno-16-17" href="#__codelineno-16-17"></a><span class="w">                </span><span class="nt">&lt;mapper&gt;</span>
-<a id="__codelineno-16-18" name="__codelineno-16-18" href="#__codelineno-16-18"></a><span class="w">                    </span><span class="nt">&lt;type&gt;</span>perm<span class="nt">&lt;/type&gt;</span>
-<a id="__codelineno-16-19" name="__codelineno-16-19" href="#__codelineno-16-19"></a><span class="w">                    </span><span class="nt">&lt;prefix&gt;</span>${addon.installation.dir}<span class="nt">&lt;/prefix&gt;</span>
-<a id="__codelineno-16-20" name="__codelineno-16-20" href="#__codelineno-16-20"></a><span class="w">                    </span><span class="nt">&lt;user&gt;</span>kurad<span class="nt">&lt;/user&gt;</span>
-<a id="__codelineno-16-21" name="__codelineno-16-21" href="#__codelineno-16-21"></a><span class="w">                    </span><span class="nt">&lt;group&gt;</span>kurad<span class="nt">&lt;/group&gt;</span>
-<a id="__codelineno-16-22" name="__codelineno-16-22" href="#__codelineno-16-22"></a><span class="w">                    </span><span class="nt">&lt;filemode&gt;</span>600<span class="nt">&lt;/filemode&gt;</span>
-<a id="__codelineno-16-23" name="__codelineno-16-23" href="#__codelineno-16-23"></a><span class="w">                </span><span class="nt">&lt;/mapper&gt;</span>
-<a id="__codelineno-16-24" name="__codelineno-16-24" href="#__codelineno-16-24"></a><span class="w">            </span><span class="nt">&lt;/data&gt;</span>
-<a id="__codelineno-16-25" name="__codelineno-16-25" href="#__codelineno-16-25"></a><span class="w">            </span><span class="nt">&lt;data&gt;</span>
-<a id="__codelineno-16-26" name="__codelineno-16-26" href="#__codelineno-16-26"></a><span class="w">                </span><span class="nt">&lt;src&gt;</span>${basedir}/target/plugins/${jar.aarch64.core}-${project.version}.jar<span class="nt">&lt;/src&gt;</span>
-<a id="__codelineno-16-27" name="__codelineno-16-27" href="#__codelineno-16-27"></a><span class="w">                </span><span class="nt">&lt;dst&gt;</span>${jar.aarch64.core}-${project.version}.jar<span class="nt">&lt;/dst&gt;</span>
-<a id="__codelineno-16-28" name="__codelineno-16-28" href="#__codelineno-16-28"></a><span class="w">                </span><span class="nt">&lt;type&gt;</span>file<span class="nt">&lt;/type&gt;</span>
-<a id="__codelineno-16-29" name="__codelineno-16-29" href="#__codelineno-16-29"></a><span class="w">                </span><span class="nt">&lt;mapper&gt;</span>
-<a id="__codelineno-16-30" name="__codelineno-16-30" href="#__codelineno-16-30"></a><span class="w">                    </span><span class="nt">&lt;type&gt;</span>perm<span class="nt">&lt;/type&gt;</span>
-<a id="__codelineno-16-31" name="__codelineno-16-31" href="#__codelineno-16-31"></a><span class="w">                    </span><span class="nt">&lt;prefix&gt;</span>${native.core.installation.dir}<span class="nt">&lt;/prefix&gt;</span>
-<a id="__codelineno-16-32" name="__codelineno-16-32" href="#__codelineno-16-32"></a><span class="w">                    </span><span class="nt">&lt;user&gt;</span>kurad<span class="nt">&lt;/user&gt;</span>
-<a id="__codelineno-16-33" name="__codelineno-16-33" href="#__codelineno-16-33"></a><span class="w">                    </span><span class="nt">&lt;group&gt;</span>kurad<span class="nt">&lt;/group&gt;</span>
-<a id="__codelineno-16-34" name="__codelineno-16-34" href="#__codelineno-16-34"></a><span class="w">                    </span><span class="nt">&lt;filemode&gt;</span>600<span class="nt">&lt;/filemode&gt;</span>
-<a id="__codelineno-16-35" name="__codelineno-16-35" href="#__codelineno-16-35"></a><span class="w">                </span><span class="nt">&lt;/mapper&gt;</span>
-<a id="__codelineno-16-36" name="__codelineno-16-36" href="#__codelineno-16-36"></a><span class="w">            </span><span class="nt">&lt;/data&gt;</span>
-<a id="__codelineno-16-37" name="__codelineno-16-37" href="#__codelineno-16-37"></a><span class="w">        </span><span class="nt">&lt;/dataSet&gt;</span>
-<a id="__codelineno-16-38" name="__codelineno-16-38" href="#__codelineno-16-38"></a><span class="w">    </span><span class="nt">&lt;/configuration&gt;</span>
-<a id="__codelineno-16-39" name="__codelineno-16-39" href="#__codelineno-16-39"></a><span class="nt">&lt;/execution&gt;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nt">&lt;execution&gt;</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">    </span><span class="nt">&lt;id&gt;</span>generate-arm64-deb<span class="nt">&lt;/id&gt;</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">    </span><span class="nt">&lt;phase&gt;</span>package<span class="nt">&lt;/phase&gt;</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">    </span><span class="nt">&lt;goals&gt;</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="w">        </span><span class="nt">&lt;goal&gt;</span>jdeb<span class="nt">&lt;/goal&gt;</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="w">    </span><span class="nt">&lt;/goals&gt;</span>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="w">    </span><span class="nt">&lt;configuration&gt;</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="w">        </span><span class="nt">&lt;verbose&gt;</span>true<span class="nt">&lt;/verbose&gt;</span>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="w">        </span><span class="nt">&lt;deb&gt;</span>${basedir}/target/deb/${package.name}_${package.version}-${package.revision}_${deb.arm64.architecture}.deb<span class="nt">&lt;/deb&gt;</span>
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="w">        </span><span class="nt">&lt;controlDir&gt;</span>${project.basedir}/deb/arm64<span class="nt">&lt;/controlDir&gt;</span>
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="w">        </span><span class="nt">&lt;skipPOMs&gt;</span>false<span class="nt">&lt;/skipPOMs&gt;</span>
+<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a><span class="w">        </span><span class="nt">&lt;dataSet&gt;</span>
+<a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a><span class="w">            </span><span class="nt">&lt;data&gt;</span>
+<a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a><span class="w">                </span><span class="nt">&lt;src&gt;</span>${basedir}/target/plugins/${jar.name}-${project.version}.jar<span class="nt">&lt;/src&gt;</span>
+<a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a><span class="w">                </span><span class="nt">&lt;dst&gt;</span>${jar.name}-${project.version}.jar<span class="nt">&lt;/dst&gt;</span>
+<a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a><span class="w">                </span><span class="nt">&lt;type&gt;</span>file<span class="nt">&lt;/type&gt;</span>
+<a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a><span class="w">                </span><span class="nt">&lt;mapper&gt;</span>
+<a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a><span class="w">                    </span><span class="nt">&lt;type&gt;</span>perm<span class="nt">&lt;/type&gt;</span>
+<a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a><span class="w">                    </span><span class="nt">&lt;prefix&gt;</span>${addon.installation.dir}<span class="nt">&lt;/prefix&gt;</span>
+<a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a><span class="w">                    </span><span class="nt">&lt;user&gt;</span>kurad<span class="nt">&lt;/user&gt;</span>
+<a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a><span class="w">                    </span><span class="nt">&lt;group&gt;</span>kurad<span class="nt">&lt;/group&gt;</span>
+<a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a><span class="w">                    </span><span class="nt">&lt;filemode&gt;</span>600<span class="nt">&lt;/filemode&gt;</span>
+<a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a><span class="w">                </span><span class="nt">&lt;/mapper&gt;</span>
+<a id="__codelineno-17-24" name="__codelineno-17-24" href="#__codelineno-17-24"></a><span class="w">            </span><span class="nt">&lt;/data&gt;</span>
+<a id="__codelineno-17-25" name="__codelineno-17-25" href="#__codelineno-17-25"></a><span class="w">            </span><span class="nt">&lt;data&gt;</span>
+<a id="__codelineno-17-26" name="__codelineno-17-26" href="#__codelineno-17-26"></a><span class="w">                </span><span class="nt">&lt;src&gt;</span>${basedir}/target/plugins/${jar.aarch64.core}-${project.version}.jar<span class="nt">&lt;/src&gt;</span>
+<a id="__codelineno-17-27" name="__codelineno-17-27" href="#__codelineno-17-27"></a><span class="w">                </span><span class="nt">&lt;dst&gt;</span>${jar.aarch64.core}-${project.version}.jar<span class="nt">&lt;/dst&gt;</span>
+<a id="__codelineno-17-28" name="__codelineno-17-28" href="#__codelineno-17-28"></a><span class="w">                </span><span class="nt">&lt;type&gt;</span>file<span class="nt">&lt;/type&gt;</span>
+<a id="__codelineno-17-29" name="__codelineno-17-29" href="#__codelineno-17-29"></a><span class="w">                </span><span class="nt">&lt;mapper&gt;</span>
+<a id="__codelineno-17-30" name="__codelineno-17-30" href="#__codelineno-17-30"></a><span class="w">                    </span><span class="nt">&lt;type&gt;</span>perm<span class="nt">&lt;/type&gt;</span>
+<a id="__codelineno-17-31" name="__codelineno-17-31" href="#__codelineno-17-31"></a><span class="w">                    </span><span class="nt">&lt;prefix&gt;</span>${native.core.installation.dir}<span class="nt">&lt;/prefix&gt;</span>
+<a id="__codelineno-17-32" name="__codelineno-17-32" href="#__codelineno-17-32"></a><span class="w">                    </span><span class="nt">&lt;user&gt;</span>kurad<span class="nt">&lt;/user&gt;</span>
+<a id="__codelineno-17-33" name="__codelineno-17-33" href="#__codelineno-17-33"></a><span class="w">                    </span><span class="nt">&lt;group&gt;</span>kurad<span class="nt">&lt;/group&gt;</span>
+<a id="__codelineno-17-34" name="__codelineno-17-34" href="#__codelineno-17-34"></a><span class="w">                    </span><span class="nt">&lt;filemode&gt;</span>600<span class="nt">&lt;/filemode&gt;</span>
+<a id="__codelineno-17-35" name="__codelineno-17-35" href="#__codelineno-17-35"></a><span class="w">                </span><span class="nt">&lt;/mapper&gt;</span>
+<a id="__codelineno-17-36" name="__codelineno-17-36" href="#__codelineno-17-36"></a><span class="w">            </span><span class="nt">&lt;/data&gt;</span>
+<a id="__codelineno-17-37" name="__codelineno-17-37" href="#__codelineno-17-37"></a><span class="w">        </span><span class="nt">&lt;/dataSet&gt;</span>
+<a id="__codelineno-17-38" name="__codelineno-17-38" href="#__codelineno-17-38"></a><span class="w">    </span><span class="nt">&lt;/configuration&gt;</span>
+<a id="__codelineno-17-39" name="__codelineno-17-39" href="#__codelineno-17-39"></a><span class="nt">&lt;/execution&gt;</span>
 </code></pre></div>
-<p>A similar execution can be used for the <code>amd64</code> architecture, just changing the <code>deb</code> and <code>controlDir</code> fields to point to the correct architecture (and change the execution <code>id</code> if they're present at the same time). Also in the <code>&lt;dataSet&gt;</code> section, the <code>src</code> and <code>dst</code> fields must be changed to point to the correct architecture-specific jars.</p>
+<p>The <code>jar.name</code>, <code>jar.aarch64.core</code> and <code>native.core.installation.dir</code> properties used above are not part of the generated project: define them in the <code>distrib/pom.xml</code> properties to match your bundle names and installation folders. A similar execution can be used for the <code>amd64</code> architecture, just changing the <code>deb</code> and <code>controlDir</code> fields to point to the correct architecture (and change the execution <code>id</code> if they're present at the same time). Also in the <code>&lt;dataSet&gt;</code> section, the <code>src</code> and <code>dst</code> fields must be changed to point to the correct architecture-specific jars.</p>
 <p>The final result will consist of two installers, one for each architecture. They will be found in the <code>distrib/target/deb/</code> folder with the following names:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>&lt;artifactId&gt;_&lt;version&gt;_&lt;deb.amd64.architecture&gt;.deb
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>&lt;artifactId&gt;_&lt;version&gt;_&lt;deb.arm64.architecture&gt;.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>&lt;package.name&gt;_&lt;version&gt;-&lt;revision&gt;_&lt;deb.amd64.architecture&gt;.deb
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>&lt;package.name&gt;_&lt;version&gt;-&lt;revision&gt;_&lt;deb.arm64.architecture&gt;.deb
 </code></pre></div>
 
 

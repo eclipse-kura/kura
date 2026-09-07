@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://eclipse-kura.github.io/kura/docs-develop/connect-field-devices/eddystone-driver/">
+        <link rel="canonical" href="https://eclipse-kura.github.io/kura/docs-develop/core-services/jwt-services/">
       
       
-        <link rel="prev" href="../ibeacon-driver/">
+        <link rel="prev" href="../crypto-service/">
       
       
-        <link rel="next" href="../xdk-driver/">
+        <link rel="next" href="../../cloud-api/overview/">
       
       
       <link rel="icon" href="../../assets/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Eddystone™ Driver - Eclipse Kura™ Documentation</title>
+        <title>JWT Services - Eclipse Kura™ Documentation</title>
       
     
     
@@ -84,7 +84,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#eddystonetm-driver" class="md-skip">
+        <a href="#json-web-token-jwt-services" class="md-skip">
           Skip to content
         </a>
       
@@ -135,7 +135,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Eddystone&trade; Driver
+              JWT Services
             
           </span>
         </div>
@@ -1327,17 +1327,19 @@ You are viewing the documentation relative to the develop branch or to an outdat
       
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
           <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
@@ -1352,7 +1354,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             Core Services
@@ -1366,7 +1368,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/introduction/" class="md-nav__link">
+      <a href="../introduction/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1388,7 +1390,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/clock-service/" class="md-nav__link">
+      <a href="../clock-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1410,7 +1412,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/deployment-service/" class="md-nav__link">
+      <a href="../deployment-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1432,7 +1434,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/command-service/" class="md-nav__link">
+      <a href="../command-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1454,7 +1456,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/configuration-service/" class="md-nav__link">
+      <a href="../configuration-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1476,7 +1478,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/h2db-service/" class="md-nav__link">
+      <a href="../h2db-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1498,7 +1500,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/sqlite-db-service/" class="md-nav__link">
+      <a href="../sqlite-db-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1520,7 +1522,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/position-service/" class="md-nav__link">
+      <a href="../position-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1542,7 +1544,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/rest-service/" class="md-nav__link">
+      <a href="../rest-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1564,7 +1566,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/watchdog-service/" class="md-nav__link">
+      <a href="../watchdog-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1622,7 +1624,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/container-orchestration-provider/" class="md-nav__link">
+      <a href="../container-orchestration-provider/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1644,7 +1646,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/container-orchestration-provider-apis/" class="md-nav__link">
+      <a href="../container-orchestration-provider-apis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1666,7 +1668,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/container-orchestration-provider-usage/" class="md-nav__link">
+      <a href="../container-orchestration-provider-usage/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1688,7 +1690,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/container-orchestration-provider-authenticated-registries/" class="md-nav__link">
+      <a href="../container-orchestration-provider-authenticated-registries/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1710,7 +1712,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/container-orchestration-image-auth/" class="md-nav__link">
+      <a href="../container-orchestration-image-auth/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1740,7 +1742,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/nvidia-triton-server-inference-engine/" class="md-nav__link">
+      <a href="../nvidia-triton-server-inference-engine/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1762,7 +1764,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/device-configuration-changes/" class="md-nav__link">
+      <a href="../device-configuration-changes/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1784,7 +1786,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/network-status-rest-v1/" class="md-nav__link">
+      <a href="../network-status-rest-v1/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1806,7 +1808,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../../core-services/crypto-service/" class="md-nav__link">
+      <a href="../crypto-service/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1825,10 +1827,31 @@ You are viewing the documentation relative to the develop branch or to an outdat
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../core-services/jwt-services/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    JWT Services
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -1838,6 +1861,254 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction-to-jwt" class="md-nav__link">
+    <span class="md-ellipsis">
+      Introduction to JWT
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#jwt-issuing-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      JWT Issuing Service
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jwt-verification-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      JWT Verification Service
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#issuing-a-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      Issuing a token
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Issuing a token">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-registered-claims-are-reserved" class="md-nav__link">
+    <span class="md-ellipsis">
+      The registered claims are reserved
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-custom-claim-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported custom claim values
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-exp-is-decided" class="md-nav__link">
+    <span class="md-ellipsis">
+      How exp is decided
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verifying-a-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verifying a token
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verifying a token">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-the-trust-anchor-is-chosen" class="md-nav__link">
+    <span class="md-ellipsis">
+      How the trust anchor is chosen
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-issuer-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      The issuer check
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-intended-consumer-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      The intended consumer check
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hardening
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hardening">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#do-not-leak-sensitive-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      Do not leak sensitive information
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#always-configure-trusted-issuers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Always configure Trusted Issuers
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#restrict-verification-key-aliases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Restrict Verification Key Aliases
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-maximum-token-lifetime-sec" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configure Maximum Token Lifetime (sec)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#always-declare-the-intended-consumer-when-verifying" class="md-nav__link">
+    <span class="md-ellipsis">
+      Always declare the intended consumer when verifying
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operational-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operational notes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Operational notes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#an-expired-signing-certificate-breaks-verification-not-issuing" class="md-nav__link">
+    <span class="md-ellipsis">
+      An expired signing certificate breaks verification, not issuing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clock-drift-is-bidirectional" class="md-nav__link">
+    <span class="md-ellipsis">
+      Clock drift is bidirectional
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verification-proves-the-token-not-the-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verification proves the token, not the identity
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2314,19 +2585,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
       
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
           <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
@@ -2341,7 +2610,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             Connect Field Devices
@@ -2355,7 +2624,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../driver-and-assets/" class="md-nav__link">
+      <a href="../../connect-field-devices/driver-and-assets/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2377,7 +2646,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../asset-implemetation/" class="md-nav__link">
+      <a href="../../connect-field-devices/asset-implemetation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2399,7 +2668,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../driver-implemetation/" class="md-nav__link">
+      <a href="../../connect-field-devices/driver-implemetation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2421,7 +2690,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../IO-apis/" class="md-nav__link">
+      <a href="../../connect-field-devices/IO-apis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2443,7 +2712,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../field-protocols/" class="md-nav__link">
+      <a href="../../connect-field-devices/field-protocols/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2462,19 +2731,17 @@ You are viewing the documentation relative to the develop branch or to an outdat
                 
   
   
-    
   
   
-  
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_6" >
         
           
           <label class="md-nav__link" for="__nav_7_6" id="__nav_7_6_label" tabindex="0">
@@ -2489,7 +2756,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_7_6">
             <span class="md-nav__icon md-icon"></span>
             Drivers
@@ -2503,7 +2770,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../opcua-driver/" class="md-nav__link">
+      <a href="../../connect-field-devices/opcua-driver/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2525,7 +2792,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../s7-driver/" class="md-nav__link">
+      <a href="../../connect-field-devices/s7-driver/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2547,7 +2814,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../gpio-driver/" class="md-nav__link">
+      <a href="../../connect-field-devices/gpio-driver/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2569,7 +2836,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../sensortag-driver/" class="md-nav__link">
+      <a href="../../connect-field-devices/sensortag-driver/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2591,7 +2858,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../sensehat-driver/" class="md-nav__link">
+      <a href="../../connect-field-devices/sensehat-driver/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2613,7 +2880,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../ibeacon-driver/" class="md-nav__link">
+      <a href="../../connect-field-devices/ibeacon-driver/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2632,31 +2899,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Eddystone&trade; Driver
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../connect-field-devices/eddystone-driver/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2666,62 +2912,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
-    <span class="md-ellipsis">
-      Features
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Installation
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#instance-creation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Instance creation
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#channel-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Channel configuration
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2734,7 +2924,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../xdk-driver/" class="md-nav__link">
+      <a href="../../connect-field-devices/xdk-driver/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2764,7 +2954,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../asset-v1-mqtt-namespace/" class="md-nav__link">
+      <a href="../../connect-field-devices/asset-v1-mqtt-namespace/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -4634,38 +4824,230 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
+  <a href="#introduction-to-jwt" class="md-nav__link">
     <span class="md-ellipsis">
-      Features
+      Introduction to JWT
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
+  <a href="#configuration" class="md-nav__link">
     <span class="md-ellipsis">
-      Installation
+      Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#jwt-issuing-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      JWT Issuing Service
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#instance-creation" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#jwt-verification-service" class="md-nav__link">
     <span class="md-ellipsis">
-      Instance creation
+      JWT Verification Service
     </span>
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#channel-configuration" class="md-nav__link">
+  <a href="#issuing-a-token" class="md-nav__link">
     <span class="md-ellipsis">
-      Channel configuration
+      Issuing a token
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Issuing a token">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-registered-claims-are-reserved" class="md-nav__link">
+    <span class="md-ellipsis">
+      The registered claims are reserved
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-custom-claim-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported custom claim values
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-exp-is-decided" class="md-nav__link">
+    <span class="md-ellipsis">
+      How exp is decided
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verifying-a-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verifying a token
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verifying a token">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-the-trust-anchor-is-chosen" class="md-nav__link">
+    <span class="md-ellipsis">
+      How the trust anchor is chosen
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-issuer-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      The issuer check
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-intended-consumer-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      The intended consumer check
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hardening" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hardening
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hardening">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#do-not-leak-sensitive-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      Do not leak sensitive information
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#always-configure-trusted-issuers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Always configure Trusted Issuers
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#restrict-verification-key-aliases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Restrict Verification Key Aliases
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-maximum-token-lifetime-sec" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configure Maximum Token Lifetime (sec)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#always-declare-the-intended-consumer-when-verifying" class="md-nav__link">
+    <span class="md-ellipsis">
+      Always declare the intended consumer when verifying
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operational-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operational notes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Operational notes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#an-expired-signing-certificate-breaks-verification-not-issuing" class="md-nav__link">
+    <span class="md-ellipsis">
+      An expired signing certificate breaks verification, not issuing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#clock-drift-is-bidirectional" class="md-nav__link">
+    <span class="md-ellipsis">
+      Clock drift is bidirectional
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verification-proves-the-token-not-the-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verification proves the token, not the identity
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -4685,26 +5067,233 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 
 
-<h1 id="eddystonetm-driver">Eddystone&trade; Driver</h1>
-<p>Eclipse Kura offers support for Eddystone&trade; protocol via a specific driver.
-It can be used into the Wires framework, the Asset model or directly using the Driver itself.</p>
-<h2 id="features">Features</h2>
-<p>The Eddystone&trade; driver is designed to listen for incoming beacon packets and to recognise the specific protocol. Of course it's not possible to write data to the beacons, since this is outside the protocol specification. The frame format to be filtered can be chosen from the channel definition. For more information about Eddystone&trade; frame format, see <a href="https://developers.google.com/beacons/eddystone">here</a>.</p>
-<h2 id="installation">Installation</h2>
-<p>As the others Drivers supported by Eclipse Kura, it is distributed as a deployment package on the Eclipse Marketplace <a href="https://marketplace.eclipse.org/content/eddystone-driver-eclipse-kura-4xy">here</a>. It can be installed following the instructions provided <a href="../../administration/application-management/">here</a>.</p>
-<h2 id="instance-creation">Instance creation</h2>
-<p>A new Eddystone Driver instance can be created either by clicking the <strong>New Driver</strong> button in the dedicated <strong>Drivers and Assets</strong> Web UI section or by clicking on the <code>+</code> button under <strong>Services</strong>. In both cases, the <code>org.eclipse.kura.driver.eddsytone</code> factory must be selected and a unique name must be provided for the new instance. 
-Once instantiated, the Driver has to be configured setting the Bluetooth interface name (i.e. <code>hci0</code>) that will be used to connect to the device.</p>
-<h2 id="channel-configuration">Channel configuration</h2>
-<p>The Eddystone Driver channel can be configured with the following parameters:</p>
+<h1 id="json-web-token-jwt-services">JSON Web Token (JWT) Services</h1>
+<p>Two services issue and verify JSON Web Tokens (JWT): the <strong>JWT Issuing Service</strong> mints them, the <strong>JWT Verification Service</strong> accepts them. Tokens are signed with <strong>RS256</strong> using an RSA private key held in a <code>KeystoreService</code>, and verified against the X.509 certificates of a <code>KeystoreService</code>. Each service is configured independently and points at its own keystore, so the key store holding the signing key and the trust store holding the accepted certificates need not be the same.</p>
+<p>Contents:</p>
 <ul>
-<li><strong>enabled</strong>: it allows to enable/disable the channel. If it isn't selected the channel will be ignored.</li>
-<li><strong>name</strong>: the channel name.</li>
-<li><strong>type</strong>: the channel type, (<code>READ</code>, <code>WRITE</code>, or <code>READ_WRITE</code>).</li>
-<li><strong>value.type</strong>: the Java type of the channel value. The value read by the Driver will be converted to the <strong>value.type</strong>.</li>
-<li><strong>listen</strong>: when selected, a listener will be attached to this channel. Any event on the channel will be reported using a callback and the value will be emitted.</li>
-<li><strong>eddystone.type</strong>: the type of the frame. Currently only <code>UID</code> and <code>URL</code> typed are supported.</li>
+<li><a href="#introduction-to-jwt">Introduction to JWT</a>: how JWT works and main characteristics</li>
+<li><a href="#configuration">Configuration</a>: service parameters and their explanation</li>
+<li><a href="#issuing-a-token">Issuing a token</a>: how to issue a token, how claims will be populated by this service, how to set the expiration time correctly</li>
+<li><a href="#verifying-a-token">Verifying a token</a>: how to create a verification request and conditions for deciding if a token is valid or not</li>
+<li><a href="#hardening">Hardening</a>: notes on how to tighten the security of these service</li>
+<li><a href="#operational-notes">Operational notes</a>: general notes about the services' behaviour</li>
 </ul>
+<h2 id="introduction-to-jwt">Introduction to JWT</h2>
+<p>JWT (JSON Web Token, RFC 7519) is a compact, URL-safe way to carry a set of claims (statements about a subject) between two parties. In practice it's the format behind most bearer tokens: a client presents one, and the recipient decides who the caller is and what they may do.</p>
+<div class="admonition warning">
+<p class="admonition-title">About JWT Security</p>
+<p>The common form (JWS) protects integrity and authenticity. The payload is merely base64 encoded, so anyone holding the token can read it: <strong>never put secrets in a JWT</strong>.</p>
+<p>JWT is stateless, so it is <strong>hard to revoke</strong>. A valid token stays valid until it expires; there's no natural "log out". This is why short lifetimes matter, and why the service has a maximum-lifetime cap.</p>
+</div>
+<p>A JWT is structured as follows, with three base64 encoded sections separated by a dot (<code>.</code>):</p>
+<p><img alt="Example of an encoded token" src="../images/jwt-example.png" /></p>
+<ul>
+<li>Header: <code>alg</code> (RS256), <code>typ</code> (JWT), and usually <code>kid</code>, naming which key signed it so the verifier can pick the right certificate</li>
+<li>Payload: the claims. Seven are registered by the RFC (anything else is a custom claim), and they're exactly the ones the service manages:<ul>
+<li><code>iss</code>: issuer, who generated it</li>
+<li><code>sub</code>: subject, who it's about</li>
+<li><code>aud</code>: audience, who it's for</li>
+<li><code>exp</code>/<code>nbf</code>: not valid after/before</li>
+<li><code>iat</code>: issued at</li>
+<li><code>jti</code>: unique token id</li>
+</ul>
+</li>
+<li>Signature: computed over the ASCII of <code>base64UrlEncode(header)</code> + <code>.</code> + <code>base64UrlEncode(payload)</code>. Change one byte of either and it stops matching</li>
+</ul>
+<h2 id="configuration">Configuration</h2>
+<h3 id="jwt-issuing-service">JWT Issuing Service</h3>
+<ul>
+<li><em>Keystore Target Filter</em>: OSGi filter selecting the <code>KeystoreService</code> holding the signing key. Defaults to <code>(kura.service.pid=changeme)</code>, so the service issues nothing until it is pointed at a real keystore</li>
+<li><em>Signing Key Alias</em>: alias of the RSA private key entry used to sign, <code>jwt-signing-key</code> by default. Published as the token's <code>kid</code> header. If the alias does not resolve to an RSA private key entry, issuing is unavailable</li>
+<li><em>Issuer</em>: value asserted in the <code>iss</code> claim of issued tokens, <code>kura</code> by default</li>
+<li><em>Maximum Token Lifetime (sec)</em>: upper bound on <code>exp</code>, <code>3600</code> by default. <code>0</code> means no bound</li>
+</ul>
+<h3 id="jwt-verification-service">JWT Verification Service</h3>
+<ul>
+<li><em>Truststore Target Filter</em>: OSGi filter selecting the <code>KeystoreService</code> holding the trusted certificates. Defaults to <code>(kura.service.pid=changeme)</code>, so the service verifies nothing until it is pointed at a real keystore</li>
+<li><em>Trusted Issuers</em>: comma-separated <code>iss</code> values accepted when verifying. Empty means the <code>iss</code> claim is not checked at all</li>
+<li><em>Verification Key Aliases</em>: comma-separated trust-store aliases allowed to verify. Empty means every entry in the store that yields an X.509 certificate with an RSA public key is used in verification</li>
+<li><em>Clock Skew Tolerance (sec)</em>: tolerance window applied to <code>exp</code>, <code>nbf</code> and <code>iat</code>, <code>30</code> seconds by default</li>
+<li><em>Require Valid Certificate</em>: when enabled, which is the default, a certificate outside its own validity period is not used to verify tokens</li>
+</ul>
+<p>Blank and repeated entries in the two comma-separated lists are ignored, and surrounding whitespace is trimmed, so <code>kura, , kura.gateway</code> and <code>kura,kura.gateway</code> are equivalent.</p>
+<h2 id="issuing-a-token">Issuing a token</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nd">@Reference</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kd">private</span><span class="w"> </span><span class="n">TokenIssuingService</span><span class="w"> </span><span class="n">tokenIssuingService</span><span class="p">;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">token</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">tokenIssuingService</span><span class="p">.</span><span class="na">issue</span><span class="p">(</span><span class="n">TokenIssueRequest</span><span class="p">.</span><span class="na">builder</span><span class="p">(</span><span class="s">&quot;admin&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="p">.</span><span class="na">intendedConsumer</span><span class="p">(</span><span class="s">&quot;rest-api&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="p">.</span><span class="na">expiresAt</span><span class="p">(</span><span class="n">Instant</span><span class="p">.</span><span class="na">now</span><span class="p">().</span><span class="na">plus</span><span class="p">(</span><span class="n">Duration</span><span class="p">.</span><span class="na">ofMinutes</span><span class="p">(</span><span class="mi">15</span><span class="p">)))</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="p">.</span><span class="na">claim</span><span class="p">(</span><span class="s">&quot;roles&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">List</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="s">&quot;operator&quot;</span><span class="p">))</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="p">.</span><span class="na">build</span><span class="p">());</span>
+</code></pre></div>
+<p>A request says <strong>what to assert</strong>, never <strong>how to protect it</strong>. The service always controls:</p>
+<ul>
+<li><code>iss</code>: taken from the Issuer setting; the caller cannot override it</li>
+<li><code>iat</code>: the issuing instant</li>
+<li><code>jti</code>: a freshly generated unique id; <code>issue()</code> is not idempotent, so two equal requests yield two distinct, independently valid tokens</li>
+<li><code>kid</code>: the <em>Signing Key Alias</em>, so verifiers can select the right certificate</li>
+<li>the algorithm (RS256) and the signing key</li>
+</ul>
+<p>The <code>identityName</code> is mandatory and becomes the <code>sub</code> claim: it is the Kura identity the token is issued for. Everything else is optional: intended consumers (<code>aud</code>), <code>nbf</code>, <code>exp</code>, and custom claims. Call <code>intendedConsumer(...)</code> once per consumer to declare several of them; <code>aud</code> is omitted entirely when none is declared.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The returned string is a credential. Do not log it, do not put it in a URL, and transport it only over a secured channel.</p>
+</div>
+<h3 id="the-registered-claims-are-reserved">The registered claims are reserved</h3>
+<p>The seven registered claim names — <code>iss</code>, <code>sub</code>, <code>aud</code>, <code>exp</code>, <code>nbf</code>, <code>iat</code>, <code>jti</code> — cannot be set through <code>claim(...)</code>. A request that carries one of them fails with <code>KuraErrorCode.BAD_REQUEST</code> naming the offending claim, and no token is issued. Use the dedicated builder methods (<code>identityName</code>, <code>intendedConsumer</code>, <code>expiresAt</code>, <code>notBefore</code>) instead; the remaining three belong to the service.</p>
+<h3 id="supported-custom-claim-values">Supported custom claim values</h3>
+<table>
+<thead>
+<tr>
+<th>Java type</th>
+<th>JSON form in the payload</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>String</code></td>
+<td>string</td>
+</tr>
+<tr>
+<td><code>Boolean</code></td>
+<td>boolean</td>
+</tr>
+<tr>
+<td><code>Integer</code>, <code>Long</code>, <code>Double</code></td>
+<td>number</td>
+</tr>
+<tr>
+<td><code>Instant</code></td>
+<td>NumericDate, that is whole epoch seconds</td>
+</tr>
+<tr>
+<td><code>List&lt;?&gt;</code></td>
+<td>array</td>
+</tr>
+<tr>
+<td><code>Map&lt;String, ?&gt;</code></td>
+<td>object</td>
+</tr>
+<tr>
+<td><code>null</code></td>
+<td>null</td>
+</tr>
+</tbody>
+</table>
+<p>Elements of a list and values of a map must themselves be of a supported type, and map keys must be <code>String</code>. Any other value type is refused with <code>KuraErrorCode.BAD_REQUEST</code> rather than serialized on a best-effort basis, so a token never carries a claim the caller did not intend.</p>
+<h3 id="how-exp-is-decided">How <code>exp</code> is decided</h3>
+<table>
+<thead>
+<tr>
+<th>Maximum lifetime</th>
+<th>Requested <code>exp</code></th>
+<th>Resulting <code>exp</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>none</td>
+<td><strong>caution</strong> no <code>exp</code> claim; the token never expires</td>
+</tr>
+<tr>
+<td><code>0</code></td>
+<td>any</td>
+<td>exactly as requested</td>
+</tr>
+<tr>
+<td><code>&gt; 0</code></td>
+<td>none</td>
+<td>now + maximum lifetime</td>
+</tr>
+<tr>
+<td><code>&gt; 0</code></td>
+<td>within the maximum</td>
+<td>exactly as requested</td>
+</tr>
+<tr>
+<td><code>&gt; 0</code></td>
+<td>beyond the maximum</td>
+<td>capped to now + maximum lifetime</td>
+</tr>
+</tbody>
+</table>
+<p>The cap only applies upwards. A requested <code>exp</code> in the past is honoured, producing a token that is already invalid. JWT timestamps are whole seconds, so sub-second precision is truncated.</p>
+<p>Capping is silent: no error is raised when a requested lifetime is shortened. Call <code>getMaximumLifetime()</code> to discover the configured bound before requesting, or read <code>getExpiresAt()</code> back from the verification proof, rather than assuming the requested window was honoured.</p>
+<h2 id="verifying-a-token">Verifying a token</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@Reference</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">private</span><span class="w"> </span><span class="n">TokenVerificationService</span><span class="w"> </span><span class="n">tokenVerificationService</span><span class="p">;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kd">final</span><span class="w"> </span><span class="n">VerificationProof</span><span class="w"> </span><span class="n">proof</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">tokenVerificationService</span><span class="p">.</span><span class="na">verify</span><span class="p">(</span><span class="n">TokenVerifyRequest</span><span class="p">.</span><span class="na">builder</span><span class="p">(</span><span class="n">encodedToken</span><span class="p">)</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">        </span><span class="p">.</span><span class="na">intendedConsumer</span><span class="p">(</span><span class="s">&quot;rest-api&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">        </span><span class="p">.</span><span class="na">build</span><span class="p">());</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">identityName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">proof</span><span class="p">.</span><span class="na">getIdentityName</span><span class="p">();</span>
+</code></pre></div>
+<p>Holding a <code>VerificationProof</code> is the proof that verification succeeded. It exposes methods to access the verified token's claims.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code>getExpiresAt()</code> is empty for a token issued without <code>exp</code>. Such a proof must not be cached indefinitely on the strength of a missing expiration.</p>
+</div>
+<p>A token is accepted only when all of the following hold:</p>
+<ol>
+<li>it is a well-formed JWT;</li>
+<li>its <code>kid</code> names a certificate allowed by <em>Verification Key Aliases</em>. A token carrying no <code>kid</code> may be verified by any of the allowed certificates;</li>
+<li>that certificate is within its validity period (unless <em>Require Valid Certificate</em> is disabled);</li>
+<li>the RS256 signature verifies against it;</li>
+<li><code>iss</code> is the configured <em>Issuer</em> or one of the <em>Trusted Issuers</em>, a token without <code>iss</code> is rejected;</li>
+<li><code>exp</code>, <code>nbf</code> and <code>iat</code> are satisfied within the clock-skew tolerance;</li>
+<li><code>sub</code> is present and not blank, so the proof always carries an identity;</li>
+<li>the intended consumer check passes (see <a href="#the-intended-consumer-check">next section</a>).</li>
+</ol>
+<h3 id="how-the-trust-anchor-is-chosen">How the trust anchor is chosen</h3>
+<p>The token's <code>kid</code> is a <strong>hint, not a constraint</strong>. When it names an alias present in the trust store, that certificate is tried first; every other allowed certificate is then tried as a fallback, and so is every allowed certificate when the <code>kid</code> is absent or names an alias this store does not have.</p>
+<p>Both <code>TrustedCertificateEntry</code> and <code>PrivateKeyEntry</code> entries contribute their X.509 certificate as a trust anchor. Entries that hold no X.509 certificate, or whose public key is not RSA, are skipped.</p>
+<h3 id="the-issuer-check">The issuer check</h3>
+<p><em>Trusted Issuers</em> is the whole trust set, and an empty setting <strong>disables the check</strong>: any <code>iss</code> is accepted, including none at all. This is the default, and it is almost never what a deployment wants — see <a href="#always-configure-trusted-issuers">Hardening</a>.</p>
+<p>When the setting is non-empty, <code>iss</code> must match one of the listed values exactly, and a token carrying no <code>iss</code> is rejected. Matching is exact, so <code>kura.gateway</code> does not admit <code>kura.gateway.attacker</code>.</p>
+<h3 id="the-intended-consumer-check">The intended consumer check</h3>
+<p>Why is the intended consumer a request parameter, and nothing else is? Every other check the service performs, it can decide on its own:</p>
+<ul>
+<li>the signature and trust anchor against the keystore</li>
+<li><code>iss</code> against the configured trust set</li>
+<li><code>exp</code> / <code>nbf</code> / <code>iat</code> against the clock</li>
+</ul>
+<p>The audience is the exception. RFC 7519 requires each principal processing a token to identify itself with a value in <code>aud</code>, and only the caller knows which principal it is, so the expected audience cannot be configuration.</p>
+<p>When an intended consumer is set, the token is accepted only if its <code>aud</code> contains that value, and a token with no <code>aud</code> at all is rejected. When it is left unset no audience constraint is enforced, and a token minted for a different consumer verifies happily.</p>
+<h2 id="hardening">Hardening</h2>
+<h3 id="do-not-leak-sensitive-information">Do not leak sensitive information</h3>
+<p>A JWT is not encrypted, so never leak sensitive information in the JWT claim values or custom claim names. For example, this is <strong>bad</strong>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Signing Key Alias = &lt;customer name&gt; // will be published as &#39;kid&#39;
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Issuer = &lt;customer name&gt; // will be published under &#39;iss&#39;
+</code></pre></div>
+<p>Example of issuing a token with <strong>bad</strong> custom claims, that leak personal information:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nt">&quot;firstname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mario&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">&quot;lastname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Rossi&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="nt">&quot;birthDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1990-01-09&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;username@example.com&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="nt">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;IT&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="nt">&quot;roles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">],</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1763210697</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="always-configure-trusted-issuers">Always configure Trusted Issuers</h3>
+<p>Left empty, <em>Trusted Issuers</em> accepts any <code>iss</code>, and a token with no <code>iss</code> at all. Every token a trusted certificate signed is then admitted, whatever minted it and whatever it was minted for. List the issuers you actually expect.</p>
+<h3 id="restrict-verification-key-aliases">Restrict Verification Key Aliases</h3>
+<p>Restrict <em>Verification Key Aliases</em> whenever the keystore is shared with TLS. With the list empty, every entry in the store that yields an X.509 certificate with an RSA public key is accepted for verification. Anyone holding a private key whose certificate is in that store can then mint tokens this service will accept. Naming the aliases you actually trust closes that path.</p>
+<h3 id="configure-maximum-token-lifetime-sec">Configure Maximum Token Lifetime (sec)</h3>
+<p>Always configure the service with a defined <em>Maximum Token Lifetime (sec)</em>, preferably as short as possible. This prevents issuing of tokens that never expire and keeps the token alive for the minimum required time to perform some operations.</p>
+<h3 id="always-declare-the-intended-consumer-when-verifying">Always declare the intended consumer when verifying</h3>
+<p>The API leaves it optional, so nothing fails if you forget it, and nothing warns you either. Make it a habit in every verifier, and give each consumer a distinct name so tokens cannot be replayed sideways.</p>
+<h2 id="operational-notes">Operational notes</h2>
+<h3 id="an-expired-signing-certificate-breaks-verification-not-issuing">An expired signing certificate breaks verification, not issuing</h3>
+<p>When <em>Require Valid Certificate</em> is enabled, which is the default, an expired signing certificate breaks just verification. The private key still signs, so <code>issue()</code> keeps succeeding while every verifier rejects the result. Issuing looks healthy and the failure surfaces at the consumer.</p>
+<h3 id="clock-drift-is-bidirectional">Clock drift is bidirectional</h3>
+<p><code>iat</code> is verified, so a gateway whose clock runs ahead of a verifier by more than the skew tolerance issues tokens that verifier refuses as "not yet usable".</p>
+<h3 id="verification-proves-the-token-not-the-identity">Verification proves the token, not the identity</h3>
+<p>A successful verification says a trusted key signed that identity name at some point, within the token's validity window. It does not say the identity still exists, is still enabled, or holds any permission, and there is no way to revoke a token before its <code>exp</code>. Look the identity up and check its permissions before acting on the proof.</p>
 
 
 
@@ -4750,7 +5339,7 @@ Once instantiated, the Driver has to be configured setting the Bluetooth interfa
               
                 
               
-              Thanks for your feedback! Help us improve this page by using our <a href="https://github.com/eclipse-kura/kura/issues/new/?title=[Feedback]+/connect-field-devices/eddystone-driver/+-+" target="_blank" rel="noopener">feedback form</a>.
+              Thanks for your feedback! Help us improve this page by using our <a href="https://github.com/eclipse-kura/kura/issues/new/?title=[Feedback]+/core-services/jwt-services/+-+" target="_blank" rel="noopener">feedback form</a>.
             </div>
           
         </div>

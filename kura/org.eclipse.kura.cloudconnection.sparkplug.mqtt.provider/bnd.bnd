@@ -33,13 +33,4 @@ Import-Package: \
     org.slf4j;version="1.7.36",\
     javax.net,\
     *
-Export-Package: \
-    org.eclipse.kura.cloudconnection.sparkplug.mqtt.device;version="2.0.0";x-internal:=true,\
-    org.eclipse.kura.cloudconnection.sparkplug.mqtt.endpoint;version="2.0.0";x-internal:=true,\
-    org.eclipse.kura.cloudconnection.sparkplug.mqtt.factory;version="2.0.0";x-internal:=true,\
-    org.eclipse.kura.cloudconnection.sparkplug.mqtt.message;version="2.0.0";x-internal:=true,\
-    org.eclipse.kura.cloudconnection.sparkplug.mqtt.subscriber;version="2.0.0";x-internal:=true,\
-    org.eclipse.kura.cloudconnection.sparkplug.mqtt.transport;version="2.0.0";x-internal:=true,\
-    org.eclipse.tahu.protobuf;version="2.0.0";x-internal:=true
-
 Service-Component: OSGI-INF/*.xml

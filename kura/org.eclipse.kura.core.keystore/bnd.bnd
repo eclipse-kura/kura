@@ -42,7 +42,7 @@ Import-Package: \
     org.slf4j;version="1.7.32",\
     *
 Export-Package: \
-    org.eclipse.kura.core.keystore.util;version="1.1.0"
+    org.eclipse.kura.core.keystore.util;version="2.0.0"
 -includeresource: \
     about_files=about_files/,\
     about.html

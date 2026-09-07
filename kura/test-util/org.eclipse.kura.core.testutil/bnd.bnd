@@ -38,13 +38,13 @@ Import-Package: \
     javax.net.ssl,\
     *
 Export-Package: \
-    org.eclipse.kura.core.testutil;version="6.0.0",\
-    org.eclipse.kura.core.testutil.event;version="6.0.0",\
-    org.eclipse.kura.core.testutil.http;version="6.0.0",\
-    org.eclipse.kura.core.testutil.json;version="6.0.0",\
-    org.eclipse.kura.core.testutil.pki;version="6.0.0",\
-    org.eclipse.kura.core.testutil.requesthandler;version="6.0.0",\
-    org.eclipse.kura.core.testutil.service;version="6.0.0"
+    org.eclipse.kura.core.testutil;version="1.0.0",\
+    org.eclipse.kura.core.testutil.event;version="1.0.0",\
+    org.eclipse.kura.core.testutil.http;version="1.0.1",\
+    org.eclipse.kura.core.testutil.json;version="1.0.0",\
+    org.eclipse.kura.core.testutil.pki;version="1.2.0",\
+    org.eclipse.kura.core.testutil.requesthandler;version="2.0.0",\
+    org.eclipse.kura.core.testutil.service;version="1.0.0"
 -includeresource: \
     about.html,\
     about_files=about_files/

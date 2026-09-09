@@ -236,7 +236,7 @@ public class CommConnectionImpl implements CommConnection, Closeable {
             throw new NullPointerException("Serial command must not be null");
         }
 
-        logger.debug(SEND_MESSAGE, getBytesAsString(command));
+        logger.atDebug().addArgument(() -> getBytesAsString(command)).log(SEND_MESSAGE);
 
         if (this.outputStream == null) {
             openOutputStream();

@@ -183,7 +183,7 @@ public abstract class Cloudlet implements CloudClientListener {
             // Handle the message asynchronously to not block the master client
             callbackExecutor.submit(new MessageHandlerCallable(this, deviceId, appTopic, msg, qos, retain));
         } catch (Throwable t) {
-            logger.error("Unexpected throwable: {}", t);
+            logger.error("Unexpected throwable", t);
         }
     }
 
@@ -285,7 +285,7 @@ class MessageHandlerCallable implements Callable<Void> {
             logger.error("Bad request topic: {}", this.appTopic);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_BAD_REQUEST);
         } catch (KuraException e) {
-            logger.error("Error handling request topic: {}\n{}", this.appTopic, e);
+            logger.error("Error handling request topic: {}", this.appTopic, e);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
             respPayload.setException(e);
         }
@@ -303,7 +303,7 @@ class MessageHandlerCallable implements Callable<Void> {
             cloudClient.controlPublish(requesterClientId, sb.toString(), respPayload, Cloudlet.DFLT_PUB_QOS,
                     Cloudlet.DFLT_RETAIN, Cloudlet.DFLT_PRIORITY);
         } catch (KuraException e) {
-            logger.error("Error publishing response for topic: {}\n{}", this.appTopic, e);
+            logger.error("Error publishing response for topic: {}", this.appTopic, e);
         }
 
         return null;

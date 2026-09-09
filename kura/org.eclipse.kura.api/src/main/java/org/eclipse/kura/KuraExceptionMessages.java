@@ -14,6 +14,7 @@ package org.eclipse.kura;
 
 import java.text.MessageFormat;
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 /**
@@ -44,13 +45,17 @@ final class KuraExceptionMessages {
         return MessageFormat.format(pattern, messageArguments);
     }
 
-    static String messagePattern(final Locale locale, final KuraErrorCode code) {
+    private static String messagePattern(final Locale locale, final KuraErrorCode code) {
         if (code == null) {
             return MessageFormat.format(GENERIC_MESSAGE_PATTERN, UNKNOWN_CODE);
         }
-        final ResourceBundle messages = ResourceBundle.getBundle(MESSAGES_BUNDLE, locale);
-        if (messages.containsKey(code.name())) {
-            return messages.getString(code.name());
+        try {
+            final ResourceBundle messages = ResourceBundle.getBundle(MESSAGES_BUNDLE, locale);
+            if (messages.containsKey(code.name())) {
+                return messages.getString(code.name());
+            }
+        } catch (final MissingResourceException e) {
+            // no message bundle for this locale: fall back to the generic pattern
         }
         return MessageFormat.format(GENERIC_MESSAGE_PATTERN, code.name());
     }

@@ -35,7 +35,8 @@ import io.moquette.broker.config.IConfig;
 
 @RunWith(Suite.class)
 @SuiteClasses({ InventoryHandlerTest.class, CommURITest.class, ComponentConfigurationImplTest.class, PasswordTest.class,
-        ConfigurationServiceTest.class, NetUtilTest.class, NetworkServiceTest.class, SystemAdminServiceTest.class })
+        KuraExceptionMessageTest.class, ConfigurationServiceTest.class, NetUtilTest.class, NetworkServiceTest.class,
+        SystemAdminServiceTest.class })
 public class AllCoreTests {
 
     private static final Logger logger = LoggerFactory.getLogger(AllCoreTests.class);

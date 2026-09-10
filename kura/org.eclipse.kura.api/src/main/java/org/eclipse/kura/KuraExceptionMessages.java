@@ -45,6 +45,14 @@ final class KuraExceptionMessages {
         return MessageFormat.format(pattern, messageArguments);
     }
 
+    static String message(final KuraErrorCode code, final Object[] arguments) {
+        return localizedMessage(Locale.US, code, arguments);
+    }
+
+    static String localizedMessage(final KuraErrorCode code, final Object[] arguments) {
+        return localizedMessage(Locale.getDefault(), code, arguments);
+    }
+
     private static String messagePattern(final Locale locale, final KuraErrorCode code) {
         if (code == null) {
             return MessageFormat.format(GENERIC_MESSAGE_PATTERN, UNKNOWN_CODE);

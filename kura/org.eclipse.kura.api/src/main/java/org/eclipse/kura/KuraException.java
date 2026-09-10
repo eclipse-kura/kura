@@ -12,8 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura;
 
-import java.util.Locale;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -138,24 +136,13 @@ public class KuraException extends Exception {
     /** {@inheritDoc} */
     @Override
     public String getLocalizedMessage() {
-        return getLocalizedMessage(Locale.getDefault());
-    }
-
-    /**
-     * Gets the localized message.
-     *
-     * @param locale
-     *            the locale
-     * @return the localized message
-     */
-    private String getLocalizedMessage(final Locale locale) {
-        return KuraExceptionMessages.localizedMessage(locale, this.code, this.arguments);
+        return KuraExceptionMessages.localizedMessage(this.code, this.arguments);
     }
 
     /** {@inheritDoc} */
     @Override
     public String getMessage() {
-        return getLocalizedMessage(Locale.US);
+        return KuraExceptionMessages.message(this.code, this.arguments);
     }
 
 }

@@ -1,24 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2026 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura;
 
-import java.text.MessageFormat;
-import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -34,15 +27,6 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public class KuraException extends Exception {
-
-    /** The Constant denoting resource bundle. */
-    private static final String KURA_EXCEPTION_MESSAGES_BUNDLE = "org.eclipse.kura.core.messages.KuraExceptionMessagesBundle";
-
-    /** The Constant denoting message pattern. */
-    private static final String KURA_GENERIC_MESSAGES_PATTERN = "Generic Error - {0}: {1}";
-
-    /** The Logger. */
-    private static final Logger logger = LogManager.getLogger(KuraException.class);
 
     /** The Constant denoting serial version identifier. */
     private static final long serialVersionUID = 7468633737373095296L;
@@ -152,73 +136,13 @@ public class KuraException extends Exception {
     /** {@inheritDoc} */
     @Override
     public String getLocalizedMessage() {
-        return getLocalizedMessage(Locale.getDefault());
-    }
-
-    /**
-     * Gets the localized message.
-     *
-     * @param locale
-     *            the locale
-     * @return the localized message
-     */
-    private String getLocalizedMessage(final Locale locale) {
-        final String pattern = getMessagePattern(locale, this.code);
-        if (this.code == null || KuraErrorCode.INTERNAL_ERROR.equals(this.code)) {
-            if (this.arguments != null && this.arguments.length > 1) {
-                // append all arguments into a single one
-                final StringBuilder sbAllArgs = new StringBuilder();
-                for (final Object arg : this.arguments) {
-                    sbAllArgs.append(" - ");
-                    sbAllArgs.append(arg);
-                }
-                this.arguments = new Object[] { sbAllArgs.toString() };
-            }
-        }
-        return MessageFormat.format(pattern, this.arguments);
+        return KuraExceptionMessages.localizedMessage(this.code, this.arguments);
     }
 
     /** {@inheritDoc} */
     @Override
     public String getMessage() {
-        return getLocalizedMessage(Locale.US);
+        return KuraExceptionMessages.message(this.code, this.arguments);
     }
 
-    /**
-     * Gets the message pattern.
-     *
-     * @param locale
-     *            the locale
-     * @param code
-     *            the code
-     * @return the message pattern
-     */
-    private String getMessagePattern(final Locale locale, final KuraErrorCode code) {
-        // Load the message pattern from the bundle
-        String messagePattern = null;
-        ResourceBundle resourceBundle = null;
-        try {
-            resourceBundle = ResourceBundle.getBundle(KURA_EXCEPTION_MESSAGES_BUNDLE, locale);
-            if (resourceBundle != null && code != null) {
-                messagePattern = resourceBundle.getString(code.name());
-                if (messagePattern == null) {
-                    logger.warn("Could not find Exception Messages for Locale {} and code {}", locale, code);
-                }
-            }
-        } catch (final MissingResourceException mre) {
-            // log the failure to load a message bundle
-            logger.warn("Could not load Exception Messages Bundle for Locale {}", locale);
-        }
-        // If no bundle or code in the bundle is found, use a generic message
-        if (messagePattern == null) {
-            if (code != null) {
-                // build a generic message format
-                messagePattern = MessageFormat.format(KURA_GENERIC_MESSAGES_PATTERN, code.name());
-            } else {
-                // build a generic message format
-                messagePattern = MessageFormat.format(KURA_GENERIC_MESSAGES_PATTERN, "Unknown");
-            }
-        }
-        return messagePattern;
-    }
 }

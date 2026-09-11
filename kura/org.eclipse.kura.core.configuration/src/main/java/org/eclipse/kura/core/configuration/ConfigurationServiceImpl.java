@@ -279,11 +279,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     protected void addSelfConfiguringComponent(final ServiceReference<SelfConfiguringComponent> reference) {
 
         final String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
-
-        if (kuraPid == null) {
-            return;
-        }
-
         final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
 
         registerSelfConfiguringComponent(kuraPid, servicePid != null ? servicePid : kuraPid);
@@ -291,13 +286,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     protected void removeSelfConfiguringComponent(final ServiceReference<SelfConfiguringComponent> reference) {
 
-        final String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
-
-        if (kuraPid == null) {
-            return;
-        }
-
-        unregisterComponentConfiguration(kuraPid);
+        unregisterComponentConfiguration(makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID)));
 
     }
 

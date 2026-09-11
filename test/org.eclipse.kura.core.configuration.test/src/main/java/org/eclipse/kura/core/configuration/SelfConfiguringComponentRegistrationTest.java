@@ -74,6 +74,16 @@ public class SelfConfiguringComponentRegistrationTest {
     }
 
     @Test
+    public void selfConfiguringComponentWithoutKuraServicePidIsIgnoredOnRemoval() throws Throwable {
+        givenConfigurationService();
+        givenSelfConfiguringComponentReference(null, SERVICE_PID);
+
+        whenSelfConfiguringComponentIsRemoved();
+
+        thenNoPidIsTracked();
+    }
+
+    @Test
     public void selfConfiguringComponentWithoutServicePidIsUntrackedOnRemoval() throws Throwable {
         givenConfigurationService();
         givenSelfConfiguringComponentReference(KURA_PID, null);

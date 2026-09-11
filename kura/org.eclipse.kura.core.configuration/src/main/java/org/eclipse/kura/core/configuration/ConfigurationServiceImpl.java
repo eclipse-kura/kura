@@ -25,6 +25,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -1678,8 +1679,13 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         if (value instanceof Collection) {
             return makeStringFromCollection((Collection<?>) value);
         }
-        if (value instanceof Object[]) {
-            return makeStringFromCollection(Arrays.asList((Object[]) value));
+        if (value.getClass().isArray()) {
+            final int length = Array.getLength(value);
+            final List<Object> elements = new ArrayList<>(length);
+            for (int i = 0; i < length; i++) {
+                elements.add(Array.get(value, i));
+            }
+            return makeStringFromCollection(elements);
         }
         return value.toString();
     }

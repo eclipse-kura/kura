@@ -117,6 +117,27 @@ public class SelfConfiguringComponentRegistrationTest {
     }
 
     @Test
+    public void primitiveArrayServicePidIsReducedToASingleValue() throws Throwable {
+        givenConfigurationService();
+        givenConfigurableComponentReference(CONFIGURABLE_KURA_PID, new int[] { 7, 7 });
+
+        whenConfigurableComponentIsAdded();
+
+        thenPidIsTracked(CONFIGURABLE_KURA_PID);
+        thenServicePidOf(CONFIGURABLE_KURA_PID, "7");
+    }
+
+    @Test
+    public void ambiguousPrimitiveArrayServicePidIsRejected() throws Throwable {
+        givenConfigurationService();
+        givenConfigurableComponentReference(CONFIGURABLE_KURA_PID, new int[] { 7, 8 });
+
+        whenConfigurableComponentIsAdded();
+
+        thenNoPidIsTracked();
+    }
+
+    @Test
     public void ambiguousServicePidIsRejected() throws Throwable {
         givenConfigurationService();
         givenConfigurableComponentReference(CONFIGURABLE_KURA_PID, Arrays.asList(SERVICE_PID, "anotherServicePid"));

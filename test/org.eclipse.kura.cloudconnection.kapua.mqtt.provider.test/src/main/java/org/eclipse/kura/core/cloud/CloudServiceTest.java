@@ -466,7 +466,7 @@ public class CloudServiceTest {
     private Map<String, Object> getConfigForNonExistingBroker() {
         final Map<String, Object> properties = new HashMap<>();
 
-        properties.put("broker-url", "mqtt://broker-url:1883/");
+        properties.put("broker-url", "mqtt://broker-url.invalid:1883/");
 
         return properties;
     }

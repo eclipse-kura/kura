@@ -370,7 +370,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         try {
             this.dockerClient.startContainerCmd(id).exec();
         } catch (Exception e) {
-            logger.error("Could not start container {}. It could be already running or not exist at all. Caused by {}",
+            logger.error("Could not start container {}. It could be already running or not exist at all",
                     id, e);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
         }
@@ -431,7 +431,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         } catch (NotModifiedException e) {
             logger.debug("Container {} already stopped", id);
         } catch (Exception e) {
-            logger.error("Could not stop container {}. Caused by {}", id, e);
+            logger.error("Could not stop container {}", id, e);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
         }
     }
@@ -450,7 +450,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             removeContainerInstanceDigest(id);
 
         } catch (Exception e) {
-            logger.error("Could not remove container {}. Caused by {}", id, e);
+            logger.error("Could not remove container {}", id, e);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
         }
     }
@@ -666,7 +666,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             try {
                 configuration.withMemory(memory.get());
             } catch (NumberFormatException e) {
-                logger.warn("Memory value {} not valid. Caused by {}", memory.get(), e);
+                logger.warn("Memory value {} not valid: {}", memory.get(), e.getMessage());
             }
         }
 
@@ -1026,7 +1026,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         try {
             this.dockerClient.removeImageCmd(imageId).exec();
         } catch (Exception e) {
-            logger.error("Could not remove image {}. Caused by {}", imageId, e);
+            logger.error("Could not remove image {}", imageId, e);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Delete Container Image",
                     "500 (server error). Image is most likely in use by a container.");
         }

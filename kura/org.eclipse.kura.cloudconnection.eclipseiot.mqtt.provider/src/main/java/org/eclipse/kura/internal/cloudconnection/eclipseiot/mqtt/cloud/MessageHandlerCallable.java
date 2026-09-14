@@ -190,7 +190,7 @@ public class MessageHandlerCallable implements Callable<Void> {
             byte[] appPayload = this.cloudConnectionManager.encodePayload(response.getPayload());
             dataService.publish(fullTopic, appPayload, DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY);
         } catch (KuraException e) {
-            logger.error("Error publishing response for topic: {}", this.appTopic, e);
+            logger.error("Error publishing response for request {} on topic: {}", requestId, this.appTopic, e);
         }
     }
 

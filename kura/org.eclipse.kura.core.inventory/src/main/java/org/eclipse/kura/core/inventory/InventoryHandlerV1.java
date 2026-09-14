@@ -361,7 +361,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             respPayload.setTimestamp(new Date());
             respPayload.setBody(s.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
-            logger.error("Error getting resource {}", RESOURCE_DEPLOYMENT_PACKAGES, e);
+            logger.error(ERROR_GETTING_RESOURCE, RESOURCE_DEPLOYMENT_PACKAGES, e);
         }
         return respPayload;
     }

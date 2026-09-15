@@ -21,8 +21,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.zip.ZipEntry;
@@ -109,7 +111,9 @@ public class UnZip {
         }
 
         long total = writtenSoFar;
-        try (OutputStream fos = Files.newOutputStream(newFile.toPath())) {
+        try (OutputStream fos = Files.newOutputStream(newFile.toPath(),
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
+                StandardOpenOption.WRITE, LinkOption.NOFOLLOW_LINKS)) {
             byte[] buffer = new byte[BUFFER];
 
             int len = zis.read(buffer);

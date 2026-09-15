@@ -25,6 +25,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -278,28 +279,15 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             unbind = "removeSelfConfiguringComponent")
     protected void addSelfConfiguringComponent(final ServiceReference<SelfConfiguringComponent> reference) {
 
+        final String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
         final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
 
-        if (servicePid == null) {
-            return;
-        }
-
-        final String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
-
-        registerSelfConfiguringComponent(kuraPid, servicePid);
+        registerSelfConfiguringComponent(kuraPid, servicePid != null ? servicePid : kuraPid);
     }
 
     protected void removeSelfConfiguringComponent(final ServiceReference<SelfConfiguringComponent> reference) {
 
-        final String servicePid = makeString(reference.getProperty(Constants.SERVICE_PID));
-
-        if (servicePid == null) {
-            return;
-        }
-
-        final String kuraPid = makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID));
-
-        unregisterComponentConfiguration(kuraPid);
+        unregisterComponentConfiguration(makeString(reference.getProperty(ConfigurationService.KURA_SERVICE_PID)));
 
     }
 
@@ -1688,7 +1676,31 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         if (value instanceof String) {
             return (String) value;
         }
+        if (value instanceof Collection) {
+            return makeStringFromCollection((Collection<?>) value);
+        }
+        if (value.getClass().isArray()) {
+            final int length = Array.getLength(value);
+            final List<Object> elements = new ArrayList<>(length);
+            for (int i = 0; i < length; i++) {
+                elements.add(Array.get(value, i));
+            }
+            return makeStringFromCollection(elements);
+        }
         return value.toString();
+    }
+
+    private static String makeStringFromCollection(Collection<?> values) {
+        final Set<String> distinctValues = values.stream().filter(Objects::nonNull).map(Object::toString)
+                .collect(Collectors.toSet());
+
+        if (distinctValues.size() == 1) {
+            return distinctValues.iterator().next();
+        }
+
+        logger.warn("Expected a single property value, found {}. Ignoring it.", values);
+
+        return null;
     }
 
     @Override

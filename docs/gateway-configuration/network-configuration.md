@@ -198,21 +198,23 @@ Name                                                             | Type      | D
 
 ### Cellular Modem properties
 
-Name                                                  | Type     | Description                                                            | Default value
-------------------------------------------------------|----------|------------------------------------------------------------------------|-----------------------------
-`net.interface.<interface>.config.enabled`	          | Boolean  | Enable the interface                                                   | false
-`net.interface.<interface>.config.username`           | String   | The username used for the connection                                   |
-`net.interface.<interface>.config.password`           | Password | The password used for the connection                                   |
-`net.interface.<interface>.config.lpcEchoInterval`    | Integer  | The lcp-echo-interval option of the PPP daemon                         | 0
-`net.interface.<interface>.config.lpcEchoFailure`     | Integer  | The lcp-echo-failure option of the PPP daemon                          | 0
-`net.interface.<interface>.config.resetTimeout`       | Integer  | The modem reset timeout in minutes                                     | 5
-`net.interface.<interface>.config.gpsEnabled`         | Boolean  | Enable the GPS device in the modem if available                        | false
-`net.interface.<interface>.config.gpsMode`            | String   | Select the GPS mode to activate for the modem if available             | `kuraModemGpsModeUnmanaged`
-`net.interface.<interface>.config.apn`                | String   | The modem Access Point Name                                            |
-`net.interface.<interface>.config.dialString`         | String   | The dial string used for connecting to the APN[^1]                     |
-`net.interface.<interface>.config.persist`            | Boolean  | Enable the cellular automatic reconnection                             | true
-`net.interface.<interface>.config.holdoff`            | Integer  | The time delay in seconds between connection attempts                  | 30
-`net.interface.<interface>.config.maxFail`            | Integer  | The maximum number of connection attempts                              | 5
+Name                                                   | Type     | Description                                                            | Default value
+-------------------------------------------------------|----------|------------------------------------------------------------------------|-----------------------------
+`net.interface.<interface>.config.enabled`	           | Boolean  | Enable the interface                                                   | false
+`net.interface.<interface>.config.username`            | String   | The username used for the connection                                   |
+`net.interface.<interface>.config.password`            | Password | The password used for the connection                                   |
+`net.interface.<interface>.config.lpcEchoInterval`     | Integer  | The lcp-echo-interval option of the PPP daemon                         | 0
+`net.interface.<interface>.config.lpcEchoFailure`      | Integer  | The lcp-echo-failure option of the PPP daemon                          | 0
+`net.interface.<interface>.config.resetTimeout`        | Integer  | The modem reset timeout in minutes                                     | 5
+`net.interface.<interface>.config.gpsEnabled`          | Boolean  | Enable the GPS device in the modem if available                        | false
+`net.interface.<interface>.config.gpsMode`             | String   | Select the GPS mode to activate for the modem if available             | `kuraModemGpsModeUnmanaged`
+`net.interface.<interface>.config.apn`                 | String   | The modem Access Point Name                                            |
+`net.interface.<interface>.config.dialString`          | String   | The dial string used for connecting to the APN[^1]                     |
+`net.interface.<interface>.config.persist`             | Boolean  | Enable the cellular automatic reconnection                             | true
+`net.interface.<interface>.config.holdoff`             | Integer  | The time delay in seconds between connection attempts                  | 30
+`net.interface.<interface>.config.maxFail`             | Integer  | The maximum number of connection attempts                              | 5
+`net.interface.<interface>.config.modem.enabled.modes` | String   | Comma separated list of Modem Modes that will be allowed on the modem. When `ANY` or `NONE` is used, they must be the only ones in the list |
+`net.interface.<interface>.config.modem.preferred.mode`| String   | Modem Mode to prefer when trying to connect. If `net.interface.<interface>.config.modem.enabled.modes` is not set `net.interface.<interface>.config.modem.preferred.mode` will be ignored. If `net.interface.<interface>.config.modem.preferred.mode` is not set it will default to `NONE`.                           |
 
 #### GPS Mode
 
@@ -222,6 +224,24 @@ The GPS mode can be set to one of the following values:
 - `kuraModemGpsModeManagedGps`: the GPS device of the modem will be setup and directly managed (typically by ModemManager) therefore the serial port won't be available for other services to use.
 
 For older versions compatibility, if the `net.interface.<interface>.config.gpsMode` property is not set, the GPS mode will be automatically set to the `kuraModemGpsModeUnmanaged` equivalent.
+
+#### Modem Mode
+
+Kura supports the following Modem Modes with the following meaning:
+
+- `NONE`: No mode can be used (for `net.interface.<interface>.config.modem.preferred.mode` means "no preference").
+- `CS`: CSD, GSM, and other circuit-switched technologies.
+- `2G`: GPRS, EDGE.
+- `3G`: UMTS, HSxPA.
+- `4G`: LTE.
+- `5G`: 5GNR.
+- `ANY`: Any mode can be used. The use of this option is discouraged in favour of explicitly setting the mode.
+
+!!! note
+    Not all combination of modes are supported by all modem. To verify what are the supported modes on your modem issue the following command on your target device:
+    ```bash
+    mmcli -m <modem_nr>
+    ```
 
 ### VLAN properties
 

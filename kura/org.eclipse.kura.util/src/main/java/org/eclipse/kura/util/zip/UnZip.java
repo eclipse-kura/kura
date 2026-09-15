@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -171,14 +172,11 @@ public class UnZip {
     }
 
     private static String validateFileName(String zipFileName, String intendedDir) throws IOException, KuraException {
-        File zipFile = new File(zipFileName);
-        String filePath = zipFile.getCanonicalPath();
+        final Path filePath = new File(zipFileName).getCanonicalFile().toPath();
+        final Path intendedCanonicalPath = new File(intendedDir).getCanonicalFile().toPath();
 
-        File iD = new File(intendedDir);
-        String canonicalID = iD.getCanonicalPath();
-
-        if (filePath.startsWith(canonicalID)) {
-            return filePath;
+        if (filePath.startsWith(intendedCanonicalPath)) {
+            return filePath.toString();
         } else {
             throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
         }

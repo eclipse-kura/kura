@@ -2,7 +2,7 @@
 
 This guide will provide information on how a cloud connection developer can leverage the new Generic Cloud Services APIs.
 
-As reference, this guide will use the Eclipse IoT WG namespace implementation bundle available [here](https://github.com/eclipse/kura/tree/develop/kura/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider)
+As reference, this guide will use the Eclipse IoT WG namespace implementation bundle available [here](https://github.com/eclipse-kura/kura/tree/develop/kura/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider)
 
 ## Implement CloudEndpoint and CloudConnectionManager
 In order to leverage the new APIs, and be managed by the Kura Web UI, the Cloud Connection implementation bundle must implement CloudEndpont and, if log-lived connections are supported, the CloudConnectionManager interface must be implemented as well.
@@ -46,36 +46,47 @@ public class CloudConnectionManagerImpl
 }
 ```
 
-A corresponding component definition should be provided in the OSGI-INF folder exposing the implementation of CloudEndpoint and CloudConnectionManager interfaces.
+The class is declared as a Declarative Services component with the `@Component` annotation, exposing the implementation of `CloudEndpoint` and `CloudConnectionManager` (and of `ConfigurableComponent`, since the endpoint is configurable) in the `service` attribute. bnd generates the `OSGI-INF` component descriptor from the annotations at build time.
 
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager">
-   <implementation class="org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudConnectionManagerImpl"/>
-   <service>
-      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
-      <provide interface="org.eclipse.kura.cloudconnection.CloudConnectionManager"/>
-      <provide interface="org.eclipse.kura.cloudconnection.CloudEndpoint"/>
-      <!-- ... -->
-   </service>
+```java
+@Component(
+    name = "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { ConfigurableComponent.class,
+            CloudConnectionManager.class,
+            CloudEndpoint.class,
+            /* ... */ },
+    property = {
+        "kura.ui.service.hide:Boolean=true",
+        "kura.ui.factory.hide:Boolean=true" })
+@Designate(ocd = ConnectionManagerOptions.class, factory = true)
+public class CloudConnectionManagerImpl
+        implements CloudConnectionManager, CloudEndpoint, ConfigurableComponent, ... {
 
-   <!-- ... -->
+    @Activate
+    protected void activate(ComponentContext componentContext, Map<String, Object> properties) { ... }
 
-   <property name="kura.ui.service.hide" type="Boolean" value="true"/>
-   <property name="kura.ui.factory.hide" type="String" value="true"/>
-</scr:component>
+    @Modified
+    public void updated(Map<String, Object> properties) { ... }
+
+    @Deactivate
+    protected void deactivate(ComponentContext componentContext) { ... }
+}
 ```
 
-In order to be fully compliant with the Web UI requirements, the CloudConnection component definition should provide two properties `kura.ui.service.hide` and `kura.ui.factory.hide` to hide the component from the left side part of the UI dedicated to display the services list.
+The `@Designate(..., factory = true)` annotation links the component to its Metatype description (`ConnectionManagerOptions`, an `@ObjectClassDefinition` annotated interface) and declares it as a factory component, so that the user can create several cloud connection instances.
+
+In order to be fully compliant with the Web UI requirements, the CloudConnection component declaration should provide two properties `kura.ui.service.hide` and `kura.ui.factory.hide` to hide the component from the left side part of the UI dedicated to display the services list.
 
 ## Implement the CloudConnectionFactory interface
 
 The CloudConnectionFactory is responsible to manage the cloud connection instance lifecycle by creating the CloudEndpoint instance and all the required services needed to publish or receive messages from the cloud platform.
 
-As a reference, please have a look at the [CloudConnectionFactory](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider/src/main/java/org/eclipse/kura/internal/cloudconnection/eclipseiot/mqtt/cloud/factory/DefaultCloudConnectionFactory.java) defined for the Eclipse IoT WG namespace implementation.
+As a reference, please have a look at the [CloudConnectionFactory](https://github.com/eclipse-kura/kura/blob/develop/kura/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider/src/main/java/org/eclipse/kura/internal/cloudconnection/eclipseiot/mqtt/cloud/factory/DefaultCloudConnectionFactory.java) defined for the Eclipse IoT WG namespace implementation.
 
 In particular, the `getFactoryPid()` method returns the PID of the CloudEndpoint factory.
-The `createConfiguration()` method receives a PID that will be used for the instantiation of the CloudEndpoint and for all the related services required to communicate with the cloud platform. In the example above, the factory creates the CloudEnpoint, and a DataService and MqttDataTransport instances internally needed to communicate with a remote cloud platform. As can be seen [here](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider/src/main/java/org/eclipse/kura/internal/cloudconnection/eclipseiot/mqtt/cloud/factory/DefaultCloudConnectionFactory.java#L215), the CloudEndpoint instance configuration is enriched with the reference to the CloudConnectionFactory that generated it. This step is required by the Web UI in order to properly relate the instances with the corresponding factories.
+The `createConfiguration()` method receives a PID that will be used for the instantiation of the CloudEndpoint and for all the related services required to communicate with the cloud platform. In the example above, the factory creates the CloudEnpoint, and a DataService and MqttDataTransport instances internally needed to communicate with a remote cloud platform. As can be seen [here](https://github.com/eclipse-kura/kura/blob/develop/kura/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider/src/main/java/org/eclipse/kura/internal/cloudconnection/eclipseiot/mqtt/cloud/factory/DefaultCloudConnectionFactory.java#L215), the CloudEndpoint instance configuration is enriched with the reference to the CloudConnectionFactory that generated it. This step is required by the Web UI in order to properly relate the instances with the corresponding factories.
 
 The `deleteConfiguration()` method deletes from the framework the CloudEndpoint instance identified by the PID passed as argument and all the related services. In the Eclipse IOT WG example, it not only deletes the CloudEndpoint instance but also the corresponding DataService and MqttDataTransport instances.
 
@@ -83,62 +94,64 @@ The `getStackComponentsPids()` method return a List of String that represent the
 
 The `getManagedCloudConnectionPids()` method will return the list of kura.service.pid of all the CloudEndpoints managed by the factory.
 
-The factory component definition should be defined as follows:
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.DefaultCloudConnectionFactory">
-   <implementation class="org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.factory.DefaultCloudConnectionFactory"/>
-   <reference bind="setConfigurationService" cardinality="1..1" interface="org.eclipse.kura.configuration.ConfigurationService" name="ConfigurationService" policy="static" unbind="unsetConfigurationService"/>
-   <service>
-      <provide interface="org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory"/>
-   </service>
-   <property name="osgi.command.scope" type="String" value="kura.cloud"/>
-   <property name="osgi.command.function" type="String">
-      createConfiguration
-   </property>
-   <property name="kura.ui.csf.pid.default" type="String" value="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager"/>
-   <property name="kura.ui.csf.pid.regex" type="String" value="^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager(\-[a-zA-Z0-9]+)?$"/>
-   <property name="service.pid" type="String" value="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.DefaultCloudConnectionFactory"/>
-</scr:component>
+The factory component should be declared as follows:
+
+```java
+@Component(
+    name = "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.DefaultCloudConnectionFactory",
+    service = { CloudConnectionFactory.class },
+    property = {
+        "osgi.command.scope=kura.cloud",
+        "osgi.command.function=createConfiguration",
+        "kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager",
+        "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager(\\-[a-zA-Z0-9]+)?$" })
+public class DefaultCloudConnectionFactory implements CloudConnectionFactory {
+
+    @Reference
+    public void setConfigurationService(ConfigurationService configurationService) { ... }
+
+    public void unsetConfigurationService(ConfigurationService configurationService) { ... }
+
+    /* ... */
+}
 ```
 
-In particular, it should expose in the `service` section the fact that the factory implements `org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory`
-```xml
-   <service>
-      <provide interface="org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory"/>
-   </service>
+In particular, it should expose in the `service` attribute the fact that the factory implements `org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory`:
+```java
+service = { CloudConnectionFactory.class }
 ```
 
 Important properties that need to be specified to have a better Web UI experience are the following:
-```xml
-<property name="kura.ui.csf.pid.default" type="String" value="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager"/>
-<property name="kura.ui.csf.pid.regex" type="String" value="^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager(\-[a-zA-Z0-9]+)?$"/>
+```java
+"kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager",
+"kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager(\\-[a-zA-Z0-9]+)?$"
 ```
 those allow to specify the form of the expected PID that the end user should provide when creating a new cloud connection.
 
 ## Provide a CloudPublisher implementation
-To provide a CloudPublisher implementation, other than implementing CloudPublisher API in a java class, the developer must provide a component definition in the OSGI-INF folder that should be like the following:
+To provide a CloudPublisher implementation, other than implementing the CloudPublisher API in a Java class, the developer must declare the component as follows:
 
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher">
-   <implementation class="org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.publisher.CloudPublisherImpl"/>
-   <service>
-      <provide interface="org.eclipse.kura.cloudconnection.publisher.CloudPublisher"/>
-      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
-   </service>
-   <property name="cloud.connection.factory.pid" type="String" value="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager"/>
-   <property name="service.pid" type="String" value="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher"/>
-   <property name="kura.ui.service.hide" type="Boolean" value="true"/>
-   <property name="kura.ui.factory.hide" type="String" value="true"/>
-   <property name="kura.ui.csf.pid.default" type="String" value="org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher"/>
-   <property name="kura.ui.csf.pid.regex" type="String" value="^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher(\-[a-zA-Z0-9]+)?$"/>
-</scr:component>
+```java
+@Component(
+    name = "org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher",
+    immediate = true,
+    configurationPolicy = ConfigurationPolicy.REQUIRE,
+    service = { CloudPublisher.class, ConfigurableComponent.class },
+    property = {
+        "cloud.connection.factory.pid=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager",
+        "kura.ui.service.hide:Boolean=true",
+        "kura.ui.factory.hide=true",
+        "kura.ui.csf.pid.default=org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher",
+        "kura.ui.csf.pid.regex=^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher(\\-[a-zA-Z0-9]+)?$" })
+@Designate(ocd = CloudPublisherMetatype.class, factory = true)
+public class CloudPublisherImpl implements CloudPublisher, ConfigurableComponent, ... {
+    /* ... */
+}
 ```
 
 As can be seen in the previous snippet, the Publisher exposes itself in the framework as a `ConfigurableComponent` and as a `CloudPublisher`.
 
-The component definition must contain the following well-known properties:
+The component must declare the following well-known properties:
 
 - `cloud.connection.factory.pid`: this property must be set to the kura.service.pid of the factory that created the cloud connection which the publisher belongs. It is used by the Web UI to enforce that the correct cloud publisher implementation is used in a specific cloud endpoint.  
 - `kura.ui.service.hide`: as specified before for the Cloud Endpoint
@@ -146,10 +159,10 @@ The component definition must contain the following well-known properties:
 - `kura.ui.csf.pid.default`: as specified before for the Cloud Factory. It is an optional property.
 - `kura.ui.csf.pid.regex`: as specified before for the Cloud Factory. It is an optional property.
 
-The relation between the CloudPublisher instance and the CloudEndpoint is defined by a [configuration property](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/cloudconnection/CloudConnectionConstants.java#L30) set by the Web UI at CloudPublisher creation.
+The relation between the CloudPublisher instance and the CloudEndpoint is defined by a [configuration property](https://github.com/eclipse-kura/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/cloudconnection/CloudConnectionConstants.java#L30) set by the Web UI at CloudPublisher creation.
 
 ## Provide a CloudSubscriber implementation
-The CloudSubscriber implementation and component definition is similar to the one described for the CloudPublisher.
+The CloudSubscriber implementation and component declaration is similar to the one described for the CloudPublisher.
 
 ## Implement RequestHandler support
 In order to support Command and Control, the cloud connection bundle should provide a service that registers itself as RequestHandlerRegistry. In this way all the RequestHandler instances could be able to discover the different Registry and subscribe for command and control messages received from the cloud platform.

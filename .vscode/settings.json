@@ -1,0 +1,13 @@
+{
+    "java.format.settings.url": "kura/setups/formatting/KuraFormatter.xml",
+    "java.format.settings.profile": "Kura_formatter_v_3",
+    "[java]": {
+        "editor.defaultFormatter": "redhat.java",
+        "editor.formatOnSave": true,
+        "files.trimTrailingWhitespace": true
+    },
+    "[xml]": {
+        "editor.defaultFormatter": "redhat.vscode-xml"
+    },
+    "files.eol": "\n"
+}

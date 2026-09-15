@@ -229,13 +229,13 @@ For older versions compatibility, if the `net.interface.<interface>.config.gpsMo
 
 Kura supports the following Modem Modes with the following meaning:
 
-- `NONE`: No mode can be used.
+- `NONE`: No mode can be used (for `net.interface.<interface>.config.modem.preferred.mode` means "no preference").
 - `CS`: CSD, GSM, and other circuit-switched technologies.
 - `2G`: GPRS, EDGE.
 - `3G`: UMTS, HSxPA.
 - `4G`: LTE.
 - `5G`: 5GNR.
-- `ANY`: Any mode can be used
+- `ANY`: Any mode can be used. The use of this option is discouraged in favour of explicitly setting the mode.
 
 !!! note
     Not all combination of modes are supported by all modem. To verify what are the supported modes on your modem issue the following command on your target device:

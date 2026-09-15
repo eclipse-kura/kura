@@ -34,8 +34,9 @@ jobs:
     name: Generate Kura core SBOM
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
-    outputs:
-      project-version: ${{ steps.get-version.outputs.PROJECT_VERSION }} # required for DependencyTrack upload
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Set checkout ref
         id: set-checkout-ref
@@ -93,17 +94,8 @@ jobs:
           echo "Product version: $VERSION"
 
       - name: Upload sbom
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        uses: eclipse-csi/workflows/upload-sbom@d83da6f2897e985d9d2b9541174c7ee5ee6d88ad # main
         with:
-          name: kura-core-sbom
-          path: ${{ env.PRODUCT_PATH }}/target/bom.json
-
-  store-sbom-data:
-    needs: ['generate-sbom']
-    uses: eclipse-csi/workflows/.github/workflows/store-sbom-data.yml@88508d92f2638d942a88744431f017225ed8c14c # main@08/04/2026
-    with:
-      projectName: 'kura-core'
-      projectVersion: ${{ needs.generate-sbom.outputs.project-version }}
-      bomArtifact: 'kura-core-sbom'
-      bomFilename: 'bom.json'
-      parentProject: 'f295fa60-24df-44d9-83ff-00b3ff8d6131'
+          sbom-file: ${{ env.PRODUCT_PATH }}/target/bom.json
+          product-name: 'kura-core'
+          product-version: ${{ steps.get-version.outputs.PROJECT_VERSION }}

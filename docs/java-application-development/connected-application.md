@@ -2,11 +2,9 @@
 
 ## Overview
 
-This section describes the prepackaged heater demo bundle that comes
-with the Kura development environment and demonstrates how to perform
-the following functions:
+This section describes the heater demo bundle of the [kura-apps](https://github.com/eclipse-kura/kura-apps) repository and demonstrates how to perform the following functions:
 
-* Run the Kura Emulator
+* Bind an application to a cloud connection through a `CloudPublisher`
 
 * Connect to the Cloud
 
@@ -16,70 +14,92 @@ the following functions:
 
 ### Prerequisites
 
-* [Setting up Kura Development Environment](/java-application-development/development-environment-setup/)
+* [Configurable Application](./configurable-application.md)
 
 * Using the Kura web UI
 
+* A device running Kura 6 (or the [Kura Docker image](../getting-started/docker-quick-start.md)) with Internet access, so it can publish to an MQTT broker
+
 ## Heater Demo Introduction
 
-The org.eclipse.kura.demo.heater bundle is a simple OSGi bundle that
-represents a thermostat and heater combination. The application utilizes
-the Kura ConfigurableComponent interface to be able to receive
-configuration updates through the local Kura web UI. In addition, this
-bundle utilizes OSGi declarative services and the Kura
-CloudClientListener. This tutorial demonstrates how to modify
-configurations of custom bundles and shows how those configuration
-changes can dynamically impact the behavior of the bundle through the
-Kura web UI.
+The `org.eclipse.kura.demo.heater` bundle is a simple OSGi bundle that represents a thermostat and heater combination. The application utilizes the Kura ConfigurableComponent interface to be able to receive configuration updates through the local Kura web UI. In addition, this bundle utilizes OSGi Declarative Services and the Kura `CloudPublisher` API to publish its telemetry. This tutorial demonstrates how to modify configurations of custom bundles and shows how those configuration changes can dynamically impact the behavior of the bundle through the Kura web UI.
+
+The source code is in the `kura-examples/bundles/heater/org.eclipse.kura.demo.heater` module of the kura-apps repository; the `kura-apps-distrib/kura-examples/heater` module builds its Debian installer.
 
 ## Code Walkthrough
 
-The following sections will highlight three important API layers when creating an application that will publish to the cloud. These layers are:
+The following sections highlight the API layers involved when creating an application that publishes to the cloud. These layers are:
 
 * DataTransportService
-  * Available for standard MQTT messaging. Allows consumers of the service to connect to brokers, publish messages, and receive messages on subscribed topics
+    * Available for standard MQTT messaging. Allows consumers of the service to connect to brokers, publish messages, and receive messages on subscribed topics
 * DataService
-  * Delegates data transport to the DataTransportService
-  * Provides extended features for managing broker connections, buffering of published messages, and priority based delivery of messages
-* CloudService
-  * Further extends the functionality of DataService
-  * Provides means for more complex flows (i.e. request/response)
-  * Manages single broker connection across multiple applications
-  * Provides payload data model with encoding/decoding serializers
-  * Publishes life cycle manages for devices and applications
+    * Delegates data transport to the DataTransportService
+    * Provides extended features for managing broker connections, buffering of published messages, and priority based delivery of messages
+* CloudEndpoint and CloudConnectionManager
+    * Further extend the functionality of DataService
+    * Manage a single broker connection across multiple applications
+    * Provide the payload data model with encoding/decoding serializers
+    * Publish life cycle messages for devices and applications
+* CloudPublisher and CloudSubscriber
+    * The application-facing API: a publisher (or subscriber) instance is created by the user in the web UI for a given cloud connection, and the application only binds to it
 
-## Acquiring CloudClient
+An application never talks to the cloud connection directly: it declares a reference to a `CloudPublisher` and the user chooses, in the web UI, which publisher of which cloud connection the application uses. The [Application developer guide](../cloud-api/app-dev-guide.md) describes the conventions in detail.
 
-The CloudService can manage multiple applications over a shared MQTT connection by treating each application as a client. The example code uses the "setCloudService" and "unsetCloudService" methods for referencing and releasing the CloudService. In the bundles activate method, the service reference in conjunction with a unique application ID can then be used to obtain a CloudClient. The relevant code is shown below (ommitted sections are denoted by ==OMMITTED==):
+!!! info "Legacy CloudService and CloudClient"
+    The `CloudService` and `CloudClient` API used by older versions of this demo are deprecated: they are tied to a single cloud connection implementation. New applications must use the `CloudPublisher`/`CloudSubscriber` API described here.
+
+## Acquiring a CloudPublisher
+
+The heater declares an optional, dynamic reference to a `CloudPublisher`. The reference has no `target`: the ConfigurationService sets it from the `CloudPublisher.target` property of the component configuration, chosen by the user in the web UI. When the publisher is bound, the heater registers itself to receive connection and delivery notifications. The relevant code is shown below (omitted sections are denoted by `==OMITTED==`):
 
 ```java
-==OMMITTED==
-// Cloud Application identifier
-private static final String APP_ID = "heater";
+==OMITTED==
 
-==OMMITTED==
+@Component(immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = { ConfigurableComponent.class, CloudConnectionListener.class, CloudDeliveryListener.class },
+        name = "org.eclipse.kura.demo.heater.Heater")
+@Designate(ocd = HeaterOCD.class)
+public class Heater implements ConfigurableComponent, CloudConnectionListener, CloudDeliveryListener {
 
-public void setCloudService(CloudService cloudService) {
-	m_cloudService = cloudService;
-}
+    private CloudPublisher cloudPublisher;
 
-public void unsetCloudService(CloudService cloudService) {
-	m_cloudService = null;
-}
+    ==OMITTED==
 
-==OMMITTED==
+    @Reference(name = "CloudPublisher",
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetCloudPublisher",
+            cardinality = ReferenceCardinality.OPTIONAL)
+    public void setCloudPublisher(final CloudPublisher cloudPublisher) {
+        this.cloudPublisher = cloudPublisher;
+        this.cloudPublisher.registerCloudConnectionListener(Heater.this);
+        this.cloudPublisher.registerCloudDeliveryListener(Heater.this);
+    }
 
-// Acquire a Cloud Application Client for this Application
-s_logger.info("Getting CloudClient for {}...", APP_ID);
-m_cloudClient = m_cloudService.newCloudClient(APP_ID);
+    public void unsetCloudPublisher(final CloudPublisher cloudPublisher) {
+        this.cloudPublisher.unregisterCloudConnectionListener(Heater.this);
+        this.cloudPublisher.unregisterCloudDeliveryListener(Heater.this);
+        this.cloudPublisher = null;
+    }
 ```
 
-## Publishing/Subscribing
-
-The private "doPublish" method is used to publish messages at a fixed rate. The method demonstrates how to use the CloudClient and KuraPayload to publish MQTT messages.
+The configuration description (`HeaterOCD`) declares the matching attribute, whose id is the reference name followed by `.target`, so that the web UI renders the publisher picker:
 
 ```java
-==OMMITTED==
+@AttributeDefinition(name = "CloudPublisher Target Filter",
+        description = "Specifies, as an OSGi target filter, the pid of the Cloud Publisher used to publish messages to the cloud platform.",
+        defaultValue = "(kura.service.pid=changeme)")
+String cloudpublisher_target_filter();
+```
+
+The cardinality is `OPTIONAL` because the publisher may not exist yet when the heater is configured: the application must be prepared to run without it.
+
+## Publishing
+
+The private `doPublish` method is used to publish messages at a fixed rate. The method demonstrates how to use the `CloudPublisher` and `KuraPayload` to publish MQTT messages.
+
+```java
+==OMITTED==
 
 // Allocate a new payload
 KuraPayload payload = new KuraPayload();
@@ -88,172 +108,90 @@ KuraPayload payload = new KuraPayload();
 payload.setTimestamp(new Date());
 
 // Add the temperature as a metric to the payload
-payload.addMetric("temperatureInternal", m_temperature);
+payload.addMetric("temperatureInternal", this.temperature);
 payload.addMetric("temperatureExternal", 5.0F);
-payload.addMetric("temperatureExhaust",  30.0F);
+payload.addMetric("temperatureExhaust", 30.0F);
 
-int code = m_random.nextInt();
-if ((m_random.nextInt() % 5) == 0) {
-	payload.addMetric("errorCode", code);
-}
-else {
-	payload.addMetric("errorCode", 0);
+int code = this.random.nextInt();
+if ((this.random.nextInt() % 5) == 0) {
+    payload.addMetric("errorCode", code);
+} else {
+    payload.addMetric("errorCode", 0);
 }
 
 // Publish the message
+KuraMessage message = new KuraMessage(payload);
 try {
-	m_cloudClient.publish(topic, payload, qos, retain);
-	s_logger.info("Published to {} message: {}", topic, payload);
-}
-catch (Exception e) {
-	s_logger.error("Cannot publish topic: "+topic, e);
+    String messageId = this.cloudPublisher.publish(message);
+    logger.info("Published message with id {}: {}", messageId, payload);
+} catch (Exception e) {
+    logger.error("Cannot publish message: {}", message, e);
 }
 ```
 
-Similarly, the CloudClient can be used to subscribe to MQTT topics. Although not shown in the example code, the following snippet could be added to subscribe to all published messages:
-
-```java
-m_cloudClient.subscribe(topic, qos);
-```
+The topic, the QoS and the retain flag are not chosen by the application: they belong to the configuration of the `CloudPublisher` instance the user created in the web UI. Similarly, a `CloudSubscriber` reference can be used to receive MQTT messages by registering a `CloudSubscriberListener` on it.
 
 ### Callback Methods
 
-The example class implements CloudClientListener, which provides methods for several common callback methods. The below snippet shows the relevant code for creating the listeners for the demo application.
+The example class implements `CloudConnectionListener` and `CloudDeliveryListener`, which provide the callbacks registered on the publisher in `setCloudPublisher`. The available methods for implementation are:
 
-```java
-==OMMITTED==
+* onConnectionEstablished: called when the cloud connection establishes a connection with the broker.
 
-public class Heater implements ConfigurableComponent, CloudClientListener
+* onConnectionLost: called when the cloud connection has lost the connection with the broker.
 
-==OMMITTED==
+* onDisconnected: called when the cloud connection is closed on purpose.
 
-m_cloudClient.addCloudClientListener(this);
+* onMessageConfirmed: called when a published message has been fully acknowledged by the broker (not applicable for QoS 0 messages); the argument is the message id returned by `publish()`.
 
-```
-
-The available methods for implementation are:
-
-* onControlMessageArrived: Method called when a control message is received from the broker.
-* onMessageArrived: Method called when a data message is received from the broker.
-* onConnectionLost: Method called when the client has lost connection with the broker.
-* onConnectionEstablished: Method called when the client establishes a connection with the broker.
-* onMessageConfirmed: Method called when a published message has been fully acknowledged by the broker (not applicable for qos 0 messages).
-* onMessagePublished: Method called when a message has been transfered from the publishing queue to the DataTransportService.
-
-For more information on the various Kura APIs, please review the [Kura APIs](/references/javadoc/)
+For more information on the various Kura APIs, please review the [Kura APIs](../references/javadoc.md).
 
 ## Run the Bundle
 
-By default, the heater demo bundle does not run automatically. To run
-the bundle and Kura in the Emulator, locate the
-**org.eclipse.kura.emulator** project. Expand it to show the
-src/main/resources folder.
+Build the kura-apps repository (`mvn clean install` from its root, JDK 21 and Maven 3.9.9+ as for Kura) and install the heater package produced under `kura-apps-distrib/kura-examples/heater/target` on the device, then restart Kura:
 
-Right-click the correct **Kura_Emulator_*[OS]*.launch** file,
-depending on which operating system you are running. In the context
-menu, select the **Run As** option, and click on **Run Configurations**.
+```shell
+apt install ./kura-heater_<version>_all.deb
+systemctl restart kura
+```
 
-Under OSGi Framework (Run Configurations window shown below), click on
-the **Kura_Emulator_[OS]** entry. In the Bundles tab under Workspace,
-enable the **org.eclipse.kura.demo.heater** checkbox to enable it as
-shown below:
+The bundle is configured with `configurationPolicy = REQUIRE` and appears in the Services area of the web UI as **Heater** as soon as it is activated with its default configuration.
 
-![](./images/connected-application/image1.png)
+## Configure the Cloud Connection
 
-Click the **Apply** and **Run** buttons to start the Kura Emulator. Once
-this setting has been made, you only need to right-click on the launch
-file and select **Run As** and the **Kura_Emulator_[OS]** option to
-run with the same settings.
+Open a browser and browse to the Kura web UI of the device at `https://<device address>` (or [https://localhost](https://localhost) for the Docker image). Enter the appropriate name and password (default is admin/admin) and click **Log in**.
 
-This will start Kura running locally and will display a Console window
-in Eclipse. The Console window will show the OSGi diagnostics as various
-bundles start and execute.
+In the **Cloud Connections** section, select the default cloud connection and open its **MqttDataTransport** tab. Fill in the following fields then click the **Apply** button:
 
-## Configure the MQTT Client
+| Field                       | Value |
+|-----------------------------|-------|
+| broker-url                  | The url for the MQTT broker, for instance `mqtt://broker.hivemq.com:1883/` for a public test broker |
+| topic.context.account-name  | Your [account_name] |
+| username                    | Typically [account_name]_broker |
+| password                    | The password for your user |
+| client-id                   | The client identifier to be used when connecting to the MQTT broker (optional) |
 
-With the heater demo bundle running, open a browser window on the same
-computer as the Eclipse development environment and browse to the Kura
-web UI at <http://127.0.0.1:8080>. Once connected to the Kura web UI, a
-log in window appears prompting you to enter the Name and Password as
-shown below:
+Now that the account credentials are set in the MqttDataTransport service, the DataService needs to be configured to connect by default. To do so, open the **DataService** tab and set `connect.auto-on-startup` to **true**, then click **Connect** in the Cloud Connections toolbar. The connection status turns to *Connected*.
 
-![](./images/connected-application/image2.png)
-
-Enter the appropriate name and password (default is admin/admin) and
-click **Log in**. The Kura Admin web UI appears as shown below:
-
-![](./images/connected-application/image3.png)
-
-From the Kura web UI, click on **MqttDataTransport** in the Services
-pane on the lower left of the browser window. You will see a menu
-similar to the one shown in the following screen capture:
-
-![](./images/connected-application/image4.png)
-
-Fill in the following fields then click the **Apply** button:
-
-Field                      | Value
----------------------------|------------------------------------------
-broker-url:                | The url for the MQTT broker (this example shows the MQTT broker-url **mqtt://iot.eclipse.org:1883/** hosted by the Eclipse Foundation)
-topic.context.account-name:| Your [account_name]
-username:                  | Typically [account_name]_broker
-password:                  | The password for your user
-client-id                  | The client identifier to be used when connecting to the MQTT broker (optional)
-
-<br>
-Now that the account credentials are set in the MqttDataTransport
-service, the DataService needs to be configured to connect by default.
-To do so, click **DataService** in the Services area on the left of the
-browser window. For the ‘connect.auto-on-startup’ parameter, select
-**true** as shown below:
-
-![](./images/connected-application/image5.png)
+Finally, create a publisher for the heater: with the cloud connection selected, click **New Pub/Sub**, choose the `CloudPublisher` factory of the connection and give it a name, such as `heater-publisher`. Its configuration defines the application id and the semantic topic the messages are published to, the QoS and the retain flag.
 
 ## Modify Bundle Configuration in Local Web UI
 
-Bundles changes may be made directly in the emulator web UI. Since you
-are running an emulated device in Eclipse, you can do this by browsing
-to <http://127.0.0.1:8080> (same URL where the MQTT client was
-configured in the previous section of this tutorial). If the bundle was
-running on a real device and you had network access to it, you would
-browse to
-[http://[ip_address_of_device]](http://ip_address_of_device/).
+From the Kura web UI, select the **Heater** bundle from the configurable services on the left. In the **CloudPublisher Target Filter** field pick the `heater-publisher` created above: the ConfigurationService updates the `CloudPublisher.target` property of the component and Declarative Services binds the publisher to the heater, which starts publishing. Then modify the other parameters as needed. By default, the heater demo is configured according to the following characteristics and assumptions about its operational environment:
 
-From the Kura web UI, select the Heater bundle from the configurable
-services on the left and modify the parameters as needed (shown in the
-screen capture below). By default, the heater demo is configured
-according to the following characteristics and assumptions about its
-operational environment:
+* Start operation is at 6:00am (06:00).
 
-*  Start operation is at 6:00am (06:00).
+* End operation is at 10:00pm (22:00).
 
-*  End operation is at 10:00pm (22:00).
+* It is colder outside than inside the heated chamber (hard-coded to 5 degrees in the application).
 
-*  It is colder outside than inside the heated chamber (hard-coded to 5
-    degrees in the application).
+* Output of the heater is constant at 30 degrees (hard-coded).
 
-*  Output of the heater is constant at 30 degrees (hard-coded).
+* When in operational mode, the temperature will drop inside if the heater is off.
 
-*  When in operational mode, the temperature will drop inside if the
-    heater is off.
+* The heater turns off when it is about to exceed the setPoint defined in the configuration.
 
-*  The heater turns off when it is about to exceed the setPoint defined
-    in the configuration.
+* After the temperature drops to four times the increment point (a made-up value to show dropping temperature, hard-coded in the application), the heater turns back on, and the temperature starts increment at the rate of the `temperature.increment` rate.
 
-*  After the temperature drops to four times the increment point (a
-    made-up value to show dropping temperature, hard-coded in the
-    application), the heater turns back on, and the temperature starts
-    increment at the rate of the ‘temperature.increment’ rate.
+Click **Apply** for changes to take effect. The `updated()` method is called after settings are applied for the new configuration.
 
-![](./images/connected-application/image6.png)
-
-Click **Apply** for changes to take affect. The updated() method is
-called after settings are applied for the new configuration.
-
-After completing this tutorial, it is highly recommended that you review
-the heater demo source code in Eclipse to see how it is put together.
-Kura automatically generates the user configuration interface through
-implementation of the ConfigurableComponent interface and some small
-additions to the component.xml file (called heater.xml). This powerful
-feature provides both a local and remote configuration user interface
-with no additional development requirements.
+After completing this tutorial, it is highly recommended that you review the heater demo source code to see how it is put together. Kura automatically generates the user configuration interface through the implementation of the ConfigurableComponent interface and the Metatype annotations of `HeaterOCD`. This powerful feature provides both a local and remote configuration user interface with no additional development requirements.

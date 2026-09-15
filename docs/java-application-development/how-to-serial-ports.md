@@ -10,7 +10,7 @@ following functions:
 
 *  Create a plugin that communicates to serial devices
 
-*  Export the bundle
+*  Build the bundle and its installer
 
 *  Install the bundle on the remote device
 
@@ -20,9 +20,9 @@ following functions:
 
 ### Prerequisites
 
-*  [Setting up Kura Development Environment](/java-application-development/development-environment-setup/)
+*  [Kura Addon Archetype](./kura-addon-archetype.md): JDK 21, Maven 3.9.9+ and git
 
-*  [Hello World Using the Kura Logger](/java-application-development/hello-world-application/)
+*  [Hello World Application](./hello-world-application.md)
 
 *  Hardware
 
@@ -110,205 +110,77 @@ If you are using two USB-to-Serial adapters, repeat the above procedure
 for the second serial port. The resulting device node will be referred
 to as [device_node_2].
 
+
 ### Implement the Bundle
 
-Now that you have two serial ports connected to each other, you are
-ready to implement the code. You will use the same general method that
-is described in section [Hello World Application](/java-application-development/hello-world-application/) with the following exceptions:
+Now that you have two serial ports connected to each other, you are ready to develop the serial bundle as follows:
 
-  1. process to export the OSGi bundle will have an additional step,
-  2. the actual code in this example will have the following differences:
-    * The new Plug-in Project is named “org.eclipse.kura.example.serial”
-    * A class named “SerialExample” is created in the org.eclipse.kura.example.serial project
-    *  The following bundles are included in the Automated Management of Dependencies section in the MANIFEST.MF:
-        * javax.comm
-        * javax.microedition.io
-        * org.eclipse.kura.cloud
-        * org.eclipse.kura.comm
-        * org.eclipse.kura.configuration
-        * org.osgi.service.component
-        * org.osgi.service.io
-        * org.slf4j
+!!! info
+    For more detailed information about bundle development (the project generation, the annotations and the build), please refer to the [Hello World Application](./hello-world-application.md) and to the [Configurable Application](./configurable-application.md).
 
-The following files need to be implemented:
+* Generate a project with the [Kura Addon Archetype](./kura-addon-archetype.md) using `org.eclipse.kura.example` as groupId, `kura-serial` as artifactId and `org.eclipse.kura.example.serial` as package, and remove the generated example classes.
 
-* META-INF/MANIFEST.MF – OSGI manifest that describes the bundle
-    and its dependencies
+* Add the `org.osgi.service.io` dependency to the bundle `pom.xml`, next to the ones the archetype already declares (`org.eclipse.kura.api`, `slf4j-api` and the Declarative Services and Metatype annotations). The version is managed by the Kura bill of materials:
 
-* OSGI-INF/component.xml – declarative services definition that
-    describe what services are exposed and consumed by this bundle
-
-* OSGI-INF/metatype/org.eclipse.kura.example.serial.SerialExample.xml
-    – configuration description of the bundle and its parameters, types,
-    and defaults
-
-* org.eclipse.kura.example.serial.SerialExample.java – main
-    implementation class
-
-#### META-INF/MANIFEST.MF File
-
-The META-INF/MANIFEST.MF file should appear as shown below when
-complete:
-
-NOTE: Whitespace is significant in this file. Make sure yours matches
-this file exactly with the exception that
-RequiredExecutionEnvironment may be JavaSE-1.6 or JavaSE-1.7,
-depending on the Java installation of your device.
-
-```
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Serial
-Bundle-SymbolicName: org.eclipse.kura.example.serial
-Bundle-Version: 1.0.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Service-Component: OSGI-INF/component.xml
-Bundle-ActivationPolicy: lazy
-Import-Package: javax.comm;version="1.2.0",
-  javax.microedition.io;resolution:=optional,
-  org.eclipse.kura.cloud;version="0.2.0",
-  org.eclipse.kura.comm;version="0.2.0",
-  org.eclipse.kura.configuration;version="0.2.0",
-  org.osgi.service.component;version="1.2.0",
-  org.osgi.service.io;version="1.0.0",
-  org.slf4j;version="1.6.4"
-Bundle-ClassPath: .
-
+```xml
+<dependency>
+    <groupId>org.osgi</groupId>
+    <artifactId>org.osgi.service.io</artifactId>
+</dependency>
 ```
 
-In addition, the build.properties file should have org.eclipse.equinox.io listed as an additional bundle similar to below:
+The following files need to be implemented in order to write the source code:
 
-```
-additional.bundles = org.eclipse.equinox.io
-```
+* **org.eclipse.kura.example.serial.SerialExampleOCD.java** - configuration description of the bundle and its parameters, types, and defaults, written with the Metatype annotations.
 
-#### OSGI-INF/component.xml File
+* **org.eclipse.kura.example.serial.SerialExample.java** - main implementation class, declared as a Declarative Services component with the `@Component` annotation.
 
-!!! warning
-    Starting from Kura 3.0, the configuration service will only track "relevant services" that, in their component description files, will provide the ConfigurableComponent or SelfConfigurableComponent interface. The old behavior can be restored by setting the  "org.eclipse.kura.core.configuration.legacyServiceTracking" property to true.
+bnd generates the manifest, the `OSGI-INF` component descriptor and the metatype file from these two classes at build time; the `Import-Package` header is computed from the code (`org.eclipse.kura.comm`, `org.eclipse.kura.configuration`, `org.osgi.service.component`, `org.osgi.service.io`, `org.slf4j`).
 
-If **Kura 2.1.0 or older versions** are used or the `org.eclipse.kura.core.configuration.legacyServiceTracking` system property is set to true, the OSGI-INF/component.xml should appear as shown below when complete:
+#### org.eclipse.kura.example.serial.SerialExampleOCD.java File
 
-```
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
-  name="org.eclipse.kura.example.serial.SerialExample" activate="activate"
-  deactivate="deactivate" modified="updated" enabled="true" immediate="true"
-  configuration-policy="require">
+```java
+package org.eclipse.kura.example.serial;
 
-  <implementation class="org.eclipse.kura.example.serial.SerialExample"/>
-  <property name="service.pid" type="String" value="org.eclipse.kura.example.serial.SerialExample"/>
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.AttributeType;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.osgi.service.metatype.annotations.Option;
 
-  <service>
-    <provide interface="org.eclipse.kura.example.serial.SerialExample"/>
-  </service>
-  <reference bind="setConnectionFactory" cardinality="1..1"
-    interface="org.osgi.service.io.ConnectionFactory" name="ConnectionFactory"
-    policy="static" unbind="unsetConnectionFactory" />
-</scr:component>
-```
+@ObjectClassDefinition(id = "org.eclipse.kura.example.serial.SerialExample", name = "SerialExample",
+        description = "Example of a Configuring Kura Application echoing data read from the serial port.")
+public @interface SerialExampleOCD {
 
-If **Kura 3.0 or newer versions** are used and the `org.eclipse.kura.core.configuration.legacyServiceTracking` system property is set to false or not set, the OSGI-INF/component.xml should appear as shown below when complete:
+    @AttributeDefinition(name = "serial.device", type = AttributeType.STRING, required = false,
+            description = "Name of the serial device (e.g. /dev/ttyS0, /dev/ttyACM0, /dev/ttyUSB0).")
+    String serial_device();
 
-```
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
-  name="org.eclipse.kura.example.serial.SerialExample" activate="activate"
-  deactivate="deactivate" modified="updated" enabled="true" immediate="true"
-  configuration-policy="require">
+    @AttributeDefinition(name = "serial.baudrate", type = AttributeType.STRING, required = true, description = "Baudrate.",
+            options = { @Option(label = "9600", value = "9600"), @Option(label = "19200", value = "19200"),
+                    @Option(label = "38400", value = "38400"), @Option(label = "57600", value = "57600"),
+                    @Option(label = "115200", value = "115200") })
+    String serial_baudrate() default "9600";
 
-  <implementation class="org.eclipse.kura.example.serial.SerialExample"/>
-  <property name="service.pid" type="String" value="org.eclipse.kura.example.serial.SerialExample"/>
+    @AttributeDefinition(name = "serial.data-bits", type = AttributeType.STRING, required = true, description = "Data bits.",
+            options = { @Option(label = "7", value = "7"), @Option(label = "8", value = "8") })
+    String serial_data$_$bits() default "8";
 
-  <service>
-    <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
-  </service>
-  <reference bind="setConnectionFactory" cardinality="1..1"
-    interface="org.osgi.service.io.ConnectionFactory" name="ConnectionFactory"
-    policy="static" unbind="unsetConnectionFactory" />
-</scr:component>
+    @AttributeDefinition(name = "serial.parity", type = AttributeType.STRING, required = true, description = "Parity.",
+            options = { @Option(label = "none", value = "none"), @Option(label = "even", value = "even"),
+                    @Option(label = "odd", value = "odd") })
+    String serial_parity() default "none";
+
+    @AttributeDefinition(name = "serial.stop-bits", type = AttributeType.STRING, required = true, description = "Stop bits.",
+            options = { @Option(label = "1", value = "1"), @Option(label = "2", value = "2") })
+    String serial_stop$_$bits() default "1";
+}
 ```
 
-#### OSGI-INF/metatype/org.eclipse.kura.example.serial.SerialExample.xml File
-
-The OSGI-INF/metatype/org.eclipse.kura.example.serial.SerialExample.xml
-file should appear as shown below when complete:
-
-```
-<?xml version="1.0" encoding="UTF-8"?>
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-  <OCD id="org.eclipse.kura.example.serial.SerialExample"
-    name="SerialExample"
-    description="Example of a Configuring KURA Application echoing data read from the serial port.">
-
-    <Icon resource="http://sphotos-a.xx.fbcdn.net/hphotos-ash4/p480x480/408247_10151040905591065_1989684710_n.jpg" size="32"/>
-
-    <AD id="serial.device"
-        name="serial.device"
-        type="String"
-        cardinality="0"
-        required="false"
-        description="Name of the serial device (e.g. /dev/ttyS0, /dev/ttyACM0, /dev/ttyUSB0)."/>
-
-    <AD id="serial.baudrate"
-        name="serial.baudrate"
-        type="String"
-        cardinality="0"
-        required="true"
-        default="9600"
-        description="Baudrate.">
-        <Option label="9600" value="9600"/>
-        <Option label="19200" value="19200"/>
-        <Option label="38400" value="38400"/>
-        <Option label="57600" value="57600"/>
-        <Option label="115200" value="115200"/>
-    </AD>
-
-    <AD id="serial.data-bits"
-        name="serial.data-bits"
-        type="String"
-        cardinality="0"
-        required="true"
-        default="8"
-        description="Data bits.">
-        <Option label="7" value="7"/>
-        <Option label="8" value="8"/>
-    </AD>
-
-    <AD id="serial.parity"
-        name="serial.parity"
-        type="String"
-        cardinality="0"
-        required="true"
-        default="none"
-        description="Parity.">
-        <Option label="none" value="none"/>
-        <Option label="even" value="even"/>
-        <Option label="odd" value="odd"/>
-    </AD>
-
-    <AD id="serial.stop-bits"
-        name="serial.stop-bits"
-        type="String"
-        cardinality="0"
-        required="true"
-        default="1"
-        description="Stop bits.">
-        <Option label="1" value="1"/>
-        <Option label="2" value="2"/>
-    </AD>
-
-  </OCD>
-  <Designate pid="org.eclipse.kura.example.serial.SerialExample">
-    <Object ocdref="org.eclipse.kura.example.serial.SerialExample"/>
-  </Designate>
-</MetaData>
-```
+The method names become the property ids: `_` maps to `.` and `$_$` maps to `-`, so `serial_data$_$bits` is the property `serial.data-bits` read by the component.
 
 #### org.eclipse.kura.example.serial.SerialExample.java File
 
-The org.eclipse.kura.example.serial.SerialExample.java file should
-appear as shown below when complete:
+The org.eclipse.kura.example.serial.SerialExample.java file should look as follows when complete.
 
 ```java
 package org.eclipse.kura.example.serial;
@@ -320,34 +192,53 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.io.ConnectionFactory;
+import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.eclipse.kura.comm.CommConnection;
+import org.eclipse.kura.comm.CommURI;
+import org.eclipse.kura.configuration.ConfigurableComponent;
+
+@Designate(ocd = SerialExampleOCD.class)
+@Component(name = "org.eclipse.kura.example.serial.SerialExample", immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE, service = ConfigurableComponent.class)
 public class SerialExample implements ConfigurableComponent {
 
   private static final Logger s_logger = LoggerFactory.getLogger(SerialExample.class);
 
-  private static final String SERIAL_DEVICE_PROP_NAME= "serial.device";
-  private static final String SERIAL_BAUDRATE_PROP_NAME= "serial.baudrate";
-  private static final String SERIAL_DATA_BITS_PROP_NAME= "serial.data-bits";
-  private static final String SERIAL_PARITY_PROP_NAME= "serial.parity";
-  private static final String SERIAL_STOP_BITS_PROP_NAME= "serial.stop-bits";
+  private static final String   SERIAL_DEVICE_PROP_NAME= "serial.device";
+  private static final String   SERIAL_BAUDRATE_PROP_NAME= "serial.baudrate";
+  private static final String   SERIAL_DATA_BITS_PROP_NAME= "serial.data-bits";
+  private static final String   SERIAL_PARITY_PROP_NAME= "serial.parity";
+  private static final String   SERIAL_STOP_BITS_PROP_NAME= "serial.stop-bits";
 
   private ConnectionFactory m_connectionFactory;
   private CommConnection m_commConnection;
   private InputStream m_commIs;
   private OutputStream m_commOs;
-  private ScheduledThreadPoolExecutor m_worker;
-  private Future<?> m_handle;
+
+     private ScheduledThreadPoolExecutor m_worker;
+     private Future<?>           m_handle;
+
   private Map<String, Object> m_properties;
 
   // ----------------------------------------------------------------
   //
-  // Dependencies
+  //   Dependencies
   //
   // ----------------------------------------------------------------
+
+  @Reference
   public void setConnectionFactory(ConnectionFactory connectionFactory) {
     this.m_connectionFactory = connectionFactory;
   }
@@ -356,42 +247,45 @@ public class SerialExample implements ConfigurableComponent {
     this.m_connectionFactory = null;
   }
 
+
   // ----------------------------------------------------------------
   //
-  // Activation APIs
+  //   Activation APIs
   //
   // ----------------------------------------------------------------
 
+  @Activate
   protected void activate(ComponentContext componentContext, Map<String,Object> properties) {
     s_logger.info("Activating SerialExample...");
-
     m_worker = new ScheduledThreadPoolExecutor(1);
     m_properties = new HashMap<String, Object>();
     doUpdate(properties);
     s_logger.info("Activating SerialExample... Done.");
   }
 
+  @Deactivate
   protected void deactivate(ComponentContext componentContext) {
     s_logger.info("Deactivating SerialExample...");
 
-    // shutting down the worker and cleaning up the properties
-    m_handle.cancel(true);
-    m_worker.shutdownNow();
-    //close the serial port
+        // shutting down the worker and cleaning up the properties
+        m_handle.cancel(true);
+        m_worker.shutdownNow();
+
+        //close the serial port
     closePort();
     s_logger.info("Deactivating SerialExample... Done.");
   }
 
+  @Modified
   public void updated(Map<String,Object> properties) {
     s_logger.info("Updated SerialExample...");
-
     doUpdate(properties);
-    s_logger.info("Updated SerialExample... Done.");
+    s_logger.info("Updated SerialExample... Done.");  
   }
 
   // ----------------------------------------------------------------
   //
-  // Private Methods
+  //   Private Methods
   //
   // ----------------------------------------------------------------
 
@@ -404,12 +298,12 @@ public class SerialExample implements ConfigurableComponent {
         s_logger.info("Update - "+s+": "+properties.get(s));
       }
 
-      // cancel a current worker handle if one if active
-      if (m_handle != null) {
-        m_handle.cancel(true);
-      }
+            // cancel a current worker handle if one if active
+            if (m_handle != null) {
+                    m_handle.cancel(true);
+            }
 
-      //close the serial port so it can be reconfigured
+            //close the serial port so it can be reconfigured
       closePort();
 
       //store the properties
@@ -426,10 +320,9 @@ public class SerialExample implements ConfigurableComponent {
           doSerial();
         }
       });
-
     } catch (Throwable t) {
-        s_logger.error("Unexpected Throwable", t);
-      }
+      s_logger.error("Unexpected Throwable", t);
+    }
   }
 
   private void openPort() {
@@ -443,15 +336,16 @@ public class SerialExample implements ConfigurableComponent {
     int baudRate = Integer.valueOf((String) m_properties.get(SERIAL_BAUDRATE_PROP_NAME));
     int dataBits = Integer.valueOf((String) m_properties.get(SERIAL_DATA_BITS_PROP_NAME));
     int stopBits = Integer.valueOf((String) m_properties.get(SERIAL_STOP_BITS_PROP_NAME));
-    String sParity = (String) m_properties.get(SERIAL_PARITY_PROP_NAME);
-    int parity = CommURI.PARITY_NONE;
 
+    String sParity = (String) m_properties.get(SERIAL_PARITY_PROP_NAME);
+
+    int parity = CommURI.PARITY_NONE;
     if (sParity.equals("none")) {
       parity = CommURI.PARITY_NONE;
     } else if (sParity.equals("odd")) {
-        parity = CommURI.PARITY_ODD;
+      parity = CommURI.PARITY_ODD;
     } else if (sParity.equals("even")) {
-        parity = CommURI.PARITY_EVEN;
+      parity = CommURI.PARITY_EVEN;
     }
 
     String uri = new CommURI.Builder(port)
@@ -466,6 +360,7 @@ public class SerialExample implements ConfigurableComponent {
       m_commConnection = (CommConnection) m_connectionFactory.createConnection(uri, 1, false);
       m_commIs = m_commConnection.openInputStream();
       m_commOs = m_commConnection.openOutputStream();
+
       s_logger.info(port+" open");
     } catch (IOException e) {
       s_logger.error("Failed to open port " + port, e);
@@ -474,36 +369,33 @@ public class SerialExample implements ConfigurableComponent {
   }
 
   private void cleanupPort() {
-
     if (m_commIs != null) {
       try {
         s_logger.info("Closing port input stream...");
         m_commIs.close();
         s_logger.info("Closed port input stream");
       } catch (IOException e) {
-          s_logger.error("Cannot close port input stream", e);
+        s_logger.error("Cannot close port input stream", e);
       }
       m_commIs = null;
     }
-
     if (m_commOs != null) {
       try {
         s_logger.info("Closing port output stream...");
         m_commOs.close();
         s_logger.info("Closed port output stream");
       } catch (IOException e) {
-          s_logger.error("Cannot close port output stream", e);
+        s_logger.error("Cannot close port output stream", e);
       }
       m_commOs = null;
     }
-
     if (m_commConnection != null) {
       try {
         s_logger.info("Closing port...");
         m_commConnection.close();
         s_logger.info("Closed port");
       } catch (IOException e) {
-          s_logger.error("Cannot close port", e);
+        s_logger.error("Cannot close port", e);
       }
       m_commConnection = null;
     }
@@ -518,6 +410,7 @@ public class SerialExample implements ConfigurableComponent {
       try {
         int c = -1;
         StringBuilder sb = new StringBuilder();
+
         while (m_commIs != null) {
           if (m_commIs.available() != 0) {
             c = m_commIs.read();
@@ -526,95 +419,56 @@ public class SerialExample implements ConfigurableComponent {
               Thread.sleep(100);
               continue;
             } catch (InterruptedException e) {
-                return;
+              return;
             }
           }
 
-        // on reception of CR, publish the received sentence
-        if (c==13) {
-          s_logger.debug("Received serial input, echoing to output: " + sb.toString());
-          sb.append("\r\n");
-          String dataRead = sb.toString();
-          //echo the data to the output stream
-          m_commOs.write(dataRead.getBytes());
-          //reset the buffer
-          sb = new StringBuilder();
-        } else if (c!=10) {
-          sb.append((char) c);
-        }
-      }
+          // on reception of CR, publish the received sentence
+          if (c==13) {
+            s_logger.debug("Received serial input, echoing to output: " + sb.toString());
+            sb.append("\r\n");
+            String dataRead = sb.toString();
 
-      } catch (IOException e) {
-          s_logger.error("Cannot read port", e);
-      } finally {
-          try {
-            m_commIs.close();
-          } catch (IOException e) {
-            s_logger.error("Cannot close buffered reader", e);
+            //echo the data to the output stream
+            m_commOs.write(dataRead.getBytes());
+
+            //reset the buffer
+            sb = new StringBuilder();
+          } else if (c!=10) {
+            sb.append((char) c);
           }
+        }
+      } catch (IOException e) {
+        s_logger.error("Cannot read port", e);
+      } finally {
+        try {
+          m_commIs.close();
+        } catch (IOException e) {
+          s_logger.error("Cannot close buffered reader", e);
+        }
       }
     }
   }
 }
 ```
-At this point, the bundle implementation is complete. *Make sure to save
-all files before proceeding.*
 
-### Export the Bundle
+The `ConnectionFactory` service, provided by the Kura runtime, creates the `CommConnection` from the `comm:` URI built with `CommURI.Builder`; the `@Reference` annotation injects it. The component registers itself as a `ConfigurableComponent`, so the serial parameters can be changed from the Kura web UI and applied by the `@Modified` method.
 
-To build the Serial Example bundle as a stand-alone OSGi plugin,
-right-click the project and select Export.
+### Build the Bundle
 
-From the wizard, select Plug-in Development | Deployable plug-ins and
-fragments and click Next.
-
-![](./images/serial-example/image1.png)
-
-The Export window appears. Under Available Plug-ins and
-Fragments, verify that the newly created plug-in is selected.
-
-Under Destination, select the Directory option button and use
-the Browse button to select an appropriate place to save the JAR
-file on the local file system.
-
-!!! info
-    You will need to know the location where this JAR file is saved for the deployment process.
-
-![](./images/serial-example/image2.png)
-
-Under Options, select the checkbox Use class files compiled in the
-workspace in addition to the checkboxes already enabled, and click
-Finish.
-
-![](./images/serial-example/image3.png)
-
-Doing so will create a JAR file in the selected directory (e.g.,
-/home/joe/myPlugins/plugins/org.eclipse.kura.example.serial_1.0.0.201410311510.jar).
+Build the project as in the [Hello World Application](./hello-world-application.md): after the first `mvn clean install -Presolve-integration-tests`, a plain `mvn clean install` produces the bundle `org.eclipse.kura.example.serial/target/org.eclipse.kura.example.serial-1.0.0-SNAPSHOT.jar` and the Debian installer under `distrib/target/deb`.
 
 ### Deploy the Bundle
 
-In order to proceed, you need to know the IP address of your embedded
-gateway that is running Kura. Once you have this IP address, follow the
-mToolkit instructions for installing a single bundle to a remote target
-device (refer to section *2.03 Testing and Deploying Bundles*).
+Copy the installer to the embedded gateway that is running Kura, install it and restart Kura as described in [Install and run the generated packages](./kura-addon-archetype.md#install-and-run-the-generated-packages).
 
-Once the installation successfully completes, you should see a message
-from the /var/log/kura.log file indicating that the bundle was
-successfully installed and configured. You can also run this example
-with the emulator in a Linux or OS X environment as shown sample output
-below. Make sure that your user account has owner permission for the
-serial device in /dev.
-
-![](./images/serial-example/image4.png)
+Once the installation successfully completes, you should see messages in the `/var/log/kura.log` file indicating that the bundle was activated and configured. Then open the Kura web UI, select **SerialExample** in the Services area and set `serial.device` to [device_node_1]: the `updated()` method opens the port and the log shows `[device_node_1] open`. Make sure that the `kurad` user, which runs Kura, has permission to access the serial device in `/dev` (on most distributions it is enough to add it to the `dialout` group).
 
 ### Validate the Bundle
 
-Next, you need to test that your bundle does indeed echo characters back
-by opening minicom and configuring it to use [device_node_2] that was
-previously determined.
+Next, you need to test that your bundle does indeed echo characters back by opening minicom and configuring it to use [device_node_2] that was previously determined.
 
-Open minicom using the following command at a Linux terminal on the
-remote gateway device:
+Open minicom using the following command at a Linux terminal on the remote gateway device:
 
 ```
 minicom -s
@@ -624,41 +478,16 @@ This command opens a view similar to the following screen capture:
 
 ![](./images/serial-example/image5.png)
 
-Scroll down to Serial port setup and press <ENTER>. A new dialog
-window opens as shown below:
+Scroll down to Serial port setup and press <ENTER>. A new dialog window opens as shown below:
 
 ![](./images/serial-example/image6.png)
 
-<span id="_Cloud_Enabled_Serial" class="anchor"></span>
+Use the minicom menu options on the left (i.e., A, B, C, etc.) to change desired fields. Set the fields to the same values as shown in the previous screen capture except the Serial Device should match the [device_node_2] on your target device. Once this is set, press \<ENTER\> to exit from this menu.
 
-Use the minicom menu options on the left (i.e., A, B, C, etc.) to change
-desired fields. Set the fields to the same values as shown in the
-previous screen capture except the Serial Device should match the
-[device_node_2] on your target device. Once this is set, press
-\<ENTER\> to exit from this menu.
+In the main configuration menu, select Exit (*do not* select the option Exit from Minicom). At this point, you have successfully started minicom on the second serial port attached to your null modem cable allowing minicom to act as a serial device that can send and receive commands to your Kura bundle. You can verify this operation by typing characters and pressing <ENTER>. The <ENTER> function (specifically a ‘\\n’ character) signals to the Kura application to echo the buffered characters back to the serial device (minicom in this case).
 
-In the main configuration menu, select Exit (*do not* select the
-option Exit from Minicom). At this point, you have successfully started
-minicom on the second serial port attached to your null modem cable
-allowing minicom to act as a serial device that can send and receive
-commands to your Kura bundle. You can verify this operation by typing
-characters and pressing <ENTER>. The <ENTER> function (specifically
-a ‘\\n’ character) signals to the Kura application to echo the buffered
-characters back to the serial device (minicom in this case).
+Upon startup, minicom sends an initialization string to the serial device. These characters are sent to the minicom terminal because they were echoed back by Kura listening on the port at the other end of the null modem cable.
 
-Upon startup, minicom sends an initialization string to the serial
-device. These characters are sent to the minicom terminal because they
-were echoed back by Kura listening on the port at the other end of the
-null modem cable.
+When you are done, exit minicom by pressing ‘<CTRL> a’, then ‘q’, and finally ‘<ENTER>’. Doing so brings you back to the Linux command prompt.
 
-When you are done, exit minicom by pressing ‘<CTRL> a’, then ‘q’, and
-finally ‘<ENTER>’. Doing so brings you back to the Linux command
-prompt.
-
-This tutorial instructed you how to write and deploy a Kura bundle on
-your target device that listens for serial data (coming from the minicom
-terminal and being received on [device_node_1]). This tutorial also
-demonstrated that the application echoes data back to the same serial
-port that is received in minicom, which acts a serial device that sends
-and receives data. If supported by the device, Kura may send and receive
-binary data instead of ASCII.
+This tutorial instructed you how to write and deploy a Kura bundle on your target device that listens for serial data (coming from the minicom terminal and being received on [device_node_1]). This tutorial also demonstrated that the application echoes data back to the same serial port that is received in minicom, which acts a serial device that sends and receives data. If supported by the device, Kura may send and receive binary data instead of ASCII.

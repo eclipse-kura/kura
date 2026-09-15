@@ -213,8 +213,8 @@ Name                                                   | Type     | Description 
 `net.interface.<interface>.config.persist`             | Boolean  | Enable the cellular automatic reconnection                             | true
 `net.interface.<interface>.config.holdoff`             | Integer  | The time delay in seconds between connection attempts                  | 30
 `net.interface.<interface>.config.maxFail`             | Integer  | The maximum number of connection attempts                              | 5
-`net.interface.<interface>.config.modem.enabled.modes` | String   | Comma separated list of Modem Modes that will be allowed on the modem  |
-`net.interface.<interface>.config.modem.preferred.mode`| String   | Modem Mode to prefer when trying to connect                            |
+`net.interface.<interface>.config.modem.enabled.modes` | String   | Comma separated list of Modem Modes that will be allowed on the modem. When `ANY` or `NONE` is used, they must be the only ones in the list |
+`net.interface.<interface>.config.modem.preferred.mode`| String   | Modem Mode to prefer when trying to connect. If `net.interface.<interface>.config.modem.enabled.modes` is not set `net.interface.<interface>.config.modem.preferred.mode` will be ignored. If `net.interface.<interface>.config.modem.preferred.mode` is not set it will default to `NONE`.                           |
 
 #### GPS Mode
 
@@ -229,15 +229,13 @@ For older versions compatibility, if the `net.interface.<interface>.config.gpsMo
 
 Kura supports the following Modem Modes with the following meaning:
 
-- `NONE`: No mode ca be used.
+- `NONE`: No mode can be used.
 - `CS`: CSD, GSM, and other circuit-switched technologies.
 - `2G`: GPRS, EDGE.
 - `3G`: UMTS, HSxPA.
 - `4G`: LTE.
 - `5G`: 5GNR.
 - `ANY`: Any mode can be used
-
-Please note that whan `ANY` or `NONE` is used in the `net.interface.<interface>.config.modem.enabled.modes`, they must be the only one specified in the list.
 
 !!! note
     Not all combination of modes are supported by all modem. To verify what are the supported modes on your modem issue the following command on your target device:

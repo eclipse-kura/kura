@@ -1004,8 +1004,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, snapshot);
             }
 
-            final XmlComponentConfigurations xmlConfigs = unmarshal(new FileInputStream(fSnapshot),
-                    XmlComponentConfigurations.class);
+            final XmlComponentConfigurations xmlConfigs;
+            try (InputStream in = new FileInputStream(fSnapshot)) {
+                xmlConfigs = unmarshal(in, XmlComponentConfigurations.class);
+            }
 
             ComponentUtil.encryptConfigs(xmlConfigs.getConfigurations(), this.cryptoService);
 
@@ -1389,23 +1391,20 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                     fSnapshot != null ? fSnapshot.getAbsolutePath() : "null");
         }
 
-        InputStream decryptedStream = null;
-        try {
-            decryptedStream = this.cryptoService.aesDecryptingStream(new FileInputStream(fSnapshot));
+        try (InputStream fileStream = new FileInputStream(fSnapshot)) {
+            InputStream decryptedStream = this.cryptoService.aesDecryptingStream(fileStream);
+            try {
+                return unmarshal(decryptedStream, XmlComponentConfigurations.class);
+            } catch (KuraException e) {
+                logger.warn("Error parsing xml", e);
+                return null;
+            }
         } catch (FileNotFoundException e) {
             logger.error("Error loading file from disk", e);
             return null;
+        } catch (IOException e) {
+            throw new KuraIOException(e);
         }
-
-        XmlComponentConfigurations xmlConfigs = null;
-
-        try {
-            xmlConfigs = unmarshal(decryptedStream, XmlComponentConfigurations.class);
-        } catch (KuraException e) {
-            logger.warn("Error parsing xml", e);
-        }
-
-        return xmlConfigs;
     }
 
     private void updateConfigurationInternal(String pid, Map<String, Object> properties, boolean snapshotOnConfirmation)

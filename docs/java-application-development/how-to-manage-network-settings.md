@@ -14,7 +14,9 @@ A more practical application of this example is for IP network interfaces that n
 
 ## Prerequisites
 
-[Setting up the Eclipse Kura Development Environment](/java-application-development/development-environment-setup)
+* [Kura Addon Archetype](./kura-addon-archetype.md): JDK 21, Maven 3.9.9+ and git
+
+* A device running Kura 6 with a Wi-Fi interface
 
 ## Network Configuration with Kura
 
@@ -85,95 +87,27 @@ In this section, you will develop a Kura network configuration bundle that sets 
 To implement the network configuration bundle, perform the following steps:
 
 !!! note
-    For more detailed information about bundle development (i.e., the plug-in project, classes, and MANIFEST file configuration), please refer to the [Hello World Application](/java-application-development/hello-world-application/)
+    For more detailed information about bundle development (the project generation, the annotations and the build), please refer to the [Hello World Application](./hello-world-application.md).
 
-- Create a Plug-in Project named `org.eclipse.kura.example.network`; set the **an OSGi framework** option to **standard**; _uncheck_ the  **Generate an activator** option; and set the **Execution Environment** variable to match the JVM on your target device.
+- Generate a project with the [Kura Addon Archetype](./kura-addon-archetype.md) using `org.eclipse.kura.example` as groupId, `kura-network` as artifactId and `org.eclipse.kura.example.network` as package, and remove the generated example classes.
 
-- Include the following bundles in the MANIFEST.MF:
-  - org.eclipse.kura
-  - org.eclipse.kura.net
-  - org.eclipse.kura.net.dhcp
-  - org.eclipse.kura.net.firewall
-  - org.eclipse.kura.net.wifi
-  - org.osgi.service.component
-  - org.slf4j
-  
-- Create a class named **NetworkConfigExample** in the org.eclipse.kura.example.network project.
+- The bundle depends on `org.eclipse.kura.api`, which provides the `org.eclipse.kura.net.*` packages, on `slf4j-api` and on the Declarative Services annotations: the archetype already declares them in the bundle `pom.xml`, with the versions managed by the Kura bill of materials.
 
-- Create an OSGI-INF folder in the org.eclipse.kura.example.network project. Add a Component Class with the parent folder org.eclipse.kura.example.network/OSGI-INF, Component Name org.eclipse.kura.example.network, and Class org.eclipse.kura.example.network.NetworkConfigExample.
-
-- Select the **Services** tab in the component.xml file. Under Referenced Services, add **org.eclipse.kura.net.NetworkAdminService**. Edit the properties of this service, and configure the Bind property to **setNetworkAdminService** and Unbind to **unsetNetworkAdminService** as shown in the following screen capture. These settings are required because of the dependency on NetworkAdminService.
-
-![access_point](./images/network/image1.png)
-
-The following source code will also need to be implemented:
-
-* **META-INF/MANIFEST.MF** - OSGI manifest that describes the bundle and its dependencies.
-
-* **OSGI-INF/component.xml** - declarative services definition describing what services are exposed by and consumed by this bundle.
-
-* **org.eclipse.kura.example.network.NetworkConfigExample.java** - main implementation class.
-
-#### META-INF/MANIFEST.MF File
-
-The META-INF/MANIFEST.MF file should look as follows when complete:
-
-!!! warning
-    Whitespace is significant in this file; make sure yours matches this file exactly.
-
-```
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Network
-Bundle-SymbolicName: org.eclipse.kura.example.network
-Bundle-Version: 1.0.0.qualifier
-Bundle-Vendor: ECLIPSE
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: org.eclipse.kura,
- org.eclipse.kura.net,
- org.eclipse.kura.net.dhcp,
- org.eclipse.kura.net.firewall,
- org.eclipse.kura.net.wifi,
- org.osgi.service.component;version="1.2.0",
- org.slf4j;version="1.6.4"
-Service-Component: OSGI-INF/component.xml
-```
-
-#### OSGI-INF/component.xml File
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
-	name="org.eclipse.kura.example.network.NetworkConfigExample"
-	activate="activate"
-	deactivate="deactivate"
-	enabled="true"
-	immediate="true"
-	configuration-policy="require"
-	modified="updated">
-   <implementation class="org.eclipse.kura.example.network.NetworkConfigExample"/>
-   <service>
-   		<provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
-   </service>
-   <reference name="NetworkAdminService"
-   		interface="org.eclipse.kura.net.NetworkAdminService"
-   		policy="static"
-   		cardinality="1..1"
-   		bind="setNetworkAdminService"
-   		unbind="unsetNetworkAdminService"/>
-   <property name="service.pid" type="String" value="org.eclipse.kura.example.network.NetworkConfigExample"/>
-</scr:component>
-```
+- Create a class named **NetworkConfigExample** in the `org.eclipse.kura.example.network` package, declared as a Declarative Services component with a reference to the `NetworkAdminService`, as shown in the code below. bnd generates the manifest and the `OSGI-INF` component descriptor from it at build time; the `Import-Package` header lists `org.eclipse.kura`, `org.eclipse.kura.net`, `org.eclipse.kura.net.dhcp`, `org.eclipse.kura.net.firewall`, `org.eclipse.kura.net.wifi`, `org.osgi.service.component` and `org.slf4j`, computed from the code.
 
 #### org.eclipse.kura.example.network.NetworkConfigExample.java
 
-```Java
+```java
 package org.eclipse.kura.example.network;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -192,6 +126,7 @@ import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 
+@Component(name = "org.eclipse.kura.example.network.NetworkConfigExample", immediate = true)
 public class NetworkConfigExample {
 
   private static final Logger s_logger = LoggerFactory.getLogger(NetworkConfigExample.class);
@@ -204,6 +139,7 @@ public class NetworkConfigExample {
   //
   // ----------------------------------------------------------------
 
+  @Reference
   public void setNetworkAdminService(NetworkAdminService netAdminService) {
     this.m_netAdminService = netAdminService;
   }
@@ -219,6 +155,7 @@ public class NetworkConfigExample {
   //
   // ----------------------------------------------------------------
 
+  @Activate
   protected void activate(ComponentContext componentContext) {
     s_logger.info("Activating NetworkConfigExample...");
 
@@ -228,6 +165,7 @@ public class NetworkConfigExample {
     s_logger.info("Activating NetworkConfigExample... Done.");
   }
 
+  @Deactivate
   protected void deactivate(ComponentContext componentContext) {
     s_logger.info("Deactivating NetworkConfigExample...");
 
@@ -374,6 +312,7 @@ public class NetworkConfigExample {
 }
 ```
 
+
 Modify the parameters in the connectToWirelessAccessPoint() method with the specific values for the access point you want to connect to, including the variables for SSID, password, and security settings:
 
 - String ssid = "access_point_ssid";
@@ -384,11 +323,11 @@ Modify the parameters in the connectToWirelessAccessPoint() method with the spec
 
 At this point, the bundle implementation is complete. *Make sure to save all files before proceeding.*
 
-Export the OSGi bundle as a stand-alone plug-in, following the instructions in [Hello World Using the Kura Logger](/java-application-development/hello-world-application/).
+Build the project as in the [Hello World Application](./hello-world-application.md): a plain `mvn clean install` (after the first build with the `resolve-integration-tests` profile) produces the bundle and the Debian installer under `distrib/target/deb`.
 
 ### Deploy the Bundle
 
-In order to proceed, you need to know the IP address of your embedded gateway that is running Kura. Follow the mToolkit instructions for installing a single bundle to the remote target device located [here](/java-application-development/deploy-and-debug-applications/#install-single-bundle-to-target-device). Once the bundle has finished deploying, it will set the device’s network configuration and attempt to connect to a Wi-Fi access point using the configured parameters in the connectToWirelessAccessPoint() method.
+Copy the installer to the embedded gateway that is running Kura, install it and restart Kura as described in [Install and run the generated packages](./kura-addon-archetype.md#install-and-run-the-generated-packages). Once the bundle is activated, it will set the device’s network configuration and attempt to connect to a Wi-Fi access point using the configured parameters in the connectToWirelessAccessPoint() method.
 
 ### Test the Connection to the Access Point
 
@@ -431,7 +370,7 @@ String ssid = "NetworkConfigExample";
 String password = "password";
 ```
 
-Export the bundle again as a stand-alone OSGi plug-in and redeploy it to the target device. It should now reconfigure itself to create an access point with an active DHCP server, DNS proxy forwarding, and NAT enabled.
+Rebuild the project and install the new package on the target device. It should now reconfigure itself to create an access point with an active DHCP server, DNS proxy forwarding, and NAT enabled.
 
 ## Test the Access Point
 

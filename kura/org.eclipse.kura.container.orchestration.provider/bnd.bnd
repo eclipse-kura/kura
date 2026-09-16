@@ -35,7 +35,6 @@ Import-Package: \
     com.aayushatharva.brotli4j.decoder;resolution:=optional,\
     com.aayushatharva.brotli4j.encoder;resolution:=optional,\
     org.newsclub.net.unix;resolution:=optional,\
-    org.newsclub.net.unix.*;resolution:=optional,\
     *
 Bundle-Name: Configurable container management component
 Bundle-Vendor: Eclipse Kura

@@ -97,6 +97,8 @@ In order to be able to build Eclipse Kura™ on your development machine, you ne
 * JDK 21
 * Maven 3.9.9+
 
+The build runs on Linux, macOS and Windows: it is a plain Maven build and produces the same artifacts everywhere. Eclipse Kura™ itself runs on Linux gateways, so what you build on macOS or Windows are the packages to install on a device, see [Install](#install).
+
 <details>
 <summary>
 
@@ -153,6 +155,25 @@ To install Maven you can follow the tutorial from the official [Maven](http://ma
 
 </details>
 
+<details>
+<summary>
+
+#### Installing Prerequisites in Windows
+
+</summary>
+
+To install Java 21, download the JDK installer from the [Adoptium Project Repository](https://adoptium.net/temurin/releases?version=21&os=windows) and run it, leaving the option that sets `JAVA_HOME` enabled. Alternatively, from a terminal:
+
+```powershell
+winget install EclipseAdoptium.Temurin.21.JDK
+```
+
+To install Maven, download the binary zip archive from the [Maven](https://maven.apache.org/download.cgi) site, unpack it in a directory of your choice and add its `bin` directory to the `PATH`, as described in the official [installation instructions](https://maven.apache.org/install.html). Remember that you need the 3.9.9 version or newer.
+
+Open a new terminal and run `java -version` and `mvn -version` to make sure both are installed correctly and reachable from the `PATH`.
+
+</details>
+
 ### Build Eclipse Kura™
 
 Clone the Eclipse Kura™ repository:
@@ -182,6 +203,9 @@ Maven orders the reactor by inter-module dependencies, so this builds all the fr
 ### Testing
 
 Unit tests run automatically as part of `mvn install` (every bundle keeps its unit tests under `src/test/java`).
+
+> [!NOTE]
+> On Windows the few tests that exercise Linux-only features are skipped: the uptime read from `/proc`, the system packages listed through the Linux package managers, and a request aborted before its body is read. Everything else runs as it does on Linux and macOS.
 
 The OSGi **integration tests** live under `test/` and are executed inside a real OSGi framework by the bnd testing tooling (`bnd-testing-maven-plugin`); each test module is driven by its own `integration-test.bndrun`, while the run configuration shared by all of them (framework, execution environment, runtime properties) lives in `test/integration-test.bnd`. They belong to the `tests` Maven profile, which is **active by default** — it is disabled only by `-DskipTests`. So both unit and integration tests run with a plain:
 

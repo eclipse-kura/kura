@@ -4732,6 +4732,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>openjdk-21-jdk<span class="w"> </span>maven<span class="w"> </span>git
 </code></pre></div>
 <p>On macOS, install a JDK 21 from <a href="https://adoptium.net/temurin/releases?version=21">Adoptium</a> and Maven with <a href="https://brew.sh/">Homebrew</a> (<code>brew install maven</code>). Check the installation with <code>java -version</code> and <code>mvn -version</code>.</p>
+<p>On Windows, install a JDK 21 from <a href="https://adoptium.net/temurin/releases?version=21&amp;os=windows">Adoptium</a> (or with <code>winget install EclipseAdoptium.Temurin.21.JDK</code>) and Maven by unpacking its <a href="https://maven.apache.org/download.cgi">binary zip archive</a> and adding the <code>bin</code> directory to the <code>PATH</code>, as described in the Maven <a href="https://maven.apache.org/install.html">installation instructions</a>. Check the installation in a new terminal with <code>java -version</code> and <code>mvn -version</code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Windows is supported for building Eclipse Kura, not for running it: the framework needs a Linux system, so the packages the build produces are meant to be installed on a gateway, a virtual machine or a container.</p>
+</div>
 <h2 id="build">Build</h2>
 <p>Clone the repository and build everything from its root:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>git<span class="w"> </span>clone<span class="w"> </span>-b<span class="w"> </span>develop<span class="w"> </span>https://github.com/eclipse-kura/kura.git
@@ -4753,6 +4758,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>Unit tests live in each bundle under <code>src/test/java</code> and run with surefire as part of the build. The OSGi integration tests live under <code>test/</code>: each module is a fragment of the bundle it tests and is executed inside a real OSGi framework by <code>bnd-testing-maven-plugin</code>, driven by its <code>integration-test.bndrun</code>. To run one integration-test module:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mvn<span class="w"> </span>-f<span class="w"> </span>test/org.eclipse.kura.core.configuration.test/pom.xml<span class="w"> </span>clean<span class="w"> </span>verify
 </code></pre></div>
+<p>On Windows the few tests that exercise Linux-only features are skipped: the uptime read from <code>/proc</code>, the system packages listed through the Linux package managers, and a request aborted before its body is read. Everything else runs as it does on Linux and macOS.</p>
 <p>The set of runtime bundles (<code>-runbundles</code>) of every <code>integration-test.bndrun</code> is resolved and committed, so a fresh checkout needs no extra step. After changing the runtime dependencies of an integration test, re-resolve and commit the updated files:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>mvn<span class="w"> </span>-f<span class="w"> </span>test/pom.xml<span class="w"> </span>clean<span class="w"> </span>verify<span class="w"> </span>-Presolve-integration-tests
 </code></pre></div>

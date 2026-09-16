@@ -67,6 +67,7 @@ public enum KuraErrorCode {
      * 
      * @deprecated
      */
+    @Deprecated
     INTERNAL_ERROR,
     /**
      * The serial port ha an invalid configuration. {0}

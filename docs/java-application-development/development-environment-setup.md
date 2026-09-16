@@ -18,6 +18,11 @@ sudo apt install openjdk-21-jdk maven git
 
 On macOS, install a JDK 21 from [Adoptium](https://adoptium.net/temurin/releases?version=21) and Maven with [Homebrew](https://brew.sh/) (`brew install maven`). Check the installation with `java -version` and `mvn -version`.
 
+On Windows, install a JDK 21 from [Adoptium](https://adoptium.net/temurin/releases?version=21&os=windows) (or with `winget install EclipseAdoptium.Temurin.21.JDK`) and Maven by unpacking its [binary zip archive](https://maven.apache.org/download.cgi) and adding the `bin` directory to the `PATH`, as described in the Maven [installation instructions](https://maven.apache.org/install.html). Check the installation in a new terminal with `java -version` and `mvn -version`.
+
+!!! note
+    Windows is supported for building Eclipse Kura, not for running it: the framework needs a Linux system, so the packages the build produces are meant to be installed on a gateway, a virtual machine or a container.
+
 ## Build
 
 Clone the repository and build everything from its root:
@@ -50,6 +55,8 @@ Unit tests live in each bundle under `src/test/java` and run with surefire as pa
 ```bash
 mvn -f test/org.eclipse.kura.core.configuration.test/pom.xml clean verify
 ```
+
+On Windows the few tests that exercise Linux-only features are skipped: the uptime read from `/proc`, the system packages listed through the Linux package managers, and a request aborted before its body is read. Everything else runs as it does on Linux and macOS.
 
 The set of runtime bundles (`-runbundles`) of every `integration-test.bndrun` is resolved and committed, so a fresh checkout needs no extra step. After changing the runtime dependencies of an integration test, re-resolve and commit the updated files:
 

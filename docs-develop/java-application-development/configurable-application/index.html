@@ -3623,54 +3623,36 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#create-plug-in" class="md-nav__link">
+  <a href="#generate-the-project" class="md-nav__link">
     <span class="md-ellipsis">
-      Create Plug-in
+      Generate the Project
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#add-dependencies-to-manifest" class="md-nav__link">
+  <a href="#create-the-configuration-description" class="md-nav__link">
     <span class="md-ellipsis">
-      Add Dependencies to Manifest
+      Create the Configuration Description
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#create-java-class" class="md-nav__link">
+  <a href="#create-the-component-class" class="md-nav__link">
     <span class="md-ellipsis">
-      Create Java Class
+      Create the Component Class
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#resolve-dependencies" class="md-nav__link">
+  <a href="#build-and-install-the-bundle" class="md-nav__link">
     <span class="md-ellipsis">
-      Resolve Dependencies
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#create-component-class" class="md-nav__link">
-    <span class="md-ellipsis">
-      Create Component Class
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#create-the-default-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Create the Default Configuration
+      Build and Install the Bundle
     </span>
   </a>
   
@@ -3678,15 +3660,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#run-the-bundle" class="md-nav__link">
-    <span class="md-ellipsis">
-      Run the Bundle
-    </span>
-  </a>
   
 </li>
       
@@ -4741,54 +4714,36 @@ You are viewing the documentation relative to the develop branch or to an outdat
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#create-plug-in" class="md-nav__link">
+  <a href="#generate-the-project" class="md-nav__link">
     <span class="md-ellipsis">
-      Create Plug-in
+      Generate the Project
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#add-dependencies-to-manifest" class="md-nav__link">
+  <a href="#create-the-configuration-description" class="md-nav__link">
     <span class="md-ellipsis">
-      Add Dependencies to Manifest
+      Create the Configuration Description
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#create-java-class" class="md-nav__link">
+  <a href="#create-the-component-class" class="md-nav__link">
     <span class="md-ellipsis">
-      Create Java Class
+      Create the Component Class
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#resolve-dependencies" class="md-nav__link">
+  <a href="#build-and-install-the-bundle" class="md-nav__link">
     <span class="md-ellipsis">
-      Resolve Dependencies
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#create-component-class" class="md-nav__link">
-    <span class="md-ellipsis">
-      Create Component Class
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#create-the-default-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Create the Default Configuration
+      Build and Install the Bundle
     </span>
   </a>
   
@@ -4796,15 +4751,6 @@ You are viewing the documentation relative to the develop branch or to an outdat
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#run-the-bundle" class="md-nav__link">
-    <span class="md-ellipsis">
-      Run the Bundle
-    </span>
-  </a>
   
 </li>
       
@@ -4835,376 +4781,143 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 <h1 id="configurable-application">Configurable Application</h1>
 <h2 id="overview">Overview</h2>
-<p>This section provides a simple example of how to create an OSGi bundle
-that implements the ConfigurableComponent interface in Kura. This bundle
-will interact with the Kura ConfigurationService via the
-ConfigurableComponent interface. It also uses the MQTT services in Kura
-to connect to the Cloud, which allows for a local configuration
-mechanism using a Web user-interface (UI). In this example, you will
-learn how to perform the following functions:</p>
+<p>This section provides a simple example of how to create an OSGi bundle that implements the ConfigurableComponent interface in Kura. This bundle will interact with the Kura ConfigurationService via the ConfigurableComponent interface, which allows for a local configuration mechanism using the Kura web user-interface (UI) and a remote one through the cloud platform. In this example, you will learn how to perform the following functions:</p>
 <ul>
 <li>
-<p>Create a plugin project</p>
+<p>Generate an add-on project with the Kura Addon Archetype</p>
 </li>
 <li>
 <p>Implement the ConfigurableComponent interface</p>
 </li>
 <li>
-<p>Use the Kura web UI to modify the bundle’s configuration</p>
+<p>Describe the configuration with the OSGi Metatype annotations</p>
 </li>
 <li>
-<p>Export a single OSGi bundle (plug-in) <span id="_Prerequisites"
-    class="anchor"></span></p>
+<p>Use the Kura web UI to modify the bundle's configuration</p>
 </li>
 </ul>
 <h3 id="prerequisites">Prerequisites</h3>
 <ul>
 <li>
-<p>Requires Kura development environment set-up (<a href="/java-application-development/development-environment-setup/">Setting up Kura
-    Development Environment</a>)</p>
+<p><a href="../hello-world-application/">Hello World Application</a>: the project generation and the build are the same</p>
 </li>
 <li>
-<p>Implements the use of Kura web user-interface (UI)</p>
+<p>Implements the use of the Kura web user-interface (UI)</p>
 </li>
 </ul>
 <h2 id="configurable-component-example">Configurable Component Example</h2>
-<h3 id="create-plug-in">Create Plug-in</h3>
-<p>In Eclipse, create a new Plug-in project by selecting <strong>File | New |
-Project</strong>. Select <strong>Plug-in Development | Plug-in Project</strong> and click
-<strong>Next</strong>.</p>
-<p><img alt="" src="../images/configurable-application/image1.png" /></p>
-<p>Your screen should display the New Plug-in Project dialog box as shown
-in the following screen capture. Enter your project a name, such as
-“org.eclipse.kura.example.configurable”. Under Target Platform, ensure
-that the <strong>an OSGi framework</strong> option button is selected and set to
-<strong>standard</strong> as shown below. You can also (optionally) add projects to a
-working set. To continue, click <strong>Next</strong>.</p>
-<p><img alt="" src="../images/configurable-application/image2.png" /></p>
-<p>In the next New Plug-in Project menu (shown below), change the <strong>Name</strong>
-field to something more descriptive, such as “Configurable Component
-Example.” Make sure that the Execution Environment list is set to match
-the JVM version running on the target device (<strong>JavaSE-1.6</strong> or
-<strong>JavaSE-1.7</strong>). To determine the JVM version running on the target
-device, log in to its administrative console and enter the command</p>
-<p><code>java –version</code></p>
-<p>Also, <u>un</u>check the <b>Generate an activator, a Java class that controls
-the plug-in’s life cycle</b> option button. For the purposes of this
-example, a single class will be used. An Activator class will not be
-created; instead, OSGi Declarative Services will be used to start and
-stop the bundle.</p>
-<p>Finally, click <strong>Finish</strong>.</p>
-<p><img alt="" src="../images/configurable-application/image3.png" /></p>
-<p>You should see the new project in the Package Explorer (or Project
-Explorer) in Eclipse. Also, you will see the MANIFEST.MF was
-automatically opened in the Manifest Editor. An OSGi bundle is a regular
-Java .jar file that contains Java code and resources and a custom
-Manifest and an Activator. The manifest will be modified in the next
-section.</p>
-<h3 id="add-dependencies-to-manifest">Add Dependencies to Manifest</h3>
-<p>First, you will use the Manifest Editor in Eclipse to add some
-dependencies. Click the <strong>Dependencies</strong> tab at the bottom of the editor
-screen and then click the <strong>Automated Management of Dependencies</strong>
-heading to expand it.</p>
-<p><img alt="" src="../images/configurable-application/image4.png" /></p>
-<p>Under Automated Management of Dependencies, click <strong>Add</strong>. In the Select
-a Plug-in field, enter <strong>org.eclipse.osgi.services</strong>. Select the plug-in
-name and click <strong>OK</strong>.</p>
-<p><img alt="" src="../images/configurable-application/image5.png" /></p>
-<p>Note that this operation is very much like adding standalone jars to the
-buildpath by including the ‘-cp’ argument to javac. However, in this
-case you are telling Eclipse where to find these dependencies the “OSGi
-way”, so it is aware of them at compile time.</p>
-<p>Click <strong>Add</strong> again and use the same procedure to add the following
-dependencies:</p>
-<ul>
-<li>slf4j.api</li>
-<li>org.eclipse.kura.api</li>
-</ul>
-<p>You should now see the list of dependencies. Save changes to the
-Manifest.</p>
-<p><img alt="" src="../images/configurable-application/image6.png" /></p>
-<h3 id="create-java-class">Create Java Class</h3>
-<p>Now you are ready to start writing a simple Java class. Right-click the
-<strong>org.eclipse.kura.example.configurable</strong> project. Select <strong>New |
-Class</strong>. Set the Package field to
-<strong>org.eclipse.kura.example.configurable</strong>, set the Name field to
-<strong>ConfigurableExample</strong>, and then click <strong>Finish</strong>.</p>
-<p><img alt="" src="../images/configurable-application/image7.png" /></p>
-<p>Write the following code for the new class. You can copy and paste the
-code provided below into your newly created Java class file.</p>
+<h3 id="generate-the-project">Generate the Project</h3>
+<p>Generate the project with the <a href="../kura-addon-archetype/">Kura Addon Archetype</a> using <code>org.eclipse.kura.example</code> as groupId, <code>kura-configurable</code> as artifactId and <code>org.eclipse.kura.example.configurable</code> as package. The generated bundle already depends on <code>org.eclipse.kura.api</code>, <code>slf4j-api</code> and the Declarative Services and Metatype annotations, which is all this example needs.</p>
+<p>The archetype generates a configurable component (<code>ExampleComponent</code>, its <code>ExampleComponentOCD</code> configuration description and the <code>ExampleComponentOptions</code> wrapper): this tutorial builds the same thing from scratch, so delete the generated classes of <code>src/main/java/org/eclipse/kura/example/configurable</code> and the test classes that refer to them.</p>
+<h3 id="create-the-configuration-description">Create the Configuration Description</h3>
+<p>A configurable component publishes the description of its parameters, types and defaults through the OSGi Metatype service: the Kura web UI renders that description as a form, and the ConfigurationService validates the values against it. The description is written as an annotated Java interface, which bnd turns into the <code>OSGI-INF/metatype/&lt;pid&gt;.xml</code> file at build time. Create <code>ConfigurableExampleOCD.java</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">package</span><span class="w"> </span><span class="nn">org.eclipse.kura.example.configurable</span><span class="p">;</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ConfigurableExample</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">ConfigurableComponent</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">s_logger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">ConfigurableExample</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">APP_ID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;org.eclipse.kura.example.configurable.ConfigurableExample&quot;</span><span class="p">;</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">properties</span><span class="p">;</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">activate</span><span class="p">(</span><span class="n">ComponentContext</span><span class="w"> </span><span class="n">componentContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">        </span><span class="n">s_logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Bundle &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">APP_ID</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; has started!&quot;</span><span class="p">);</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">activate</span><span class="p">(</span><span class="n">ComponentContext</span><span class="w"> </span><span class="n">componentContext</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">properties</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">        </span><span class="n">s_logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Bundle &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">APP_ID</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; has started with config!&quot;</span><span class="p">);</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">        </span><span class="n">updated</span><span class="p">(</span><span class="n">properties</span><span class="p">);</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">deactivate</span><span class="p">(</span><span class="n">ComponentContext</span><span class="w"> </span><span class="n">componentContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">        </span><span class="n">s_logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Bundle &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">APP_ID</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; has stopped!&quot;</span><span class="p">);</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">updated</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">properties</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">properties</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">properties</span><span class="p">;</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">properties</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">properties</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">            </span><span class="n">Iterator</span><span class="o">&lt;</span><span class="n">Entry</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">properties</span><span class="p">.</span><span class="na">entrySet</span><span class="p">().</span><span class="na">iterator</span><span class="p">();</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">            </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="na">hasNext</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">                </span><span class="n">Entry</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">it</span><span class="p">.</span><span class="na">next</span><span class="p">();</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">                </span><span class="n">s_logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;New property - &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">entry</span><span class="p">.</span><span class="na">getKey</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; = &quot;</span><span class="w"> </span><span class="o">+</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">                </span><span class="n">entry</span><span class="p">.</span><span class="na">getValue</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; of type &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">entry</span><span class="p">.</span><span class="na">getValue</span><span class="p">().</span><span class="na">getClass</span><span class="p">().</span><span class="na">toString</span><span class="p">());</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">            </span><span class="p">}</span>
-<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="p">}</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.osgi.service.metatype.annotations.AttributeDefinition</span><span class="p">;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.osgi.service.metatype.annotations.AttributeType</span><span class="p">;</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.osgi.service.metatype.annotations.ObjectClassDefinition</span><span class="p">;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="nd">@ObjectClassDefinition</span><span class="p">(</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;org.eclipse.kura.example.configurable.ConfigurableExample&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;ConfigurableExample&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;This is a sample metatype for a simple configurable component&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="kd">public</span><span class="w"> </span><span class="nd">@interface</span><span class="w"> </span><span class="n">ConfigurableExampleOCD</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="nd">@AttributeDefinition</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;param1.string&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">AttributeType</span><span class="p">.</span><span class="na">STRING</span><span class="p">,</span><span class="w"> </span><span class="n">required</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">            </span><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;String configuration parameter&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="nf">param1_string</span><span class="p">()</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="s">&quot;Some Text&quot;</span><span class="p">;</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="nd">@AttributeDefinition</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;param2.float&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">AttributeType</span><span class="p">.</span><span class="na">FLOAT</span><span class="p">,</span><span class="w"> </span><span class="n">required</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="n">min</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;5.0&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">max</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;40.0&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">            </span><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Float configuration parameter&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="kt">float</span><span class="w"> </span><span class="nf">param2_float</span><span class="p">()</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="mf">20.5f</span><span class="p">;</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="nd">@AttributeDefinition</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;param3.integer&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">AttributeType</span><span class="p">.</span><span class="na">INTEGER</span><span class="p">,</span><span class="w"> </span><span class="n">required</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="n">min</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;1&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">            </span><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Integer configuration parameter&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="nf">param3_integer</span><span class="p">()</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="p">}</span>
 </code></pre></div>
-<p>The activate() method is the entry point when the bundle is started.
-Note this class has two forms of the activate() method. The second
-method (with the “Map<String, Object> properties” parameter) enables a
-default configuration to be specified at bundle start time. The
-deactivate() method is the entry point when the bundle is stopped. You
-have also specified an updated() method. These methods define how the
-bundle receives a new configuration from the Kura configuration manager.
-Kura handles robust configuration management routines automatically once
-you implement the ConfigurableComponent interface and the updated()
-method.</p>
-<h3 id="resolve-dependencies">Resolve Dependencies</h3>
-<p>At this point, there will be errors in your code because of unresolved
-imports.</p>
-<p>Select the menu <strong>Source | Organize Imports</strong> to resolve these errors.
-Because you added dependencies to your dependency list in the Manifest,
-you will be prompted to choose one of the following two potential
-sources for importing a few classes.</p>
-<p>For the “Entry” class, select <strong>java.util.Map.Entry</strong> as shown below and
-click <strong>Next</strong>.</p>
-<p><img alt="" src="../images/configurable-application/image8.png" /></p>
-<p>For the “Logger” class, select <strong>org.slf4j.Logger</strong> as shown below and
-click <strong>Finish</strong>.</p>
-<p><img alt="" src="../images/configurable-application/image9.png" /></p>
-<p>Resolving the imports should clear the errors in the class as shown in
-the screen capture that follows. Save the changes to the
-ConfigurableExample class.</p>
-<p><img alt="" src="../images/configurable-application/image10.png" /></p>
-<p>The complete set of code (with import statements) is shown below.</p>
+<p>The <code>id</code> of the <code>@ObjectClassDefinition</code> is the persistent identifier (PID) of the configuration: it must match the name of the component that receives it. The method names become the property ids, with <code>_</code> mapped to <code>.</code>: <code>param1_string</code> is the property <code>param1.string</code>. Each <code>@AttributeDefinition</code> carries the type, whether the value is required, the optional range and the description shown in the web UI; the default value is the default of the method.</p>
+<h3 id="create-the-component-class">Create the Component Class</h3>
+<p>Create <code>ConfigurableExample.java</code> with the following code:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">package</span><span class="w"> </span><span class="nn">org.eclipse.kura.example.configurable</span><span class="p">;</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Iterator</span><span class="p">;</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map.Entry</span><span class="p">;</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.osgi.service.component.ComponentContext</span><span class="p">;</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.kura.configuration.ConfigurableComponent</span><span class="p">;</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ConfigurableExample</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">ConfigurableComponent</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">s_logger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">ConfigurableExample</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">APP_ID</span><span class="o">*</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;org.eclipse.kura.configurable.ConfigurableExample&quot;</span><span class="p">;</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">properties</span><span class="p">;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map.Entry</span><span class="p">;</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.eclipse.kura.configuration.ConfigurableComponent</span><span class="p">;</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.osgi.service.component.ComponentContext</span><span class="p">;</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.osgi.service.component.annotations.Activate</span><span class="p">;</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.osgi.service.component.annotations.Component</span><span class="p">;</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.osgi.service.component.annotations.ConfigurationPolicy</span><span class="p">;</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.osgi.service.component.annotations.Deactivate</span><span class="p">;</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.osgi.service.component.annotations.Modified</span><span class="p">;</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.osgi.service.metatype.annotations.Designate</span><span class="p">;</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span>
 <a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">activate</span><span class="p">(</span><span class="n">ComponentContext</span><span class="w"> </span><span class="n">componentContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">      </span><span class="n">s_logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Bundle &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">APP_ID</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; has started!&quot;</span><span class="p">);</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">activate</span><span class="p">(</span><span class="n">ComponentContext</span><span class="w"> </span><span class="n">componentContext</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">properties</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">        </span><span class="n">s_logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Bundle &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">APP_ID</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; has started with config!&quot;</span><span class="p">);</span>
-<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">        </span><span class="n">updated</span><span class="p">(</span><span class="n">properties</span><span class="p">);</span>
-<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>
-<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">deactivate</span><span class="p">(</span><span class="n">ComponentContext</span><span class="w"> </span><span class="n">componentContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="w">        </span><span class="n">s_logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Bundle &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">APP_ID</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; has stopped!&quot;</span><span class="p">);</span>
-<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>
-<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">updated</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">properties</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">properties</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">properties</span><span class="p">;</span>
-<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a><span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">properties</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">properties</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a><span class="w">            </span><span class="n">Iterator</span><span class="o">&lt;</span><span class="n">Entry</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">properties</span><span class="p">.</span><span class="na">entrySet</span><span class="p">().</span><span class="na">iterator</span><span class="p">();</span>
-<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a><span class="w">            </span><span class="k">while</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="na">hasNext</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a><span class="w">                </span><span class="n">Entry</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">it</span><span class="p">.</span><span class="na">next</span><span class="p">();</span>
-<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a><span class="w">                </span><span class="n">s_logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;New property - &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">entry</span><span class="p">.</span><span class="na">getKey</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; = &quot;</span><span class="w"> </span><span class="o">+</span>
-<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a><span class="w">                </span><span class="n">entry</span><span class="p">.</span><span class="na">getValue</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot; of type &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">entry</span><span class="p">.</span><span class="na">getValue</span><span class="p">().</span><span class="na">getClass</span><span class="p">().</span><span class="na">toString</span><span class="p">());</span>
-<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a><span class="w">            </span><span class="p">}</span>
-<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a><span class="w">        </span><span class="p">}</span>
-<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a><span class="p">}</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="nd">@Designate</span><span class="p">(</span><span class="n">ocd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ConfigurableExampleOCD</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="nd">@Component</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;org.eclipse.kura.example.configurable.ConfigurableExample&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">immediate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">        </span><span class="n">configurationPolicy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ConfigurationPolicy</span><span class="p">.</span><span class="na">REQUIRE</span><span class="p">,</span><span class="w"> </span><span class="n">service</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ConfigurableComponent</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ConfigurableExample</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">ConfigurableComponent</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">logger</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">ConfigurableExample</span><span class="p">.</span><span class="na">class</span><span class="p">);</span>
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">APP_ID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;org.eclipse.kura.example.configurable.ConfigurableExample&quot;</span><span class="p">;</span>
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">properties</span><span class="p">;</span>
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="w">    </span><span class="nd">@Activate</span>
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">activate</span><span class="p">(</span><span class="n">ComponentContext</span><span class="w"> </span><span class="n">componentContext</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">properties</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a><span class="w">        </span><span class="n">logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Bundle {} has started with config!&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">APP_ID</span><span class="p">);</span>
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a><span class="w">        </span><span class="n">updated</span><span class="p">(</span><span class="n">properties</span><span class="p">);</span>
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a><span class="w">    </span><span class="nd">@Deactivate</span>
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">deactivate</span><span class="p">(</span><span class="n">ComponentContext</span><span class="w"> </span><span class="n">componentContext</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a><span class="w">        </span><span class="n">logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Bundle {} has stopped!&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">APP_ID</span><span class="p">);</span>
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a><span class="w">    </span><span class="nd">@Modified</span>
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">updated</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">properties</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">properties</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">properties</span><span class="p">;</span>
+<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">properties</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">properties</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a><span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">Entry</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">properties</span><span class="p">.</span><span class="na">entrySet</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a><span class="w">                </span><span class="n">logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;New property - {} = {} of type {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">entry</span><span class="p">.</span><span class="na">getKey</span><span class="p">(),</span><span class="w"> </span><span class="n">entry</span><span class="p">.</span><span class="na">getValue</span><span class="p">(),</span>
+<a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a><span class="w">                        </span><span class="n">entry</span><span class="p">.</span><span class="na">getValue</span><span class="p">().</span><span class="na">getClass</span><span class="p">());</span>
+<a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a><span class="w">            </span><span class="p">}</span>
+<a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a><span class="p">}</span>
 </code></pre></div>
-<p>Switch back to the Manifest Editor. Under <strong>Automated Management of
-Dependencies</strong>, ensure the <strong>Import-Package</strong> option button is selected.
-Click the <strong>add dependencies</strong> link to automatically add packages to the
-dependencies list (under <strong>Imported Packages</strong>) based on the “import”
-statements in your example code. Save changes to the Manifest again.</p>
-<p><img alt="" src="../images/configurable-application/image11.png" /></p>
-<h3 id="create-component-class">Create Component Class</h3>
-<p>Right-click the example project and select <strong>New | Folder</strong>. Create a
-new folder named “OSGI-INF”.</p>
-<p>Now, right-click the example project’s “OSGI-INF” folder and select
-<strong>New | Other</strong>. From the wizard, select <strong>Plug-in Development |
-Component Definition</strong> and click <strong>Next</strong>.</p>
-<p><img alt="" src="../images/configurable-application/image12.png" /></p>
-<p>Next to the Class field, click <strong>Browse</strong> and type the name of your
-newly created class in the Select entries field. In this case, type the
-word “Configurable”, and you will see matching items. Select the
-<strong>ConfigurableExample</strong> class and click <strong>OK</strong>.</p>
-<p><img alt="" src="../images/configurable-application/image13.png" /></p>
-<p>In the <strong>Enter or select the parent folder</strong> field, make sure
-<strong>“</strong>/OSGI-INF” is at the end of the existing entry
-(e.g., org.eclipse.kura.example.configurable/OSGI-INF). Set the <strong>Name</strong>
-field equal to the <strong>Class</strong> field as shown below:</p>
-<p><img alt="" src="../images/configurable-application/image14.png" /></p>
-<p>Click <strong>Finish</strong>.</p>
-<p>After the Component class has been created, it will
-open in the Workspace. On the Services tab, click the <strong>Add</strong> button
-under <strong>Provided Services</strong>. Enter “configurable” and select the
-interface “org.eclipse.kura.example.configurable”. This is required for
-components that are configurable through the Kura ConfigurationService,
-so that they expose a Service.</p>
-<p><img alt="" src="../images/configurable-application/image15.png" /></p>
-<p>In the Overview tab, the Name and Class fields should already point to
-your Java class. Make the following settings:</p>
+<p>The annotations replace the component definition and metatype files that were written by hand in older Kura versions:</p>
 <ul>
 <li>
-<p>Set the Activate field to <strong>activate</strong> and set the Deactivate field
-    to <strong>deactivate</strong>. This tells the component where these OSGi
-    activation methods are located.</p>
+<p><code>@Component</code> declares the Declarative Services component. Its <code>name</code> is the PID that the ConfigurationService uses to store the configuration in the snapshots and to show the component in the web UI: it must be the same as the <code>id</code> of the <code>@ObjectClassDefinition</code>. <code>configurationPolicy = ConfigurationPolicy.REQUIRE</code> makes the component wait for its configuration before activating, so the <code>@Activate</code> method always receives the properties; the ConfigurationService creates the initial configuration from the metatype defaults. <code>immediate = true</code> activates it as soon as the configuration is available.</p>
 </li>
 <li>
-<p>Set the Configuration Policy to <strong>require</strong>.</p>
+<p><code>service = ConfigurableComponent.class</code> registers the component as a <code>ConfigurableComponent</code> service. The ConfigurationService tracks only the components that <strong>provide</strong> this service (or <code>SelfConfiguringComponent</code>): implementing the interface alone is not enough.</p>
 </li>
 <li>
-<p>Set the Modified field to <strong>updated</strong>. This tells the component
-    which method to call when the configuration is updated.</p>
+<p><code>@Designate(ocd = ...)</code> links the component to its configuration description.</p>
 </li>
 <li>
-<p>Uncheck the box <strong>This component is enabled when started</strong>, then
-    check both boxes <strong>This component is enabled when started</strong> and
-    <strong>This component is immediately activated</strong>.</p>
+<p><code>@Modified</code> marks the method called when the configuration changes at runtime. The <code>@Activate</code> method receives the initial configuration, the <code>@Deactivate</code> method is called when the component is stopped.</p>
 </li>
 </ul>
-<p>Click the <strong>Add Property</strong> button. Enter a property with the name
-“service.pid” and value
-“org.eclipse.kura.example.configurable.ConfigurableExample” as shown in
-the screen capture below.</p>
-<p><img alt="" src="../images/configurable-application/image16.png" /></p>
-<p>Verify that the completed Overview tab looks like the screen shot shown
-below and save the Component class definition file:</p>
-<p><img alt="" src="../images/configurable-application/image17.png" /></p>
-<p>Check the Source tab of the component.xml file and carefully verify that
-each of the property values and tags match what is shown below:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">&lt;scr:component</span><span class="w"> </span><span class="na">xmlns:scr=</span><span class="s">&quot;http://www.osgi.org/xmlns/scr/v1.1.0&quot;</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="na">activate=</span><span class="s">&quot;activate&quot;</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="na">configuration-policy=</span><span class="s">&quot;require&quot;</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="na">deactivate=</span><span class="s">&quot;deactivate&quot;</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="na">enabled=</span><span class="s">&quot;true&quot;</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="na">immediate=</span><span class="s">&quot;true&quot;</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="na">modified=</span><span class="s">&quot;updated&quot;</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="na">name=</span><span class="s">&quot;org.eclipse.kura.example.configurable.ConfigurableExample&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="nt">&lt;implementation</span><span class="w"> </span><span class="na">class=</span><span class="s">&quot;org.eclipse.kura.example.configurable.ConfigurableExample&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="nt">&lt;service&gt;</span>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">        </span><span class="nt">&lt;provide</span><span class="w"> </span><span class="na">interface=</span><span class="s">&quot;org.eclipse.kura.example.configurable.ConfigurableExample&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">    </span><span class="nt">&lt;/service&gt;</span>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">    </span><span class="nt">&lt;property</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;service.pid&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="w"> </span><span class="na">value=</span><span class="s">&quot;org.eclipse.kura.example.configurable.ConfigurableExample&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="nt">&lt;/scr:component&gt;</span>
+<div class="admonition warning">
+<p class="admonition-title">Legacy Configurable Components</p>
+<p>Components that implement <code>ConfigurableComponent</code> without providing it as a service are no longer tracked by the ConfigurationService, unless the property <code>org.eclipse.kura.core.configuration.legacyServiceTracking</code> is set to <code>true</code> in <code>/opt/eclipse/kura/framework/kura.properties</code>.</p>
+</div>
+<h3 id="build-and-install-the-bundle">Build and Install the Bundle</h3>
+<p>Build the project as in the <a href="../hello-world-application/">Hello World Application</a>: after the first <code>mvn clean install -Presolve-integration-tests</code>, a plain <code>mvn clean install</code> produces the bundle and the Debian installer. The bundle jar now contains the generated <code>OSGI-INF/org.eclipse.kura.example.configurable.ConfigurableExample.xml</code> descriptor and the <code>OSGI-INF/metatype/org.eclipse.kura.example.configurable.ConfigurableExample.xml</code> metatype: open them in <code>target/classes</code> to check what the annotations produced.</p>
+<p>Install the package on the device and restart Kura (<code>systemctl restart kura</code>). The framework log shows the activation with the default configuration:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>INFO  o.e.k.e.c.ConfigurableExample - Bundle org.eclipse.kura.example.configurable.ConfigurableExample has started with config!
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>INFO  o.e.k.e.c.ConfigurableExample - New property - param1.string = Some Text of type class java.lang.String
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>INFO  o.e.k.e.c.ConfigurableExample - New property - param2.float = 20.5 of type class java.lang.Float
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>INFO  o.e.k.e.c.ConfigurableExample - New property - param3.integer = 2 of type class java.lang.Integer
 </code></pre></div>
-<p>If <strong>Kura 3.0 or newer versions</strong> are used and the "org.eclipse.kura.core.configuration.legacyServiceTracking" system property is set to false or not set, proceed as follows.</p>
-<h3 id="create-the-default-configuration">Create the Default Configuration</h3>
-<p>With the component definition file created, you also need to specify the
-configurable parameters of this bundle. This is done using the
-“metatype” definition. Right-click the <strong>OSGI-INF</strong> directory for the
-example project in the Package Explorer window and select <strong>New |
-Folder.</strong> Name the folder “metatype”. Next, right-click the <strong>metatype</strong>
-folder and select <strong>New | File</strong>.</p>
-<p>Name the file
-“org.eclipse.kura.example.configurable.ConfigurableExample.xml” as shown
-in the following screen capture:</p>
-<p><img alt="" src="../images/configurable-application/image18.png" /></p>
-<p>At this point, you have to write the ‘metatype’ file that defines the
-parameters, default values, types, etc. Click on the <strong>Source</strong> button
-and paste the following XML text into ConfigurableExample.xml for this
-example. Save changes to ConfigurableExample.xml.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nt">&lt;MetaData</span><span class="w"> </span><span class="na">xmlns=</span><span class="s">&quot;http://www.osgi.org/xmlns/metatype/v1.2.0&quot;</span><span class="w"> </span><span class="na">localization=</span><span class="s">&quot;en_us&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">&lt;OCD</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;org.eclipse.kura.example.configurable.ConfigurableExample&quot;</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">        </span><span class="na">name=</span><span class="s">&quot;ConfigurableExample&quot;</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">        </span><span class="na">description=</span><span class="s">&quot;This is a sample metatype file for a simple configurable component&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">        </span><span class="nt">&lt;AD</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;param1.string&quot;</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">            </span><span class="na">name=</span><span class="s">&quot;param1.string&quot;</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">            </span><span class="na">type=</span><span class="s">&quot;String&quot;</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">            </span><span class="na">cardinality=</span><span class="s">&quot;0&quot;</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">            </span><span class="na">required=</span><span class="s">&quot;true&quot;</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">            </span><span class="na">default=</span><span class="s">&quot;Some Text&quot;</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">            </span><span class="na">description=</span><span class="s">&quot;String configuration parameter&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>
-<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">        </span><span class="nt">&lt;AD</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;param2.float&quot;</span>
-<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">            </span><span class="na">name=</span><span class="s">&quot;param2.float&quot;</span>
-<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">            </span><span class="na">type=</span><span class="s">&quot;Float&quot;</span>
-<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">            </span><span class="na">cardinality=</span><span class="s">&quot;0&quot;</span>
-<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">            </span><span class="na">required=</span><span class="s">&quot;false&quot;</span>
-<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">            </span><span class="na">default=</span><span class="s">&quot;20.5&quot;</span>
-<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">            </span><span class="na">min=</span><span class="s">&quot;5.0&quot;</span>
-<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="w">            </span><span class="na">max=</span><span class="s">&quot;40.0&quot;</span>
-<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="w">            </span><span class="na">description=</span><span class="s">&quot;Float configuration parameter&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>
-<a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a><span class="w">        </span><span class="nt">&lt;AD</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;param3.integer&quot;</span>
-<a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a><span class="w">            </span><span class="na">name=</span><span class="s">&quot;param3.integer&quot;</span>
-<a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a><span class="w">            </span><span class="na">type=</span><span class="s">&quot;Integer&quot;</span>
-<a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a><span class="w">            </span><span class="na">cardinality=</span><span class="s">&quot;0&quot;</span>
-<a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a><span class="w">            </span><span class="na">required=</span><span class="s">&quot;true&quot;</span>
-<a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a><span class="w">            </span><span class="na">default=</span><span class="s">&quot;2&quot;</span>
-<a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a><span class="w">            </span><span class="na">min=</span><span class="s">&quot;1&quot;</span>
-<a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a><span class="w">            </span><span class="na">description=</span><span class="s">&quot;Integer configuration parameter&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a><span class="w">    </span><span class="nt">&lt;/OCD&gt;</span>
-<a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>
-<a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a><span class="w">    </span><span class="nt">&lt;Designate</span><span class="w"> </span><span class="na">pid=</span><span class="s">&quot;org.eclipse.kura.example.configurable.ConfigurableExample&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a><span class="w">        </span><span class="nt">&lt;Object</span><span class="w"> </span><span class="na">ocdref=</span><span class="s">&quot;org.eclipse.kura.example.configurable.ConfigurableExample&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a><span class="w">    </span><span class="nt">&lt;/Designate&gt;</span>
-<a id="__codelineno-3-38" name="__codelineno-3-38" href="#__codelineno-3-38"></a><span class="nt">&lt;/MetaData&gt;</span>
-</code></pre></div>
-<p>In the MANIFEST.MF of this bundle, you must also make sure the XML file
-gets packaged into the bundle when you export the plug-in. Click the
-<strong>Build</strong> tab, and in the Binary Build section of the Manifest editor
-verify that all the checkboxes for items under META-INF and OSGI-INF are
-checked. Save the Manifest after making this change.</p>
-<p><img alt="" src="../images/configurable-application/image19.png" /></p>
-<h2 id="run-the-bundle">Run the Bundle</h2>
-<p>At this point, you can run the bundle using the emulator in Eclipse
-(Linux or OS X only). To do so, expand the <strong>org.eclipse.kura.emulator</strong>
-project in the package explorer and browse to src/main/resources. As
-appropriate for you platform type, right-click
-<strong>Kura_Emulator_<em>[OS]</em>.launch</strong> (where “<em>[OS]</em>” specifies your
-operating system) and select <strong>Run as | KURA_EMULATOR_<em>[OS]</em>.launch</strong>.
-Doing so will start the Kura emulator and your new bundle in the console
-window of Eclipse.</p>
 <h2 id="view-the-bundle-configuration-in-the-local-web-ui">View the Bundle Configuration in the Local Web UI</h2>
-<p>With the bundle running, open a browser window on the same computer as
-the Eclipse development environment and browse to the Kura web UI at
-<a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a>. Once connected to the Kura web UI, a log in
-window appears prompting you to enter the Name and Password as shown
-below:</p>
-<p><img alt="" src="../images/configurable-application/image20.png" /></p>
-<p>Enter the appropriate name and password (default is admin/admin) and
-click <strong>Log in</strong>. The Kura Admin web UI appears with the
-<strong>ConfigurableExample</strong> in the Services area on the left side of the
-browser window as shown below:</p>
-<p><img alt="" src="../images/configurable-application/image21.png" /></p>
-<p>From the Kura Admin web UI, you can change the parameters that are used
-by the Kura configuration manager and in turn call the updated() method
-of the newly created bundle. To do so, click <strong>ConfigurableExample</strong> and
-the configurable component parameters will be displayed as shown below:</p>
-<p><img alt="" src="../images/configurable-application/image22.png" /></p>
-<p>Make any necessary changes and click the <strong>Apply</strong> button near the top
-left of the configuration pane for the modifications to take affect.
-Every time a change is made to the configuration, a new snapshot is
-generated along with an ID.</p>
+<p>With the bundle running, open a browser window and browse to the Kura web UI of the device at <code>https://&lt;device address&gt;</code> (or <a href="https://localhost">https://localhost</a> for the Docker image). Once connected to the Kura web UI, a log in window appears prompting you to enter the Name and Password.</p>
+<p>Enter the appropriate name and password (default is admin/admin) and click <strong>Log in</strong>. The Kura Admin web UI appears with the <strong>ConfigurableExample</strong> in the Services area on the left side of the browser window.</p>
+<p>From the Kura Admin web UI, you can change the parameters that are used by the Kura configuration manager and in turn call the <code>updated()</code> method of the newly created bundle. To do so, click <strong>ConfigurableExample</strong> and the configurable component parameters will be displayed as described by the metatype: a text field for <code>param1.string</code>, numeric fields with the declared ranges for the other two.</p>
+<p>Make any necessary changes and click the <strong>Apply</strong> button near the top left of the configuration pane for the modifications to take effect. Every time a change is made to the configuration, a new snapshot is generated along with an ID, and the new values are logged by the <code>updated()</code> method.</p>
 
 
 

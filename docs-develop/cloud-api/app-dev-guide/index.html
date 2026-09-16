@@ -4574,106 +4574,105 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 <h1 id="application-developer-guide">Application developer guide</h1>
 <p>This guide will provide information on how an application developer can leverage the new Generic Cloud Services APIs, in order to be able to properly use the CloudPublisher/CloudSubscriber API, publish a message, being notified of message delivery and of connection status changes.</p>
-<p>The Kura <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.publisher">ExamplePublisher</a> will be used as a reference.</p>
+<p>The Kura <a href="https://github.com/eclipse-kura/kura-apps/tree/develop/kura-examples/bundles/publishers/org.eclipse.kura.example.publisher">ExamplePublisher</a> will be used as a reference.</p>
 <p>The application should bind itself to a <code>CloudPublisher</code> or <code>CloudSubscriber</code> instance, this can be done in different ways, such as using OSGi <code>ServiceTracker</code>s or by leveraging the Declarative Service layer.</p>
 <p>The recommended way to perform this operation is choosing the latter and allowing the user to customize the service references through component configuration.</p>
-<p>If the component metatype and definition are structured as described below, the Kura Web UI will show a dedicated widget in component configuration that helps the user to pick compatible <code>CloudPublisher</code> or <code>CloudSubscriber</code> instances.</p>
+<p>If the component declaration and metatype are structured as described below, the Kura Web UI will show a dedicated widget in component configuration that helps the user to pick compatible <code>CloudPublisher</code> or <code>CloudSubscriber</code> instances.</p>
 <ol>
 <li>
-<p><strong>Write component definition</strong></p>
-<p>The first step involves declaring the Publisher or Subscriber references in component definition:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="w">  </span><span class="nt">&lt;scr:component</span><span class="w"> </span><span class="na">xmlns:scr=</span><span class="s">&quot;http://www.osgi.org/xmlns/scr/v1.1.0&quot;</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="na">name=</span><span class="s">&quot;org.eclipse.kura.example.publisher.ExamplePublisher&quot;</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="na">activate=</span><span class="s">&quot;activate&quot;</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="na">deactivate=</span><span class="s">&quot;deactivate&quot;</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="na">modified=</span><span class="s">&quot;updated&quot;</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="na">enabled=</span><span class="s">&quot;true&quot;</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="na">immediate=</span><span class="s">&quot;true&quot;</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="na">configuration-policy=</span><span class="s">&quot;require&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span><span class="nt">&lt;implementation</span><span class="w"> </span><span class="na">class=</span><span class="s">&quot;org.eclipse.kura.example.publisher.ExamplePublisher&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">   </span><span class="cm">&lt;!-- If the component is configurable through the Kura ConfigurationService, it must expose a Service. --&gt;</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">   </span><span class="nt">&lt;property</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;service.pid&quot;</span><span class="w"> </span><span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="w"> </span><span class="na">value=</span><span class="s">&quot;org.eclipse.kura.example.publisher.ExamplePublisher&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">   </span><span class="nt">&lt;service&gt;</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">       </span><span class="nt">&lt;provide</span><span class="w"> </span><span class="na">interface=</span><span class="s">&quot;org.eclipse.kura.configuration.ConfigurableComponent&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">   </span><span class="nt">&lt;/service&gt;</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">   </span><span class="nt">&lt;reference</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;CloudPublisher&quot;</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">           </span><span class="na">policy=</span><span class="s">&quot;static&quot;</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">           </span><span class="na">bind=</span><span class="s">&quot;setCloudPublisher&quot;</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">           </span><span class="na">unbind=</span><span class="s">&quot;unsetCloudPublisher&quot;</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">           </span><span class="na">cardinality=</span><span class="s">&quot;0..1&quot;</span>
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">           </span><span class="na">interface=</span><span class="s">&quot;org.eclipse.kura.cloudconnection.publisher.CloudPublisher&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">   </span><span class="nt">&lt;reference</span><span class="w"> </span><span class="na">name=</span><span class="s">&quot;CloudSubscriber&quot;</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">           </span><span class="na">policy=</span><span class="s">&quot;static&quot;</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">           </span><span class="na">bind=</span><span class="s">&quot;setCloudSubscriber&quot;</span>
-<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">           </span><span class="na">unbind=</span><span class="s">&quot;unsetCloudSubscriber&quot;</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">           </span><span class="na">cardinality=</span><span class="s">&quot;0..1&quot;</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">           </span><span class="na">interface=</span><span class="s">&quot;org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">  </span><span class="nt">&lt;/scr:component&gt;</span>
+<p><strong>Declare the component and its references</strong></p>
+<p>The first step involves declaring the Publisher or Subscriber references in the component class, with the Declarative Services annotations (bnd generates the <code>OSGI-INF</code> descriptor from them at build time):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nd">@Component</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;org.eclipse.kura.example.publisher.ExamplePublisher&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">        </span><span class="n">immediate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="n">configurationPolicy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ConfigurationPolicy</span><span class="p">.</span><span class="na">REQUIRE</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="c1">// If the component is configurable through the Kura ConfigurationService, it must provide the service.</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="n">service</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ConfigurableComponent</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nd">@Designate</span><span class="p">(</span><span class="n">ocd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ExamplePublisherOCD</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">factory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ExamplePublisher</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">ConfigurableComponent</span><span class="p">,</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="nd">@Reference</span><span class="p">(</span><span class="n">cardinality</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReferenceCardinality</span><span class="p">.</span><span class="na">OPTIONAL</span><span class="p">,</span><span class="w"> </span><span class="n">policy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReferencePolicy</span><span class="p">.</span><span class="na">DYNAMIC</span><span class="p">)</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setCloudPublisher</span><span class="p">(</span><span class="n">CloudPublisher</span><span class="w"> </span><span class="n">cloudPublisher</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="p">...</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">unsetCloudPublisher</span><span class="p">(</span><span class="n">CloudPublisher</span><span class="w"> </span><span class="n">cloudPublisher</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="p">...</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="nd">@Reference</span><span class="p">(</span><span class="n">cardinality</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReferenceCardinality</span><span class="p">.</span><span class="na">OPTIONAL</span><span class="p">,</span><span class="w"> </span><span class="n">policy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReferencePolicy</span><span class="p">.</span><span class="na">DYNAMIC</span><span class="p">)</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setCloudSubscriber</span><span class="p">(</span><span class="n">CloudSubscriber</span><span class="w"> </span><span class="n">cloudSubscriber</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">    </span><span class="p">...</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">unsetCloudSubscriber</span><span class="p">(</span><span class="n">CloudSubscriber</span><span class="w"> </span><span class="n">cloudSubscriber</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span><span class="p">...</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span><span class="nd">@Activate</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">activate</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">properties</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">    </span><span class="nd">@Modified</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">updated</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">Object</span><span class="o">&gt;</span><span class="w"> </span><span class="n">properties</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">    </span><span class="nd">@Deactivate</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">    </span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">deactivate</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="p">}</span>
 </code></pre></div>
-<p>The snipped above shows the definition of Kura ExamplePublisher, this component is capable of sending and receiving messages, and therefore defines two references, the first to a <code>CloudPublisher</code> and the second to a <code>CloudSubscriber</code>.</p>
-<p>In order to allow the user to customize the bindings at runtime, the <code>target</code> attribute of the references should not be specified at this point in component definition, as it will be set by the Web UI.</p>
-<p>Reference cardinality should be use the <code>0..1</code> or <code>0..n</code> form, as it is not guaranteed that the references will point to a valid service instance during all the lifetime of the application component. For example, references can not be bound if the application has not been configured by the user yet or if the target service is missing.</p>
+<p>The snippet above shows the declaration of the Kura ExamplePublisher, this component is capable of sending and receiving messages, and therefore defines two references, the first to a <code>CloudPublisher</code> and the second to a <code>CloudSubscriber</code>. The name of a reference defaults to the name of its bind method without the <code>set</code> prefix (<code>CloudPublisher</code> and <code>CloudSubscriber</code> here) and the unbind method to the same name with the <code>unset</code> prefix; both can be set explicitly with the <code>name</code> and <code>unbind</code> attributes of <code>@Reference</code>.</p>
+<p>In order to allow the user to customize the bindings at runtime, the <code>target</code> attribute of the references should not be specified at this point in the component declaration, as it will be set by the Web UI through the <code>&lt;reference name&gt;.target</code> configuration property.</p>
+<p>Reference cardinality should use the <code>OPTIONAL</code> or <code>MULTIPLE</code> form (<code>0..1</code> or <code>0..n</code>), as it is not guaranteed that the references will point to a valid service instance during all the lifetime of the application component. For example, references can not be bound if the application has not been configured by the user yet or if the target service is missing.</p>
 </li>
 <li>
-<p><strong>Create component metatype</strong></p>
-<p>Application metatype should declare an <code>AD</code> for each Publisher/Subscriber reference declared in component definition:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="w">  </span><span class="nt">&lt;MetaData</span><span class="w"> </span><span class="na">xmlns=</span><span class="s">&quot;http://www.osgi.org/xmlns/metatype/v1.2.0&quot;</span><span class="w"> </span><span class="na">localization=</span><span class="s">&quot;en_us&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">      </span><span class="nt">&lt;OCD</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;org.eclipse.kura.example.publisher.ExamplePublisher&quot;</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">           </span><span class="na">name=</span><span class="s">&quot;ExamplePublisher&quot;</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">           </span><span class="na">description=</span><span class="s">&quot;Example of a Configuring Kura Application.&quot;</span><span class="nt">&gt;</span>
+<p><strong>Create the component metatype</strong></p>
+<p>The application metatype should declare an attribute for each Publisher/Subscriber reference declared in the component. It is written as an <code>@ObjectClassDefinition</code> annotated interface, which bnd turns into the <code>OSGI-INF/metatype</code> file:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@ObjectClassDefinition</span><span class="p">(</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;org.eclipse.kura.example.publisher.ExamplePublisher&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">        </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;ExamplePublisher&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">        </span><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Example of a Configuring Kura Application.&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kd">public</span><span class="w"> </span><span class="nd">@interface</span><span class="w"> </span><span class="n">ExamplePublisherOCD</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">       </span><span class="cm">&lt;!-- ... --&gt;</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="c1">// ...</span>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">        </span><span class="nt">&lt;AD</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;CloudPublisher.target&quot;</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">            </span><span class="na">name=</span><span class="s">&quot;CloudPublisher Target Filter&quot;</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">            </span><span class="na">type=</span><span class="s">&quot;String&quot;</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">            </span><span class="na">cardinality=</span><span class="s">&quot;0&quot;</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">            </span><span class="na">required=</span><span class="s">&quot;true&quot;</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">            </span><span class="na">default=</span><span class="s">&quot;(kura.service.pid=changeme)&quot;</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">            </span><span class="na">description=</span><span class="s">&quot;Specifies, as an OSGi target filter, the pid of the Cloud Publisher used to publish messages to the cloud platform.&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">        </span><span class="nt">&lt;/AD&gt;</span>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">        </span><span class="nt">&lt;AD</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;CloudSubscriber.target&quot;</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">            </span><span class="na">name=</span><span class="s">&quot;CloudSubscriber Target Filter&quot;</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">            </span><span class="na">type=</span><span class="s">&quot;String&quot;</span>
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">            </span><span class="na">cardinality=</span><span class="s">&quot;0&quot;</span>
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">            </span><span class="na">required=</span><span class="s">&quot;true&quot;</span>
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">            </span><span class="na">default=</span><span class="s">&quot;(kura.service.pid=changeme)&quot;</span>
-<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">            </span><span class="na">description=</span><span class="s">&quot;Specifies, as an OSGi target filter, the pid of the Cloud Subscriber used to receive messages from the cloud platform.&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w">        </span><span class="nt">&lt;/AD&gt;</span>
-<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>
-<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="w">        </span><span class="cm">&lt;!-- ... --&gt;</span>
-<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>
-<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="w">        </span><span class="nt">&lt;/OCD&gt;</span>
-<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a><span class="w">    </span><span class="nt">&lt;Designate</span><span class="w"> </span><span class="na">pid=</span><span class="s">&quot;org.eclipse.kura.example.publisher.ExamplePublisher&quot;</span><span class="w"> </span><span class="na">factoryPid=</span><span class="s">&quot;org.eclipse.kura.example.publisher.ExamplePublisher&quot;</span><span class="nt">&gt;</span>
-<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a><span class="w">        </span><span class="nt">&lt;Object</span><span class="w"> </span><span class="na">ocdref=</span><span class="s">&quot;org.eclipse.kura.example.publisher.ExamplePublisher&quot;</span><span class="nt">/&gt;</span>
-<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a><span class="w">    </span><span class="nt">&lt;/Designate&gt;</span>
-<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a><span class="w">  </span><span class="nt">&lt;/MetaData&gt;</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="nd">@AttributeDefinition</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;CloudPublisher Target Filter&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">            </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">AttributeType</span><span class="p">.</span><span class="na">STRING</span><span class="p">,</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">            </span><span class="n">cardinality</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">            </span><span class="n">required</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">            </span><span class="n">defaultValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;(kura.service.pid=changeme)&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">            </span><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Specifies, as an OSGi target filter, the pid of the Cloud Publisher used to publish messages to the cloud platform.&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="nf">CloudPublisher_target</span><span class="p">();</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">    </span><span class="nd">@AttributeDefinition</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;CloudSubscriber Target Filter&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">            </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">AttributeType</span><span class="p">.</span><span class="na">STRING</span><span class="p">,</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">            </span><span class="n">cardinality</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">            </span><span class="n">required</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">            </span><span class="n">defaultValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;(kura.service.pid=changeme)&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">            </span><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Specifies, as an OSGi target filter, the pid of the Cloud Subscriber used to receive messages from the cloud platform.&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="nf">CloudSubscriber_target</span><span class="p">();</span>
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w">    </span><span class="c1">// ...</span>
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="p">}</span>
 </code></pre></div>
-<p>It is important to respect the following rules for some of the <code>AD</code> attributes:</p>
+<p>It is important to respect the following rules for some of the attribute definitions:</p>
 <ul>
 <li><code>id</code></li>
 </ul>
-<p>This attribute must have the following form:</p>
+<p>The id of the attribute is derived from the method name, with <code>_</code> mapped to <code>.</code>, and must have the following form:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>&lt;reference name&gt;.target
 </code></pre></div>
-<p>where <code>&lt;reference name&gt;</code> should match the value of the <code>name</code> attribute of the corresponding reference in component definition.</p>
+<p>where <code>&lt;reference name&gt;</code> should match the name of the corresponding <code>@Reference</code> in the component declaration: the <code>CloudPublisher_target()</code> method above produces the <code>CloudPublisher.target</code> attribute.</p>
 <ul>
 <li>
 <p><code>required</code> must be set to <code>true</code></p>
 </li>
 <li>
-<p><code>default</code> must not be empty and must be a valid OSGi filter.</p>
+<p><code>defaultValue</code> must not be empty and must be a valid OSGi filter.</p>
 </li>
 </ul>
-<p>The Web UI will renderer a dedicated widget for picking <code>CloudPublisher</code> and <code>CloudSubscriber</code> instances:</p>
+<p>The Web UI will render a dedicated widget for picking <code>CloudPublisher</code> and <code>CloudSubscriber</code> instances:</p>
 <p><img alt="cloud-connections" src="https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/generic-cloud-services/cloud-connections-user-7.png" /></p>
 </li>
 <li>
-<p><strong>Write the bind/unbind methods in applicaiton code</strong></p>
-<p>The last step involves defining some <code>bind...()</code>/<code>unbind...()</code> methods with a name that matches the values of the <code>bind</code>/<code>unbind</code> attributes of the references in component definition.</p>
+<p><strong>Write the bind/unbind methods in application code</strong></p>
+<p>The last step involves implementing the bind/unbind methods annotated above. The bind method carries the <code>@Reference</code> annotation; the unbind method is the one named by its <code>unbind</code> attribute, by default the bind method name with <code>set</code> replaced by <code>unset</code>. The <code>DYNAMIC</code> policy lets the user change the target at runtime without reactivating the component.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setCloudPublisher</span><span class="p">(</span><span class="n">CloudPublisher</span><span class="w"> </span><span class="n">cloudPublisher</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="p">...</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="p">}</span>
@@ -4690,7 +4689,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="p">...</span>
 <a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="p">}</span>
 </code></pre></div>
-<p>As stated above, since reference cardinality is declared as <code>0..</code>, the application must be prepared to handle the cases where references are not satisfied, and therefore <code>CloudPublisher</code> and <code>CloudSubscriber</code> instances are not available.</p>
+<p>As stated above, since reference cardinality is declared as optional, the application must be prepared to handle the cases where references are not satisfied, and therefore <code>CloudPublisher</code> and <code>CloudSubscriber</code> instances are not available.</p>
 </li>
 <li>
 <p><strong>Publish a message</strong></p>

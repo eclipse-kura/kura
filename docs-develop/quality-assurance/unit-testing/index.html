@@ -4814,38 +4814,34 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <p>Build-time testing is further divided into unit testing and integration testing.</p>
 <p>Unit testing is focused on testing separate methods or groups of methods, preferably in a single class. This way it can verify the correct operation of difficult-to-reach corner cases.</p>
 <p>Integration testing is a more-high-level testing that tests certain functionality on a group of connected services in an approximation of the real environment. It verifies that the services can successfully register in the environment and connect to other services as well as perform their tasks.</p>
-<p>Code coverage of the develop branch can be observed in <a href="https://ci.eclipse.org/kura/">Jenkins</a>.</p>
-<p>For some tips on running the tests also check <a href="https://github.com/eclipse/kura/wiki/Development-Environment-Tips-and-Tricks">Kura GitHub Wiki</a>.</p>
+<p>Code coverage of the develop branch can be observed in <a href="https://ci.eclipse.org/kura/">Jenkins</a> and on <a href="https://sonarcloud.io/project/overview?id=org.eclipse.kura%3Akura">SonarCloud</a>.</p>
+<p>Since Kura 5.1.0 every new test must follow the Gherkin structure (Given/When/Then) described in the <a href="https://github.com/eclipse-kura/kura/blob/develop/CONTRIBUTING.md#tests">contributing guide</a>: one feature per test class, scenarios as <code>@Test</code> methods and steps as private <code>given*</code>/<code>when*</code>/<code>then*</code> helpers.</p>
 <h3 id="unit-testing_1">Unit Testing</h3>
 <p>Unit tests should try to cover as many corner cases in the code as possible. Add them for (all) the new code you decide to contribute.</p>
 <h4 id="test-location">Test Location</h4>
-<p>Kura discourages to introduce test-only dependencies on the implementation level, so all tests are located in their own projects under <code>test/</code>. The proper folder to put the tests in is <code>src/test/java</code>.</p>
+<p>Unit tests are <strong>co-located</strong> with the code they cover: they live in the <code>src/test/java</code> folder of the bundle module itself (for instance <code>kura/org.eclipse.kura.core.configuration/src/test/java</code>) and are run by the <code>maven-surefire-plugin</code> during the build of that module. Test-only dependencies (JUnit, Mockito, ...) are declared with the <code>test</code> scope in the bundle <code>pom.xml</code>, so they never reach the bundle manifest.</p>
 <h4 id="code-conventions">Code Conventions</h4>
 <ul>
-<li>Preferably use <code>&lt;package name&gt;.test</code> as the name of the test project. Add it as a module in <code>test/pom.xml</code> that also serves as maven artifact's parent.</li>
-<li>Only add <code>src/main/java</code> to build.properties' <code>source..</code>.</li>
-<li>Make the bundle a fragment of the class-under-test's bundle so that you gain access to its internal packages.</li>
 <li>Use the same package for the test as the class under test. Subpackages are OK.</li>
-<li>Use the same coding style as <a href="https://github.com/eclipse/kura/blob/develop/CONTRIBUTING.md#making-your-changes">Kura</a>. Try to incorporate the suggestions SonarLint may have for your tests.</li>
+<li>Keep the test classes in <code>src/test/java</code> only: bnd packages <code>src/main/java</code> in the bundle, so nothing under <code>src/test</code> is shipped.</li>
+<li>Use the same coding style as <a href="https://github.com/eclipse-kura/kura/blob/develop/CONTRIBUTING.md#making-your-changes">Kura</a>. Try to incorporate the suggestions SonarLint may have for your tests.</li>
 </ul>
 <h4 id="running-the-tests">Running the Tests</h4>
-<p>The basic flow is to build your implementation using maven and then also build and run the unit tests using <code>mvn clean test</code> (or some other phase e.g. install, which also runs integration tests).</p>
-<p>Advanced test running and running them in IDE is described in <a href="https://github.com/eclipse/kura/wiki/Development-Environment-Tips-and-Tricks">Kura GitHub Wiki</a>.</p>
+<p>The basic flow is to build your implementation using Maven and run the unit tests of a bundle with <code>mvn -f kura/&lt;bundle&gt;/pom.xml clean test</code>; add <code>-Dtest=&lt;ClassName&gt;</code> to narrow down to a single class. <code>mvn clean install</code> from the repository root runs the unit tests of every bundle (and the integration tests too), <code>-DskipTests</code> skips them all.</p>
 <h3 id="integration-testing">Integration Testing</h3>
-<p>These test proper behavior in the OSGi environment. Some additional configuration is therefore necessary.</p>
+<p>These tests verify proper behavior in the OSGi environment. Some additional configuration is therefore necessary.</p>
 <h4 id="test-location_1">Test Location</h4>
-<p>We don't want to mess with the implementation code here, either, so all tests are again located in the test projects under <code>test/</code>. It can be the same project as for unit tests. The proper folder to put the tests in is <code>src/main/java</code>.</p>
+<p>Integration tests are located in their own modules under <code>test/</code>, one per bundle under test, named <code>&lt;bundle symbolic name&gt;.test</code>. Each module is an OSGi <strong>fragment</strong> of the bundle it tests (<code>Fragment-Host</code> in its <code>bnd.bnd</code>), so it gains access to the internal packages of the bundle. The proper folder to put the tests in is <code>src/main/java</code>, since the test classes must be packaged inside the fragment.</p>
+<p>The tests are run by the <code>bnd-testing-maven-plugin</code> inside a real Equinox framework, described by the <code>integration-test.bndrun</code> of the module, which includes the shared <code>test/integration-test.bnd</code> (framework, <code>JavaSE-21</code> execution environment, runtime properties and the Kura emulator bundles every test needs). The <code>Test-Cases</code> header of the fragment selects the classes to run: every public, concrete class whose name ends with <code>Test</code>.</p>
 <h4 id="code-conventions_1">Code Conventions</h4>
 <ul>
-<li>Preferably use <code>&lt;package name&gt;.test</code> as the name of the test project. Add it as a module in <code>test/pom.xml</code> that also serves as maven artifact's parent.</li>
-<li>Only add <code>src/main/java</code> to build.properties' <code>source..</code>.</li>
-<li>Make the bundle a fragment of the class-under-test's bundle so that you gain access to its internal packages.</li>
-<li>Use the <code>&lt;package name&gt;.test</code> as the package to put the test in. Also add <code>.test</code> suffix to any subpackages that are also under test.</li>
-<li>Use the same coding style as <a href="https://github.com/eclipse/kura/blob/develop/CONTRIBUTING.md#making-your-changes">Kura</a>. Try to incorporate the suggestions SonarLint may have for your tests.</li>
+<li>Use <code>&lt;bundle symbolic name&gt;.test</code> as the name of the test module. Add it as a module in <code>test/pom.xml</code>, which also serves as the Maven parent: the module <code>pom.xml</code> contains only the artifactId and the dependencies specific to that module.</li>
+<li>Use the <code>&lt;package name&gt;.test</code> package to put the test in. Also add the <code>.test</code> suffix to any subpackages that are also under test.</li>
+<li>In <code>integration-test.bndrun</code> declare only what is specific to the module: the <code>-runrequires.&lt;name&gt;</code> entries for the bundle under test and any extra provider. The <code>-runbundles</code> list is written by the resolver and committed: after changing the requirements, re-resolve it with <code>mvn -f test/pom.xml clean verify -Presolve-integration-tests</code>.</li>
+<li>Use the same coding style as <a href="https://github.com/eclipse-kura/kura/blob/develop/CONTRIBUTING.md#making-your-changes">Kura</a>. Try to incorporate the suggestions SonarLint may have for your tests.</li>
 </ul>
 <h4 id="running-the-tests_1">Running the Tests</h4>
-<p>The basic flow is to build your implementation using maven and then also build and run the integration tests using <code>mvn clean install</code>.</p>
-<p>Advanced test running and running them in IDE is described in <a href="https://github.com/eclipse/kura/wiki/Development-Environment-Tips-and-Tricks">Kura GitHub Wiki</a>.</p>
+<p>The integration tests belong to the <code>tests</code> Maven profile, active by default and disabled by <code>-DskipTests</code>, so <code>mvn clean install</code> from the repository root builds the implementation and runs them. A single module can be run with <code>mvn -f test/&lt;module&gt;/pom.xml clean verify</code>. The framework log of the run is streamed into the Maven output, which is the first place to look when a component does not activate.</p>
 
 
 

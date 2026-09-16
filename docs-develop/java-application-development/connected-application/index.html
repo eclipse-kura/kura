@@ -3653,22 +3653,22 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#acquiring-cloudclient" class="md-nav__link">
+  <a href="#acquiring-a-cloudpublisher" class="md-nav__link">
     <span class="md-ellipsis">
-      Acquiring CloudClient
+      Acquiring a CloudPublisher
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#publishingsubscribing" class="md-nav__link">
+  <a href="#publishing" class="md-nav__link">
     <span class="md-ellipsis">
-      Publishing/Subscribing
+      Publishing
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Publishing/Subscribing">
+    <nav class="md-nav" aria-label="Publishing">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -3695,9 +3695,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#configure-the-mqtt-client" class="md-nav__link">
+  <a href="#configure-the-cloud-connection" class="md-nav__link">
     <span class="md-ellipsis">
-      Configure the MQTT Client
+      Configure the Cloud Connection
     </span>
   </a>
   
@@ -4740,22 +4740,22 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#acquiring-cloudclient" class="md-nav__link">
+  <a href="#acquiring-a-cloudpublisher" class="md-nav__link">
     <span class="md-ellipsis">
-      Acquiring CloudClient
+      Acquiring a CloudPublisher
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#publishingsubscribing" class="md-nav__link">
+  <a href="#publishing" class="md-nav__link">
     <span class="md-ellipsis">
-      Publishing/Subscribing
+      Publishing
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Publishing/Subscribing">
+    <nav class="md-nav" aria-label="Publishing">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -4782,9 +4782,9 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
-  <a href="#configure-the-mqtt-client" class="md-nav__link">
+  <a href="#configure-the-cloud-connection" class="md-nav__link">
     <span class="md-ellipsis">
-      Configure the MQTT Client
+      Configure the Cloud Connection
     </span>
   </a>
   
@@ -4817,12 +4817,10 @@ You are viewing the documentation relative to the develop branch or to an outdat
 
 <h1 id="connected-application">Connected Application</h1>
 <h2 id="overview">Overview</h2>
-<p>This section describes the prepackaged heater demo bundle that comes
-with the Kura development environment and demonstrates how to perform
-the following functions:</p>
+<p>This section describes the heater demo bundle of the <a href="https://github.com/eclipse-kura/kura-apps">kura-apps</a> repository and demonstrates how to perform the following functions:</p>
 <ul>
 <li>
-<p>Run the Kura Emulator</p>
+<p>Bind an application to a cloud connection through a <code>CloudPublisher</code></p>
 </li>
 <li>
 <p>Connect to the Cloud</p>
@@ -4837,149 +4835,143 @@ the following functions:</p>
 <h3 id="prerequisites">Prerequisites</h3>
 <ul>
 <li>
-<p><a href="/java-application-development/development-environment-setup/">Setting up Kura Development Environment</a></p>
+<p><a href="../configurable-application/">Configurable Application</a></p>
 </li>
 <li>
 <p>Using the Kura web UI</p>
 </li>
+<li>
+<p>A device running Kura 6 (or the <a href="../../getting-started/docker-quick-start/">Kura Docker image</a>) with Internet access, so it can publish to an MQTT broker</p>
+</li>
 </ul>
 <h2 id="heater-demo-introduction">Heater Demo Introduction</h2>
-<p>The org.eclipse.kura.demo.heater bundle is a simple OSGi bundle that
-represents a thermostat and heater combination. The application utilizes
-the Kura ConfigurableComponent interface to be able to receive
-configuration updates through the local Kura web UI. In addition, this
-bundle utilizes OSGi declarative services and the Kura
-CloudClientListener. This tutorial demonstrates how to modify
-configurations of custom bundles and shows how those configuration
-changes can dynamically impact the behavior of the bundle through the
-Kura web UI.</p>
+<p>The <code>org.eclipse.kura.demo.heater</code> bundle is a simple OSGi bundle that represents a thermostat and heater combination. The application utilizes the Kura ConfigurableComponent interface to be able to receive configuration updates through the local Kura web UI. In addition, this bundle utilizes OSGi Declarative Services and the Kura <code>CloudPublisher</code> API to publish its telemetry. This tutorial demonstrates how to modify configurations of custom bundles and shows how those configuration changes can dynamically impact the behavior of the bundle through the Kura web UI.</p>
+<p>The source code is in the <code>kura-examples/bundles/heater/org.eclipse.kura.demo.heater</code> module of the kura-apps repository; the <code>kura-apps-distrib/kura-examples/heater</code> module builds its Debian installer.</p>
 <h2 id="code-walkthrough">Code Walkthrough</h2>
-<p>The following sections will highlight three important API layers when creating an application that will publish to the cloud. These layers are:</p>
+<p>The following sections highlight the API layers involved when creating an application that publishes to the cloud. These layers are:</p>
 <ul>
-<li>DataTransportService</li>
+<li>DataTransportService<ul>
 <li>Available for standard MQTT messaging. Allows consumers of the service to connect to brokers, publish messages, and receive messages on subscribed topics</li>
-<li>DataService</li>
+</ul>
+</li>
+<li>DataService<ul>
 <li>Delegates data transport to the DataTransportService</li>
 <li>Provides extended features for managing broker connections, buffering of published messages, and priority based delivery of messages</li>
-<li>CloudService</li>
-<li>Further extends the functionality of DataService</li>
-<li>Provides means for more complex flows (i.e. request/response)</li>
-<li>Manages single broker connection across multiple applications</li>
-<li>Provides payload data model with encoding/decoding serializers</li>
-<li>Publishes life cycle manages for devices and applications</li>
 </ul>
-<h2 id="acquiring-cloudclient">Acquiring CloudClient</h2>
-<p>The CloudService can manage multiple applications over a shared MQTT connection by treating each application as a client. The example code uses the "setCloudService" and "unsetCloudService" methods for referencing and releasing the CloudService. In the bundles activate method, the service reference in conjunction with a unique application ID can then be used to obtain a CloudClient. The relevant code is shown below (ommitted sections are denoted by ==OMMITTED==):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="o">==</span><span class="n">OMMITTED</span><span class="o">==</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1">// Cloud Application identifier</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">APP_ID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;heater&quot;</span><span class="p">;</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="o">==</span><span class="n">OMMITTED</span><span class="o">==</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setCloudService</span><span class="p">(</span><span class="n">CloudService</span><span class="w"> </span><span class="n">cloudService</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="n">m_cloudService</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cloudService</span><span class="p">;</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">}</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">unsetCloudService</span><span class="p">(</span><span class="n">CloudService</span><span class="w"> </span><span class="n">cloudService</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="n">m_cloudService</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">}</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="o">==</span><span class="n">OMMITTED</span><span class="o">==</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="c1">// Acquire a Cloud Application Client for this Application</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="n">s_logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Getting CloudClient for {}...&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">APP_ID</span><span class="p">);</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="n">m_cloudClient</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_cloudService</span><span class="p">.</span><span class="na">newCloudClient</span><span class="p">(</span><span class="n">APP_ID</span><span class="p">);</span>
+</li>
+<li>CloudEndpoint and CloudConnectionManager<ul>
+<li>Further extend the functionality of DataService</li>
+<li>Manage a single broker connection across multiple applications</li>
+<li>Provide the payload data model with encoding/decoding serializers</li>
+<li>Publish life cycle messages for devices and applications</li>
+</ul>
+</li>
+<li>CloudPublisher and CloudSubscriber<ul>
+<li>The application-facing API: a publisher (or subscriber) instance is created by the user in the web UI for a given cloud connection, and the application only binds to it</li>
+</ul>
+</li>
+</ul>
+<p>An application never talks to the cloud connection directly: it declares a reference to a <code>CloudPublisher</code> and the user chooses, in the web UI, which publisher of which cloud connection the application uses. The <a href="../../cloud-api/app-dev-guide/">Application developer guide</a> describes the conventions in detail.</p>
+<div class="admonition info">
+<p class="admonition-title">Legacy CloudService and CloudClient</p>
+<p>The <code>CloudService</code> and <code>CloudClient</code> API used by older versions of this demo are deprecated: they are tied to a single cloud connection implementation. New applications must use the <code>CloudPublisher</code>/<code>CloudSubscriber</code> API described here.</p>
+</div>
+<h2 id="acquiring-a-cloudpublisher">Acquiring a CloudPublisher</h2>
+<p>The heater declares an optional, dynamic reference to a <code>CloudPublisher</code>. The reference has no <code>target</code>: the ConfigurationService sets it from the <code>CloudPublisher.target</code> property of the component configuration, chosen by the user in the web UI. When the publisher is bound, the heater registers itself to receive connection and delivery notifications. The relevant code is shown below (omitted sections are denoted by <code>==OMITTED==</code>):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="o">==</span><span class="n">OMITTED</span><span class="o">==</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nd">@Component</span><span class="p">(</span><span class="n">immediate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="n">configurationPolicy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ConfigurationPolicy</span><span class="p">.</span><span class="na">REQUIRE</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="n">service</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">ConfigurableComponent</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">CloudConnectionListener</span><span class="p">.</span><span class="na">class</span><span class="p">,</span><span class="w"> </span><span class="n">CloudDeliveryListener</span><span class="p">.</span><span class="na">class</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;org.eclipse.kura.demo.heater.Heater&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="nd">@Designate</span><span class="p">(</span><span class="n">ocd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HeaterOCD</span><span class="p">.</span><span class="na">class</span><span class="p">)</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Heater</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">ConfigurableComponent</span><span class="p">,</span><span class="w"> </span><span class="n">CloudConnectionListener</span><span class="p">,</span><span class="w"> </span><span class="n">CloudDeliveryListener</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">CloudPublisher</span><span class="w"> </span><span class="n">cloudPublisher</span><span class="p">;</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="o">==</span><span class="n">OMITTED</span><span class="o">==</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="nd">@Reference</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;CloudPublisher&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">            </span><span class="n">policy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReferencePolicy</span><span class="p">.</span><span class="na">DYNAMIC</span><span class="p">,</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">            </span><span class="n">unbind</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;unsetCloudPublisher&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">            </span><span class="n">cardinality</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReferenceCardinality</span><span class="p">.</span><span class="na">OPTIONAL</span><span class="p">)</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setCloudPublisher</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">CloudPublisher</span><span class="w"> </span><span class="n">cloudPublisher</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">cloudPublisher</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cloudPublisher</span><span class="p">;</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">cloudPublisher</span><span class="p">.</span><span class="na">registerCloudConnectionListener</span><span class="p">(</span><span class="n">Heater</span><span class="p">.</span><span class="na">this</span><span class="p">);</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">cloudPublisher</span><span class="p">.</span><span class="na">registerCloudDeliveryListener</span><span class="p">(</span><span class="n">Heater</span><span class="p">.</span><span class="na">this</span><span class="p">);</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">unsetCloudPublisher</span><span class="p">(</span><span class="kd">final</span><span class="w"> </span><span class="n">CloudPublisher</span><span class="w"> </span><span class="n">cloudPublisher</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">cloudPublisher</span><span class="p">.</span><span class="na">unregisterCloudConnectionListener</span><span class="p">(</span><span class="n">Heater</span><span class="p">.</span><span class="na">this</span><span class="p">);</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">cloudPublisher</span><span class="p">.</span><span class="na">unregisterCloudDeliveryListener</span><span class="p">(</span><span class="n">Heater</span><span class="p">.</span><span class="na">this</span><span class="p">);</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">cloudPublisher</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">    </span><span class="p">}</span>
 </code></pre></div>
-<h2 id="publishingsubscribing">Publishing/Subscribing</h2>
-<p>The private "doPublish" method is used to publish messages at a fixed rate. The method demonstrates how to use the CloudClient and KuraPayload to publish MQTT messages.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="o">==</span><span class="n">OMMITTED</span><span class="o">==</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1">// Allocate a new payload</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">KuraPayload</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">KuraPayload</span><span class="p">();</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1">// Timestamp the message</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">payload</span><span class="p">.</span><span class="na">setTimestamp</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Date</span><span class="p">());</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1">// Add the temperature as a metric to the payload</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">payload</span><span class="p">.</span><span class="na">addMetric</span><span class="p">(</span><span class="s">&quot;temperatureInternal&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">m_temperature</span><span class="p">);</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="n">payload</span><span class="p">.</span><span class="na">addMetric</span><span class="p">(</span><span class="s">&quot;temperatureExternal&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">5.0F</span><span class="p">);</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="n">payload</span><span class="p">.</span><span class="na">addMetric</span><span class="p">(</span><span class="s">&quot;temperatureExhaust&quot;</span><span class="p">,</span><span class="w">  </span><span class="mf">30.0F</span><span class="p">);</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="kt">int</span><span class="w"> </span><span class="n">code</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_random</span><span class="p">.</span><span class="na">nextInt</span><span class="p">();</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">m_random</span><span class="p">.</span><span class="na">nextInt</span><span class="p">()</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">    </span><span class="n">payload</span><span class="p">.</span><span class="na">addMetric</span><span class="p">(</span><span class="s">&quot;errorCode&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">code</span><span class="p">);</span>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="p">}</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="k">else</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">    </span><span class="n">payload</span><span class="p">.</span><span class="na">addMetric</span><span class="p">(</span><span class="s">&quot;errorCode&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="p">}</span>
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="c1">// Publish the message</span>
-<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="k">try</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w">    </span><span class="n">m_cloudClient</span><span class="p">.</span><span class="na">publish</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span><span class="w"> </span><span class="n">payload</span><span class="p">,</span><span class="w"> </span><span class="n">qos</span><span class="p">,</span><span class="w"> </span><span class="n">retain</span><span class="p">);</span>
-<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w">    </span><span class="n">s_logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Published to {} message: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">topic</span><span class="p">,</span><span class="w"> </span><span class="n">payload</span><span class="p">);</span>
-<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="p">}</span>
-<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="w">    </span><span class="n">s_logger</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&quot;Cannot publish topic: &quot;</span><span class="o">+</span><span class="n">topic</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">);</span>
-<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a><span class="p">}</span>
+<p>The configuration description (<code>HeaterOCD</code>) declares the matching attribute, whose id is the reference name followed by <code>.target</code>, so that the web UI renders the publisher picker:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@AttributeDefinition</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;CloudPublisher Target Filter&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">        </span><span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Specifies, as an OSGi target filter, the pid of the Cloud Publisher used to publish messages to the cloud platform.&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">        </span><span class="n">defaultValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;(kura.service.pid=changeme)&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">String</span><span class="w"> </span><span class="nf">cloudpublisher_target_filter</span><span class="p">();</span>
 </code></pre></div>
-<p>Similarly, the CloudClient can be used to subscribe to MQTT topics. Although not shown in the example code, the following snippet could be added to subscribe to all published messages:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">m_cloudClient</span><span class="p">.</span><span class="na">subscribe</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span><span class="w"> </span><span class="n">qos</span><span class="p">);</span>
+<p>The cardinality is <code>OPTIONAL</code> because the publisher may not exist yet when the heater is configured: the application must be prepared to run without it.</p>
+<h2 id="publishing">Publishing</h2>
+<p>The private <code>doPublish</code> method is used to publish messages at a fixed rate. The method demonstrates how to use the <code>CloudPublisher</code> and <code>KuraPayload</code> to publish MQTT messages.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="o">==</span><span class="n">OMITTED</span><span class="o">==</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1">// Allocate a new payload</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">KuraPayload</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">KuraPayload</span><span class="p">();</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1">// Timestamp the message</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">payload</span><span class="p">.</span><span class="na">setTimestamp</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Date</span><span class="p">());</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="c1">// Add the temperature as a metric to the payload</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="n">payload</span><span class="p">.</span><span class="na">addMetric</span><span class="p">(</span><span class="s">&quot;temperatureInternal&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">temperature</span><span class="p">);</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="n">payload</span><span class="p">.</span><span class="na">addMetric</span><span class="p">(</span><span class="s">&quot;temperatureExternal&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">5.0F</span><span class="p">);</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="n">payload</span><span class="p">.</span><span class="na">addMetric</span><span class="p">(</span><span class="s">&quot;temperatureExhaust&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">30.0F</span><span class="p">);</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="kt">int</span><span class="w"> </span><span class="n">code</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">random</span><span class="p">.</span><span class="na">nextInt</span><span class="p">();</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="k">this</span><span class="p">.</span><span class="na">random</span><span class="p">.</span><span class="na">nextInt</span><span class="p">()</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span><span class="n">payload</span><span class="p">.</span><span class="na">addMetric</span><span class="p">(</span><span class="s">&quot;errorCode&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">code</span><span class="p">);</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">    </span><span class="n">payload</span><span class="p">.</span><span class="na">addMetric</span><span class="p">(</span><span class="s">&quot;errorCode&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="p">}</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="c1">// Publish the message</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="n">KuraMessage</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">KuraMessage</span><span class="p">(</span><span class="n">payload</span><span class="p">);</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="n">messageId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">cloudPublisher</span><span class="p">.</span><span class="na">publish</span><span class="p">(</span><span class="n">message</span><span class="p">);</span>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">    </span><span class="n">logger</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Published message with id {}: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">messageId</span><span class="p">,</span><span class="w"> </span><span class="n">payload</span><span class="p">);</span>
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">    </span><span class="n">logger</span><span class="p">.</span><span class="na">error</span><span class="p">(</span><span class="s">&quot;Cannot publish message: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">);</span>
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="p">}</span>
 </code></pre></div>
+<p>The topic, the QoS and the retain flag are not chosen by the application: they belong to the configuration of the <code>CloudPublisher</code> instance the user created in the web UI. Similarly, a <code>CloudSubscriber</code> reference can be used to receive MQTT messages by registering a <code>CloudSubscriberListener</code> on it.</p>
 <h3 id="callback-methods">Callback Methods</h3>
-<p>The example class implements CloudClientListener, which provides methods for several common callback methods. The below snippet shows the relevant code for creating the listeners for the demo application.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="o">==</span><span class="n">OMMITTED</span><span class="o">==</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Heater</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">ConfigurableComponent</span><span class="p">,</span><span class="w"> </span><span class="n">CloudClientListener</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="o">==</span><span class="n">OMMITTED</span><span class="o">==</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">m_cloudClient</span><span class="p">.</span><span class="na">addCloudClientListener</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
-</code></pre></div>
-<p>The available methods for implementation are:</p>
+<p>The example class implements <code>CloudConnectionListener</code> and <code>CloudDeliveryListener</code>, which provide the callbacks registered on the publisher in <code>setCloudPublisher</code>. The available methods for implementation are:</p>
 <ul>
-<li>onControlMessageArrived: Method called when a control message is received from the broker.</li>
-<li>onMessageArrived: Method called when a data message is received from the broker.</li>
-<li>onConnectionLost: Method called when the client has lost connection with the broker.</li>
-<li>onConnectionEstablished: Method called when the client establishes a connection with the broker.</li>
-<li>onMessageConfirmed: Method called when a published message has been fully acknowledged by the broker (not applicable for qos 0 messages).</li>
-<li>onMessagePublished: Method called when a message has been transfered from the publishing queue to the DataTransportService.</li>
+<li>
+<p>onConnectionEstablished: called when the cloud connection establishes a connection with the broker.</p>
+</li>
+<li>
+<p>onConnectionLost: called when the cloud connection has lost the connection with the broker.</p>
+</li>
+<li>
+<p>onDisconnected: called when the cloud connection is closed on purpose.</p>
+</li>
+<li>
+<p>onMessageConfirmed: called when a published message has been fully acknowledged by the broker (not applicable for QoS 0 messages); the argument is the message id returned by <code>publish()</code>.</p>
+</li>
 </ul>
-<p>For more information on the various Kura APIs, please review the <a href="/references/javadoc/">Kura APIs</a></p>
+<p>For more information on the various Kura APIs, please review the <a href="../../references/javadoc/">Kura APIs</a>.</p>
 <h2 id="run-the-bundle">Run the Bundle</h2>
-<p>By default, the heater demo bundle does not run automatically. To run
-the bundle and Kura in the Emulator, locate the
-<strong>org.eclipse.kura.emulator</strong> project. Expand it to show the
-src/main/resources folder.</p>
-<p>Right-click the correct <strong>Kura_Emulator_<em>[OS]</em>.launch</strong> file,
-depending on which operating system you are running. In the context
-menu, select the <strong>Run As</strong> option, and click on <strong>Run Configurations</strong>.</p>
-<p>Under OSGi Framework (Run Configurations window shown below), click on
-the <strong>Kura_Emulator_[OS]</strong> entry. In the Bundles tab under Workspace,
-enable the <strong>org.eclipse.kura.demo.heater</strong> checkbox to enable it as
-shown below:</p>
-<p><img alt="" src="../images/connected-application/image1.png" /></p>
-<p>Click the <strong>Apply</strong> and <strong>Run</strong> buttons to start the Kura Emulator. Once
-this setting has been made, you only need to right-click on the launch
-file and select <strong>Run As</strong> and the <strong>Kura_Emulator_[OS]</strong> option to
-run with the same settings.</p>
-<p>This will start Kura running locally and will display a Console window
-in Eclipse. The Console window will show the OSGi diagnostics as various
-bundles start and execute.</p>
-<h2 id="configure-the-mqtt-client">Configure the MQTT Client</h2>
-<p>With the heater demo bundle running, open a browser window on the same
-computer as the Eclipse development environment and browse to the Kura
-web UI at <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a>. Once connected to the Kura web UI, a
-log in window appears prompting you to enter the Name and Password as
-shown below:</p>
-<p><img alt="" src="../images/connected-application/image2.png" /></p>
-<p>Enter the appropriate name and password (default is admin/admin) and
-click <strong>Log in</strong>. The Kura Admin web UI appears as shown below:</p>
-<p><img alt="" src="../images/connected-application/image3.png" /></p>
-<p>From the Kura web UI, click on <strong>MqttDataTransport</strong> in the Services
-pane on the lower left of the browser window. You will see a menu
-similar to the one shown in the following screen capture:</p>
-<p><img alt="" src="../images/connected-application/image4.png" /></p>
-<p>Fill in the following fields then click the <strong>Apply</strong> button:</p>
+<p>Build the kura-apps repository (<code>mvn clean install</code> from its root, JDK 21 and Maven 3.9.9+ as for Kura) and install the heater package produced under <code>kura-apps-distrib/kura-examples/heater/target</code> on the device, then restart Kura:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>apt<span class="w"> </span>install<span class="w"> </span>./kura-heater_&lt;version&gt;_all.deb
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>systemctl<span class="w"> </span>restart<span class="w"> </span>kura
+</code></pre></div>
+<p>The bundle is configured with <code>configurationPolicy = REQUIRE</code> and appears in the Services area of the web UI as <strong>Heater</strong> as soon as it is activated with its default configuration.</p>
+<h2 id="configure-the-cloud-connection">Configure the Cloud Connection</h2>
+<p>Open a browser and browse to the Kura web UI of the device at <code>https://&lt;device address&gt;</code> (or <a href="https://localhost">https://localhost</a> for the Docker image). Enter the appropriate name and password (default is admin/admin) and click <strong>Log in</strong>.</p>
+<p>In the <strong>Cloud Connections</strong> section, select the default cloud connection and open its <strong>MqttDataTransport</strong> tab. Fill in the following fields then click the <strong>Apply</strong> button:</p>
 <table>
 <thead>
 <tr>
@@ -4989,19 +4981,19 @@ similar to the one shown in the following screen capture:</p>
 </thead>
 <tbody>
 <tr>
-<td>broker-url:</td>
-<td>The url for the MQTT broker (this example shows the MQTT broker-url <strong>mqtt://iot.eclipse.org:1883/</strong> hosted by the Eclipse Foundation)</td>
+<td>broker-url</td>
+<td>The url for the MQTT broker, for instance <code>mqtt://broker.hivemq.com:1883/</code> for a public test broker</td>
 </tr>
 <tr>
-<td>topic.context.account-name:</td>
+<td>topic.context.account-name</td>
 <td>Your [account_name]</td>
 </tr>
 <tr>
-<td>username:</td>
+<td>username</td>
 <td>Typically [account_name]_broker</td>
 </tr>
 <tr>
-<td>password:</td>
+<td>password</td>
 <td>The password for your user</td>
 </tr>
 <tr>
@@ -5010,26 +5002,10 @@ similar to the one shown in the following screen capture:</p>
 </tr>
 </tbody>
 </table>
-<p><br>
-Now that the account credentials are set in the MqttDataTransport
-service, the DataService needs to be configured to connect by default.
-To do so, click <strong>DataService</strong> in the Services area on the left of the
-browser window. For the ‘connect.auto-on-startup’ parameter, select
-<strong>true</strong> as shown below:</p>
-<p><img alt="" src="../images/connected-application/image5.png" /></p>
+<p>Now that the account credentials are set in the MqttDataTransport service, the DataService needs to be configured to connect by default. To do so, open the <strong>DataService</strong> tab and set <code>connect.auto-on-startup</code> to <strong>true</strong>, then click <strong>Connect</strong> in the Cloud Connections toolbar. The connection status turns to <em>Connected</em>.</p>
+<p>Finally, create a publisher for the heater: with the cloud connection selected, click <strong>New Pub/Sub</strong>, choose the <code>CloudPublisher</code> factory of the connection and give it a name, such as <code>heater-publisher</code>. Its configuration defines the application id and the semantic topic the messages are published to, the QoS and the retain flag.</p>
 <h2 id="modify-bundle-configuration-in-local-web-ui">Modify Bundle Configuration in Local Web UI</h2>
-<p>Bundles changes may be made directly in the emulator web UI. Since you
-are running an emulated device in Eclipse, you can do this by browsing
-to <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a> (same URL where the MQTT client was
-configured in the previous section of this tutorial). If the bundle was
-running on a real device and you had network access to it, you would
-browse to
-<a href="http://ip_address_of_device/">http://[ip_address_of_device]</a>.</p>
-<p>From the Kura web UI, select the Heater bundle from the configurable
-services on the left and modify the parameters as needed (shown in the
-screen capture below). By default, the heater demo is configured
-according to the following characteristics and assumptions about its
-operational environment:</p>
+<p>From the Kura web UI, select the <strong>Heater</strong> bundle from the configurable services on the left. In the <strong>CloudPublisher Target Filter</strong> field pick the <code>heater-publisher</code> created above: the ConfigurationService updates the <code>CloudPublisher.target</code> property of the component and Declarative Services binds the publisher to the heater, which starts publishing. Then modify the other parameters as needed. By default, the heater demo is configured according to the following characteristics and assumptions about its operational environment:</p>
 <ul>
 <li>
 <p>Start operation is at 6:00am (06:00).</p>
@@ -5038,37 +5014,23 @@ operational environment:</p>
 <p>End operation is at 10:00pm (22:00).</p>
 </li>
 <li>
-<p>It is colder outside than inside the heated chamber (hard-coded to 5
-    degrees in the application).</p>
+<p>It is colder outside than inside the heated chamber (hard-coded to 5 degrees in the application).</p>
 </li>
 <li>
 <p>Output of the heater is constant at 30 degrees (hard-coded).</p>
 </li>
 <li>
-<p>When in operational mode, the temperature will drop inside if the
-    heater is off.</p>
+<p>When in operational mode, the temperature will drop inside if the heater is off.</p>
 </li>
 <li>
-<p>The heater turns off when it is about to exceed the setPoint defined
-    in the configuration.</p>
+<p>The heater turns off when it is about to exceed the setPoint defined in the configuration.</p>
 </li>
 <li>
-<p>After the temperature drops to four times the increment point (a
-    made-up value to show dropping temperature, hard-coded in the
-    application), the heater turns back on, and the temperature starts
-    increment at the rate of the ‘temperature.increment’ rate.</p>
+<p>After the temperature drops to four times the increment point (a made-up value to show dropping temperature, hard-coded in the application), the heater turns back on, and the temperature starts increment at the rate of the <code>temperature.increment</code> rate.</p>
 </li>
 </ul>
-<p><img alt="" src="../images/connected-application/image6.png" /></p>
-<p>Click <strong>Apply</strong> for changes to take affect. The updated() method is
-called after settings are applied for the new configuration.</p>
-<p>After completing this tutorial, it is highly recommended that you review
-the heater demo source code in Eclipse to see how it is put together.
-Kura automatically generates the user configuration interface through
-implementation of the ConfigurableComponent interface and some small
-additions to the component.xml file (called heater.xml). This powerful
-feature provides both a local and remote configuration user interface
-with no additional development requirements.</p>
+<p>Click <strong>Apply</strong> for changes to take effect. The <code>updated()</code> method is called after settings are applied for the new configuration.</p>
+<p>After completing this tutorial, it is highly recommended that you review the heater demo source code to see how it is put together. Kura automatically generates the user configuration interface through the implementation of the ConfigurableComponent interface and the Metatype annotations of <code>HeaterOCD</code>. This powerful feature provides both a local and remote configuration user interface with no additional development requirements.</p>
 
 
 

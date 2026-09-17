@@ -18,7 +18,7 @@ Import-Package: \
     org.slf4j;version="1.6.4",\
     *
 Export-Package: \
-    org.eclipse.kura.core.inventory;version="1.1.0";x-internal:=true,\
+    org.eclipse.kura.core.inventory;version="1.1.1";x-internal:=true,\
     org.eclipse.kura.core.inventory.resources;version="1.0.0";x-internal:=true
 -includeresource: \
     about.html,\

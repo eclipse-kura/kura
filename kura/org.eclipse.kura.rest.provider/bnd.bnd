@@ -17,14 +17,14 @@ Import-Package: \
     org.eclipse.kura.identity;version="[1.1,2.0)",\
     org.eclipse.kura.request.handler.jaxrs;version="[2.0,3.0)",\
     org.eclipse.kura.util.configuration;version="[1.0,2.0)",\
-    org.eclipse.kura.util.validation;version="[1.0,2.0)",\
+    org.eclipse.kura.util.validation;version="[2.0,3.0)",\
     org.osgi.framework;version="1.10.0",\
     org.osgi.service.cm;version="1.6.0",\
     org.slf4j;version="1.7.21",\
     javax.naming.ldap,\
     *
 Export-Package: \
-    org.eclipse.kura.rest.auth;version="1.0.0",\
+    org.eclipse.kura.rest.auth;version="2.0.0",\
     org.eclipse.kura.rest.utils;version="1.0.0"
 -includeresource: \
     about.html,\

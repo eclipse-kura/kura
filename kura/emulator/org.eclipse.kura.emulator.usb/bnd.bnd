@@ -9,7 +9,7 @@ Import-Package: \
     org.osgi.service.component;version="1.2.0",\
     *
 Export-Package: \
-    org.eclipse.kura.emulator.usb; version="1.0.0"
+    org.eclipse.kura.emulator.usb; version="1.0.1"
 -includeresource: \
     about.html,\
     about_files=about_files/

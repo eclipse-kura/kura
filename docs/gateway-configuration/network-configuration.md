@@ -239,9 +239,12 @@ Kura supports the following Modem Modes with the following meaning:
 
 !!! note
     Not all combination of modes are supported by all modem. To verify what are the supported modes on your modem issue the following command on your target device:
+
     ```bash
     mmcli -m <modem_nr>
     ```
+
+    or [refer to the NetworkStatus API](../core-services/network-status-rest-v1.md#modeminterfacestatus)
 
 ### VLAN properties
 

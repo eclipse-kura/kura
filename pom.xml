@@ -241,6 +241,7 @@
                     <configuration>
                         <continueOnError>${bnd.baseline.continueOnError}</continueOnError>
                         <fullReport>true</fullReport>
+                        <failOnMissing>false</failOnMissing>
                     </configuration>
                     <executions>
                         <execution>

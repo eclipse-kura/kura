@@ -10,7 +10,7 @@ Import-Package: \
     org.slf4j;version="1.7.25",\
     *
 Export-Package: \
-    org.eclipse.kura.emulator; version="1.0.1"
+    org.eclipse.kura.emulator; version="1.0.1";x-internal:=true
 -includeresource: \
     about.html,\
     about_files=about_files/

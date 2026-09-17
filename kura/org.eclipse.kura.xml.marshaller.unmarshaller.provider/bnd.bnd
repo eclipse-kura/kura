@@ -23,7 +23,7 @@ Import-Package: \
     org.xml.sax,\
     *
 Export-Package: \
-    org.eclipse.kura.internal.xml.marshaller.unmarshaller;version="1.1.0"
+    org.eclipse.kura.internal.xml.marshaller.unmarshaller;version="1.1.0";x-internal:=true
 -includeresource: \
     about.html,\
     about_files=about_files/

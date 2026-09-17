@@ -15,8 +15,6 @@ Import-Package: \
     org.xml.sax,\
     org.xml.sax.helpers,\
     *
-Export-Package: \
-    org.eclipse.kura.emulator.position; version="1.1.0"
 -includeresource: \
     about.html,\
     about_files=about_files/

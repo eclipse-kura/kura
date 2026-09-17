@@ -24,8 +24,8 @@ Import-Package: \
     javax.naming.ldap,\
     *
 Export-Package: \
-    org.eclipse.kura.rest.auth;version="2.0.0",\
-    org.eclipse.kura.rest.utils;version="1.0.0"
+    org.eclipse.kura.rest.auth;version="2.0.0";x-internal:=true,\
+    org.eclipse.kura.rest.utils;version="1.0.0";x-internal:=true
 -includeresource: \
     about.html,\
     about_files=about_files/

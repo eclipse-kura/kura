@@ -20,18 +20,18 @@ Import-Package: \
     org.slf4j;version="1.6.4",\
     *
 Export-Package: \
-    org.eclipse.kura.util.base;version="1.2.0",\
-    org.eclipse.kura.util.collection;version="1.0.0",\
-    org.eclipse.kura.util.configuration;version="1.0.0",\
+    org.eclipse.kura.util.base;version="1.2.0";x-internal:=true,\
+    org.eclipse.kura.util.collection;version="1.0.0";x-internal:=true,\
+    org.eclipse.kura.util.configuration;version="1.0.0";x-internal:=true,\
     org.eclipse.kura.util.jdbc;version="1.0.0";x-internal:=true,\
     org.eclipse.kura.util.message.store;version="1.0.0";x-internal:=true,\
-    org.eclipse.kura.util.osgi;version="1.1.0",\
-    org.eclipse.kura.util.service;version="1.2.0",\
+    org.eclipse.kura.util.osgi;version="1.1.0";x-internal:=true,\
+    org.eclipse.kura.util.service;version="1.2.0";x-internal:=true,\
     org.eclipse.kura.util.store.listener;version="1.0.0";x-internal:=true,\
     org.eclipse.kura.util.useradmin;version="1.1.0";x-internal:=true,\
-    org.eclipse.kura.util.validation;version="1.0.0";x-internal:=true,\
+    org.eclipse.kura.util.validation;version="2.0.0";x-internal:=true,\
     org.eclipse.kura.util.wire.store;version="1.0.0";x-internal:=true,\
-    org.eclipse.kura.util.zip;version="1.0.0"
+    org.eclipse.kura.util.zip;version="1.0.1";x-internal:=true
 
 -includeresource: \
     about.html,\

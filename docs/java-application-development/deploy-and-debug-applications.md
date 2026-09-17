@@ -265,6 +265,9 @@ commands:
 
 `telnet localhost 5002`
 
+!!! warning
+    Up to version 5.6.2, the OSGI console is enabled by default. **Since version 5.6.3** the OSGI console is, instead, **disabled** by default. To enable it you need to move to remote debugging: the procedure is explained in the [related docs here](./remote-debugging-on-target-platform.md).
+
 There are many commands available in the OSGi console for managing
 bundles. Following are just a few useful commands:
 

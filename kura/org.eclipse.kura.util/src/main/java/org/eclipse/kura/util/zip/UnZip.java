@@ -21,7 +21,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.zip.ZipEntry;
@@ -108,7 +111,9 @@ public class UnZip {
         }
 
         long total = writtenSoFar;
-        try (OutputStream fos = Files.newOutputStream(newFile.toPath())) {
+        try (OutputStream fos = Files.newOutputStream(newFile.toPath(),
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
+                StandardOpenOption.WRITE, LinkOption.NOFOLLOW_LINKS)) {
             byte[] buffer = new byte[BUFFER];
 
             int len = zis.read(buffer);
@@ -171,14 +176,11 @@ public class UnZip {
     }
 
     private static String validateFileName(String zipFileName, String intendedDir) throws IOException, KuraException {
-        File zipFile = new File(zipFileName);
-        String filePath = zipFile.getCanonicalPath();
+        final Path filePath = new File(zipFileName).getCanonicalFile().toPath();
+        final Path intendedCanonicalPath = new File(intendedDir).getCanonicalFile().toPath();
 
-        File iD = new File(intendedDir);
-        String canonicalID = iD.getCanonicalPath();
-
-        if (filePath.startsWith(canonicalID)) {
-            return filePath;
+        if (filePath.startsWith(intendedCanonicalPath)) {
+            return filePath.toString();
         } else {
             throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
         }

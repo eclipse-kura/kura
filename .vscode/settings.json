@@ -47,11 +47,6 @@
         "editor.insertSpaces": true,
         "editor.tabSize": 4,
         "editor.detectIndentation": false,
-        // formatter lineSplit = 120, checkstyle LineLength max = 150
-        "editor.rulers": [
-            120,
-            150
-        ],
         // cleanup.remove_trailing_whitespaces(_all) = true, _ignore_empty = false
         "files.trimTrailingWhitespace": true,
         // formatter insert_new_line_at_end_of_file_if_missing = do not insert

@@ -149,7 +149,7 @@ public class DnsServerMonitor {
                     logger.debug("Getting DNS proxy config for {}", netInterfaceConfig.getName());
                     List<NetConfig> netConfigs = ((AbstractNetInterface<?>) netInterfaceConfig).getNetConfigs();
                     for (NetConfig netConfig : netConfigs) {
-                        addToAllowedNetworksIfPassDnsEnabled(allowedNetworks, netConfig);
+                        addToAllowedNetworksIfDhcpServerAndPassDnsEnabled(allowedNetworks, netConfig);
                     }
                 }
             }
@@ -159,7 +159,7 @@ public class DnsServerMonitor {
 
     }
 
-    private void addToAllowedNetworksIfPassDnsEnabled(Set<NetworkPair<IP4Address>> allowedNetworks,
+    private void addToAllowedNetworksIfDhcpServerAndPassDnsEnabled(Set<NetworkPair<IP4Address>> allowedNetworks,
             NetConfig netConfig) {
         if (isDhcpServerAndPassDnsEnabled(netConfig)) {
 
@@ -197,8 +197,8 @@ public class DnsServerMonitor {
     }
 
     public boolean isDhcpServerAndPassDnsEnabled(NetConfig netConfig) {
-        return netConfig instanceof DhcpServerConfig && ((DhcpServerConfig) netConfig).isEnabled() && 
-                ((DhcpServerConfig) netConfig).isPassDns();
+        return netConfig instanceof DhcpServerConfig && ((DhcpServerConfig) netConfig).isEnabled() 
+                && ((DhcpServerConfig) netConfig).isPassDns();
     }
 
     private Set<IP4Address> getForwarders(Set<IPAddress> dnsServers) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022, 2026 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -109,8 +109,8 @@ public class IpConfigurationInterpreter {
         String configDhcpServerEnabled = NET_INTERFACE + interfaceName + ".config.dhcpServer4.enabled";
         if (props.containsKey(configDhcpServerEnabled)) {
 
-            boolean dhcpEnabled = isDhcpClient4Enabled(props, interfaceName);
-            IP4Address routerAddress = dhcpEnabled ? (IP4Address) netInterfaceAddress : netConfigIP4.getAddress();
+            boolean dhcpClientEnabled = isDhcpClient4Enabled(props, interfaceName);
+            IP4Address routerAddress = dhcpClientEnabled ? (IP4Address) netInterfaceAddress : netConfigIP4.getAddress();
 
             short prefix = getDhcpServer4Prefix(props, interfaceName);
 
@@ -145,8 +145,11 @@ public class IpConfigurationInterpreter {
                 try {
                     dhcpServerConfigIP4 = new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4);
                 } catch (KuraException e) {
-                    logger.warn("This invalid DhcpServerCfgIP4 configuration is ignored - {}, {}", dhcpServerCfg,
-                            dhcpServerCfgIP4);
+                    // If the DHCP Server is disabled, ignore the configuration validity
+                    if (dhcpServerEnabled) {
+                        logger.warn("This invalid DhcpServerCfgIP4 configuration is ignored - {}, {}", dhcpServerCfg,
+                                dhcpServerCfgIP4);
+                    }
                 }
             }
         }

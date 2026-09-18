@@ -18,6 +18,7 @@ import java.io.File;
 import java.net.URI;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CRLException;
 import java.security.cert.CertStore;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
@@ -310,27 +311,32 @@ public class CRLManager implements Closeable {
     private boolean validateAndStoreCRL(final long now, final DistributionPointState state,
             final Optional<StoredCRL> storedCrl, final X509CRL newCrl) {
 
-        if (storedCrl.isPresent()) {
-            final X509CRL stored = storedCrl.get().getCrl();
+        try {
+            if (storedCrl.isPresent()) {
+                final StoredCRL stored = storedCrl.get();
 
-            if (stored.equals(newCrl)) {
-                logger.info("current CRL is up to date");
+                if (stored.hasSameEncoding(newCrl)) {
+                    logger.info("current CRL is up to date");
+                    state.lastDownloadInstantNanos = OptionalLong.of(now);
+                    return false;
+                }
+
+                if (!stored.getIssuer().equals(newCrl.getIssuerX500Principal())) {
+                    logger.warn("CRL issuer differs, not updating CRL");
+                    return false;
+                }
+            }
+
+            if (this.verifier.verifyCRL(newCrl)) {
+                this.store.storeCRL(new StoredCRL(state.distributionPoints, newCrl));
                 state.lastDownloadInstantNanos = OptionalLong.of(now);
+                return true;
+            } else {
+                logger.warn("CRL verification failed");
                 return false;
             }
-
-            if (!stored.getIssuerX500Principal().equals(newCrl.getIssuerX500Principal())) {
-                logger.warn("CRL issuer differs, not updating CRL");
-                return false;
-            }
-        }
-
-        if (this.verifier.verifyCRL(newCrl)) {
-            this.store.storeCRL(new StoredCRL(state.distributionPoints, newCrl));
-            state.lastDownloadInstantNanos = OptionalLong.of(now);
-            return true;
-        } else {
-            logger.warn("CRL verification failed");
+        } catch (final CRLException e) {
+            logger.warn("failed to encode CRL for {}", state.distributionPoints, e);
             return false;
         }
     }

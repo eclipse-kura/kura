@@ -5,7 +5,6 @@
     "java.format.enabled": true,
     "java.format.settings.url": "kura/setups/formatting/KuraFormatter.xml",
     "java.format.settings.profile": "Kura_formatter_v_3",
-    // comment.format_javadoc_comments / format_line_comments / format_block_comments = true
     "java.format.comments.enabled": true,
 
     // =====================================================================

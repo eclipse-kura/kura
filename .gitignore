@@ -26,7 +26,11 @@ bin_test/
 .launch
 
 # IntelliJ IDEA
-.idea/
+.idea/*
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+!.idea/eclipseCodeFormatter.xml
+!.idea/externalDependencies.xml
 *.iml
 
 # VS Code

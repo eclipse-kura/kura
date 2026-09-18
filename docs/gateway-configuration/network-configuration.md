@@ -213,8 +213,8 @@ Name                                                   | Type     | Description 
 `net.interface.<interface>.config.persist`             | Boolean  | Enable the cellular automatic reconnection                             | true
 `net.interface.<interface>.config.holdoff`             | Integer  | The time delay in seconds between connection attempts                  | 30
 `net.interface.<interface>.config.maxFail`             | Integer  | The maximum number of connection attempts                              | 5
-`net.interface.<interface>.config.modem.enabled.modes` | String   | Comma separated list of Modem Modes that will be allowed on the modem. When `ANY` or `NONE` is used, they must be the only ones in the list |
-`net.interface.<interface>.config.modem.preferred.mode`| String   | Modem Mode to prefer when trying to connect. If `net.interface.<interface>.config.modem.enabled.modes` is not set `net.interface.<interface>.config.modem.preferred.mode` will be ignored. If `net.interface.<interface>.config.modem.preferred.mode` is not set it will default to `NONE`.                           |
+`net.interface.<interface>.config.allowed.modem.modes` | String   | Comma separated list of Modem Modes that will be allowed on the modem. When `ANY` or `NONE` is used, they must be the only ones in the list |
+`net.interface.<interface>.config.preferred.modem.mode`| String   | Modem Mode to prefer when trying to connect. If `net.interface.<interface>.config.allowed.modem.modes` is not set `net.interface.<interface>.config.preferred.modem.mode` will be ignored. If `net.interface.<interface>.config.preferred.modem.mode` is not set it will default to `NONE`.                           |
 
 #### GPS Mode
 
@@ -229,13 +229,13 @@ For older versions compatibility, if the `net.interface.<interface>.config.gpsMo
 
 Kura supports the following Modem Modes with the following meaning:
 
-- `NONE`: No mode can be used (for `net.interface.<interface>.config.modem.preferred.mode` means "no preference").
+- `NONE`: No mode can be used (for `net.interface.<interface>.config.preferred.modem.mode` means "no preference").
 - `CS`: CSD, GSM, and other circuit-switched technologies.
-- `2G`: GPRS, EDGE.
-- `3G`: UMTS, HSxPA.
-- `4G`: LTE.
-- `5G`: 5GNR.
-- `ANY`: Any mode can be used. The use of this option is discouraged in favour of explicitly setting the mode.
+- `MODE_2G`: GPRS, EDGE.
+- `MODE_3G`: UMTS, HSxPA.
+- `MODE_4G`: LTE.
+- `MODE_5G`: 5GNR.
+- `ANY`: Any mode can be used.
 
 !!! note
     Not all combination of modes are supported by all modem. To verify what are the supported modes on your modem issue the following command on your target device:

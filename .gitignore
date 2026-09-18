@@ -26,12 +26,20 @@ bin_test/
 .launch
 
 # IntelliJ IDEA
-.idea/
+.idea/*
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+!.idea/eclipseCodeFormatter.xml
+!.idea/externalDependencies.xml
+!.idea/runConfigurations/
 *.iml
 
 # VS Code
 javaConfig.json
-.vscode
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
 
 # Code analysis
 .sonar

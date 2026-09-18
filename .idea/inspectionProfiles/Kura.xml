@@ -1,0 +1,77 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Kura" />
+
+    <!-- cleanup.organize_imports / cleanup.remove_unused_imports -->
+    <inspection_tool class="UnusedImport" enabled="true" level="WARNING" enabled_by_default="true" />
+
+    <!-- cleanup.add_missing_override_annotations(_interface_methods) -->
+    <inspection_tool class="MissingOverrideAnnotation" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoreObjectMethods" value="false" />
+      <option name="ignoreAnonymousClassMethods" value="false" />
+    </inspection_tool>
+
+    <!-- cleanup.add_missing_deprecated_annotations -->
+    <inspection_tool class="MissingDeprecatedAnnotation" enabled="true" level="WARNING" enabled_by_default="true" />
+
+    <!-- cleanup.use_lambda + cleanup.convert_functional_interfaces -->
+    <inspection_tool class="Convert2Lambda" enabled="true" level="WARNING" enabled_by_default="true" />
+
+    <!-- cleanup.always_use_this_for_non_static_field_access -->
+    <inspection_tool class="UnqualifiedFieldAccess" enabled="true" level="WARNING" enabled_by_default="true" />
+    <!-- cleanup.always_use_this_for_non_static_method_access = false -->
+    <inspection_tool class="UnqualifiedMethodAccess" enabled="false" level="WARNING" enabled_by_default="false" />
+
+    <!-- cleanup.qualify_static_member_accesses_through_instances_with_declaring_class -->
+    <inspection_tool class="AccessStaticViaInstance" enabled="true" level="WARNING" enabled_by_default="true" />
+    <!-- cleanup.qualify_static_member_accesses_through_subtypes_with_declaring_class -->
+    <inspection_tool class="StaticFieldReferenceOnSubclass" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="StaticCallOnSubclass" enabled="true" level="WARNING" enabled_by_default="true" />
+    <!-- cleanup.qualify_static_field_accesses_with_declaring_class = false
+         cleanup.qualify_static_method_accesses_with_declaring_class = false
+         -> static imports must NOT be expanded -->
+    <inspection_tool class="UnqualifiedStaticUsage" enabled="false" level="WARNING" enabled_by_default="false" />
+
+    <!-- cleanup.make_private_fields_final -->
+    <inspection_tool class="FieldMayBeFinal" enabled="true" level="WARNING" enabled_by_default="true" />
+    <!-- cleanup.make_local_variable_final = false, cleanup.make_parameters_final = false -->
+    <inspection_tool class="LocalCanBeFinal" enabled="false" level="WARNING" enabled_by_default="false" />
+
+    <!-- cleanup.add_serial_version_id + cleanup.add_generated_serial_version_id -->
+    <inspection_tool class="SerializableHasSerialVersionUIDField" enabled="true" level="WARNING" enabled_by_default="true" />
+
+    <!-- cleanup.remove_redundant_semicolons -->
+    <inspection_tool class="UnnecessarySemicolon" enabled="true" level="WARNING" enabled_by_default="true" />
+
+    <!-- cleanup.remove_redundant_type_arguments -->
+    <inspection_tool class="Convert2Diamond" enabled="true" level="WARNING" enabled_by_default="true" />
+
+    <!-- cleanup.always_use_blocks + cleanup.use_blocks -->
+    <inspection_tool class="ControlFlowStatementWithoutBraces" enabled="true" level="WARNING" enabled_by_default="true" />
+
+    <!-- cleanup.convert_to_enhanced_for_loop -->
+    <inspection_tool class="ForCanBeForeach" enabled="true" level="WARNING" enabled_by_default="true" />
+
+    <!-- cleanup.remove_unnecessary_casts -->
+    <inspection_tool class="RedundantCast" enabled="true" level="WARNING" enabled_by_default="true" />
+
+    <!-- cleanup.never_use_parentheses_in_expressions -->
+    <inspection_tool class="UnnecessaryParentheses" enabled="true" level="WARNING" enabled_by_default="true" />
+
+    <!-- cleanup.remove_unused_local_variables + remove_unused_private_fields/methods/types
+         + remove_private_constructors. Reported, but deletions are applied manually
+         (Alt+Enter): OSGi declarative-services members can look unused to the IDE. -->
+    <inspection_tool class="unused" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="LOCAL_VARIABLE" value="true" />
+      <option name="FIELD" value="true" />
+      <option name="METHOD" value="true" />
+      <option name="CLASS" value="true" />
+      <option name="PARAMETER" value="false" />
+      <option name="REPORT_PARAMETER_FOR_PUBLIC_METHODS" value="false" />
+    </inspection_tool>
+
+    <!-- cleanup.remove_redundant_modifiers = false (checkstyle RedundantModifier is off too) -->
+    <inspection_tool class="UnnecessaryInterfaceModifier" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="UnnecessaryEnumModifier" enabled="false" level="WARNING" enabled_by_default="false" />
+  </profile>
+</component>

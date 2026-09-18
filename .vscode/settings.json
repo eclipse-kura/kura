@@ -1,0 +1,58 @@
+{
+    // =====================================================================
+    // Formatter -> kura/setups/formatting/KuraFormatter.xml
+    // =====================================================================
+    "java.format.enabled": true,
+    "java.format.settings.url": "kura/setups/formatting/KuraFormatter.xml",
+    "java.format.settings.profile": "Kura_formatter_v_3",
+    "java.format.comments.enabled": true,
+
+    // =====================================================================
+    // Clean up -> kura/setups/formatting/KuraCleanupProfile.xml
+    // vscode-java cannot import an Eclipse clean up profile: the equivalent
+    // actions are declared one by one below.
+    // https://github.com/redhat-developer/vscode-java (java.cleanup.actions)
+    // =====================================================================
+    "java.saveActions.cleanup": true,
+    "java.cleanup.actions": [
+        // cleanup.organize_imports + cleanup.remove_unused_imports
+        "organizeImports",
+        // cleanup.add_missing_override_annotations(_interface_methods)
+        "addOverride",
+        // cleanup.add_missing_deprecated_annotations
+        "addDeprecated",
+        // cleanup.use_lambda + cleanup.convert_functional_interfaces
+        "lambdaExpressionFromAnonymousClass"
+    ],
+    // AvoidStarImport in checkstyle_checks.xml: never collapse into an on demand import
+    "java.sources.organizeImports.starThreshold": 999,
+    "java.sources.organizeImports.staticStarThreshold": 999,
+    "java.completion.importOrder": [
+        "#",
+        "java",
+        "javax",
+        "org",
+        "com",
+        ""
+    ],
+
+    "[java]": {
+        "editor.defaultFormatter": "redhat.java",
+        // cleanup.format_source_code = true
+        "editor.formatOnSave": true,
+        // cleanup.format_source_code_changes_only = false
+        "editor.formatOnSaveMode": "file",
+        // formatter tabulation.char = space, tabulation.size = 4
+        "editor.insertSpaces": true,
+        "editor.tabSize": 4,
+        "editor.detectIndentation": false,
+        // cleanup.remove_trailing_whitespaces(_all) = true, _ignore_empty = false
+        "files.trimTrailingWhitespace": true,
+        // formatter insert_new_line_at_end_of_file_if_missing = do not insert
+        "files.insertFinalNewline": false
+    },
+    "[xml]": {
+        "editor.defaultFormatter": "redhat.vscode-xml"
+    },
+    "files.eol": "\n"
+}

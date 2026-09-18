@@ -14,21 +14,27 @@
 package org.eclipse.kura.core.keystore.crl;
 
 import java.io.IOException;
+import java.lang.ref.SoftReference;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.cert.CRLException;
 import java.security.cert.X509CRL;
+import java.util.Arrays;
 import java.util.Base64;
-import java.util.Base64.Decoder;
-import java.util.Base64.Encoder;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
+
+import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.cert.X509CRLHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CRLConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
@@ -39,53 +45,127 @@ public class StoredCRL {
 
     private static final String DISTRIBUTION_POINTS_KEY = "dps";
     private static final String BODY_KEY = "body";
+    private static final String FILE_KEY = "file";
+    private static final String ISSUER_KEY = "issuer";
+    private static final String NEXT_UPDATE_KEY = "nextUpdate";
 
     private final Set<URI> distributionPoints;
-    private final X509CRL crl;
+    private final X500Principal issuer;
+    private final Optional<Date> nextUpdate;
+    private final boolean loadedWithMetadata;
+    private byte[] pendingEncoded;
+    private Optional<Path> bodyFile;
+    private SoftReference<byte[]> encodedCache = new SoftReference<>(null);
+    private SoftReference<X509CRL> decodedCache = new SoftReference<>(null);
 
-    public StoredCRL(final Set<URI> distributionPoints, final X509CRL crl) {
+    public StoredCRL(final Set<URI> distributionPoints, final X509CRL crl) throws CRLException {
+        this(distributionPoints, crl.getIssuerX500Principal(), Optional.ofNullable(crl.getNextUpdate()), true);
+        this.pendingEncoded = crl.getEncoded();
+        this.bodyFile = Optional.empty();
+        this.decodedCache = new SoftReference<>(crl);
+    }
+
+    private StoredCRL(final Set<URI> distributionPoints, final X500Principal issuer, final Optional<Date> nextUpdate,
+            final boolean loadedWithMetadata) {
         this.distributionPoints = distributionPoints;
-        this.crl = crl;
+        this.issuer = issuer;
+        this.nextUpdate = nextUpdate;
+        this.loadedWithMetadata = loadedWithMetadata;
+        this.bodyFile = Optional.empty();
     }
 
     public Set<URI> getDistributionPoints() {
         return distributionPoints;
     }
 
-    public X509CRL getCrl() {
+    public synchronized X509CRL getCrl() {
+        X509CRL crl = this.decodedCache.get();
+        if (crl == null) {
+            try {
+                crl = decode(getEncoded());
+            } catch (final CRLException e) {
+                throw new IllegalStateException("failed to decode stored CRL for " + this.issuer, e);
+            }
+            this.decodedCache = new SoftReference<>(crl);
+        }
         return crl;
+    }
+
+    public synchronized byte[] getEncoded() {
+        if (this.pendingEncoded != null) {
+            return this.pendingEncoded;
+        }
+        byte[] encoded = this.encodedCache.get();
+        if (encoded == null) {
+            final Path file = this.bodyFile
+                    .orElseThrow(() -> new IllegalStateException("stored CRL for " + this.issuer + " has no body"));
+            try {
+                encoded = Files.readAllBytes(file);
+            } catch (final IOException e) {
+                throw new IllegalStateException("failed to read stored CRL " + file, e);
+            }
+            this.encodedCache = new SoftReference<>(encoded);
+        }
+        return encoded;
+    }
+
+    public synchronized Optional<Path> getBodyFile() {
+        return this.bodyFile;
+    }
+
+    public synchronized boolean isPersisted() {
+        return this.bodyFile.isPresent();
+    }
+
+    public synchronized void persistedTo(final Path file) {
+        this.bodyFile = Optional.of(file);
+        if (this.pendingEncoded != null) {
+            this.encodedCache = new SoftReference<>(this.pendingEncoded);
+            this.pendingEncoded = null;
+        }
+    }
+
+    public X500Principal getIssuer() {
+        return this.issuer;
+    }
+
+    public Optional<Date> getNextUpdate() {
+        return this.nextUpdate;
+    }
+
+    public boolean hasSameEncoding(final X509CRL other) throws CRLException {
+        return Arrays.equals(getEncoded(), other.getEncoded());
+    }
+
+    public boolean isLoadedWithMetadata() {
+        return this.loadedWithMetadata;
     }
 
     public boolean isExpired() {
         final long now = System.currentTimeMillis();
-        final Date nextUpdate = crl.getNextUpdate();
-
-        return nextUpdate != null && nextUpdate.getTime() < now;
+        return this.nextUpdate.isPresent() && this.nextUpdate.get().getTime() < now;
     }
 
     public boolean isNearingExpiry(final long thresholdMs) {
-        final Date nextUpdate = crl.getNextUpdate();
-        if (nextUpdate == null) {
+        if (!this.nextUpdate.isPresent()) {
             return false;
         }
-        final long remainingMs = nextUpdate.getTime() - System.currentTimeMillis();
+        final long remainingMs = this.nextUpdate.get().getTime() - System.currentTimeMillis();
         return remainingMs > 0 && remainingMs < thresholdMs;
     }
 
     public long getTimeToNextUpdateMs() {
-        final Date nextUpdate = crl.getNextUpdate();
-        if (nextUpdate == null) {
+        if (!this.nextUpdate.isPresent()) {
             return Long.MAX_VALUE;
         }
-        final long remaining = nextUpdate.getTime() - System.currentTimeMillis();
+        final long remaining = this.nextUpdate.get().getTime() - System.currentTimeMillis();
         return Math.max(0, remaining);
     }
 
-    public static StoredCRL fromJson(final JsonObject object) throws IOException, CRLException {
+    public static StoredCRL fromJson(final JsonObject object, final Path bodyDirectory)
+            throws IOException, CRLException {
         final Set<URI> dps = new HashSet<>();
-
         final JsonArray dpsArray = object.get(DISTRIBUTION_POINTS_KEY).asArray();
-
         for (final JsonValue value : dpsArray) {
             try {
                 dps.add(new URI(value.asString()));
@@ -94,33 +174,66 @@ public class StoredCRL {
             }
         }
 
-        final String body = object.get(BODY_KEY).asString();
+        final JsonValue issuerValue = object.get(ISSUER_KEY);
+        final JsonValue fileValue = object.get(FILE_KEY);
+        if (issuerValue != null && issuerValue.isString() && fileValue != null && fileValue.isString()) {
+            final Path file = bodyDirectory.resolve(fileValue.asString());
+            if (!Files.isRegularFile(file)) {
+                throw new IOException("missing CRL body file " + file);
+            }
+            final StoredCRL result = new StoredCRL(dps, new X500Principal(issuerValue.asString()),
+                    readNextUpdate(object), true);
+            result.bodyFile = Optional.of(file);
+            return result;
+        }
 
-        final Decoder decoder = Base64.getDecoder();
-
-        final byte[] decoded = decoder.decode(body);
-
-        final X509CRLHolder holder = new X509CRLHolder(decoded);
-        return new StoredCRL(dps, new JcaX509CRLConverter().getCRL(holder));
+        final byte[] encoded = Base64.getDecoder().decode(object.get(BODY_KEY).asString());
+        final X500Principal issuer;
+        final Optional<Date> nextUpdate;
+        X509CRL crl = null;
+        final boolean hasMetadata = issuerValue != null && issuerValue.isString();
+        if (hasMetadata) {
+            issuer = new X500Principal(issuerValue.asString());
+            nextUpdate = readNextUpdate(object);
+        } else {
+            crl = decode(encoded);
+            issuer = crl.getIssuerX500Principal();
+            nextUpdate = Optional.ofNullable(crl.getNextUpdate());
+        }
+        final StoredCRL result = new StoredCRL(dps, issuer, nextUpdate, hasMetadata);
+        result.pendingEncoded = encoded;
+        result.decodedCache = new SoftReference<>(crl);
+        return result;
     }
 
-    public JsonObject toJson() throws CRLException {
+    public synchronized JsonObject toJson() {
         final JsonObject result = new JsonObject();
-
         final JsonArray dpsArray = new JsonArray();
-
         for (final URI uri : this.distributionPoints) {
             dpsArray.add(uri.toString());
         }
-
         result.add(DISTRIBUTION_POINTS_KEY, dpsArray);
-
-        final Encoder encoder = Base64.getEncoder();
-
-        final String body = encoder.encodeToString(crl.getEncoded());
-
-        result.add(BODY_KEY, body);
-
+        if (this.bodyFile.isPresent()) {
+            result.add(FILE_KEY, this.bodyFile.get().getFileName().toString());
+        } else {
+            result.add(BODY_KEY, Base64.getEncoder().encodeToString(getEncoded()));
+        }
+        result.add(ISSUER_KEY, this.issuer.getName(X500Principal.RFC2253));
+        this.nextUpdate.ifPresent(date -> result.add(NEXT_UPDATE_KEY, Json.value(date.getTime())));
         return result;
+    }
+
+    private static Optional<Date> readNextUpdate(final JsonObject object) {
+        final JsonValue nextUpdateValue = object.get(NEXT_UPDATE_KEY);
+        return nextUpdateValue != null && nextUpdateValue.isNumber() ? Optional.of(new Date(nextUpdateValue.asLong()))
+                : Optional.empty();
+    }
+
+    private static X509CRL decode(final byte[] encoded) throws CRLException {
+        try {
+            return new JcaX509CRLConverter().getCRL(new X509CRLHolder(encoded));
+        } catch (final IOException e) {
+            throw new CRLException(e);
+        }
     }
 }

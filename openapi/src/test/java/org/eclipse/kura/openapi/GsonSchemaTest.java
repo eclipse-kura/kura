@@ -40,6 +40,7 @@ import com.google.gson.Gson;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
+import com.networknt.schema.oas.OpenApi30;
 
 import io.swagger.v3.core.util.Json;
 
@@ -149,7 +150,10 @@ public class GsonSchemaTest {
         final ObjectNode schema = Json.mapper().createObjectNode();
         schema.put("$ref", "#/components/schemas/" + this.schemaName);
         schema.set("components", this.document.path("components"));
-        this.errors = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4).getSchema(schema).validate(this.payload);
+        this.errors = JsonSchemaFactory.builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4))
+                .metaSchema(OpenApi30.getInstance())
+                .defaultMetaSchemaIri("https://spec.openapis.org/oas/3.0/dialect")
+                .build().getSchema(schema).validate(this.payload);
     }
 
     private void thenPayloadIsValid() {

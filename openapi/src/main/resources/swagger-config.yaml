@@ -9,6 +9,7 @@ resourceClasses:
   - org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2
   - org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV1
   - org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2
+  - org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider
 readerClass: org.eclipse.kura.openapi.KuraOpenApiReader
 readAllResources: true
 openAPI:
@@ -17,7 +18,8 @@ openAPI:
     title: Eclipse Kura REST API
     version: '${project.version}'
     description: >-
-      System v1, configuration v2, session v1, identity v1/v2 and security v1/v2 APIs.
+      System v1, configuration v2, session v1, identity v1/v2, security v1/v2
+      and service listing v1 APIs.
       Available endpoints depend on installed bundles and REST settings.
       Use HTTP Basic authentication when enabled, or log in through session/v1/login/password,
       retain the JSESSIONID cookie, obtain session/v1/xsrfToken, then send both the cookie and

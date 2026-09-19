@@ -182,6 +182,7 @@ public abstract class AbstractHttpContractTest {
         application.register(systemResource);
         application.register(configurationResource);
         application.register(sessionResource);
+        registerAdditionalResources(application);
         application.register(this.authentication);
         application.register(AuthorizationFilter.class);
         application.register(AuditFilter.class);
@@ -203,6 +204,9 @@ public abstract class AbstractHttpContractTest {
                 .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ALL)).build();
         this.authorization = "Basic " + Base64.getEncoder()
                 .encodeToString("user:password".getBytes(StandardCharsets.UTF_8));
+    }
+
+    protected void registerAdditionalResources(ResourceConfig application) throws Exception {
     }
 
     protected void givenNoBasicAuthentication() {
@@ -235,6 +239,10 @@ public abstract class AbstractHttpContractTest {
     }
 
     protected void whenRequest(String method, String path, String body) throws Exception {
+        whenRequest(method, path, body, "application/json");
+    }
+
+    protected void whenRequest(String method, String path, String body, String contentType) throws Exception {
         this.requestPath = path;
         this.requestMethod = method.toLowerCase(java.util.Locale.ROOT);
         final HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(this.base + path))
@@ -246,7 +254,7 @@ public abstract class AbstractHttpContractTest {
             request.header("X-XSRF-Token", this.token);
         }
         if (body != null) {
-            request.header("Content-Type", "application/json");
+            request.header("Content-Type", contentType);
         }
         request.method(method, body == null ? HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofString(body));
         this.response = this.client.send(request.build(), HttpResponse.BodyHandlers.ofString());

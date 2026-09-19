@@ -43,6 +43,16 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -58,6 +68,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
 
 @SuppressWarnings("restriction")
+@Tag(name = "Session", description = "Authentication and session lifecycle; availability depends on REST service settings.")
 @Path(SessionRestServiceConstants.BASE_PATH)
 public class SessionRestService {
 
@@ -94,6 +105,21 @@ public class SessionRestService {
     @Path(SessionRestServiceConstants.LOGIN_PASSWORD_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @SecurityRequirements
+    @Operation(operationId = "post_session_v1_login_password", summary = "Create a password session",
+            description = "Creates a session cookie. Fetch xsrfToken next. If passwordChangeNeeded is true, changePassword must precede API access.",
+            requestBody = @RequestBody(required = true,
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = UsernamePasswordDTO.class))))
+    @ApiResponse(responseCode = "200", description = "Authentication result.",
+            headers = @Header(name = "Set-Cookie", description = "Session cookie lifecycle; preserve cookies between requests.",
+                    schema = @Schema(type = "string")),
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = AuthenticationResponseDTO.class)))
+    @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest")
+    @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized")
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/Disabled")
+    @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalError")
     public AuthenticationResponseDTO authenticateWithUsernameAndPassword(final UsernamePasswordDTO usernamePassword,
             @Context final HttpServletRequest request) {
 
@@ -142,6 +168,17 @@ public class SessionRestService {
     @POST
     @Path(SessionRestServiceConstants.LOGIN_CERTIFICATE_PATH)
     @Produces(MediaType.APPLICATION_JSON)
+    @SecurityRequirements
+    @Operation(operationId = "post_session_v1_login_certificate", summary = "Create a certificate session",
+            description = "Requires a trusted client certificate on a mutual-TLS port. Creates a session cookie; fetch xsrfToken next.")
+    @ApiResponse(responseCode = "200", description = "Authentication result.",
+            headers = @Header(name = "Set-Cookie", description = "Session cookie lifecycle; preserve cookies between requests.",
+                    schema = @Schema(type = "string")),
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = AuthenticationResponseDTO.class)))
+    @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized")
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/Disabled")
+    @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalError")
     public AuthenticationResponseDTO authenticateWithCertificate(@Context final HttpServletRequest request,
             @Context final ContainerRequestContext requestContext) {
         if (!options.isSessionManagementEnabled() || !options.isCertificateAuthEnabled()) {
@@ -173,6 +210,15 @@ public class SessionRestService {
 
     @GET
     @Path(SessionRestServiceConstants.XSRF_TOKEN_PATH)
+    @SecurityRequirement(name = "sessionCookie")
+    @Operation(operationId = "get_session_v1_xsrfToken", summary = "Read the session XSRF token",
+            description = "Requires an existing session cookie. This is the only session-authenticated endpoint exempt from X-XSRF-Token.")
+    @ApiResponse(responseCode = "200", description = "Authentication result.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = XsrfTokenDTO.class)))
+    @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized")
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/Disabled")
+    @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalError")
     public XsrfTokenDTO getXSRFToken(@Context final HttpServletRequest request,
             @Context final ContainerRequestContext requestContext) {
         if (!options.isSessionManagementEnabled()) {
@@ -194,6 +240,15 @@ public class SessionRestService {
 
     @POST
     @Path(SessionRestServiceConstants.CHANGE_PASSWORD_PATH)
+    @Operation(operationId = "post_session_v1_changePassword", summary = "Change the current password",
+            description = "Requires currentPassword and newPassword. Replaces the session; fetch a new XSRF token. Allowed for a locked session.",
+            requestBody = @RequestBody(required = true,
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = UpdatePasswordDTO.class))))
+    @ApiResponse(responseCode = "204", ref = "#/components/responses/SessionChanged")
+    @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest")
+    @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized")
+    @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalError")
     public void updateUserPassword(@Context final ContainerRequestContext requestContext,
             @Context final HttpServletRequest request, final UpdatePasswordDTO passwordUpdate) {
 
@@ -246,6 +301,12 @@ public class SessionRestService {
 
     @POST
     @Path(SessionRestServiceConstants.LOGOUT_PATH)
+    @Operation(operationId = "post_session_v1_logout", summary = "End the current session",
+            description = "Invalidates the current session and expires request cookies. Session authentication requires X-XSRF-Token.")
+    @ApiResponse(responseCode = "204", ref = "#/components/responses/SessionChanged")
+    @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized")
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/Disabled")
+    @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalError")
     public void logout(@Context final HttpServletRequest request, @Context final HttpServletResponse response,
             @Context final ContainerRequestContext requestContext) {
         if (!options.isSessionManagementEnabled()) {
@@ -264,6 +325,14 @@ public class SessionRestService {
     @GET
     @Path(SessionRestServiceConstants.CURRENT_IDENTITY)
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "get_session_v1_currentIdentity", summary = "Read the current identity",
+            description = "Returns identity, password-change status and assigned permissions. Session authentication requires X-XSRF-Token.")
+    @ApiResponse(responseCode = "200", description = "Authentication result.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = IdentityInfoDTO.class)))
+    @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthorized")
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/Disabled")
+    @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalError")
     public IdentityInfoDTO getCurrentIdentityInfo(@Context final ContainerRequestContext requestContext,
             @Context final HttpServletRequest request) {
         if (!options.isSessionManagementEnabled()) {
@@ -291,6 +360,13 @@ public class SessionRestService {
     @GET
     @Path(SessionRestServiceConstants.AUTHENTICATION_INFO)
     @Produces(MediaType.APPLICATION_JSON)
+    @SecurityRequirements
+    @Operation(operationId = "get_session_v1_authenticationInfo", summary = "Read authentication options",
+            description = "Returns password-login availability, usable certificate-login ports and an optional pre-login banner.")
+    @ApiResponse(responseCode = "200", description = "Authentication result.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = AuthenticationInfoDTO.class)))
+    @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalError")
     public AuthenticationInfoDTO getAuthenticationMethodInfo() {
 
         final boolean isPasswordAuthEnabled = options.isPasswordAuthEnabled();

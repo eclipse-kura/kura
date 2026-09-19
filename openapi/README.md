@@ -1,7 +1,8 @@
-# Kura OpenAPI for system and configuration APIs
+# Kura OpenAPI
 
 The normal Maven build generates an OpenAPI 3.0.3 document for all operations in
-the system v1, configuration v2, and session v1 REST resources. This module is a build tool;
+the system v1, configuration v2, session v1, identity v1/v2, and security v1/v2 REST resources.
+This module is a build tool;
 it is not an OSGi bundle and is not included in device distributions.
 
 From the repository root, using JDK 21:
@@ -23,7 +24,8 @@ nor an OSGi framework is required. No runtime OpenAPI endpoint or UI is added.
 The scanner uses an explicit resource-class allowlist in `swagger-config.yaml`.
 The relative server URL is `/services`; paths retain their API versions.
 Source annotations define stable operation IDs, summaries, request fields, and responses.
-The reader assigns an ID from the HTTP method and path only when an operation has none.
+The reader assigns an ID from the HTTP method and path when an operation has none,
+and for inherited security operations shared across API versions.
 
 HTTP Basic is available when enabled. For a password session, call
 `POST /session/v1/login/password`, retain the session cookie, then call
@@ -34,8 +36,12 @@ the token endpoint and `POST /session/v1/changePassword`; obtain a new token
 after changing the password. Kura also supports certificate authentication
 on configured mutual TLS ports. OpenAPI 3.0 cannot express that security
 scheme, so the specification describes the certificate route in prose.
-System endpoints require `rest.system` and configuration endpoints require
-`rest.configuration`; `kura.admin` also grants access. Missing or invalid
+System endpoints require `rest.system`, configuration endpoints require
+`rest.configuration`, protected identity endpoints require `rest.identity`,
+and protected security endpoints require `rest.security`; `kura.admin` also
+grants access. Identity permission and password-requirement discovery endpoints
+have no identity-role restriction. Security debug-mode status requires an
+authenticated principal but no security role. Missing or invalid
 authentication returns an empty 401 after the audit filter. An authenticated
 identity without permission receives an empty 403.
 
@@ -50,7 +56,10 @@ validate the document with the [official OpenAPI 3.0 schema](https://spec.openap
 and Swagger Parser, and check request requirements and Gson payloads with an
 OpenAPI-aware schema validator. Embedded HTTP tests exercise the actual REST
 resources, authentication filters, authorization, and Gson serializer, then
-compare responses with the generated contract. The vendored schema is supplied
+compare responses with the generated contract for the previously covered system,
+configuration, and session resources. Identity and security currently have generated
+schema and authorization-shape checks, but not embedded HTTP payload tests.
+The vendored schema is supplied
 by the OpenAPI Initiative under the [Apache 2.0 license](https://github.com/OAI/OpenAPI-Specification/blob/main/LICENSE).
 
 ## Known gaps

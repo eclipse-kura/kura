@@ -2,9 +2,9 @@
 
 The normal Maven build generates an OpenAPI 3.0.3 document for all operations in
 the system v1, configuration v2, session v1, identity v1/v2, security v1/v2,
-and service listing v1 REST resources.
-This module is a build tool;
-it is not an OSGi bundle and is not included in device distributions.
+service listing v1, cloud connection v1, keystore v1/v2, tamper v1, and
+inventory v1 REST resources. This module is a build tool; it is not an OSGi
+bundle and is not included in device distributions.
 
 From the repository root, using JDK 21:
 
@@ -26,7 +26,7 @@ The scanner uses an explicit resource-class allowlist in `swagger-config.yaml`.
 The relative server URL is `/services`; paths retain their API versions.
 Source annotations define stable operation IDs, summaries, request fields, and responses.
 The reader assigns an ID from the HTTP method and path when an operation has none,
-and for inherited security operations shared across API versions.
+and for inherited security and keystore operations shared across API versions.
 
 HTTP Basic is available when enabled. For a password session, call
 `POST /session/v1/login/password`, retain the session cookie, then call
@@ -39,11 +39,14 @@ on configured mutual TLS ports. OpenAPI 3.0 cannot express that security
 scheme, so the specification describes the certificate route in prose.
 System endpoints require `rest.system`, configuration endpoints require
 `rest.configuration`, protected identity endpoints require `rest.identity`,
-and protected security endpoints require `rest.security`; `kura.admin` also
-grants access. Service-listing endpoints require an authenticated principal
-without a specific REST role. Identity permission and password-requirement discovery endpoints
-have no identity-role restriction. Security debug-mode status requires an
-authenticated principal but no security role. Missing or invalid
+protected security endpoints require `rest.security`, cloud connections require
+`rest.cloudconnection`, keystores require `rest.keystores`, tamper detection
+requires `rest.tamper.detection`, and inventory requires `rest.inventory`.
+`kura.admin` also grants access. Service-listing endpoints require an
+authenticated principal without a specific REST role. Identity permission
+and password-requirement discovery endpoints have no identity-role restriction.
+Security debug-mode status requires an authenticated principal but no security
+role. Missing or invalid
 authentication returns an empty 401 after the audit filter. An authenticated
 identity without permission receives an empty 403.
 
@@ -51,7 +54,10 @@ The documentation-only reader uses private fields instead of getters to match
 Kura's Gson serialization. Java `Object` values remain unconstrained, including
 configuration property values. This is not a general-purpose Gson adapter:
 future custom serializers or field-naming annotations need additional handling
-and payload tests before expanding coverage.
+and payload tests before expanding coverage. Inventory responses are marshalled
+by Kura's JSON marshaller rather than the REST Gson serializer; their generated
+schemas describe the resource types, but are not yet covered by embedded HTTP
+payload checks.
 
 Tests compare JSON and YAML, check endpoint coverage and reference resolution,
 validate the document with the [official OpenAPI 3.0 schema](https://spec.openapis.org/oas/3.0/schema/2021-09-28)
@@ -72,4 +78,5 @@ obtained from component metadata. The embedded HTTP tests use a local servlet
 server and mocked services; they do not verify a full OSGi installation or
 the deployment's TLS and certificate configuration.
 
-Next steps are additional REST bundles, compatibility checks, and hosted documentation.
+Next steps are embedded HTTP checks for the newly mapped bundles, compatibility
+checks, and hosted documentation.

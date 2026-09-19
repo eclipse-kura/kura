@@ -19,6 +19,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -32,6 +40,12 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.core.inventory.InventoryHandlerV1;
+import org.eclipse.kura.core.inventory.resources.ContainerImages;
+import org.eclipse.kura.core.inventory.resources.DockerContainers;
+import org.eclipse.kura.core.inventory.resources.SystemBundles;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
+import org.eclipse.kura.core.inventory.resources.SystemPackages;
+import org.eclipse.kura.core.inventory.resources.SystemResourcesInfo;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
@@ -42,6 +56,14 @@ import org.slf4j.LoggerFactory;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+@Tag(name = "Inventory", description = "Requires rest.inventory or kura.admin permission.")
+@ApiResponses({
+        @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+        @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthenticated"),
+        @ApiResponse(responseCode = "403", ref = "#/components/responses/Forbidden"),
+        @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+        @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalError")
+})
 @Path("/inventory/v1")
 @Component(
     name = "org.eclipse.kura.internal.rest.inventory.InventoryRestService",
@@ -79,6 +101,10 @@ public class InventoryRestService {
     @RolesAllowed("inventory")
     @Path("/inventory")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "get_inventory_v1_inventory", summary = "Read inventory summary",
+            description = "Returns available system, bundle and container resources.")
+    @ApiResponse(responseCode = "200", description = "Requested inventory data.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SystemResourcesInfo.class)))
     public Response getInventorySummary() {
         try {
             return makeInventoryDoGetRequest(buildKuraMessage(Arrays.asList(InventoryHandlerV1.INVENTORY), ""));
@@ -97,6 +123,10 @@ public class InventoryRestService {
     @RolesAllowed("inventory")
     @Path("/bundles")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "get_inventory_v1_bundles", summary = "List bundles",
+            description = "Returns installed OSGi bundles and their state.")
+    @ApiResponse(responseCode = "200", description = "Requested inventory data.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SystemBundles.class)))
     public Response getBundles() {
         try {
             return makeInventoryDoGetRequest(buildKuraMessage(Arrays.asList(InventoryHandlerV1.RESOURCE_BUNDLES), ""));
@@ -116,6 +146,11 @@ public class InventoryRestService {
     @Path("/bundles/_start")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "post_inventory_v1_bundles_start", summary = "Start bundle",
+            description = "Starts the bundle selected by name and optional version.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(ref = "#/components/schemas/InventoryBundleReference"))))
+    @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
     public Response startBundle(final String bundleJson) {
         try {
             return makeInventoryDoExecRequest(buildKuraMessage(InventoryHandlerV1.START_BUNDLE, bundleJson));
@@ -135,6 +170,11 @@ public class InventoryRestService {
     @Path("/bundles/_stop")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "post_inventory_v1_bundles_stop", summary = "Stop bundle",
+            description = "Stops the bundle selected by name and optional version.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(ref = "#/components/schemas/InventoryBundleReference"))))
+    @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
     public Response stopBundle(final String bundleJson) {
         try {
             return makeInventoryDoExecRequest(buildKuraMessage(InventoryHandlerV1.STOP_BUNDLE, bundleJson));
@@ -153,6 +193,10 @@ public class InventoryRestService {
     @RolesAllowed("inventory")
     @Path("/deploymentPackages")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "get_inventory_v1_deploymentPackages", summary = "List deployment packages",
+            description = "Returns installed deployment packages.")
+    @ApiResponse(responseCode = "200", description = "Requested inventory data.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SystemDeploymentPackages.class)))
     public Response getDeploymentPackages() {
         try {
             return makeInventoryDoGetRequest(
@@ -172,6 +216,10 @@ public class InventoryRestService {
     @RolesAllowed("inventory")
     @Path("/systemPackages")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "get_inventory_v1_systemPackages", summary = "List system packages",
+            description = "Returns installed system packages.")
+    @ApiResponse(responseCode = "200", description = "Requested inventory data.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SystemPackages.class)))
     public Response getSystemPackages() {
         try {
             return makeInventoryDoGetRequest(
@@ -191,6 +239,10 @@ public class InventoryRestService {
     @RolesAllowed("inventory")
     @Path("/containers")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "get_inventory_v1_containers", summary = "List containers",
+            description = "Returns containers; may be unavailable when orchestration is not installed.")
+    @ApiResponse(responseCode = "200", description = "Requested inventory data.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = DockerContainers.class)))
     public Response getContainers() {
         try {
             return makeInventoryDoGetRequest(
@@ -211,6 +263,11 @@ public class InventoryRestService {
     @Path("/containers/_start")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "post_inventory_v1_containers_start", summary = "Start container",
+            description = "Starts the container selected by name.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(ref = "#/components/schemas/InventoryContainerReference"))))
+    @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
     public Response startContainer(final String bundleJson) {
         try {
             return makeInventoryDoExecRequest(buildKuraMessage(InventoryHandlerV1.START_CONTAINER, bundleJson));
@@ -230,6 +287,11 @@ public class InventoryRestService {
     @Path("/containers/_stop")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "post_inventory_v1_containers_stop", summary = "Stop container",
+            description = "Stops the container selected by name.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(ref = "#/components/schemas/InventoryContainerReference"))))
+    @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
     public Response stopContainer(final String bundleJson) {
         try {
             return makeInventoryDoExecRequest(buildKuraMessage(InventoryHandlerV1.STOP_CONTAINER, bundleJson));
@@ -248,6 +310,10 @@ public class InventoryRestService {
     @RolesAllowed("inventory")
     @Path("/images")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "get_inventory_v1_images", summary = "List container images",
+            description = "Returns container images; may be unavailable when orchestration is not installed.")
+    @ApiResponse(responseCode = "200", description = "Requested inventory data.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ContainerImages.class)))
     public Response getImages() {
         try {
             return makeInventoryDoGetRequest(
@@ -268,6 +334,11 @@ public class InventoryRestService {
     @Path("/images/_delete")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "post_inventory_v1_images_delete", summary = "Delete container image",
+            description = "Deletes the image selected by name and tag.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(ref = "#/components/schemas/InventoryImageReference"))))
+    @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
     public Response deleteImage(final String bundleJson) {
         try {
             return makeInventoryDoExecRequest(buildKuraMessage(InventoryHandlerV1.DELETE_IMAGE, bundleJson));

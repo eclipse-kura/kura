@@ -20,10 +20,26 @@ import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 
 import org.osgi.service.component.annotations.Component;
+@Tag(name = "Keystores", description = "Requires rest.keystores or kura.admin permission.")
+@ApiResponses({
+        @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+        @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthenticated"),
+        @ApiResponse(responseCode = "403", ref = "#/components/responses/Forbidden"),
+        @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+        @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalError")
+})
 @Path("/keystores/v2")
 @Component(
     name = "org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestServiceV2",
@@ -41,6 +57,10 @@ public class KeystoreRestServiceV2 extends KeystoreRestService {
     @Path("/entries/privatekey")
     @RolesAllowed("keystores")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Store private key", description = "Stores a private key and certificate chain.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = PrivateKeyWriteRequest.class))))
+    @ApiResponse(responseCode = "204", description = "Operation completed; response body is empty.")
     public void storeKeypairEntry(PrivateKeyWriteRequest writeRequest) {
         validate(writeRequest, BAD_WRITE_REQUEST_ERROR_MESSAGE);
         try {

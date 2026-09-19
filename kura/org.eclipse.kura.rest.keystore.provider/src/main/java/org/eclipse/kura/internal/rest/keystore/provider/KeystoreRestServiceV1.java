@@ -12,9 +12,21 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.keystore.provider;
 
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.ws.rs.Path;
 
 import org.osgi.service.component.annotations.Component;
+@Tag(name = "Keystores", description = "Requires rest.keystores or kura.admin permission.")
+@ApiResponses({
+        @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+        @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthenticated"),
+        @ApiResponse(responseCode = "403", ref = "#/components/responses/Forbidden"),
+        @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+        @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalError")
+})
 @Path("/keystores/v1")
 @Component(
     name = "org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestServiceV1",

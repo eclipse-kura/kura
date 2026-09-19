@@ -65,7 +65,8 @@ public class KuraOpenApiReader extends Reader {
                 if (publicOperations.contains(operation.getOperationId())) {
                     operation.setSecurity(java.util.Collections.emptyList());
                 }
-                if (path.startsWith("/security/") || operation.getOperationId() == null
+                if (path.startsWith("/security/") || path.startsWith("/keystores/")
+                        || operation.getOperationId() == null
                         || operation.getOperationId().isBlank()) {
                     operation.setOperationId(method.name().toLowerCase(Locale.ROOT) + "_"
                             + path.replaceAll("[^a-zA-Z0-9]+", "_").replaceAll("^_|_$", ""));

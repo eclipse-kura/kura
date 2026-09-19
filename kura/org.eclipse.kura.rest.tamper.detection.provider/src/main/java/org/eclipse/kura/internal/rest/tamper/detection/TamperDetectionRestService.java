@@ -22,6 +22,14 @@ import org.eclipse.kura.rest.tamper.detection.api.TamperStatusInfo;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -33,6 +41,13 @@ import jakarta.ws.rs.core.MediaType;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+@Tag(name = "Tamper detection", description = "Requires rest.tamper.detection or kura.admin permission.")
+@ApiResponses({
+        @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthenticated"),
+        @ApiResponse(responseCode = "403", ref = "#/components/responses/Forbidden"),
+        @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+        @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalError")
+})
 @Path("/tamper/v1")
 @Component(
     name = "org.eclipse.kura.internal.rest.tamper.detection.TamperDetectionRestService",
@@ -50,6 +65,11 @@ public class TamperDetectionRestService extends TamperDetectionRemoteService {
     @Path("/list")
     @RolesAllowed("tamper.detection")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "get_tamper_v1_list", summary = "List tamper-detection services",
+            description = "Returns configured tamper-detection service information.")
+    @ApiResponse(responseCode = "200", description = "Configured services.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    array = @ArraySchema(schema = @Schema(implementation = TamperDetectionServiceInfo.class))))
     public List<TamperDetectionServiceInfo> listTamperDetectionServices() {
         return listTamperDetectionServicesInternal();
     }
@@ -58,6 +78,11 @@ public class TamperDetectionRestService extends TamperDetectionRemoteService {
     @RolesAllowed("tamper.detection")
     @Path("/pid/{pid}")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "get_tamper_v1_pid", summary = "Read tamper status",
+            description = "Returns current tamper status for the named service PID.")
+    @ApiResponse(responseCode = "200", description = "Current tamper status.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = TamperStatusInfo.class)))
     public TamperStatusInfo getTamperStatus(@PathParam("pid") final String pid) {
         try {
             return getTamperStatusInternal(pid);
@@ -69,6 +94,9 @@ public class TamperDetectionRestService extends TamperDetectionRemoteService {
     @POST
     @RolesAllowed("tamper.detection")
     @Path("/pid/{pid}/_reset")
+    @Operation(operationId = "post_tamper_v1_pid_reset", summary = "Reset tamper status",
+            description = "Resets tamper status for the named service PID.")
+    @ApiResponse(responseCode = "204", description = "Status reset; response body is empty.")
     public void resetTamperStatus(@PathParam("pid") final String pid) {
         try {
             resetTamperStatusInternal(pid);

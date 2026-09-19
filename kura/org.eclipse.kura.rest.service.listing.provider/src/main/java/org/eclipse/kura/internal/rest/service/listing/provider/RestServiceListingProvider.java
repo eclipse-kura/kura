@@ -44,6 +44,14 @@ import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -60,6 +68,13 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+@Tag(name = "Service listing", description = "Requires an authenticated principal; no specific REST role is checked.")
+@ApiResponses({
+        @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
+        @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthenticated"),
+        @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound"),
+        @ApiResponse(responseCode = "500", ref = "#/components/responses/InternalError")
+})
 @Path("serviceListing/v1")
 @Component(
     name = "org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProviderstingProvider",
@@ -130,6 +145,10 @@ public class RestServiceListingProvider {
     @GET
     @Path("/servicePids")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "get_serviceListing_v1_servicePids", summary = "List service PIDs",
+            description = "Returns PIDs of running services with a kura.service.pid property.")
+    @ApiResponse(responseCode = "200", description = "Matching PIDs.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PidSet.class)))
     public PidSet getServicePids(@Context final ContainerRequestContext requestContext) {
         try {
 
@@ -158,6 +177,12 @@ public class RestServiceListingProvider {
     @Path("/servicePids/byInterface")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "post_serviceListing_v1_servicePids_byInterface", summary = "Find service PIDs by interface",
+            description = "Returns service PIDs implementing every specified interface.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = InterfaceNamesDTO.class))))
+    @ApiResponse(responseCode = "200", description = "Matching PIDs.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PidSet.class)))
     public PidSet getServicePidsByInterface(final InterfaceNamesDTO interfacesList,
             @Context final ContainerRequestContext requestContext) {
         try {
@@ -177,6 +202,12 @@ public class RestServiceListingProvider {
     @Path("/servicePids/byProperty")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "post_serviceListing_v1_servicePids_byProperty", summary = "Find service PIDs by property",
+            description = "Returns service PIDs matching the supplied property filter.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = FilterDTO.class))))
+    @ApiResponse(responseCode = "200", description = "Matching PIDs.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PidSet.class)))
     public PidSet getServicePidsByFilter(final FilterDTO filter,
             @Context final ContainerRequestContext requestContext) {
         try {
@@ -196,6 +227,12 @@ public class RestServiceListingProvider {
     @Path("/servicePids/satisfyingReference")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "post_serviceListing_v1_servicePids_satisfyingReference", summary = "Find PIDs satisfying a reference",
+            description = "Returns service PIDs that can satisfy the named component reference.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = RefDTO.class))))
+    @ApiResponse(responseCode = "200", description = "Matching PIDs.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PidSet.class)))
     public PidSet getServicePidsSatisfyingReference(final RefDTO ref,
             @Context final ContainerRequestContext requestContext) {
         try {
@@ -223,6 +260,10 @@ public class RestServiceListingProvider {
     @GET
     @Path("/factoryPids")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "get_serviceListing_v1_factoryPids", summary = "List factory PIDs",
+            description = "Returns factory component PIDs.")
+    @ApiResponse(responseCode = "200", description = "Matching PIDs.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PidSet.class)))
     public PidSet getFactoryPids(@Context final ContainerRequestContext requestContext) {
         try {
 
@@ -238,6 +279,12 @@ public class RestServiceListingProvider {
     @POST
     @Path("/factoryPids/byInterface")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "post_serviceListing_v1_factoryPids_byInterface", summary = "Find factory PIDs by interface",
+            description = "Returns factory PIDs implementing every specified interface.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = InterfaceNamesDTO.class))))
+    @ApiResponse(responseCode = "200", description = "Matching PIDs.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PidSet.class)))
     public PidSet getFactoryPidsByInterface(final InterfaceNamesDTO interfacesList,
             @Context final ContainerRequestContext requestContext) {
         try {
@@ -261,6 +308,12 @@ public class RestServiceListingProvider {
     @POST
     @Path("/factoryPids/byProperty")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "post_serviceListing_v1_factoryPids_byProperty", summary = "Find factory PIDs by property",
+            description = "Returns factory PIDs matching the supplied property filter.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = FilterDTO.class))))
+    @ApiResponse(responseCode = "200", description = "Matching PIDs.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PidSet.class)))
     public PidSet getFactoryPidsByFilter(final FilterDTO filter,
             @Context final ContainerRequestContext requestContext) {
         try {

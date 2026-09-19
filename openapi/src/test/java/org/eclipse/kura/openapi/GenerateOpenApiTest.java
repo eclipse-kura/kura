@@ -23,11 +23,16 @@ import java.util.Set;
 
 import org.eclipse.kura.internal.rest.configuration.ConfigurationRestService;
 import org.eclipse.kura.internal.rest.auth.SessionRestService;
+import org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV1;
 import org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2;
+import org.eclipse.kura.internal.rest.inventory.InventoryRestService;
+import org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestServiceV1;
+import org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestServiceV2;
 import org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV1;
 import org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2;
 import org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider;
+import org.eclipse.kura.internal.rest.tamper.detection.TamperDetectionRestService;
 import org.eclipse.kura.rest.system.SystemRestService;
 import org.junit.Test;
 
@@ -88,14 +93,17 @@ public class GenerateOpenApiTest {
         final Set<String> expected = new HashSet<>();
         for (Class<?> resource : Set.of(SystemRestService.class, ConfigurationRestService.class, SessionRestService.class,
                 IdentityRestServiceV1.class, IdentityRestServiceV2.class, SecurityRestServiceV1.class,
-                SecurityRestServiceV2.class, RestServiceListingProvider.class)) {
+                SecurityRestServiceV2.class, RestServiceListingProvider.class, CloudConnectionRestService.class,
+                KeystoreRestServiceV1.class, KeystoreRestServiceV2.class, TamperDetectionRestService.class,
+                InventoryRestService.class)) {
             final String base = resource.getAnnotation(jakarta.ws.rs.Path.class).value();
             for (Method method : resource.getMethods()) {
                 for (Annotation annotation : method.getAnnotations()) {
                     final HttpMethod verb = annotation.annotationType().getAnnotation(HttpMethod.class);
                     if (verb != null) {
                         final jakarta.ws.rs.Path suffix = method.getAnnotation(jakarta.ws.rs.Path.class);
-                        final String path = ("/" + base + "/" + (suffix == null ? "" : suffix.value())).replaceAll("/+", "/");
+                        final String path = ("/" + base + (suffix == null ? "" : "/" + suffix.value()))
+                                .replaceAll("/+", "/");
                         expected.add(verb.value().toLowerCase(Locale.ROOT) + " " + path);
                     }
                 }

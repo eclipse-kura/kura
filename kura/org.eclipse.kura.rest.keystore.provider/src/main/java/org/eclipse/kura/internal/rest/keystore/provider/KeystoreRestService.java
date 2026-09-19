@@ -17,6 +17,13 @@ import static org.eclipse.kura.rest.utils.Validable.validate;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -59,6 +66,10 @@ public class KeystoreRestService extends KeystoreRemoteService {
     @GET
     @RolesAllowed("keystores")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "List keystores", description = "Returns available keystore services.")
+    @ApiResponse(responseCode = "200", description = "Requested entries.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    array = @ArraySchema(schema = @Schema(implementation = KeystoreInfo.class))))
     public List<KeystoreInfo> listKeystores() {
         return listKeystoresInternal();
     }
@@ -67,6 +78,10 @@ public class KeystoreRestService extends KeystoreRemoteService {
     @Path("/entries")
     @RolesAllowed("keystores")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "List keystore entries", description = "Returns entries, optionally filtered by keystore PID or alias.")
+    @ApiResponse(responseCode = "200", description = "Requested entries.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    array = @ArraySchema(schema = @Schema(implementation = EntryInfo.class))))
     public List<EntryInfo> getEntries(@QueryParam("keystoreServicePid") String keystoreServicePid,
             @QueryParam("alias") String alias) {
         if (isNull(keystoreServicePid) && isNull(alias)) {
@@ -82,6 +97,9 @@ public class KeystoreRestService extends KeystoreRemoteService {
     @Path("/entries/entry")
     @RolesAllowed("keystores")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Read keystore entry", description = "Returns the entry matching keystore PID and alias.")
+    @ApiResponse(responseCode = "200", description = "Requested entry.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = EntryInfo.class)))
     public EntryInfo getEntry(@QueryParam("keystoreServicePid") String keystoreServicePid,
             @QueryParam("alias") String alias) {
         return getKeyInternal(keystoreServicePid, alias);
@@ -92,6 +110,11 @@ public class KeystoreRestService extends KeystoreRemoteService {
     @RolesAllowed("keystores")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Generate certificate signing request", description = "Generates a CSR for the requested key alias.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = CsrReadRequest.class))))
+    @ApiResponse(responseCode = "200", description = "Requested entry.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CsrResponse.class)))
     public CsrResponse getCSR(CsrReadRequest csrReadRequest) {
         validate(csrReadRequest, BAD_GET_CSR_REQUEST_ERROR_MESSAGE);
         return new CsrResponse(getCSRInternal(csrReadRequest));
@@ -101,6 +124,10 @@ public class KeystoreRestService extends KeystoreRemoteService {
     @Path("/entries/certificate")
     @RolesAllowed("keystores")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Store trusted certificate", description = "Stores a trusted certificate entry.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = TrustedCertificateWriteRequest.class))))
+    @ApiResponse(responseCode = "204", description = "Operation completed; response body is empty.")
     public void storeTrustedCertificateEntry(TrustedCertificateWriteRequest writeRequest) {
         validate(writeRequest, BAD_WRITE_REQUEST_ERROR_MESSAGE);
         storeTrustedCertificateEntryInternal(writeRequest);
@@ -110,6 +137,10 @@ public class KeystoreRestService extends KeystoreRemoteService {
     @Path("/entries/keypair")
     @RolesAllowed("keystores")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Store key pair", description = "Stores a generated key-pair entry.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = KeyPairWriteRequest.class))))
+    @ApiResponse(responseCode = "204", description = "Operation completed; response body is empty.")
     public void storeKeypairEntry(KeyPairWriteRequest writeRequest) {
         validate(writeRequest, BAD_WRITE_REQUEST_ERROR_MESSAGE);
         storeKeyPairEntryInternal(writeRequest);
@@ -119,6 +150,10 @@ public class KeystoreRestService extends KeystoreRemoteService {
     @Path("/entries")
     @RolesAllowed("keystores")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Delete keystore entry", description = "Deletes the requested keystore entry.",
+            requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = EntryRequest.class))))
+    @ApiResponse(responseCode = "204", description = "Operation completed; response body is empty.")
     public void deleteKeyEntry(EntryRequest deleteRequest) {
         validate(deleteRequest, BAD_DELETE_REQUEST_ERROR_MESSAGE);
         deleteKeyEntryInternal(deleteRequest.getKeystoreServicePid(), deleteRequest.getAlias());

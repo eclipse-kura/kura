@@ -10,6 +10,11 @@ resourceClasses:
   - org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV1
   - org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2
   - org.eclipse.kura.internal.rest.service.listing.provider.RestServiceListingProvider
+  - org.eclipse.kura.internal.rest.cloudconnection.provider.CloudConnectionRestService
+  - org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestServiceV1
+  - org.eclipse.kura.internal.rest.keystore.provider.KeystoreRestServiceV2
+  - org.eclipse.kura.internal.rest.tamper.detection.TamperDetectionRestService
+  - org.eclipse.kura.internal.rest.inventory.InventoryRestService
 readerClass: org.eclipse.kura.openapi.KuraOpenApiReader
 readAllResources: true
 openAPI:
@@ -19,7 +24,8 @@ openAPI:
     version: '${project.version}'
     description: >-
       System v1, configuration v2, session v1, identity v1/v2, security v1/v2
-      and service listing v1 APIs.
+      service listing v1, cloud connection v1, keystore v1/v2, tamper v1
+      and inventory v1 APIs.
       Available endpoints depend on installed bundles and REST settings.
       Use HTTP Basic authentication when enabled, or log in through session/v1/login/password,
       retain the JSESSIONID cookie, obtain session/v1/xsrfToken, then send both the cookie and
@@ -32,7 +38,9 @@ openAPI:
       Missing or invalid authentication returns an empty 401 after the audit filter;
       authenticated identities without permission receive an empty 403.
       Protected operations require their corresponding rest.system, rest.configuration,
-      rest.identity or rest.security permission; kura.admin also grants access.
+      rest.identity, rest.security, rest.cloudconnection, rest.keystores,
+      rest.tamper.detection or rest.inventory permission; kura.admin also grants access.
+      Service listing requires an authenticated principal without a specific REST role.
   servers:
     - url: /services
 
@@ -57,6 +65,28 @@ openAPI:
         name: X-XSRF-Token
         description: Token from session/v1/xsrfToken; required with session authentication even for GET.
     schemas:
+      InventoryBundleReference:
+        type: object
+        required: [name]
+        properties:
+          name:
+            type: string
+          version:
+            type: string
+      InventoryContainerReference:
+        type: object
+        required: [containerName]
+        properties:
+          containerName:
+            type: string
+      InventoryImageReference:
+        type: object
+        required: [imageName, imageTag]
+        properties:
+          imageName:
+            type: string
+          imageTag:
+            type: string
       Error:
         type: object
         required: [message]

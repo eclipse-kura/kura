@@ -1,7 +1,8 @@
 # Kura OpenAPI
 
 The normal Maven build generates an OpenAPI 3.0.3 document for all operations in
-the system v1, configuration v2, session v1, identity v1/v2, and security v1/v2 REST resources.
+the system v1, configuration v2, session v1, identity v1/v2, security v1/v2,
+and service listing v1 REST resources.
 This module is a build tool;
 it is not an OSGi bundle and is not included in device distributions.
 
@@ -39,7 +40,8 @@ scheme, so the specification describes the certificate route in prose.
 System endpoints require `rest.system`, configuration endpoints require
 `rest.configuration`, protected identity endpoints require `rest.identity`,
 and protected security endpoints require `rest.security`; `kura.admin` also
-grants access. Identity permission and password-requirement discovery endpoints
+grants access. Service-listing endpoints require an authenticated principal
+without a specific REST role. Identity permission and password-requirement discovery endpoints
 have no identity-role restriction. Security debug-mode status requires an
 authenticated principal but no security role. Missing or invalid
 authentication returns an empty 401 after the audit filter. An authenticated
@@ -57,8 +59,7 @@ and Swagger Parser, and check request requirements and Gson payloads with an
 OpenAPI-aware schema validator. Embedded HTTP tests exercise the actual REST
 resources, authentication filters, authorization, and Gson serializer, then
 compare responses with the generated contract for the previously covered system,
-configuration, and session resources. Identity and security currently have generated
-schema and authorization-shape checks, but not embedded HTTP payload tests.
+configuration, session, identity, security, and service-listing resources.
 The vendored schema is supplied
 by the OpenAPI Initiative under the [Apache 2.0 license](https://github.com/OAI/OpenAPI-Specification/blob/main/LICENSE).
 

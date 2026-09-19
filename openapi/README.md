@@ -1,7 +1,7 @@
-# Kura OpenAPI generation pilot
+# Kura OpenAPI for system and configuration APIs
 
 The normal Maven build generates an OpenAPI 3.0.3 document for all operations in
-the system v1 and configuration v2 REST resources. This module is a build tool;
+the system v1, configuration v2, and session v1 REST resources. This module is a build tool;
 it is not an OSGi bundle and is not included in device distributions.
 
 From the repository root, using JDK 21:
@@ -22,8 +22,22 @@ nor an OSGi framework is required. No runtime OpenAPI endpoint or UI is added.
 
 The scanner uses an explicit resource-class allowlist in `swagger-config.yaml`.
 The relative server URL is `/services`; paths retain their API versions.
-Operation IDs combine the HTTP method and normalized versioned resource path.
-Changing a method or path consequently changes its operation ID.
+Source annotations define stable operation IDs, summaries, request fields, and responses.
+The reader assigns an ID from the HTTP method and path only when an operation has none.
+
+HTTP Basic is available when enabled. For a password session, call
+`POST /session/v1/login/password`, retain the session cookie, then call
+`GET /session/v1/xsrfToken`. Send the cookie and `X-XSRF-Token` together on
+subsequent requests, including GET. The token endpoint alone is exempt from
+the token requirement. A session locked for password change permits only
+the token endpoint and `POST /session/v1/changePassword`; obtain a new token
+after changing the password. Kura also supports certificate authentication
+on configured mutual TLS ports. OpenAPI 3.0 cannot express that security
+scheme, so the specification describes the certificate route in prose.
+System endpoints require `rest.system` and configuration endpoints require
+`rest.configuration`; `kura.admin` also grants access. Missing or invalid
+authentication returns an empty 401 after the audit filter. An authenticated
+identity without permission receives an empty 403.
 
 The documentation-only reader uses private fields instead of getters to match
 Kura's Gson serialization. Java `Object` values remain unconstrained, including
@@ -32,24 +46,20 @@ future custom serializers or field-naming annotations need additional handling
 and payload tests before expanding coverage.
 
 Tests compare JSON and YAML, check endpoint coverage and reference resolution,
-and validate representative Gson payloads using JSON Schema draft 4 for the
-structural subset exercised by this pilot. They also check an invalid payload
-is rejected. This does not replace full OpenAPI semantic validation or tests
-against a running device.
+validate the document with the [official OpenAPI 3.0 schema](https://spec.openapis.org/oas/3.0/schema/2021-09-28)
+and Swagger Parser, and check request requirements and Gson payloads with an
+OpenAPI-aware schema validator. Embedded HTTP tests exercise the actual REST
+resources, authentication filters, authorization, and Gson serializer, then
+compare responses with the generated contract. The vendored schema is supplied
+by the OpenAPI Initiative under the [Apache 2.0 license](https://github.com/OAI/OpenAPI-Specification/blob/main/LICENSE).
 
 ## Known gaps
 
-This is a preliminary generated contract, not complete API documentation.
-Authentication, XSRF handling, permissions, required request properties, error
-responses, and bodies hidden behind generic JAX-RS `Response` return types need
-explicit documentation. Inferred responses currently use the generator's
-`default` response, rather than asserting specific HTTP status codes.
-The absence of a security declaration does not mean an endpoint is public.
-
-The specification describes these two resources in the source release, not
+The specification describes these resources in the source release, not
 the capabilities of a particular device. Installed bundles determine actual
 availability. Component-specific configuration constraints must still be
-obtained from component metadata.
+obtained from component metadata. The embedded HTTP tests use a local servlet
+server and mocked services; they do not verify a full OSGi installation or
+the deployment's TLS and certificate configuration.
 
-Next steps are selective annotation enrichment, additional REST bundles,
-complete contract validation and compatibility checks, and hosted documentation.
+Next steps are additional REST bundles, compatibility checks, and hosted documentation.

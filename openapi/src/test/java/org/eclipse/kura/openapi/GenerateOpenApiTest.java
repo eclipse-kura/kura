@@ -22,6 +22,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.kura.internal.rest.configuration.ConfigurationRestService;
+import org.eclipse.kura.internal.rest.auth.SessionRestService;
 import org.eclipse.kura.rest.system.SystemRestService;
 import org.junit.Test;
 
@@ -44,7 +45,7 @@ public class GenerateOpenApiTest {
         whenDocumentsAreRead();
 
         thenFormatsAreEquivalent();
-        thenMetadataDescribesThePilot();
+        thenMetadataDescribesTheApi();
         thenReferencesResolve(this.document);
         thenOperationsMatchResources();
     }
@@ -62,7 +63,7 @@ public class GenerateOpenApiTest {
         assertEquals(this.document, this.yaml);
     }
 
-    private void thenMetadataDescribesThePilot() {
+    private void thenMetadataDescribesTheApi() {
         assertEquals("3.0.3", this.document.path("openapi").asText());
         assertEquals("/services", this.document.at("/servers/0/url").asText());
         assertFalse(this.document.at("/info/version").asText().isEmpty());
@@ -80,7 +81,7 @@ public class GenerateOpenApiTest {
 
     private void thenOperationsMatchResources() {
         final Set<String> expected = new HashSet<>();
-        for (Class<?> resource : Set.of(SystemRestService.class, ConfigurationRestService.class)) {
+        for (Class<?> resource : Set.of(SystemRestService.class, ConfigurationRestService.class, SessionRestService.class)) {
             final String base = resource.getAnnotation(jakarta.ws.rs.Path.class).value();
             for (Method method : resource.getMethods()) {
                 for (Annotation annotation : method.getAnnotations()) {

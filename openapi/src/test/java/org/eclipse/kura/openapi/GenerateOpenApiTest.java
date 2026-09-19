@@ -23,6 +23,10 @@ import java.util.Set;
 
 import org.eclipse.kura.internal.rest.configuration.ConfigurationRestService;
 import org.eclipse.kura.internal.rest.auth.SessionRestService;
+import org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV1;
+import org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2;
+import org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV1;
+import org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2;
 import org.eclipse.kura.rest.system.SystemRestService;
 import org.junit.Test;
 
@@ -81,7 +85,9 @@ public class GenerateOpenApiTest {
 
     private void thenOperationsMatchResources() {
         final Set<String> expected = new HashSet<>();
-        for (Class<?> resource : Set.of(SystemRestService.class, ConfigurationRestService.class, SessionRestService.class)) {
+        for (Class<?> resource : Set.of(SystemRestService.class, ConfigurationRestService.class, SessionRestService.class,
+                IdentityRestServiceV1.class, IdentityRestServiceV2.class, SecurityRestServiceV1.class,
+                SecurityRestServiceV2.class)) {
             final String base = resource.getAnnotation(jakarta.ws.rs.Path.class).value();
             for (Method method : resource.getMethods()) {
                 for (Annotation annotation : method.getAnnotations()) {

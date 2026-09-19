@@ -5,15 +5,20 @@ resourceClasses:
   - org.eclipse.kura.internal.rest.auth.SessionRestService
   - org.eclipse.kura.rest.system.SystemRestService
   - org.eclipse.kura.internal.rest.configuration.ConfigurationRestService
+  - org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV1
+  - org.eclipse.kura.internal.rest.identity.provider.IdentityRestServiceV2
+  - org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV1
+  - org.eclipse.kura.internal.rest.security.provider.SecurityRestServiceV2
 readerClass: org.eclipse.kura.openapi.KuraOpenApiReader
 readAllResources: true
 openAPI:
   openapi: 3.0.3
   info:
-    title: Eclipse Kura system and configuration REST API
+    title: Eclipse Kura REST API
     version: '${project.version}'
     description: >-
-      System v1, configuration v2 and session v1 APIs. Available endpoints depend on installed bundles and REST settings.
+      System v1, configuration v2, session v1, identity v1/v2 and security v1/v2 APIs.
+      Available endpoints depend on installed bundles and REST settings.
       Use HTTP Basic authentication when enabled, or log in through session/v1/login/password,
       retain the JSESSIONID cookie, obtain session/v1/xsrfToken, then send both the cookie and
       X-XSRF-Token on subsequent requests, including GET. Only xsrfToken is exempt from the token requirement.
@@ -24,7 +29,8 @@ openAPI:
       The cookie name shown is the servlet default and can depend on the deployment.
       Missing or invalid authentication returns an empty 401 after the audit filter;
       authenticated identities without permission receive an empty 403.
-      Permissions are rest.system or rest.configuration; kura.admin also grants access.
+      Protected operations require their corresponding rest.system, rest.configuration,
+      rest.identity or rest.security permission; kura.admin also grants access.
   servers:
     - url: /services
 

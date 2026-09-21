@@ -28,6 +28,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.identity.IdentityService;
@@ -39,7 +40,11 @@ import org.eclipse.kura.internal.rest.auth.RestIdentityHelper;
 import org.eclipse.kura.internal.rest.auth.RestSessionHelper;
 import org.eclipse.kura.internal.rest.auth.SessionAuthProvider;
 import org.eclipse.kura.internal.rest.auth.SessionRestService;
+import org.eclipse.kura.internal.rest.auth.jwt.JwtAuthenticationProvider;
+import org.eclipse.kura.internal.rest.auth.jwt.JwtRestService;
 import org.eclipse.kura.rest.auth.AuthenticationProvider;
+import org.eclipse.kura.security.token.TokenIssuingService;
+import org.eclipse.kura.security.token.TokenVerificationService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -54,6 +59,7 @@ import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,6 +90,11 @@ public class RestService implements ConfigurableComponent {
 
     private SessionAuthProvider sessionAuthenticationProvider;
     private SessionRestService authRestService;
+
+    private JwtAuthenticationProvider jwtAuthProvider;
+    private JwtRestService jwtRestService;
+    private Optional<TokenIssuingService> tokenIssuingService = Optional.empty();
+    private Optional<TokenVerificationService> tokenVerificationService = Optional.empty();
 
     private final IncomingPortCheckFilter incomingPortCheckFilter = new IncomingPortCheckFilter();
     private final AuthenticationFilter authenticationFilter = new AuthenticationFilter();
@@ -119,6 +130,55 @@ public class RestService implements ConfigurableComponent {
 
     public void unbindAuthenticationProvider(final AuthenticationProvider provider) {
         this.authenticationFilter.unregisterAuthenticationProvider(provider);
+    }
+
+    @Reference(//
+            cardinality = ReferenceCardinality.OPTIONAL, //
+            policy = ReferencePolicy.DYNAMIC, //
+            policyOption = ReferencePolicyOption.GREEDY)
+    public synchronized void bindTokenVerificationService(final TokenVerificationService tokenVerificationService) {
+        this.tokenVerificationService = Optional.of(tokenVerificationService);
+
+        if (this.jwtAuthProvider != null) {
+            this.jwtAuthProvider.setTokenVerificationService(tokenVerificationService);
+        }
+
+        if (this.jwtRestService != null) {
+            this.jwtRestService.setTokenVerificationService(tokenVerificationService);
+        }
+    }
+
+    public synchronized void unbindTokenVerificationService(final TokenVerificationService tokenVerificationService) {
+        this.tokenVerificationService = this.tokenVerificationService
+                .filter(current -> current != tokenVerificationService);
+
+        if (this.jwtAuthProvider != null) {
+            this.jwtAuthProvider.unsetTokenVerificationService(tokenVerificationService);
+        }
+
+        if (this.jwtRestService != null) {
+            this.jwtRestService.unsetTokenVerificationService(tokenVerificationService);
+        }
+    }
+
+    @Reference(//
+            cardinality = ReferenceCardinality.OPTIONAL, //
+            policy = ReferencePolicy.DYNAMIC, //
+            policyOption = ReferencePolicyOption.GREEDY)
+    public synchronized void bindTokenIssuingService(final TokenIssuingService tokenIssuingService) {
+        this.tokenIssuingService = Optional.of(tokenIssuingService);
+
+        if (this.jwtRestService != null) {
+            this.jwtRestService.setTokenIssuingService(tokenIssuingService);
+        }
+    }
+
+    public synchronized void unbindTokenIssuingService(final TokenIssuingService tokenIssuingService) {
+        this.tokenIssuingService = this.tokenIssuingService.filter(current -> current != tokenIssuingService);
+
+        if (this.jwtRestService != null) {
+            this.jwtRestService.unsetTokenIssuingService(tokenIssuingService);
+        }
     }
 
     @Activate
@@ -161,7 +221,12 @@ public class RestService implements ConfigurableComponent {
         this.registeredServices.add(
                 bundleContext.registerService(ExceptionMapper.class, new RestExceptionMapper(), serviceProperties));
 
+        createJwtComponents(identityHelper);
+
         update(properties);
+
+        this.registeredServices.add(bundleContext.registerService(JwtRestService.class, this.jwtRestService,
+                RestServiceUtils.resourceProperties()));
 
         try {
             configureDefaultWhiteboard();
@@ -192,6 +257,14 @@ public class RestService implements ConfigurableComponent {
 
     }
 
+    private synchronized void createJwtComponents(final RestIdentityHelper identityHelper) {
+        this.jwtRestService = new JwtRestService(identityHelper);
+        this.jwtAuthProvider = new JwtAuthenticationProvider(identityHelper);
+
+        this.tokenIssuingService.ifPresent(this::bindTokenIssuingService);
+        this.tokenVerificationService.ifPresent(this::bindTokenVerificationService);
+    }
+
     @Modified
     public void update(final Map<String, Object> properties) {
         logger.info("updating...");
@@ -202,6 +275,7 @@ public class RestService implements ConfigurableComponent {
             this.options = newOptions;
             this.authRestService.setOptions(newOptions);
             this.sessionAuthenticationProvider.setOptions(newOptions);
+            this.jwtRestService.setOptions(newOptions);
             this.incomingPortCheckFilter.setAllowedPorts(newOptions.getAllowedPorts());
 
             updateBuiltinAuthenticationProviders(newOptions);
@@ -238,6 +312,12 @@ public class RestService implements ConfigurableComponent {
 
         if (options.isSessionManagementEnabled()) {
             bindAuthenticationProvider(this.sessionAuthenticationProvider);
+        }
+
+        if (options.isJwtAuthEnabled()) {
+            bindAuthenticationProvider(this.jwtAuthProvider);
+        } else {
+            unbindAuthenticationProvider(this.jwtAuthProvider);
         }
     }
 

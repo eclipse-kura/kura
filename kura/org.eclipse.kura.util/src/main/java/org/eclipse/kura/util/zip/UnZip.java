@@ -15,54 +15,234 @@
 package org.eclipse.kura.util.zip;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.security.CodeSource;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.ExitStatus;
 
 public class UnZip {
 
-    private static final Logger logger = LoggerFactory.getLogger(UnZip.class);
+    private static final Logger logger = Logger.getLogger(UnZip.class.getName());
 
     private static final int BUFFER = 1024;
     private static final int ZIP_MAGIC_FIRST_BYTE = 0x50;  // 'P'
     private static final int ZIP_MAGIC_SECOND_BYTE = 0x4B; // 'K'
+    private static final String EXTRACTION_LIBRARY_PREFIX = "kura-unzip-lib-";
+    private static final int EXTRACTION_TIMEOUT = 300;  // Max duration of an extraction, 5 minutes
+    private static final int TIMEOUT_EXIT_CODE = 124;   // Exit code returned by the timeout command
     private static int tooBig = 0x6400000; // Max size of unzipped data, 100MB
     private static int tooMany = 1024;     // Max number of files
+
+    private static volatile String extractionClassPath;
+    private static volatile boolean aborted;
 
     private UnZip() {
         // Do nothing...
     }
 
+    public static void unZip(InputStream archive, String outputFolder) throws IOException {
+        unZipZipInputStream(new ZipInputStream(archive), outputFolder);
+    }
+
     public static void unZipBytes(byte[] bytes, String outputFolder) throws IOException {
-        ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(bytes));
-        unZipZipInputStream(zis, outputFolder);
+        unZip(new ByteArrayInputStream(bytes), outputFolder);
     }
 
     public static void unZipFile(String filename, String outputFolder) throws IOException {
         File file = new File(filename);
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
-        unZipZipInputStream(zis, outputFolder);
+        unZip(new FileInputStream(file), outputFolder);
+    }
+
+    /**
+     * Extracts the given archive in a dedicated process spawned through the provided {@link CommandExecutorService}.
+     * When an unprivileged executor service is used, the extraction is performed by the configured command user instead
+     * of the user running the framework.
+     * <p>
+     * The archive is streamed to the standard input of the extraction process. The given stream is not closed by this
+     * method. The extraction process is killed when it takes longer than {@value #EXTRACTION_TIMEOUT} seconds.
+     *
+     * @param archive
+     *            the stream the archive is read from
+     * @param outputFolder
+     *            the folder the archive is extracted in
+     * @param executorService
+     *            the executor service used to spawn the extraction process
+     * @throws IOException
+     *             if the extraction fails
+     */
+    public static void unZip(InputStream archive, String outputFolder, CommandExecutorService executorService)
+            throws IOException {
+        String classPath = extractionClassPath();
+
+        String[] commandLine = new String[] { quote(javaExecutable()), "-cp", quote(classPath),
+                UnZip.class.getName(), quote(outputFolder) };
+
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+
+        Command command = new Command(commandLine);
+        command.setExecuteInAShell(true);
+        command.setTimeout(EXTRACTION_TIMEOUT);
+        command.setInputStream(archive);
+        command.setErrorStream(err);
+
+        CommandStatus status = executorService.execute(command);
+
+        ExitStatus exitStatus = status.getExitStatus();
+        if (status.isTimedout() || (exitStatus != null && exitStatus.getExitCode() == TIMEOUT_EXIT_CODE)) {
+            throw new IOException("The extraction of the archive in " + outputFolder + " did not complete within "
+                    + EXTRACTION_TIMEOUT + " seconds");
+        }
+
+        if (exitStatus == null || !exitStatus.isSuccessful()) {
+            throw new IOException("Unable to extract the archive in " + outputFolder + ": "
+                    + new String(err.toByteArray(), StandardCharsets.UTF_8).trim());
+        }
+    }
+
+    /**
+     * Extracts in the given folder the archive read from the standard input. This entry point is used to perform the
+     * extraction in a dedicated process, see {@link #unZip(InputStream, String, CommandExecutorService)}.
+     *
+     * When the process is killed before the extraction completes, for example because it timed out, a shutdown hook
+     * removes the entries extracted so far instead of leaving a partial extraction behind.
+     *
+     * @param args
+     *            the folder the archive is extracted in
+     */
+    public static void main(String[] args) {
+        if (args.length != 1) {
+            System.err.println("Usage: " + UnZip.class.getName()
+                    + " <output folder> - the archive is read from the standard input");
+            System.exit(1);
+            return;
+        }
+
+        Deque<File> createdEntries = new ConcurrentLinkedDeque<>();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            aborted = true;
+            deleteCreatedEntries(createdEntries);
+        }));
+
+        try {
+            unZipZipInputStream(new ZipInputStream(System.in), args[0], createdEntries);
+
+            createdEntries.clear();
+        } catch (IOException | RuntimeException e) {
+            System.err.println("Unable to extract the archive in " + args[0] + ": " + e.getMessage());
+            System.exit(1);
+        }
+    }
+
+    private static String javaExecutable() {
+        return System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+    }
+
+    private static String extractionClassPath() throws IOException {
+        String classPath = extractionClassPath;
+
+        if (classPath == null) {
+            synchronized (UnZip.class) {
+                if (extractionClassPath == null) {
+                    extractionClassPath = copyExtractionLibraries();
+                }
+                classPath = extractionClassPath;
+            }
+        }
+
+        return classPath;
+    }
+
+    private static String copyExtractionLibraries() throws IOException {
+        Path libraryFolder = Files.createTempDirectory(EXTRACTION_LIBRARY_PREFIX);
+        libraryFolder.toFile().deleteOnExit();
+        shareWithExtractionUser(libraryFolder, true);
+
+        Set<Path> sources = new LinkedHashSet<>();
+        for (Class<?> clazz : new Class<?>[] { UnZip.class, KuraException.class }) {
+            sources.add(codeSourcePath(clazz));
+        }
+
+        Set<String> entries = new LinkedHashSet<>();
+        for (Path source : sources) {
+            entries.add(copyExtractionLibrary(source, libraryFolder));
+        }
+
+        return String.join(File.pathSeparator, entries);
+    }
+
+    private static String copyExtractionLibrary(Path source, Path libraryFolder) throws IOException {
+        if (!Files.isRegularFile(source)) {
+            return source.toString();
+        }
+
+        Path target = libraryFolder.resolve(source.getFileName().toString());
+        Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+        target.toFile().deleteOnExit();
+        shareWithExtractionUser(target, false);
+
+        return target.toString();
+    }
+
+    private static void shareWithExtractionUser(Path path, boolean traversable) throws IOException {
+        File file = path.toFile();
+
+        if (!file.setReadable(true, false) || (traversable && !file.setExecutable(true, false))) {
+            throw new IOException("Unable to make " + path + " readable by the user performing the extraction");
+        }
+    }
+
+    private static Path codeSourcePath(Class<?> clazz) throws IOException {
+        CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
+
+        if (codeSource == null || codeSource.getLocation() == null) {
+            throw new IOException("Unable to locate the archive providing " + clazz.getName());
+        }
+
+        try {
+            return Paths.get(codeSource.getLocation().toURI());
+        } catch (URISyntaxException | RuntimeException e) {
+            throw new IOException("Unable to locate the archive providing " + clazz.getName(), e);
+        }
+    }
+
+    private static String quote(String argument) {
+        return "'" + argument.replace("'", "'\\''") + "'";
     }
 
     private static void unZipZipInputStream(ZipInputStream zis, String outFolder) throws IOException {
-        File folder = new File(outFolder == null ? System.getProperty("user.dir") : outFolder);
-        Deque<File> createdEntries = new ArrayDeque<>();
+        unZipZipInputStream(zis, outFolder, new ArrayDeque<>());
+    }
+
+    private static void unZipZipInputStream(ZipInputStream zis, String outFolder, Deque<File> createdEntries)
+            throws IOException {
+        File folder = new File(outFolder);
 
         try {
             createDirectories(folder, createdEntries);
@@ -83,6 +263,10 @@ public class UnZip {
         ZipEntry ze = zis.getNextEntry();
 
         while (ze != null) {
+            if (aborted) {
+                throw new IllegalStateException("The extraction has been interrupted.");
+            }
+
             File newFile = getFile(entryPath(folder, ze), folder);
 
             if (ze.isDirectory()) {
@@ -155,13 +339,17 @@ public class UnZip {
     }
 
     private static void deleteCreatedEntries(Deque<File> createdEntries) {
-        while (!createdEntries.isEmpty()) {
-            File entry = createdEntries.pop();
-            try {
-                Files.deleteIfExists(entry.toPath());
-            } catch (IOException e) {
-                logger.warn("Unable to delete {} while cleaning up a failed extraction", entry, e);
-            }
+        for (File entry = createdEntries.pollFirst(); entry != null; entry = createdEntries.pollFirst()) {
+            deleteCreatedEntry(entry);
+        }
+    }
+
+    private static void deleteCreatedEntry(File entry) {
+        try {
+            Files.deleteIfExists(entry.toPath());
+        } catch (IOException e) {
+            logger.log(Level.WARNING, e,
+                    () -> "Unable to delete " + entry + " while cleaning up a failed extraction");
         }
     }
 

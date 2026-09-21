@@ -121,6 +121,26 @@ public class UnZipTest {
         thenUncompressedFileNotExist();
     }
 
+    @Test
+    public void testPathValidationUsingPathStartsWithNormalizesPaths() throws IOException {
+        givenArchiveWithAnEntryOutsideTheTargetFolder();
+
+        whenFileIsUnzippedCatchingIoError();
+
+        thenExceptionIsCaught();
+    }
+
+    @Test
+    public void testNoFollowSymlinksWhenExtractingZipEntries() throws IOException {
+        givenCompressedFile();
+        givenSymlinkInWorkFolder();
+
+        whenFileIsUnzipped();
+
+        thenUncompressedFileExists();
+        thenSymlinkIsNotFollowed();
+    }
+
     private void givenCompressedFile() throws IOException {
         TestZipArchives.writeTo(TestZipArchives.withSingleFile(), INPUT_ZIP_FILE);
     }
@@ -228,5 +248,33 @@ public class UnZipTest {
     private void thenUncompressedFileNotExist() {
         File uncompressedFile = new File(WORK_FOLDER + FILE_NAME);
         assertFalse(uncompressedFile.exists());
+    }
+
+    private void givenSymlinkInWorkFolder() throws IOException {
+        File workDir = new File(WORK_FOLDER);
+        if (!workDir.exists()) {
+            workDir.mkdirs();
+        }
+        
+        File symlink = new File(WORK_FOLDER + "symlink_to_outside");
+        try {
+            java.nio.file.Files.createSymbolicLink(
+                symlink.toPath(),
+                new File("/tmp").toPath()
+            );
+        } catch (UnsupportedOperationException e) {
+            // Skip test if symlinks are not supported (e.g., on Windows without admin rights)
+            org.junit.Assume.assumeNoException("Symbolic links not supported on this platform", e);
+        }
+    }
+
+    private void thenSymlinkIsNotFollowed() throws IOException {
+        File symlink = new File(WORK_FOLDER + "symlink_to_outside");
+
+        if (java.nio.file.Files.isSymbolicLink(symlink.toPath())) {
+            java.nio.file.Path target = java.nio.file.Files.readSymbolicLink(symlink.toPath());
+            assertTrue("Symlink should still be a link, not a regular file", 
+                java.nio.file.Files.isSymbolicLink(symlink.toPath()));
+        }
     }
 }

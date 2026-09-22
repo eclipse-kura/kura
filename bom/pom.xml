@@ -52,6 +52,9 @@
         <org.usb4java.version>2.0.0-SNAPSHOT</org.usb4java.version>
         <usb4java-javax.version>2.0.0-SNAPSHOT</usb4java-javax.version>
         <mockito.version>5.21.0</mockito.version>
+        <swagger.version>2.2.55</swagger.version>
+        <swagger-parser.version>2.1.48</swagger-parser.version>
+        <json-schema-validator.version>1.5.6</json-schema-validator.version>
     </properties>
 
     <dependencyManagement>
@@ -938,6 +941,26 @@
                 <groupId>org.objenesis</groupId>
                 <artifactId>objenesis</artifactId>
                 <version>${objenesis.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations-jakarta</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-jaxrs2-jakarta</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.parser.v3</groupId>
+                <artifactId>swagger-parser-v3</artifactId>
+                <version>${swagger-parser.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.networknt</groupId>
+                <artifactId>json-schema-validator</artifactId>
+                <version>${json-schema-validator.version}</version>
             </dependency>
             <!-- END test dependencies -->
             <!-- START Kura wrapper bundles (target-platform modules) -->

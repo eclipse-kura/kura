@@ -96,7 +96,6 @@
         <!-- Dependency versions -->
         <mockito.version>5.21.0</mockito.version>
         <perfmark-api.version>0.26.0</perfmark-api.version>
-        <swagger.version>2.2.55</swagger.version>
 
         <!-- The two wrapper versions referenced directly via ${...} in bnd instructions
              (target-platform usb4java wrappers). All other dependency versions live in
@@ -158,11 +157,6 @@
                 <version>6.0.0-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.swagger.core.v3</groupId>
-                <artifactId>swagger-annotations-jakarta</artifactId>
-                <version>${swagger.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

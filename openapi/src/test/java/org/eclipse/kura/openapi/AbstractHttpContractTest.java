@@ -248,7 +248,7 @@ public abstract class AbstractHttpContractTest {
     }
 
     protected void whenRequest(String method, String path, String body, String contentType) throws Exception {
-        this.requestPath = path;
+        this.requestPath = path.split("\\?", 2)[0];
         this.requestMethod = method.toLowerCase(java.util.Locale.ROOT);
         final HttpRequest.Builder request = HttpRequest.newBuilder(URI.create(this.base + path))
                 .timeout(Duration.ofSeconds(5)).header("Accept", "application/json");

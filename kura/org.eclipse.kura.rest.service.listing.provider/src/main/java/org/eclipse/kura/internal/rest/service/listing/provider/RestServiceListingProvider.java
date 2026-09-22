@@ -69,6 +69,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+
 @Tag(name = "Service listing", description = "Requires an authenticated principal; no specific REST role is checked.")
 @ApiResponses({
         @ApiResponse(responseCode = "401", ref = "#/components/responses/Unauthenticated"),
@@ -234,7 +235,7 @@ public class RestServiceListingProvider {
                     schema = @Schema(implementation = RefDTO.class))))
     @ApiResponses({
             @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequest"),
-            @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFound")
+            @ApiResponse(responseCode = "404", ref = "#/components/responses/EntitylessNotFound")
     })
     @ApiResponse(responseCode = "200", description = "Matching PIDs.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PidSet.class)))

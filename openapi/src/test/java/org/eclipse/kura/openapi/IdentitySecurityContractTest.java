@@ -51,6 +51,15 @@ public class IdentitySecurityContractTest {
         thenPolicyUploadHasRequiredTextBody();
     }
 
+    @Test
+    public void conflictResponsesDocumentErrorBodies() throws Exception {
+        givenGeneratedDocument();
+
+        whenIdentityConflictsAreRead();
+
+        thenConflictsReferenceTheErrorSchema();
+    }
+
     private void givenGeneratedDocument() throws Exception {
         this.document = Json.mapper()
                 .readTree(Files.readString(Path.of(System.getProperty("openapi.directory"), "openapi.json")));
@@ -62,6 +71,18 @@ public class IdentitySecurityContractTest {
 
     private void whenSecurityEndpointsAreRead() {
         this.paths = this.document.path("paths");
+    }
+
+    private void whenIdentityConflictsAreRead() {
+        this.paths = this.document.path("paths");
+    }
+
+    private void thenConflictsReferenceTheErrorSchema() {
+        for (String path : new String[] { "/identity/v2/identities", "/identity/v2/permissions" }) {
+            JsonNode conflict = this.paths.path(path).path("post").path("responses").path("409");
+            assertEquals(path, "#/components/schemas/Error",
+                    conflict.path("content").path("application/json").path("schema").path("$ref").asText());
+        }
     }
 
     private void thenIdentityDiscoveryEndpointsArePublic() {

@@ -182,6 +182,23 @@ public class RestTransport implements Transport {
         throw new IllegalStateException("Port " + port + "not open");
     }
 
+    public static void waitPortClosed(final String host, final int port, final long timeout,
+            final TimeUnit timeoutUnit) throws InterruptedException {
+        final long now = System.nanoTime();
+
+        while (System.nanoTime() - now < timeoutUnit.toNanos(timeout)) {
+            try {
+                new Socket(host, port).close();
+                logger.info("port still open");
+            } catch (final Exception e) {
+                return;
+            }
+            Thread.sleep(500);
+        }
+
+        throw new IllegalStateException("Port " + port + " not closed");
+    }
+
     public void setSslContext(final SSLContext sslContext) {
         this.sslContext = Optional.of(sslContext);
     }

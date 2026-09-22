@@ -1210,6 +1210,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
     private final Map<String, KeystoreService> keystoreServices = new HashMap<>();
     private final Map<String, TestCA> testCAs = new HashMap<>();
     private final Set<String> createdFactoryPids = new HashSet<>();
+    private final Set<Integer> httpsClientAuthPorts = new HashSet<>();
+    private boolean httpServiceCustomized = false;
 
     public void givenNoBasicCredentials() {
         givenBasicCredentials(Optional.empty());
@@ -1306,6 +1308,9 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
             properties.put("KeystoreService.target", "(kura.service.pid=" + keystorePid + ")");
             properties.put("https.client.auth.ports", new Integer[] { port });
 
+            this.httpsClientAuthPorts.add(port);
+            this.httpServiceCustomized = true;
+
             configurationService.updateConfiguration("org.eclipse.kura.http.server.manager.HttpService", properties);
 
             RestTransport.waitPortOpen("localhost", port, 1, TimeUnit.MINUTES);
@@ -1325,11 +1330,43 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
             configurationService.updateConfiguration("org.eclipse.kura.http.server.manager.HttpService", properties);
 
-            RestTransport.waitPortOpen("localhost", 8080, 1, TimeUnit.MINUTES);
+            waitHttpServiceRestarted();
 
         } catch (Exception e) {
             fail("cannot set httpservice keystore pid");
         }
+    }
+
+    private void restoreHttpServiceConfiguration() {
+        if (!this.httpServiceCustomized) {
+            return;
+        }
+
+        try {
+            final ConfigurationService configurationService = ServiceUtil
+                    .trackService(ConfigurationService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
+
+            final Map<String, Object> properties = new HashMap<>();
+            properties.put("KeystoreService.target", "(kura.service.pid=changeme)");
+            properties.put("https.client.auth.ports", new Integer[] {});
+
+            configurationService.updateConfiguration("org.eclipse.kura.http.server.manager.HttpService", properties);
+
+            waitHttpServiceRestarted();
+
+            this.httpsClientAuthPorts.clear();
+            this.httpServiceCustomized = false;
+        } catch (Exception e) {
+            fail("cannot restore httpservice configuration");
+        }
+    }
+
+    private void waitHttpServiceRestarted() throws InterruptedException {
+        for (final int port : this.httpsClientAuthPorts) {
+            RestTransport.waitPortClosed("localhost", port, 1, TimeUnit.MINUTES);
+        }
+
+        RestTransport.waitPortOpen("localhost", 8080, 1, TimeUnit.MINUTES);
     }
 
     private void givenConfiguration(final String pid, final Object... properties) {
@@ -1601,6 +1638,8 @@ public class RestServiceTest extends AbstractRequestHandlerTest {
 
             givenRestServiceConfiguration(defaultConfig);
         }
+
+        restoreHttpServiceConfiguration();
 
         try {
             if (createdFactoryPids.isEmpty()) {

@@ -67,13 +67,17 @@ public class KuraOpenApiReader extends Reader {
                     .map(m -> m.getAnnotation(Operation.class).operationId())
                     .filter(operationId -> !operationId.isBlank())
                     .collect(Collectors.toSet());
+            final Set<String> explicitOperationIds = classes.stream().flatMap(c -> Arrays.stream(c.getMethods()))
+                    .filter(m -> m.isAnnotationPresent(Operation.class))
+                    .map(m -> m.getAnnotation(Operation.class).operationId())
+                    .filter(operationId -> !operationId.isBlank())
+                    .collect(Collectors.toSet());
             result.getPaths().forEach((path, item) -> item.readOperationsMap().forEach((method, operation) -> {
                 if (publicOperations.contains(operation.getOperationId())) {
                     operation.setSecurity(java.util.Collections.emptyList());
                 }
-                if (path.startsWith("/security/") || path.startsWith("/keystores/")
-                        || operation.getOperationId() == null
-                        || operation.getOperationId().isBlank()) {
+                final String operationId = operation.getOperationId();
+                if (operationId == null || operationId.isBlank() || !explicitOperationIds.contains(operationId)) {
                     operation.setOperationId(method.name().toLowerCase(Locale.ROOT) + "_"
                             + path.replaceAll("[^a-zA-Z0-9]+", "_").replaceAll("^_|_$", ""));
                 }

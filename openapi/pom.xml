@@ -30,7 +30,6 @@
         <dependency>
             <groupId>io.swagger.parser.v3</groupId>
             <artifactId>swagger-parser-v3</artifactId>
-            <version>2.1.48</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -101,7 +100,6 @@
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-jaxrs2-jakarta</artifactId>
-            <version>${swagger.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -121,7 +119,6 @@
         <dependency>
             <groupId>com.networknt</groupId>
             <artifactId>json-schema-validator</artifactId>
-            <version>1.5.6</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -157,7 +154,7 @@
             <plugin>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-maven-plugin-jakarta</artifactId>
-                <version>${swagger.version}</version>
+                <version>2.2.55</version>
                 <configuration>
                     <configurationFilePath>${project.build.outputDirectory}/swagger-config.yaml</configurationFilePath>
                     <outputPath>${project.build.directory}/openapi</outputPath>

@@ -94,6 +94,90 @@ public class RequestSchemaTest {
         thenRequestIsAccepted();
     }
 
+    @Test
+    public void identityNamesOutsideTheValidatedPatternAreRejected() throws Exception {
+        givenRequest("IdentityDTO", "{\"name\":\"oapi-v2\"}");
+
+        whenRequestIsValidated();
+
+        thenRequestIsRejected();
+    }
+
+    @Test
+    public void identityNamesInsideTheValidatedPatternAreAccepted() throws Exception {
+        givenRequest("IdentityDTO", "{\"name\":\"oapi_v2\"}");
+
+        whenRequestIsValidated();
+
+        thenRequestIsAccepted();
+    }
+
+    @Test
+    public void tooShortIdentityNamesAreRejected() throws Exception {
+        givenRequest("IdentityDTO", "{\"name\":\"ab\"}");
+
+        whenRequestIsValidated();
+
+        thenRequestIsRejected();
+    }
+
+    @Test
+    public void unknownConfigurationComponentsAreRejected() throws Exception {
+        givenRequest("IdentityConfigurationRequestDTO",
+                "{\"identity\":{\"name\":\"test_user\"},\"configurationComponents\":[\"Bogus\"]}");
+
+        whenRequestIsValidated();
+
+        thenRequestIsRejected();
+    }
+
+    @Test
+    public void knownConfigurationComponentsAreAccepted() throws Exception {
+        givenRequest("IdentityConfigurationRequestDTO", "{\"identity\":{\"name\":\"test_user\"},"
+                + "\"configurationComponents\":[\"AdditionalConfigurations\",\"AssignedPermissions\","
+                + "\"PasswordConfiguration\"]}");
+
+        whenRequestIsValidated();
+
+        thenRequestIsAccepted();
+    }
+
+    @Test
+    public void legacyContainerReferencesAreRejected() throws Exception {
+        givenRequest("InventoryContainerReference", "{\"containerName\":\"pr6294-test\"}");
+
+        whenRequestIsValidated();
+
+        thenRequestIsRejected();
+    }
+
+    @Test
+    public void marshallerShapedContainerReferencesAreAccepted() throws Exception {
+        givenRequest("InventoryContainerReference", "{\"name\":\"pr6294-test\",\"version\":\"nginx:latest\"}");
+
+        whenRequestIsValidated();
+
+        thenRequestIsAccepted();
+    }
+
+    @Test
+    public void legacyImageReferencesAreRejected() throws Exception {
+        givenRequest("InventoryImageReference", "{\"imageName\":\"hello-world\",\"imageTag\":\"latest\"}");
+
+        whenRequestIsValidated();
+
+        thenRequestIsRejected();
+    }
+
+    @Test
+    public void marshallerShapedImageReferencesAreAccepted() throws Exception {
+        givenRequest("InventoryImageReference", "{\"name\":\"hello-world\",\"version\":\"latest\"}");
+
+        whenRequestIsValidated();
+
+        thenRequestIsAccepted();
+    }
+
     private void givenRequest(String schemaName, String request) throws Exception {
         this.document = Json.mapper().readTree(Files.readString(
                 Path.of(System.getProperty("openapi.directory"), "openapi.json")));

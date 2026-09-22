@@ -67,8 +67,34 @@ public class IdentityHttpContractTest extends AbstractHttpContractTest {
         thenIdentityWasCreated();
     }
 
+    @Test
+    public void conflictingIdentityCreationReturnsTheDocumentedErrorBody() throws Exception {
+        givenIdentityPermission();
+        givenServer();
+        givenIdentityAlreadyExists();
+
+        whenRequest("POST", "/identity/v2/identities", "{\"name\":\"alice\"}");
+
+        thenResponseMatchesContract(409);
+    }
+
+    @Test
+    public void unknownConfigurationComponentsAreRejectedAsBadRequests() throws Exception {
+        givenIdentityPermission();
+        givenServer();
+
+        whenRequest("POST", "/identity/v2/identities/byName",
+                "{\"identity\":{\"name\":\"alice\"},\"configurationComponents\":[\"Bogus\"]}");
+
+        thenResponseMatchesContract(400);
+    }
+
     private void givenIdentityPermission() {
         this.permissions = Set.of("rest.identity");
+    }
+
+    private void givenIdentityAlreadyExists() throws org.eclipse.kura.KuraException {
+        when(this.identity.createIdentity(any(IdentityConfiguration.class))).thenReturn(false);
     }
 
     @Override

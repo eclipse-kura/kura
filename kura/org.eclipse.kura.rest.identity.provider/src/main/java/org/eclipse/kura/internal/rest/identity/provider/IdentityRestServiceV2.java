@@ -145,7 +145,8 @@ public class IdentityRestServiceV2 {
             requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = IdentityDTO.class))))
     @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
-    @ApiResponse(responseCode = "409", description = "Identity or permission already exists.")
+    @ApiResponse(responseCode = "409", description = "Identity or permission already exists.", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON, schema = @Schema(ref = "#/components/schemas/Error")))
     public Response createIdentity(final IdentityDTO identity) {
         logger.debug(DEBUG_MESSAGE, "createIdentity");
 
@@ -349,7 +350,8 @@ public class IdentityRestServiceV2 {
             requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = PermissionDTO.class))))
     @ApiResponse(responseCode = "200", ref = "#/components/responses/EmptySuccess")
-    @ApiResponse(responseCode = "409", description = "Identity or permission already exists.")
+    @ApiResponse(responseCode = "409", description = "Identity or permission already exists.", content = @Content(
+            mediaType = MediaType.APPLICATION_JSON, schema = @Schema(ref = "#/components/schemas/Error")))
     public Response createPermission(final PermissionDTO permissionDTO) {
         logger.debug(DEBUG_MESSAGE, "createPermission");
 
@@ -427,6 +429,8 @@ public class IdentityRestServiceV2 {
 
     private WebApplicationException toWebApplicationException(final Exception e) {
         if (e instanceof KuraException && ((KuraException) e).getCode() == KuraErrorCode.INVALID_PARAMETER) {
+            return DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST, e.getMessage());
+        } else if (e instanceof IllegalArgumentException) {
             return DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST, e.getMessage());
         } else {
             return DefaultExceptionHandler.toWebApplicationException(e);

@@ -41,6 +41,15 @@ public class RemainingServicesContractTest {
     }
 
     @Test
+    public void inventoryResponsesDescribeMarshallerPayloads() throws Exception {
+        givenGeneratedPaths();
+
+        whenInventoryResponsesAreRead();
+
+        thenInventoryResponsesUsePayloadAccurateSchemas();
+    }
+
+    @Test
     public void versionedKeystoreWritesUseEmptySuccessResponses() throws Exception {
         givenGeneratedPaths();
 
@@ -48,6 +57,24 @@ public class RemainingServicesContractTest {
 
         thenKeystoreVersionsHaveDistinctIdentifiers();
         thenKeystoreWritesReturnNoContent();
+    }
+
+    @Test
+    public void keystoreEntriesArePolymorphic() throws Exception {
+        givenGeneratedPaths();
+
+        whenKeystoreEntryOperationsAreRead();
+
+        thenEntryResponsesAllowCertificateAndPrivateKeyShapes();
+    }
+
+    @Test
+    public void entitylessFailuresDoNotPromiseAnErrorBody() throws Exception {
+        givenGeneratedPaths();
+
+        whenEntitylessNotFoundOperationsAreRead();
+
+        thenEntitylessOperationsReferenceTheContainerGeneratedResponse();
     }
 
     @Test
@@ -68,6 +95,18 @@ public class RemainingServicesContractTest {
 
     private void whenInventoryActionsAreRead() {
         assertFalse(this.paths.path("/inventory/v1/bundles/_start").isMissingNode());
+    }
+
+    private void whenInventoryResponsesAreRead() {
+        assertFalse(this.paths.path("/inventory/v1/inventory").isMissingNode());
+    }
+
+    private void whenKeystoreEntryOperationsAreRead() {
+        assertFalse(this.paths.path("/keystores/v1/entries").isMissingNode());
+    }
+
+    private void whenEntitylessNotFoundOperationsAreRead() {
+        assertFalse(this.paths.path("/keystores/v1/entries/entry").isMissingNode());
     }
 
     private void whenKeystoreOperationsAreRead() {
@@ -95,6 +134,48 @@ public class RemainingServicesContractTest {
         assertEquals("#/components/responses/EmptySuccess",
                 this.paths.path("/inventory/v1/bundles/_start").path("post").path("responses")
                         .path("200").path("$ref").asText());
+    }
+
+    private void thenInventoryResponsesUsePayloadAccurateSchemas() {
+        thenResponseSchemaMatches("/inventory/v1/inventory", "get", "InventorySummary");
+        thenResponseSchemaMatches("/inventory/v1/systemPackages", "get", "SystemPackagesSummary");
+        thenResponseSchemaMatches("/inventory/v1/containers", "get", "DockerContainersSummary");
+        thenResponseSchemaMatches("/inventory/v1/images", "get", "ContainerImagesSummary");
+        thenResponseSchemaMatches("/inventory/v1/bundles", "get", "BundlesSummary");
+        thenResponseSchemaMatches("/inventory/v1/deploymentPackages", "get", "DeploymentPackagesSummary");
+    }
+
+    private void thenResponseSchemaMatches(String path, String method, String schema) {
+        assertEquals(path, "#/components/schemas/" + schema,
+                this.paths.path(path).path(method).path("responses").path("200")
+                        .path("content").path("application/json").path("schema").path("$ref").asText());
+    }
+
+    private void thenEntryResponsesAllowCertificateAndPrivateKeyShapes() {
+        for (String path : new String[] { "/keystores/v1/entries", "/keystores/v2/entries" }) {
+            JsonNode items = this.paths.path(path).path("get").path("responses").path("200")
+                    .path("content").path("application/json").path("schema").path("items");
+            assertTrue(path, items.has("anyOf"));
+            assertEquals(path, "#/components/schemas/CertificateInfo", items.path("anyOf").path(0).path("$ref")
+                    .asText());
+            assertEquals(path, "#/components/schemas/PrivateKeyInfo", items.path("anyOf").path(1).path("$ref")
+                    .asText());
+        }
+        for (String path : new String[] { "/keystores/v1/entries/entry", "/keystores/v2/entries/entry" }) {
+            JsonNode schema = this.paths.path(path).path("get").path("responses").path("200")
+                    .path("content").path("application/json").path("schema");
+            assertTrue(path, schema.has("anyOf"));
+        }
+    }
+
+    private void thenEntitylessOperationsReferenceTheContainerGeneratedResponse() {
+        for (String operation : new String[] { "get:/keystores/v1/entries/entry",
+                "get:/keystores/v2/entries/entry", "get:/tamper/v1/pid/{pid}",
+                "post:/serviceListing/v1/servicePids/satisfyingReference" }) {
+            final String[] parts = operation.split(":", 2);
+            assertEquals(operation, "#/components/responses/EntitylessNotFound",
+                    this.paths.path(parts[1]).path(parts[0]).path("responses").path("404").path("$ref").asText());
+        }
     }
 
     private void thenKeystoreVersionsHaveDistinctIdentifiers() {
